@@ -1,0 +1,42 @@
+@use '@/styles/variables/_variables.scss' as vars;
+@use '@/styles/mixins/_glass-effect.scss' as glass;
+
+.tab-bar {
+  width: 100%;
+  height: 84px;
+  border-radius: 0;
+  padding: 24px 108px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  @include glass.glass-effect();
+
+  &__controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__button {
+    width: 115px;
+    height: 36px;
+    border-radius: 8px;
+    padding: 8px 24px;
+    text-align: center;
+    font-size: 15px;
+    cursor: pointer;
+
+    &--login {
+      background: vars.$black-blue;
+      color: white;
+    }
+
+    &--signup {
+      background: white;
+      color: vars.$black-blue;
+      border: 1px solid vars.$black-blue;
+    }
+  }
+}

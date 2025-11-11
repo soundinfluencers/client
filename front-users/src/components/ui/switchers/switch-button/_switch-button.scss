@@ -1,0 +1,45 @@
+@use '@/styles/mixins/glass-effect' as glass;
+@use '@/styles/variables/variables' as vars;
+
+.switch-button {
+  @include glass.glass-effect();
+  width: 600px;
+  height: 51px;
+  border-radius: 32px;
+  padding: 4px;
+  border: 1px solid vars.$white-gray-2;
+  display: flex;
+  position: relative;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+
+  &__slider {
+    position: absolute;
+    height: 43px;
+    width: 278px;
+    border-radius: 32px;
+    background: vars.$brightest-gradient;
+    transition: transform 0.15s ease-in-out;
+  }
+
+  &__content {
+    width: 292px;
+    height: 43px;
+    border-radius: 32px;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+
+    p {
+      color: vars.$gray-dark;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      letter-spacing: 0;
+    }
+  }
+}

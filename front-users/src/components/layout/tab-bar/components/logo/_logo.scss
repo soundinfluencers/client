@@ -1,0 +1,28 @@
+@use '@/styles/mixins/_glass-effect.scss' as glass;
+
+.logo {
+  user-select: none;
+  cursor: pointer;
+  width: 186px;
+  height: 36px;
+  border-radius: 8px;
+  padding: 8px 24px;
+  gap: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @include glass.glass-effect();
+
+  img {
+    width: 14px;
+    height: 15px;
+    z-index: 1;
+  }
+
+  p {
+    margin: 0;
+    font-weight: 500;
+    z-index: 1;
+  }
+}

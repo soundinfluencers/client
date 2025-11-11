@@ -1,0 +1,90 @@
+@use '@/styles/mixins/title' as title;
+@use '@/styles/variables/variables' as vars;
+
+.auth-page {
+  width: 100%;
+  max-width: 100vw;
+  min-height: calc(100vh - 160px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 64px 0;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    padding-bottom: 64px;
+    width: 100%;
+  }
+
+  &__title-block {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__title {
+    @include title.title();
+  }
+
+  &__subtitle {
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  &__switch {
+    margin-top: 32px;
+  }
+
+  &__footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+  }
+}
+
+.auth-form {
+  width: 600px;
+  height: 255px;
+  background: vars.$light-blue;
+  border-radius: 16px;
+  padding: 48px 0;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  &__title {
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  &__subtitle {
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 40px;
+    gap: 24px;
+  }
+}

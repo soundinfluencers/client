@@ -1,0 +1,64 @@
+@use '../variables/variables' as vars;
+
+@mixin button(
+  $text-color: white,
+   $background: vars.$black-blue,
+    $hover-background: vars.$hover-button-1,
+     $border-color: vars.$black-blue,
+      $hover-border-color: vars.$hover-button-1,
+       $active-background: vars.$pressed-button-1,
+        $active-border-color: vars.$pressed-button-1,
+         $active-text-color: vars.$black-blue,
+          $disabled-background: vars.$disabled-button-1,
+           $disabled-border: vars.$disabled-button-1,
+) {
+  display: flex;
+  width: 250px;
+  height: 46px;
+  padding: 8px 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  background: $background;
+  border: 1px solid $border-color;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background 0.3s ease, border-width 0.1s ease, border-color 0.3s ease;
+
+  p {
+    color: $text-color;
+    text-align: center;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-transform: capitalize;
+    user-select: none;
+    transition: color 0.3s ease;
+  }
+
+  &:hover {
+    background: $hover-background;
+    border: 1px solid $hover-border-color;
+  }
+
+  &:active {
+    background: $active-background;
+    border: 1px solid $active-border-color;
+
+    p {
+      color: $active-text-color;
+    }
+  }
+
+  &.disabled {
+    background: $disabled-background;
+    border: 1px solid $disabled-border;
+    cursor: not-allowed;
+
+    p {
+      color: gray;
+    }
+  }
+}
