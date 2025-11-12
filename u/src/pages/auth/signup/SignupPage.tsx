@@ -1,5 +1,5 @@
 import {type FC} from "react";
-import {SignupClient} from "./layout/SignupClient.tsx";
+import {SignupClient} from "./components/layout/SignupClient.tsx";
 
 export const SignupPage: FC = () => {
     return (

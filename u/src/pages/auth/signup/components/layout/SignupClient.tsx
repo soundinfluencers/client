@@ -1,11 +1,12 @@
-import '../_signup-page.scss';
-import {TextInput} from "../../../../components/ui/inputs/text-input/TextInput.tsx";
+import '../../_signup-page.scss';
+import {TextInput} from "../../../../../components/ui/inputs/text-input/TextInput.tsx";
 import {useDispatch, useSelector} from "react-redux";
-import type {AppDispatch, RootState} from "../../../../store/store.ts";
-import {setField} from "../../../../store/slices/features/signupClient.ts";
-import {ButtonMain} from "../../../../components/ui/buttons/button/Button.tsx";
-import {RadioButton} from "../../../../components/ui/buttons/radio/RadioButton.tsx";
+import type {AppDispatch, RootState} from "../../../../../store/store.ts";
+import {setField} from "../../../../../store/slices/features/signupClient.ts";
+import {ButtonMain} from "../../../../../components/ui/buttons/button/Button.tsx";
+import {RadioButton} from "../../../../../components/ui/buttons/radio/RadioButton.tsx";
 import {useState} from "react";
+import {InputPhone} from "../ui/phone-input/InputPhone.tsx";
 
 export const SignupClient = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -50,10 +51,8 @@ export const SignupClient = () => {
                            value={fields.email}
                            setValue={(value) => dispatch(setField({key: 'email', value: value}))}
                            placeholder="Enter email"/>
-                <TextInput title='Phone'
-                           value={fields.phone ?? ''}
-                           setValue={(value) => dispatch(setField({key: 'phone', value: value}))}
-                           placeholder="Enter phone"/>
+                <InputPhone value={fields.phone ?? ''}
+                           setValue={(value) => dispatch(setField({key: 'phone', value: value}))}/>
                 <TextInput title='Referral code'
                            value={fields.referralCode ?? ''}
                            setValue={(value) => dispatch(setField({key: 'referralCode', value: value}))}
