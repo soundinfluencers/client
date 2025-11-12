@@ -1,7 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface LoginState {
-    page: number;
     email: string;
     password: string;
     errorEmail: string;
@@ -9,7 +8,6 @@ interface LoginState {
 }
 
 const initialState: LoginState = {
-    page: 0,
     email: '',
     password: '',
     errorEmail: '',
@@ -33,7 +31,6 @@ export const loginSlice = createSlice({
             state.errorPassword = action.payload;
         },
         resetLogin: (state) => {
-            state.page = 0;
             state.email = '';
             state.password = '';
             state.errorEmail = '';

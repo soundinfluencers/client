@@ -2,6 +2,7 @@ import type {IRoute} from "./navigation.types.ts";
 import {LoginPage} from "../pages/auth/login/LoginPage.tsx";
 import {AuthPage} from "../pages/auth/auth/AuthPage.tsx";
 import {SignupPage} from "../pages/auth/signup/SignupPage.tsx";
+import {ForgotPasswordPage} from "../pages/auth/forgot/ForgotPasswordPage.tsx";
 
 export const routes: IRoute[] = [
     {
@@ -9,6 +10,12 @@ export const routes: IRoute[] = [
         path: "/auth",
         component: AuthPage,
         isProtected: false,
+    },
+    {
+      name: "ForgotPassword",
+      path: "/forgot-password",
+      component: ForgotPasswordPage,
+      isProtected: false,
     },
     {
         name: "Login",
@@ -24,7 +31,7 @@ export const routes: IRoute[] = [
     },
     {
         name: "SignupInfluncer",
-        path: "/signup/client",
+        path: "/signup/influencer",
         component: SignupPage,
         isProtected: false,
     },

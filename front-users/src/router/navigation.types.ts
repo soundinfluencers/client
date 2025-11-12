@@ -3,6 +3,7 @@ import type {ComponentType} from "react";
 export type TypeCommonRoutes = {
     Auth: undefined;
     Login: undefined;
+    ForgotPassword: undefined;
     SignupClient: undefined;
     SignupInfluncer: undefined;
     Home: undefined;

@@ -15,6 +15,13 @@ export const AuthPage: FC = () => {
         else setSelectedRole(0)
     }
 
+    const handleSignupClick = () => {
+        if (selectedRole === 0)
+            navigate('/signup/client')
+        else
+            navigate('signup/influencer')
+    }
+
     return (
         <div className="auth-page">
             <div className="auth-page__content">
@@ -34,7 +41,7 @@ export const AuthPage: FC = () => {
                     </div>
                     <div className="auth-form__controls">
                         <ButtonSecondary text={"Log In"} onClick={() => navigate('/login')}/>
-                        <ButtonMain text={"Sign Up"} onClick={() => console.log('2')}/>
+                        <ButtonMain text={"Sign Up"} onClick={handleSignupClick}/>
                     </div>
                 </div>
             </div>
