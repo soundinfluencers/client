@@ -11,6 +11,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  border: 1px solid transparent;
 
   @include glass.glass-effect();
 
@@ -22,7 +23,7 @@
 
   p {
     margin: 0;
-    font-weight: 500;
     z-index: 1;
+    font-weight: 800;
   }
 }

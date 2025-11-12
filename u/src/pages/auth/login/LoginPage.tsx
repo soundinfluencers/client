@@ -5,6 +5,7 @@ import {type NavigateFunction, useNavigate} from "react-router-dom";
 import {TextInput} from "../../../components/ui/inputs/text-input/TextInput.tsx";
 import {setEmail, setPassword} from "../../../store/slices/features/loginSlice.ts";
 import {ButtonMain} from "../../../components/ui/buttons/button/Button.tsx";
+import './_login-page.scss';
 
 export const LoginPage: FC = () => {
     const dispatch: AppDispatch = useDispatch();
