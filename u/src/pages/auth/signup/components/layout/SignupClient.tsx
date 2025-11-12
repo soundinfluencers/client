@@ -13,6 +13,7 @@ export const SignupClient = () => {
 
     const fields = useSelector((state: RootState) => state.signupClient);
 
+    const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState(false);
     const [repeatPassword, setRepeatPassword] = useState<string>('');
 
     const handleSignup = () => {
@@ -52,7 +53,9 @@ export const SignupClient = () => {
                            setValue={(value) => dispatch(setField({key: 'email', value: value}))}
                            placeholder="Enter email"/>
                 <InputPhone value={fields.phone ?? ''}
-                           setValue={(value) => dispatch(setField({key: 'phone', value: value}))}/>
+                            setValue={(value) => dispatch(setField({key: 'phone', value: value}))}
+                            isMenuOpen={isPhoneDropdownOpen}
+                            setIsMenuOpen={() => setIsPhoneDropdownOpen(!isPhoneDropdownOpen)}/>
                 <TextInput title='Referral code'
                            value={fields.referralCode ?? ''}
                            setValue={(value) => dispatch(setField({key: 'referralCode', value: value}))}

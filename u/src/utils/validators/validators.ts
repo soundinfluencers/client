@@ -22,3 +22,8 @@ export function validatePhoneNumber(phone: string): PhoneValidationResult {
         } : undefined
     };
 }
+
+export const validateLetters = (value: string): boolean => {
+    const regex = /^[A-Za-zА-Яа-яЁё]*$/;
+    return regex.test(value);
+};
