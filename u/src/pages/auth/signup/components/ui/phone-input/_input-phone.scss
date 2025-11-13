@@ -26,6 +26,11 @@
     justify-content: flex-start;
     background: white;
 
+    &--active {
+      outline: none;
+      border: 1px solid vars.$blue;
+    }
+
     &:focus-within {
       outline: none;
       border: 1px solid vars.$blue;

@@ -28,10 +28,26 @@
     border-radius: 8px;
     border: 1px solid vars.$white-gray-2;
 
-    &:focus-within {
+    &--active {
       border: 1px solid vars.$blue;
       outline: none;
     }
+  }
+
+  &__selected-type {
+    color: vars.$black;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  &__placeholder {
+    color: vars.$gray;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
   }
 
   &__dropdown {

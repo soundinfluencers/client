@@ -1,4 +1,4 @@
-import { type ChangeEvent, type FC, useEffect, useState, useMemo } from "react";
+import {type ChangeEvent, type FC, useEffect, useState, useMemo, useRef} from "react";
 import './_input-phone.scss';
 import openMenu from "@/assets/icons/chevron-down.svg";
 import smallSearch from "@/assets/icons/small-search.svg";
@@ -6,6 +6,7 @@ import check from "@/assets/icons/check.svg";
 import { validateLetters, validatePhoneNumber } from "../../../../../../utils/validators/validators.ts";
 import type { PhoneNumberType } from "../../../../../../types/utils/constants.types.ts";
 import { phoneNumbers } from "../../../../../../utils/constants/phone-numbers.ts";
+import {useClickOutside} from "../../../../../../hooks/useClickOutside.ts";
 
 export interface InputPhoneProps {
     value: string;
@@ -18,6 +19,7 @@ export interface InputPhoneProps {
 export const InputPhone: FC<InputPhoneProps> = ({ value, setValue, isMenuOpen, setIsMenuOpen, isError }: InputPhoneProps) => {
     const [isValid, setIsValid] = useState(true);
     const [searchValue, setSearchValue] = useState('');
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const [selectedPhoneDetails, setSelectedPhoneDetails] = useState<PhoneNumberType>({
         countryName: 'UK',
         placeholder: '+44',
@@ -39,6 +41,10 @@ export const InputPhone: FC<InputPhoneProps> = ({ value, setValue, isMenuOpen, s
         return () => clearTimeout(handler);
     }, [value]);
 
+    useClickOutside(dropdownRef, () => {
+       if (isMenuOpen) setIsMenuOpen(false);
+    });
+
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const cleanedValue = e?.target?.value?.replace(/[^+\d\s\-()]/g, '') ?? '';
         setValue(cleanedValue);
@@ -59,10 +65,10 @@ export const InputPhone: FC<InputPhoneProps> = ({ value, setValue, isMenuOpen, s
     );
 
     return (
-        <div className={`input-phone ${!isValid || isError ? 'input-phone--error' : ''}`}>
+        <div ref={dropdownRef} className={`input-phone ${!isValid || isError ? 'input-phone--error' : ''}`}>
             <p className='input-phone__title'>Phone</p>
 
-            <div className="input-phone__input-block">
+            <div className={`input-phone__input-block ${isMenuOpen ? 'input-phone__input-block--active' : ''}`}>
                 <div className="input-phone__menu-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                     <p className='input-phone__flag'>{selectedPhoneDetails.countryFlag}</p>
                     <img src={openMenu} alt='' className="input-phone__open-menu-btn" />
