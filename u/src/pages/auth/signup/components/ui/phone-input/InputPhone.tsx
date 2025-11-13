@@ -40,11 +40,12 @@ export const InputPhone: FC<InputPhoneProps> = ({ value, setValue, isMenuOpen, s
     }, [value]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setValue(e.target.value);
+        const cleanedValue = e?.target?.value?.replace(/[^+\d\s\-()]/g, '') ?? '';
+        setValue(cleanedValue);
     };
 
     const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
+        const val = e.target.value ?? '';
         if (validateLetters(val)) {
             setSearchValue(val);
         }
@@ -58,7 +59,7 @@ export const InputPhone: FC<InputPhoneProps> = ({ value, setValue, isMenuOpen, s
     );
 
     return (
-        <div className={`input-phone ${!isValid || isError ? 'error' : ''}`}>
+        <div className={`input-phone ${!isValid || isError ? 'input-phone--error' : ''}`}>
             <p className='input-phone__title'>Phone</p>
 
             <div className="input-phone__input-block">
@@ -102,8 +103,6 @@ export const InputPhone: FC<InputPhoneProps> = ({ value, setValue, isMenuOpen, s
                     ))}
                 </div>
             </div>
-
-            {!isValid && <p className="input-phone__error">Invalid phone number</p>}
         </div>
     );
 };

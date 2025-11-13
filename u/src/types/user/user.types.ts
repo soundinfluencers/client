@@ -7,6 +7,14 @@ export type ClientCompanyType =
     'Label' |
     'Other'
 
+export const clientCompanyTypes: ClientCompanyType[] = [
+    'Artist',
+    'Promoter',
+    'Pr Agent',
+    'Label',
+    'Other',
+];
+
 export interface Client {
     firstName: string,
     lastName: string,

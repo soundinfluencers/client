@@ -1,0 +1,59 @@
+@use '@/styles/variables/variables' as vars;
+@use '@/styles/mixins/_dropdown-menu' as dropdown-menu;
+
+.client-company-select {
+  @include dropdown-menu.dropdown($height-expanded: 223px);
+  position: relative;
+
+  &__title {
+    color: vars.$gray-dark;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  &__main {
+    z-index: 10;
+    margin-top: 8px;
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 51px;
+    padding: 16px;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid vars.$white-gray-2;
+
+    &:focus-within {
+      border: 1px solid vars.$blue;
+      outline: none;
+    }
+  }
+
+  &__dropdown {
+    &-list {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 8px 16px;
+    }
+
+    &-list-item {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 15px;
+      color: vars.$gray-dark;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+  }
+}

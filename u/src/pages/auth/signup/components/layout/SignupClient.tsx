@@ -7,6 +7,8 @@ import {ButtonMain} from "../../../../../components/ui/buttons/button/Button.tsx
 import {RadioButton} from "../../../../../components/ui/buttons/radio/RadioButton.tsx";
 import {useState} from "react";
 import {InputPhone} from "../ui/phone-input/InputPhone.tsx";
+import {ClientCompanySelect} from "../ui/client-company-select/ClientCompanySelect.tsx";
+import type {ClientCompanyType} from "../../../../../types/user/user.types.ts";
 
 export const SignupClient = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -14,6 +16,7 @@ export const SignupClient = () => {
     const fields = useSelector((state: RootState) => state.signupClient);
 
     const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState(false);
+    const [isCompanyTypeDropdownOpen, setIsCompanyTypeDropdownOpen] = useState(false);
     const [repeatPassword, setRepeatPassword] = useState<string>('');
 
     const handleSignup = () => {
@@ -40,10 +43,13 @@ export const SignupClient = () => {
                            value={fields.company}
                            setValue={(value) => dispatch(setField({key: 'company', value: value}))}
                            placeholder="Enter company"/>
-                <TextInput title='Company type'
-                           value={fields.companyType}
-                           setValue={(value) => dispatch(setField({key: 'companyType', value: value}))}
-                           placeholder="Enter company type"/>
+                <ClientCompanySelect selectedType={fields.companyType}
+                                     selectType={(value: ClientCompanyType) => dispatch(setField({
+                                         key: 'companyType',
+                                         value: value
+                                     }))}
+                                     isMenuOpen={isCompanyTypeDropdownOpen}
+                                     setIsMenuOpen={setIsCompanyTypeDropdownOpen}/>
                 <TextInput title='Instagram'
                            value={fields.instagramLink}
                            setValue={(value) => dispatch(setField({key: 'instagramLink', value: value}))}
@@ -55,7 +61,7 @@ export const SignupClient = () => {
                 <InputPhone value={fields.phone ?? ''}
                             setValue={(value) => dispatch(setField({key: 'phone', value: value}))}
                             isMenuOpen={isPhoneDropdownOpen}
-                            setIsMenuOpen={() => setIsPhoneDropdownOpen(!isPhoneDropdownOpen)}/>
+                            setIsMenuOpen={setIsPhoneDropdownOpen}/>
                 <TextInput title='Referral code'
                            value={fields.referralCode ?? ''}
                            setValue={(value) => dispatch(setField({key: 'referralCode', value: value}))}
