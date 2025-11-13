@@ -3,44 +3,57 @@
 
 .switch-button {
   @include glass.glass-effect();
-  width: 600px;
+
+  width: 100%;
+  max-width: 600px;
   height: 51px;
-  border-radius: 32px;
   padding: 4px;
-  border: 1px solid vars.$white-gray-2;
+  box-sizing: border-box;
+
   display: flex;
-  position: relative;
   align-items: center;
-  text-align: center;
-  gap: 4px;
+  position: relative;
+  border-radius: 32px;
+  border: 1px solid vars.$white-gray-2;
+
+  @media screen and (max-width: 900px) {
+    height: 44px;
+  }
 
   &__slider {
     position: absolute;
+    left: 4px;
     height: 43px;
-    width: 278px;
+    width: calc(50% - 4px);
     border-radius: 32px;
     background: vars.$brightest-gradient;
-    transition: transform 0.15s ease-in-out;
+    transition: transform 0.18s ease-in-out;
+    z-index: 1;
   }
 
   &__content {
-    width: 292px;
+    flex: 1 1 50%;
     height: 43px;
     border-radius: 32px;
-    padding: 8px;
-    text-align: center;
+
     cursor: pointer;
     position: relative;
     z-index: 20;
 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     p {
       color: vars.$gray-dark;
       font-size: 20px;
-      font-style: normal;
       font-weight: 400;
-      line-height: normal;
-      letter-spacing: 0;
-      mix-blend-mode: normal;
+      margin: 0;
+      z-index: 2;
+
+      @media screen and (max-width: 900px) {
+        font-size: 15px;
+      }
     }
   }
 }
