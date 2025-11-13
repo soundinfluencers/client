@@ -31,7 +31,7 @@
     text-align: center;
     cursor: pointer;
     position: relative;
-    z-index: 1;
+    z-index: 20;
 
     p {
       color: vars.$gray-dark;
@@ -40,6 +40,7 @@
       font-weight: 400;
       line-height: normal;
       letter-spacing: 0;
+      mix-blend-mode: normal;
     }
   }
 }

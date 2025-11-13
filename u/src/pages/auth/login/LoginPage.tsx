@@ -27,7 +27,7 @@ export const LoginPage: FC = () => {
                                    setValue={(value) => dispatch(setPassword(value))}
                                    type="password"
                                    placeholder="Enter password"/>
-                        <p className="login-page__forgot">Forgot password?</p>
+                        <p className="login-page__forgot" onClick={() => navigate("/forgot-password")}>Forgot password?</p>
                     </div>
                 </div>
 
