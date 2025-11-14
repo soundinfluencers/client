@@ -1,23 +1,23 @@
 @use '@/styles/mixins/_glass-effect.scss' as glass;
 
 .logo {
+  @include glass.glass-effect();
+
   user-select: none;
   cursor: pointer;
   width: 186px;
   height: 36px;
-  border-radius: 8px;
   padding: 8px 24px;
   gap: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid transparent;
+  border-radius: 8px;
 
   @media screen and (max-width: 900px) {
     padding: 4px 16px;
   }
 
-  @include glass.glass-effect();
 
   img {
     width: 14px;
