@@ -41,16 +41,13 @@ body {
     filter: blur(150px);
   }
 
+  /* ===== DESKTOP (больше 900px) ===== */
   &::before {
     width: 1025px;
     height: 1025px;
     top: -300px;
     left: -350px;
-    background: radial-gradient(
-                    circle at center,
-                    #D6E6F9 40%,
-                    #FFFFFF 100%
-    );
+    background: radial-gradient(circle at center, #D6E6F9 40%, #FFFFFF 100%);
   }
 
   &::after {
@@ -58,10 +55,44 @@ body {
     height: 644px;
     bottom: -300px;
     right: -150px;
-    background: radial-gradient(
-                    circle at center,
-                    #D6E6F9 40%,
-                    #FFFFFF 100%
-    );
+    background: radial-gradient(circle at center, #D6E6F9 40%, #FFFFFF 100%);
+  }
+
+  /* ===== TABLET (max-width: 900px) ===== */
+  @media screen and (max-width: 900px) {
+    &::before {
+      width: 700px;
+      height: 700px;
+      top: -250px;
+      left: -250px;
+      filter: blur(120px);
+    }
+
+    &::after {
+      width: 450px;
+      height: 450px;
+      bottom: -200px;
+      right: -80px;
+      filter: blur(120px);
+    }
+  }
+
+  /* ===== MOBILE (max-width: 500px) ===== */
+  @media screen and (max-width: 500px) {
+    &::before {
+      width: 420px;
+      height: 420px;
+      top: -180px;
+      left: -120px;
+      filter: blur(90px);
+    }
+
+    &::after {
+      width: 280px;
+      height: 280px;
+      bottom: -120px;
+      right: -40px;
+      filter: blur(90px);
+    }
   }
 }

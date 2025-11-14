@@ -2,7 +2,7 @@
 @use '@/styles/variables/variables' as vars;
 
 .auth-page__wrapper {
-  min-height: calc(100vh - 84px);
+  min-height: calc(100vh - 84px); // 100% экрана - высота таб бара
   padding: 64px 0;
   margin: 0 auto;
   display: flex;
@@ -12,6 +12,7 @@
 
   @media screen and (max-width: 900px) {
     padding: 32px 0 49px 0;
+    min-height: calc(100vh - 48px);
   }
 
   @media screen and (max-width: 500px) {
