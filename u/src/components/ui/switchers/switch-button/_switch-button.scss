@@ -29,6 +29,10 @@
     background: vars.$brightest-gradient;
     transition: transform 0.18s ease-in-out;
     z-index: 1;
+
+    @media screen and (max-width: 900px) {
+      height: 36px;
+    }
   }
 
   &__content {
