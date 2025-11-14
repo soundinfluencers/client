@@ -1,5 +1,6 @@
 @use '@/styles/variables/_variables.scss' as vars;
 @use '@/styles/mixins/_glass-effect.scss' as glass;
+@use '@/styles/mixins/_dropdown-menu.scss' as dropdown;
 
 .tab-bar {
   width: 100%;
@@ -9,18 +10,32 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
+
+  @media screen and (min-width: 901px) {
+    @include glass.glass-effect();
+  }
 
   @media screen and (max-width: 900px) {
     height: 48px;
+    padding: 10px 40px;
   }
 
-  @include glass.glass-effect();
+  @media screen and (max-width: 500px) {
+    padding: 10px 16px;
+  }
 
   &__controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
+    &-desktop {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    &-mobile {
+      cursor: pointer;
+    }
   }
 
   &__button {
@@ -31,6 +46,18 @@
     text-align: center;
     font-size: 15px;
     cursor: pointer;
+    line-height: normal;
+
+    @media screen and (max-width: 900px) {
+      width: 250px;
+      min-width: 150px;
+      flex-shrink: 1;
+    }
+
+    @media screen and (max-width: 500px) {
+      width: 100%;
+      height: 46px;
+    }
 
     &--login {
       background: vars.$black-blue;
@@ -41,6 +68,39 @@
       background: white;
       color: vars.$black-blue;
       border: 1px solid vars.$black-blue;
+    }
+  }
+
+  &__burger {
+    @include glass.glass-effect();
+    opacity: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    transition: opacity 0.3s ease;
+    padding: 24px;
+
+    @media screen and (max-width: 500px) {
+      flex-direction: column;
+      gap: 16px;
+      padding: 24px 16px;
+    }
+
+    &--visible {
+      z-index: 10;
+      height: auto;
+      opacity: 1;
+
+      & > * {
+        z-index: 1;
+        position: relative;
+      }
     }
   }
 }

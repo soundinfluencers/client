@@ -13,17 +13,31 @@
   align-items: center;
   border: 1px solid transparent;
 
+  @media screen and (max-width: 900px) {
+    padding: 4px 16px;
+  }
+
   @include glass.glass-effect();
 
   img {
     width: 14px;
     height: 15px;
     z-index: 1;
+
+    @media screen and (max-width: 900px) {
+      width: 12px;
+      height: 13px;
+    }
   }
 
   p {
     margin: 0;
     z-index: 1;
     font-weight: 800;
+
+    @media screen and (max-width: 900px) {
+      font-weight: 600;
+      font-size: 14px;
+    }
   }
 }
