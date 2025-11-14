@@ -14,8 +14,8 @@ export const LoginPage: FC = () => {
     const {email, password} = useSelector((state: RootState) => state.login);
 
     return (
-        <div className="login-page">
-            <div className="login-page__content">
+        <div className="login-page__wrapper">
+            <div className="login-page">
                 <p className="login-page__title">Log in to your Client Dashboard</p>
 
                 <div className="login-page__inputs">
@@ -27,15 +27,16 @@ export const LoginPage: FC = () => {
                                    setValue={(value) => dispatch(setPassword(value))}
                                    type="password"
                                    placeholder="Enter password"/>
-                        <p className="login-page__forgot" onClick={() => navigate("/forgot-password")}>Forgot password?</p>
+                        <p className="login-page__forgot" onClick={() => navigate("/forgot-password")}>Forgot
+                            password?</p>
                     </div>
                 </div>
 
                 <div className="login-page__controls">
-                    <ButtonMain text={"Log in now"} onClick={() => console.log('1')} isDisabled={email.length === 0 || password.length === 0}/>
+                    <ButtonMain text={"Log in now"} onClick={() => console.log('1')}
+                                isDisabled={email.length === 0 || password.length === 0}/>
                 </div>
             </div>
-
             <div className="login-page__footer">
                 <p className="login-page__footer--text">Don’t have an account? <a className="login-page__footer--link" onClick={() => navigate('/signup/client')}>Sign up here</a></p>
             </div>
