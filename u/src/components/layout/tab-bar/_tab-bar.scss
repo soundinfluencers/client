@@ -10,6 +10,10 @@
   align-items: center;
   justify-content: space-between;
 
+  @media screen and (max-width: 900px) {
+    height: 48px;
+  }
+
   @include glass.glass-effect();
 
   &__controls {

@@ -15,9 +15,9 @@ html {
 }
 
 body {
+  position: relative;
   margin: 0;
   background-color: #fafaf9;
-  position: relative;
   min-height: 100vh;
   font-family: 'Satoshi', 'Noto Color Emoji', sans-serif;
   overflow-x: clip;
