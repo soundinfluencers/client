@@ -78,7 +78,20 @@ export const SignupClient = () => {
                            placeholder="Repeat password"/>
             </div>
             <div className="signup-client__radio">
-                <RadioButton content='Agree to Terms and Conditions' size='lg'/>
+                <RadioButton content={
+                    <div className='signup-client__radio-content'>
+                        <p>
+                            Agree to{" "}
+                            <a
+                                href="/terms/client"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ textDecoration: "underline", color: "black" }}
+                            >
+                                Terms and Conditions
+                            </a>
+                        </p>                    </div>
+                } size='lg'/>
             </div>
             <div className="signup-client__controls">
                 <ButtonMain isDisabled={true} text='Apply now' onClick={handleSignup}/>
