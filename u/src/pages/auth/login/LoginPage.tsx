@@ -6,12 +6,23 @@ import {TextInput} from "../../../components/ui/inputs/text-input/TextInput.tsx"
 import {setEmail, setPassword} from "../../../store/slices/features/loginSlice.ts";
 import {ButtonMain} from "../../../components/ui/buttons/button/Button.tsx";
 import './_login-page.scss';
+import {login} from "../../../api/auth/auth.api.ts";
+import {useAuth} from "../../../contexts/AuthContext.tsx";
 
 export const LoginPage: FC = () => {
     const dispatch: AppDispatch = useDispatch();
     const navigate: NavigateFunction = useNavigate();
 
     const {email, password} = useSelector((state: RootState) => state.login);
+    const {setAccessToken} = useAuth();
+
+    const handleLogin = async () => {
+        const res = await login({email, password});
+
+        console.log(res, 'login page')
+        setAccessToken('1');
+        navigate('/client/home')
+    }
 
     return (
         <div className="login-page__wrapper">
@@ -33,7 +44,7 @@ export const LoginPage: FC = () => {
                 </div>
 
                 <div className="login-page__controls">
-                    <ButtonMain text={"Log in now"} onClick={() => console.log('1')}
+                    <ButtonMain text={"Log in now"} onClick={handleLogin}
                                 isDisabled={email.length === 0 || password.length === 0}/>
                 </div>
             </div>
