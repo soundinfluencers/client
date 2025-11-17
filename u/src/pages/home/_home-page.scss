@@ -1,3 +1,7 @@
 .home-page {
   padding: 17px 110px 104px;
+
+  @media screen and (max-width: 900px) {
+    padding: 24px 40px 33px;
+  }
 }
