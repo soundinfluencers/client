@@ -4,6 +4,7 @@ import {AuthPage} from "../pages/auth/auth/AuthPage.tsx";
 import {SignupPage} from "../pages/auth/signup/SignupPage.tsx";
 import {ForgotPasswordPage} from "../pages/auth/forgot/ForgotPasswordPage.tsx";
 import {TermsPage} from "../pages/auth/terms/TermsPage.tsx";
+import {HomePage} from "../pages/home/HomePage.tsx";
 
 export const routes: IRoute[] = [
     {
@@ -48,4 +49,10 @@ export const routes: IRoute[] = [
         component: TermsPage,
         isProtected: false,
     },
+    {
+        name: "Home",
+        path: "/client/home",
+        component: HomePage,
+        isProtected: true,
+    }
 ]

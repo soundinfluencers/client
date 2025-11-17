@@ -1,0 +1,44 @@
+@use '@/styles/variables/variables' as vars;
+
+.home-header {
+  width: 100%;
+  height: 282px;
+  background: vars.$light-blue;
+  border: 1px solid white;
+  border-radius: 16px;
+
+  &__top {
+    height: 183px;
+    padding: 0 0 24px 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+
+    p {
+      color: vars.$black-blue;
+      font-size: 32px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+  }
+
+  &__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+
+    &-button {
+
+    }
+
+    &-rectangle {
+      width: 600px;
+      height: 121px;
+      align-items: flex-end;
+      justify-content: flex-end;
+      border-radius: 16px;
+    }
+  }
+}
