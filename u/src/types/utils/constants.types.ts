@@ -4,3 +4,5 @@ export interface PhoneNumberType {
     pattern: string;
     countryFlag: string;
 }
+
+export type ListDisplayMode = 'list' | 'grid';
