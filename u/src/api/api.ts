@@ -2,7 +2,7 @@ import axios, {AxiosError} from 'axios';
 import {handleApiError} from "./error.api.ts";
 
 const $api = axios.create({
-    baseURL: import.meta.env.V,
+    baseURL: import.meta.env.VITE_SERVER,
     headers: {
         'Content-Type': 'application/json',
     },
