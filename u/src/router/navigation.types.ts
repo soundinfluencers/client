@@ -7,6 +7,7 @@ export type TypeCommonRoutes = {
     SignupClient: undefined;
     SignupInfluncer: undefined;
     Home: undefined;
+    Terms: undefined;
 };
 
 export type TypeClientRoutes = {

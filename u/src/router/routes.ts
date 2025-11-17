@@ -3,6 +3,7 @@ import {LoginPage} from "../pages/auth/login/LoginPage.tsx";
 import {AuthPage} from "../pages/auth/auth/AuthPage.tsx";
 import {SignupPage} from "../pages/auth/signup/SignupPage.tsx";
 import {ForgotPasswordPage} from "../pages/auth/forgot/ForgotPasswordPage.tsx";
+import {TermsPage} from "../pages/auth/terms/TermsPage.tsx";
 
 export const routes: IRoute[] = [
     {
@@ -33,6 +34,18 @@ export const routes: IRoute[] = [
         name: "SignupInfluncer",
         path: "/signup/influencer",
         component: SignupPage,
+        isProtected: false,
+    },
+    {
+        name: "Terms",
+        path: "/terms/client",
+        component: TermsPage,
+        isProtected: false,
+    },
+    {
+        name: "Terms",
+        path: "/terms/influencer",
+        component: TermsPage,
         isProtected: false,
     },
 ]
