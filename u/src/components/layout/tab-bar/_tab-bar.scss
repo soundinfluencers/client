@@ -5,7 +5,6 @@
 .tab-bar {
   width: 100%;
   height: 84px;
-  border-radius: 0;
   padding: 24px 108px;
   display: flex;
   align-items: center;
@@ -25,19 +24,7 @@
     padding: 10px 16px;
   }
 
-  &__controls {
-    &-desktop {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-    }
-
-    &-mobile {
-      cursor: pointer;
-    }
-  }
-
+  /* ---------- LOGO ---------- */
   &__button {
     width: 115px;
     height: 36px;
@@ -71,20 +58,49 @@
     }
   }
 
-  &__burger {
+  /* ---------- CONTROLS (RIGHT SIDE) ---------- */
+  &__controls {
+    display: flex;
+    align-items: center;
+
+    &--auth {
+
+    }
+
+    &-desktop {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    &-mobile {
+      cursor: pointer;
+    }
+  }
+
+  /* ---------- BURGER ICON ---------- */
+  &__burger-toggle {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
+
+  /* ---------- MENU (DROPDOWN) ---------- */
+  &__menu {
     @include glass.glass-effect();
     opacity: 0;
     overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
     position: absolute;
     top: 100%;
     left: 0;
     width: 100%;
-    transition: opacity 0.3s ease;
+
     padding: 24px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+
+    transition: opacity 0.3s ease;
 
     @media screen and (max-width: 500px) {
       flex-direction: column;
@@ -92,15 +108,45 @@
       padding: 24px 16px;
     }
 
-    &--visible {
-      z-index: 10;
-      height: auto;
+    &--open {
       opacity: 1;
+      z-index: 10;
 
       & > * {
-        z-index: 1;
         position: relative;
+        z-index: 1;
       }
+    }
+  }
+
+  /* ---------- MENU ITEM ---------- */
+  &__menu-item {
+    width: 115px;
+    height: 36px;
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-size: 15px;
+    text-align: center;
+    cursor: pointer;
+    line-height: normal;
+
+    background: vars.$black-blue;
+    color: white;
+
+    @media screen and (max-width: 900px) {
+      width: 250px;
+      min-width: 150px;
+    }
+
+    @media screen and (max-width: 500px) {
+      width: 100%;
+      height: 46px;
+    }
+
+    &--signup {
+      background: white;
+      color: vars.$black-blue;
+      border: 1px solid vars.$black-blue;
     }
   }
 }
