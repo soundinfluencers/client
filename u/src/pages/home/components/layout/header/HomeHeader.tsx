@@ -11,7 +11,6 @@ export interface HomeHeaderProps {
 }
 
 export const HomeHeader: React.FC<HomeHeaderProps> = ({firstName, balance = "0 €", userRole}) => {
-    console.log(userRole);
     const { width } = useWindowSize();
 
     return (

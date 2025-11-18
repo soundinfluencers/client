@@ -6,8 +6,8 @@ import {TextInput} from "../../../components/ui/inputs/text-input/TextInput.tsx"
 import {setEmail, setPassword} from "../../../store/slices/features/loginSlice.ts";
 import {ButtonMain} from "../../../components/ui/buttons/button/Button.tsx";
 import './_login-page.scss';
-import {login} from "../../../api/auth/auth.api.ts";
 import {useAuth} from "../../../contexts/AuthContext.tsx";
+import {loginApi} from "../../../api/auth/auth.api.ts";
 
 export const LoginPage: FC = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -17,9 +17,8 @@ export const LoginPage: FC = () => {
     const {setAccessToken} = useAuth();
 
     const handleLogin = async () => {
-        const res = await login({email, password});
+        const res = await loginApi({email, password});
 
-        console.log(res, 'login page')
         setAccessToken('1');
         navigate('/client/home')
     }
