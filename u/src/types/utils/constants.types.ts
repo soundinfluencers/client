@@ -6,3 +6,14 @@ export interface PhoneNumberType {
 }
 
 export type ListDisplayMode = 'list' | 'grid';
+
+export type SocialMediaType =
+    | 'instagram'
+    | 'tiktok'
+    | 'facebook'
+    | 'youtube'
+    | 'spotify'
+    | 'soundcloud'
+    | 'press'
+    | 'multipromo';
+

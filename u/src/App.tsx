@@ -11,11 +11,7 @@ function App() {
     const {accessToken, setAccessToken, logout} = useAuth();
 
     useEffect(() => {
-        setupInterceptors(
-            () => accessToken,
-            setAccessToken,
-            logout
-        );
+        setupInterceptors(setAccessToken, logout);
     }, []);
 
     return (

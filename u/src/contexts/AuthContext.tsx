@@ -1,6 +1,6 @@
-import {createContext, type ReactNode, useContext, useEffect, useState} from "react";
+import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import $api from "../api/api.ts";
-import {logoutApi} from "../api/auth/auth.api.ts";
+import { logoutApi } from "../api/auth/auth.api.ts";
 
 interface AuthContextType {
     accessToken: string | null;
@@ -8,18 +8,33 @@ interface AuthContextType {
     logout: () => void;
 }
 
+let accessTokenStore: string | null = null;
+
+export const tokenStorage = {
+    get: () => accessTokenStore,
+    set: (token: string | null) => (accessTokenStore = token)
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [accessToken, setAccessToken] = useState<string | null>(null);
+    const [accessToken, setAccessTokenState] = useState<string | null>(null);
+
+    const setAccessToken = (token: string | null) => {
+        setAccessTokenState(token);
+        tokenStorage.set(token);
+    };
 
     useEffect(() => {
         const refresh = async () => {
             try {
-                const { data } = await $api.post<{ accessToken: string }>('/auth/refresh');
+                const { data } = await $api.post<{ accessToken: string }>("/auth/refresh");
+
                 setAccessToken(data.accessToken);
             } catch {
-                logout();
+                if (window.location.pathname !== "/auth") {
+                    logout();
+                }
             }
         };
 

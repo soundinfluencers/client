@@ -8,6 +8,7 @@ import {ButtonMain} from "../../../components/ui/buttons/button/Button.tsx";
 import './_login-page.scss';
 import {useAuth} from "../../../contexts/AuthContext.tsx";
 import {loginApi} from "../../../api/auth/auth.api.ts";
+import type {ResponseLoginUserModel} from "../../../types/auth/auth.types.ts";
 
 export const LoginPage: FC = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -17,10 +18,12 @@ export const LoginPage: FC = () => {
     const {setAccessToken} = useAuth();
 
     const handleLogin = async () => {
-        const res = await loginApi({email, password});
+        const res: ResponseLoginUserModel = await loginApi({email, password});
 
-        setAccessToken('1');
-        navigate('/client/home')
+        if (res.accessToken && res.userRole) {
+            setAccessToken(res.accessToken);
+            navigate('/client/home')
+        }
     }
 
     return (
@@ -48,7 +51,9 @@ export const LoginPage: FC = () => {
                 </div>
             </div>
             <div className="login-page__footer">
-                <p className="login-page__footer--text">Don’t have an account? <a className="login-page__footer--link" onClick={() => navigate('/signup/client')}>Sign up here</a></p>
+                <p className="login-page__footer--text">Don’t have an account? <a className="login-page__footer--link"
+                                                                                  onClick={() => navigate('/signup/client')}>Sign
+                    up here</a></p>
             </div>
         </div>
     )

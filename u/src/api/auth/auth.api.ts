@@ -1,11 +1,16 @@
-import type {RequestLoginUserModel} from "../../types/auth/auth.types.ts";
+import type {RequestLoginUserModel, ResponseLoginUserModel} from "../../types/auth/auth.types.ts";
 import $api from "../api.ts";
 
-export const loginApi = async ({email, password}: RequestLoginUserModel) => {
+export const loginApi = async ({email, password}: RequestLoginUserModel): Promise<ResponseLoginUserModel> => {
     const res = await $api.post('/auth/login', {
         email,
         password
     })
+
+    return {
+        accessToken: res.data?.accessToken || null,
+        userRole: res.data?.role || null
+    }
 }
 
 export const logoutApi = async () => {

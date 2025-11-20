@@ -1,5 +1,6 @@
 import axios, {AxiosError} from 'axios';
 import {handleApiError} from "./error.api.ts";
+import {tokenStorage} from "../contexts/AuthContext.tsx";
 
 const $api = axios.create({
     baseURL: import.meta.env.VITE_SERVER,
@@ -19,7 +20,7 @@ $api.interceptors.response.use(
 );
 
 // настройка интерцептора при инициализации приложения
-export const setupInterceptors = (getAccessToken: () => string | null, setAccessToken: (token: string) => void, logout: () => void) => {
+export const setupInterceptors = (setAccessToken: (token: string) => void, logout: () => void) => {
     let isRefreshing = false;
     let failedQueue: Array<any> = [];
 
@@ -28,9 +29,11 @@ export const setupInterceptors = (getAccessToken: () => string | null, setAccess
         failedQueue = [];
     };
 
-    $api.interceptors.request.use(config => {
-        const token = getAccessToken();
-        if (token) config.headers["Authorization"] = `Bearer ${token}`;
+    $api.interceptors.request.use((config) => {
+        const token = tokenStorage.get();
+        if (token && config.headers) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
         return config;
     });
 

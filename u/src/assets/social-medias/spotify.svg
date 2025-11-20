@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 32 32">
+  <rect width="32" height="32" fill="url(#a)" rx="8"/>
+  <g clip-path="url(#b)" filter="url(#c)">
+    <path fill="#fff" fill-rule="evenodd" d="M15.99 4.533C9.689 4.533 4.533 9.693 4.533 16S9.69 27.467 15.99 27.467c6.3 0 11.456-5.16 11.456-11.467S22.348 4.533 15.99 4.533Zm5.27 16.57c-.23.344-.63.458-.974.229-2.692-1.663-6.072-2.007-10.082-1.09-.4.115-.745-.171-.86-.515-.114-.402.173-.746.516-.86 4.354-.975 8.135-.574 11.113 1.261.401.172.459.63.287.975Zm1.374-3.154c-.286.402-.802.574-1.203.287-3.093-1.892-7.79-2.465-11.399-1.319-.458.115-.973-.114-1.088-.573-.115-.459.115-.975.573-1.09 4.181-1.26 9.337-.63 12.888 1.549.344.172.516.745.23 1.146Zm.115-3.21c-3.666-2.179-9.795-2.408-13.29-1.319a1.075 1.075 0 0 1-1.317-.688 1.076 1.076 0 0 1 .687-1.319c4.067-1.204 10.77-.974 15.008 1.548.516.287.688.975.401 1.491-.286.401-.973.573-1.489.287Z" clip-rule="evenodd"/>
+  </g>
+  <defs>
+    <linearGradient id="a" x1="18.212" x2="3.252" y1="32.954" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00D95F"/>
+      <stop offset="1" stop-color="#10BC4C"/>
+    </linearGradient>
+    <clipPath id="b">
+      <path fill="#fff" d="M4 4h24v24H4z"/>
+    </clipPath>
+    <filter id="c" width="24" height="24.5" x="4" y="4" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feColorMatrix in="SourceAlpha" result="hardAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+      <feOffset dy=".5"/>
+      <feGaussianBlur stdDeviation="1.25"/>
+      <feComposite in2="hardAlpha" k2="-1" k3="1" operator="arithmetic"/>
+      <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/>
+      <feBlend in2="shape" result="effect1_innerShadow_3917_4038"/>
+    </filter>
+  </defs>
+</svg>
