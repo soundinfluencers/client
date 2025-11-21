@@ -18,7 +18,7 @@ export const HomePage: FC = () => {
         <div className='home-page'>
             <HomeHeader/>
             {campaigns ? (
-                <CampaignsList listDisplayMode={'grid'} list={campaigns}/>
+                <CampaignsList listDisplayMode={'list'} list={campaigns}/>
             ) : (<p>error</p>)}
         </div>
     )

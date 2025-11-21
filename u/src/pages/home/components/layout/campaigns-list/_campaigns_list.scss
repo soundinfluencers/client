@@ -1,5 +1,11 @@
 @use '@/styles/variables/variables' as vars;
 
+.home-campaign-table {
+  &__header {
+
+  }
+}
+
 .home-campaigns-grid {
   width: 100%;
   display: grid;
@@ -44,6 +50,7 @@
     background: vars.$light-blue;
     color: vars.$black-blue;
     font-size: 16px;
+    cursor: pointer;
 
     @media screen and (max-width: 1100px) {
       font-size: 15px;
