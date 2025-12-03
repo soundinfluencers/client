@@ -1,0 +1,59 @@
+.scroll_Plattforms {
+  &__title {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    h3 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 16px;
+      line-height: 100%;
+      letter-spacing: 0%;
+    }
+  }
+
+  ul {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    list-style: none;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 24px;
+
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 14px;
+      line-height: 100%;
+      letter-spacing: 0%;
+      background-color: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(231, 232, 241, 1);
+      border-radius: 32px;
+      flex-shrink: 0;
+
+      &:first-child {
+        img {
+          max-width: 32px;
+          height: 32px;
+        }
+      }
+
+      &.active {
+        background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+.containerCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  justify-items: center;
+  gap: 16px;
+  width: 100%;
+  // @media (max-width: 515) {
+  //   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  //   max-width: 343px;
+  // }
+  &.viewed {
+    width: 100%;
+    overflow-x: auto;
+    .promo-table {
+      width: 100%;
+      border-collapse: collapse;
+      .name {
+        width: 312px;
+      }
+      thead th {
+        text-align: left;
+        padding: 14px 0;
+        font-weight: 500;
+        color: #9298a0;
+        font-size: 14px;
+        border-bottom: 1px solid #ececec;
+        white-space: nowrap;
+      }
+    }
+  }
+}

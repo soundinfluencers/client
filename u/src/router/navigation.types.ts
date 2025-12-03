@@ -1,31 +1,31 @@
-import type {ComponentType} from "react";
+import type { ComponentType } from "react";
 
 export type TypeCommonRoutes = {
-    Auth: undefined;
-    Login: undefined;
-    ForgotPassword: undefined;
-    SignupClient: undefined;
-    SignupInfluncer: undefined;
-    Home: undefined;
-    Terms: undefined;
+  Auth: undefined;
+  Login: undefined;
+  ForgotPassword: undefined;
+  SignupClient: undefined;
+  SignupInfluncer: undefined;
+  Home: undefined;
+  Terms: undefined;
+  CreateCampaign: undefined;
 };
 
 export type TypeClientRoutes = {
-    SignupClient: undefined;
+  SignupClient: undefined;
 };
 
 export type TypeInfluencerRoutes = {
-    SignupInfluencer: undefined;
+  SignupInfluencer: undefined;
 };
 
-export type TypeRootStackParamList =
-    & TypeCommonRoutes
-    & TypeClientRoutes
-    & TypeInfluencerRoutes;
+export type TypeRootStackParamList = TypeCommonRoutes &
+  TypeClientRoutes &
+  TypeInfluencerRoutes;
 
 export interface IRoute {
-    name: keyof TypeRootStackParamList;
-    path: string;
-    component: ComponentType;
-    isProtected: boolean;
+  name: keyof TypeRootStackParamList;
+  path: string;
+  component: ComponentType;
+  isProtected: boolean;
 }

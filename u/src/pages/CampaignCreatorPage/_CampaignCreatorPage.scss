@@ -1,0 +1,21 @@
+.Campaign_Creator_Page {
+  max-width: 1224px;
+  margin: 0 auto;
+  padding: 0px 10px;
+  &__head {
+    h1 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 46px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+      @media (max-width: 500px) {
+        font-size: 30px;
+      }
+    }
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+}

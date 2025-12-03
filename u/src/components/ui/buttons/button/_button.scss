@@ -1,5 +1,5 @@
-@use '@/styles/variables/variables' as vars;
-@use '@/styles/mixins/button' as button-mixin;
+@use "@/styles/variables/variables" as vars;
+@use "@/styles/mixins/button" as button-mixin;
 
 .button-main {
   @include button-mixin.button();
@@ -7,11 +7,11 @@
 
 .button-secondary {
   @include button-mixin.button(
-          $text-color: vars.$black-blue,
-          $background: white,
-          $hover-background: vars.$hover-button-2,
-          $disabled-background: white,
-          $disabled-border: vars.$white-gray-2
+    $text-color: vars.$black-blue,
+    $background: white,
+    $hover-background: vars.$hover-button-2,
+    $disabled-background: white,
+    $disabled-border: vars.$white-gray-2
   );
 
   &:active {
