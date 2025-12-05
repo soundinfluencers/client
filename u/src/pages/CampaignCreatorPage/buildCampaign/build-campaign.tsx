@@ -13,6 +13,7 @@ interface Props {}
 export const BuildCampaign: React.FC<Props> = () => {
   const [filterFlag, setFilterFlag] = React.useState<boolean>(false);
   const [view, setView] = React.useState<number>(1);
+  const [isSmall, setIsSmall] = React.useState(false);
   const arrView = [menu, grid];
   return (
     <div className="build-compaign">
@@ -51,12 +52,22 @@ export const BuildCampaign: React.FC<Props> = () => {
             ))}
           </ul>
         </div>
-        <div className="build-compaign__content_functional">
+        <div
+          className={`build-compaign__content_functional ${
+            isSmall ? "tableAdaptive" : ""
+          }`}>
           {" "}
           {filterFlag && (
-            <Filters onToggle={() => setFilterFlag((prev) => !prev)} />
+            <Filters
+              isSmall={isSmall}
+              onToggle={() => setFilterFlag((prev) => !prev)}
+            />
           )}
-          <CardsContainer view={view} />
+          <CardsContainer
+            isSmall={isSmall}
+            setIsSmall={setIsSmall}
+            view={view}
+          />
         </div>
       </div>
     </div>

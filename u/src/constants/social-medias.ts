@@ -6,15 +6,15 @@ import spotifyIcon from "@/assets/social-medias/spotify.svg";
 import soundcloudIcon from "@/assets/social-medias/soundcloud.svg";
 import pressIcon from "@/assets/social-medias/press.svg";
 import multipromoIcon from "@/assets/social-medias/multipromo.svg";
-import plattform_multi from "../../assets/plattform-social_medias/plattform_multi.svg";
-import plattform_instagram from "../../assets/plattform-social_medias/plattform_instagram.svg";
-import plattform_tiktok from "../../assets/plattform-social_medias/plattform_tiktok.svg";
-import plattform_spotify from "../../assets/plattform-social_medias/plattform_spotify.svg";
-import plattform_facebook from "../../assets/plattform-social_medias/plattform_facebook.svg";
-import plattform_soundclound from "../../assets/plattform-social_medias/plattform_soundcloud.svg";
-import plattform_youtube from "../../assets/plattform-social_medias/plattform_youtube.svg";
-import plattform_press from "../../assets/plattform-social_medias/plattform_press.svg";
-import type { SocialMediaType } from "../../types/utils/constants.types.ts";
+import plattform_multi from "../assets/plattform-social_medias/plattform_multi.svg";
+import plattform_instagram from "../assets/plattform-social_medias/plattform_instagram.svg";
+import plattform_tiktok from "../assets/plattform-social_medias/plattform_tiktok.svg";
+import plattform_spotify from "../assets/plattform-social_medias/plattform_spotify.svg";
+import plattform_facebook from "../assets/plattform-social_medias/plattform_facebook.svg";
+import plattform_soundclound from "../assets/plattform-social_medias/plattform_soundcloud.svg";
+import plattform_youtube from "../assets/plattform-social_medias/plattform_youtube.svg";
+import plattform_press from "../assets/plattform-social_medias/plattform_press.svg";
+import type { SocialMediaType } from "../types/utils/constants.types";
 
 export const getSocialMediaIcon = (socialMedia: SocialMediaType) => {
   switch (socialMedia) {

@@ -1,0 +1,84 @@
+.promo-grid-row {
+  display: grid;
+  grid-template-columns: 27% 100px 100px 1fr 1fr;
+  border-bottom: 1px solid rgba(185, 208, 255, 1);
+  padding-bottom: 16px;
+  margin-top: 16px;
+  align-items: start;
+  &.adaptive {
+    @media (max-width: 470px) {
+      grid-template-columns: 25% 76px 76px 1fr 1fr;
+      .name {
+        span {
+          font-size: 12px;
+        }
+      }
+
+      .price,
+      .followers {
+        gap: 8px;
+        img {
+          width: 20px;
+          height: 20px;
+        }
+        span {
+          font-size: 13px;
+        }
+      }
+    }
+  }
+  > div {
+    max-width: 312px;
+    overflow: hidden;
+  }
+
+  .name {
+    display: flex;
+    align-items: start;
+    gap: 8px;
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .price,
+  .followers {
+    display: flex;
+    align-items: start;
+    gap: 8px;
+    img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  .tags {
+    display: flex;
+    align-items: start;
+    flex-wrap: wrap;
+    gap: 5px;
+    .chevronPopUp {
+      flex: 1;
+      width: fit-content;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(231, 232, 241, 1);
+      margin: 0px 5px;
+    }
+    .tag {
+      padding: 4px 12px;
+      background: transparent;
+      border: 1px solid rgba(231, 232, 241, 1);
+      border-radius: 8px;
+      font-size: 14px;
+      text-transform: capitalize;
+      white-space: nowrap;
+    }
+  }
+}

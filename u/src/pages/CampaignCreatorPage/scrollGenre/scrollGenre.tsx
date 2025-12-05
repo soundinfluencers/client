@@ -23,11 +23,11 @@ export const ScrollGenres: React.FC<Props> = ({
   ];
 
   return (
-    <div className="scroll_Plattforms">
-      <div className="scroll_Plattforms__title">
+    <div className="platforms-scroll">
+      <div className="platforms-scroll__header">
         <h3>Select your music genre</h3> <img src={chevron} alt="" />
       </div>
-      <ul>
+      <ul className="platforms-scroll__list">
         {mockData.map((item) => (
           <li
             key={item.name}

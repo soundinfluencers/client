@@ -5,18 +5,22 @@ import { ScrollGenres } from "./scrollGenre/scrollGenre";
 import { SliderForCard } from "./SliderForCards/SliderForCards";
 import { getPublishedOffers } from "../../api/client/CreatorCampaign/offers/client-creator-campaign-offers.api";
 import { BuildCampaign } from "./buildCampaign/build-campaign";
+import { Container } from "../../components/container/container";
+import { useCreateCampaign } from "../../store/createCampaign";
+import { Loader } from "../../components/ui/loader/loader";
+import { Breadcrumbs } from "../../components/ui/Breadcrumbs/pathnames";
 interface Props {}
 
 export const CampaignCreatorPage: React.FC<Props> = () => {
+  const { setOffers, offers, loading } = useCreateCampaign();
   const [selectedPlatform, setSelectedPlatform] = React.useState("instagram");
   const [selectedGenre, setSelectedGenre] = React.useState(
     "Techno (Melodic, Minimal)"
   );
-  const [offers, setOffers] = React.useState<any[]>([]);
+
   React.useEffect(() => {
     const fetchOffers = async () => {
-      const data = await getPublishedOffers(selectedPlatform, selectedGenre);
-      setOffers(data);
+      await setOffers(selectedPlatform, selectedGenre);
     };
     fetchOffers();
   }, []);
@@ -24,8 +28,7 @@ export const CampaignCreatorPage: React.FC<Props> = () => {
     setSelectedPlatform(platform);
     if (selectedGenre) {
       try {
-        const data = await getPublishedOffers(platform, selectedGenre);
-        setOffers(data);
+        await setOffers(platform, selectedGenre);
       } catch (err) {
         console.error(err);
       }
@@ -36,8 +39,7 @@ export const CampaignCreatorPage: React.FC<Props> = () => {
     setSelectedGenre(genre);
     if (selectedPlatform) {
       try {
-        const data = await getPublishedOffers(selectedPlatform, genre);
-        setOffers(data);
+        await setOffers(selectedPlatform, genre);
       } catch (err) {
         console.error(err);
       }
@@ -45,8 +47,11 @@ export const CampaignCreatorPage: React.FC<Props> = () => {
   };
 
   return (
-    <div className="Campaign_Creator_Page">
+    <Container className="Campaign_Creator_Page">
+      {loading && <Loader />}
       <div className="Campaign_Creator_Page__head">
+        {" "}
+        <Breadcrumbs />
         <h1>Ready-to-launch offers</h1>
         <ScrollPlatforms
           selectedPlatform={selectedPlatform}
@@ -59,6 +64,6 @@ export const CampaignCreatorPage: React.FC<Props> = () => {
       </div>{" "}
       <SliderForCard packages={offers} />
       <BuildCampaign />
-    </div>
+    </Container>
   );
 };

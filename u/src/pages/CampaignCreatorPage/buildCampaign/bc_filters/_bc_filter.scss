@@ -9,6 +9,15 @@
   @media (max-width: 600px) {
     max-width: 100%;
   }
+  &.bc_filterForTable {
+    @media (max-width: 835px) {
+      max-width: 100%;
+    }
+  }
+  &__sticky {
+    position: sticky;
+    top: 30px;
+  }
   &__head {
     position: relative;
     display: flex;

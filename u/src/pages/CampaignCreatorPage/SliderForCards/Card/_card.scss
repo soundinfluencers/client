@@ -1,44 +1,45 @@
-.card_campaign {
+.campaign-card {
   display: flex;
   align-items: center;
   flex-direction: column;
-  &__head {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  &.active {
+    .campaign-card__header {
+      border: 1px solid rgba(14, 116, 220, 1);
+    }
+    .campaign-card__title-section {
+      background: linear-gradient(
+        107.52deg,
+        #bce8ff 3.56%,
+        rgba(218, 244, 255, 0.94) 50.39%,
+        rgba(191, 216, 255, 0.895) 79.14%,
+        rgba(164, 188, 255, 0.85) 100%
+      );
+    }
+    .button {
+      background-color: rgba(14, 116, 220, 1);
+      transition: none;
+      &:active {
+        p {
+          color: white;
+        }
+      }
+    }
+    .campaign-card__accounts {
+      border-left: 1px solid rgba(14, 116, 220, 1);
+      border-right: 1px solid rgba(14, 116, 220, 1);
+      transition: 0.2s ease;
+      border-bottom: 1px solid rgba(14, 116, 220, 1);
+    }
+  }
+  &__header {
     max-width: 288px;
     width: 100%;
     padding: 8px;
     border: 1px solid rgba(231, 232, 241, 1);
     transition: 0.2s ease;
     border-radius: 24px;
-    &__titular {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      max-width: 272px;
-      width: 100%;
-      height: 156px;
-      background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
-      padding: 16px;
 
-      border-radius: 16px;
-      h2 {
-        font-weight: 500;
-        font-style: Medium;
-        font-size: 24px;
-        leading-trim: NONE;
-        line-height: 100%;
-        letter-spacing: 0%;
-        color: rgba(42, 42, 42, 1);
-      }
-      p {
-        font-weight: 400;
-        font-style: Regular;
-        font-size: 36px;
-        leading-trim: NONE;
-        line-height: 100%;
-        letter-spacing: 0%;
-        color: rgba(42, 42, 42, 1);
-      }
-    }
     ul {
       display: flex;
       flex-direction: column;
@@ -61,7 +62,37 @@
       margin-bottom: 8px;
     }
   }
-  .block {
+  &__title-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    max-width: 272px;
+    width: 100%;
+    height: 156px;
+    background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+    padding: 16px;
+
+    border-radius: 16px;
+    h2 {
+      font-weight: 500;
+      font-style: Medium;
+      font-size: 24px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+      color: rgba(42, 42, 42, 1);
+    }
+    p {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 36px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+      color: rgba(42, 42, 42, 1);
+    }
+  }
+  &__accounts {
     margin-top: -19px;
     max-width: 288px;
 
@@ -119,38 +150,45 @@
         img {
           width: 32px;
           height: 32px;
+          filter: grayscale(100%);
           border-radius: 50%;
         }
       }
     }
   }
   &:hover {
-    .card_campaign__head {
-      transition: 0.2s ease;
+    transform: scale(0.99);
+    .campaign-card__header {
       border: 1px solid rgba(14, 116, 220, 1);
-      .card_campaign__head__titular {
-        background: linear-gradient(
-          107.52deg,
-          #bce8ff 3.56%,
-          rgba(218, 244, 255, 0.94) 50.39%,
-          rgba(191, 216, 255, 0.895) 79.14%,
-          rgba(164, 188, 255, 0.85) 100%
-        );
-      }
+    }
+    .campaign-card__title-section {
+      background: linear-gradient(
+        107.52deg,
+        #bce8ff 3.56%,
+        rgba(218, 244, 255, 0.94) 50.39%,
+        rgba(191, 216, 255, 0.895) 79.14%,
+        rgba(164, 188, 255, 0.85) 100%
+      );
     }
     .button {
       background-color: rgba(14, 116, 220, 1);
+      transition: none;
       &:active {
         p {
           color: white;
         }
       }
     }
-    .block {
+    .campaign-card__accounts {
       border-left: 1px solid rgba(14, 116, 220, 1);
       border-right: 1px solid rgba(14, 116, 220, 1);
       transition: 0.2s ease;
       border-bottom: 1px solid rgba(14, 116, 220, 1);
+    }
+    .campaign-card__header,
+    .campaign-card__title-section,
+    .campaign-card__accounts {
+      transition: 0.25s ease;
     }
   }
 }

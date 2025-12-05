@@ -2,16 +2,21 @@ import React from "react";
 import "./_card.scss";
 import type { ApiOffer } from "../../../../types/creator-campaign/creator-campaign.types";
 import { ButtonMain } from "../../../../components/ui/buttons/button/Button";
+import { useFormDataOffer } from "../../../../store/createCampaign";
 interface Props {
   dataCard: ApiOffer;
 }
 
 export const Card: React.FC<Props> = ({ dataCard }) => {
+  const { setActiveOffer, activeOfferId, setOffer, offer } = useFormDataOffer();
+  console.log(offer);
   return (
-    <div className="card_campaign">
-      <div className="card_campaign__head">
-        {" "}
-        <div className="card_campaign__head__titular">
+    <div
+      className={`campaign-card ${
+        activeOfferId === dataCard._id ? "active" : ""
+      }`}>
+      <div className="campaign-card__header">
+        <div className="campaign-card__title-section">
           <h2>{dataCard.title}</h2>
           <p>{dataCard.price} €</p>
         </div>
@@ -22,13 +27,14 @@ export const Card: React.FC<Props> = ({ dataCard }) => {
         </ul>
         <ButtonMain
           text={"Choose"}
-          onClick={function (): void {
-            throw new Error("Function not implemented.");
+          onClick={() => {
+            setOffer(dataCard);
+            setActiveOffer(dataCard._id);
           }}
           className="button"
         />
       </div>
-      <div className="block">
+      <div className="campaign-card__accounts">
         <ul>
           {dataCard.connectedAccounts.map((acc, i) => (
             <li key={i}>

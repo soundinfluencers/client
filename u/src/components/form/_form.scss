@@ -1,0 +1,40 @@
+.form {
+  max-width: 600px;
+  .labelForm {
+    margin: 24px 0px 16px;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+
+    width: 100%;
+    border-bottom: 1px solid rgba(185, 208, 255, 1);
+    padding-bottom: 8px;
+  }
+  .inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .button-section {
+    margin-top: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    button {
+      max-width: 250px;
+      width: 100%;
+      height: 46px;
+      padding: 12px 24px;
+      border-radius: 24px;
+      border: 1px solid rgba(185, 208, 255, 1);
+    }
+    .submit {
+      background: rgba(236, 238, 240, 1);
+      border: none;
+    }
+  }
+}

@@ -135,6 +135,11 @@
       @media (max-width: 600px) {
         flex-direction: column;
       }
+      &.tableAdaptive {
+        @media (max-width: 835px) {
+          flex-direction: column;
+        }
+      }
     }
   }
 }

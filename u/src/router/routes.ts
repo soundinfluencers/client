@@ -6,6 +6,7 @@ import { ForgotPasswordPage } from "../pages/auth/forgot/ForgotPasswordPage.tsx"
 import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
 import { HomePage } from "../pages/home/HomePage.tsx";
 import { CampaignCreatorPage } from "../pages/CampaignCreatorPage/CampaignCreatorPage.tsx";
+import { CampaignPostContent } from "../pages/CampaignCreatorPage/campaign-post-content/campaign-post-content.tsx";
 
 export const routes: IRoute[] = [
   {
@@ -60,6 +61,12 @@ export const routes: IRoute[] = [
     name: "CreateCampaign",
     path: "/client/CreateCampaign",
     component: CampaignCreatorPage,
+    isProtected: true,
+  },
+  {
+    name: "Content",
+    path: "/client/CreateCampaign/Content",
+    component: CampaignPostContent,
     isProtected: true,
   },
 ];

@@ -1,5 +1,5 @@
-.scroll_Plattforms {
-  &__title {
+.platforms-scroll {
+  &__header {
     width: 100%;
     display: flex;
     align-items: center;
@@ -13,7 +13,7 @@
     }
   }
 
-  ul {
+  &__list {
     margin-top: 8px;
     display: flex;
     align-items: center;

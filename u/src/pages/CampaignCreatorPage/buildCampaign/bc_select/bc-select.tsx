@@ -3,7 +3,7 @@ import "./_bc_select.scss";
 import check from "../../../../assets/icons/check.svg";
 interface Props {}
 
-import { Dropdown } from "./dropdown/dropdown";
+import { Dropdown } from "../../ui/dropdown/dropdown";
 
 export const SelectBudget: React.FC = () => {
   const currencyArr = ["£", "$", "€"];

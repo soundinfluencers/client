@@ -3,12 +3,12 @@ import "./_home-header.scss";
 import arrowIcon from "@/assets/icons/arrow-down-right.svg";
 import logoIcon from "@/assets/logos/small-black-logo.svg";
 import { useWindowSize } from "../../../../../hooks/useWindowSize.ts";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export interface HomeHeaderProps {
   firstName?: string;
   balance?: string;
-  userRole: string;
+  userRole?: string;
 }
 
 export const HomeHeader: React.FC<HomeHeaderProps> = ({
@@ -17,24 +17,24 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
   userRole,
 }) => {
   const { width } = useWindowSize();
-
+  const navigate = useNavigate();
   return width > 500 ? (
     <div className="home-header">
       <div className="home-header__left">
         <div className="home-header__greeting">
           {firstName ? <p>Welcome back, {firstName}!</p> : <p>Welcome back!</p>}
         </div>
-        <Link to={"/client/CreateCampaign"}>
-          <div className="home-header__create-wrapper">
-            <div className="home-header__create">
-              <p>Create a campaign</p>
+        <div
+          onClick={() => navigate("/client/CreateCampaign")}
+          className="home-header__create-wrapper">
+          <div className="home-header__create">
+            <p>Create a campaign</p>
 
-              <div className="home-header__create-img">
-                <img src={arrowIcon} alt="" />
-              </div>
+            <div className="home-header__create-img">
+              <img src={arrowIcon} alt="" />
             </div>
-          </div>{" "}
-        </Link>
+          </div>
+        </div>{" "}
       </div>
 
       <div className="home-header__right">
@@ -72,18 +72,17 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
           </div>
         </div>
       </div>
-      <Link to={"/client/CreateCampaign"}>
-        {" "}
-        <div className="home-header__create-wrapper">
-          <div className="home-header__create">
-            <p>Create a campaign</p>
+      <div
+        onClick={() => navigate("/client/CreateCampaign")}
+        className="home-header__create-wrapper">
+        <div className="home-header__create">
+          <p>Create a campaign</p>
 
-            <div className="home-header__create-img">
-              <img src={arrowIcon} alt="" />
-            </div>
+          <div className="home-header__create-img">
+            <img src={arrowIcon} alt="" />
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   );
 };

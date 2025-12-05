@@ -1,0 +1,49 @@
+input,
+textarea {
+  width: 100%;
+  resize: none;
+}
+label {
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+.form-field {
+  textarea {
+    height: 80px;
+    padding: 16px;
+    margin-top: 4px;
+    width: 100%;
+    background: rgba(255, 255, 255, 1);
+    border: 1px solid rgba(231, 232, 241, 1);
+    border-radius: 8px;
+  }
+}
+.form-input {
+  input {
+    padding: 16px;
+    margin-top: 4px;
+    width: 100%;
+    background: rgba(255, 255, 255, 1);
+    border: 1px solid rgba(231, 232, 241, 1);
+    border-radius: 8px;
+  }
+}
+.form-field,
+.form-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  &.error {
+    label {
+      color: rgba(225, 25, 32, 1);
+    }
+    input,
+    textarea {
+      border: 1px solid rgba(225, 25, 32, 1);
+    }
+  }
+}

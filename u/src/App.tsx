@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { TabBar } from "./components/layout/tab-bar/TabBar";
 import { routes } from "./router/routes";
 import { useEffect } from "react";
@@ -7,6 +7,7 @@ import { setupInterceptors } from "./api/api";
 import { PrivateRoute } from "./router/components/PrivateRoute.tsx";
 import { PublicRoute } from "./router/components/PublicRoute.tsx";
 import "./app.scss";
+import { Proceed } from "./components/proceed/proceed.tsx";
 function App() {
   const { accessToken, setAccessToken, logout } = useAuth();
 
@@ -17,7 +18,7 @@ function App() {
   return (
     <div>
       <TabBar isAuthenticated={!!accessToken} />
-      {accessToken && <div className="proceed"></div>}
+      {accessToken && <Proceed />}
       <Routes>
         {routes.map(({ path, component: Component, name, isProtected }) => (
           <Route
@@ -33,8 +34,7 @@ function App() {
                   <Component />
                 </PublicRoute>
               )
-            }
-          />
+            }></Route>
         ))}
 
         {/* fallback */}

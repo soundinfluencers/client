@@ -1,6 +1,6 @@
 import React from "react";
 import "./_scrollPlattforms.scss";
-import { getSocialMediaIconPlattform } from "../../../utils/constants/social-medias";
+import { getSocialMediaIconPlattform } from "../../../constants/social-medias";
 import chevron from "../../../assets/icons/chevron-right.svg";
 import type { SocialMediaType } from "../../../types/utils/constants.types";
 
@@ -25,12 +25,12 @@ export const ScrollPlatforms: React.FC<Props> = ({
   ];
 
   return (
-    <div className="scroll_Plattforms">
-      {" "}
-      <div className="scroll_Plattforms__title">
-        <h3>Choose your platforms</h3> <img src={chevron} alt="" />
+    <div className="platforms-scroll">
+      <div className="platforms-scroll__header">
+        <h3>Choose your platforms</h3>
+        <img src={chevron} alt="Chevron icon" />
       </div>
-      <ul>
+      <ul className="platforms-scroll__list">
         {mockData.map((item) => (
           <li
             key={item.name}

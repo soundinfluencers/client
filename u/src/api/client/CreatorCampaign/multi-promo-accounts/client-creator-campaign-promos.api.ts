@@ -2,7 +2,9 @@ import $api from "../../../api";
 
 export const getMultiPromoAccounts = async (socialMedia: string) => {
   try {
-    const response = await $api.get(`/multi-promo/accounts/${socialMedia}`);
+    const response = await $api.get(
+      `/multi-promo/accounts/${socialMedia},spotify`
+    );
 
     return response;
   } catch (error) {

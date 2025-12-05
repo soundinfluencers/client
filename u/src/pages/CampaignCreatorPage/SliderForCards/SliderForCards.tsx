@@ -7,6 +7,7 @@ import "./_slider.scss";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { useLocation } from "react-router-dom";
 
 interface Props {
   packages: any[];
