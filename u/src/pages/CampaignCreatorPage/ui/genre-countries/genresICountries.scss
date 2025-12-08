@@ -1,0 +1,61 @@
+.information_popUp {
+  position: absolute;
+  background: white;
+  width: calc(100% + 2px);
+  border: 1px solid rgba(185, 208, 255, 1);
+  padding: 24px;
+  left: -1px;
+  right: 0;
+  margin-top: 16px;
+  z-index: 10;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+  &.flag {
+    top: 23px;
+    ul {
+      li {
+        font-size: 12px;
+      }
+    }
+  }
+  .genres {
+    h3 {
+      font-weight: normal;
+      border-bottom: 1px solid rgba(185, 208, 255, 1);
+    }
+    ul {
+      margin-top: 14px;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      li {
+        flex: 0 0 auto;
+        padding: 4px 12px;
+        background: rgba(255, 255, 255, 1);
+        border: 1px solid rgba(231, 232, 241, 1);
+        border-radius: 4px;
+      }
+    }
+  }
+  .countries {
+    margin-top: 16px;
+    h3 {
+      font-weight: normal;
+      border-bottom: 1px solid rgba(185, 208, 255, 1);
+    }
+    ul {
+      margin-top: 14px;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      li {
+        padding: 4px 12px;
+        background: rgba(255, 255, 255, 1);
+        border: 1px solid rgba(231, 232, 241, 1);
+        border-radius: 4px;
+      }
+    }
+  }
+}

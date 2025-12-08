@@ -6,15 +6,22 @@ import chevronDown from "../../../../../assets/icons/chevron-down.svg";
 import type { SocialMediaType } from "../../../../../types/utils/constants.types";
 import { formatFollowers } from "../../../../../utils/functions/formatFollowers";
 import { GenresCountries } from "../../../ui/genre-countries/genre-countries";
+import { useFormDataOffer } from "../../../../../store/createCampaign";
 interface Props {
   data: PromoCard;
   view: number;
 }
 
 export const Card: React.FC<Props> = ({ data, view }) => {
+  const { setPromoCard, promoCard } = useFormDataOffer();
+  const activePromo = promoCard.find((card) => card._id === data._id);
   const [flag, setFlag] = React.useState<boolean>(false);
   return (
-    <div className={`bc_card ${flag ? "open" : ""}`}>
+    <div
+      onClick={() => setPromoCard(data)}
+      className={`bc_card ${flag ? "open" : ""} ${
+        activePromo ? "active" : ""
+      }`}>
       <div className="bc_card__head">
         <div className="cost">
           <img src={data.logo} alt="" />

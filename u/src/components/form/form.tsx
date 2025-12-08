@@ -39,8 +39,8 @@ export default function Form({ data, className }: FormSection) {
       {" "}
       {data.headInput && (
         <FormInput<FormSchema>
-          name={data.headInput.name}
           label={data.headInput.name}
+          name={data.headInput.name}
           placeholder={data.headInput.placeholder}
           register={register}
           required

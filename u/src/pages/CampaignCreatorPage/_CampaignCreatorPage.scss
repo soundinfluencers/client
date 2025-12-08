@@ -1,5 +1,10 @@
 .Campaign_Creator_Page {
   &__head {
+    .navmenu {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
     h1 {
       font-weight: 400;
       font-style: Regular;

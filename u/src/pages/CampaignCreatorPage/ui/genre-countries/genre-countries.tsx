@@ -1,5 +1,5 @@
 import React from "react";
-import "../../buildCampaign/bc_cards/bc_card/_card-bc_card.scss";
+import "./genresICountries.scss";
 import type { Country } from "../../../../types/creator-campaign/creator-campaign.types";
 type musicStyles = {
   musicSubStyles: string[];
@@ -8,11 +8,12 @@ type musicStyles = {
 };
 interface Props {
   data: musicStyles;
+  flag?: boolean;
 }
 
-export const GenresCountries: React.FC<Props> = ({ data }) => {
+export const GenresCountries: React.FC<Props> = ({ data, flag = false }) => {
   return (
-    <div className="information__popUp">
+    <div className={`information_popUp ${flag ? "flag" : ""}`}>
       {data.musicSubStyles.length > 0 && data.musicStyleOther.length > 0 && (
         <div className="genres">
           <h3>Genres</h3>

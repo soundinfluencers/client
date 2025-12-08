@@ -5,6 +5,7 @@ import type {
   PromoCard,
 } from "../../types/creator-campaign/creator-campaign.types";
 import { getPublishedOffers } from "../../api/client/CreatorCampaign/offers/client-creator-campaign-offers.api";
+import { calcTotal } from "../../utils/functions/calsTotal";
 
 interface CreateCampaignProps {
   offers: ApiOffer[];
@@ -41,11 +42,40 @@ interface FormDataOffer {
   setActiveOffer: (id: string) => void;
   offer: ApiOffer | null;
   setOffer: (data: ApiOffer) => void;
+  promoCard: PromoCard[];
+  setPromoCard: (data: PromoCard) => void;
+  totalPrice: number;
+  recalcTotal: () => void;
 }
 
-export const useFormDataOffer = create<FormDataOffer>((set) => ({
+export const useFormDataOffer = create<FormDataOffer>((set, get) => ({
   offer: null,
+  promoCard: [],
+  totalPrice: 0,
   activeOfferId: null,
-  setOffer: (data: ApiOffer) => set({ offer: data }),
-  setActiveOffer: (id: string) => set({ activeOfferId: id }),
+
+  setPromoCard: (data) =>
+    set((state) => {
+      const updatedCards = [...state.promoCard, data];
+
+      return {
+        promoCard: updatedCards,
+        totalPrice: calcTotal(state.offer, updatedCards),
+      };
+    }),
+
+  setOffer: (data) =>
+    set((state) => ({
+      offer: data,
+      totalPrice: calcTotal(data, state.promoCard),
+    })),
+
+  setActiveOffer: (id) => set({ activeOfferId: id }),
+
+  recalcTotal: () => {
+    const state = get();
+    set({
+      totalPrice: calcTotal(state.offer, state.promoCard),
+    });
+  },
 }));

@@ -9,6 +9,7 @@ import { Container } from "../../components/container/container";
 import { useCreateCampaign } from "../../store/createCampaign";
 import { Loader } from "../../components/ui/loader/loader";
 import { Breadcrumbs } from "../../components/ui/Breadcrumbs/pathnames";
+import { SaveDraft } from "../../components/save-draft/save-draft";
 interface Props {}
 
 export const CampaignCreatorPage: React.FC<Props> = () => {
@@ -51,7 +52,10 @@ export const CampaignCreatorPage: React.FC<Props> = () => {
       {loading && <Loader />}
       <div className="Campaign_Creator_Page__head">
         {" "}
-        <Breadcrumbs />
+        <div className="navmenu">
+          <Breadcrumbs />
+          <SaveDraft />
+        </div>{" "}
         <h1>Ready-to-launch offers</h1>
         <ScrollPlatforms
           selectedPlatform={selectedPlatform}

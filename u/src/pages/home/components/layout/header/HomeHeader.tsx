@@ -18,23 +18,37 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
 }) => {
   const { width } = useWindowSize();
   const navigate = useNavigate();
-  return width > 500 ? (
+  return width > 970 ? (
     <div className="home-header">
       <div className="home-header__left">
         <div className="home-header__greeting">
           {firstName ? <p>Welcome back, {firstName}!</p> : <p>Welcome back!</p>}
         </div>
-        <div
-          onClick={() => navigate("/client/CreateCampaign")}
-          className="home-header__create-wrapper">
-          <div className="home-header__create">
-            <p>Create a campaign</p>
+        <div className="home-header__row">
+          {" "}
+          <div
+            onClick={() => navigate("/client/CreateCampaign")}
+            className="home-header__create-wrapper">
+            <div className="home-header__create">
+              <p>Create a campaign</p>
 
-            <div className="home-header__create-img">
-              <img src={arrowIcon} alt="" />
+              <div className="home-header__create-img">
+                <img src={arrowIcon} alt="" />
+              </div>
+            </div>
+          </div>{" "}
+          <div
+            onClick={() => navigate("/client/BespokeCampaign")}
+            className="home-header__create-wrapper">
+            <div className="home-header__create">
+              <p>Bespoke Campaign </p>
+
+              <div className="home-header__create-img">
+                <img src={arrowIcon} alt="" />
+              </div>
             </div>
           </div>
-        </div>{" "}
+        </div>
       </div>
 
       <div className="home-header__right">
@@ -72,14 +86,28 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
           </div>
         </div>
       </div>
-      <div
-        onClick={() => navigate("/client/CreateCampaign")}
-        className="home-header__create-wrapper">
-        <div className="home-header__create">
-          <p>Create a campaign</p>
+      <div className="home-header-mobile__row">
+        {" "}
+        <div
+          onClick={() => navigate("/client/CreateCampaign")}
+          className="home-header__create-wrapper">
+          <div className="home-header__create">
+            <p>Create a campaign</p>
 
-          <div className="home-header__create-img">
-            <img src={arrowIcon} alt="" />
+            <div className="home-header__create-img">
+              <img src={arrowIcon} alt="" />
+            </div>
+          </div>
+        </div>
+        <div
+          onClick={() => navigate("/client/BespokeCampaign")}
+          className="home-header__create-wrapper">
+          <div className="home-header__create">
+            <p>Bespoke Campaign </p>
+
+            <div className="home-header__create-img">
+              <img src={arrowIcon} alt="" />
+            </div>
           </div>
         </div>
       </div>

@@ -1,0 +1,16 @@
+.save-draft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 7px 22px;
+  border-radius: 8px;
+  p {
+    font-style: Regular;
+    font-size: 15px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+  }
+  border: 1px solid rgba(185, 208, 255, 1);
+}
