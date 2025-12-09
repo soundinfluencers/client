@@ -11,8 +11,9 @@ import {
 } from "../ui/inputs/form-input/form-attributes";
 import "./_form.scss";
 import type { PlattformsDataFormProps } from "../../types/form/plattforms-data-form.types";
+import type { BespokeCampaignTabData } from "../../types/form/bespoke-campaign-tabs-data";
 interface FormSection {
-  data: PlattformsDataFormProps;
+  data: PlattformsDataFormProps | BespokeCampaignTabData;
   className?: string;
 }
 
@@ -25,31 +26,37 @@ export default function Form({ data, className }: FormSection) {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<DynamicFormData>();
+
   const onSubmit = async () => {
-    try {
-      console.log("sent");
-      reset();
-    } catch (error) {}
+    console.log("sent");
+    reset();
   };
+
+  const isPlatformForm = data.formType === "platform";
+  const isBespokeForm = data.formType === "bespoke";
+
   return (
     <form
       className={`form ${className}`}
       onSubmit={handleSubmit(onSubmit)}
       noValidate>
-      {" "}
-      {data.headInput && (
-        <FormInput<FormSchema>
+      {isPlatformForm && data.headInput && (
+        <FormInput
           label={data.headInput.name}
           name={data.headInput.name}
           placeholder={data.headInput.placeholder}
           register={register}
           required
-          error={errors.name}
+          error={errors[data.headInput.name]}
         />
       )}
-      {data.contentTitle && <p className="labelForm">{data.contentTitle} 1</p>}
+
+      {isPlatformForm && data.contentTitle && (
+        <p className="labelForm">{data.contentTitle}</p>
+      )}
+
       <div className="inputs">
-        {data.inputs.length > 0 &&
+        {isPlatformForm &&
           data.inputs.map((input, i) => (
             <FormInput
               key={i}
@@ -59,25 +66,61 @@ export default function Form({ data, className }: FormSection) {
               register={register}
               error={errors[input.name]}
             />
-          ))}{" "}
-        {Array.isArray(data.textAreas) &&
+          ))}
+
+        {isPlatformForm &&
+          Array.isArray(data.textAreas) &&
           data.textAreas.map((textArea, i) => (
-            <FormTextArea<FormSchema>
+            <FormTextArea
               key={i}
               name={textArea.name}
               label={textArea.name}
               placeholder={textArea.placeholder}
               register={register}
-              required={false}
               error={errors[textArea.name]}
             />
           ))}
+
+        {isBespokeForm &&
+          data.inputs.map((input) => (
+            <FormInput
+              key={input.name}
+              label={input.label}
+              name={input.name}
+              placeholder={input.placeholder}
+              register={register}
+              error={errors[input.name]}
+            />
+          ))}
+        {isBespokeForm &&
+          data.textAreas &&
+          data.textAreas.map((input) => (
+            <FormTextArea
+              isBespoke={true}
+              key={input.name}
+              label={input.name}
+              name={input.name}
+              placeholder={input.placeholder}
+              register={register}
+              error={errors[input.name]}
+            />
+          ))}
       </div>
+
       <div className="button-section">
-        <button>Add additional {data.contentTitle.toLocaleLowerCase()} </button>
-        <button className="submit" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Sending..." : "Continue"}
-        </button>
+        {isPlatformForm && (
+          <button>Add additional {data.contentTitle?.toLowerCase()}</button>
+        )}
+        {isPlatformForm && (
+          <button className="submit" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Sending..." : "Continue"}
+          </button>
+        )}{" "}
+        {isBespokeForm && (
+          <button className="submit" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Sending..." : "Create"}
+          </button>
+        )}
       </div>
     </form>
   );

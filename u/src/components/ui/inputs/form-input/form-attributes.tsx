@@ -24,6 +24,7 @@ interface FormTextArea<T extends FieldValues> {
   required?: boolean;
   className?: string;
   error?: FieldError;
+  isBespoke?: boolean;
 }
 
 export function FormInput<T extends FieldValues>({
@@ -57,6 +58,7 @@ export function FormTextArea<T extends FieldValues>({
   required = false,
   error,
   className = "",
+  isBespoke,
 }: FormTextArea<T>) {
   return (
     <div className={`form-field  ${className} ${error ? "error" : ""}`}>
@@ -65,6 +67,7 @@ export function FormTextArea<T extends FieldValues>({
         id={name}
         {...register(name, { required })}
         placeholder={placeholder}
+        className={isBespoke ? "bespoke" : ""}
       />
     </div>
   );

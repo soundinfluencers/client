@@ -1,0 +1,15 @@
+.promo-form {
+  &__title {
+    border-bottom: 1px solid rgba(185, 208, 255, 1);
+    padding-bottom: 8px;
+    h2 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 20px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+    }
+    margin-bottom: 16px;
+  }
+}

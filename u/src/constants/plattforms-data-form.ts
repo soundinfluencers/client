@@ -2,6 +2,7 @@ import type { PlattformsDataFormProps } from "../types/form/plattforms-data-form
 
 export const PlattformsDataForm: PlattformsDataFormProps[] = [
   {
+    formType: "platform",
     plattform: "spotify",
     headInput: {
       name: "Campaign Name",
@@ -24,6 +25,7 @@ export const PlattformsDataForm: PlattformsDataFormProps[] = [
     contentTitle: "Song",
   },
   {
+    formType: "platform",
     plattform: "soundclound",
     headInput: {
       name: "Campaign Name",
@@ -46,6 +48,7 @@ export const PlattformsDataForm: PlattformsDataFormProps[] = [
     contentTitle: "Song",
   },
   {
+    formType: "platform",
     plattform: "press",
     headInput: {
       name: "Campaign Name",

@@ -7,6 +7,7 @@ import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
 import { HomePage } from "../pages/home/HomePage.tsx";
 import { CampaignCreatorPage } from "../pages/CampaignCreatorPage/CampaignCreatorPage.tsx";
 import { CampaignPostContent } from "../pages/CampaignCreatorPage/campaign-post-content/campaign-post-content.tsx";
+import { BespokeCampaign } from "../pages/BespokeCampaign/bespoke-campaign.tsx";
 
 export const routes: IRoute[] = [
   {
@@ -67,6 +68,12 @@ export const routes: IRoute[] = [
     name: "Content",
     path: "/client/CreateCampaign/Content",
     component: CampaignPostContent,
+    isProtected: true,
+  },
+  {
+    name: "BespokeCampaign",
+    path: "/client/BespokeCampaign",
+    component: BespokeCampaign,
     isProtected: true,
   },
 ];

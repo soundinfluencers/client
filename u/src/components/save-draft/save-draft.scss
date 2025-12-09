@@ -3,7 +3,7 @@
   align-items: center;
   gap: 8px;
   width: fit-content;
-  padding: 7px 22px;
+  padding: 8px 22px;
   border-radius: 8px;
   p {
     font-style: Regular;
@@ -13,4 +13,7 @@
     letter-spacing: 0%;
   }
   border: 1px solid rgba(185, 208, 255, 1);
+  @media (max-width: 600px) {
+    padding: 8px 12px;
+  }
 }

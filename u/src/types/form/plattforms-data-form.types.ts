@@ -8,6 +8,7 @@ type textAreas = {
 };
 
 export interface PlattformsDataFormProps {
+  formType: "platform";
   plattform: string;
   headInput: inputs;
   inputs: inputs[];
