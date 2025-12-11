@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import "./_forgot_password_page.scss";
 import { TextInput } from "../../../components/ui/inputs/text-input/TextInput.tsx";
-import { useLoginStore } from "../../../store/slices/features/loginSlice.ts";
+import { useLoginStore } from "../../../store/features/loginSlice.ts";
 import { ButtonMain } from "../../../components/ui/buttons/button/Button.tsx";
 
 export const ForgotPasswordPage: FC = () => {

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CampaignsList } from "./components/layout/campaigns-list/CampaignsList.tsx";
 import type { CampaignForList } from "../../types/campaign.types.ts";
 import { Container } from "../../components/container/container.tsx";
+import { Table } from "../../components/ui/table/table.tsx";
 
 export const HomePage: FC = () => {
   const {
@@ -22,11 +23,11 @@ export const HomePage: FC = () => {
   return (
     <Container className="home-page">
       <HomeHeader />
-      {campaigns ? (
+      {/* {campaigns ? (
         <CampaignsList listDisplayMode={"list"} list={campaigns} />
       ) : (
         <p>error</p>
-      )}
+      )} */}
     </Container>
   );
 };

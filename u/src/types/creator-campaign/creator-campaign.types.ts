@@ -1,4 +1,6 @@
-export interface ApiOffer {
+// IApiOffer for offers in CreateCampaign //
+
+export interface IApiOffer {
   _id: string;
   title: string;
   socialMedia: string;
@@ -20,7 +22,9 @@ export interface ApiOffer {
   updatedAt: string;
 }
 
-export interface PromoCard {
+// IPromoCard for promo card in CreateCampaign //
+
+export interface IPromoCard {
   influencerId: string;
   socialMedia: string;
   _id: string;

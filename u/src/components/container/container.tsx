@@ -6,6 +6,8 @@ interface Props {
   ref?: React.RefObject<HTMLDivElement | null>;
 }
 
+// base layout container //
+
 export const Container: React.FC<Props> = ({ children, className, ref }) => {
   return (
     <div ref={ref} className={`${Styles.container} ${className}`}>

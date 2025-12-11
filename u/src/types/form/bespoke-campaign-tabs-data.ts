@@ -8,7 +8,7 @@ type textAreas = {
   placeholder: string;
 };
 
-export interface BespokeCampaignTabData {
+export interface IBespokeCampaignTabData {
   formType: "bespoke";
   promoType: string;
   title: string;

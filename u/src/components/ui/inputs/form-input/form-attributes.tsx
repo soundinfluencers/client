@@ -27,6 +27,8 @@ interface FormTextArea<T extends FieldValues> {
   isBespoke?: boolean;
 }
 
+// input for form //
+
 export function FormInput<T extends FieldValues>({
   name,
   label,
@@ -50,6 +52,8 @@ export function FormInput<T extends FieldValues>({
   );
 }
 
+// textarea for form //
+
 export function FormTextArea<T extends FieldValues>({
   name,
   label,
@@ -72,3 +76,5 @@ export function FormTextArea<T extends FieldValues>({
     </div>
   );
 }
+
+// also can be added a new one //

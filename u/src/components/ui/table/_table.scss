@@ -1,0 +1,45 @@
+.table {
+  display: table;
+  width: 100%;
+  border: 1px solid rgba(185, 208, 255, 1);
+  border-radius: 8px;
+
+  &__header,
+  &__body-row {
+    display: table-row;
+  }
+
+  &__header-data,
+  &__body-data {
+    display: table-cell;
+    padding: 8px;
+    text-align: center;
+    vertical-align: top;
+  }
+  &__add {
+    display: flex;
+    padding: 8px;
+    height: 52px;
+    background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+  }
+  &__header-data {
+    font-weight: 600;
+    background: rgba(185, 208, 255, 0.15);
+
+    border: 1px solid rgba(185, 208, 255, 1);
+  }
+  &__body-data {
+    border: 1px solid rgba(191, 212, 255, 0.4);
+
+    height: 70px;
+    font-weight: 600;
+  }
+  &__footer-data {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border: 1px solid rgba(191, 212, 255, 0.4);
+    height: 36px;
+    font-weight: 600;
+  }
+}

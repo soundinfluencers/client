@@ -1,23 +1,25 @@
 import { type FC } from "react";
 import { type NavigateFunction, useNavigate } from "react-router-dom";
 import { TextInput } from "../../../components/ui/inputs/text-input/TextInput.tsx";
-import { useLoginStore } from "../../../store/slices/features/loginSlice.ts";
+import { useLoginStore } from "../../../store/features/loginSlice.ts";
 import { ButtonMain } from "../../../components/ui/buttons/button/Button.tsx";
 import "./_login-page.scss";
 import { useAuth } from "../../../contexts/AuthContext.tsx";
 import { loginApi } from "../../../api/auth/auth.api.ts";
 import type { ResponseLoginUserModel } from "../../../types/auth/auth.types.ts";
+import { useClientUser } from "../../../store/get-user-client/index.ts";
 
 export const LoginPage: FC = () => {
   const navigate: NavigateFunction = useNavigate();
-
+  const { setUser } = useClientUser();
   const { email, password, setEmail, setPassword } = useLoginStore();
   const { setAccessToken } = useAuth();
 
   const handleLogin = async () => {
     const res: ResponseLoginUserModel = await loginApi({ email, password });
 
-    if (res.accessToken && res.userRole) {
+    if (res.accessToken && res.userRole && res.id) {
+      setUser(res.accessToken, res.id);
       setAccessToken(res.accessToken);
       navigate("/client/home");
     }

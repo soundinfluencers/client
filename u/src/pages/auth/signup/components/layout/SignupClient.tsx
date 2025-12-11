@@ -6,7 +6,7 @@ import { useState } from "react";
 import { InputPhone } from "../ui/phone-input/InputPhone.tsx";
 import { ClientCompanySelect } from "../ui/client-company-select/ClientCompanySelect.tsx";
 import type { ClientCompanyType } from "../../../../../types/user/user.types.ts";
-import { useSignupClientStore } from "../../../../../store/slices/features/signupClient.ts";
+import { useSignupClientStore } from "../../../../../store/features/signupClient.ts";
 
 export const SignupClient = () => {
   const fields = useSignupClientStore((state) => state);

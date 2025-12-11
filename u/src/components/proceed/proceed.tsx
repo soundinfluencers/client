@@ -4,6 +4,8 @@ import "./_proceed.scss";
 import { useFormDataOffer } from "../../store/createCampaign";
 interface Props {}
 
+// info about current cart //
+
 export const Proceed: React.FC<Props> = () => {
   const { offer } = useFormDataOffer();
   const navigate = useNavigate();

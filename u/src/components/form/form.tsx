@@ -1,25 +1,29 @@
-import {
-  useForm,
-  type FieldValues,
-  type RegisterOptions,
-  type UseFormRegisterReturn,
-} from "react-hook-form";
+import { useForm } from "react-hook-form";
+
 import type { FormSchema } from "./schemas";
+
+// reusable form with ZOD validation //
+
 import {
   FormInput,
   FormTextArea,
 } from "../ui/inputs/form-input/form-attributes";
 import "./_form.scss";
-import type { PlattformsDataFormProps } from "../../types/form/plattforms-data-form.types";
-import type { BespokeCampaignTabData } from "../../types/form/bespoke-campaign-tabs-data";
+import type { IPlattformsDataFormProps } from "../../types/form/plattforms-data-form.types";
+import type { IBespokeCampaignTabData } from "../../types/form/bespoke-campaign-tabs-data";
+import type { IPaymentCampaignField } from "../../types/form/payment-campaign-inputs";
+
+// interface FormSection includes data reliable to form //
+
 interface FormSection {
-  data: PlattformsDataFormProps | BespokeCampaignTabData;
+  data?: IPlattformsDataFormProps | IBespokeCampaignTabData;
+  paymentData?: IPaymentCampaignField;
   className?: string;
 }
 
 type DynamicFormData = Record<string, string>;
 
-export default function Form({ data, className }: FormSection) {
+export default function Form({ data, className, paymentData }: FormSection) {
   const {
     register,
     handleSubmit,
@@ -32,8 +36,9 @@ export default function Form({ data, className }: FormSection) {
     reset();
   };
 
-  const isPlatformForm = data.formType === "platform";
-  const isBespokeForm = data.formType === "bespoke";
+  const isPlatformForm = data?.formType === "platform";
+  const isBespokeForm = data?.formType === "bespoke";
+  const isPaymentForm = paymentData?.formType === "payment";
 
   return (
     <form
@@ -67,7 +72,17 @@ export default function Form({ data, className }: FormSection) {
               error={errors[input.name]}
             />
           ))}
-
+        {isPaymentForm &&
+          paymentData.inputs.map((input, i) => (
+            <FormInput
+              key={i}
+              label={input.name}
+              name={input.name}
+              placeholder={input.placeholder}
+              register={register}
+              error={errors[input.name]}
+            />
+          ))}
         {isPlatformForm &&
           Array.isArray(data.textAreas) &&
           data.textAreas.map((textArea, i) => (

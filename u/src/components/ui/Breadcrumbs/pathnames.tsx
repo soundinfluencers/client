@@ -5,6 +5,8 @@ import "./pathnames.scss";
 
 interface Props {}
 
+// BreadCrumbs using for navigation //
+
 export const Breadcrumbs: React.FC<Props> = () => {
   const location = useLocation();
   const pathnames = location.pathname

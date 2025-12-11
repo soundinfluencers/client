@@ -7,10 +7,14 @@ import { useWindowSize } from "../../../hooks/useWindowSize.ts";
 import burgerMenu from "@/assets/icons/burger-menu.svg";
 import { useClickOutside } from "../../../hooks/useClickOutside.ts";
 import { useAuth } from "../../../contexts/AuthContext.tsx";
+import React from "react";
+import { getUser } from "../../../api/client/get-user/get-user.ts";
+import { useClientUser } from "../../../store/get-user-client/index.ts";
 
 export const TabBar: FC = () => {
   const [isBurgerOpen, setIsBurgerOpen] = useState<boolean>(false);
-
+  const { user } = useClientUser();
+  console.log(user, "useruseruser");
   const tabBarRef = useRef<HTMLDivElement>(null);
 
   const { logout, accessToken } = useAuth();
@@ -26,7 +30,13 @@ export const TabBar: FC = () => {
     setIsBurgerOpen(false);
     navigate(path);
   };
-
+  // React.useEffect(() => {
+  //   const fetch = async () => {
+  //     const res = getUser(accessToken || "");
+  //     console.log(res, "dawdadawdadw");
+  //   };
+  //   fetch();
+  // }, []);
   const isDesktop = width > 900;
 
   return (
@@ -41,11 +51,12 @@ export const TabBar: FC = () => {
               <LoginButton onClick={() => navigate("/login")} />
             </>
           ) : (
-            <>
-              <button className="tab-bar__logout" onClick={logout}>
+            <div onClick={() => navigate("/client/AccountSetting")}>
+              <p>Account{user?.avatar ? "" : `: ${user?.firstName}`}</p>
+              {/* <button className="tab-bar__logout" onClick={logout}>
                 Logout
-              </button>
-            </>
+              </button> */}
+            </div>
           )}
         </div>
       )}

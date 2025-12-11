@@ -1,6 +1,8 @@
 import React from "react";
 import Styles from "./loader.module.scss";
 
+// loader during loading //
+
 export const Loader = () => {
   return (
     <div className={Styles.loader}>

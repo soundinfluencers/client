@@ -7,7 +7,7 @@ type textAreas = {
   placeholder: string;
 };
 
-export interface PlattformsDataFormProps {
+export interface IPlattformsDataFormProps {
   formType: "platform";
   plattform: string;
   headInput: inputs;

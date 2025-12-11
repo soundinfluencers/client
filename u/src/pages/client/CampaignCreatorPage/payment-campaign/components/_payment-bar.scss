@@ -1,0 +1,20 @@
+.ul-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 288px;
+  width: 100%;
+  li {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+
+    height: 87px;
+    padding: 12px 16px;
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 8px;
+    &.active {
+      border: 2px solid rgba(185, 208, 255, 1);
+    }
+  }
+}
