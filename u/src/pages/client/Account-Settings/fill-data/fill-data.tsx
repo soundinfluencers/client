@@ -1,10 +1,17 @@
 import React from "react";
+import { FillDataRow } from "./fill-data-row/fill-data-row";
 import "./_fill-data.scss";
-import type { IUser } from "../../../../types/user/user.types";
 interface Props {
-  data: IUser;
+  data: Record<string, any>;
+  fields: { key: string; label: string }[];
 }
 
-export const FillData: React.FC<Props> = ({ data }) => {
-  return <div className="Fill-Data"></div>;
+export const FillData: React.FC<Props> = ({ data, fields }) => {
+  return (
+    <div className="Fill-Data">
+      {fields.map(({ key, label }) => (
+        <FillDataRow key={key} label={label} name={data[key] || "—"} />
+      ))}
+    </div>
+  );
 };

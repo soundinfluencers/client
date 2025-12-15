@@ -1,0 +1,22 @@
+.fill-data-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  &__label {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    width: 184px;
+  }
+  &__name {
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+  }
+}
