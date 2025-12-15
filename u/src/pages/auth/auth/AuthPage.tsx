@@ -19,7 +19,7 @@ export const AuthPage: FC = () => {
         if (selectedRole === 0)
             navigate('/signup/client')
         else
-            navigate('signup/influencer')
+            navigate('/signup/influencer')
     }
 
     return (

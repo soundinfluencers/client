@@ -43,6 +43,7 @@
     width: 100%;
   }
 
+  //TODO: remove width
   &__title {
     @include title.title();
     width: 669px;

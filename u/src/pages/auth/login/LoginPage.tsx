@@ -25,11 +25,15 @@ export const LoginPage: FC = () => {
     }
   };
 
+  /*
+    1. make dynamic title Influencer/Client
+    2. style title white-space no-warap or remove width for title, raise title above page
+  */
+
   return (
     <div className="login-page__wrapper">
       <div className="login-page">
         <p className="login-page__title">Log in to your Client Dashboard</p>
-
         <div className="login-page__inputs">
           <TextInput
             title="Email"

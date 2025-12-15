@@ -1,0 +1,237 @@
+@use "@/styles/variables/variables" as vars;
+@use "@/styles/mixins/title" as title;
+// @use "@/styles/mixins/_glass-effect.scss" as glass;
+
+.signup-influencer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+  width: 600px;
+
+  padding: 64px 0 140px;
+  margin: 0 auto;
+
+  @media screen and (max-width: 900px) {
+    width: 545px;
+    padding: 31px 0 32px;
+    gap: 0;
+  }
+
+  @media screen and (max-width: 700px) {
+    width: 100%;
+    padding: 24px 25px 12px;
+  }
+
+  @media screen and (max-width: 500px) {
+    padding: 24px 16px 12px;
+    gap: 24px;
+  }
+
+  > div {
+    width: 100%;
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    @media screen and (max-width: 900px) {
+      margin-bottom: 24px;
+    }
+
+    @media screen and (max-width: 500px) {
+      margin-bottom: 0;
+      gap: 4px;
+    }
+  }
+
+  &__title {
+    @include title.title();
+  }
+  &__subtitle {
+    @include title.subtitle($font-color: vars.$gray);
+  }
+
+  &__inputs-label {
+    margin-bottom: 16px;
+    text-align: center;
+    font-size: 24px;
+
+    @media screen and (max-width: 500px) {
+      font-size: 16px;
+    }
+  }
+
+  &__inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    @media screen and (max-width: 900px) {
+      margin-bottom: 48px;
+    }
+
+    @media screen and (max-width: 500px) {
+      margin-bottom: 0;
+    }
+  }
+
+  &__socials {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    @media screen and (max-width: 900px) {
+      margin-bottom: 32px;
+    }
+
+    @media screen and (max-width: 500px) {
+      margin-bottom: 0;
+    }
+  }
+
+  &__socials-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__socials-title {
+    font-size: 24px;
+    @media screen and (max-width: 500px) {
+      font-size: 16px;
+    }
+  }
+
+  &__socials-subtitle {
+    font-size: 16px;
+    @media screen and (max-width: 500px) {
+      font-size: 14px;
+    }
+  }
+
+  &__socials-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__socials-item {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+
+    @media screen and (max-width: 900px) {
+      padding: 8px 12px;
+    }
+
+    @media screen and (max-width: 500px) {
+      padding: 8px;
+    }
+
+    background: rgba(255, 255, 255, 0.5);
+    border: 1.5px solid vars.$white-gray-2;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.03), 0 4px 8px rgba(0, 0, 0, 0.02);
+
+    // background: rgb(255, 255, 255, 0.5);
+    // backdrop-filter: blur(8px) brightness(1.12) contrast(1.08) saturate(1.35);
+    // -webkit-backdrop-filter: blur(8px) brightness(1.12) contrast(1.08)
+    //   saturate(1.35);
+    // border: 1px solid rgba(231, 232, 241, 0.55);
+
+    // box-shadow: -4px -4px 8px rgba(255, 255, 255, 0.25),
+    //   0 0 4px rgba(200, 225, 255, 0.25), 0 6px 12px rgba(0, 0, 0, 0.04);
+
+    // background: linear-gradient(
+    //   90deg,
+    //   rgba(255, 255, 255, 1) 0%,
+    //   rgba(252, 253, 255, 1) 40%,
+    //   rgba(245, 247, 255, 1) 100%
+    // );
+  }
+
+  &__social {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__social-icon {
+    @media screen and (max-width: 500px) {
+      width: 34px;
+      height: 34px;
+    }
+  }
+
+  &__social-label {
+    font-size: 16px;
+    //TODO: fz for tablet 15px mobile 14px (@screene ?)
+  }
+
+  &__social-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &__accounts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__accounts-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__accounts-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    > span {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 1px solid vars.$white-gray-2;
+      border-radius: 4px;
+    }
+  }
+
+  &__accounts-edit {
+    border: 1px solid vars.$blue;
+    border-radius: 4px;
+    padding: 4px 16px;
+    width: 88px;
+    height: 30px;
+    background-color: #fff;
+
+    display: flex;
+    gap: 8px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: vars.$light-blue;
+    }
+  }
+
+  &__controls {
+    width: 250px !important;
+
+    @media screen and (max-width: 500px) {
+      width: 100% !important;
+    }
+  }
+}

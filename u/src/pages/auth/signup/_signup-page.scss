@@ -1,5 +1,5 @@
-@use '@/styles/variables/variables' as vars;
-@use '@/styles/mixins/title' as title;
+@use "@/styles/variables/variables" as vars;
+@use "@/styles/mixins/title" as title;
 
 .signup-client {
   display: flex;
@@ -37,11 +37,11 @@
   }
 
   &__title {
-    @include title.title()
+    @include title.title();
   }
 
   &__subtitle {
-    @include title.subtitle()
+    @include title.subtitle();
   }
 
   &__inputs {
