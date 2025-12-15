@@ -1,6 +1,6 @@
-import type { PlattformsDataFormProps } from "../types/form/plattforms-data-form.types";
+import type { IPlattformsDataFormProps } from "../types/form/plattforms-data-form.types";
 
-export const PlattformsDataForm: PlattformsDataFormProps[] = [
+export const PlattformsDataForm: IPlattformsDataFormProps[] = [
   {
     formType: "platform",
     plattform: "spotify",

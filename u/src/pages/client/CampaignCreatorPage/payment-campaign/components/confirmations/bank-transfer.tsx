@@ -1,11 +1,11 @@
 import React from "react";
-import euro from "../../../../../assets/payments-icons/Vector (10).svg";
-import hashtag from "../../../../../assets/payments-icons/clarity_hashtag-solid.svg";
-import method from "../../../../../assets/payments-icons/mdi_recurring-payment.svg";
-import link from "../../../../../assets/payments-icons/link.svg";
-import beneficiary from "../../../../../assets/payments-icons/rkqZiVo 30.svg";
-import num from "../../../../../assets/payments-icons/hugeicons_text-number-sign.svg";
-import qr from "../../../../../assets/payments-icons/mage_bar-code-scan.svg";
+import euro from "../../../../../../assets/payments-icons/Vector (10).svg";
+import hashtag from "../../../../../../assets/payments-icons/clarity_hashtag-solid.svg";
+import method from "../../../../../../assets/payments-icons/mdi_recurring-payment.svg";
+import link from "../../../../../../assets/payments-icons/link.svg";
+import beneficiary from "../../../../../../assets/payments-icons/rkqZiVo 30.svg";
+import num from "../../../../../../assets/payments-icons/hugeicons_text-number-sign.svg";
+import qr from "../../../../../../assets/payments-icons/mage_bar-code-scan.svg";
 import "./styles/_base-confirmations.scss";
 
 interface Props {}

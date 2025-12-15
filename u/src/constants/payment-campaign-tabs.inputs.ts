@@ -1,6 +1,6 @@
-import type { PaymentCampaignField } from "../types/form/payment-campaign-inputs";
+import type { IPaymentCampaignField } from "../types/form/payment-campaign-inputs";
 
-export const PAYMENT_CAMPAIGN_TABS_INPUTS: PaymentCampaignField = {
+export const PAYMENT_CAMPAIGN_TABS_INPUTS: IPaymentCampaignField = {
   formType: "payment",
   inputs: [
     {

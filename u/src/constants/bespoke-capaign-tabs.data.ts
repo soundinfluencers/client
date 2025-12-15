@@ -1,6 +1,6 @@
-import type { BespokeCampaignTabData } from "../types/form/bespoke-campaign-tabs-data";
+import type { IBespokeCampaignTabData } from "../types/form/bespoke-campaign-tabs-data";
 
-export const BESPOKE_CAMPAIGN_TABS_DATA: BespokeCampaignTabData[] = [
+export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
   {
     formType: "bespoke",
     promoType: "Artist",
