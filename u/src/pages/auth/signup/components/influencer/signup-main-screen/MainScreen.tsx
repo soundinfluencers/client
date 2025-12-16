@@ -28,9 +28,24 @@ export const MainScreen = () => {
 
   const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState(false);
 
+  //TODO: after submit resetFullForm
+
   const handleSingup = () => {
-    console.log(firstName, lastName, email, phoneNumber, password);
+    const payload = {
+      profile: {
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        password
+      },
+      accounts,
+    }
+
+    console.log(payload);
   };
+
+  //TODO: Change Inputs
 
   return (
     <div className="signup-influencer">
@@ -85,7 +100,7 @@ export const MainScreen = () => {
         <ul className="signup-influencer__socials-list">
           {SOCIAL_ACCOUNTS_DATA.map(({ id, label, icon }) => (
             <li className="signup-influencer__socials-item" key={id}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
                 <div className="signup-influencer__social">
                   <img className="signup-influencer__social-icon" src={icon} alt={label} />
                   <p className="signup-influencer__social-label">{label}</p>
@@ -122,8 +137,9 @@ export const MainScreen = () => {
       </div>
 
       <div className="signup-influencer__controls">
-        <ButtonMain isDisabled text="Submit Application" onClick={handleSingup} />
+        <ButtonMain  text="Submit Application" onClick={handleSingup} />
       </div>
     </div>
   )
 }
+// isDisabled

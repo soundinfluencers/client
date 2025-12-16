@@ -6,7 +6,8 @@ import type { SocialMediaType } from "../../types/utils/constants.types";
 interface ISignupInfluencerState extends IInfluencerProfile {
   screen: TSignupInfluencerScreen;
   accounts: IInfluencerAccount[];
-  errors: Partial<Record<keyof IInfluencerProfile, boolean>>;
+  // errors: Partial<Record<keyof IInfluencerProfile, boolean>>;
+  // serverErrors?: Partial<Record<keyof IInfluencerProfile, string>>;
 
   setField: <K extends keyof ISignupInfluencerState>(key: K, value: ISignupInfluencerState[K]) => void;
 
@@ -32,7 +33,7 @@ export const useSignupInfluencerStore = create<ISignupInfluencerState>((set) => 
   ...initialProfile,
   screen: { type: 'main'},
   accounts: [],
-  errors: {},
+  // errors: {},
 
   setField: (key, value) => set((state) => {
     if (key === 'accounts' || key === 'screen') {
@@ -90,7 +91,7 @@ export const useSignupInfluencerStore = create<ISignupInfluencerState>((set) => 
     ...initialProfile,
     screen: { type: 'main'},
     accounts: [],
-    errors: {},
+    // errors: {},
   })),
 }));
 

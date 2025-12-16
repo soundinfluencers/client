@@ -1,0 +1,41 @@
+@use "@/styles/variables/variables" as vars;
+@use "@/styles/mixins/title" as title;
+
+.account-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 64px 0 180px;
+  margin: 0 auto;
+  position: relative;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+
+  &__title {
+    @include title.title();
+  }
+  &__subtitle {
+    @include title.subtitle($font-color: vars.$gray);
+  }
+}
+
+.btn-back {
+  font-size: 24px;
+  position: absolute;
+  top: 0;
+  left: 100px;
+}
+
+.btn-save {
+  font-size: 28px;
+  position: absolute;
+  top: 50px;
+  left: 100px;
+}

@@ -12,6 +12,7 @@ export const Breadcrumbs: React.FC<Props> = () => {
   const pathnames = location.pathname
     .split("/")
     .filter((segment) => segment && segment !== "client");
+    //&& segment !== 'influenser'
 
   return (
     <nav className="breadcrumbs">

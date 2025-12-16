@@ -6,6 +6,9 @@ import type {
   Path,
   UseFormRegister,
 } from "react-hook-form";
+
+// input for form //
+
 interface FormInput<T extends FieldValues> {
   name: Path<T>;
   label?: string;
@@ -16,18 +19,6 @@ interface FormInput<T extends FieldValues> {
   className?: string;
   error?: FieldError;
 }
-interface FormTextArea<T extends FieldValues> {
-  name: Path<T>;
-  label?: string;
-  placeholder?: string;
-  register: UseFormRegister<T>;
-  required?: boolean;
-  className?: string;
-  error?: FieldError;
-  isBespoke?: boolean;
-}
-
-// input for form //
 
 export function FormInput<T extends FieldValues>({
   name,
@@ -53,6 +44,17 @@ export function FormInput<T extends FieldValues>({
 }
 
 // textarea for form //
+
+interface FormTextArea<T extends FieldValues> {
+  name: Path<T>;
+  label?: string;
+  placeholder?: string;
+  register: UseFormRegister<T>;
+  required?: boolean;
+  className?: string;
+  error?: FieldError;
+  isBespoke?: boolean;
+}
 
 export function FormTextArea<T extends FieldValues>({
   name,

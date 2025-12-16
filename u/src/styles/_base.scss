@@ -8,6 +8,12 @@ html {
   letter-spacing: 0;
 }
 
+html,
+:has(:target) {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
 *,
 *::before,
 *::after {

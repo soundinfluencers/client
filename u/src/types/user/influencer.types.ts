@@ -19,6 +19,7 @@ export interface IInfluencerAccount {
   username: string;
   link: string;
   followersNumber?: string;
+  logo?: File | string;
 
   profileCategory?: TProfileCategory;
 
@@ -33,7 +34,7 @@ export interface IInfluencerAccount {
     country?: string;
     percentage?: number;
   }[];
-};
+}
 
 export interface IInfluencerProfile {
   firstName: string;
@@ -41,7 +42,26 @@ export interface IInfluencerProfile {
   email: string;
   phoneNumber: string;
   password: string;
-};
+}
+
+export interface IAccountFormValues {
+  username: string;
+  link: string;
+  followersNumber?: number;
+  logo?: File | null;
+
+  profileCategory: "community" | "creator";
+
+  musicStyle?: string;
+  musicSubStyles?: string[];
+
+  countries?: {
+    country: string;
+    percentage: number;
+  }[];
+
+  price?: string;
+}
 
 // export interface ICountry {
 //   country?: string;

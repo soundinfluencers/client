@@ -1,5 +1,5 @@
 import { MainScreen } from "../influencer/signup-main-screen/MainScreen";
-import { AccountDetailsForm } from "../influencer/signup-account-details-form/AccountDetailsForm";
+import { AccountDetails } from "../influencer/signup-account-details-form/AccountDetails";
 import { useSignupInfluencerStore } from "../../../../../store/features/signupInfluencer";
 
 export const SignupInfluencer = () => {
@@ -8,7 +8,7 @@ export const SignupInfluencer = () => {
 
   if (screen.type === 'platform') {
     return (
-      <AccountDetailsForm
+      <AccountDetails
         platform={screen.platform}
         mode={screen.mode}
         accountId={screen.accountId}

@@ -1,0 +1,39 @@
+@use "@/styles/variables/variables" as vars;
+
+.logo-input {
+  height: 56px;
+  margin-top: 4px;
+  border: 1px solid rgba(231, 232, 241, 1);
+  padding: 16px;
+  border-radius: 8px;
+  background: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+
+  img {
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  //TODO: fix color for placeholder
+  span {
+    color: vars.$light-gray;
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  &--preview {
+    padding: 6px 16px;
+  }
+}
+
+.form-input.error .logo-input {
+  border-color: rgba(225, 25, 32, 1);
+}

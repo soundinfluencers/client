@@ -1,0 +1,72 @@
+@use "@/styles/variables/variables" as vars;
+
+.account-switcher {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &__title {
+    font-size: 16px;
+  }
+
+  &__switchers {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    &-btn {
+      position: relative;
+      overflow: hidden;
+      font-size: 20px;
+      width: 288px;
+      height: 43px;
+      border-radius: 8px;
+      z-index: 1;
+
+      background: rgb(0, 0, 0, 0);
+      backdrop-filter: blur(3px) contrast(1.08) saturate(1.2);
+      -webkit-backdrop-filter: blur(3px) contrast(1.08) saturate(1.2);
+      border: 1px solid rgba($color: vars.$blue, $alpha: 0.5);
+      box-shadow: -4px -4px 8px rgba(255, 255, 255, 0.25),
+        0 0 4px rgba(200, 225, 255, 0.25), 0 6px 12px rgba(0, 0, 0, 0.04);
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+
+        background: linear-gradient(
+          136deg,
+          #bce8ff 0%,
+          rgba(218, 244, 255, 0.94) 48.56%,
+          rgba(191, 216, 255, 0.89) 78.37%,
+          rgba(164, 188, 255, 0.85) 100%
+        );
+
+        opacity: 0;
+        transition: opacity 0.35s ease;
+        z-index: -1;
+      }
+
+      &--active::before {
+        opacity: 1;
+      }
+
+      > * {
+        position: relative;
+        z-index: 1;
+      }
+    }
+
+    > p {
+      font-size: 15px;
+    }
+  }
+}
