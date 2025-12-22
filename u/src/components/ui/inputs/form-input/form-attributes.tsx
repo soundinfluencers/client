@@ -8,6 +8,9 @@ import {
   type RegisterOptions,
   type UseFormRegister,
 } from "react-hook-form";
+
+// input for form //
+
 interface FormInput<T extends FieldValues> {
   name: Path<T>;
   label?: string;
@@ -17,6 +20,7 @@ interface FormInput<T extends FieldValues> {
   className?: string;
   validation?: RegisterOptions;
 }
+
 interface FormTextArea<T extends FieldValues> {
   name: Path<T>;
   label?: string;
@@ -67,6 +71,17 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInput<any>>(
 FormInput.displayName = "FormInput";
 
 // textarea for form //
+
+interface FormTextArea<T extends FieldValues> {
+  name: Path<T>;
+  label?: string;
+  placeholder?: string;
+  register: UseFormRegister<T>;
+  required?: boolean;
+  className?: string;
+  error?: FieldError;
+  isBespoke?: boolean;
+}
 
 export function FormTextArea<T extends FieldValues>({
   name,

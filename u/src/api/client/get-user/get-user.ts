@@ -3,9 +3,11 @@ import $api from "../../api.ts";
 
 // getting CLIENT user //
 
-export const getUser = async (access: string, id: string): Promise<any> => {
+export const getUser = async (access: string): Promise<any> => {
   try {
+
     const responce = await $api.get(`/auth/me/`, {
+
       headers: {
         Authorization: `Bearer ${access}`,
       },

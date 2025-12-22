@@ -1,0 +1,40 @@
+@use "@/styles/variables/variables" as vars;
+
+.new-promos {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &__quantity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-left: auto;
+    background: vars.$light-blue;
+  }
+
+  &__label {
+    font-weight: 400;
+    font-size: 14px;
+    text-align: center;
+    color: vars.$black;
+  }
+
+  &__number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    border: 1px solid vars.$blue;
+    border-radius: 4px;
+    padding: 2px 8px;
+    background: #fff;
+
+    font-size: 16px;
+    text-align: center;
+    color: vars.$black;
+  }
+}

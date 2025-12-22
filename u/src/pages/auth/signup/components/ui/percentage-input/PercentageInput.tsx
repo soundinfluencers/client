@@ -1,0 +1,1 @@
+import './_percentage-input.scss';

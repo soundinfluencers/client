@@ -7,7 +7,6 @@ import { useClientUser } from "../../store/get-user-client";
 import { Bar } from "./components/layout/bar/bar";
 import { CampaignsList } from "./components/layout/campaigns-list/CampaignsList";
 import { HomeHeader } from "./components/layout/header/HomeHeader";
-
 export const HomePage: FC = () => {
   const { user } = useClientUser();
   const [campaigns, setCampaigns] = React.useState<any[]>([]);
@@ -20,7 +19,6 @@ export const HomePage: FC = () => {
   React.useEffect(() => {
     fetch();
   }, []);
-
   console.log(campaigns, "campaigns");
   return (
     <Container className="home-page">

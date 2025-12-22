@@ -8,10 +8,12 @@ import { useAuth } from "../../../contexts/AuthContext.tsx";
 import { loginApi } from "../../../api/auth/auth.api.ts";
 import type { ResponseLoginUserModel } from "../../../types/auth/auth.types.ts";
 import { useClientUser } from "../../../store/get-user-client/index.ts";
+import { useInfluencerStore } from "../../../store/influencer/index.ts";
 
 export const LoginPage: FC = () => {
   const navigate: NavigateFunction = useNavigate();
   const { setUser } = useClientUser();
+  // const { setInfluencer } = useInfluencerStore();
   const { email, password, setEmail, setPassword } = useLoginStore();
   const { setAccessToken } = useAuth();
 
@@ -25,11 +27,15 @@ export const LoginPage: FC = () => {
     }
   };
 
+  /*
+    1. make dynamic title Influencer/Client
+    2. style title white-space no-warap or remove width for title, raise title above page
+  */
+
   return (
     <div className="login-page__wrapper">
       <div className="login-page">
         <p className="login-page__title">Log in to your Client Dashboard</p>
-
         <div className="login-page__inputs">
           <TextInput
             title="Email"
