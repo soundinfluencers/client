@@ -1,7 +1,9 @@
 import React from "react";
 import { BESPOKE_CAMPAIGN_TABS_DATA } from "../../../../constants/bespoke-capaign-tabs.data";
 import "./_promo-form.scss";
-import Form from "../../../../components/form/form";
+import { BespokeForm } from "../../../../components/form/client-forms/bespoke";
+import { SubmtiButton } from "../../../../components/ui/submit-button/submit-button";
+import { Form } from "../../../../components";
 interface Props {
   activeTabId: string;
 }
@@ -18,7 +20,9 @@ export const PromoForm: React.FC<Props> = ({ activeTabId }) => {
           <h2>{PromoFormData?.title}</h2>
         </div>
       )}
-      <Form data={PromoFormData}></Form>
+      <Form submitButton={<SubmtiButton data="Create" />}>
+        <BespokeForm data={PromoFormData} />
+      </Form>
     </div>
   );
 };

@@ -5,12 +5,14 @@ import $api from "../../api.ts";
 
 export const getUser = async (access: string): Promise<any> => {
   try {
-    const responce = await $api.get(`/auth/me`, {
+
+    const responce = await $api.get(`/auth/me/`, {
+
       headers: {
         Authorization: `Bearer ${access}`,
       },
     });
-    console.log("Success: user", responce);
+    console.log(responce, "wak;dmjwd;kkd");
     return responce.data.data;
   } catch (error: any) {
     console.error("Error fetching user:", error);

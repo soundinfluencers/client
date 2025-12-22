@@ -1,0 +1,72 @@
+.payment-campaign {
+  display: flex;
+  gap: 24px;
+  &__width {
+    max-width: 930px;
+  }
+  &__confirmation {
+    margin-top: 64px;
+    .PO {
+      margin-top: 64px;
+
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      gap: 8px;
+      .btn {
+        max-width: 250px;
+      }
+      p {
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 16px;
+        leading-trim: NONE;
+        line-height: 100%;
+        letter-spacing: 0%;
+        text-align: center;
+      }
+    }
+  }
+  &__form {
+    width: 100%;
+    max-width: 930px;
+    .margin {
+      margin-top: 16px;
+    }
+    .ul-BankTransfer {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      li {
+        text-align: center;
+        max-width: 288px;
+        width: 100%;
+        padding: 24px;
+        height: 80px;
+        background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+        border-radius: 8px;
+
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 24px;
+        leading-trim: NONE;
+        line-height: 100%;
+        letter-spacing: 0%;
+      }
+    }
+  }
+  &__invoice {
+    margin-bottom: 32px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(185, 208, 255, 1);
+    h3 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 20px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+    }
+  }
+}

@@ -1,10 +1,9 @@
 import React from "react";
-import { Container } from "../../../components/container/container";
-import { Breadcrumbs } from "../../../components/ui/Breadcrumbs/pathnames";
-import { SaveDraft } from "../../../components/save-draft/save-draft";
+
 import { TabBar } from "./components/tab-bar";
 import "./_bespoke-campaign.scss";
 import { PromoForm } from "./tab/promo-form";
+import { Breadcrumbs, Container, SaveDraft } from "../../../components";
 interface Props {}
 
 export const BespokeCampaign: React.FC<Props> = () => {

@@ -1,10 +1,12 @@
 import React from "react";
 import "./_form-attributes.scss";
-import type {
-  FieldError,
-  FieldValues,
-  Path,
-  UseFormRegister,
+import {
+  get,
+  useFormContext,
+  type FieldValues,
+  type Path,
+  type RegisterOptions,
+  type UseFormRegister,
 } from "react-hook-form";
 
 // input for form //
@@ -13,35 +15,60 @@ interface FormInput<T extends FieldValues> {
   name: Path<T>;
   label?: string;
   placeholder: string;
-  register: UseFormRegister<T>;
   required?: boolean;
   type?: string;
   className?: string;
-  error?: FieldError;
+  validation?: RegisterOptions;
 }
 
-export function FormInput<T extends FieldValues>({
-  name,
-  label,
-  placeholder,
-  register,
-  required = false,
-  type = "text",
-  className = "",
-  error,
-}: FormInput<T>) {
-  return (
-    <div className={`form-input ${className} ${error ? "error" : ""}`}>
-      {label && <label htmlFor={name}>{label}</label>}
-      <input
-        id={name}
-        {...register(name, { required })}
-        placeholder={placeholder}
-        type={type}
-      />
-    </div>
-  );
+interface FormTextArea<T extends FieldValues> {
+  name: Path<T>;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+  className?: string;
+  isBespoke?: boolean;
 }
+
+// input for form //
+
+export const FormInput = React.forwardRef<HTMLInputElement, FormInput<any>>(
+  (
+    {
+      name,
+      label,
+      placeholder,
+      required = false,
+      type = "text",
+      className = "",
+      validation,
+    },
+    ref
+  ) => {
+    const {
+      register,
+      formState: { errors },
+    } = useFormContext();
+
+    const error = get(errors, name)?.message as string;
+    console.log(error, "error");
+    return (
+      <div className={`form-input ${className} ${error ? "error" : ""}`}>
+        {label && <label htmlFor={String(name)}>{label}</label>}
+
+        <input
+          id={String(name)}
+          type={type}
+          placeholder={placeholder}
+          {...register(name as any, { required, ...validation })}
+        />
+        {error && <span className="error-message">{error}</span>}
+      </div>
+    );
+  }
+);
+
+FormInput.displayName = "FormInput";
 
 // textarea for form //
 
@@ -60,12 +87,16 @@ export function FormTextArea<T extends FieldValues>({
   name,
   label,
   placeholder,
-  register,
   required = false,
-  error,
   className = "",
   isBespoke,
 }: FormTextArea<T>) {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
+
+  const error = get(errors, name)?.message as string;
   return (
     <div className={`form-field  ${className} ${error ? "error" : ""}`}>
       {label && <label htmlFor={name}>{label}</label>}

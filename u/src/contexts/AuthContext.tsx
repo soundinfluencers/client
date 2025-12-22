@@ -25,7 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
-  console.log(accessToken, "acct");
+
   const setAccessToken = (token: string | null) => {
     setAccessTokenState(token);
     tokenStorage.set(token);
@@ -52,7 +52,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     try {
       await logoutApi();
-      console.log("awdwad");
     } catch (err) {
       console.error("Logout failed", err);
     } finally {

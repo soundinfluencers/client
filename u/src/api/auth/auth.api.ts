@@ -12,11 +12,11 @@ export const loginApi = async ({
     email,
     password,
   });
-  console.log(res.data, "dataatatta");
+  console.log(res, "res");
   return {
-    id: res.data.data?._id || null,
-    accessToken: res.data?.data?.accessToken || null,
-    userRole: res.data?.data?.role || null,
+    id: res.data.data._id || null,
+    accessToken: res.data?.data.accessToken || null,
+    userRole: res.data?.data.role || null,
   };
 };
 

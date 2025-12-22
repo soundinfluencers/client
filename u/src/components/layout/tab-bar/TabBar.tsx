@@ -14,7 +14,6 @@ import { useClientUser } from "../../../store/get-user-client/index.ts";
 export const TabBar: FC = () => {
   const [isBurgerOpen, setIsBurgerOpen] = useState<boolean>(false);
   const { user } = useClientUser();
-  console.log(user, "useruseruser");
   const tabBarRef = useRef<HTMLDivElement>(null);
 
   const { logout, accessToken } = useAuth();

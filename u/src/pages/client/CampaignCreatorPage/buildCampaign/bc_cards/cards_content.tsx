@@ -1,5 +1,5 @@
 import React from "react";
-import { useCreateCampaign } from "../../../../../store/createCampaign";
+import { useCreateCampaign } from "../../../../../store/client/createCampaign";
 import "./_cards_content.scss";
 import { Card } from "./bc_card/card";
 import { TableRowCard } from "./bc_card/tableRowCard";
@@ -17,7 +17,7 @@ export const CardsContainer: React.FC<Props> = ({
   isSmall,
 }) => {
   const { setPromoCards, promosCards, loading } = useCreateCampaign();
-
+  console.log(promosCards, "cardardad");
   const [cardsCount, setCardsCount] = React.useState(20);
 
   const observerRef = React.useRef<IntersectionObserver | null>(null);

@@ -6,7 +6,7 @@
     align-items: center;
     justify-content: space-between;
 
-    @media (max-width: 600px) {
+    @media screen and (max-width: 600px) {
       max-width: 430px;
       overflow-y: auto;
     }
@@ -27,7 +27,7 @@
           rgba(164, 188, 255, 0.85) 100%
         );
       }
-      @media (max-width: 600px) {
+      @media screen and (max-width: 600px) {
         padding: 8px 16px;
       }
       cursor: pointer;

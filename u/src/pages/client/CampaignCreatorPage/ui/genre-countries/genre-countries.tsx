@@ -1,6 +1,6 @@
 import React from "react";
 import "./genresICountries.scss";
-import type { Country } from "../../../../types/creator-campaign/creator-campaign.types";
+import type { Country } from "../../../../../types/creator-campaign/creator-campaign.types";
 type musicStyles = {
   musicSubStyles: string[];
   musicStyleOther: string[];

@@ -1,44 +1,18 @@
-import React from "react";
-import { Container } from "../../../components/container/container";
-import { Breadcrumbs } from "../../../components/ui/Breadcrumbs/pathnames";
-import { Edit } from "../../../components/ui/edit/edit";
-import "./_account-settings.scss";
-import { FillData } from "./fill-data/fill-data";
+import React, { useState, useEffect } from "react";
 import { useClientUser } from "../../../store/get-user-client";
-import {
-  invoiceFields,
-  userFields,
-} from "../../../constants/account-settings-data";
-import Form from "../../../components/form/form";
-interface Props {}
+import { useAccountChange } from "../../../store/client/account-settings";
+import { EditPasswordFlow } from "./sections/edit-field";
 
-export const AccountSetting: React.FC<Props> = () => {
+import "./_account-settings.scss";
+import { Breadcrumbs, Container } from "../../../components";
+import { AccountDetailsSection, InvoiceDetailsSection } from "./sections";
+export const AccountSetting: React.FC = () => {
   const { user } = useClientUser();
+  const { isEdit, resetAll } = useAccountChange();
 
-  const [formData, setFormData] = React.useState({
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "lastName",
-    company: user?.company || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-  });
-  const [formInvoiceData, setformInvoiceData] = React.useState({
-    firstName: "1",
-    lastName: "2",
-    address: "3",
-    country: "4",
-    company: "5",
-    VAT: "6",
-  });
+  const [accountFlag, setAccountFlag] = useState(false);
+  const [invoiceFlag, setInvoiceFlag] = useState(false);
 
-  const [accountFlag, setAccountFlag] = React.useState<boolean>(false);
-  const [invoiceFlag, setInvoiceFlag] = React.useState<boolean>(false);
-  const AccountChange = () => {
-    setAccountFlag((prev) => !prev);
-  };
-  const InvoiceChange = () => {
-    setInvoiceFlag((prev) => !prev);
-  };
   const invoiceData = {
     firstName: "No data",
     lastName: "No data",
@@ -47,6 +21,11 @@ export const AccountSetting: React.FC<Props> = () => {
     company: "No data",
     vatNumber: "No data",
   };
+
+  useEffect(() => {
+    return () => resetAll();
+  }, [resetAll]);
+
   return (
     <Container className="Account-settings">
       <div className="Account-settings__navigation">
@@ -55,31 +34,25 @@ export const AccountSetting: React.FC<Props> = () => {
       <div className="Account-settings__title">
         <h2>Account setting</h2>
       </div>
-      <div className="Account-settings__content">
-        {" "}
-        <div className="Account-settings__details">
-          <div className="Account-settings__subtitle">
-            <h3>Account details</h3>
-            <Edit active={accountFlag} onChange={AccountChange} />
-          </div>
-          {accountFlag ? (
-            <Form accountSettings={formData}></Form>
-          ) : (
-            <FillData data={user || {}} fields={userFields} />
-          )}
+
+      {isEdit ? (
+        <div className="Account-settings__content">
+          <EditPasswordFlow />
         </div>
-        <div className="Account-settings__invoice">
-          <div className="Account-settings__subtitle">
-            <h3>Invoice details</h3>
-            <Edit active={invoiceFlag} onChange={InvoiceChange} />
-          </div>
-          {invoiceFlag ? (
-            <Form invoiceSettings={formInvoiceData}></Form>
-          ) : (
-            <FillData data={invoiceData} fields={invoiceFields} />
-          )}
+      ) : (
+        <div className="Account-settings__content">
+          <AccountDetailsSection
+            user={user}
+            isEditing={accountFlag}
+            toggleEdit={() => setAccountFlag((prev) => !prev)}
+          />
+          <InvoiceDetailsSection
+            invoiceData={invoiceData}
+            isEditing={invoiceFlag}
+            toggleEdit={() => setInvoiceFlag((prev) => !prev)}
+          />
         </div>
-      </div>
+      )}
     </Container>
   );
 };
