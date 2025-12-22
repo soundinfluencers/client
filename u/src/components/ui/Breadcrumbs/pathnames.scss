@@ -16,6 +16,9 @@
     line-height: 100%;
     letter-spacing: 0%;
     color: rgba(32, 41, 52, 1);
+    @media screen and (max-width: 650px) {
+      font-size: 14px;
+    }
   }
   a {
     text-decoration: none;

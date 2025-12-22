@@ -1,0 +1,96 @@
+.bar-home {
+  margin-top: 40px;
+  margin-bottom: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  @media screen and (max-width: 1100px) {
+    align-items: start;
+    flex-direction: column;
+    gap: 16px;
+  }
+  &__title {
+    @media screen and (max-width: 900px) {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    p {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 20px;
+      leading-trim: NONE;
+      line-height: 110.00000000000001%;
+      letter-spacing: 0%;
+    }
+  }
+
+  &__feutures {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 8px;
+    border: 1px solid rgba(185, 208, 255, 1);
+    @media screen and (max-width: 900px) {
+      width: 100%;
+      justify-content: space-between;
+      gap: 4px;
+      align-items: start;
+      flex-wrap: wrap;
+      border-radius: 0px;
+      border: 0px;
+      background-color: transparent;
+    }
+    @media screen and (max-width: 570px) {
+      justify-content: start;
+      width: 100%;
+      gap: 4px;
+      align-items: start;
+      flex-wrap: wrap;
+      border-radius: 0px;
+      border: 0px;
+      background-color: transparent;
+    }
+  }
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    @media screen and (max-width: 1100px) {
+      width: 100%;
+      justify-content: space-between;
+      gap: 0px;
+    }
+  }
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-right: 1px solid rgba(185, 208, 255, 1);
+  @media screen and (max-width: 870px) {
+    flex: none;
+    width: fit-content;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 1);
+    border: 1px solid rgba(185, 208, 255, 1);
+    padding: 8px;
+  }
+  @media screen and (max-width: 415px) {
+    font-size: 13px;
+  }
+  &.radius {
+    border-right: 0px;
+  }
+  .dot {
+    background-color: rgba(185, 208, 255, 1);
+    border-radius: 50%;
+    width: 6px;
+    height: 6px;
+  }
+}

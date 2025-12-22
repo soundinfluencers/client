@@ -1,6 +1,6 @@
 import React from "react";
 import chevronDown from "../../../../../assets/icons/chevron-down.svg";
-import "../../buildCampaign/bc_select/_bc_select.scss";
+import "../../buildCampaign/bar-ui/bc_select/_bc_select.scss";
 
 interface DropdownProps {
   isOpen: boolean;

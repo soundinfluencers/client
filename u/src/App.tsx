@@ -7,7 +7,7 @@ import { setupInterceptors } from "./api/api";
 import { PrivateRoute } from "./router/components/PrivateRoute.tsx";
 import { PublicRoute } from "./router/components/PublicRoute.tsx";
 import "./app.scss";
-import { Proceed } from "./components/proceed/proceed.tsx";
+import { Proceed } from "./components";
 function App() {
   const { accessToken, setAccessToken, logout } = useAuth();
 

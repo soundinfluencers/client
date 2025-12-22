@@ -16,7 +16,6 @@ export const DropdownFilter: React.FC<Props> = ({
   onToggle,
   AndOr,
 }) => {
-  console.log(AndOr);
   return (
     <div className="dropdown_filter">
       <div onClick={onToggle} className="dropdown_filter__head">
@@ -25,7 +24,7 @@ export const DropdownFilter: React.FC<Props> = ({
       </div>
       {isOpen && AndOr?.length > 0 && (
         <ul className="blockWithMethod">
-          {AndOr.map((ar, i) => (
+          {AndOr.map((ar: any, i: number) => (
             <li key={i}>{ar.method}</li>
           ))}
         </ul>

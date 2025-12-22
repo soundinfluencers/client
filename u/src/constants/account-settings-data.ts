@@ -4,6 +4,7 @@ export const userFields = [
   { key: "company", label: "Company" },
   { key: "email", label: "Email" },
   { key: "phone", label: "Phone number" },
+  { key: "password", label: "password" },
 ];
 export const invoiceFields = [
   { key: "firstName", label: "First name" },

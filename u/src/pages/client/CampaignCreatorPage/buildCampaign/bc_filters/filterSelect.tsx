@@ -1,48 +1,68 @@
 import React from "react";
 import { DropdownFilter } from "./dropdownFilter/dropdown-filter";
+
 import "./_bc_filter.scss";
+import type {
+  FilterData,
+  FilterItem,
+} from "../../../../../types/creator-campaign/filters.types";
+import { FilterNode } from "./filter-node/filter-node";
+
 interface Props {
-  data?: any;
+  data: FilterData;
 }
 
 export const FilterSelect: React.FC<Props> = ({ data }) => {
-  const [flag, setFlag] = React.useState<boolean>(false);
-  const renderItem = (item: any, key: number, level = 0) => {
-    return (
-      <div key={key} className="choose">
-        {item.children && item.children.length > 0 ? (
-          <div className="choose__home">
-            <div className="parent_item">
-              <input id={item.filterName} type="checkbox" />
-              <label htmlFor={item.filterName}>{item.filterName}</label>
-              <span>{item.count}</span>
-            </div>
+  const { filters, AndOrFlag, title } = data;
 
-            <div className="children">
-              {item.children.map((child: any, i: number) =>
-                renderItem(child, i, level + 1)
-              )}
-            </div>
-          </div>
-        ) : (
-          <>
-            <input id={item.filterName} type="checkbox" />
-            <label htmlFor={item.filterName}>{item.filterName}</label>
-            <span>{item.count}</span>
-          </>
-        )}
-      </div>
-    );
+  const [open, setOpen] = React.useState(false);
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
+
+  const toggleItem = (item: FilterItem, checked: boolean) => {
+    // copied choosen filters
+    const newSet = new Set(selected);
+
+    //use to parent and to all children
+    const toggleRecursively = (node: FilterItem) => {
+      checked ? newSet.add(node.id) : newSet.delete(node.id);
+      node.children?.forEach(toggleRecursively);
+    };
+
+    toggleRecursively(item);
+
+    // if at least choose on children,parent will be updated
+    const updateParent = (items: FilterItem[]) => {
+      items.forEach((parent) => {
+        if (!parent.children) return;
+
+        const allChecked = parent.children.some((c) => newSet.has(c.id));
+
+        allChecked ? newSet.add(parent.id) : newSet.delete(parent.id);
+        updateParent(parent.children);
+      });
+    };
+
+    updateParent(filters);
+
+    //saving state
+    setSelected(newSet);
   };
 
   return (
     <DropdownFilter
-      AndOr={data?.AndOrFlag}
-      isOpen={flag}
-      title={data.title}
-      onToggle={() => setFlag((prev) => !prev)}>
-      {data.filters.map((item, i) => (
-        <div className="chooseContainer"> {renderItem(item, i)}</div>
+      AndOr={AndOrFlag}
+      isOpen={open}
+      title={title}
+      onToggle={() => setOpen((p) => !p)}>
+      {filters.map((item) => (
+        <div className="chooseContainer">
+          <FilterNode
+            key={item.id}
+            item={item}
+            selected={selected}
+            onToggle={toggleItem}
+          />
+        </div>
       ))}
     </DropdownFilter>
   );

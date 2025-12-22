@@ -4,7 +4,7 @@ import { getUser } from "../../api/client/get-user/get-user";
 
 interface IUserClient {
   user: IUser | null;
-  setUser: (accessToken: string, id: string) => void;
+  setUser: (accessToken: string, id: string, userRole: string) => void;
 }
 
 export const useClientUser = create<IUserClient>((set) => ({
@@ -13,7 +13,7 @@ export const useClientUser = create<IUserClient>((set) => ({
   setUser: async (accessToken: string, id: string) => {
     try {
       const data = await getUser(accessToken, id);
-      console.log(data, "dadawawnlawfjnlfnawlk");
+
       set({ user: data.client });
     } catch (error) {
       throw error;

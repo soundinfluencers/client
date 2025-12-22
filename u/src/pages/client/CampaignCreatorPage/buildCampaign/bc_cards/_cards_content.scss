@@ -30,8 +30,8 @@
             white-space: nowrap;
           }
           &.adaptive {
-            @media (max-width: 470px) {
-              grid-template-columns: 27% 71px 66px 1fr 1fr;
+            @media screen and (max-width: 500px) {
+              grid-template-columns: 24% 71px 66px 1fr 1fr;
               div {
                 font-size: 14px;
               }

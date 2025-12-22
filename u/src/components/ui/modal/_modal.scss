@@ -1,0 +1,51 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // position: absolute;
+  // top: 0;
+  // left: 0;
+  // width: 100%;
+  // height: 100%;
+  // background: rgba(0, 0, 0, 0.2);
+  // display: flex;
+  // align-items: center;
+  // justify-content: center;
+  // z-index: 1000;
+  // backdrop-filter: blur(2px);
+  // -webkit-backdrop-filter: blur(4px);
+  // animation: modalFadeIn 0.3s ease-in-out;
+
+  .overlay-modal {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 756px;
+    width: 100%;
+    padding: 32px 48px 40px;
+    background-color: rgba(251, 250, 249, 1);
+    border-radius: 16px;
+    img {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+    }
+    h3 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 36px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+      text-align: center;
+    }
+  }
+}

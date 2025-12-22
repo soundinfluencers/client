@@ -4,6 +4,8 @@ import arrowIcon from "@/assets/icons/arrow-down-right.svg";
 import logoIcon from "@/assets/logos/small-black-logo.svg";
 import { useWindowSize } from "../../../../../hooks/useWindowSize.ts";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../../../contexts/AuthContext.tsx";
+import { useClientUser } from "../../../../../store/get-user-client/index.ts";
 
 export interface HomeHeaderProps {
   firstName?: string;
@@ -16,6 +18,8 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
   balance = "0 €",
   userRole,
 }) => {
+  const { user } = useClientUser();
+  console.log(user, "uhawdhalwd");
   const { width } = useWindowSize();
   const navigate = useNavigate();
   return width > 970 ? (

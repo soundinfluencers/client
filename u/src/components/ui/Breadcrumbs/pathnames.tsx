@@ -24,8 +24,7 @@ export const Breadcrumbs: React.FC<Props> = () => {
       {pathnames.map((name, index) => {
         const routeTo = `/client/${pathnames.slice(0, index + 1).join("/")}`;
         const isLast = index === pathnames.length - 1;
-        console.log(routeTo, "routeTo");
-        console.log(isLast, "isLast");
+
         return isLast ? (
           <span key={routeTo}>
             {" "}
