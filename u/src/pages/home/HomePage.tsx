@@ -1,4 +1,4 @@
-import { type FC, useEffect } from "react";
+import { type FC, use, useEffect } from "react";
 import "./_home-page.scss";
 import { HomeHeader } from "./components/layout/header/HomeHeader.tsx";
 import { getCampaigns } from "../../api/client/campaign/client-campaign.api.ts";
@@ -7,19 +7,23 @@ import { CampaignsList } from "./components/layout/campaigns-list/CampaignsList.
 import type { CampaignForList } from "../../types/campaign.types.ts";
 import { Container } from "../../components/container/container.tsx";
 import { Table } from "../../components/ui/table/table.tsx";
+import { useClientUser } from "../../store/get-user-client/index.ts";
 
 export const HomePage: FC = () => {
-  const {
-    data: campaigns,
-    isLoading,
-    error,
-  } = useQuery<CampaignForList[]>({
-    queryKey: ["campaigns"],
-    queryFn: getCampaigns,
-    staleTime: 1000 * 60 * 5,
-  });
+  // const {
+  //   data: campaigns,
+  //   isLoading,
+  //   error,
+  // } = useQuery<CampaignForList[]>({
+  //   queryKey: ["campaigns"],
+  //   queryFn: getCampaigns,
+  //   staleTime: 1000 * 60 * 5,
+  // });
 
-  console.log(campaigns, "campaigns");
+  const user = useClientUser((state) => state.user);
+  console.log(user);
+
+  // console.log(campaigns, "campaigns");
   return (
     <Container className="home-page">
       <HomeHeader />

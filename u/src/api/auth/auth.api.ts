@@ -8,15 +8,15 @@ export const loginApi = async ({
   email,
   password,
 }: RequestLoginUserModel): Promise<ResponseLoginUserModel> => {
-  const res = await $api.post("/auth/login", {
+  const res = await $api.patch("/auth/login", {
     email,
     password,
   });
   console.log(res.data, "dataatatta");
   return {
-    id: res.data._id || null,
-    accessToken: res.data?.accessToken || null,
-    userRole: res.data?.role || null,
+    id: res.data.data?._id || null,
+    accessToken: res.data?.data?.accessToken || null,
+    userRole: res.data?.data?.role || null,
   };
 };
 

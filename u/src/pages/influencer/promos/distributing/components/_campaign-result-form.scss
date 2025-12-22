@@ -1,0 +1,82 @@
+@use "@/styles/variables/variables" as vars;
+
+.campaign-result {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  &__title {
+    font-weight: 400;
+    font-size: 48px;
+    color: vars.$black-blue;
+  }
+
+  &__form {
+    width: 600px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 16px;
+    color: vars.$gray-dark;
+
+    > p {
+      font-size: 14px;
+      color: vars.$gray-dark;
+    }
+  }
+
+  &__input {
+    height: 52px;
+    padding: 16px;
+    border: 1px solid vars.$light-blue;
+    border-radius: 8px;
+    font-size: 16px;
+    color: vars.$black-blue;
+    background-color: #fff;
+  }
+
+  &__actions {
+    margin-top: 48px;
+    display: flex;
+    justify-content: center;
+  }
+
+  &__button-submit {
+    border-radius: 24px;
+    padding: 12px 24px;
+    width: 250px;
+    height: 46px;
+    background: vars.$black-blue;
+    font-weight: 400;
+    font-size: 16px;
+    text-align: center;
+    color: #fff;
+    transition: background 0.3s ease, border-width 0.1s ease,
+      border-color 0.3s ease;
+
+    &:disabled {
+      background: vars.$disabled-button-1;
+      font-weight: 400;
+      font-size: 16px;
+      text-align: center;
+      color: vars.$gray-dark;
+
+      &:hover {
+        background: vars.$disabled-button-1;
+        // border: 1px solid vars.$disabled-border;
+        cursor: not-allowed;
+      }
+    }
+
+    &:hover {
+      background: vars.$hover-button-1;
+    }
+  }
+}

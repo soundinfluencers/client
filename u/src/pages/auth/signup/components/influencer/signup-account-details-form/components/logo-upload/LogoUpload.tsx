@@ -10,23 +10,13 @@ interface Props {
   onChange: (file: File | null) => void;
 }
 
-// TODO: FIX IMAGE LOGO
 export const LogoUpload: React.FC<Props> = ({ value, onChange, error }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  // const [preview1, setPreview] = useState(value);
 
   const preview = useMemo(() => {
     if (!value) return null;
     return typeof value === 'string' ? value : URL.createObjectURL(value);
   }, [value]);
-
-  // useEffect(() => {
-  //   return () => {
-  //     if (preview?.startsWith('blob:')) {
-  //       URL.revokeObjectURL(preview);
-  //     }
-  //   };
-  // }, [preview]);
 
   const openFileDialog = () => {
     inputRef.current?.click();
@@ -38,9 +28,12 @@ export const LogoUpload: React.FC<Props> = ({ value, onChange, error }) => {
     onChange(file);
   };
 
-  //fix delete
   const handleRemove = () => {
     onChange(null);
+
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
   };
 
   return (
@@ -52,14 +45,13 @@ export const LogoUpload: React.FC<Props> = ({ value, onChange, error }) => {
           ref={inputRef}
           type="file"
           accept='image/*'
-          placeholder='JOPA 123'
           hidden
           onChange={handleSelect}
         />
         {preview ? (
           <>
-            <img src={preview} alt="User Logo" width={40} height={40} />
-            <button type='button' onClick={handleRemove}>
+            <img src={preview} alt="User Logo" className='logo-input__logo'/>
+            <button type='button' onClick={handleRemove} className='logo-input__remove'>
               <img src={trash} alt='Trash container'/>
             </button>
           </>

@@ -9,6 +9,7 @@ import { BespokeCampaign } from "../pages/client/BespokeCampaign/bespoke-campaig
 import { CampaignPostContent } from "../pages/client/CampaignCreatorPage/campaign-post-content/campaign-post-content.tsx";
 import { CampaignCreatorPage } from "../pages/client/CampaignCreatorPage/CampaignCreatorPage.tsx";
 import { AccountSetting } from "../pages/client/Account-Settings/account-settings.tsx";
+import { Promos } from "../pages/influencer/promos/Promos.tsx";
 
 export const routes: IRoute[] = [
   {
@@ -36,9 +37,9 @@ export const routes: IRoute[] = [
     isProtected: false,
   },
   {
-    name: "SignupInfluncer",
+    name: "SignupInfluencer",
     path: "/signup/influencer",
-    component: SignupPage,
+    component: Promos,
     isProtected: false,
   },
   {

@@ -8,10 +8,12 @@ import { useAuth } from "../../../contexts/AuthContext.tsx";
 import { loginApi } from "../../../api/auth/auth.api.ts";
 import type { ResponseLoginUserModel } from "../../../types/auth/auth.types.ts";
 import { useClientUser } from "../../../store/get-user-client/index.ts";
+import { useInfluencerStore } from "../../../store/influencer/index.ts";
 
 export const LoginPage: FC = () => {
   const navigate: NavigateFunction = useNavigate();
   const { setUser } = useClientUser();
+  // const { setInfluencer } = useInfluencerStore();
   const { email, password, setEmail, setPassword } = useLoginStore();
   const { setAccessToken } = useAuth();
 

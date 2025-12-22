@@ -30,7 +30,7 @@ export const MainScreen = () => {
 
   //TODO: after submit resetFullForm
 
-  const handleSingup = () => {
+  const handleSinup = () => {
     const payload = {
       profile: {
         firstName,
@@ -137,9 +137,9 @@ export const MainScreen = () => {
       </div>
 
       <div className="signup-influencer__controls">
-        <ButtonMain  text="Submit Application" onClick={handleSingup} />
+        {/* TODO: Add validation and disable button if necessary */}
+        <ButtonMain text="Submit Application" onClick={handleSinup} />
       </div>
     </div>
   )
 }
-// isDisabled

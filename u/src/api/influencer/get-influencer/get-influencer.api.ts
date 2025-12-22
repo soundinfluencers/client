@@ -1,17 +1,16 @@
-import type { IUser } from "../../../types/user/user.types.ts";
 import $api from "../../api.ts";
 
-// getting CLIENT user //
+// getting INFLUENCER user //
 
-export const getUser = async (access: string): Promise<any> => {
+export const getInfluencer = async (access: string, id: string): Promise<any> => {
   try {
-    const responce = await $api.get(`/auth/me`, {
+    const response = await $api.get(`/auth/influencer/${id}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
     });
-    console.log("Success: user", responce);
-    return responce.data.data;
+    console.log("Success: user", response);
+    return response.data.data;
   } catch (error: any) {
     console.error("Error fetching user:", error);
     console.error("Response status:", error.response?.status);

@@ -20,6 +20,7 @@ export const AccountSwitcher: React.FC<Props> = ({ control }) => {
           <div
             className={`account-switcher__switchers`}
           >
+            {/* <p style={{ position: 'absolute'}}>Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem recusandae ipsum consectetur. Dicta exercitationem tempore a recusandae ab possimus esse commodi harum praesentium vel, eligendi ducimus quos expedita alias aspernatur.</p> */}
             <div className="account-switcher__action">
               <button
                 type="button"

@@ -1,7 +1,7 @@
 import type { SocialMediaType } from "../utils/constants.types";
 
 export type TProfileCategory = "community" | "creator";
-export type TCurrency = "EUR";
+export type TCurrency = "EUR"; //TODO: Extend as needed or delete and change currency type to string
 
 export type TSignupInfluencerScreen =
   | { type: "main" }
@@ -25,6 +25,8 @@ export interface IInfluencerAccount {
 
   musicStyle?: string;
   musicSubStyles?: string[];
+  musicStyleOther?: string[];
+
 
   price?: string;
   publicPrice?: string;
@@ -50,14 +52,21 @@ export interface IAccountFormValues {
   followersNumber?: number;
   logo?: File | null;
 
-  profileCategory: "community" | "creator";
+  profileCategory?: "community" | "creator";
 
+  // Community fields
   musicStyle?: string;
   musicSubStyles?: string[];
+  musicStyleOther?: string[];
+
+  // Creator fields
+  entertainmentCategories?: string[];
+  musicCategories?: string[];
+
 
   countries?: {
-    country: string;
-    percentage: number;
+    country?: string;
+    percentage?: number;
   }[];
 
   price?: string;

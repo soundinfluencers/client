@@ -8,6 +8,14 @@
   
   > div {
     width: 100%;
-    position: relative;
+  }
+
+  @media screen and (max-width: 900px) {
+    margin-bottom: 32px;
+    gap: 16px;
+  }
+
+  @media screen and (max-width: 500px) {
+    margin-bottom: 24px;
   }
 }
