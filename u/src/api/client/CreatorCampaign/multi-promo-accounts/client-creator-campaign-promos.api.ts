@@ -8,7 +8,7 @@ export const getMultiPromoAccounts = async (socialMedia: string) => {
       `/multi-promo/accounts/${socialMedia},spotify`
     );
 
-    return response;
+    return response.data;
   } catch (error) {
     console.error("Error fetching multi promo accounts:", error);
     throw error;

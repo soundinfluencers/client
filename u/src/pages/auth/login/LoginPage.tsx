@@ -19,7 +19,7 @@ export const LoginPage: FC = () => {
     const res: ResponseLoginUserModel = await loginApi({ email, password });
 
     if (res.accessToken && res.userRole && res.id) {
-      setUser(res.accessToken, res.id);
+      setUser(res.accessToken, res.id, res.userRole);
       setAccessToken(res.accessToken);
       navigate("/client/home");
     }

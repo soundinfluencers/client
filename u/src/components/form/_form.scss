@@ -18,6 +18,16 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+    .edit-input {
+      position: relative;
+      &__pos {
+        position: absolute;
+        top: 50%;
+        right: 16px;
+        transform: translateY(-15%);
+        z-index: 1000;
+      }
+    }
   }
   .button-section {
     margin-top: 64px;

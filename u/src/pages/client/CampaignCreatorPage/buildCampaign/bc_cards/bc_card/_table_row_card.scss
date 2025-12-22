@@ -6,10 +6,10 @@
   margin-top: 16px;
   align-items: start;
   &.adaptive {
-    @media (max-width: 470px) {
+    @media screen and (max-width: 500px) {
       grid-template-columns: 25% 76px 76px 1fr 1fr;
       .name {
-        span {
+        label {
           font-size: 12px;
         }
       }
@@ -34,7 +34,7 @@
 
   .name {
     display: flex;
-    align-items: start;
+    align-items: center;
     gap: 8px;
 
     .checkbox {
@@ -55,7 +55,6 @@
       object-fit: cover;
     }
   }
-
   .tags {
     display: flex;
     align-items: start;

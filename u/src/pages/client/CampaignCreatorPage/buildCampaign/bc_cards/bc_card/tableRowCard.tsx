@@ -1,15 +1,16 @@
 import React from "react";
-import type { PromoCard } from "../../../../../../types/creator-campaign/creator-campaign.types";
 import { getSocialMediaIcon } from "../../../../../../constants/social-medias";
 import type { SocialMediaType } from "../../../../../../types/utils/constants.types";
 import chevron from "../../../../../../assets/icons/chevron-down.svg";
+import "./_table_row_card.scss";
+import { formatFollowers } from "../../../../../../utils/functions/formatFollowers";
+import type { IPromoCard } from "../../../../../../types/creator-campaign/creator-campaign.types";
+import { Checkbox } from "../../../../../../components";
 interface Props {
-  data: PromoCard;
+  data: IPromoCard;
   setIsSmall: React.Dispatch<React.SetStateAction<boolean>>;
   isSmall: boolean;
 }
-import "./_table_row_card.scss";
-import { formatFollowers } from "../../../../../../utils/functions/formatFollowers";
 export const TableRowCard: React.FC<Props> = ({
   data,
   setIsSmall,
@@ -43,14 +44,14 @@ export const TableRowCard: React.FC<Props> = ({
       </>
     );
   };
+
   return (
     <div
       data-id={data._id}
       className={`promo-grid-row ${isSmall ? "adaptive" : ""}`}
       key={data._id}>
       <div className="name">
-        <input type="checkbox" className="checkbox" />
-        <span>{data.instagramUsername}</span>
+        <Checkbox name={data.instagramUsername} />
       </div>
 
       <div className="price">

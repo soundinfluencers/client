@@ -1,13 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./_proceed.scss";
-import { useFormDataOffer } from "../../store/createCampaign";
+import { useFormDataOffer } from "../../store/client/createCampaign";
 interface Props {}
 
 // info about current cart //
 
 export const Proceed: React.FC<Props> = () => {
-  const { offer } = useFormDataOffer();
+  const { offer, totalPrice, promoCard } = useFormDataOffer();
   const navigate = useNavigate();
   return (
     <div className="proceed">
@@ -25,13 +25,13 @@ export const Proceed: React.FC<Props> = () => {
         </div>{" "}
         <div className="proceed__content__offers">
           <p>
-            Networks: <span>0</span>
+            Networks: <span>{promoCard.length > 0 ? promoCard.length : 0}</span>
           </p>
         </div>
       </div>
       <div className="total">
         <p>
-          Offer: {offer?._id ? <span>{offer.price}€</span> : <span>0€</span>}
+          Offer: {offer?._id ? <span>{totalPrice}€</span> : <span>0€</span>}
         </p>
       </div>
       {offer?._id ? (

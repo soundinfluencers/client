@@ -4,9 +4,9 @@ import $api from "../../api.ts";
 
 export const getCampaigns = async (): Promise<any[]> => {
   try {
-    const result = await $api.get(`/promos/client/get/list`);
-    console.log("Success:", result.data);
-    return result.data.campaigns;
+    const result = await $api.get(`/campaigns`);
+    console.log(result, "rwao;rmqwr;qwok");
+    return result.data.data.campaigns;
   } catch (error: any) {
     console.error("Error fetching campaigns:", error);
     console.error("Response status:", error.response?.status);

@@ -1,20 +1,19 @@
 import React from "react";
 import "./_build-compaign.scss";
 import filterIcon from "../../../../assets/icons/filter (1).svg";
-import { Search } from "./bc_search/bc_search";
-import { SelectBudget, SortSelect } from "./bc_select/bc-select";
+import { Search } from "./bar-ui/bc_search/bc_search";
+import { SelectBudget, SortSelect } from "./bar-ui/bc_select/bc-select";
 import { Filters } from "./bc_filters/bc-filters";
 import { CardsContainer } from "./bc_cards/cards_content";
-import menu from "../../../../assets/icons/menu.svg";
-import grid from "../../../../assets/icons/grid.svg";
-import check from "../../../../assets/icons/check.svg";
+
+import { SwitchView } from "../../../../components/ui/switch-view/switch-view";
 interface Props {}
 
 export const BuildCampaign: React.FC<Props> = () => {
   const [filterFlag, setFilterFlag] = React.useState<boolean>(false);
   const [view, setView] = React.useState<number>(1);
   const [isSmall, setIsSmall] = React.useState(false);
-  const arrView = [menu, grid];
+
   return (
     <div className="build-compaign">
       <div className="build-compaign__title">
@@ -38,26 +37,11 @@ export const BuildCampaign: React.FC<Props> = () => {
             <SortSelect />
           </div>
         </div>
-        <div className="changeView">
-          <div className="changeView__content">
-            {" "}
-            {arrView.map((item, i) => (
-              <div
-                className={`changeView-check ${view === i ? "active" : ""}`}
-                onClick={() => setView(i)}>
-                {view === i && (
-                  <img className="check" src={check} alt="checked" />
-                )}
-                <img src={item} alt="" />{" "}
-              </div>
-            ))}
-          </div>
-        </div>
+        <SwitchView view={view} setView={setView} />
         <div
           className={`build-compaign__content_functional ${
             isSmall ? "tableAdaptive" : ""
           }`}>
-          {" "}
           {filterFlag && (
             <Filters
               isSmall={isSmall}

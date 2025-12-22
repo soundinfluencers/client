@@ -1,6 +1,8 @@
 import React from "react";
 import "./_table.scss";
-interface Props {}
+interface Props {
+  className?: string;
+}
 
 // reusable table //
 
@@ -16,9 +18,9 @@ interface Props {}
 
  */
 
-export const Table: React.FC<Props> = () => {
+export const Table: React.FC<Props> = ({ className }) => {
   return (
-    <div className="table">
+    <div className={`table ${className}`}>
       <div className="table__header">
         <div className="table__header-data">Networks</div>
         <div className="table__header-data">Followers</div>
@@ -48,13 +50,14 @@ export const Table: React.FC<Props> = () => {
         <div className="table__body-data">@kolschofficia </div>
         <div className="table__body-data">https://ffm.to/joan</div>
         <div className="table__body-data">special requests text</div>
-      </div>
-      <div className="table__add">
-        <button>Add influencer</button>
       </div>{" "}
-      <div className="table__footer">
-        <div className="table__footer-data">Price: 1599€</div>
+      <div className={`table__footer-row`}>
+        <div className={`table__footer-data ${"left"}`}>Price: 1599€</div>
+        <div className="table__footer-data">12000000</div>
       </div>
+      {/* <div className="table__add">
+        <button>Add influencer</button>
+      </div>{" "} */}
     </div>
   );
 };

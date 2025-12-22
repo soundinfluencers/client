@@ -6,9 +6,11 @@ import { ForgotPasswordPage } from "../pages/auth/forgot/ForgotPasswordPage.tsx"
 import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
 import { HomePage } from "../pages/home/HomePage.tsx";
 import { BespokeCampaign } from "../pages/client/BespokeCampaign/bespoke-campaign.tsx";
-import { CampaignPostContent } from "../pages/client/CampaignCreatorPage/campaign-post-content/campaign-post-content.tsx";
 import { CampaignCreatorPage } from "../pages/client/CampaignCreatorPage/CampaignCreatorPage.tsx";
 import { AccountSetting } from "../pages/client/Account-Settings/account-settings.tsx";
+import { CamapignStrategy } from "../pages/client/campaign-strategy/campaign-strategy.tsx";
+import { CampaignPostContent } from "../pages/client/campaign-post-content/campaign-post-content.tsx";
+import { PaymentCampaign } from "../pages/client/payment-campaign/payment-campaign.tsx";
 
 export const routes: IRoute[] = [
   {
@@ -69,6 +71,18 @@ export const routes: IRoute[] = [
     name: "Content",
     path: "/client/CreateCampaign/Content",
     component: CampaignPostContent,
+    isProtected: true,
+  },
+  {
+    name: "Strategy",
+    path: "/client/CreateCampaign/Content/Strategy",
+    component: CamapignStrategy,
+    isProtected: true,
+  },
+  {
+    name: "Payment",
+    path: "/client/CreateCampaign/Content/Strategy/Payment",
+    component: PaymentCampaign,
     isProtected: true,
   },
   {

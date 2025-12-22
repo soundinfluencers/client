@@ -1,15 +1,12 @@
 import React from "react";
 import "./_CampaignCreatorPage.scss";
-import { ScrollPlatforms } from "./scrollPlatftorms/scrollPlattforms";
-import { ScrollGenres } from "./scrollGenre/scrollGenre";
-import { SliderForCard } from "./SliderForCards/SliderForCards";
-import { getPublishedOffers } from "../../../api/client/CreatorCampaign/offers/client-creator-campaign-offers.api";
+import { useCreateCampaign } from "../../../store/client/createCampaign";
+import { Breadcrumbs, Container, Loader, SaveDraft } from "../../../components";
+import { ScrollPlatforms } from "./components/scrollPlatftorms/scrollPlattforms";
+import { ScrollGenres } from "./components/scrollGenre/scrollGenre";
 import { BuildCampaign } from "./buildCampaign/build-campaign";
-import { Container } from "../../../components/container/container";
-import { useCreateCampaign } from "../../../store/createCampaign";
-import { Loader } from "../../../components/ui/loader/loader";
-import { Breadcrumbs } from "../../../components/ui/Breadcrumbs/pathnames";
-import { SaveDraft } from "../../../components/save-draft/save-draft";
+import { SliderForCard } from "./components/SliderForCards/SliderForCards";
+
 interface Props {}
 
 export const CampaignCreatorPage: React.FC<Props> = () => {

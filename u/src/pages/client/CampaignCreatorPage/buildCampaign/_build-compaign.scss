@@ -8,7 +8,7 @@
       leading-trim: NONE;
       line-height: 100%;
       letter-spacing: 0%;
-      @media (max-width: 500px) {
+      @media screen and (max-width: 500px) {
         font-size: 30px;
       }
     }
@@ -20,7 +20,7 @@
       leading-trim: NONE;
       line-height: 100%;
       letter-spacing: 0%;
-      @media (max-width: 500px) {
+      @media screen and (max-width: 500px) {
         font-size: 15px;
       }
     }
@@ -31,14 +31,14 @@
       width: 100%;
       display: flex;
       align-items: center;
-      @media (max-width: 900px) {
+      @media screen and (max-width: 900px) {
         flex-direction: column;
       }
       &__finput {
         display: flex;
         gap: 8px;
         width: 100%;
-        @media (max-width: 900px) {
+        @media screen and (max-width: 900px) {
           max-width: 100%;
           flex: 1 1 auto;
         }
@@ -56,7 +56,7 @@
           &.active {
             border: 1px solid rgba(185, 208, 255, 1);
           }
-          @media (max-width: 900px) {
+          @media screen and (max-width: 900px) {
             max-width: 42px;
             height: 42px;
             p {
@@ -69,79 +69,25 @@
         display: flex;
         width: 100%;
         max-width: 472px;
-        @media (max-width: 900px) {
+        gap: 24px;
+        @media screen and (max-width: 900px) {
+          gap: 16px;
           margin-top: 8px;
           justify-content: space-between;
           max-width: 100%;
         }
       }
     }
-    .changeView {
-      margin-top: 16px;
-      width: 100%;
-      display: flex;
-      justify-content: end;
-      &__content {
-        display: flex;
-        align-items: center;
 
-        max-width: 108px;
-        border-radius: 8px;
-        border: 1px solid rgba(231, 232, 241, 1);
-        height: 36px;
-        overflow: hidden;
-        .changeView-check {
-          position: relative;
-          width: 54px;
-          padding: 8px;
-          opacity: 0.5;
-          .check {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-          }
-          &:first-child {
-            display: flex;
-            align-items: center;
-            border-right: 1px solid rgba(231, 232, 241, 1);
-            padding-left: 26px;
-          }
-          &:last-child {
-            display: flex;
-            align-items: center;
-            flex-direction: row-reverse;
-            padding-right: 26px;
-          }
-          &.active {
-            opacity: 1;
-            &:first-child {
-              .check {
-                left: 8px;
-              }
-            }
-            &:last-child {
-              .check {
-                right: 8px;
-              }
-            }
-          }
-        }
-      }
-
-      ul {
-        li {
-        }
-      }
-    }
     .build-compaign__content_functional {
       margin-top: 16px;
       display: flex;
       gap: 16px;
-      @media (max-width: 600px) {
+      @media screen and (max-width: 900px) {
         flex-direction: column;
       }
       &.tableAdaptive {
-        @media (max-width: 835px) {
+        @media screen and (max-width: 600px) {
           flex-direction: column;
         }
       }

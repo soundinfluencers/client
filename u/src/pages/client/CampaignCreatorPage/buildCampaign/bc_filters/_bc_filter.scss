@@ -6,12 +6,16 @@
   border: 1px solid;
   border: 1px solid rgba(231, 232, 241, 1);
   border-radius: 8px;
-  @media (max-width: 600px) {
+  @media screen and (max-width: 900px) {
     max-width: 100%;
   }
   &.bc_filterForTable {
-    @media (max-width: 835px) {
+    @media screen and (max-width: 600px) {
       max-width: 100%;
+      .blockWithMethod {
+        max-width: 100%;
+        width: 100%;
+      }
     }
   }
   &__sticky {
