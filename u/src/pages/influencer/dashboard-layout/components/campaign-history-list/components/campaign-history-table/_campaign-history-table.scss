@@ -1,0 +1,85 @@
+@use "@/styles/variables/variables" as vars;
+
+.campaign-history-table {
+  min-width: 100%;
+  width: max-content;
+  table-layout: fixed;
+  border-collapse: collapse;
+
+  &__thead {
+    &-tr {
+    }
+
+    &-th {
+      padding: 8px 0 8px 0;
+      text-align: start;
+      font-weight: 400;
+
+      @media screen and (max-width: 900px) {
+        font-size: 14px;
+      }
+
+      &:nth-child(1) {
+        width: 474px;
+
+        @media screen and (max-width: 900px) {
+          width: 261px;
+        }
+      }
+      &:nth-child(2) {
+        width: 140px;
+        @media screen and (max-width: 900px) {
+          width: 90px;
+        }
+      }
+      &:nth-child(3) {
+        width: 100px;
+        @media screen and (max-width: 900px) {
+          width: 90px;
+        }
+      }
+      &:nth-child(4) {
+        width: 182px;
+        @media screen and (max-width: 900px) {
+          width: 126px;
+        }
+      }
+      &:nth-child(5) {
+        width: 232px;
+        @media screen and (max-width: 900px) {
+          width: 200px;
+        }
+      }
+    }
+  }
+
+  &__tbody {
+  }
+}
+
+//div table structure
+// display: flex;
+// flex-direction: column;
+// margin-bottom: 24px;
+// gap: 16px;
+
+// &__header {
+//   display: flex;
+
+//   @media screen and (max-width: 500px) {
+//     font-size: 14px;
+//   }
+// }
+
+// &__cell {
+//   flex: 1;
+//   padding: 8px 0;
+//   padding-left: 8px;
+//   text-align: start;
+// }
+
+// &__row {
+//   display: flex;
+//   border-bottom: 1px solid vars.$blue;
+//   // padding-left: 8px;
+// }

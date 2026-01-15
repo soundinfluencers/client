@@ -1,0 +1,57 @@
+.information_popUp {
+  position: absolute;
+  background: white;
+  width: calc(100% + 2px);
+  border: 1px solid rgb(185, 208, 255);
+  padding: 24px;
+  left: -1px;
+  right: 0;
+  margin-top: 16px;
+  z-index: 10;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+.information_popUp.flag {
+  top: 23px;
+}
+.information_popUp.flag ul li {
+  font-size: 12px;
+}
+.information_popUp .genres h3 {
+  font-weight: normal;
+  border-bottom: 1px solid rgb(185, 208, 255);
+}
+.information_popUp .genres ul {
+  margin-top: 14px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.information_popUp .genres ul li {
+  flex: 0 0 auto;
+  padding: 4px 12px;
+  background: rgb(255, 255, 255);
+  border: 1px solid rgb(231, 232, 241);
+  border-radius: 4px;
+}
+.information_popUp .countries {
+  margin-top: 16px;
+}
+.information_popUp .countries h3 {
+  font-weight: normal;
+  border-bottom: 1px solid rgb(185, 208, 255);
+}
+.information_popUp .countries ul {
+  margin-top: 14px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.information_popUp .countries ul li {
+  padding: 4px 12px;
+  background: rgb(255, 255, 255);
+  border: 1px solid rgb(231, 232, 241);
+  border-radius: 4px;
+}/*# sourceMappingURL=genresICountries.css.map */

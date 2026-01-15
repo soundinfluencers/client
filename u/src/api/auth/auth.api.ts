@@ -8,7 +8,7 @@ export const loginApi = async ({
   email,
   password,
   role,
-}: RequestLoginUserModel): Promise<any> => {
+}: RequestLoginUserModel): Promise<ResponseLoginUserModel> => {
   const { data } = await $api.post("/auth/login", {
     email,
     password,
@@ -17,6 +17,7 @@ export const loginApi = async ({
 
   return data.data;
 };
+
 
 export const logoutApi = async () => {
   await $api.post("/auth/logout");

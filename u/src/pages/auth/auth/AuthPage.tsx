@@ -8,22 +8,18 @@ import {
 import { useNavigate } from "react-router-dom";
 import type { UserRoleType } from "@/types/user/user.types.ts";
 import { useUser } from "@/store/get-user/index.ts";
-
 export const AuthPage: FC = () => {
   const navigate = useNavigate();
   const { setRole, role } = useUser();
   const [selectedRole, setSelectedRole] = useState<UserRoleType>(role);
-
   const handleSwitchClick = (role: UserRoleType) => {
     setSelectedRole(role);
     setRole(role);
   };
-
   const handleSignupClick = () => {
     if (selectedRole === "client") navigate("/signup/client");
     else navigate("/signup/influencer");
   };
-
   return (
     <div className="auth-page__wrapper">
       <div className="auth-page">
@@ -34,7 +30,6 @@ export const AuthPage: FC = () => {
               Choose how you’d like to collaborate with SoundInfluencers
             </p>
           </div>
-
           <div className="auth-page__form-block">
             <div className="auth-page__switch">
               <SwitchButton
@@ -44,7 +39,6 @@ export const AuthPage: FC = () => {
                 onClick={handleSwitchClick}
               />
             </div>
-
             <div className="auth-form">
               <div className="auth-form__header">
                 <p className="auth-form__title">

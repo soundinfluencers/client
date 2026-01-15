@@ -11,8 +11,11 @@ export const Breadcrumbs: React.FC<Props> = () => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter(Boolean);
 
+    console.log(pathnames);
+
   return (
     <nav className="breadcrumbs">
+
       <span>
         <Link to="/">Dashboard</Link> <img src={chevron} alt="" />
       </span>

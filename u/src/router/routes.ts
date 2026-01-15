@@ -3,16 +3,19 @@ import { LoginPage } from "../pages/auth/login/LoginPage.tsx";
 import { AuthPage } from "../pages/auth/auth/AuthPage.tsx";
 import { SignupPage } from "../pages/auth/signup/SignupPage.tsx";
 import { ForgotPasswordPage } from "../pages/auth/forgot/ForgotPasswordPage.tsx";
-import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
 import { HomePage } from "../pages/home/HomePage.tsx";
+
+// Client Imports
+import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
 import { BespokeCampaign } from "../pages/client/BespokeCampaign/bespoke-campaign.tsx";
 import { CampaignCreatorPage } from "../pages/client/CampaignCreatorPage/CampaignCreatorPage.tsx";
 import { AccountSetting } from "../pages/client/Account-Settings/account-settings.tsx";
-import { Promos } from "../pages/influencer/promos/Promos.tsx";
 import { CamapignStrategy } from "../pages/client/campaign-strategy/campaign-strategy.tsx";
 import { CampaignPostContent } from "../pages/client/campaign-post-content/campaign-post-content.tsx";
 import { PaymentCampaign } from "../pages/client/payment-campaign/payment-campaign.tsx";
+import { InfluencerTermsPage } from "../pages/auth/terms/influencer/InfluencerTermsPage.tsx";
 import { CampaignProposals } from "../pages/client/campaign-proposal/campaign-proposal.tsx";
+
 
 export const routes: IRoute[] = [
   {
@@ -54,7 +57,7 @@ export const routes: IRoute[] = [
   {
     name: "Terms",
     path: "/terms/influencer",
-    component: TermsPage,
+    component: InfluencerTermsPage,
     isProtected: false,
   },
   {

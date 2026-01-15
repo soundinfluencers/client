@@ -1,0 +1,15 @@
+.container {
+  max-width: 1244px;
+  margin: 0 auto;
+  padding: 0px 10px;
+}
+@media screen and (max-width: 900px) {
+  .container {
+    padding: 0 40px;
+  }
+}
+@media screen and (max-width: 500px) {
+  .container {
+    padding: 0 16px;
+  }
+}/*# sourceMappingURL=container.module.css.map */

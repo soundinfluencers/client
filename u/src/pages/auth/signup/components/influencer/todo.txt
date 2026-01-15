@@ -1,7 +1,0 @@
-1. DropDown for country+
-2. percentage for input+
-3. currency for input+
-
-
-MINOR FIX
-1) fix height phone number item

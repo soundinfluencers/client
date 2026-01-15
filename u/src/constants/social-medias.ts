@@ -6,6 +6,7 @@ import spotifyIcon from "@/assets/social-medias/spotify.svg";
 import soundcloudIcon from "@/assets/social-medias/soundcloud.svg";
 import pressIcon from "@/assets/social-medias/press.svg";
 import multipromoIcon from "@/assets/social-medias/multipromo.svg";
+
 import plattform_multi from "../assets/plattform-social_medias/plattform_multi.svg";
 import plattform_instagram from "../assets/plattform-social_medias/plattform_instagram.svg";
 import plattform_tiktok from "../assets/plattform-social_medias/plattform_tiktok.svg";

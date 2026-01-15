@@ -9,12 +9,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import type { CampaignForList } from "@/types/client/dashboard/campaign.types";
-
 export const HomePage = () => {
   const { user } = useUser();
   const { accessToken } = useAuth();
   const [view, setView] = React.useState<number>(1);
-
   const {
     data: campaigns,
     isLoading,
@@ -24,9 +22,7 @@ export const HomePage = () => {
     queryKey: ["campaigns", "all"],
     queryFn: () => getCampaigns("all"),
   });
-
   if (isError) return <p>Error loading campaigns</p>;
-
   return (
     <Container className="home-page">
       <HomeHeader firstName={user?.firstName} />

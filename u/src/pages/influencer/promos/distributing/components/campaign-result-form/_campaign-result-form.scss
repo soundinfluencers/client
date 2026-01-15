@@ -1,0 +1,19 @@
+@use "@/styles/variables/variables" as vars;
+
+.campaign-result {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  &__title {
+    font-weight: 400;
+    font-size: 48px;
+    color: vars.$black-blue;
+  }
+
+  &__form {
+    @media screen and (max-width: 900px) {
+      max-width: 100%;
+    }
+  }
+}

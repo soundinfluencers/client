@@ -14,6 +14,7 @@ import { Container } from "@/components/container/container.tsx";
 export const TabBar: FC = () => {
   const [isBurgerOpen, setIsBurgerOpen] = useState<boolean>(false);
   const { user } = useUser();
+
   const tabBarRef = useRef<HTMLDivElement>(null);
 
   const { logout, accessToken } = useAuth();

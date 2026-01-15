@@ -8,6 +8,7 @@ export interface RequestLoginUserModel {
 
 export interface ResponseLoginUserModel {
   accessToken: string | null;
-  id: string;
-  userRole: UserRoleType | null;
+  firstName: string;
+  balance: number;
+  role: UserRoleType | null;
 }

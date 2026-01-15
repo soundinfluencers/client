@@ -1,0 +1,120 @@
+@use "@/styles/variables/variables" as vars;
+@use "@/styles/mixins/title" as title;
+
+.account-setup-form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 64px 0;
+  margin: 0 auto;
+
+  @media screen and (max-width: 900px) {
+    padding: 32px 40px;
+  }
+
+  @media screen and (max-width: 500px) {
+    padding: 24px 16px;
+  }
+
+  &__header {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 40px;
+
+    @media screen and (max-width: 900px) {
+      margin-bottom: 24px;
+    }
+
+    @media screen and (max-width: 500px) {
+      gap: 4px;
+    }
+  }
+
+  &__title {
+    @include title.title();
+  }
+  &__subtitle {
+    @include title.subtitle($font-color: vars.$gray);
+  }
+
+  &__form {
+    width: 600px;
+
+    @media screen and (max-width: 900px) {
+      width: 545px;
+    }
+
+    @media screen and (max-width: 700px) {
+      width: 100%;
+      gap: 24px;
+    }
+  }
+
+  &__btn-back {
+    position: absolute;
+    z-index: 1;
+    top: 64px;
+    left: 108px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    &:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+
+      padding: 1px;
+      border-radius: inherit;
+
+      background: vars.$brightest-gradient;
+
+      -webkit-mask: linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+
+      pointer-events: none;
+    }
+
+    @media screen and (max-width: 900px) {
+      top: 40px;
+      left: 40px;
+      width: 32px;
+      height: 32px;
+
+      > img {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    @media screen and (max-width: 500px) {
+      left: 16px;
+      top: 16px;
+    }
+  }
+}

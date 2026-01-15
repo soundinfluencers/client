@@ -55,7 +55,8 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
       </div>
 
       <div className="home-header__right">
-        <div className="home-header__right-top"></div>
+        <div className="home-header__right-top">
+        </div>
 
         <div className="home-header__right-bottom">
           <div className="home-header__balance-block">

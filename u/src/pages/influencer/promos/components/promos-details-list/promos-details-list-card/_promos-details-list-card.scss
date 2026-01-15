@@ -9,6 +9,10 @@
   border: 1px solid #fff;
   background: vars.$light-blue;
 
+  @media screen and (max-width: 500px) {
+    padding: 16px;
+  }
+
   &__header {
     display: flex;
     align-items: center;
@@ -16,24 +20,45 @@
     margin-bottom: 24px;
     padding-bottom: 8px;
     border-bottom: 1px solid vars.$blue;
+
+    @media screen and (max-width: 500px) {
+      gap: 4px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
   }
 
   &__number {
     font-weight: 500;
     font-size: 24px;
     text-transform: uppercase;
+
+    @media screen and (max-width: 900px) {
+      font-weight: 400;
+      font-size: 20px;
+    }
+    @media screen and (max-width: 500px) {
+      font-size: 15px;
+    }
   }
 
   &__status {
     font-weight: 500;
     font-size: 20px;
     text-transform: uppercase;
+
+    @media screen and (max-width: 900px) {
+      font-weight: 400;
+      font-size: 16px;
+    }
+    @media screen and (max-width: 500px) {
+      font-size: 15px;
+    }
   }
 
   &__body {
     display: flex;
     flex-direction: column;
-    margin-bottom: 24px;
 
     &-header {
       display: flex;
@@ -47,6 +72,24 @@
         object-fit: cover;
         height: 67px;
         width: 67px;
+
+        @media screen and (max-width: 900px) {
+          width: 48px;
+          height: 48px;
+        }
+        @media screen and (max-width: 500px) {
+          width: 32px;
+          height: 32px;
+        }
+      }
+
+      @media screen and (max-width: 900px) {
+        font-size: 32px;
+      }
+      @media screen and (max-width: 500px) {
+        font-size: 24px;
+        gap: 8px;
+        margin-bottom: 24px;
       }
     }
 
@@ -68,12 +111,15 @@
 
           @media screen and (max-width: 900px) {
             width: 100px;
+            font-size: 14px;
           }
 
           @media screen and (max-width: 500px) {
             width: 92px;
+            font-size: 13px;
           }
         }
+
         &-wrapper {
           display: flex;
           align-items: flex-start;
@@ -81,21 +127,76 @@
           flex: 1;
           gap: 8px;
         }
+
         &-description {
-          font-weight: 500;
           font-size: 16px;
           flex: 1;
-          line-height: 1.4;
           word-break: break-word;
+
+          @media screen and (max-width: 900px) {
+            // font-size: 15px;
+          }
+          @media screen and (max-width: 500px) {
+            font-size: 14px;
+          }
         }
+
         &-copy {
+          position: relative;
           flex-shrink: 0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           margin-left: auto;
           border-radius: 16px;
           padding: 4px 16px;
-          width: 50px;
-          height: 26px;
           background: #fff;
+          transition: all 0.2s ease;
+
+          z-index: 1;
+
+          &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+
+            padding: 1px;
+            border-radius: inherit;
+
+            background: linear-gradient(180deg, #ecedff, rgba(185, 208, 255, 0.8));
+
+            -webkit-mask: linear-gradient(#fff 0 0) content-box,
+              linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+          }
+
+          @media screen and (max-width: 500px) {
+            padding: 4px 12px;
+          }
+
+          > img {
+            transition: transform 0.18s ease, opacity 0.18s ease;
+            @media screen and (max-width: 900px) {
+              width: 19px;
+              height: 19px;
+            }
+
+            @media screen and (max-width: 500px) {
+              width: 16px;
+              height: 16px;
+            }
+          }
+
+          &--copied {
+            background: #f2faff;
+
+            > img {
+              transform: scale(1.1);
+              opacity: 0.9;
+            }
+          }
         }
       }
     }
@@ -106,31 +207,11 @@
     gap: 16px;
     align-items: center;
     justify-content: center;
+    margin-top: 48px;
 
-    // > button {
-    //   width: 250px;
-    //   height: 46px;
-    //   padding: 12px 0;
-    //   border-radius: 24px;
-    //   font-size: 16px;
-    //   cursor: pointer;
-    //   text-align: center;
-    // }
-
-    // &-decline {
-    //   border: 1px solid vars.$black-blue;
-
-    //   &:active {
-    //     background: white !important;
-    //     border: 2px solid vars.$black-blue !important;
-    //   }
-    // }
-    // &-accept {
-    // }
-  }
-
-  .btn {
-    width: 250px;
-    height: 46px;
+    @media screen and (max-width: 500px) {
+      flex-direction: column-reverse;
+      margin-top: 32px;
+    }
   }
 }

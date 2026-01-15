@@ -137,3 +137,15 @@ body {
 ul {
   list-style: none;
 }
+
+a {
+  color: inherit; /* Ensures color is inherited from parent element */
+  text-decoration: none; /* Removes the default underline */
+  cursor: pointer; /* Ensures a pointer cursor on hover, even if not explicitly set by the browser */
+}
+
+/* Optional: Add a hover state to indicate interactivity */
+a:hover,
+a:focus {
+  text-decoration: none; /* Re-adds the underline on hover for usability */
+}

@@ -1,0 +1,113 @@
+@use "@/styles/variables/variables" as vars;
+
+.promos-filters-bar {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+
+  @media screen and (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+    gap: 4px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 16px;
+    background-color: #ffffff;
+    border-top: 1px solid vars.$border-secondary;
+    border-bottom: 1px solid vars.$border-secondary;
+    border-left: 1px solid vars.$border-secondary;
+
+    &:first-child {
+      border-radius: 8px 0 0 8px;
+    }
+
+    &:last-child {
+      border-radius: 0 8px 8px 0;
+      border-right: 1px solid vars.$border-secondary;
+    }
+
+    @media screen and (max-width: 900px) {
+      padding: 6px 8px;
+    }
+    @media screen and (max-width: 600px) {
+      padding: 8.5px 16px;
+      width: 100%;
+      border-radius: 8px !important;
+      border: 1px solid vars.$border-secondary !important;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    &-label-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    &-label {
+      color: vars.$light-gray;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      cursor: pointer;
+
+      &--active {
+        color: vars.$black-blue;
+      }
+
+      @media screen and (max-width: 900px) {
+        font-size: 14px;
+      }
+
+      &:hover {
+        color: vars.$black-blue;
+      }
+    }
+
+    &-indicator {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: vars.$blue;
+      opacity: 0;
+      transition: all 0.2s ease;
+
+      &--active {
+        opacity: 1;
+      }
+
+      @media screen and (max-width: 900px) {
+      }
+      @media screen and (max-width: 500px) {
+      }
+    }
+
+    &-button {
+      border: 1px solid vars.$blue;
+      border-radius: 4px;
+      padding: 8px;
+
+      font-size: 13px;
+      line-height: 105%;
+      text-align: center;
+      transition: all 0.2s ease;
+
+      @media screen and (max-width: 900px) {
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+      @media screen and (max-width: 500px) {
+        padding: 8px;
+      }
+
+      &:hover {
+        background-color: vars.$hover-button-2;
+      }
+    }
+  }
+}
