@@ -1,23 +1,33 @@
+import { useEffect } from "react";
+import { useInfluenserSignupStore } from "../../../../../store/influencer/account-settings/useInfluenserSignupStore";
+import { useAccountSetupStore } from "../../../../influencer/components/account-setup-form/store/useAccountSetupStore";
 import { MainScreen } from "../influencer/signup-main-screen/MainScreen";
-import { AccountDetails } from "../influencer/signup-account-details-form/AccountDetails";
-import { useSignupInfluencerStore } from "../../../../../store/features/signupInfluencer";
+import { AccountSetupForm } from "../../../../influencer/components/account-setup-form/AccountSetupForm";
 
 export const SignupInfluencer = () => {
-  const screen = useSignupInfluencerStore(state => state.screen);
-  const goToMain = useSignupInfluencerStore(state => state.goToMain);
+  const { settingsMode, onResetAccountForm } = useAccountSetupStore();
+  const { saveAccount, removeAccount } = useInfluenserSignupStore();
 
-  if (screen.type === 'platform') {
-    return (
-      <AccountDetails
-        platform={screen.platform}
-        mode={screen.mode}
-        accountId={screen.accountId}
-        goBack={goToMain}
-      />
-    )
-  }
+  useEffect(() => {
+    onResetAccountForm();
+  }, []);
 
   return (
-    <MainScreen />
+    settingsMode.type === 'account' ? (
+      <AccountSetupForm
+        platform={settingsMode.platform}
+        mode={settingsMode.mode}
+        account={settingsMode.account}
+        onSave={(data) => saveAccount(settingsMode.platform, data, settingsMode.accountId)}
+        onRemove={() => {
+          if (settingsMode.accountId !== undefined) {
+            removeAccount(settingsMode.platform, settingsMode.accountId);
+          }
+        }}
+        // accountId={settingsMode.accountId}
+      />
+    ) : (
+      <MainScreen />
+    )
   )
 }

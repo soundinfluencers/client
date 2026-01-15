@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { ButtonMain } from "../../../../../../components/ui/buttons/button/Button";
+import { useInfluenserSignupStore } from "../../../../../../store/influencer/account-settings/useInfluenserSignupStore";
 import { TextInput } from "../../../../../../components/ui/inputs/text-input/TextInput";
-import { SOCIAL_ACCOUNTS_DATA } from "../../../../../../constants/influencer/social-accounts.data";
 import { InputPhone } from "../../ui/phone-input/InputPhone";
-import plus from '@/assets/icons/plus.svg';
-import edit from '@/assets/icons/edit.svg';
-import { useSignupInfluencerStore } from "../../../../../../store/features/signupInfluencer";
+import { SocialAccountsList } from "../../../../../influencer/components/social-accounts-list/SocialAccountsList";
+import { ButtonMain } from "../../../../../../components/ui/buttons-fix/ButtonFix";
 
 import './_main-screen.scss';
 
@@ -14,44 +12,39 @@ import './_main-screen.scss';
 */
 
 export const MainScreen = () => {
-  const {
-    accounts,
-    openCreateAccount,
-    openEditAcccount,
-    setField,
-    firstName,
-    lastName,
-    email,
-    phoneNumber,
-    password,
-  } = useSignupInfluencerStore();
-
+  const { user, errors, validate, setField, resetSignup, isFormReady } = useInfluenserSignupStore();
   const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  //TODO: after submit resetFullForm
-
-  const handleSinup = () => {
-    const payload = {
-      profile: {
-        firstName,
-        lastName,
-        email,
-        phoneNumber,
-        password
-      },
-      accounts,
+  const handleSinup = async () => {
+    const isValid = validate();
+    if (!isValid) {
+      return;
     }
 
-    console.log(payload);
+    console.log("Payload influencer", user);
+    setIsLoading(true);
+    // simulate api call
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    setIsLoading(false);
+    resetSignup();
   };
 
-  //TODO: Change Inputs
+  const isDisabled = !isFormReady() || isLoading;
 
   return (
     <div className="signup-influencer">
       <div className="signup-influencer__header">
         <p className="signup-influencer__title">Complete your application</p>
         <p className="signup-influencer__subtitle">Get approved to join the SoundInfluencers network</p>
+        {/* <a
+          href="/terms/influencer"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ textDecoration: "underline", color: "black" }}>
+          Terms and Conditions
+        </a> */}
       </div>
 
       <div>
@@ -60,34 +53,39 @@ export const MainScreen = () => {
           <TextInput
             title="First name*"
             placeholder="Enter first name"
-            value={firstName}
-            setValue={(v) => setField('firstName', v)}
+            value={user.firstName}
+            setValue={(v) => setField('firstName', v.trim())}
+            isError={errors.firstName}
           />
           <TextInput
             title="Last name*"
             placeholder="Enter last name"
-            value={lastName}
-            setValue={(v) => setField('lastName', v)}
+            value={user.lastName}
+            setValue={(v) => setField('lastName', v.trim())}
+            isError={errors.lastName}
           />
           <TextInput
             title="Email*"
             type="email"
             placeholder="Enter email"
-            value={email}
-            setValue={(v) => setField('email', v)}
+            value={user.email}
+            setValue={(v) => setField('email', v.trim())}
+            isError={errors.email}
           />
           <InputPhone
-            value={phoneNumber}
-            setValue={(v) => setField('phoneNumber', v)}
+            value={user.phone}
+            setValue={(v) => setField('phone', v.trim())}
             isMenuOpen={isPhoneDropdownOpen}
             setIsMenuOpen={setIsPhoneDropdownOpen}
           />
           <TextInput
             title="Password*"
             type="password"
-            value={password}
+            value={user.password}
             placeholder="Enter password"
-            setValue={(v) => setField('password', v)} />
+            setValue={(v) => setField('password', v.trim())}
+            isError={errors.password}
+          />
         </div>
       </div>
 
@@ -97,48 +95,16 @@ export const MainScreen = () => {
           <p className="signup-influencer__socials-subtitle">Add at least one platform to submit your application</p>
         </div>
 
-        <ul className="signup-influencer__socials-list">
-          {SOCIAL_ACCOUNTS_DATA.map(({ id, label, icon }) => (
-            <li className="signup-influencer__socials-item" key={id}>
-              <div>
-                <div className="signup-influencer__social">
-                  <img className="signup-influencer__social-icon" src={icon} alt={label} />
-                  <p className="signup-influencer__social-label">{label}</p>
-                </div>
-                <button
-                  className="signup-influencer__social-btn"
-                  onClick={() => openCreateAccount(id)}
-                >
-                  <img src={plus} alt="Plus" />
-                </button>
-              </div>
-              {accounts.filter(a => a.platform === id).length !== 0 && (
-                <ul className="signup-influencer__accounts-list">
-                  {accounts.filter(a => a.platform === id).map((account, index) => (
-                    <li key={account.clientId} className="signup-influencer__accounts-item">
-                      <div className="signup-influencer__accounts-info">
-                        <span>{index + 1}</span>
-                        <p>{account.username}</p>
-                      </div>
-                      <button
-                        className="signup-influencer__accounts-edit"
-                        onClick={() => openEditAcccount(account.clientId)}
-                      >
-                        Edit
-                        <img src={edit} alt="Edit" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-          ))}
-        </ul>
+        <SocialAccountsList user={user} />
       </div>
 
       <div className="signup-influencer__controls">
         {/* TODO: Add validation and disable button if necessary */}
-        <ButtonMain text="Submit Application" onClick={handleSinup} />
+        <ButtonMain
+          label={isLoading ? "Submitting..." : "Submit Application"}
+          onClick={handleSinup}
+          isDisabled={isDisabled}
+        />
       </div>
     </div>
   )

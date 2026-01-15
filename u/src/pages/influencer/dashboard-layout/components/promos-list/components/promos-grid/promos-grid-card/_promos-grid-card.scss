@@ -1,0 +1,73 @@
+
+.promos-grid-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+
+  border-radius: 8px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+
+    &-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &-text {
+        font-size: 16px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        text-align: center;
+
+        @media screen and (max-width: 900px) {
+          font-size: 15px;
+        }
+      }
+
+      &-date {
+        font-size: 16px;
+        margin-left: auto;
+
+        @media screen and (max-width: 900px) {
+          font-size: 15px;
+        }
+
+        @media screen and (max-width: 500px) {
+          font-size: 14px;
+        }
+      }
+
+      &-reward {
+        font-size: 16px;
+        text-align: right;
+      }
+    }
+
+    &-icon {
+      width: 32px;
+      height: 32px;
+
+      @media screen and (max-width: 900px) {
+        width: 24px;
+        height: 24px;
+      }
+
+      @media screen and (max-width: 500px) {
+        width: 32px;
+        height: 32px;
+      }
+    }
+  }
+
+  &__campaign-name {
+    font-size: 20px;
+
+    @media screen and (max-width: 900px) {
+      font-size: 16px;
+    }
+  }
+}

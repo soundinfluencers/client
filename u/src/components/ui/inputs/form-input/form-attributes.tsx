@@ -60,7 +60,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInput<any>>(
           id={String(name)}
           type={type}
           placeholder={placeholder}
-          {...register(name as any, { required, ...validation })}
+          {...register(name, { required, ...validation })}
         />
         {error && <span className="error-message">{error}</span>}
       </div>

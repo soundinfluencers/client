@@ -1,0 +1,81 @@
+@use "@/styles/variables/variables" as vars;
+
+.invoice-link {
+  display: inline-flex;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 12px 12px 12px 24px;
+  width: 100%;
+  height: fit-content;
+  transition: all 0.2s ease;
+  border: 1px solid #ecedff;
+
+  @media screen and (max-width: 900px) {
+    padding: 10px 16px;
+    border-radius: 8px;
+  }
+
+  @media screen and (max-width: 600px) {
+     height: 46px;
+  }
+
+  @media screen and (max-width: 500px) {
+    width: 100%;
+    padding: 6px 12px;
+  }
+
+  &__create {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 20px;
+    color: vars.$gray-dark;
+
+    @media screen and (max-width: 900px) {
+      font-size: 14px;
+    }
+  }
+
+  &__arrow-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(
+      --gradient,
+      linear-gradient(180deg, #ebecff 0%, #dff0ff 100%)
+    );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media screen and (max-width: 900px) {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  &:hover {
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
+    // background: vars.$hover-button-2;
+  }
+}
+
+// z-index: 1;
+// &::before {
+//   content: "";
+//   position: absolute;
+//   inset: 0;
+
+//   padding: 0.5px;
+//   border-radius: inherit;
+
+//   background: linear-gradient(180deg, #ecedff, rgba(185, 208, 255, 0.8));
+
+//   -webkit-mask: linear-gradient(#fff 0 0) content-box,
+//     linear-gradient(#fff 0 0);
+//   -webkit-mask-composite: xor;
+//   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+//   mask-composite: exclude;
+// }

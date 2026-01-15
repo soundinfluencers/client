@@ -6,6 +6,7 @@ import { useWindowSize } from "../../../../../hooks/useWindowSize.ts";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../../contexts/AuthContext.tsx";
 import { useClientUser } from "../../../../../store/get-user-client/index.ts";
+import { HistoryLink } from "../../../../influencer/dashboard-layout/components/campaign-history-link/HistoryLink.tsx";
 
 export interface HomeHeaderProps {
   firstName?: string;
@@ -56,7 +57,8 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
       </div>
 
       <div className="home-header__right">
-        <div className="home-header__right-top"></div>
+        <div className="home-header__right-top">
+        </div>
 
         <div className="home-header__right-bottom">
           <div className="home-header__balance-block">

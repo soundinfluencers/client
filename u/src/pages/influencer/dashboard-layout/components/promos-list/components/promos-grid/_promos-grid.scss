@@ -1,0 +1,41 @@
+@use "@/styles/variables/variables" as vars;
+
+.promos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
+  gap: 24px;
+
+  @media screen and (max-width: 900px) {
+    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+    gap: 16px;
+  }
+
+  @media screen and (max-width: 500px) {
+    grid-template-columns: repeat(auto-fit, minmax(343px, 1fr));
+    column-gap: 0;
+    row-gap: 16px;
+  }
+
+  &__item {
+    display: flex;
+    background: vars.$light-blue;
+    border: 1px solid vars.$blue;
+    border-radius: 8px;
+    padding: 16px;
+    height: 155px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    @media screen and (max-width: 900px) {
+      height: 139px;
+    }
+
+    @media screen and (max-width: 500px) {
+      height: 133px;
+    }
+
+    &:hover {
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+}

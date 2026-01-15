@@ -1,0 +1,87 @@
+@use "@/styles/variables/variables" as vars;
+
+.campaign-history-table-row {
+  border-bottom: 1px solid vars.$blue;
+
+  &__status,
+  &__date-post,
+  &__name,
+  &__actions,
+  &__reward {
+    padding: 16px 0 16px 0;
+    @media screen and (max-width: 900px) {
+      padding: 8px 0 8px 0;
+    }
+  }
+
+  &__name {
+    vertical-align: middle;
+
+    &-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      @media screen and (max-width: 900px) {
+        font-size: 14px;
+      }
+    }
+
+    &-icon {
+      width: 32px;
+      height: 32px;
+
+      @media screen and (max-width: 900px) {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  &__date-post {
+    @media screen and (max-width: 900px) {
+      font-size: 13px;
+    }
+  }
+
+  &__reward {
+    @media screen and (max-width: 900px) {
+      font-size: 14px;
+    }
+  }
+
+  &__status {
+    @media screen and (max-width: 900px) {
+      font-size: 14px;
+    }
+  }
+
+  &__actions {
+    vertical-align: middle;
+  }
+
+  &__link {
+    border: 1px solid vars.$blue;
+    border-radius: 4px;
+    padding: 8px 24px;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+
+    @media screen and (max-width: 900px) {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+  }
+
+  &__result {
+    text-align: center;
+    padding: 8px 24px;
+    display: block;
+    box-sizing: border-box;
+    @media screen and (max-width: 900px) {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+  }
+}

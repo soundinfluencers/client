@@ -2,18 +2,20 @@ import { type FC, useRef, useState } from "react";
 import { Logo } from "./components/logo/Logo.tsx";
 import { LoginButton, SignupButton } from "./components/buttons/Buttons.tsx";
 import "./_tab-bar.scss";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useWindowSize } from "../../../hooks/useWindowSize.ts";
 import burgerMenu from "@/assets/icons/burger-menu.svg";
 import { useClickOutside } from "../../../hooks/useClickOutside.ts";
 import { useAuth } from "../../../contexts/AuthContext.tsx";
-import React from "react";
-import { getUser } from "../../../api/client/get-user/get-user.ts";
-import { useClientUser } from "../../../store/get-user-client/index.ts";
+// import React from "react";
+// import { getUser } from "../../../api/client/get-user/get-user.ts";
+// import { useClientUser } from "../../../store/get-user-client/index.ts";
+import { useUserStore } from "../../../store/user/useUserStore.ts";
 
 export const TabBar: FC = () => {
   const [isBurgerOpen, setIsBurgerOpen] = useState<boolean>(false);
-  const { user } = useClientUser();
+  // const { user } = useClientUser();
+  const { user } = useUserStore();
   const tabBarRef = useRef<HTMLDivElement>(null);
 
   const { logout, accessToken } = useAuth();
@@ -50,12 +52,19 @@ export const TabBar: FC = () => {
               <LoginButton onClick={() => navigate("/login")} />
             </>
           ) : (
-            <div onClick={() => navigate("/client/AccountSetting")}>
-              <p>Account{user?.avatar ? "" : `: ${user?.firstName}`}</p>
-              {/* <button className="tab-bar__logout" onClick={logout}>
-                Logout
-              </button> */}
-            </div>
+            // <div onClick={() => navigate("/client/AccountSetting")}>
+            //   {/* <p>Account{user?.avatar ? "" : `: ${user?.firstName}`}</p> */}
+            //   <p>Account{user?.avatar ? "" : `: ${user?.firstName}`}</p>
+            //   {/* <button className="tab-bar__logout" onClick={logout}>
+            //     Logout
+            //   </button> */}
+            // </div>
+
+            <Link to="/dashboard/account-setting" className="tab-bar__account-link">
+              <p className="tab-bar__account-text">
+                Account{`${user?.firstName}`}
+              </p>
+            </Link>
           )}
         </div>
       )}

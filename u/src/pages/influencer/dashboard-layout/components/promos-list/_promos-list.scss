@@ -1,0 +1,55 @@
+@use "@/styles/variables/variables" as vars;
+
+.promos-list {
+  margin: 0 auto;
+  max-width: 1244px;
+
+  &__content {
+    padding: 0px 10px 64px 10px;
+    margin-top: 32px;
+
+    @media screen and (max-width: 900px) {
+      padding: 0 40px 32px 40px;
+    }
+    @media screen and (max-width: 500px) {
+      padding: 0 16px 32px 16px;
+    }
+  }
+
+  &__scroll {
+    overflow-x: auto;
+
+    margin-right: calc(50% - 50vw);
+    padding-right: calc(50vw - 50%);
+
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: vars.$light-blue;
+      border-radius: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: vars.$black-blue;
+      border-radius: 8px;
+    }
+  }
+
+  &__actions {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 64px;
+
+    @media screen and (max-width: 900px) {
+      margin-top: 32px;
+    }
+
+    @media screen and (max-width: 500px) {
+      margin-top: 24px;
+    }
+  }
+}

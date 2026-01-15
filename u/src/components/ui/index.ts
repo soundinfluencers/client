@@ -10,3 +10,6 @@ export { Table } from "./table/table";
 export { SubmtiButton } from "./submit-button/submit-button";
 export { Modal } from "./modal/modal";
 export { Checkbox } from "./checkbox/checkbox";
+export { BaseInput } from "./inputs/base-input/BaseInput";
+export { ImageUpload } from "./image-upload/ImageUpload";
+export { StarRatingField } from "./star-rating/StarRatingField";

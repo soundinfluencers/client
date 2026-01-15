@@ -1,26 +1,40 @@
 import './_promos-details-list-card.scss';
-import type { IInfluencerNewPromo } from '../../../../../../types/influencer/promos.types';
+import type { IInfluencerPromo } from '../../../../../../types/influencer/promos/promos.types';
 import { DetailsRow } from './DetailsRow';
-import { ButtonMain, ButtonSecondary } from '../../../../../../components/ui/buttons/button/Button';
-import { normalizeSocialMedia } from '../../../distributing/components/types';
+import { ButtonMain, ButtonSecondary } from '../../../../../../components/ui/buttons-fix/ButtonFix';
+import type { TSocialMedia } from '../../../../../../types/influencer/form/campaign-result/campaign-result.types';
+import { normalizeSocialMedia } from '../../../../../../constants/influencer/form-data/campaign-result/campaign-result.data';
+import { getPromoFields, getPromoStatus } from '../../../../../../constants/influencer/promos/promos.data';
 
 interface Props {
-  promo: IInfluencerNewPromo;
+  promo: IInfluencerPromo;
   index: number;
   onAccept?: (campaignId: string) => void;
   onDecline?: (campaignId: string) => void;
   onFormOpen?: () => void;
-  onMetaChange?: (newMeta: string) => void;
+  onMetaChange?: (newMeta: TSocialMedia) => void;
 }
 
 /*
   TODO: format dateRequest to readable format
+        think about id or unique identifier for copyable fields
 */
 
-export const PromosDetailsListCard: React.FC<Props> = ({ promo, index, onAccept, onDecline, onFormOpen, onMetaChange }) => {
-  const isNew = promo.statusCampaign === 'Pending';
+export const PromosDetailsListCard: React.FC<Props> = ({
+  promo,
+  index,
+  onAccept,
+  onDecline,
+  onFormOpen,
+  onMetaChange
+}) => {
+  const status = getPromoStatus(promo);
+  const fields = getPromoFields(promo, status);
 
-  const title = promo.closedStatus === 'close' ? 'Completed' : promo.closedStatus === 'open' ? 'Distributing' : 'New promo';
+  const title = status === 'completed' ? 'Completed' : status === 'distributing' ? 'Distributing' : 'New promo';
+  const isNew = status === 'new';
+  const isDistributing = status === 'distributing';
+  const isCompleted = status === 'completed';
 
   return (
     <article className="promos-details-list-card">
@@ -36,55 +50,50 @@ export const PromosDetailsListCard: React.FC<Props> = ({ promo, index, onAccept,
         </span>
 
         <div className="promos-details-list-card__body-details">
-          <DetailsRow label={promo.socialMedia} value={promo.socialMediaUsername} />
-          <DetailsRow label="Client ID" value={promo.client} />
-          <DetailsRow label="Videolink" value={promo.videoLink} />
-          <DetailsRow label="Description" value={promo.postDescription} copyble={true} />
-          <DetailsRow label="Story link" value={promo.storyLink} copyble={true} />
-          <DetailsRow label="Story tag" value={promo.storyTag} />
-          <DetailsRow label="Date request" value={promo.dateRequest} />
-          <DetailsRow label="Additional brief" value={promo.additionalBrief} />
+          {fields
+            .map(field => (
+              <DetailsRow
+                key={`${field.key}-${field.label}`}
+                label={field.label}
+                value={
+                  field.format
+                    ? field.format((promo)[field.key] as number, promo)
+                    : (promo)[field.key]?.toString() ?? ''
+                }
+                copyble={field.copyable}
+              />
+            ))}
         </div>
       </div>
 
-      <div className="promos-details-list-card__actions">
-        {isNew && (
-          <>
-            <ButtonSecondary
-              text='Decline'
-              onClick={() => onDecline && onDecline(promo.campaignId)}
-              className='btn'
-            />
+      {!isCompleted && (
+        <div className="promos-details-list-card__actions">
+          {isNew && (
+            <>
+              <ButtonSecondary
+                label="Decline"
+                onClick={() => onDecline && onDecline(promo.campaignId)}
+              />
+              <ButtonMain
+                label="Accept promo"
+                onClick={() => onAccept && onAccept(promo.campaignId)}
+              />
+            </>
+          )}
+
+          {isDistributing && (
             <ButtonMain
-              text='Accept promo'
-              onClick={() => onAccept && onAccept(promo.campaignId)}
-              className='btn'
+              label="Submit results & get paid"
+              onClick={() => {
+                onFormOpen && onFormOpen();
+                onMetaChange && onMetaChange(normalizeSocialMedia(promo.socialMedia));
+              }}
             />
-          </>
-        )}
+          )}
+        </div>
+      )}
 
-        <ButtonMain
-          text='Submit results & get paid'
-          onClick={() => {
-            onFormOpen && onFormOpen();
-            onMetaChange && onMetaChange(normalizeSocialMedia(promo.socialMedia));
-          }}
-          className='btn'
-        />
-
-        {/* <button
-          className='promos-details-list-card__actions-decline'
-          onClick={() => console.log('Decline')}
-        >
-          Decline
-        </button>
-        <button
-          className='promos-details-list-card__actions-accept'
-          onClick={() => console.log('Accept promo')}
-        >
-          Accept promo
-        </button> */}
-      </div>
+      {/*TODO: Modal for accept/decline new promo */}
     </article>
   );
-}
+};

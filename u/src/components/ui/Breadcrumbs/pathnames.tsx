@@ -14,16 +14,19 @@ export const Breadcrumbs: React.FC<Props> = () => {
     .filter((segment) => segment && segment !== "client");
     //&& segment !== 'influenser'
 
+    console.log(pathnames);
+
   return (
     <nav className="breadcrumbs">
-      {pathnames.length > 0 ? (
+      {/* {pathnames.length > 0 ? (
         <span>
           <Link to="/">Dashboard</Link> <img src={chevron} alt="" />
         </span>
-      ) : null}
+      ) : null} */}
 
       {pathnames.map((name, index) => {
-        const routeTo = `/client/${pathnames.slice(0, index + 1).join("/")}`;
+        // const routeTo = `/client/${pathnames.slice(0, index + 1).join("/")}`;
+        const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
         const isLast = index === pathnames.length - 1;
 
         return isLast ? (

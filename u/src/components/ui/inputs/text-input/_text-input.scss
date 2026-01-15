@@ -25,6 +25,7 @@
     height: 51px;
     padding: 16px;
     text-align: left;
+    background: #ffffff;
     border: 1px solid vars.$white-gray-2;
     border-radius: 8px;
     color: vars.$gray-dark;
@@ -33,12 +34,10 @@
 
     @media screen and (max-width: 900px) {
       font-size: 14px;
-      height: 50px;
     }
 
     @media screen and (max-width: 500px) {
       font-size: 13px;
-      height: 48px;
     }
 
     &::placeholder {

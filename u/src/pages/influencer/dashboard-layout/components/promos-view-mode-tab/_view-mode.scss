@@ -1,0 +1,65 @@
+@use "@/styles/variables/variables" as vars;
+
+.promos-view-mode-tabs {
+  display: flex;
+  align-items: center;
+  @media screen and (max-width: 750px) {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  &__tab {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 8.5px 11px;
+    background-color: #ffffff;
+    border: 1px solid vars.$border-secondary;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+
+    &:first-child {
+      border-radius: 8px 0 0 8px;
+      border-right: none;
+    }
+    &:last-child {
+      border-radius: 0 8px 8px 0;
+    }
+
+    &--active {
+      opacity: 1;
+    }
+
+    @media screen and (max-width: 900px) {
+      padding: 8px;
+    }
+  }
+
+  &__icon-check {
+    width: 16px;
+    height: 16px;
+    transition: all 0.2s ease;
+    opacity: 0;
+    transform: scale(0.6);
+
+    &--active {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  &__img {
+    width: 24px;
+    height: 24px;
+
+    @media screen and (max-width: 900px) {
+      width: 18px;
+      height: 18px;
+    }
+    @media screen and (max-width: 500px) {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { type FC, useState } from "react";
+import { type FC } from "react";
 import "./_auth-page.scss";
 import { SwitchButton } from "../../../components/ui/switchers/switch-button/SwitchButton.tsx";
 import {
@@ -6,20 +6,15 @@ import {
   ButtonSecondary,
 } from "../../../components/ui/buttons/button/Button.tsx";
 import { useNavigate } from "react-router-dom";
+import { useLoginStore } from "../../../store/features/loginSlice.ts";
 
 export const AuthPage: FC = () => {
   const navigate = useNavigate();
-
-  const [selectedRole, setSelectedRole] = useState(0);
-
-  const handleSwitchClick = () => {
-    if (selectedRole === 0) setSelectedRole(1);
-    else setSelectedRole(0);
-  };
+  const { role } = useLoginStore();
 
   const handleSignupClick = () => {
-    if (selectedRole === 0) navigate("/signup/client");
-    else navigate("signup/influencer");
+    if (role === "client") navigate("/signup/client");
+    else navigate("/signup/influencer");
   };
 
   return (
@@ -38,20 +33,18 @@ export const AuthPage: FC = () => {
               <SwitchButton
                 firstTitle={"Client"}
                 secondTitle={"Influencer"}
-                activeIndex={selectedRole}
-                onClick={handleSwitchClick}
               />
             </div>
 
             <div className="auth-form">
               <div className="auth-form__header">
                 <p className="auth-form__title">
-                  {selectedRole === 0
+                  {role === "client"
                     ? "I’m a sponsoring client"
                     : "I’m an influencer"}
                 </p>
                 <p className="auth-form__subtitle">
-                  {selectedRole === 0
+                  {role === "client"
                     ? "Discover top creators and manage your campaigns"
                     : "Join campaigns and collaborate with leading brands"}
                 </p>
@@ -66,6 +59,16 @@ export const AuthPage: FC = () => {
             </div>
           </div>
         </div>
+        
+        {/* <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
+          <button onClick={() => navigate("/dashboard/promos/new-promos")} className="btn">new-promos</button>
+          <button onClick={() => navigate("/dashboard/promos/distributing")} className="btn">distributing</button>
+          <button onClick={() => navigate("/dashboard/promos/completed")} className="btn">completed</button>
+          <button onClick={() => navigate("/dashboard/create-invoice")} className="btn">create-invoice</button>
+          <button onClick={() => navigate("/dashboard/invoices")} className="btn">invoices</button>
+          <button onClick={() => navigate("/dashboard/promos")} className="btn">promos</button>
+          <button onClick={() => navigate("/dashboard/account-setting")} className="btn">account-setting</button>
+        </div> */}
       </div>
       <div className="auth-page__footer">
         <p>Amplify your influence</p>

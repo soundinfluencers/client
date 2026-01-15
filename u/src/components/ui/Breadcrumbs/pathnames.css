@@ -1,0 +1,29 @@
+.breadcrumbs {
+  display: flex;
+}
+.breadcrumbs span {
+  width: -moz-fit-content;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+}
+.breadcrumbs a,
+.breadcrumbs span {
+  z-index: 1000;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: rgb(32, 41, 52);
+}
+@media screen and (max-width: 650px) {
+  .breadcrumbs a,
+  .breadcrumbs span {
+    font-size: 14px;
+  }
+}
+.breadcrumbs a {
+  text-decoration: none;
+}/*# sourceMappingURL=pathnames.css.map */

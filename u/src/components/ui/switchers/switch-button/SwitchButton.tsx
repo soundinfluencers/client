@@ -1,21 +1,20 @@
 import type { FC } from "react";
 import "./_switch-button.scss";
+import { useLoginStore } from "../../../../store/features/loginSlice";
 
 export interface SwitchButtonProps {
   firstTitle: string;
   secondTitle: string;
-  activeIndex: number;
-  onClick: (index: number) => void;
 }
 
 export const SwitchButton: FC<SwitchButtonProps> = ({
   firstTitle,
   secondTitle,
-  activeIndex,
-  onClick,
 }) => {
+  const { role, setRole } = useLoginStore();
+
   const sliderStyle = {
-    transform: activeIndex === 0 ? "translateX(0)" : "translateX(100%)",
+    transform: role === "client" ? "translateX(0)" : "translateX(100%)",
   };
 
   return (
@@ -24,17 +23,17 @@ export const SwitchButton: FC<SwitchButtonProps> = ({
 
       <div
         className={`switch-button__content ${
-          activeIndex === 0 ? "active" : ""
+          role === "client" ? "active" : ""
         }`}
-        onClick={() => onClick(0)}>
+        onClick={() => setRole("client")}>
         <p>{firstTitle}</p>
       </div>
 
       <div
         className={`switch-button__content ${
-          activeIndex === 1 ? "active" : ""
+          role === "influencer" ? "active" : ""
         }`}
-        onClick={() => onClick(1)}>
+        onClick={() => setRole("influencer")}>
         <p>{secondTitle}</p>
       </div>
     </div>

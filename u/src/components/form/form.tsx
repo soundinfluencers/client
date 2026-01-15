@@ -17,13 +17,15 @@ interface FormSection {
   className?: string;
   classNameBtnSection?: string;
 
+  defaultValues?: Record<string, any>;
+
   isConfirm?: boolean;
   schema?: ZodTypeAny;
   // onSubmit?: (data: DynamicFormData) => Promise<void> | void;
   onSubmit?: () => void;
 }
 
-type DynamicFormData = Record<string, string>;
+type DynamicFormData = Record<string, any>;
 
 export const Form = ({
   children,
@@ -32,8 +34,12 @@ export const Form = ({
   classNameBtnSection,
   onSubmit,
   schema,
+  defaultValues
 }: FormSection) => {
-  const methods = useForm();
+  const methods = useForm({
+    defaultValues,
+  });
+
   const handleFormSubmit = async (formData: DynamicFormData) => {
     console.log(formData, "form");
     if (onSubmit) {
@@ -47,9 +53,11 @@ export const Form = ({
         className={`form ${className}`}
         onSubmit={methods.handleSubmit(handleFormSubmit)}>
         {children}
-        <div className={`button-section ${classNameBtnSection}`}>
-          {submitButton}
-        </div>
+        {submitButton && (
+          <div className={`form__btn-section ${classNameBtnSection || ""}`}>
+            {submitButton}
+          </div>
+        )}
       </form>
     </FormProvider>
   );

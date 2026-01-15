@@ -46,16 +46,17 @@
   //TODO: remove width
   &__title {
     @include title.title();
-    width: 669px;
     text-align: center;
+    // width: 669px;
+    // white-space: nowrap;
 
-    @media screen and (max-width: 900px) {
-      width: 446px;
-    }
+    // @media screen and (max-width: 900px) {
+    //   width: 446px;
+    // }
 
-    @media screen and (max-width: 500px) {
-      width: 335px;
-    }
+    // @media screen and (max-width: 500px) {
+    //  width: 335px;
+    // }
   }
 
   &__inputs {
@@ -132,3 +133,25 @@
     }
   }
 }
+
+
+//TODO: loading spinner styles
+// .loader {
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// }
+
+// .spinner-gradient {
+//   transform-origin: 50% 50%;
+//   animation: spin 6.5s linear infinite;
+// }
+
+// @keyframes spin {
+//   0% {
+//     transform: rotate(0deg);
+//   }
+//   100% {
+//     transform: rotate(360deg);
+//   }
+// }

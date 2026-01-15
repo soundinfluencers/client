@@ -1,31 +1,36 @@
 import { useMemo, useState } from 'react';
 import { PromosDetailsList } from '../components/promos-details-list/PromosDetailsList';
-import { NEW_PROMOS_DATA, type IInfluencerNewPromo } from '../../../../types/influencer/promos.types';
+import { NEW_PROMOS_DATA, type IInfluencerPromo } from '../../../../types/influencer/promos/promos.types';
+import { CampaignResultForm } from './components/campaign-result-form/CampaignResultForm';
+import { Breadcrumbs, Container } from '../../../../components';
+import type { TSocialMedia } from '../../../../types/influencer/form/campaign-result/campaign-result.types';
 
 import './_distributing.scss';
-import { CampaignResultForm } from './components/CampaignResultForm';
-import type { Platform } from './components/types';
 
+//TODO: REVIEW AND FIX THE FUNCTIONALITY AS NEEDED
 export const Distributing = () => {
-  const [promos, setPromos] = useState<IInfluencerNewPromo[]>(NEW_PROMOS_DATA);
+  const [promos, setPromos] = useState<IInfluencerPromo[]>(NEW_PROMOS_DATA);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [meta, setMeta] = useState<Platform>('');
+  const [meta, setMeta] = useState<TSocialMedia | null>(null);
 
   const distributingPromos = useMemo(() => {
     return promos.filter(promo => promo.closedStatus === 'open');
   }, [promos]);
 
-  if (isFormOpen) {
-    return <CampaignResultForm meta={meta} onFormClose={() => setIsFormOpen(false)} />;
-  }
-
   return (
-    <div className='distributing-page'>
-      <PromosDetailsList
-        data={distributingPromos}
-        onFormOpen={() => setIsFormOpen(true)}
-        onMetaChange={(newMeta) => setMeta(newMeta)}
-      />
-    </div>
+    <Container className='distributing-page'>
+      <Breadcrumbs />
+      {isFormOpen && meta ? (
+        <CampaignResultForm meta={meta} onFormClose={() => setIsFormOpen(false)} />
+      ) : (
+        <PromosDetailsList
+          data={distributingPromos}
+          onFormOpen={() => setIsFormOpen(true)}
+          onMetaChange={(newMeta) => setMeta(newMeta)}
+        />
+      )}
+
+      {/*TODO: Modal */}
+    </Container>
   );
 };

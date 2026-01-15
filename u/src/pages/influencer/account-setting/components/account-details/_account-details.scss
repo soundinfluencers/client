@@ -1,0 +1,28 @@
+@use "@/styles/variables/variables" as vars;
+
+.account-details {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @media screen and (max-width: 500px) {
+    gap: 16px;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid vars.$blue;
+  }
+
+  &__title {
+    font-weight: 400;
+    font-size: 20px;
+
+    @media screen and (max-width: 500px) {
+      font-size: 16px;
+    }
+  }
+}

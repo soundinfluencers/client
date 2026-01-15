@@ -1,0 +1,56 @@
+@use "@/styles/variables/variables" as vars;
+
+.edit-button {
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 8px;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: vars.$light-blue;
+  }
+
+  &:active {
+    background: vars.$light-blue;
+    // transform: scale(0.95);
+  }
+
+  &--account {
+    width: 85px;
+    height: 38px;
+    padding: 8px 16px;
+    border: 1px solid #ebecff;
+    border-radius: 8px;
+    color: vars.$gray-dark;
+
+    @media screen and (max-width: 900px) {
+      width: 77px;
+      padding: 8px 12px;
+    }
+
+    @media screen and (max-width: 500px) {
+      width: 70px;
+      height: 35px;
+      gap: 4px;
+      font-size: 14px;
+    }
+  }
+
+  &--social {
+    width: 88px;
+    height: 30px;
+    padding: 4px 16px;
+    border-radius: 4px;
+    border: 1px solid vars.$blue;
+
+    @media screen and (max-width: 900px) {
+      font-size: 14px;
+    }
+  }
+
+  &.active {
+    background: vars.$light-blue;
+  }
+}

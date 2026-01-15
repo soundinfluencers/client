@@ -174,3 +174,17 @@
     }
   }
 }
+
+//set style simple style for buttons without modifiers full simple style for testing
+.btn {
+  width: 100%;
+  background: vars.$blue;
+  border-radius: 8px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  font-style: normal;
+  color: vars.$black;
+  
+}

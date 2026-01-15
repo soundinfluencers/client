@@ -44,6 +44,7 @@ export const TextInput: FC<TextInputProps> = ({
     }
   };
 
+  //TODO: fix margin top
   return (
     <div className={`text-input ${isError ? "error" : ""}`}>
       {title && <p className="text-input__title">{title}</p>}

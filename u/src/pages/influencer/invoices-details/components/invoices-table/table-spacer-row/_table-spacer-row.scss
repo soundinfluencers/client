@@ -1,0 +1,12 @@
+.table-spacer-row {
+  height: 16px;
+
+  &__cell {
+    padding: 0;
+    border-left: 1px solid #ebecff;
+
+    &:first-child {
+      border: none;
+    }
+  }
+}

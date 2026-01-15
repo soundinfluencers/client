@@ -3,7 +3,15 @@
 .new-promos {
   display: flex;
   flex-direction: column;
+  padding-top: 24px;
+  padding-bottom: 64px;
   gap: 16px;
+
+  @media screen and (max-width: 900px) {
+    padding-bottom: 48px;
+  }
+
+  //TODO: mb for 500px
 
   &__quantity {
     display: flex;
@@ -14,6 +22,14 @@
     border-radius: 8px;
     margin-left: auto;
     background: vars.$light-blue;
+
+    @media screen and (max-width: 900px) {
+      gap: 4px;
+    }
+    @media screen and (max-width: 500px) {
+      height: 32px;
+      padding: 4px 12px;
+    }
   }
 
   &__label {
@@ -36,5 +52,101 @@
     font-size: 16px;
     text-align: center;
     color: vars.$black;
+
+    @media screen and (max-width: 900px) {
+      font-size: 15px;
+    }
+  }
+
+  &__modal {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 32px 48px 40px;
+
+    @media screen and (max-width: 900px) {
+      padding: 32px 16px;
+    }
+
+    @media screen and (max-width: 500px) {
+      padding: 24px 16px 32px;
+    }
+
+    &-image {
+      width: 100px;
+      height: 100px;
+
+      @media screen and (max-width: 900px) {
+        width: 72px;
+        height: 72px;
+      }
+    }
+
+    &-header {
+      margin-top: 32px;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+
+      @media screen and (max-width: 900px) {
+        margin-top: 32px;
+        margin-bottom: 24px;
+      }
+      @media screen and (max-width: 500px) {
+        margin-top: 24px;
+        margin-bottom: 24px;
+      }
+    }
+
+    &-title {
+      font-weight: 400;
+      font-size: 40px;
+
+      @media screen and (max-width: 900px) {
+        font-size: 32px;
+      }
+      @media screen and (max-width: 500px) {
+        font-size: 24px;
+      }
+    }
+
+    &-description {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    &-subtitle {
+      font-weight: 400;
+      font-size: 20px;
+      color: vars.$gray;
+
+      @media screen and (max-width: 900px) {
+        font-size: 16px;
+        text-align: center;
+      }
+      @media screen and (max-width: 500px) {
+        font-size: 15px;
+      }
+    }
+
+    &-text {
+      font-size: 16px;
+      font-weight: 400;
+      color: vars.$gray;
+
+      @media screen and (max-width: 900px) {
+        font-size: 14px;
+        text-align: center;
+      }
+      @media screen and (max-width: 500px) {
+        font-size: 13px;
+      }
+    }
   }
 }

@@ -1,0 +1,57 @@
+@use "@/styles/variables/variables" as vars;
+
+.custom-table-row {
+  &__cell {
+    padding: 10.5px 16px;
+    font-size: 14px;
+    color: vars.$black;
+    white-space: nowrap;
+    border-left: 1px solid #ebecff;
+
+    &:first-child {
+      border: none;
+    }
+
+    @media screen and (max-width: 900px) {
+      font-size: 13px;
+    }
+  }
+
+  &__status-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+    color: vars.$black;
+    border-radius: 8px;
+    padding: 4px 24px;
+    text-transform: capitalize;
+    margin-right: 16px;
+    background: #f8f8fd;
+
+    @media screen and (max-width: 900px) {
+      font-size: 13px;
+    }
+  }
+}
+
+
+// position: relative;
+// border: 1px solid #ecedff;
+// z-index: 1;
+
+// &::before {
+//   content: "";
+//   position: absolute;
+//   inset: 0;
+
+//   padding: 1px;
+//   border-radius: inherit;
+
+//   background: linear-gradient(180deg, #ecedff, rgba(185, 208, 255, 0.8));
+
+//   -webkit-mask: linear-gradient(#fff 0 0) content-box,
+//     linear-gradient(#fff 0 0);
+//   -webkit-mask-composite: xor;
+//   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+//   mask-composite: exclude;
+// }

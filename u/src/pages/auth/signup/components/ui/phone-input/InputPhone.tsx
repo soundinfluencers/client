@@ -88,7 +88,7 @@ export const InputPhone: FC<InputPhoneProps> = ({
       className={`input-phone ${
         !isValid || isError ? "input-phone--error" : ""
       }`}>
-      <p className="input-phone__title">Phone</p>
+      <p className="input-phone__title">Phone*</p>
 
       <div
         className={`input-phone__input-block ${
