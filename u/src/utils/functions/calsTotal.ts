@@ -1,7 +1,7 @@
 import type {
   IApiOffer,
   IPromoCard,
-} from "../../types/creator-campaign/creator-campaign.types";
+} from "../../types/client/creator-campaign/creator-campaign.types";
 
 export const calcTotal = (offer: IApiOffer | null, cards: IPromoCard[]) => {
   const offerPrice = offer ? offer.price : 0;

@@ -1,14 +1,14 @@
 import React from "react";
 import "./_card.scss";
-import type { IApiOffer } from "../../../../../../types/creator-campaign/creator-campaign.types";
-import { ButtonMain } from "../../../../../../components/ui/buttons/button/Button";
-import { useFormDataOffer } from "../../../../../../store/client/createCampaign";
+import type { IApiOffer } from "@/types/client/creator-campaign/creator-campaign.types";
+import { ButtonMain } from "@/components/ui/buttons/button/Button";
+import { useCampaignStore } from "@/store/client/createCampaign";
 interface Props {
   dataCard: IApiOffer;
 }
 
 export const Card: React.FC<Props> = ({ dataCard }) => {
-  const { setActiveOffer, activeOfferId, setOffer, offer } = useFormDataOffer();
+  const { actions, activeOfferId } = useCampaignStore();
 
   return (
     <div
@@ -18,7 +18,7 @@ export const Card: React.FC<Props> = ({ dataCard }) => {
       <div className="campaign-card__header">
         <div className="campaign-card__title-section">
           <h2>{dataCard.title}</h2>
-          <p>{dataCard.price} €</p>
+          <p>€{dataCard.price}</p>
         </div>
         <ul>
           <li>{dataCard.storyAndPostDetails}</li>
@@ -28,8 +28,8 @@ export const Card: React.FC<Props> = ({ dataCard }) => {
         <ButtonMain
           text={"Choose"}
           onClick={() => {
-            setOffer(dataCard);
-            setActiveOffer(dataCard._id);
+            actions.setOffer(dataCard);
+            actions.setActiveOffer(dataCard._id);
           }}
           className="button"
         />

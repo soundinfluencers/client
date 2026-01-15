@@ -1,46 +1,39 @@
 import React from "react";
 import "./_CampaignCreatorPage.scss";
-import { useCreateCampaign } from "../../../store/client/createCampaign";
-import { Breadcrumbs, Container, Loader, SaveDraft } from "../../../components";
-import { ScrollPlatforms } from "./components/scrollPlatftorms/scrollPlattforms";
-import { ScrollGenres } from "./components/scrollGenre/scrollGenre";
+import { useCreateCampaign, useFilter } from "@/store/client/createCampaign";
+import { Breadcrumbs, Container, Loader, SaveDraft } from "@/components";
+import { ScrollPlatforms } from "./components/scroll/scrollPlatftorms/scrollPlattforms";
+import { ScrollGenres } from "./components/scroll/scrollGenre/scrollGenre";
 import { BuildCampaign } from "./buildCampaign/build-campaign";
 import { SliderForCard } from "./components/SliderForCards/SliderForCards";
+import { useCreateCampaignPlatform } from "@/store/client/createCampaign/useCreate-campaign-fetch";
 
 interface Props {}
 
 export const CampaignCreatorPage: React.FC<Props> = () => {
   const { setOffers, offers, loading } = useCreateCampaign();
-  const [selectedPlatform, setSelectedPlatform] = React.useState("instagram");
+  const { selectedPlatform, setPlatform } = useCreateCampaignPlatform();
+  const { setSelected } = useFilter();
   const [selectedGenre, setSelectedGenre] = React.useState(
     "Techno (Melodic, Minimal)"
   );
-
   React.useEffect(() => {
-    const fetchOffers = async () => {
-      await setOffers(selectedPlatform, selectedGenre);
-    };
-    fetchOffers();
+    setOffers(selectedPlatform, selectedGenre);
   }, []);
-  const handlePlatformSelect = async (platform: string) => {
-    setSelectedPlatform(platform);
+
+  const handlePlatformSelect = (platform: string) => {
+    setPlatform(platform);
+    // setSelected()
     if (selectedGenre) {
-      try {
-        await setOffers(platform, selectedGenre);
-      } catch (err) {
-        console.error(err);
-      }
+      setOffers(platform, selectedGenre);
     }
   };
 
-  const handleGenreSelect = async (genre: string) => {
+  const handleGenreSelect = (genre: string) => {
     setSelectedGenre(genre);
+
     if (selectedPlatform) {
-      try {
-        await setOffers(selectedPlatform, genre);
-      } catch (err) {
-        console.error(err);
-      }
+      setOffers(selectedPlatform, genre);
     }
   };
 

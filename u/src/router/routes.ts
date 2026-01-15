@@ -12,7 +12,7 @@ import { Promos } from "../pages/influencer/promos/Promos.tsx";
 import { CamapignStrategy } from "../pages/client/campaign-strategy/campaign-strategy.tsx";
 import { CampaignPostContent } from "../pages/client/campaign-post-content/campaign-post-content.tsx";
 import { PaymentCampaign } from "../pages/client/payment-campaign/payment-campaign.tsx";
-
+import { CampaignProposals } from "../pages/client/campaign-proposal/campaign-proposal.tsx";
 
 export const routes: IRoute[] = [
   {
@@ -42,7 +42,7 @@ export const routes: IRoute[] = [
   {
     name: "SignupInfluencer",
     path: "/signup/influencer",
-    component: Promos,
+    component: SignupPage,
     isProtected: false,
   },
   {
@@ -59,43 +59,43 @@ export const routes: IRoute[] = [
   },
   {
     name: "Home",
-    path: "/client/home",
+    path: "/",
     component: HomePage,
     isProtected: true,
   },
   {
     name: "CreateCampaign",
-    path: "/client/CreateCampaign",
+    path: "/CreateCampaign",
     component: CampaignCreatorPage,
     isProtected: true,
   },
   {
     name: "Content",
-    path: "/client/CreateCampaign/Content",
+    path: "/CreateCampaign/Content",
     component: CampaignPostContent,
     isProtected: true,
   },
   {
     name: "Strategy",
-    path: "/client/CreateCampaign/Content/Strategy",
+    path: "/CreateCampaign/Content/Strategy",
     component: CamapignStrategy,
     isProtected: true,
   },
   {
     name: "Payment",
-    path: "/client/CreateCampaign/Content/Strategy/Payment",
+    path: "/CreateCampaign/Content/Strategy/Payment",
     component: PaymentCampaign,
     isProtected: true,
   },
   {
     name: "BespokeCampaign",
-    path: "/client/BespokeCampaign",
+    path: "/BespokeCampaign",
     component: BespokeCampaign,
     isProtected: true,
   },
   {
     name: "AccountSetting",
-    path: "/client/AccountSetting",
+    path: "/AccountSetting",
     component: AccountSetting,
     isProtected: true,
   },

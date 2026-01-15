@@ -1,5 +1,5 @@
 import React from "react";
-import editIcon from "../../../assets/icons/edit.svg";
+import editIcon from "@/assets/icons/edit.svg";
 interface Props {
   onChange: () => void;
   active: boolean;

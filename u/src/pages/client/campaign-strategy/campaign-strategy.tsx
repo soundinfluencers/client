@@ -1,166 +1,57 @@
 import React from "react";
 import "./_campaign-strategy.scss";
+
+import { useLocation, useNavigate } from "react-router-dom";
 import {
+  Breadcrumbs,
   ButtonMain,
   ButtonSecondary,
-} from "../../../components/ui/buttons/button/Button";
-import {
-  Container,
-  Breadcrumbs,
-  Table,
   Checkbox,
-  Modal,
-} from "../../../components";
-import { BudgetUi } from "./bar-ui/budget";
-import { PostsUi } from "./bar-ui/posts";
-import { ReachUi } from "./bar-ui/reach";
-import { SubmittedUi } from "./bar-ui/submitted";
-import { VideoUI } from "./bar-ui/video";
-import { ViewAudience } from "./view-audience/view-audience";
-import edit from "../../../assets/bar-campaign-strategy/edit-3.svg";
-import { useNavigate } from "react-router-dom";
-import { boolean } from "zod";
-import { getSocialMediaIcon } from "../../../constants/social-medias";
-import type { SocialMediaType } from "../../../types/utils/constants.types";
-import { LiveViewCard } from "./components/live-view";
+  Container,
+} from "@/components";
+import { ViewChange } from "@/pages/client/components/(proposals,strategy)/view-change";
+import { Bar } from "@/pages/client/components/(proposals,strategy)/bar";
+import { LiveViewCard } from "@/pages/client/components/(proposals,strategy)/live-view";
+import { ViewAudience } from "@/pages/client/components/(proposals,strategy)/view-audience";
+
+import { TableStrategy } from "./components/table-strategy/table";
+import { useSelectedSocials } from "@/hooks/client/useSelectedSocials";
+import { mockdata } from "@/constants/client/campaign-strategy.data";
+import { useCampaignStore } from "@/store/client/createCampaign";
+import { useResetCampaignOnLeave } from "./hooks/useCampaignLeave";
+
 interface Props {}
 
 export const CamapignStrategy: React.FC<Props> = () => {
-  const mockdata = [
-    {
-      video: true,
-      desciptions: [
-        "Post description post description.",
-        "Post description post description. ",
-      ],
-      storyTags: ["@kolschofficia", "@ctellabossi "],
-      StoryLink: ["https://ffm.to/joan.lowe.ddd"],
-      AudienceReach: [
-        {
-          socialMedia: "tiktok",
-          followers: "414K followers",
-        },
-        {
-          followers: "504K followers",
-          socialMedia: "instagram",
-        },
-      ],
-      Networks: [
-        {
-          nameNetwork: "Techno TV",
-          followers: "1.1M",
-        },
-        {
-          nameNetwork: "Techno TV",
-          followers: "1.1M",
-        },
-        {
-          nameNetwork: "Techno TV",
-          followers: "1.1M",
-        },
-      ],
-    },
-    {
-      video: true,
-      desciptions: [
-        "Post description post description.",
-        "Post description post description. ",
-      ],
-      storyTags: ["@kolschofficia", "@ctellabossi "],
-      StoryLink: ["https://ffm.to/joan.lowe.ddd"],
-      AudienceReach: [
-        {
-          socialMedia: "tiktok",
-          followers: "414K followers",
-        },
-        {
-          followers: "504K followers",
-          socialMedia: "instagram",
-        },
-      ],
-      Networks: [
-        {
-          nameNetwork: "Techno TV",
-          followers: "1.1M",
-        },
-        {
-          nameNetwork: "Techno TV",
-          followers: "1.1M",
-        },
-        {
-          nameNetwork: "Techno TV",
-          followers: "1.1M",
-        },
-      ],
-    },
-    {
-      video: true,
-      desciptions: [
-        "Post description post description.",
-        "Post description post description. ",
-      ],
-      storyTags: ["@kolschofficia", "@ctellabossi "],
-      StoryLink: ["https://ffm.to/joan.lowe.ddd"],
-      AudienceReach: [
-        {
-          socialMedia: "tiktok",
-          followers: "414K followers",
-        },
-        {
-          followers: "504K followers",
-          socialMedia: "instagram",
-        },
-      ],
-      Networks: [
-        {
-          nameNetwork: "Techno TV",
-          followers: "1.1M",
-        },
-        {
-          nameNetwork: "Techno TV",
-          followers: "1.1M",
-        },
-        {
-          nameNetwork: "Techno TV",
-          followers: "1.1M",
-        },
-      ],
-    },
-  ];
+  useResetCampaignOnLeave();
+  const { postContent, campaignName, actions } = useCampaignStore();
 
+  const [changeView, setChangeView] = React.useState<boolean>(false);
   const [view, setView] = React.useState<number>(1);
-
-  const arrView = ["Live View", "Edit View"];
   const navigate = useNavigate();
+  console.log("postContent", postContent);
+
+  const main = postContent.main;
+  const music = postContent.music;
+  console.log("main", main);
+  console.log("music", music);
+
   return (
     <Container className="campaign-strategy">
       <div className="navmenu">
         <Breadcrumbs />
-        <div className="changeView">
-          <div className="changeView__content">
-            {" "}
-            {arrView.map((item, i) => (
-              <div
-                className={`changeView-check ${view === i ? "active" : ""}`}
-                onClick={() => setView(i)}>
-                {view === i && <div className="dot"></div>}
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
+        <ViewChange setView={setView} view={view} />
       </div>{" "}
-      <h1>KOLSCH - Campaign SoundInfluencers</h1>
-      <div className="campaign-strategy__bar">
-        <SubmittedUi />
-        <BudgetUi />
-        <ReachUi />
-        <PostsUi />
-        <VideoUI />
-      </div>
-      <ViewAudience />
+      <h1>{campaignName || ""} - Campaign SoundInfluencers</h1>
+      <Bar />
+      {view === 1 && (
+        <ViewAudience
+          flag={changeView}
+          onChange={() => setChangeView((prev) => !prev)}
+        />
+      )}
       {view === 0 ? (
-        <div className="live-view">
+        <div className="live-view-campaign">
           {mockdata.map((data) => (
             <LiveViewCard data={data} />
           ))}
@@ -168,7 +59,16 @@ export const CamapignStrategy: React.FC<Props> = () => {
       ) : (
         <div className="table-wrapper">
           {" "}
-          <Table className="width" />
+          {music.length >= 1 && (
+            <TableStrategy
+              isMusic={true}
+              changeView={changeView}
+              items={music}
+            />
+          )}{" "}
+          {main.length >= 1 && (
+            <TableStrategy changeView={changeView} items={main} />
+          )}
         </div>
       )}
       <Checkbox name="Allow automatic influencer replacement if a creator opts out." />
@@ -191,19 +91,10 @@ export const CamapignStrategy: React.FC<Props> = () => {
       <div className="campaign-strategy__proceedTo">
         <ButtonMain
           text={"Proceed to payment"}
-          onClick={() =>
-            navigate("/client/CreateCampaign/Content/Strategy/Payment")
-          }
+          onClick={() => navigate("/CreateCampaign/Content/Strategy/Payment")}
           className="proceedTo"
         />
       </div>
-      <Modal
-        title={"awdawdawd"}
-        onToggle={function (): void {
-          throw new Error("Function not implemented.");
-        }}>
-        <div>wadaddwa</div>
-      </Modal>
     </Container>
   );
 };

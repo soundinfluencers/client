@@ -1,21 +1,22 @@
 import type { FC } from "react";
 import "./_switch-button.scss";
+import type { UserRoleType } from "@/types/user/user.types";
 
 export interface SwitchButtonProps {
   firstTitle: string;
   secondTitle: string;
-  activeIndex: number;
-  onClick: (index: number) => void;
+  activeRole: UserRoleType;
+  onClick: (role: UserRoleType) => void;
 }
 
 export const SwitchButton: FC<SwitchButtonProps> = ({
   firstTitle,
   secondTitle,
-  activeIndex,
+  activeRole,
   onClick,
 }) => {
   const sliderStyle = {
-    transform: activeIndex === 0 ? "translateX(0)" : "translateX(100%)",
+    transform: activeRole === "client" ? "translateX(0)" : "translateX(100%)",
   };
 
   return (
@@ -24,17 +25,17 @@ export const SwitchButton: FC<SwitchButtonProps> = ({
 
       <div
         className={`switch-button__content ${
-          activeIndex === 0 ? "active" : ""
+          activeRole === "client" ? "active" : ""
         }`}
-        onClick={() => onClick(0)}>
+        onClick={() => onClick("client")}>
         <p>{firstTitle}</p>
       </div>
 
       <div
         className={`switch-button__content ${
-          activeIndex === 1 ? "active" : ""
+          activeRole === "influencer" ? "active" : ""
         }`}
-        onClick={() => onClick(1)}>
+        onClick={() => onClick("influencer")}>
         <p>{secondTitle}</p>
       </div>
     </div>

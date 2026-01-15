@@ -1,7 +1,8 @@
 import React from "react";
-import { Form, SubmtiButton } from "../../../../components";
-import { useAccountChange } from "../../../../store/client/account-settings";
-import { ReserPasswordForm } from "../../../../components/form/client-forms/account-settings";
+import { Form, SubmtiButton } from "@/components";
+import { ReserPasswordForm } from "@/pages/client/components/client-forms/account-settings";
+import { useAccountChange } from "@/store/client/account-settings";
+
 interface Props {}
 
 export const ReserPassword: React.FC<Props> = () => {

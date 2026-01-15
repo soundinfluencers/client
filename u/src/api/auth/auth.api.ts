@@ -1,23 +1,21 @@
 import type {
   RequestLoginUserModel,
   ResponseLoginUserModel,
-} from "../../types/auth/auth.types.ts";
+} from "@/types/auth/auth.types.ts";
 import $api from "../api.ts";
 
 export const loginApi = async ({
   email,
   password,
-}: RequestLoginUserModel): Promise<ResponseLoginUserModel> => {
-  const res = await $api.patch("/auth/login", {
+  role,
+}: RequestLoginUserModel): Promise<any> => {
+  const { data } = await $api.post("/auth/login", {
     email,
     password,
+    role,
   });
-  console.log(res, "res");
-  return {
-    id: res.data.data._id || null,
-    accessToken: res.data?.data.accessToken || null,
-    userRole: res.data?.data.role || null,
-  };
+
+  return data.data;
 };
 
 export const logoutApi = async () => {

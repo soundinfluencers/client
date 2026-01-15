@@ -5,7 +5,7 @@ import { Proposals } from "./actions/proposals";
 import { UnderReview } from "./actions/under-review";
 import { Distributing } from "./actions/distributing";
 import { Completed } from "./actions/completed";
-import { SwitchView } from "../../../../../components/ui/switch-view/switch-view";
+import { SwitchView } from "../../../../client/components/switch-view/switch-view";
 import { useWindowSize } from "../../../../../hooks/useWindowSize";
 interface Props {
   view: number;
@@ -18,7 +18,7 @@ export const Bar: React.FC<Props> = ({ view, setView }) => {
     <div className="bar-home">
       <div className="bar-home__title">
         <p>Campaigns</p>{" "}
-        {width < 870 && (
+        {width < 901 && (
           <SwitchView className="base" view={view} setView={setView} />
         )}
       </div>
@@ -30,7 +30,7 @@ export const Bar: React.FC<Props> = ({ view, setView }) => {
           <Distributing />
           <Completed width={width} />
         </div>
-        {width > 870 && (
+        {width > 901 && (
           <SwitchView className="base" view={view} setView={setView} />
         )}
       </div>

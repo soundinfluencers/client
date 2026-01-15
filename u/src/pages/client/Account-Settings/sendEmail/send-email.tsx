@@ -1,7 +1,7 @@
 import React from "react";
-import { Form, SubmtiButton } from "../../../../components";
-import { EmailForm } from "../../../../components/form/client-forms/account-settings";
-import { useAccountChange } from "../../../../store/client/account-settings";
+import { Form, SubmtiButton } from "@/components";
+import { EmailForm } from "@/pages/client/components/client-forms/account-settings";
+import { useAccountChange } from "@/store/client/account-settings";
 
 interface Props {}
 

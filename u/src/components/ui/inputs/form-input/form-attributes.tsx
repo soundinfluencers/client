@@ -6,23 +6,20 @@ import {
   type FieldValues,
   type Path,
   type RegisterOptions,
-  type UseFormRegister,
 } from "react-hook-form";
-
-// input for form //
-
 interface FormInput<T extends FieldValues> {
   name: Path<T>;
   label?: string;
+  id?: string;
   placeholder: string;
   required?: boolean;
   type?: string;
   className?: string;
   validation?: RegisterOptions;
 }
-
 interface FormTextArea<T extends FieldValues> {
   name: Path<T>;
+  id?: string;
   label?: string;
   placeholder?: string;
   required?: boolean;
@@ -33,25 +30,23 @@ interface FormTextArea<T extends FieldValues> {
 // input for form //
 
 export const FormInput = React.forwardRef<HTMLInputElement, FormInput<any>>(
-  (
-    {
-      name,
-      label,
-      placeholder,
-      required = false,
-      type = "text",
-      className = "",
-      validation,
-    },
-    ref
-  ) => {
+  ({
+    name,
+    label,
+    placeholder,
+    required = false,
+    type = "text",
+    className = "",
+    validation,
+    id,
+  }) => {
     const {
       register,
       formState: { errors },
     } = useFormContext();
 
     const error = get(errors, name)?.message as string;
-    console.log(error, "error");
+
     return (
       <div className={`form-input ${className} ${error ? "error" : ""}`}>
         {label && <label htmlFor={String(name)}>{label}</label>}
@@ -72,17 +67,6 @@ FormInput.displayName = "FormInput";
 
 // textarea for form //
 
-interface FormTextArea<T extends FieldValues> {
-  name: Path<T>;
-  label?: string;
-  placeholder?: string;
-  register: UseFormRegister<T>;
-  required?: boolean;
-  className?: string;
-  error?: FieldError;
-  isBespoke?: boolean;
-}
-
 export function FormTextArea<T extends FieldValues>({
   name,
   label,
@@ -90,6 +74,7 @@ export function FormTextArea<T extends FieldValues>({
   required = false,
   className = "",
   isBespoke,
+  id,
 }: FormTextArea<T>) {
   const {
     register,
@@ -102,7 +87,7 @@ export function FormTextArea<T extends FieldValues>({
       {label && <label htmlFor={name}>{label}</label>}
       <textarea
         id={name}
-        {...register(name, { required })}
+        {...register(name as any, { required })}
         placeholder={placeholder}
         className={isBespoke ? "bespoke" : ""}
       />

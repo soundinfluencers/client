@@ -1,5 +1,5 @@
 import React from "react";
-import searchIcon from "../../../../../../assets/icons/search (1).svg";
+import searchIcon from "@/assets/icons/search (1).svg";
 import "./_bc_search.scss";
 interface Props {}
 

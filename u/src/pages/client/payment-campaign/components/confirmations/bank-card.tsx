@@ -1,5 +1,6 @@
 import React from "react";
 import "./styles/_base-confirmations.scss";
+
 interface Props {}
 
 export const BankCard: React.FC<Props> = () => {

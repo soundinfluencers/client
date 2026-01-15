@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useClientUser } from "../../../store/get-user-client";
-import { useAccountChange } from "../../../store/client/account-settings";
+import { useUser } from "@/store/get-user";
+import { useAccountChange } from "@/store/client/account-settings";
 import { EditPasswordFlow } from "./sections/edit-field";
+import { Breadcrumbs, Container } from "@/components";
+import { AccountDetailsSection, InvoiceDetailsSection } from "./sections";
 
 import "./_account-settings.scss";
-import { Breadcrumbs, Container } from "../../../components";
-import { AccountDetailsSection, InvoiceDetailsSection } from "./sections";
 export const AccountSetting: React.FC = () => {
-  const { user } = useClientUser();
+  const { user } = useUser();
   const { isEdit, resetAll } = useAccountChange();
 
   const [accountFlag, setAccountFlag] = useState(false);

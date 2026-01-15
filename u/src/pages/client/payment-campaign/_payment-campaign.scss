@@ -1,6 +1,12 @@
 .payment-campaign {
-  display: flex;
-  gap: 24px;
+  .navmenu {
+    margin-top: 24px;
+  }
+  &__content {
+    margin-top: 40px;
+    display: flex;
+    gap: 24px;
+  }
   &__width {
     max-width: 930px;
   }
@@ -44,8 +50,9 @@
         width: 100%;
         padding: 24px;
         height: 80px;
-        background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+
         border-radius: 8px;
+        background: rgba(255, 255, 255, 1);
 
         font-weight: 400;
         font-style: Regular;
@@ -53,6 +60,9 @@
         leading-trim: NONE;
         line-height: 100%;
         letter-spacing: 0%;
+        &.active {
+          background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+        }
       }
     }
   }

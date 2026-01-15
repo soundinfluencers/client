@@ -11,16 +11,14 @@ import type { ZodTypeAny } from "zod/v3";
 
 interface FormSection {
   children: React.ReactNode;
+
   submitButton?: React.ReactNode;
-  isPassword?: boolean;
-  isEmail?: boolean;
+
   className?: string;
   classNameBtnSection?: string;
 
-  isConfirm?: boolean;
   schema?: ZodTypeAny;
-  // onSubmit?: (data: DynamicFormData) => Promise<void> | void;
-  onSubmit?: () => void;
+  onSubmit?: (data: DynamicFormData) => Promise<void> | void;
 }
 
 type DynamicFormData = Record<string, string>;
@@ -37,7 +35,7 @@ export const Form = ({
   const handleFormSubmit = async (formData: DynamicFormData) => {
     console.log(formData, "form");
     if (onSubmit) {
-      onSubmit();
+      onSubmit(formData);
     }
   };
 

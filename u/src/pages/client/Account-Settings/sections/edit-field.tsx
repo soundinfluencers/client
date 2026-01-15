@@ -1,5 +1,5 @@
 import React from "react";
-import { useAccountChange } from "../../../../store/client/account-settings";
+import { useAccountChange } from "@/store/client/account-settings";
 import { Confirm, ReserPassword, SendEmail } from "..";
 
 export const EditPasswordFlow: React.FC = () => {
