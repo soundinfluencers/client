@@ -1,5 +1,5 @@
 import React from "react";
-import x from "../../../assets/icons/x.svg";
+import x from "@/assets/icons/x.svg";
 import { createPortal } from "react-dom";
 import "./_modal.scss";
 interface Props {

@@ -10,6 +10,9 @@
   z-index: 10;
   border-bottom-right-radius: 8px;
   border-bottom-left-radius: 8px;
+  &.selected {
+    background-color: rgba(235, 245, 254, 1);
+  }
   &.flag {
     top: 23px;
     ul {

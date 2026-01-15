@@ -11,7 +11,7 @@
     gap: 16px;
   }
   &__title {
-    @media screen and (max-width: 900px) {
+    @media screen and (max-width: 901px) {
       width: 100%;
       display: flex;
       align-items: center;
@@ -34,7 +34,7 @@
     background-color: rgba(255, 255, 255, 1);
     border-radius: 8px;
     border: 1px solid rgba(185, 208, 255, 1);
-    @media screen and (max-width: 900px) {
+    @media screen and (max-width: 901px) {
       width: 100%;
       justify-content: space-between;
       gap: 4px;
@@ -44,7 +44,7 @@
       border: 0px;
       background-color: transparent;
     }
-    @media screen and (max-width: 570px) {
+    @media screen and (max-width: 600px) {
       justify-content: start;
       width: 100%;
       gap: 4px;
@@ -73,15 +73,19 @@
   gap: 8px;
   padding: 8px 16px;
   border-right: 1px solid rgba(185, 208, 255, 1);
-  @media screen and (max-width: 870px) {
+  @media screen and (max-width: 901px) {
     flex: none;
     width: fit-content;
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 1);
     border: 1px solid rgba(185, 208, 255, 1);
     padding: 8px;
+    font-size: 15px;
   }
-  @media screen and (max-width: 415px) {
+  @media screen and (max-width: 420px) {
+    gap: 4px;
+    justify-content: center;
+    flex: 1 1 auto;
     font-size: 13px;
   }
   &.radius {

@@ -1,0 +1,8 @@
+.date-input {
+  max-width: 76px;
+  font-size: 14px;
+  &::placeholder {
+    font-weight: 200;
+    color: black;
+  }
+}

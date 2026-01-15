@@ -2,14 +2,17 @@ import $api from "../../api.ts";
 
 // getting INFLUENCER user //
 
-export const getInfluencer = async (access: string, id: string): Promise<any> => {
+export const getInfluencer = async (
+  access: string,
+  id: string
+): Promise<any> => {
   try {
     const response = await $api.get(`/auth/influencer/${id}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
     });
-    console.log("Success: user", response);
+
     return response.data.data;
   } catch (error: any) {
     console.error("Error fetching user:", error);

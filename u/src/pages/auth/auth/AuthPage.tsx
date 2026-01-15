@@ -4,22 +4,24 @@ import { SwitchButton } from "../../../components/ui/switchers/switch-button/Swi
 import {
   ButtonMain,
   ButtonSecondary,
-} from "../../../components/ui/buttons/button/Button.tsx";
+} from "@/components/ui/buttons/button/Button.tsx";
 import { useNavigate } from "react-router-dom";
+import type { UserRoleType } from "@/types/user/user.types.ts";
+import { useUser } from "@/store/get-user/index.ts";
 
 export const AuthPage: FC = () => {
   const navigate = useNavigate();
+  const { setRole, role } = useUser();
+  const [selectedRole, setSelectedRole] = useState<UserRoleType>(role);
 
-  const [selectedRole, setSelectedRole] = useState(0);
-
-  const handleSwitchClick = () => {
-    if (selectedRole === 0) setSelectedRole(1);
-    else setSelectedRole(0);
+  const handleSwitchClick = (role: UserRoleType) => {
+    setSelectedRole(role);
+    setRole(role);
   };
 
   const handleSignupClick = () => {
-    if (selectedRole === 0) navigate("/signup/client");
-    else navigate("signup/influencer");
+    if (selectedRole === "client") navigate("/signup/client");
+    else navigate("/signup/influencer");
   };
 
   return (
@@ -38,7 +40,7 @@ export const AuthPage: FC = () => {
               <SwitchButton
                 firstTitle={"Client"}
                 secondTitle={"Influencer"}
-                activeIndex={selectedRole}
+                activeRole={selectedRole}
                 onClick={handleSwitchClick}
               />
             </div>
@@ -46,12 +48,12 @@ export const AuthPage: FC = () => {
             <div className="auth-form">
               <div className="auth-form__header">
                 <p className="auth-form__title">
-                  {selectedRole === 0
+                  {selectedRole === "client"
                     ? "I’m a sponsoring client"
                     : "I’m an influencer"}
                 </p>
                 <p className="auth-form__subtitle">
-                  {selectedRole === 0
+                  {selectedRole === "client"
                     ? "Discover top creators and manage your campaigns"
                     : "Join campaigns and collaborate with leading brands"}
                 </p>

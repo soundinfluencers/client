@@ -1,27 +1,37 @@
 import React from "react";
 import "./genresICountries.scss";
-import type { Country } from "../../../../../types/creator-campaign/creator-campaign.types";
+import type {
+  Country,
+  IPromoCard,
+} from "@/types/client/creator-campaign/creator-campaign.types";
 type musicStyles = {
-  musicSubStyles: string[];
-  musicStyleOther: string[];
+  musicGenres: string[];
   countries: Country[];
 };
 interface Props {
   data: musicStyles;
   flag?: boolean;
+  activePromo?: IPromoCard | undefined;
 }
 
-export const GenresCountries: React.FC<Props> = ({ data, flag = false }) => {
+export const GenresCountries: React.FC<Props> = ({
+  data,
+  flag = false,
+  activePromo,
+}) => {
   return (
-    <div className={`information_popUp ${flag ? "flag" : ""}`}>
-      {data.musicSubStyles.length > 0 && data.musicStyleOther.length > 0 && (
+    <div
+      className={`information_popUp ${flag ? "flag" : ""} ${
+        activePromo ? "selected" : ""
+      }`}>
+      {data.musicGenres.length > 0 && (
         <div className="genres">
           <h3>Genres</h3>
           <ul>
-            {data.musicSubStyles.map((item, i) => (
+            {data.musicGenres.map((item, i) => (
               <li key={i}>{item}</li>
             ))}
-            {data.musicStyleOther.map((item, i) => (
+            {data.musicGenres.map((item, i) => (
               <li key={i}>{item}</li>
             ))}
           </ul>

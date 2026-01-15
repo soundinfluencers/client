@@ -1,5 +1,5 @@
 import React from "react";
-import { BESPOKE_CAMPAIGN_TABS } from "../../../../constants/bespoke-campaign-tabs";
+import { BESPOKE_CAMPAIGN_TABS } from "@/constants/client/bespoke-campaign-tabs";
 import "./_tab-bar.scss";
 interface Props {
   activeTab: string;

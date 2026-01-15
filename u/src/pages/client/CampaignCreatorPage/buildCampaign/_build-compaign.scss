@@ -25,12 +25,55 @@
       }
     }
   }
+  &__viewAfilters {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 16px;
+    ul {
+      width: 100%;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      max-width: 1100px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      border-radius: 8px;
+      &::-webkit-scrollbar {
+        height: 6px;
+      }
+      &::-webkit-scrollbar-track {
+        background-color: rgba(231, 232, 241, 1);
+      }
+      &::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #d9daf4 0%, #dae9f8 100%);
+
+        border-radius: 3px;
+      }
+      li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+        padding: 8px 16px;
+        background-color: white;
+        border: 1px solid rgba(231, 232, 241, 1);
+        border-radius: 8px;
+        height: 38px;
+        img {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
   &__content {
-    margin-top: 24px;
+    margin-top: 16px;
     .toolbar {
       width: 100%;
       display: flex;
       align-items: center;
+      gap: 16px;
       @media screen and (max-width: 900px) {
         flex-direction: column;
       }

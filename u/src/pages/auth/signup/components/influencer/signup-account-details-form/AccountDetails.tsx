@@ -1,25 +1,34 @@
-import type React from "react"
+import type React from "react";
 import type { SocialMediaType } from "../../../../../../types/utils/constants.types";
 import { useSignupInfluencerStore } from "../../../../../../store/features/signupInfluencer";
 import { getSocialMeta } from "../../../../../../constants/influencer/social-accounts.data";
 import { useForm, useWatch } from "react-hook-form";
 import { UserInputs } from "./components/user-inputs/UserInputs";
 import { AccountSwitcher } from "./components/account-type-switcher/AccountSwitcher";
-import { ENTERTAINMENT_CATEGORIES_DATA, MUSIC_CATEGORIES_DATA, MUSIC_GENERS_DATA, THEME_TOPICS_DATA } from "../../../../../../constants/influencer/checkbox-button.data";
+import {
+  ENTERTAINMENT_CATEGORIES_DATA,
+  MUSIC_CATEGORIES_DATA,
+  MUSIC_GENERS_DATA,
+  THEME_TOPICS_DATA,
+} from "../../../../../../constants/influencer/checkbox-button.data";
 
-import './_account-details.scss';
+import "./_account-details.scss";
 import type { IAccountFormValues } from "../../../../../../types/user/influencer.types";
 import { useEffect } from "react";
 import { CheckboxButtonList } from "./components/checkbox-button-list/CheckboxButtonList";
 import { AudienceInsights } from "./components/audience-insights/AudienceInsights";
 // import { FormInput } from "../../../../../../components/ui/inputs/form-input/form-attributes";
-import { ButtonMain, ButtonSecondary } from "../../../../../../components/ui/buttons/button/Button";
-import arrowLeft from '../../../../../../assets/icons/arrow-left.svg';
+import {
+  ButtonMain,
+  ButtonSecondary,
+} from "../../../../../../components/ui/buttons/button/Button";
+import arrowLeft from "../../../../../../assets/icons/arrow-left.svg";
 import { PLATFORM_CONFIG } from "../../../../../../constants/influencer/platform-config";
+import { Form } from "../../../../../../components";
 
 interface Props {
   platform: SocialMediaType;
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   accountId?: string;
   goBack: () => void;
 }
@@ -42,11 +51,17 @@ interface Props {
         9) Make adaptive for tablet/mobile ✅
 */
 
-export const AccountDetails: React.FC<Props> = ({ platform, mode, accountId, goBack }) => {
+export const AccountDetails: React.FC<Props> = ({
+  platform,
+  mode,
+  accountId,
+  goBack,
+}) => {
   const { saveAccount, removeAccount, accounts } = useSignupInfluencerStore();
 
   const meta = getSocialMeta(platform);
-  const existing = mode === 'edit' ? accounts.find(a => a.clientId === accountId) : null;
+  const existing =
+    mode === "edit" ? accounts.find((a) => a.clientId === accountId) : null;
   const platformConfig = PLATFORM_CONFIG[platform];
 
   const handleRemove = () => {
@@ -66,49 +81,59 @@ export const AccountDetails: React.FC<Props> = ({ platform, mode, accountId, goB
       musicStyle: data.musicStyle,
       musicSubStyles: data.musicSubStyles,
       musicStyleOther: data.musicStyleOther,
-      countries: data.countries?.filter(c => c.country && c.percentage != null),
+      countries: data.countries?.filter(
+        (c) => c.country && c.percentage != null
+      ),
       price: data.price,
       logo: data.logo ?? undefined,
-    })
+    });
   };
 
   const form = useForm<IAccountFormValues>({
-    defaultValues: existing ?
-      {
-        username: existing.username,
-        link: existing.link,
-        followersNumber: Number(existing.followersNumber),
-        profileCategory: existing.profileCategory,
-        logo: existing.logo instanceof File ? existing.logo : null,
-        // countries: existing.countries ?? [],
-        price: existing.price?.toString(),
-        musicStyle: existing.musicStyle,
-        musicSubStyles: existing.musicSubStyles,
-        musicStyleOther: existing.musicStyleOther,
-      } : {
-        profileCategory: 'community',
-        logo: null,
-        countries: [],
-      },
+    defaultValues: existing
+      ? {
+          username: existing.username,
+          link: existing.link,
+          followersNumber: Number(existing.followersNumber),
+          profileCategory: existing.profileCategory,
+          logo: existing.logo instanceof File ? existing.logo : null,
+          // countries: existing.countries ?? [],
+          price: existing.price?.toString(),
+          musicStyle: existing.musicStyle,
+          musicSubStyles: existing.musicSubStyles,
+          musicStyleOther: existing.musicStyleOther,
+        }
+      : {
+          profileCategory: "community",
+          logo: null,
+          countries: [],
+        },
   });
 
-  const { handleSubmit, register, control, formState: { errors }, resetField, setValue } = form;
+  const {
+    handleSubmit,
+    register,
+    control,
+    formState: { errors },
+    resetField,
+    setValue,
+  } = form;
   // const methods = useForm<IAccountFormValues>();
 
   const profileCategory = useWatch({
     control,
-    name: 'profileCategory',
+    name: "profileCategory",
   });
 
   useEffect(() => {
     // Reset fields when profileCategory changes
-    if (profileCategory === 'community') {
-      resetField('musicStyle');
-      resetField('musicSubStyles');
-      resetField('musicStyleOther');
-    } else if (profileCategory === 'creator') {
-      resetField('entertainmentCategories');
-      resetField('musicCategories');
+    if (profileCategory === "community") {
+      resetField("musicStyle");
+      resetField("musicSubStyles");
+      resetField("musicStyleOther");
+    } else if (profileCategory === "creator") {
+      resetField("entertainmentCategories");
+      resetField("musicCategories");
     }
   }, [profileCategory, resetField]);
 
@@ -118,23 +143,24 @@ export const AccountDetails: React.FC<Props> = ({ platform, mode, accountId, goB
         <img src={arrowLeft} alt="Go back" />
       </button>
       <div className="account-details__header">
-        <h2 className="account-details__title">{mode === 'edit' ? `Edit your ${meta?.label} Account Setup` : `${meta?.label} Account Setup`}</h2>
-        {mode !== 'edit' && <p className="account-details__subtitle">Add your page info and audience insights</p>}
+        <h2 className="account-details__title">
+          {mode === "edit"
+            ? `Edit your ${meta?.label} Account Setup`
+            : `${meta?.label} Account Setup`}
+        </h2>
+        {mode !== "edit" && (
+          <p className="account-details__subtitle">
+            Add your page info and audience insights
+          </p>
+        )}
       </div>
 
-      <form className="account-details__form">
-        <UserInputs
-          meta={meta!!}
-          register={register}
-          control={control}
-          errors={errors}
-        />
+      <Form className="account-details__form">
+        <UserInputs meta={meta!!} control={control} />
 
-        {platformConfig.switcher && (
-          <AccountSwitcher control={control} />
-        )}
+        {platformConfig.switcher && <AccountSwitcher control={control} />}
 
-        {profileCategory === 'community' && (
+        {profileCategory === "community" && (
           <>
             {platformConfig.musicGenres && (
               <CheckboxButtonList
@@ -159,7 +185,7 @@ export const AccountDetails: React.FC<Props> = ({ platform, mode, accountId, goB
           </>
         )}
 
-        {profileCategory === 'creator' && (
+        {profileCategory === "creator" && (
           <>
             <CheckboxButtonList
               data={ENTERTAINMENT_CATEGORIES_DATA}
@@ -190,22 +216,22 @@ export const AccountDetails: React.FC<Props> = ({ platform, mode, accountId, goB
             id="price"
             type="numeric"
             placeholder="100€"
-            {...register('price', {
+            {...register("price", {
               setValueAs: (value: string) => {
                 if (!value) return null;
-                return Number(value.replace('€', ''));
+                return Number(value.replace("€", ""));
               },
               onChange: (e) => {
-                const val = e.target.value.replace('€', '');
+                const val = e.target.value.replace("€", "");
                 if (!/^\d*\.?\d*$/.test(val)) return;
-                e.target.value = val ? `${val}€` : '';
-              }
+                e.target.value = val ? `${val}€` : "";
+              },
             })}
           />
         </div>
 
         <div className="account-details__actions">
-          {mode === 'edit' ? (
+          {mode === "edit" ? (
             <>
               <ButtonSecondary
                 className="account-details__btn"
@@ -220,13 +246,13 @@ export const AccountDetails: React.FC<Props> = ({ platform, mode, accountId, goB
             </>
           ) : (
             <ButtonMain
-              text={'Add account'}
+              text={"Add account"}
               onClick={() => handleSubmit(onSubmit)()}
               className="account-details__btn submit"
             />
           )}
         </div>
-      </form>
+      </Form>
     </div>
-  )
+  );
 };

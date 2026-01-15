@@ -1,4 +1,7 @@
 .campaign-post-content {
+  .navmenu {
+    margin-top: 24px;
+  }
   &__row {
     margin-top: 40px;
     display: flex;
@@ -6,6 +9,10 @@
     gap: 12px;
     .form-block {
       width: 100%;
+      .add-description-btn {
+        max-width: 250px;
+        margin: 0 auto;
+      }
       &__header {
         display: flex;
         align-items: center;
@@ -13,7 +20,7 @@
         h1 {
           font-weight: 400;
           font-style: Regular;
-          font-size: 48px;
+          font-size: clamp(24px, 3.2vw, 48px);
           leading-trim: NONE;
           line-height: 100%;
           letter-spacing: 0%;
@@ -23,14 +30,24 @@
       &__sticky {
         position: sticky;
         top: 50px;
+        width: 100%;
+        @media screen and (max-width: 900px) {
+          .form-width {
+            max-width: 100%;
+          }
+        }
+        .additional-button {
+          max-width: 250px;
+          margin: 63px auto 16px auto;
+        }
       }
-      @media screen and (max-width: 860px) {
+      @media screen and (max-width: 900px) {
         .postContent {
           max-width: 100%;
         }
       }
     }
-    @media screen and (max-width: 860px) {
+    @media screen and (max-width: 900px) {
       flex-direction: column-reverse;
     }
   }

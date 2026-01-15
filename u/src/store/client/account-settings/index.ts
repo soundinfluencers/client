@@ -1,17 +1,5 @@
+import type { AccountSettingsEdit } from "@/types/store/index.types";
 import { create } from "zustand";
-
-interface AccountSettingsEdit {
-  isEdit: boolean;
-  onChangeEdit: () => void;
-
-  isConfirm: boolean;
-  setConfirm: () => void;
-
-  isEmail: boolean;
-  onChangeEmail: () => void;
-
-  resetAll: () => void;
-}
 
 export const useAccountChange = create<AccountSettingsEdit>((set) => ({
   isEdit: false,
