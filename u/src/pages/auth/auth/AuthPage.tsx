@@ -1,22 +1,25 @@
-import { type FC } from "react";
+import { type FC, useState } from "react";
 import "./_auth-page.scss";
 import { SwitchButton } from "../../../components/ui/switchers/switch-button/SwitchButton.tsx";
 import {
   ButtonMain,
   ButtonSecondary,
-} from "../../../components/ui/buttons/button/Button.tsx";
+} from "@/components/ui/buttons/button/Button.tsx";
 import { useNavigate } from "react-router-dom";
-import { useLoginStore } from "../../../store/features/loginSlice.ts";
-
+import type { UserRoleType } from "@/types/user/user.types.ts";
+import { useUser } from "@/store/get-user/index.ts";
 export const AuthPage: FC = () => {
   const navigate = useNavigate();
-  const { role } = useLoginStore();
-
+  const { setRole, role } = useUser();
+  const [selectedRole, setSelectedRole] = useState<UserRoleType>(role);
+  const handleSwitchClick = (role: UserRoleType) => {
+    setSelectedRole(role);
+    setRole(role);
+  };
   const handleSignupClick = () => {
-    if (role === "client") navigate("/signup/client");
+    if (selectedRole === "client") navigate("/signup/client");
     else navigate("/signup/influencer");
   };
-
   return (
     <div className="auth-page__wrapper">
       <div className="auth-page">
@@ -27,24 +30,24 @@ export const AuthPage: FC = () => {
               Choose how you’d like to collaborate with SoundInfluencers
             </p>
           </div>
-
           <div className="auth-page__form-block">
             <div className="auth-page__switch">
               <SwitchButton
                 firstTitle={"Client"}
                 secondTitle={"Influencer"}
+                activeRole={selectedRole}
+                onClick={handleSwitchClick}
               />
             </div>
-
             <div className="auth-form">
               <div className="auth-form__header">
                 <p className="auth-form__title">
-                  {role === "client"
+                  {selectedRole === "client"
                     ? "I’m a sponsoring client"
                     : "I’m an influencer"}
                 </p>
                 <p className="auth-form__subtitle">
-                  {role === "client"
+                  {selectedRole === "client"
                     ? "Discover top creators and manage your campaigns"
                     : "Join campaigns and collaborate with leading brands"}
                 </p>
@@ -59,16 +62,6 @@ export const AuthPage: FC = () => {
             </div>
           </div>
         </div>
-        
-        {/* <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
-          <button onClick={() => navigate("/dashboard/promos/new-promos")} className="btn">new-promos</button>
-          <button onClick={() => navigate("/dashboard/promos/distributing")} className="btn">distributing</button>
-          <button onClick={() => navigate("/dashboard/promos/completed")} className="btn">completed</button>
-          <button onClick={() => navigate("/dashboard/create-invoice")} className="btn">create-invoice</button>
-          <button onClick={() => navigate("/dashboard/invoices")} className="btn">invoices</button>
-          <button onClick={() => navigate("/dashboard/promos")} className="btn">promos</button>
-          <button onClick={() => navigate("/dashboard/account-setting")} className="btn">account-setting</button>
-        </div> */}
       </div>
       <div className="auth-page__footer">
         <p>Amplify your influence</p>

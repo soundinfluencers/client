@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import type { ReactNode } from "react";
-import { useUserStore } from "../../store/user/useUserStore";
+import { useUser } from "@/store/get-user";
 
 interface Props {
   children: ReactNode;
@@ -9,10 +9,10 @@ interface Props {
 
 export const PublicRoute = ({ children }: Props) => {
   const { accessToken } = useAuth();
-  const { user } = useUserStore();
+  const { user } = useUser();
 
   if (accessToken) {
-    const route = user?.role === "influencer" ? "/dashboard" : user?.role === "client" ? "/client/home" : "/";
+    const route = user?.role === "influencer" ? "/dashboard" : user?.role === "client" ? "/" : "/auth";
 
     return <Navigate to={route} replace />;
   }

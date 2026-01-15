@@ -35,6 +35,9 @@
       transform: translateY(-50%);
       left: 10%;
       z-index: -10;
+      &.checked {
+        opacity: 1;
+      }
     }
   }
 }

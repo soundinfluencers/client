@@ -2,11 +2,10 @@ import React from "react";
 import "./_home-header.scss";
 import arrowIcon from "@/assets/icons/arrow-down-right.svg";
 import logoIcon from "@/assets/logos/small-black-logo.svg";
-import { useWindowSize } from "../../../../../hooks/useWindowSize.ts";
+import { useWindowSize } from "@/hooks/useWindowSize.ts";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../../../contexts/AuthContext.tsx";
-import { useClientUser } from "../../../../../store/get-user-client/index.ts";
-import { HistoryLink } from "../../../../influencer/dashboard-layout/components/campaign-history-link/HistoryLink.tsx";
+import { useAuth } from "@/contexts/AuthContext.tsx";
+import { useUser } from "@/store/get-user/index.ts";
 
 export interface HomeHeaderProps {
   firstName?: string;
@@ -19,11 +18,10 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
   balance = "0 €",
   userRole,
 }) => {
-  const { user } = useClientUser();
-  console.log(user, "uhawdhalwd");
+  const { user } = useUser();
   const { width } = useWindowSize();
   const navigate = useNavigate();
-  return width > 970 ? (
+  return width > 812 ? (
     <div className="home-header">
       <div className="home-header__left">
         <div className="home-header__greeting">
@@ -32,7 +30,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
         <div className="home-header__row">
           {" "}
           <div
-            onClick={() => navigate("/client/CreateCampaign")}
+            onClick={() => navigate("/CreateCampaign")}
             className="home-header__create-wrapper">
             <div className="home-header__create">
               <p>Create a campaign</p>
@@ -43,7 +41,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
             </div>
           </div>{" "}
           <div
-            onClick={() => navigate("/client/BespokeCampaign")}
+            onClick={() => navigate("/BespokeCampaign")}
             className="home-header__create-wrapper">
             <div className="home-header__create">
               <p>Bespoke Campaign </p>
@@ -95,7 +93,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
       <div className="home-header-mobile__row">
         {" "}
         <div
-          onClick={() => navigate("/client/CreateCampaign")}
+          onClick={() => navigate("/CreateCampaign")}
           className="home-header__create-wrapper">
           <div className="home-header__create">
             <p>Create a campaign</p>
@@ -106,7 +104,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
           </div>
         </div>
         <div
-          onClick={() => navigate("/client/BespokeCampaign")}
+          onClick={() => navigate("/BespokeCampaign")}
           className="home-header__create-wrapper">
           <div className="home-header__create">
             <p>Bespoke Campaign </p>

@@ -1,8 +1,8 @@
 import React from "react";
-import { Edit, Form, SubmtiButton } from "../../../../components";
+import { Edit, Form, SubmtiButton } from "@/components";
 import { FillData } from "..";
-import { AccountSettingsForm } from "../../../../components/form/client-forms/account-settings";
-import { userFields } from "../../../../constants/account-settings-data";
+import { AccountSettingsForm } from "@/pages/client/components/client-forms/account-settings";
+import { userFields } from "@/constants/client/account-settings-data";
 
 interface Props {
   user: any;

@@ -1,16 +1,26 @@
 import $api from "../../../api";
+import type { MultiPromoAccountsBody } from "./types";
 
 // get multi promo accounts  //
 
-export const getMultiPromoAccounts = async (socialMedia: string) => {
-  try {
-    const response = await $api.get(
-      `/multi-promo/accounts/${socialMedia},spotify`
-    );
+export const getMultiPromoAccounts = async ({
+  sortBy = "bestMatch",
+  limit = 12,
+  page = 1,
+  body,
+}: {
+  sortBy?: string;
+  limit?: number;
+  page?: number;
+  body: MultiPromoAccountsBody;
+}) => {
+  const response = await $api.post(`/profile/social-account/filter`, body, {
+    params: {
+      sortBy,
+      limit,
+      page,
+    },
+  });
 
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching multi promo accounts:", error);
-    throw error;
-  }
+  return response.data;
 };

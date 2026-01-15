@@ -1,37 +1,42 @@
-import { type FC, useEffect } from "react";
 import "./_home-page.scss";
-import React from "react";
-import { getCampaigns } from "../../api/client/campaign/client-campaign.api";
-import { Container } from "../../components";
-import { useClientUser } from "../../store/get-user-client";
+import { getCampaigns } from "@/api/client/dashboard/client-campaign.api";
+import { ButtonMain, Container } from "@/components";
+import { useUser } from "@/store/get-user";
 import { Bar } from "./components/layout/bar/bar";
 import { CampaignsList } from "./components/layout/campaigns-list/CampaignsList";
 import { HomeHeader } from "./components/layout/header/HomeHeader";
-
-export const HomePage: FC = () => {
-  const { user } = useClientUser();
-  const [campaigns, setCampaigns] = React.useState<any[]>([]);
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import type { CampaignForList } from "@/types/client/dashboard/campaign.types";
+export const HomePage = () => {
+  const { user } = useUser();
+  const { accessToken } = useAuth();
   const [view, setView] = React.useState<number>(1);
-
-  const fetch = async () => {
-    const data = await getCampaigns();
-    console.log(data, "dataaaa");
-    setCampaigns(data);
-  };
-  React.useEffect(() => {
-    fetch();
-  }, []);
-  console.log(campaigns, "campaigns");
-
+  const {
+    data: campaigns,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery<CampaignForList[], Error>({
+    queryKey: ["campaigns", "all"],
+    queryFn: () => getCampaigns("all"),
+  });
+  if (isError) return <p>Error loading campaigns</p>;
   return (
     <Container className="home-page">
       <HomeHeader firstName={user?.firstName} />
       <Bar view={view} setView={setView} />
-      {campaigns ? (
-        <CampaignsList listDisplayMode={view} list={campaigns} />
+      {isLoading ? (
+        "loading.."
       ) : (
-        <p>error</p>
+        <CampaignsList listDisplayMode={view} list={campaigns ?? []} />
       )}
+      <ButtonMain
+        className="button-view-more"
+        text={"View More"}
+        onClick={() => refetch()}
+      />
     </Container>
   );
 };

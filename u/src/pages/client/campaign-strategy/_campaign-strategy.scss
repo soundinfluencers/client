@@ -12,7 +12,9 @@
     }
   }
   .navmenu {
+    margin-top: 24px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     @media screen and (max-width: 650px) {
       align-items: start;
@@ -21,34 +23,22 @@
     }
   }
   .table-wrapper,
-  .live-view {
+  .live-view-campaign {
     margin-bottom: 24px;
   }
-  .table-wrapper {
-    width: 100%;
-    max-width: 1224px;
-    overflow-x: auto;
-    padding-bottom: 20px;
-    &::-webkit-scrollbar-thumb {
-      background-color: black;
-      border-radius: 8px;
-    }
-
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-    }
-    .width {
-      min-width: 1224px;
-    }
-  }
-  .live-view {
+  .live-view-campaign {
+    margin-top: 16px;
     display: flex;
     justify-content: space-between;
     gap: 24px;
     overflow-x: scroll;
+    @media screen and (max-width: 500px) {
+      overflow-x: visible;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
     &__card {
       display: flex;
       align-items: start;
@@ -121,61 +111,28 @@
       }
     }
   }
-
-  .changeView {
-    margin-top: 0px;
-    width: 100%;
+  .table-wrapper {
     display: flex;
-    justify-content: end;
-
-    &__content {
-      display: flex;
-      align-items: center;
-
-      max-width: 209px;
-      width: 100%;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 1224px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    &::-webkit-scrollbar-thumb {
+      background-color: black;
       border-radius: 8px;
-      border: 1px solid rgba(231, 232, 241, 1);
-      height: 36px;
-      overflow: hidden;
-      .changeView-check {
-        position: relative;
-        width: 100%;
-        padding: 8px;
-        opacity: 0.5;
-        .dot {
-          position: absolute;
-          width: 6px;
-          height: 6px;
-          background-color: rgba(185, 208, 255, 1);
-          border-radius: 50%;
-        }
-        &:first-child {
-          display: flex;
-          align-items: center;
-          border-right: 1px solid rgba(231, 232, 241, 1);
-          padding-left: 16px;
-        }
-        &:last-child {
-          display: flex;
-          align-items: center;
-          flex-direction: row-reverse;
-          padding-right: 16px;
-        }
-        &.active {
-          opacity: 1;
-          &:first-child {
-            .dot {
-              right: 8px;
-            }
-          }
-          &:last-child {
-            .dot {
-              left: 8px;
-            }
-          }
-        }
-      }
+    }
+
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: rgba(185, 208, 255, 0.15);
+    }
+    .width {
+      min-width: 1224px;
     }
   }
 
@@ -211,50 +168,5 @@
         max-width: 350px;
       }
     }
-  }
-  &__bar {
-    margin-top: 24px;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-    @media screen and (max-width: 900px) {
-      justify-content: start;
-      gap: 4px;
-    }
-  }
-}
-
-.UI-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 40px;
-  border-radius: 16px;
-  border: 1px solid rgb(231, 232, 241);
-  background-color: rgba(255, 255, 255, 0.5);
-  @media screen and (max-width: 900px) {
-    padding: 8px;
-    font-size: 13px;
-    gap: 4px;
-    img {
-      width: 17px;
-      height: 17px;
-    }
-  }
-}
-.ViewAudience {
-  display: flex;
-  justify-content: end;
-  margin: 16px 0px;
-  &__btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: fit-content;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid rgba(185, 208, 255, 1);
-    background-color: rgba(255, 255, 255, 0.5);
   }
 }

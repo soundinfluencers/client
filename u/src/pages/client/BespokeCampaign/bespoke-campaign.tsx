@@ -3,7 +3,7 @@ import React from "react";
 import { TabBar } from "./components/tab-bar";
 import "./_bespoke-campaign.scss";
 import { PromoForm } from "./tab/promo-form";
-import { Breadcrumbs, Container, SaveDraft } from "../../../components";
+import { Breadcrumbs, Container, SaveDraft } from "@/components";
 interface Props {}
 
 export const BespokeCampaign: React.FC<Props> = () => {

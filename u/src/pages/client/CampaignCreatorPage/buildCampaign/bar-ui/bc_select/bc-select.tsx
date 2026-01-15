@@ -1,18 +1,33 @@
 import React from "react";
 import "./_bc_select.scss";
-import check from "../../../../../../assets/icons/check.svg";
-interface Props {}
-
+import check from "@/assets/icons/check.svg";
+interface SelectBudgetProps {
+  setBudget: (budget: any) => void;
+  setCurrency: (currency: any) => void;
+  currencySelected: any;
+  budgetSelected: number;
+}
+interface SelectSortProps {
+  setSelectedFilter: (any: any) => void;
+  selectedFilter: any;
+}
 import { Dropdown } from "../../../ui/dropdown/dropdown";
+import {
+  currencyArr,
+  filtersArr,
+} from "../../build-campaign.data/build-campaign.data";
 
-export const SelectBudget: React.FC = () => {
-  const currencyArr = ["£", "$", "€"];
+export const SelectBudget: React.FC<SelectBudgetProps> = ({
+  currencySelected,
+  budgetSelected,
+  setBudget,
+  setCurrency,
+}) => {
   const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState(currencyArr[0]);
 
   return (
     <Dropdown
-      selected={`Budget: 100000 ${selected}`}
+      selected={`Budget: ${budgetSelected} ${currencySelected.key}`}
       isOpen={open}
       onToggle={() => setOpen((prev) => !prev)}>
       <div className="currency">
@@ -20,11 +35,11 @@ export const SelectBudget: React.FC = () => {
           {currencyArr.map((cr) => (
             <li
               onClick={() => {
-                setSelected(cr);
+                setCurrency(cr);
                 setOpen(false);
               }}
-              key={cr}>
-              {cr}
+              key={cr.key}>
+              {cr.key}
             </li>
           ))}
         </ul>
@@ -32,38 +47,38 @@ export const SelectBudget: React.FC = () => {
 
       <div className="BudgetPopUp__select_price">
         <label htmlFor="price">Price</label>
-        <input type="text" id="price" />
+
+        <input
+          onChange={(e) => setBudget(Number(e.target.value))}
+          type="number"
+          id="price"
+        />
       </div>
     </Dropdown>
   );
 };
-export const SortSelect: React.FC = () => {
-  const filtersArr = [
-    "Best Match",
-    "Lowest Price",
-    "Highest Price",
-    "Lowest Followers",
-    "Highest Followers",
-  ];
+export const SortSelect: React.FC<SelectSortProps> = ({
+  selectedFilter,
+  setSelectedFilter,
+}) => {
   const [open, setOpen] = React.useState(false);
 
-  const [selected, setSelected] = React.useState(filtersArr[0]);
   return (
     <Dropdown
       isChange={true}
-      selected={selected}
+      selected={selectedFilter.name}
       isOpen={open}
       onToggle={() => setOpen((prev) => !prev)}>
       <ul className="my-sort-list">
         {filtersArr.map((item, i) => (
           <li
             onClick={() => {
-              setSelected(item);
               setOpen(false);
+              setSelectedFilter(item);
             }}
-            key={item}>
-            {item}
-            {item === selected && <img src={check} alt="" />}
+            key={item.key}>
+            {item.name}
+            {item.name === selectedFilter.name && <img src={check} alt="" />}
           </li>
         ))}
       </ul>

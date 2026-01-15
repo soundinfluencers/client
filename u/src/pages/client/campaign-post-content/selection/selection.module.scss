@@ -8,6 +8,7 @@
 
   &__head {
     display: flex;
+    align-items: center;
     justify-content: space-between;
 
     h3 {
@@ -17,7 +18,7 @@
       leading-trim: NONE;
       line-height: 100%;
       letter-spacing: 0%;
-      @media screen and (max-width: 460px) {
+      @media screen and (max-width: 500px) {
         font-size: 24px;
       }
     }
@@ -25,6 +26,9 @@
       border-radius: 24px;
       padding: 8px 24px;
       border: 1px solid rgba(32, 41, 52, 1);
+      @media screen and (max-width: 500px) {
+        font-size: 14px;
+      }
     }
   }
   &__content {
@@ -141,10 +145,14 @@
         display: flex;
         align-items: start;
         justify-content: space-between;
+        gap: 4px;
         .title {
           display: flex;
           align-items: center;
           gap: 8px;
+          h3 {
+            font-size: 16px;
+          }
           img {
             filter: grayscale(100%);
           }
@@ -155,6 +163,7 @@
           p {
             width: 100%;
             display: flex;
+            font-size: 16px;
             justify-content: space-between;
           }
           .genresIcountries {
@@ -182,6 +191,9 @@
       leading-trim: NONE;
       line-height: 100%;
       letter-spacing: 0%;
+      @media screen and (max-width: 500px) {
+        font-size: 16px;
+      }
     }
   }
 }

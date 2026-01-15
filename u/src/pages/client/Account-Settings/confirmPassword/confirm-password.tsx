@@ -1,6 +1,6 @@
 import React from "react";
-import { Form, SubmtiButton } from "../../../../components/";
-import { ConfirmForm } from "../../../../components/form/client-forms/account-settings";
+import { Form, SubmtiButton } from "@/components/";
+import { ConfirmForm } from "@/pages/client/components/client-forms/account-settings";
 
 interface Props {}
 

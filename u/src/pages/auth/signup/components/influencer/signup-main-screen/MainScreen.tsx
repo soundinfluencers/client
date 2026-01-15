@@ -16,7 +16,7 @@ export const MainScreen = () => {
   const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSinup = async () => {
+  const handleSignup = async () => {
     const isValid = validate();
     if (!isValid) {
       return;
@@ -102,7 +102,7 @@ export const MainScreen = () => {
         {/* TODO: Add validation and disable button if necessary */}
         <ButtonMain
           label={isLoading ? "Submitting..." : "Submit Application"}
-          onClick={handleSinup}
+          onClick={handleSignup}
           isDisabled={isDisabled}
         />
       </div>

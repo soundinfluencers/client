@@ -1,43 +1,72 @@
 @use "@/styles/variables/variables" as vars;
 
-.table-list {
-  display: table;
-  width: 100%;
-  border-radius: 8px;
-  p {
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 16px;
-    leading-trim: NONE;
-    line-height: 100%;
-    letter-spacing: 0%;
-  }
-  .socialMedia {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  &__header,
-  &__body-row {
-    display: table-row;
+.table-wrapper {
+  overflow-x: auto;
+  padding-bottom: 24px;
+  &::-webkit-scrollbar-thumb {
+    background-color: black;
+    border-radius: 8px;
   }
 
-  &__header-data,
-  &__body-data {
-    display: table-cell;
-    text-align: start;
-    vertical-align: middle;
+  &::-webkit-scrollbar {
+    height: 8px;
   }
+  &::-webkit-scrollbar-track {
+    background-color: rgba(185, 208, 255, 0.15);
+  }
+  .table-list {
+    display: table;
+    width: 100%;
+    border-radius: 8px;
+    max-width: 1224px;
+    min-width: 900px;
+    p {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 16px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+    }
+    .header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      .socialMedia {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
 
-  &__header-data {
-    font-weight: 600;
-    padding: 8px 8px 16px 8px;
-  }
-  &__body-data {
-    height: 48px;
-    font-weight: 600;
-    padding: 16px 8px 8px 8px;
-    border-bottom: 1px solid rgba(185, 208, 255, 1);
+    &__header,
+    &__body-row {
+      display: table-row;
+    }
+
+    &__header-data,
+    &__body-data {
+      display: table-cell;
+      text-align: start;
+      vertical-align: middle;
+    }
+
+    &__header-data {
+      font-weight: 600;
+      padding: 8px 8px 16px 8px;
+    }
+    &__body-data {
+      height: 48px;
+      font-weight: 600;
+      padding: 16px 8px 8px 8px;
+      border-bottom: 1px solid rgba(185, 208, 255, 1);
+    }
+    .date-post {
+      width: 250px;
+      @media screen and (max-width: 900px) {
+        width: 100px;
+      }
+    }
   }
 }
 
@@ -156,6 +185,7 @@
     }
 
     &-title {
+      width: fit-content;
       font-size: 20px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -174,5 +204,9 @@
         -webkit-line-clamp: 1;
       }
     }
+  }
+  &__footer {
+    display: flex;
+    justify-content: space-between;
   }
 }

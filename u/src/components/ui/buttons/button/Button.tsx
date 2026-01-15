@@ -6,24 +6,23 @@ export interface ButtonProps {
   onClick: () => void;
   isDisabled?: boolean;
   className?: string;
+  children?: React.ReactNode;
 }
-
-const handleClick = (isDisabled: boolean, onClick: () => void) => {
-  if (!isDisabled) onClick();
-};
 
 export const ButtonMain: FC<ButtonProps> = ({
   text,
   onClick,
   isDisabled = false,
   className,
-}: ButtonProps) => {
+}) => {
   return (
-    <div
-      className={`button-main ${isDisabled ? "disabled" : ""} ${className}`}
-      onClick={() => handleClick(isDisabled, onClick)}>
+    <button
+      type="button"
+      className={`button-main ${className}`}
+      disabled={isDisabled}
+      onClick={onClick}>
       <p>{text}</p>
-    </div>
+    </button>
   );
 };
 
@@ -32,12 +31,16 @@ export const ButtonSecondary: FC<ButtonProps> = ({
   onClick,
   isDisabled = false,
   className,
-}: ButtonProps) => {
+  children,
+}) => {
   return (
-    <div
-      className={`${"button-secondary"} ${className}`}
-      onClick={() => handleClick(isDisabled, onClick)}>
-      <p>{text}</p>
-    </div>
+    <button
+      type="button"
+      className={`button-secondary ${className}`}
+      disabled={isDisabled}
+      onClick={onClick}>
+      {children}
+      <p> {text}</p>
+    </button>
   );
 };

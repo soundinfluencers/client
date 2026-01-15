@@ -1,5 +1,4 @@
 import React from "react";
-import { PAYMENT_CAMPAIGN_TABS } from "../../../../constants/payment-campaign-tabs";
 import "./_payment-bar.scss";
 interface Props {
   data: any[];

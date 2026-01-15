@@ -2,19 +2,17 @@ import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, A11y } from "swiper/modules";
 import { Card } from "./Card/Card";
-import chevron from "../../../../../assets/icons/chevron-right.svg";
+import chevron from "@/assets/icons/chevron-right.svg";
 import "./_slider.scss";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { useLocation } from "react-router-dom";
 
 interface Props {
   packages: any[];
 }
 
 export const SliderForCard: React.FC<Props> = ({ packages }) => {
-  console.log(packages, "kmoiawdmajwd");
   return (
     <div className="slider-wrapper" style={{ position: "relative" }}>
       <div className="swiper-button-prev">

@@ -1,9 +1,9 @@
 import React from "react";
-import { BESPOKE_CAMPAIGN_TABS_DATA } from "../../../../constants/bespoke-capaign-tabs.data";
 import "./_promo-form.scss";
-import { BespokeForm } from "../../../../components/form/client-forms/bespoke";
-import { SubmtiButton } from "../../../../components/ui/submit-button/submit-button";
-import { Form } from "../../../../components";
+import { BespokeForm } from "@/pages/client/components/client-forms/bespoke";
+import { SubmtiButton } from "@/components/ui/submit-button/submit-button";
+import { Form } from "@/components";
+import { BESPOKE_CAMPAIGN_TABS_DATA } from "@/constants/client/bespoke-capaign-tabs.data";
 interface Props {
   activeTabId: string;
 }

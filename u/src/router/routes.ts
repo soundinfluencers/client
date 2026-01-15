@@ -13,18 +13,8 @@ import { AccountSetting } from "../pages/client/Account-Settings/account-setting
 import { CamapignStrategy } from "../pages/client/campaign-strategy/campaign-strategy.tsx";
 import { CampaignPostContent } from "../pages/client/campaign-post-content/campaign-post-content.tsx";
 import { PaymentCampaign } from "../pages/client/payment-campaign/payment-campaign.tsx";
-
-// Influencer Imports
 import { InfluencerTermsPage } from "../pages/auth/terms/influencer/InfluencerTermsPage.tsx";
-// import { Promos } from "../pages/influencer/promos/promos-list/Promos.tsx";
-// import { InvoicePage } from "../pages/influencer/create-invoice/InvoicePage.tsx";
-// import { InvoicesDetails } from "../pages/influencer/invoices-details/InvoicesDetails.tsx";
-// import { NewPromos } from "../pages/influencer/promos/new-promos/NewPromos.tsx";
-// import { Distributing } from "../pages/influencer/promos/distributing/Distributing.tsx";
-// import { Completed } from "../pages/influencer/promos/completed/Completed.tsx";
-// import { AccountSettingInfluencer } from "../pages/influencer/account-setting/AccountSettingInfluencer.tsx";
-// import { CampaignHistory } from "../pages/influencer/campaign-history/CampaignHistory.tsx";
-// import { DashboardLayout } from "../pages/influencer/dashboard-layout/DashboardLayout.tsx";
+import { CampaignProposals } from "../pages/client/campaign-proposal/campaign-proposal.tsx";
 
 
 export const routes: IRoute[] = [
@@ -72,94 +62,44 @@ export const routes: IRoute[] = [
   },
   {
     name: "Home",
-    path: "/client/home",
+    path: "/",
     component: HomePage,
     isProtected: true,
   },
   {
     name: "CreateCampaign",
-    path: "/client/CreateCampaign",
+    path: "/CreateCampaign",
     component: CampaignCreatorPage,
     isProtected: true,
   },
   {
     name: "Content",
-    path: "/client/CreateCampaign/Content",
+    path: "/CreateCampaign/Content",
     component: CampaignPostContent,
     isProtected: true,
   },
   {
     name: "Strategy",
-    path: "/client/CreateCampaign/Content/Strategy",
+    path: "/CreateCampaign/Content/Strategy",
     component: CamapignStrategy,
     isProtected: true,
   },
   {
     name: "Payment",
-    path: "/client/CreateCampaign/Content/Strategy/Payment",
+    path: "/CreateCampaign/Content/Strategy/Payment",
     component: PaymentCampaign,
     isProtected: true,
   },
   {
     name: "BespokeCampaign",
-    path: "/client/BespokeCampaign",
+    path: "/BespokeCampaign",
     component: BespokeCampaign,
     isProtected: true,
   },
   {
     name: "AccountSetting",
-    path: "/client/AccountSetting",
+    path: "/AccountSetting",
     component: AccountSetting,
     isProtected: true,
   },
-
-  //Influencer Routes
-  // {
-  //   name: "Promos",
-  //   path: "/dashboard/promos",
-  //   component: DashboardLayout,
-  //   isProtected: false,
-  // },
-  // {
-  //   name: "NewPromos",
-  //   path: "/dashboard/promos/new-promos",
-  //   component: NewPromos,
-  //   isProtected: false,
-  // },
-  // {
-  //   name: "DistributingPromos",
-  //   path: "promos/distributing",
-  //   component: Distributing,
-  //   isProtected: false,
-  // },
-  // {
-  //   name: "CompletedPromos",
-  //   path: "/dashboard/promos/completed",
-  //   component: Completed,
-  //   isProtected: false,
-  // },
-  // {
-  //   name: "CreateInvoice",
-  //   path: '/dashboard/create-invoice',
-  //   component: InvoicePage,
-  //   isProtected: false,
-  // },
-  // {
-  //   name: "Invoices",
-  //   path: '/dashboard/invoices',
-  //   component: InvoicesDetails,
-  //   isProtected: false,
-  // },
-  // {
-  //   name: "AccountSettingInfluencer",
-  //   path: "/dashboard/account-setting",
-  //   component: AccountSettingInfluencer,
-  //   isProtected: false,
-  // },
-  // {
-  //   name: "CampaignHistory",
-  //   path: "/dashboard/campaign-history",
-  //   component: CampaignHistory,
-  //   isProtected: false,
-  // }
 ];

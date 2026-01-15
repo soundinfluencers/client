@@ -1,39 +1,36 @@
 import type { FC } from "react";
 import "./_switch-button.scss";
-import { useLoginStore } from "../../../../store/features/loginSlice";
-
+import type { UserRoleType } from "@/types/user/user.types";
 export interface SwitchButtonProps {
   firstTitle: string;
   secondTitle: string;
+  activeRole: UserRoleType;
+  onClick: (role: UserRoleType) => void;
 }
-
 export const SwitchButton: FC<SwitchButtonProps> = ({
   firstTitle,
   secondTitle,
+  activeRole,
+  onClick,
 }) => {
-  const { role, setRole } = useLoginStore();
-
   const sliderStyle = {
-    transform: role === "client" ? "translateX(0)" : "translateX(100%)",
+    transform: activeRole === "client" ? "translateX(0)" : "translateX(100%)",
   };
-
   return (
     <div className="switch-button">
       <div className="switch-button__slider" style={sliderStyle} />
-
       <div
         className={`switch-button__content ${
-          role === "client" ? "active" : ""
+          activeRole === "client" ? "active" : ""
         }`}
-        onClick={() => setRole("client")}>
+        onClick={() => onClick("client")}>
         <p>{firstTitle}</p>
       </div>
-
       <div
         className={`switch-button__content ${
-          role === "influencer" ? "active" : ""
+          activeRole === "influencer" ? "active" : ""
         }`}
-        onClick={() => setRole("influencer")}>
+        onClick={() => onClick("influencer")}>
         <p>{secondTitle}</p>
       </div>
     </div>
