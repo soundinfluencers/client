@@ -1,6 +1,6 @@
 import "./_home-page.scss";
 import { getCampaigns } from "@/api/client/dashboard/client-campaign.api";
-import { ButtonMain, Container } from "@/components";
+import { ButtonMain, Container, Proceed } from "@/components";
 import { useUser } from "@/store/get-user";
 import { Bar } from "./components/layout/bar/bar";
 import { CampaignsList } from "./components/layout/campaigns-list/CampaignsList";
@@ -25,7 +25,7 @@ export const HomePage = () => {
   if (isError) return <p>Error loading campaigns</p>;
   return (
     <Container className="home-page">
-      <HomeHeader firstName={user?.firstName} />
+      <HomeHeader balance={user?.balance} firstName={user?.firstName} />
       <Bar view={view} setView={setView} />
       {isLoading ? (
         "loading.."

@@ -3,6 +3,14 @@ import type {
   IPromoCard,
 } from "../client/creator-campaign/creator-campaign.types";
 import type { FilterItem } from "../client/creator-campaign/filters.types";
+import type { Profile } from "../profile-details/profile-detials.types";
+
+// profile-details
+
+export interface IProfileDetails {
+  profile: Profile | null;
+  setProfile: (data: Profile) => void;
+}
 
 // account-settings
 
@@ -49,31 +57,7 @@ export interface CreateCampaignPlatformProps {
   setPlatform: (platform: string) => void;
 }
 
-// useCampaignStore
-
-// type PlatformForm = {
-//   campaignName?: string;
-//   items: Record<string, string>[];
-// };
-
-// export type CampaignState = {
-//   offer: IApiOffer | null;
-//   promoCard: IPromoCard[];
-//   postContent: Record<string, PlatformForm[]>;
-
-//   totalPrice: number;
-//   activeOfferId: string | null;
-
-//   actions: {
-//     setOffer: (offer: IApiOffer) => void;
-//     setPromoCard: (card: IPromoCard) => void;
-//     addPostContent: (platform: string, data: PlatformForm) => void;
-//     setActiveOffer: (id: string) => void;
-
-//     resetCampaign: () => void;
-//     recalcTotal: () => void;
-//   };
-// };
+// useCampaign
 
 type PlatformForm = {
   _id: string;

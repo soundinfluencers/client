@@ -1,5 +1,5 @@
-@use '@/styles/mixins/title' as title;
-@use '@/styles/variables/variables' as vars;
+@use "@/styles/mixins/title" as title;
+@use "@/styles/variables/variables" as vars;
 
 .login-page__wrapper {
   min-height: calc(100vh - 84px); // 100% экрана - высота таб бара
@@ -104,7 +104,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 250px!important;
+    width: 250px !important;
 
     @media screen and (max-width: 500px) {
       width: 100% !important;
@@ -133,7 +133,6 @@
     }
   }
 }
-
 
 //TODO: loading spinner styles
 // .loader {

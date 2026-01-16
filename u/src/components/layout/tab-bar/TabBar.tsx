@@ -25,6 +25,10 @@ export const TabBar: FC = () => {
   });
 
   const navigate = useNavigate();
+  const AccountSettings =
+    user?.role === "client"
+      ? "/client/AccountSettigns"
+      : "/influencer/account-setting";
 
   const handleClickBurgerMenu = (path: string) => {
     setIsBurgerOpen(false);
@@ -46,7 +50,7 @@ export const TabBar: FC = () => {
                 <LoginButton onClick={() => navigate("/login")} />
               </>
             ) : (
-              <div onClick={() => navigate("/AccountSetting")}>
+              <div onClick={() => navigate(AccountSettings)}>
                 <p>Account: ${user?.firstName}</p>
                 {/* <button className="tab-bar__logout" onClick={logout}>
                 Logout

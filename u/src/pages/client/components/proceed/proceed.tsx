@@ -33,7 +33,9 @@ export const Proceed: React.FC = () => {
       <button
         className={canProceed ? "active" : ""}
         disabled={!canProceed}
-        onClick={() => canProceed && navigate("/CreateCampaign/Content")}>
+        onClick={() =>
+          canProceed && navigate("/client/CreateCampaign/Content")
+        }>
         Proceed
       </button>
     </div>

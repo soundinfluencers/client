@@ -18,6 +18,7 @@ export const useUser = create<User>((set) => ({
     set({ role: role });
   },
   setUser: (data: IUser) => {
+    console.log(data, "IUSer");
     set({ user: data });
   },
 }));
