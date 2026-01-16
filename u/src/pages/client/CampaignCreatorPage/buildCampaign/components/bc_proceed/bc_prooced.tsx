@@ -18,7 +18,7 @@ export const BcProceed: React.FC<Props> = () => {
         text={"Proceed"}
         onClick={() => {
           if (totalPrice > 0) {
-            navigate("/CreateCampaign/Content");
+            navigate("/client/CreateCampaign/Content");
           } else null;
         }}
       />

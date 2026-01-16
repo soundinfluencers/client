@@ -91,7 +91,9 @@ export const CamapignStrategy: React.FC<Props> = () => {
       <div className="campaign-strategy__proceedTo">
         <ButtonMain
           text={"Proceed to payment"}
-          onClick={() => navigate("/CreateCampaign/Content/Strategy/Payment")}
+          onClick={() =>
+            navigate("/client/CreateCampaign/Content/Strategy/Payment")
+          }
           className="proceedTo"
         />
       </div>

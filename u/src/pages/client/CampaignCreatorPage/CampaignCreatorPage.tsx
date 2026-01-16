@@ -8,19 +8,23 @@ import { BuildCampaign } from "./buildCampaign/build-campaign";
 import { SliderForCard } from "./components/SliderForCards/SliderForCards";
 import { useCreateCampaignPlatform } from "@/store/client/createCampaign/useCreate-campaign-fetch";
 
+import { useProfileDetails } from "@/store/profile-details/useProfile-details";
+
 interface Props {}
 
 export const CampaignCreatorPage: React.FC<Props> = () => {
   const { setOffers, offers, loading } = useCreateCampaign();
   const { selectedPlatform, setPlatform } = useCreateCampaignPlatform();
+  const { profile, setProfile } = useProfileDetails();
   const { setSelected } = useFilter();
   const [selectedGenre, setSelectedGenre] = React.useState(
     "Techno (Melodic, Minimal)"
   );
+
   React.useEffect(() => {
     setOffers(selectedPlatform, selectedGenre);
   }, []);
-
+  console.log(profile, "profile");
   const handlePlatformSelect = (platform: string) => {
     setPlatform(platform);
     // setSelected()

@@ -12,7 +12,7 @@ export const PublicRoute = ({ children }: Props) => {
   const { user } = useUser();
 
   if (accessToken) {
-    const route = user?.role === "influencer" ? "/dashboard" : user?.role === "client" ? "/" : "/auth";
+    const route = user?.role === "influencer" ? "/" : "/";
 
     return <Navigate to={route} replace />;
   }

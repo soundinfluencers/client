@@ -16,7 +16,6 @@ import { PaymentCampaign } from "../pages/client/payment-campaign/payment-campai
 import { InfluencerTermsPage } from "../pages/auth/terms/influencer/InfluencerTermsPage.tsx";
 import { CampaignProposals } from "../pages/client/campaign-proposal/campaign-proposal.tsx";
 
-
 export const routes: IRoute[] = [
   {
     name: "Auth",
@@ -62,43 +61,43 @@ export const routes: IRoute[] = [
   },
   {
     name: "Home",
-    path: "/",
+    path: "/client",
     component: HomePage,
     isProtected: true,
   },
   {
     name: "CreateCampaign",
-    path: "/CreateCampaign",
+    path: "/client/CreateCampaign",
     component: CampaignCreatorPage,
     isProtected: true,
   },
   {
     name: "Content",
-    path: "/CreateCampaign/Content",
+    path: "/client/CreateCampaign/Content",
     component: CampaignPostContent,
     isProtected: true,
   },
   {
     name: "Strategy",
-    path: "/CreateCampaign/Content/Strategy",
+    path: "/client/CreateCampaign/Content/Strategy",
     component: CamapignStrategy,
     isProtected: true,
   },
   {
     name: "Payment",
-    path: "/CreateCampaign/Content/Strategy/Payment",
+    path: "/client/CreateCampaign/Content/Strategy/Payment",
     component: PaymentCampaign,
     isProtected: true,
   },
   {
     name: "BespokeCampaign",
-    path: "/BespokeCampaign",
+    path: "/client/BespokeCampaign",
     component: BespokeCampaign,
     isProtected: true,
   },
   {
     name: "AccountSetting",
-    path: "/AccountSetting",
+    path: "/client/AccountSetting",
     component: AccountSetting,
     isProtected: true,
   },

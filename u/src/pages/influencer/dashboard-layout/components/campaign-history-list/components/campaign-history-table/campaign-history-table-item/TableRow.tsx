@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import { getSocialMediaIcon } from '../../../../../../../../constants/social-medias';
-import './_table-row.scss';
+import { Link } from "react-router-dom";
+import { getSocialMediaIcon } from "../../../../../../../../constants/social-medias";
+import "./_table-row.scss";
 // import type { TSocialMedia } from '../../../../../../../../types/influencer/form/campaign-result/campaign-result.types';
 // import type { SocialMediaType } from '../../../../../../../../types/utils/constants.types';
 
@@ -22,32 +22,35 @@ interface Props {
 export const TableRow = ({ campaign }) => {
   return (
     <tr className="campaign-history-table-row">
-      <td className='campaign-history-table-row__name'>
-        <div className='campaign-history-table-row__name-content'>
+      <td className="campaign-history-table-row__name">
+        <div className="campaign-history-table-row__name-content">
           <img
-            src={getSocialMediaIcon(campaign.socialMedia) || ''}
+            src={getSocialMediaIcon(campaign.socialMedia) || ""}
             alt={campaign.socialMedia}
             className="campaign-history-table-row__name-icon"
           />
           {campaign.campaignName}
         </div>
       </td>
-      <td className='campaign-history-table-row__date-post'>
+      <td className="campaign-history-table-row__date-post">
         {dateFormatter(campaign.dateRequest)}
       </td>
-      <td className='campaign-history-table-row__reward'>
-        {campaign.reward ? `${campaign.reward}€` : '-'}
+      <td className="campaign-history-table-row__reward">
+        {campaign.reward ? `${campaign.reward}€` : "-"}
       </td>
-      <td className='campaign-history-table-row__status'>
+      <td className="campaign-history-table-row__status">
         {normalizeStatus(campaign.statusCampaign)}
       </td>
-      <td className='campaign-history-table-row__actions'>
-        {STATUS_ACTIONS_MAP[campaign.statusCampaign] || <span className="campaign-history-table-item__result">N/A</span>}
+      <td className="campaign-history-table-row__actions">
+        {STATUS_ACTIONS_MAP[campaign.statusCampaign] || (
+          <span className="campaign-history-table-item__result">N/A</span>
+        )}
       </td>
     </tr>
   );
 };
-{/* <>
+{
+  /* <>
   <div className="campaign-history-table-item__name">
     <img
       src={getSocialMediaIcon(campaign.socialMedia) || ''}
@@ -66,14 +69,15 @@ export const TableRow = ({ campaign }) => {
   <div className="campaign-history-table-item__actions">
     {STATUS_ACTIONS_MAP[campaign.statusCampaign] || <span className="campaign-history-table-item__result">N/A</span>}
   </div>
-</> */}
+</> */
+}
 
 //TODO: Move to utils?
 function dateFormatter(dateString: string) {
   //DD.MM.YYYY
   const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
 
   return `${day}.${month}.${year}`;
@@ -81,25 +85,45 @@ function dateFormatter(dateString: string) {
 
 const normalizeStatus = (status: string) => {
   switch (status) {
-    case 'Pending':
-      return 'Pending';
-    case 'Distributing':
-      return 'In Distributing';
-    case 'Paid':
-      return 'Paid';
-    case 'invoiceSubmitted':
-      return 'Invoice Submitted';
-    case 'insightsSubmitted':
-      return 'Insights Submitted';
+    case "Pending":
+      return "Pending";
+    case "Distributing":
+      return "In Distributing";
+    case "Paid":
+      return "Paid";
+    case "invoiceSubmitted":
+      return "Invoice Submitted";
+    case "insightsSubmitted":
+      return "Insights Submitted";
     default:
       return status;
   }
-}
+};
 
 const STATUS_ACTIONS_MAP = {
-  invoiceSubmitted: <span className="campaign-history-table-row__result">Awaiting Payment</span>,
+  invoiceSubmitted: (
+    <span className="campaign-history-table-row__result">Awaiting Payment</span>
+  ),
   Paid: <span className="campaign-history-table-row__result">Completed</span>,
-  insightsSubmitted: <Link to={'/dashboard/create-invoice'} className="campaign-history-table-row__link">Create Invoice</Link>,
-  Distributing: <Link to={'/dashboard/promos/distributing'} className="campaign-history-table-row__link">Post & Submit Insights</Link>,
-  Pending: <Link to={'/dashboard/promos/new-promos'} className="campaign-history-table-row__link">Accept/Deny Request</Link>,
+  insightsSubmitted: (
+    <Link
+      to={"/influencer/create-invoice"}
+      className="campaign-history-table-row__link">
+      Create Invoice
+    </Link>
+  ),
+  Distributing: (
+    <Link
+      to={"/influencer/promos/distributing"}
+      className="campaign-history-table-row__link">
+      Post & Submit Insights
+    </Link>
+  ),
+  Pending: (
+    <Link
+      to={"/influencer/promos/new-promos"}
+      className="campaign-history-table-row__link">
+      Accept/Deny Request
+    </Link>
+  ),
 };

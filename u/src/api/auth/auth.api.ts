@@ -14,10 +14,9 @@ export const loginApi = async ({
     password,
     role,
   });
-
+  console.log(data, "login");
   return data.data;
 };
-
 
 export const logoutApi = async () => {
   await $api.post("/auth/logout");

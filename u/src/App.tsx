@@ -1,27 +1,37 @@
-import { Routes, Route, Navigate, useNavigate, Outlet } from "react-router-dom";
-import { TabBar } from "./components/layout/tab-bar/TabBar";
-import { routes } from "./router/routes";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useEffect } from "react";
+
+import { TabBar } from "./components/layout/tab-bar/TabBar";
+import { Proceed } from "./components";
+
 import { useAuth } from "./contexts/AuthContext";
 import { setupInterceptors } from "./api/api";
-import { PrivateRoute } from "./router/components/PrivateRoute.tsx";
-import { PublicRoute } from "./router/components/PublicRoute.tsx";
+
+import { PrivateRoute } from "./router/components/PrivateRoute";
+import { PublicRoute } from "./router/components/PublicRoute";
+import { routes } from "./router/routes";
+
+// influencer
+import { DashboardLayout } from "./pages/influencer/dashboard-layout/DashboardLayout";
+import { PromosList } from "./pages/influencer/dashboard-layout/components/promos-list/PromosList";
+import { CampaignHistoryList } from "./pages/influencer/dashboard-layout/components/campaign-history-list/CampaignHistoryList";
+import { NewPromos } from "./pages/influencer/promos/new-promos/NewPromos";
+import { Distributing } from "./pages/influencer/promos/distributing/Distributing";
+import { Completed } from "./pages/influencer/promos/completed/Completed";
+import { InvoicePage } from "./pages/influencer/create-invoice/InvoicePage";
+import { InvoicesDetails } from "./pages/influencer/invoices-details/InvoicesDetails";
+import { AccountSettingInfluencer } from "./pages/influencer/account-setting/AccountSettingInfluencer";
+
+// client
+import { HomePage } from "./pages/home/HomePage";
+
 import "./app.scss";
-import { Proceed } from "./components";
-import { DashboardLayout } from "./pages/influencer/dashboard-layout/DashboardLayout.tsx";
-import { PromosList } from "./pages/influencer/dashboard-layout/components/promos-list/PromosList.tsx";
-import { CampaignHistoryList } from "./pages/influencer/dashboard-layout/components/campaign-history-list/CampaignHistoryList.tsx";
-import { NewPromos } from "./pages/influencer/promos/new-promos/NewPromos.tsx";
-import { Distributing } from "./pages/influencer/promos/distributing/Distributing.tsx";
-import { Completed } from "./pages/influencer/promos/completed/Completed.tsx";
-import { InvoicePage } from "./pages/influencer/create-invoice/InvoicePage.tsx";
-import { InvoicesDetails } from "./pages/influencer/invoices-details/InvoicesDetails.tsx";
-import { AccountSettingInfluencer } from "./pages/influencer/account-setting/AccountSettingInfluencer.tsx";
-import { useUserStore } from "./store/user/useUserStore.ts";
+import { useUser } from "./store/get-user";
+import { RootRedirect } from "./router/components/rootRedirect";
 
 function App() {
   const { accessToken, setAccessToken, logout } = useAuth();
-  const { user } = useUserStore();
+  const { user } = useUser();
 
   useEffect(() => {
     setupInterceptors(setAccessToken, logout);
@@ -31,16 +41,36 @@ function App() {
     <div>
       <TabBar isAuthenticated={!!accessToken} />
       {accessToken && user?.role === "client" && <Proceed />}
+
       <Routes>
-        {/* ---------- INFLUENCER DASHBOARD ---------- */}
+        {/* ---------- ROOT SWITCH ---------- */}
         <Route
-          path="/dashboard"
+          path="/"
+          element={
+            <PrivateRoute>
+              <RootRedirect />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ---------- CLIENT ---------- */}
+        <Route
+          path="/client"
+          element={
+            <PrivateRoute>
+              <HomePage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ---------- INFLUENCER ---------- */}
+        <Route
+          path="/influencer"
           element={
             <PrivateRoute>
               <Outlet />
             </PrivateRoute>
-          }
-        >
+          }>
           {/* ---------- HERO PAGES ---------- */}
           <Route element={<DashboardLayout />}>
             <Route index element={<PromosList />} />
@@ -55,9 +85,13 @@ function App() {
 
           <Route path="create-invoice" element={<InvoicePage />} />
           <Route path="invoices" element={<InvoicesDetails />} />
-          <Route path="account-setting" element={<AccountSettingInfluencer />} />
+          <Route
+            path="account-setting"
+            element={<AccountSettingInfluencer />}
+          />
         </Route>
 
+        {/* ---------- PUBLIC & OTHER ROUTES ---------- */}
         {routes.map(({ path, component: Component, name, isProtected }) => (
           <Route
             key={name}
@@ -72,10 +106,11 @@ function App() {
                   <Component />
                 </PublicRoute>
               )
-            }></Route>
+            }
+          />
         ))}
 
-        {/* fallback */}
+        {/* ---------- FALLBACK ---------- */}
         <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
     </div>
