@@ -31,4 +31,13 @@
     -webkit-appearance: none;
     margin: 0;
   }
+
+  &--error {
+    border: 1px solid vars.$error;
+
+    &:focus {
+      outline: none;
+      border: 1px solid vars.$error;
+    }
+  }
 }

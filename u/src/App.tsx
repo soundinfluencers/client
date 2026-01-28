@@ -28,6 +28,7 @@ import { HomePage } from "./pages/home/HomePage";
 import "./app.scss";
 import { useUser } from "./store/get-user";
 import { RootRedirect } from "./router/components/rootRedirect";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const { accessToken, setAccessToken, logout } = useAuth();
@@ -39,6 +40,7 @@ function App() {
 
   return (
     <div>
+      <ToastContainer />
       <TabBar isAuthenticated={!!accessToken} />
       {accessToken && user?.role === "client" && <Proceed />}
 

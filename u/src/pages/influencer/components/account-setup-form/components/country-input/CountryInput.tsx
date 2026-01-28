@@ -1,29 +1,19 @@
 import './_country-input.scss';
 import { useMemo, useRef, useState } from "react";
 import { useClickOutside } from '../../../../../../hooks/useClickOutside';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { COUNTRY_LIST } from './data/countries.data';
 
 interface Props {
   placeholder: string;
   index: number;
-  isError?: boolean;
 }
-
-/*
-TODO: add validation for country selection
-  {
-    shouldValidate: true,
-    shouldDirty: true,
-  }
-*/
 
 export const CountryInput: React.FC<Props> = ({
   placeholder,
   index,
-  isError,
 }: Props) => {
-  const { control } = useFormContext();
+  const { control, setValue } = useFormContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isSelectingRef = useRef(false);
   const [searchValue, setSearchValue] = useState('');
@@ -33,17 +23,33 @@ export const CountryInput: React.FC<Props> = ({
     if (isFocused) setIsFocused(false);
   });
 
+  const allCountries = useWatch({
+    control,
+    name: "countries",
+  }) as Array<{ country: string | null; percentage: number | null }> | undefined;
+
+  const selectedSet = useMemo(() => {
+    const set = new Set<string>();
+    (allCountries ?? []).forEach((item, i) => {
+      if (i === index) return;
+      if (item?.country) set.add(item.country);
+    });
+    return set;
+  }, [allCountries, index]);
+
   return (
     <Controller
       control={control}
       name={`countries.${index}.country`}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
+        const hasError = fieldState.invalid;
+
         const filteredCountries = useMemo(() => {
           if (!searchValue) return [];
-          return COUNTRY_LIST.filter(c =>
-            c.name.toLowerCase().includes(searchValue.toLowerCase())
-          );
-        }, [searchValue]);
+          return COUNTRY_LIST
+            .filter(c => c.name.toLowerCase().includes(searchValue.toLowerCase()))
+            .filter(c => !selectedSet.has(c.name));
+        }, [searchValue, selectedSet]);
 
         const showDropdown = isFocused && filteredCountries.length > 0;
 
@@ -53,7 +59,7 @@ export const CountryInput: React.FC<Props> = ({
           <div ref={dropdownRef} className={`country-input ${isFocused ? 'country-input--focused' : ''}`}>
             <input
               type="text"
-              className="country-input__input"
+              className={`country-input__input ${hasError ? 'country-input__input--error' : ''}`}
               placeholder={placeholder}
               value={displayValue}
               onChange={(e) => {
@@ -73,7 +79,10 @@ export const CountryInput: React.FC<Props> = ({
                 }
 
                 if (!searchValue.trim()) {
-                  field.onChange(null);
+                  setValue(`countries.${index}.country`, null, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
                 }
               }}
             />
@@ -87,7 +96,10 @@ export const CountryInput: React.FC<Props> = ({
                     onMouseDown={(e) => {
                       e.preventDefault();
                       isSelectingRef.current = true;
-                      field.onChange(country.name);
+                      setValue(`countries.${index}.country`, country.name, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
                       setSearchValue('');
                       setTimeout(() => setIsFocused(false), 120);
                     }}

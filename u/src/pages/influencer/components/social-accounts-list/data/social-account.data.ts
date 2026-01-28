@@ -7,7 +7,7 @@ import soundcloudIcon from "../../../../../assets/social-accounts/soundcloud.svg
 import pressIcon from "../../../../../assets/social-accounts/press.svg";
 
 import type { ISocialAccountMeta } from "../types/social-account.types";
-import type { TSocialAccounts } from "../../account-setup-form/types/account-setup.types";
+import type { TSocialAccounts } from "@/types/user/influencer.types";
 
 export const SOCIAL_ACCOUNTS_DATA: ISocialAccountMeta[] = [
   { id: "instagram", label: "Instagram", icon: instagramIcon },

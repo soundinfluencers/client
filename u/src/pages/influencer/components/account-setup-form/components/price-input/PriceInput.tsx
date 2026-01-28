@@ -3,7 +3,7 @@ import './_price-input.scss';
 import { useFormContext, Controller } from "react-hook-form";
 import { useState } from 'react';
 import { normalizePriceLabel } from './utils/normalize-price-label';
-import type { TSocialAccounts } from '../../types/account-setup.types';
+import type { TSocialAccounts } from '@/types/user/influencer.types';
 
 //TODO: need add validation
 export const PriceInput = ({ platform }: { platform: TSocialAccounts }) => {
@@ -15,7 +15,8 @@ export const PriceInput = ({ platform }: { platform: TSocialAccounts }) => {
     <Controller
       name="price"
       control={control}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
+        const hasError = fieldState.invalid;
         const displayValue = isFocused ? draft : field.value != null ? `${field.value}€` : '';
 
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,12 +46,12 @@ export const PriceInput = ({ platform }: { platform: TSocialAccounts }) => {
 
         return (
           <div className="price-input">
-            <label htmlFor="price" className="price-input__label">
+            <label htmlFor="price" className={`price-input__label ${hasError ? 'price-input__label--error' : ''}`}>
               {normalizePriceLabel(platform)}
             </label>
             <input
               id="price"
-              className="price-input__input"
+              className={`price-input__input ${hasError ? 'price-input__input--error' : ''}`}
               type="text"
               placeholder="100€"
               value={displayValue}

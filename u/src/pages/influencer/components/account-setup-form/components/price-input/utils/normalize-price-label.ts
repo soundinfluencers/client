@@ -1,4 +1,4 @@
-import type { TSocialAccounts } from "../../../../../../../types/influencer/form/account-setup/social-accounts.types";
+import type { TSocialAccounts } from "@/types/user/influencer.types";
 
 export const normalizePriceLabel = (platform: TSocialAccounts) => {
   switch (platform) {

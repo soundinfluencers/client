@@ -13,13 +13,13 @@ export const ACCOUNT_DETAILS_INPUTS_DATA: TDetailsInputs[] = [
     label: "Last Name",
     placeholder: "Enter last name",
   },
-  {
-    type: "file",
-    name: "logosUrl",
-    label: "Photo profile",
-    placeholder: "Attach the logo for your brand here",
-    size: "small",
-  },
+  // {
+  //   type: "file",
+  //   name: "profilePhotoUrl",
+  //   label: "Photo profile",
+  //   placeholder: "Attach the logo for your brand here",
+  //   size: "small",
+  // },
   {
     type: "text",
     name: "email",
@@ -32,10 +32,10 @@ export const ACCOUNT_DETAILS_INPUTS_DATA: TDetailsInputs[] = [
     label: "Phone number",
     placeholder: "Enter phone number",
   },
-  {
-    type: 'text',
-    name: 'telegram',
-    label: 'Telegram',
-    placeholder: 'Enter telegram username',
-  }
+  // {
+  //   type: 'text',
+  //   name: 'telegramUsername',
+  //   label: 'Telegram',
+  //   placeholder: 'Enter telegram username',
+  // }
 ];

@@ -1,10 +1,13 @@
 @use "@/styles/mixins/_glass-effect.scss" as glass;
+@use "@/styles/variables/_variables.scss" as vars;
 
 .logo {
   @include glass.glass-effect();
 
   user-select: none;
+  background: #ffffff;
   cursor: pointer;
+  border: 1px solid #BCE8FF;
   width: fit-content;
   height: 36px;
   padding: 8px 12px;

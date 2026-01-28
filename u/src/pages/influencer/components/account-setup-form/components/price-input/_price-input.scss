@@ -16,6 +16,10 @@
     @media screen and (max-width: 500px) {
       font-size: 14px;
     }
+
+    &--error {
+      color: vars.$error;
+    }
   }
 
   &__input {
@@ -28,6 +32,15 @@
     &::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
+    }
+
+    &--error {
+      border: 1px solid vars.$error;
+
+      &:focus {
+        outline: none;
+        border: 1px solid vars.$error;
+      }
     }
   }
 }

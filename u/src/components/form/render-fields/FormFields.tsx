@@ -6,13 +6,12 @@ import { ImageUpload } from '../../ui/image-upload/ImageUpload';
 import { StarRatingField } from '../../ui/star-rating/StarRatingField';
 
 // import type { TCampaignResultInput } from '../../../types/influencer/form/campaign-result/campaign-result.types';
+// import type { TInvoiceInputConfig } from '../../../pages/influencer/create-invoice/components/invoice-form-content/types/invoice-form-inputs.types';
 import { Fragment } from 'react/jsx-runtime';
 
 interface Props {
   inputs: any;
 };
-
-// Rename component to FormFields
 
 export const FormFields = ({ inputs }: Props) => {
   const { control } = useFormContext();
@@ -56,7 +55,7 @@ export const FormFields = ({ inputs }: Props) => {
                     value={field.value}
                     onChange={field.onChange}
                     size={input.size}
-                  // error={fieldState.error}
+                    error={fieldState.error}
                   />
                 )}
               />

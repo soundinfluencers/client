@@ -1,22 +1,23 @@
 import type React from 'react';
 import './_view-mode.scss';
 
-import type { ListDisplayMode } from '../../../../../types/utils/constants.types';
 import check from '../../../../../assets/icons/check.svg';
 import gridViewIcon from '../../../../../assets/icons/grid.svg';
 import listViewIcon from '../../../../../assets/icons/menu.svg';
+import { useDashboardLayoutStore } from '../../store/useDashboardLayoutStore';
 
-interface Props {
-  viewMode: ListDisplayMode;
-  setViewMode: (mode: ListDisplayMode) => void;
-};
+export const ViewModeTabs:React.FC = () => {
+  const { viewMode, setViewMode } = useDashboardLayoutStore();
 
-export const ViewModeTabs:React.FC<Props> = ({ viewMode, setViewMode }) => {
   return (
     <div className="promos-view-mode-tabs">
       <button
         className={`promos-view-mode-tabs__tab ${viewMode === 'list' ? 'promos-view-mode-tabs__tab--active' : ''}`}
-        onClick={() => setViewMode('list')}
+        onClick={() => {
+          if (viewMode !== 'list') {
+            setViewMode('list');
+          };
+        }}
       >
         <img
           src={check}
@@ -31,7 +32,11 @@ export const ViewModeTabs:React.FC<Props> = ({ viewMode, setViewMode }) => {
       </button>
       <button
         className={`promos-view-mode-tabs__tab ${viewMode === 'grid' ? 'promos-view-mode-tabs__tab--active' : ''}`}
-        onClick={() => setViewMode('grid')}
+        onClick={() => {
+          if (viewMode !== 'grid') {
+            setViewMode('grid');
+          };
+        }}
       >
         <img
           src={gridViewIcon}

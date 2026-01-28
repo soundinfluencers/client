@@ -32,6 +32,15 @@
     @media screen and (max-width: 500px) {
       padding: 11px 16px;
     }
+
+    &--error {
+      border: 1px solid vars.$error;
+
+      &:focus {
+        outline: none;
+        border: 1px solid vars.$error;
+      }
+    }
   }
 
   &__list-wrapper {
@@ -47,7 +56,9 @@
     opacity: 0;
     z-index: 1;
     transform: translateY(-4px);
-    transition: opacity 0.12s ease, transform 0.12s ease;
+    transition:
+      opacity 0.12s ease,
+      transform 0.12s ease;
     pointer-events: none;
 
     &--visible {

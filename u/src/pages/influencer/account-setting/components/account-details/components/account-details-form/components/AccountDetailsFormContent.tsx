@@ -1,46 +1,73 @@
-import { useFormContext } from "react-hook-form";
-import { FormFields } from "../../../../../../../../components/form/render-fields/FormFields";
-import { ACCOUNT_DETAILS_INPUTS_DATA } from "../data/account-details-inputs.data";
-import { useUserStore } from "../../../../../../../../store/influencer/account-settings/useUserStore";
 import { useState } from "react";
-
-import { MaskedPasswordInput } from "./masked-password-input/MaskedPasswordInput";
+import { useFormContext } from "react-hook-form";
+import { useInfluenserProfileStore } from "@/store/influencer/account-settings/useInfluenserProfileStore";
 import { useAccountSettingsStore } from "../../../../../store/useAccountSettingsStore";
+import { useUpdateInfluencerDetails } from "@/pages/influencer/account-setting/hooks/useInfluencerProfileDetails";
 
-//TODO: fix types any where possible, change button to UButton
+import { FormFields } from "../../../../../../../../components/form/render-fields/FormFields";
+import { MaskedPasswordInput } from "./masked-password-input/MaskedPasswordInput";
+import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix";
+import { ACCOUNT_DETAILS_INPUTS_DATA } from "../data/account-details-inputs.data";
+import type { InfluencerProfileApi, TInfluencerProfileDetailsModel } from "@/types/user/influencer.types";
+
+import './_account-details-form-content.scss'
 
 export const AccountDetailsFormContent = () => {
-  const { handleSubmit } = useFormContext();
-  const { saveUserDetails } = useUserStore();
+  const { handleSubmit } = useFormContext<TInfluencerProfileDetailsModel>();
   const { setMode } = useAccountSettingsStore();
   const [isLoading, setIsLoading] = useState(false);
+  const { profile } = useInfluenserProfileStore();
 
-  const handleSave = async (data: any) => {
+  const updateMutation = useUpdateInfluencerDetails();
+
+  const handleSave = async (data: TInfluencerProfileDetailsModel) => {
+    if (!profile) return;
+
+    if (compareProfiles(data, profile)) {
+      console.log("No changes detected, skipping update.");
+      setMode("view");
+      return;
+    }
+
     console.log('Form data to save:', data);
-
     setIsLoading(true);
-    // Simulate an API call
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    saveUserDetails(data);
-    setIsLoading(false);
-    setMode("view");
+    console.log('Profie before update', profile);
+
+    try {
+      await updateMutation.mutateAsync(data);
+    } catch (error) {
+      console.error("Error updating influencer profile details:", error);
+      // Handle error (e.g., show toast notification)
+    } finally {
+      setIsLoading(false);
+      setMode("view");
+    }
   }
 
   return (
-    <>
+    <div className="account-details-form-content">
       <FormFields inputs={ACCOUNT_DETAILS_INPUTS_DATA} />
 
       <MaskedPasswordInput />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginTop: 32, width: '100%', justifyContent: 'space-between' }}>
-        <button
-          style={{ width: 250, height: 50, background: '#00FF00', borderRadius: 8 }}
+      <div className="account-details-form-content__actions">
+        <ButtonMain
+          label={isLoading ? "Saving..." : "Save"}
           onClick={handleSubmit(handleSave)}
-          type='submit'
-        >
-          {isLoading ? 'Saving...' : 'Save changes'}
-        </button>
+          isDisabled={isLoading}
+        />
       </div>
-    </>
+    </div>
+  );
+};
+
+function compareProfiles(a: TInfluencerProfileDetailsModel, b: InfluencerProfileApi): boolean {
+  return (
+    a.firstName === b.firstName &&
+    a.email === b.email &&
+    a.phone === b.phone &&
+    a.lastName === b.lastName
+    // a.profilePhotoUrl === b.profilePhotoUrl &&
+    // a.telegramUsername === b.telegramUsername
   );
 };

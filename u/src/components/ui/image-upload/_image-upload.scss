@@ -20,6 +20,10 @@
     @media screen and (max-width: 500px) {
       font-size: 14px;
     }
+
+    &--error {
+      color: vars.$error;
+    }
   }
 
   &__field {
@@ -43,6 +47,15 @@
       }
       &-large {
         padding: 16px;
+      }
+    }
+
+    &--error {
+      border: 1px solid vars.$error;
+
+      &:focus {
+        outline: none;
+        border: 1px solid vars.$error;
       }
     }
   }

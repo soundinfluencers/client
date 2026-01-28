@@ -8,6 +8,7 @@ import React from "react";
 import type { ZodTypeAny } from "zod/v3";
 
 // interface FormSection includes data reliable to form //
+type DynamicFormData = Record<string, string | number | FileList | undefined>;
 
 interface FormSection {
   children: React.ReactNode;
@@ -17,13 +18,11 @@ interface FormSection {
   className?: string;
   classNameBtnSection?: string;
 
-  defaultValues?: Record<string, any>;
+  defaultValues?: Record<string, string | number | FileList | undefined>;
 
   schema?: ZodTypeAny;
   onSubmit?: (data: DynamicFormData) => Promise<void> | void;
 }
-
-type DynamicFormData = Record<string, any>;
 
 export const Form = ({
   children,
@@ -36,12 +35,15 @@ export const Form = ({
 }: FormSection) => {
   const methods = useForm({
     defaultValues,
+    resolver: schema ? zodResolver(schema) : undefined,
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
 
   const handleFormSubmit = async (formData: DynamicFormData) => {
     console.log(formData, "form");
     if (onSubmit) {
-      onSubmit(formData);
+      await onSubmit(formData);
     }
   };
 

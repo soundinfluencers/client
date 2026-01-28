@@ -9,12 +9,13 @@
   height: 51px;
   padding: 4px;
   box-sizing: border-box;
+  background: #ffffff;
 
   display: flex;
   align-items: center;
   position: relative;
   border-radius: 32px;
-  border: 1px solid vars.$white-gray-2;
+  // border: 1px solid vars.$white-gray-2;
 
   @media screen and (max-width: 900px) {
     height: 44px;

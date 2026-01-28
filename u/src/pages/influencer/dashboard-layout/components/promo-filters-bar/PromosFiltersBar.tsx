@@ -19,16 +19,16 @@ export const PromosFiltersBar = () => {
   const handleReviewAll = (status: string) => {
     switch (status) {
       case 'pending':
-        navigate('/dashboard/promos/new-promos');
+        navigate('/influencer/promos/new-promos');
         break;
       case 'distributing':
-        navigate('/dashboard/promos/distributing');
+        navigate('/influencer/promos/distributing');
         break;
       case 'completed':
-        navigate('/dashboard/promos/completed');
+        navigate('/influencer/promos/completed');
         break;
       default:
-        navigate('/dashboard/promos');
+        navigate('/influencer/promos');
     }
   };
 

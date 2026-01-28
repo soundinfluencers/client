@@ -32,7 +32,7 @@ export const ButtonSecondary: React.FC<Props> = ({
   onClick,
   isDisabled = false,
   type = "button",
-  className,
+  className = '',
 }: Props) => {
   return (
     <button
@@ -44,4 +44,4 @@ export const ButtonSecondary: React.FC<Props> = ({
       {label}
     </button>
   );
-}
+};

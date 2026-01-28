@@ -1,7 +1,7 @@
-// import type { IInfluencerPromo } from '../../../../../../../types/influencer/promos/promos.types';
 import { PromosTableItem } from './promos-table-item/PromosTableItem';
+import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
 import './_promos-table.scss';
-import type { IPromo } from '../../../../../../../api/influencer/promos/influencer-promos.api';
+
 
 interface Props {
   promos: IPromo[];
@@ -21,7 +21,7 @@ export const PromosTable = ({ promos }: Props) => {
 
       <tbody className='promos-table__tbody'>
         {promos.map((promo) => (
-          <PromosTableItem key={promo.campaignId} promo={promo} />
+          <PromosTableItem key={promo.addedAccountsId} promo={promo} />
         ))}
       </tbody>
     </table>

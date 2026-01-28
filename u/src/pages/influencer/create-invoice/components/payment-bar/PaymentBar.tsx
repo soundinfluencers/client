@@ -1,6 +1,7 @@
 import './_payment-bar.scss'
-import {INVOICE_PAYMENT_METHODS_TABS } from "../../../../../constants/influencer/form-data/invoice/invoice-payment.data";
-import type { TInvoicePaymentMethod } from '../../../../../types/influencer/form/invoice/payment-method.types';
+import { INVOICE_PAYMENT_METHODS_TABS } from './data/payment-method.data';
+import type { TInvoicePaymentMethod } from './types/payment-method.types';
+
 
 interface Props {
   tab: TInvoicePaymentMethod;

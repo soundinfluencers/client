@@ -1,5 +1,6 @@
 import type {FC} from "react";
-import logo from '@/assets/logos/logo.svg';
+// import logo from '@/assets/logos/logo.svg';
+import logoMain from '@/assets/logos/logo-main.svg';
 import './_logo.scss';
 
 export interface LogoProps {
@@ -13,7 +14,7 @@ export const Logo: FC<LogoProps> = ({onClick}: LogoProps) => {
 
     return (
       <div className="logo" onClick={handleClick}>
-          <img src={logo} alt=""/>
+          <img src={logoMain} alt=""/>
           <p>SoundInfluencers</p>
       </div>
     );

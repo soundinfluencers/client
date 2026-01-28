@@ -1,13 +1,11 @@
 import { type FC, useState } from "react";
 import "./_auth-page.scss";
 import { SwitchButton } from "../../../components/ui/switchers/switch-button/SwitchButton.tsx";
-import {
-  ButtonMain,
-  ButtonSecondary,
-} from "@/components/ui/buttons/button/Button.tsx";
+
 import { useNavigate } from "react-router-dom";
 import type { UserRoleType } from "@/types/user/user.types.ts";
 import { useUser } from "@/store/get-user/index.ts";
+import { ButtonMain, ButtonSecondary } from "@/components/ui/buttons-fix/ButtonFix.tsx";
 export const AuthPage: FC = () => {
   const navigate = useNavigate();
   const { setRole, role } = useUser();
@@ -54,10 +52,10 @@ export const AuthPage: FC = () => {
               </div>
               <div className="auth-form__controls">
                 <ButtonSecondary
-                  text={"Log In"}
+                  label={"Log In"}
                   onClick={() => navigate("/login")}
                 />
-                <ButtonMain text={"Sign Up"} onClick={handleSignupClick} />
+                <ButtonMain label={"Sign Up"} onClick={handleSignupClick} />
               </div>
             </div>
           </div>

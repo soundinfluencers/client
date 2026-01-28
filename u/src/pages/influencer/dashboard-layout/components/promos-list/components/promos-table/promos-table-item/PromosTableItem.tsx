@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { getSocialMediaIcon } from '../../../../../../../../constants/social-medias';
-// import type { IInfluencerPromo } from '../../../../../../../../types/influencer/promos/promos.types';
+import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
+
 import './_promos-table-item.scss';
-import type { IPromo } from '../../../../../../../../api/influencer/promos/influencer-promos.api';
 
 interface Props {
   promo: IPromo;
@@ -11,26 +11,30 @@ interface Props {
 export const PromosTableItem = ({ promo }: Props) => {
   const navigate = useNavigate();
 
-  const handleNavigate = (status: string) => {
-    switch (status) {
-      case 'Pending':
-        navigate('/dashboard/promos/new-promos');
+  const handleNavigate = (statusCampaign: string, campaignId?: string, addedAccountsId?: string) => {
+    switch (statusCampaign) {
+      case 'pending':
+        navigate('/influencer/promos/new-promos');
         break;
-      case 'Distributing':
-        navigate('/dashboard/promos/distributing');
+      case "distributing":
+        navigate(`/influencer/promos/distributing`, {
+          state: { campaignId, addedAccountsId }
+        });
         break;
-      case 'Completed':
-        navigate('/dashboard/promos/completed');
+      case 'completed':
+        navigate(`/influencer/promos/completed`, {
+          state: { campaignId, addedAccountsId }
+        });
         break;
       default:
-        navigate('/dashboard/promos');
+        navigate('/influencer/promos');
     }
   };
 
   return (
     <tr className="promos-table-item">
       <td className='promos-table-item__status'>
-        <div className="promos-table-item__status-content" onClick={() => handleNavigate(promo.statusCampaign)}>
+        <div className="promos-table-item__status-content" onClick={() => handleNavigate(promo.statusCampaign, promo.campaignId, promo.addedAccountsId)}>
           <img
             src={getSocialMediaIcon(promo.socialMedia) || ''}
             alt={promo.socialMedia}
@@ -44,8 +48,7 @@ export const PromosTableItem = ({ promo }: Props) => {
       </td>
       <td className='promos-table-item__name'>{promo.campaignName}</td>
       <td className='promos-table-item__reward'>
-        {/* {promo.reward ? `${promo.reward}€` : ''} */}
-        {`599€`}
+        {promo.reward && `${promo.reward}€`}
       </td>
     </tr>
   );
@@ -72,23 +75,23 @@ export const PromosTableItem = ({ promo }: Props) => {
 
 
 //TODO: Move to utils?
-function dateFormatter(dateString: string) {
-  //DD.MM.YYYY
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
+// function dateFormatter(dateString: string) {
+//   //DD.MM.YYYY
+//   const date = new Date(dateString);
+//   const day = String(date.getDate()).padStart(2, '0');
+//   const month = String(date.getMonth() + 1).padStart(2, '0');
+//   const year = date.getFullYear();
 
-  return `${day}.${month}.${year}`;
-}
+//   return `${day}.${month}.${year}`;
+// }
 
 const normalizeStatus = (status: string) => {
   switch (status) {
-    case 'Pending':
+    case 'pending':
       return 'New Request';
-    case 'Distributing':
+    case 'distributing':
       return 'Distributing';
-    case 'Completed':
+    case 'completed':
       return 'Completed';
     default:
       return status;

@@ -1,14 +1,11 @@
-/*
-  structure of table head columns:
-  invoice id | date issued | payment method | amount | status (submitted, paid, overdue)
-*/
-// import type { TInvoicePaymentMethod } from "../../../../types/influencer/form/invoice/payment-method.types";
+import type { TInvoicePaymentMethod } from "../../create-invoice/components/payment-bar/types/payment-method.types";
 
-export interface IInvoiceDetailsItem {
-  invoiceId: string;
-  dateIssued: string; // ISO date string
-  paymentMethod: string;
-  amount: number; // in cents
-  status: 'submitted' | 'paid' | 'overdue';
-  description?: string;
+export type TInvoiceStatus = "Submitted";
+
+export interface IInvoiceResponseModel {
+  shortInvoiceId: string;
+  creationDate: string;
+  paymentMethod: TInvoicePaymentMethod;
+  amount: number;
+  status: TInvoiceStatus;
 };

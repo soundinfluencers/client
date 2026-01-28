@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-// import type { IInfluencerPromo } from '../../../../../../../types/influencer/promos/promos.types';
 import { PromosGridCard } from './promos-grid-card/PromosGridCard';
 
+import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
+
 import './_promos-grid.scss';
-import type { IPromo } from '../../../../../../../api/influencer/promos/influencer-promos.api';
 
 interface Props {
   promos: IPromo[];
@@ -12,19 +12,23 @@ interface Props {
 export const PromosGrid = ({ promos }: Props) => {
   const navigate = useNavigate();
 
-  const handleNavigate = (confirmation: string) => {
-    switch (confirmation) {
-      case 'wait':
-        navigate('/dashboard/promos/new-promos');
+  const handleNavigate = (statusCampaign: string, campaignId?: string, addedAccountsId?: string) => {
+    switch (statusCampaign) {
+      case 'pending':
+        navigate('/influencer/promos/new-promos');
         break;
-      case 'accept':
-        navigate('/dashboard/promos/distributing');
+      case "distributing":
+        navigate(`/influencer/promos/distributing`, {
+          state: { campaignId, addedAccountsId }
+        });
         break;
-      case 'Completed':
-        navigate('/dashboard/promos/completed');
+      case 'completed':
+        navigate(`/influencer/promos/completed`, {
+          state: { campaignId, addedAccountsId }
+        });
         break;
       default:
-        navigate('/dashboard/promos');
+        navigate('/influencer/promos');
     }
   };
   
@@ -32,9 +36,9 @@ export const PromosGrid = ({ promos }: Props) => {
     <ul className='promos-grid'>
       {promos.map((promo) => (
         <li
-          key={promo.campaignId}
+          key={promo.addedAccountsId + promo.campaignId}
           className='promos-grid__item'
-          onClick={() => handleNavigate(promo.confirmation)}
+          onClick={() => handleNavigate(promo.statusCampaign, promo.campaignId, promo.addedAccountsId)}
         >
           <PromosGridCard promo={promo} />
         </li>

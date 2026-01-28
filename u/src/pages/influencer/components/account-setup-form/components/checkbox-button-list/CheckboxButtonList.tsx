@@ -3,7 +3,7 @@ import { useController, useFormContext } from 'react-hook-form';
 
 import './_checkbox-button-list.scss';
 import type { ICheckboxButton } from "./types/checkbox-buttons.types";
-import type { ISocilaAccountFormValues } from "../../types/account-setup.types";
+import type { TSocialAccountFormValues } from "../../types/account-setup.types";
 
 interface Props {
   data: ICheckboxButton[];
@@ -20,24 +20,38 @@ export const CheckboxButtonList: React.FC<Props> = ({ data, name, title, subtitl
     control,
   });
 
+  // const hasError = fieldState.invalid;
+
   const isMusicGenres = name === "musicGenres";
 
   const values = field.value ?? [];
 
-  const getGenre = (genre: string) =>
-    (values as ISocilaAccountFormValues["musicGenres"]).find(g => g.genre === genre);
+  // console.log(values);
 
-  const getSelectedSubGenres = (genre: string) =>
-    getGenre(genre)?.subGenres ?? [];
+  const getGenre = (genre: string) => {
+    // console.log(genre);
 
-  const getChildrenValues = (parent: ICheckboxButton): string[] =>
-    parent.children?.map(c => c.value) ?? [];
+    return (values as TSocialAccountFormValues["musicGenres"]).find(g => g.genre === genre);
+  };
+
+  const getSelectedSubGenres = (genre: string) => {
+    // console.log(genre);
+
+    return getGenre(genre)?.subGenres ?? [];
+  };
+
+  const getChildrenValues = (parent: ICheckboxButton): string[] => {
+    // console.log(parent);
+
+    return parent.children?.map(c => c.value) ?? [];
+  };
 
   // Parent is considered selected if at least one child is selected (for musicGenres)
   const isParentChecked = (parent: ICheckboxButton) => {
     if (!isMusicGenres) return (values as string[]).includes(parent.value);
 
     const children = getChildrenValues(parent);
+    // console.log(children);
     if (children.length === 0) return !!getGenre(parent.value);
 
     return getSelectedSubGenres(parent.value).length > 0;
@@ -52,7 +66,7 @@ export const CheckboxButtonList: React.FC<Props> = ({ data, name, title, subtitl
 
     const children = getChildrenValues(parent);
     const current = getSelectedSubGenres(parent.value);
-    let newValues = [...(values as ISocilaAccountFormValues["musicGenres"])];
+    let newValues = [...(values as TSocialAccountFormValues["musicGenres"])];
 
     if (children.length === 0) {
       const exists = !!getGenre(parent.value);
@@ -77,7 +91,7 @@ export const CheckboxButtonList: React.FC<Props> = ({ data, name, title, subtitl
 
     const genre = parent.value;
     const current = getGenre(genre);
-    let newValues = [...(values as ISocilaAccountFormValues["musicGenres"])];
+    let newValues = [...(values as TSocialAccountFormValues["musicGenres"])];
 
     if (!current) {
       newValues.push({ genre, subGenres: [childValue] });
@@ -95,7 +109,7 @@ export const CheckboxButtonList: React.FC<Props> = ({ data, name, title, subtitl
   };
 
   return (
-    <div className='checkbox-button-list'>
+    <div className={`checkbox-button-list`}>
       <div className='checkbox-button-list__header'>
         <p className="checkbox-button-list__title">{title}</p>
         <p className="checkbox-button-list__subtitle">{subtitle}</p>

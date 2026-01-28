@@ -11,16 +11,17 @@ interface DashboardLayoutState {
 
   activeCampaignHistoryFilter: string;
   setActiveCampaignHistoryFilter: (option: string) => void;
-};
+}
 
 export const useDashboardLayoutStore = create<DashboardLayoutState>((set) => ({
   viewMode: "grid",
   setViewMode: (mode) => set({ viewMode: mode }),
 
-  activePromosFilter: 'all',
+  activePromosFilter: "all",
   setActivePromosFilter: (option) => set({ activePromosFilter: option }),
   limit: 12,
 
-  activeCampaignHistoryFilter: 'all',
-  setActiveCampaignHistoryFilter: (option) => set({ activeCampaignHistoryFilter: option }),
+  activeCampaignHistoryFilter: "all",
+  setActiveCampaignHistoryFilter: (option) =>
+    set({ activeCampaignHistoryFilter: option }),
 }));

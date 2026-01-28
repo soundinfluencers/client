@@ -1,4 +1,4 @@
-import type { TSocialAccounts } from "../../../types/account-setup.types";
+import type { TSocialAccounts } from "@/types/user/influencer.types";
 
 export interface IAccountUserInput {
   name: string;

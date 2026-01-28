@@ -67,10 +67,16 @@
     display: block;
     box-sizing: border-box;
     text-align: center;
+    transition: all 0.2s ease;
 
     @media screen and (max-width: 900px) {
       padding: 8px 16px;
       font-size: 14px;
+    }
+
+    &:hover {
+      background: vars.$hover-button-2;
+      text-decoration: none;
     }
   }
 

@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import type { TSocialAccounts } from "../../../pages/influencer/components/account-setup-form/types/account-setup.types";
 import type {
   ISignupInfluencerDraft,
   SocialAccountDraft,
+  TSocialAccounts,
 } from "../../../types/user/influencer.types";
 
 const initialInfluencer: ISignupInfluencerDraft = {
@@ -21,51 +21,75 @@ const initialInfluencer: ISignupInfluencerDraft = {
   press: [],
 };
 
+type BaseField = "firstName" | "lastName" | "email" | "phone" | "password";
+
+const initialErrors: Record<BaseField, boolean> = {
+  firstName: false,
+  lastName: false,
+  email: false,
+  phone: false,
+  password: false,
+};
+
 interface ISingupInfluencerState {
   user: ISignupInfluencerDraft;
-  errors: Partial<Record<keyof ISignupInfluencerDraft, boolean>>; //TODO: fix types later, create set types for fields
+  errors: Record<BaseField, boolean>;
+  submitError: string | null;
 }
 
 interface ISingupInfluencerActions {
   setField: <K extends keyof ISignupInfluencerDraft>(
     key: K,
-    value: ISignupInfluencerDraft[K]
+    value: ISignupInfluencerDraft[K],
   ) => void;
 
-  setError: (field: keyof ISignupInfluencerDraft, value: boolean) => void;
+  setError: (field: BaseField, value: boolean) => void;
   clearErrors: () => void;
+  setSubmitError: (message: string | null) => void;
+  clearSubmitError: () => void;
   validate: () => boolean;
   isFormReady: () => boolean;
 
   saveAccount: (
     platform: TSocialAccounts,
     account: SocialAccountDraft,
-    accountId?: number
+    index?: number,
   ) => void;
 
-  removeAccount: (platform: TSocialAccounts, accountId: number) => void;
+  removeAccount: (platform: TSocialAccounts, index: number) => void;
 
   resetSignup: () => void;
 }
 
 type ISingupInfluencerStore = ISingupInfluencerState & ISingupInfluencerActions;
 
+const cloneInfluencer = (): ISignupInfluencerDraft => ({
+  ...initialInfluencer,
+  instagram: [],
+  tiktok: [],
+  spotify: [],
+  soundcloud: [],
+  facebook: [],
+  youtube: [],
+  press: [],
+});
+
 export const useInfluenserSignupStore = create<ISingupInfluencerStore>()(
   immer((set, get) => ({
-    user: structuredClone(initialInfluencer),
-
-    errors: {
-      firstName: false,
-      lastName: false,
-      email: false,
-      phone: false,
-      password: false,
-    },
+    user: cloneInfluencer(),
+    errors: { ...initialErrors },
+    submitError: null,
 
     setField: (key, value) =>
       set((state) => {
         state.user[key] = value;
-        state.errors[key] = false;
+
+        // reset errors only for base fields
+        if (key in state.errors) {
+          state.errors[key as BaseField] = false;
+        }
+
+        state.submitError = null;
       }),
 
     setError: (field, value) =>
@@ -75,32 +99,35 @@ export const useInfluenserSignupStore = create<ISingupInfluencerStore>()(
 
     clearErrors: () =>
       set((state) => {
-        Object.keys(state.errors).forEach((key) => {
-          state.errors[key as keyof ISignupInfluencerDraft] = false;
-        });
+        state.errors = { ...initialErrors };
+      }),
+
+    setSubmitError: (message) =>
+      set((s) => {
+        s.submitError = message;
+      }),
+
+    clearSubmitError: () =>
+      set((state) => {
+        state.submitError = null;
       }),
 
     validate: () => {
       const { user } = get();
-      let isValid = true;
 
-      const setErr = (
-        key: keyof ISignupInfluencerDraft,
-        condition: boolean
-      ) => {
-        if (!condition) {
-          isValid = false;
-          set((state) => {
-            state.errors[key] = true;
-          });
-        }
+      const nextErrors: Record<BaseField, boolean> = {
+        firstName: !baseValidateText(user.firstName),
+        lastName: !baseValidateText(user.lastName),
+        email: !baseValidatedEmail(user.email),
+        phone: !baseValidatedPhone(user.phone),
+        password: !baseValidatePassword(user.password),
       };
 
-      setErr("firstName", baseValidateText(user.firstName));
-      setErr("lastName", baseValidateText(user.lastName));
-      setErr("email", baseValidatedEmail(user.email));
-      setErr("phone", baseValidatedPhone(user.phone));
-      setErr("password", baseValidatePassword(user.password));
+      const isValid = !Object.values(nextErrors).some(Boolean);
+
+      set((state) => {
+        state.errors = nextErrors;
+      });
 
       return isValid;
     },
@@ -113,77 +140,51 @@ export const useInfluenserSignupStore = create<ISingupInfluencerStore>()(
         user.lastName.trim().length > 0 &&
         user.email.trim().length > 0 &&
         user.phone.trim().length > 0 &&
-        user.password.trim().length > 0;
+        user.password.length > 0;
 
       const hasAtLeastOneAccount =
-        user.instagram.length > 0 ||
-        user.tiktok.length > 0 ||
-        user.youtube.length > 0 ||
-        user.spotify.length > 0 ||
-        user.soundcloud.length > 0 ||
-        user.facebook.length > 0 ||
-        user.press.length > 0;
+        (user.instagram?.length ?? 0) > 0 ||
+        (user.tiktok?.length ?? 0) > 0 ||
+        (user.youtube?.length ?? 0) > 0 ||
+        (user.spotify?.length ?? 0) > 0 ||
+        (user.soundcloud?.length ?? 0) > 0 ||
+        (user.facebook?.length ?? 0) > 0 ||
+        (user.press?.length ?? 0) > 0;
 
       return hasRequiredFields && hasAtLeastOneAccount;
     },
 
-    saveAccount: (
-      platform: TSocialAccounts,
-      account: SocialAccountDraft,
-      accountId?: number
-    ) =>
+    saveAccount: (platform, account, index) =>
       set((state) => {
-        // console.log('Payloda:', platform, account, accountId);
-
         const list = state.user[platform];
-        if (!Array.isArray(list)) return;
 
-        // console.log('List accounts before edit:', list);
-
-        // edit existing
-        if (accountId !== undefined) {
-          if (accountId < 0 || accountId >= list.length) return;
-          // console.log('Accont before edit:', list[accountId]);
-          list[accountId] = {
-            ...list[accountId],
-            ...account,
-          };
-          // console.log('Accont after edit:', list[accountId]);
+        if (index === undefined || Number.isNaN(index)) {
+          list.push(account);
           return;
         }
 
-        // create new
-        // console.log('Creating new account:', account);
-        list.push({ ...account });
-        // console.log('List accounts after create:', list);
+        if (index < 0 || index >= list.length) return;
+        list[index] = account;
       }),
 
-    removeAccount: (platform: TSocialAccounts, accountId: number) => {
+    removeAccount: (platform, index) =>
       set((state) => {
-        // console.log("Payload:", platform, accountId)
-        const list = state.user?.[platform];
-        if (!Array.isArray(list)) return;
-        if (accountId < 0 || accountId >= list.length) return;
-        // console.log("Account list before removal:", list);
-        // console.log("Existing account:", existingAccount);
-
-        // remove by index
-        list.splice(accountId, 1);
-
-        // console.log("Account list after removal:", list);
-      });
-    },
+        const list = state.user[platform];
+        if (index < 0 || index >= list.length) return;
+        list.splice(index, 1);
+      }),
 
     resetSignup: () =>
       set((state) => {
-        state.user = structuredClone(initialInfluencer);
+        state.user = cloneInfluencer();
+        state.errors = { ...initialErrors };
+        state.submitError = null;
       }),
-  }))
+  })),
 );
 
-const baseValidateText = (text: string) => {
-  return text.trim().length > 2;
-};
+// validators
+const baseValidateText = (text: string) => text.trim().length > 2;
 
 const baseValidatedEmail = (email: string) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -191,13 +192,11 @@ const baseValidatedEmail = (email: string) => {
 };
 
 const baseValidatePassword = (password: string) => {
-  // Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character
-  const re =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  return re.test(String(password));
+  // min 8 characters
+  return /^.{8,}$/.test(String(password));
 };
 
 const baseValidatedPhone = (phone: string) => {
-  const re = /^\+?[1-9]\d{1,14}$/; // E.164 format
-  return re.test(String(phone));
+  // E.164
+  return /^\+?[1-9]\d{1,14}$/.test(String(phone));
 };

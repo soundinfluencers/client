@@ -92,10 +92,19 @@
   }
 
   &__footer {
-    margin-top: auto;
+    margin-top: 140px;
     text-align: center;
     font-size: 16px;
     font-weight: 400;
+
+    @media screen and (max-width: 900px) {
+      margin-top: 55px;
+      font-size: 14px;
+    }
+    @media screen and (max-width: 500px) {
+      margin-top: 120px;
+      font-size: 14px;
+    }
   }
 }
 

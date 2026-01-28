@@ -1,15 +1,13 @@
 .invoice-page {
   padding-top: 24px;
-  padding-bottom: 190px;
+  padding-bottom: 64px;
 
   @media screen and (max-width: 900px) {
-    padding-bottom: 72px;
-    padding-inline: 40px;
+    padding-bottom: 32px;
   }
 
   @media screen and (max-width: 500px) {
-    padding-bottom: 26px;
-    padding-inline: 16px;
+    padding-bottom: 24px;
   }
 
   &__title {

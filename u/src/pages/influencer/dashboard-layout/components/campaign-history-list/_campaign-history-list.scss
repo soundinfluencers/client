@@ -1,27 +1,26 @@
 @use "@/styles/variables/variables" as vars;
 
 .campaign-history-list {
-  margin: 0 auto;
-  max-width: 1244px;
+  margin-top: 32px;
+  padding-bottom: 64px;
+
+  @media screen and (max-width: 900px) {
+    padding-bottom: 32px;
+  }
+  @media screen and (max-width: 900px) {
+    padding-bottom: 24px;
+  }
 
   &__content {
-    padding: 0px 10px 64px 10px;
-    margin-top: 32px;
-
-    @media screen and (max-width: 900px) {
-      margin-top: 16px;
-      padding: 0 40px 32px 40px;
-    }
-    @media screen and (max-width: 500px) {
-      margin-top: 30px;
-      padding: 0 16px 32px 16px;
-    }
+    overflow-x: visible;
   }
 
   &__scroll {
     overflow-x: auto;
-    margin-right: calc(50% - 50vw);
-    padding-right: calc(50vw - 50%);
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+
+    box-sizing: border-box;
 
     &::-webkit-scrollbar {
       height: 8px;

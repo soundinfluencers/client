@@ -3,6 +3,14 @@
 
 .invoices-details {
   padding-top: 24px;
+  padding-bottom: 64px;
+
+  @media screen and (max-width: 900px) {
+    padding-bottom: 40px;
+  }
+  @media screen and (max-width: 500px) {
+    padding-bottom: 16px;
+  }
 
   &__header {
     margin-top: 40px;
@@ -21,32 +29,45 @@
     }
   }
 
-  &__table {
-    margin: 0 auto;
-    max-width: 1244px;
-
-    padding: 0px 10px 64px 10px;
-
-    @media screen and (max-width: 900px) {
-      padding: 0 40px 32px 40px;
-    }
-    @media screen and (max-width: 500px) {
-      padding: 0 16px 32px 16px;
-    }
+  &__content {
+    overflow-x: visible;
   }
 
   &__scroll-container {
     overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+
+    box-sizing: border-box;
 
     &::-webkit-scrollbar {
       height: 8px;
     }
-    &::-webkit-scrollbar-thumb {
+
+    &::-webkit-scrollbar-track {
+      background: vars.$light-blue;
       border-radius: 8px;
-      background: vars.$black-blue;
     }
 
-    margin-right: calc(50% - 50vw);
-    padding-right: calc(50vw - 50%);
+    &::-webkit-scrollbar-thumb {
+      background-color: vars.$black-blue;
+      border-radius: 8px;
+    }
+  }
+
+  &__actions {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 64px;
+
+    @media screen and (max-width: 900px) {
+      margin-top: 32px;
+    }
+
+    @media screen and (max-width: 500px) {
+      margin-top: 24px;
+    }
   }
 }
