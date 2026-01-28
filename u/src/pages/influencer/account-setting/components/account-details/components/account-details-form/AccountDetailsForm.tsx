@@ -1,19 +1,18 @@
-import './_account-details-form.scss';
+import { useInfluenserProfileStore } from '@/store/influencer/account-settings/useInfluenserProfileStore';
 
 import { Form } from '../../../../../../../components';
-import { useUserStore } from '../../../../../../../store/influencer/account-settings/useUserStore';
 import { AccountDetailsFormContent } from './components/AccountDetailsFormContent';
-import { useAccountSettingsStore } from '../../../../store/useAccountSettingsStore';
 import { getDefaultFormValues } from './utils/getDefaultFormValues';
 
+import './_account-details-form.scss';
+
 export const AccountDetailsForm: React.FC = () => {
-  const { user } = useUserStore();
-  const {} = useAccountSettingsStore();
+  const { profile } = useInfluenserProfileStore();
 
   return (
     <Form
       className="account-details-form"
-      defaultValues={getDefaultFormValues(user)}
+      defaultValues={getDefaultFormValues(profile)}
     >
       <AccountDetailsFormContent />
     </Form>

@@ -3,15 +3,20 @@
 .invoice-form-content {
   width: 100%;
   display: flex;
-  gap: 24px;
+  flex-direction: column;
 
-  @media screen and (max-width: 900px) {
-    gap: 16px;
-    justify-content: space-between;
-  }
+  &__wrapper {
+    display: flex;
+    gap: 24px;
 
-  @media screen and (max-width: 500px) {
-    flex-direction: column;
+    @media screen and (max-width: 900px) {
+      gap: 16px;
+      justify-content: space-between;
+    }
+
+    @media screen and (max-width: 500px) {
+      flex-direction: column;
+    }
   }
 
   &__inputs-block {
@@ -53,6 +58,110 @@
 
     @media screen and (max-width: 500px) {
       font-size: 15px;
+    }
+  }
+
+  &__submit-button {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 64px;
+
+    @media screen and (max-width: 900px) {
+      margin-top: 48px;
+    }
+
+    @media screen and (max-width: 500px) {
+      margin-top: 32px;
+    }
+  }
+
+  &__modal {
+    display: flex;
+    flex-direction: column;
+    padding: 32px 48px 40px;
+    gap: 40px;
+
+    @media screen and (max-width: 900px) {
+      gap: 48px;
+      padding: 32px 24px;
+    }
+
+    @media screen and (max-width: 500px) {
+      gap: 40px;
+      padding: 32px 16px 24px;
+    }
+
+    &-header {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+
+      @media screen and (max-width: 900px) {
+        gap: 16px;
+      }
+
+      &-title {
+        font-weight: 400;
+        font-size: 36px;
+        text-align: center;
+
+        @media screen and (max-width: 900px) {
+          font-size: 32px;
+        }
+
+        @media screen and (max-width: 500px) {
+          font-size: 24px;
+        }
+      }
+
+      &-description-block {
+        text-align: center;
+      }
+
+      &-description {
+        font-size: 16px;
+
+        > strong {
+          font-weight: 500;
+        }
+
+        @media screen and (max-width: 900px) {
+          font-size: 20px;
+        }
+
+        @media screen and (max-width: 500px) {
+          font-size: 14px;
+        }
+      }
+    }
+
+    &-actions-block {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    &-actions-title {
+      font-size: 24px;
+      font-weight: 400;
+      text-align: center;
+
+      @media screen and (max-width: 500px) {
+        font-size: 20px;
+      }
+    }
+
+    &-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+
+      @media screen and (max-width: 500px) {
+        flex-direction: column-reverse;
+        gap: 8px;
+      }
     }
   }
 }

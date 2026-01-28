@@ -1,11 +1,13 @@
-import './_campaign-history-table.scss';
 import { TableRow } from './campaign-history-table-item/TableRow';
+import type { Campaign } from '../../types/campaign-history.types';
+
+import './_campaign-history-table.scss';
 
 interface Props {
-  promos: any[];
+  campaigns: Campaign[];
 };
 
-export const CampaignHistoryTable = ({ promos }: Props) => {
+export const CampaignHistoryTable = ({ campaigns }: Props) => {
   return (
     <table className='campaign-history-table'>
       <thead className='campaign-history-table__thead'>
@@ -18,8 +20,8 @@ export const CampaignHistoryTable = ({ promos }: Props) => {
         </tr>
       </thead>
       <tbody className='campaign-history-table__tbody'>
-        {promos.map((campaign) => (
-           <TableRow key={campaign.campaignId} campaign={campaign} />
+        {campaigns.map((campaign) => (
+          <TableRow key={campaign.campaignId} campaign={campaign} />
         ))}
       </tbody>
     </table>

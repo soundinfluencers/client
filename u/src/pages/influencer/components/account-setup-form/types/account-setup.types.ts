@@ -1,45 +1,25 @@
-export type TSocialAccounts =
-  | "instagram"
-  | "tiktok"
-  | "facebook"
-  | "youtube"
-  | "spotify"
-  | "soundcloud"
-  | "press";
+import type {
+  SocialAccountDraft,
+  TSocialAccounts,
+} from "@/types/user/influencer.types";
 
-export interface ISocialAccountFormValues {
-  accountId?: string;
-  username: string;
-  profileLink: string;
-  followers: number | null;
-  logoUrl: string;
-  profileCategory: "community" | "creator";
-  price: number | null;
-  musicGenres: { genre: string; subGenres: string[] }[];
-  categories: string[];
-  creatorCategories: string[];
-  countries: { country: string; percentage: number }[];
-}
+// Form values type
+export type TSocialAccountFormValues = SocialAccountDraft;
 
 // Setting mode types for store and components
-export type TMode = "create" | "edit";
-
 export type TSettingMode =
-  | { type: "main" }
+  | { type: "main"; platform?: TSocialAccounts; accountIdentifier?: string }
   | {
       type: "account";
-      mode: TMode;
       platform: TSocialAccounts;
-      account?: ISocialAccountFormValues;
-      accountId?: number;
+      accountIdentifier?: string;
     };
 
-// Form configuration types
+// Form configuration types (for different platforms)
 type TPlatformConfig = {
   switcher: boolean;
   musicGenres: boolean;
   themeTopics: boolean;
   audienceInsights: boolean;
 };
-
 export type TPlatformConfigRecord = Record<TSocialAccounts, TPlatformConfig>;

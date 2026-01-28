@@ -23,7 +23,7 @@
   color: #fff;
 
   &:hover {
-    opacity: 0.8;
+    background: vars.$hover-button-1;
   }
   &:active {
     background: vars.$pressed-button-1;
@@ -33,24 +33,27 @@
     background: vars.$disabled-button-1;
     color: vars.$gray;
     cursor: not-allowed;
-    opacity: 1;
+    // opacity: 1;
   }
 }
 
 .custom-button-secondary {
-  border: 1px solid vars.$black-blue;
+  border: 1px solid #E7E8F1;
   background: #fff;
   color: vars.$black-blue;
 
   &:hover {
     background: vars.$hover-button-2;
   }
+
   &:active {
-    border: 2px solid vars.$black-blue;
+    background: vars.$pressed-button-1;
+    // color: vars.$black-blue;
   }
+
   &:disabled {
     color: vars.$gray;
-    border: 1px solid vars.$white-gray-2;
+    // border: 1px solid vars.$white-gray-2;
     cursor: not-allowed;
     background: #fff;
   }

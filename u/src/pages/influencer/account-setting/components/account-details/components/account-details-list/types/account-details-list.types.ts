@@ -3,10 +3,10 @@ type TextUserKey =
   | "lastName"
   | "email"
   | "phone"
-  | "telegram"
+  | "telegramUsername"
   | "whatsapp";
 
-type AvatarUserKey = "logosUrl";
+type AvatarUserKey = "profilePhotoUrl";
 type PasswordUserKey = "password";
 
 export type AccountDetailsField =

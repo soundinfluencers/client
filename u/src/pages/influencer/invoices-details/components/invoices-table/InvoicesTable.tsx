@@ -1,10 +1,15 @@
-import { mockInvoiceDetailsData } from '../../types/invoices.data';
 import { TableRow } from './invoices-table-row/TableRow';
 import { TableSpacerRow } from './table-spacer-row/TableSpacerRow';
+import type { IInvoiceResponseModel } from '../../types/invoice';
 
 import './_invoices-table.scss';
 
-export const InvoicesTable = () => {
+interface Props {
+  invoices: IInvoiceResponseModel[];
+}
+
+export const InvoicesTable: React.FC<Props> = ({ invoices }) => {
+  //
   return (
     <div className="table-card">
       <table className="custom-table">
@@ -19,13 +24,14 @@ export const InvoicesTable = () => {
         </thead>
         <tbody className='custom-table__tbody'>
           <TableSpacerRow colSpan={5} />
-          {mockInvoiceDetailsData.map((item) => (
-            <TableRow key={item.invoiceId} item={item} />
+          {invoices.map((item) => (
+            <TableRow key={item.shortInvoiceId} item={item} />
           ))}
           <TableSpacerRow colSpan={5} />
         </tbody>
-      </table>
-      <div className='custom-table__footer' />
+        <tfoot className='custom-table__footer'></tfoot>
+      </table >
+      {/* <div className='custom-table__footer' /> */}
     </div>
   );
 };

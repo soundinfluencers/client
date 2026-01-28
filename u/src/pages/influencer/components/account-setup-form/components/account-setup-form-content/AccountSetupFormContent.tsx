@@ -7,28 +7,31 @@ import { AccountSwitcher } from '../account-type-switcher/AccountSwitcher';
 import { CheckboxButtonList } from '../checkbox-button-list/CheckboxButtonList';
 import { AudienceInsights } from '../audience-insights/AudienceInsights';
 import { PriceInput } from '../price-input/PriceInput';
+import { ButtonMain, ButtonSecondary } from '../../../../../../components/ui/buttons-fix/ButtonFix';
+import { Modal } from '../../../../../../components/ui/modal-fix/Modal';
 
-import type { ISocialAccountFormValues, TMode, TSocialAccounts } from '../../types/account-setup.types';
 import { PLATFORM_CONFIG } from '../../data/account-setup-form.data';
 import { ACCOUNT_INPUTS_DATA } from './data/user-inputs.data';
 import { MUSIC_GENERS_DATA } from '../checkbox-button-list/data/music-genres.data';
 import { THEME_TOPICS_DATA } from '../checkbox-button-list/data/categories.data';
 import { ENTERTAINMENT_CATEGORIES_DATA, MUSIC_CATEGORIES_DATA } from '../checkbox-button-list/data/creator-categories.data';
 
-import './_account-setup-form-content.scss';
-import { ButtonMain, ButtonSecondary } from '../../../../../../components/ui/buttons-fix/ButtonFix';
-import { Modal } from '../../../../../../components/ui/modal-fix/Modal';
+import type { TSocialAccounts } from '@/types/user/influencer.types';
+import type { TSocialAccountFormValues } from '../../types/account-setup.types';
 
+import './_account-setup-form-content.scss';
+import { normalizeAccountForApi } from '@/pages/influencer/shared/utils/socialAccount.mapper';
 
 interface Props {
   platform: TSocialAccounts;
-  mode: TMode;
-  onSave: (data: ISocialAccountFormValues) => Promise<void> | void;
+  isEdit: boolean;
+  onSave: (data: TSocialAccountFormValues) => Promise<void> | void;
   onRemove: () => Promise<void> | void;
 };
 
-export const AccountSetupFormContent = ({ platform, mode, onRemove, onSave }: Props) => {
-  const { control, setValue, handleSubmit } = useFormContext<ISocialAccountFormValues>();
+//TODO: add loading state to buttons
+export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: Props) => {
+  const { control, setValue, handleSubmit } = useFormContext<TSocialAccountFormValues>();
   const { onResetAccountForm } = useAccountSetupStore();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -66,24 +69,26 @@ export const AccountSetupFormContent = ({ platform, mode, onRemove, onSave }: Pr
 
   const handleRemove = async () => {
     setIsLoading(true);
-    // имитация загрузки
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    onRemove();
-    setIsLoading(false);
 
-    onResetAccountForm();
+    try {
+      await onRemove();
+      onResetAccountForm();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSave = async (data: ISocialAccountFormValues) => {
+  const handleSave = async (data: TSocialAccountFormValues) => {
     console.log("form data to save:", data);
     setIsLoading(true);
-
-    // имитация загрузки
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    onSave(data);
-    setIsLoading(false);
-
-    onResetAccountForm();
+    try {
+      const cleaned = normalizeAccountForApi(data);
+      console.log("cleaned form data to save:", cleaned);
+      await onSave(cleaned);
+      onResetAccountForm();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -140,7 +145,7 @@ export const AccountSetupFormContent = ({ platform, mode, onRemove, onSave }: Pr
       </div>
 
       <div className="account-setup-form-content__actions">
-        {mode === 'edit' ? (
+        {isEdit ? (
           <>
             <ButtonSecondary
               onClick={() => setIsModalOpen(true)}
@@ -149,12 +154,14 @@ export const AccountSetupFormContent = ({ platform, mode, onRemove, onSave }: Pr
             <ButtonMain
               onClick={handleSubmit(handleSave)}
               label="Save"
+              type='submit'
             />
           </>
         ) : (
           <ButtonMain
             label={'Add account'}
             onClick={handleSubmit(handleSave)}
+            type='submit'
           />
         )}
       </div>
@@ -168,8 +175,8 @@ export const AccountSetupFormContent = ({ platform, mode, onRemove, onSave }: Pr
             </div>
 
             <div className='account-setup-form-content__modal-actions'>
-              <ButtonSecondary label='Cancel' onClick={() => setIsModalOpen(false)}/>
-              <ButtonMain label='Delete' onClick={handleRemove}/>
+              <ButtonSecondary label='Cancel' onClick={() => setIsModalOpen(false)} />
+              <ButtonMain label='Delete' onClick={handleRemove} />
             </div>
           </div>
         </Modal>
@@ -177,4 +184,3 @@ export const AccountSetupFormContent = ({ platform, mode, onRemove, onSave }: Pr
     </>
   );
 };
-

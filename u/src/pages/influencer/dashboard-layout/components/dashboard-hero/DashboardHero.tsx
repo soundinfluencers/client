@@ -6,9 +6,11 @@ import { HomePageLink } from "../home-page-link/HomePageLink";
 import blackLogo from "../../../../../assets/logos/small-black-logo.svg";
 
 import "./_dashboard-hero.scss";
+import { useUser } from "@/store/get-user";
 
 export const DashboardHero = () => {
-  const { user } = useUserStore();
+  // const { user } = useUserStore();
+  const { user } = useUser();
   const isDashboard = useMatch("/influencer");
   const isPromos = useMatch("/influencer/promos");
   const isHistory = useMatch("/influencer/campaign-history");

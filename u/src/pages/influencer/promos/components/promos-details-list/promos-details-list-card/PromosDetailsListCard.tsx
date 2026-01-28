@@ -1,51 +1,63 @@
-import './_promos-details-list-card.scss';
-import type { IInfluencerPromo } from '../../../../../../types/influencer/promos/promos.types';
 import { DetailsRow } from './DetailsRow';
 import { ButtonMain, ButtonSecondary } from '../../../../../../components/ui/buttons-fix/ButtonFix';
-import type { TSocialMedia } from '../../../../../../types/influencer/form/campaign-result/campaign-result.types';
-import { normalizeSocialMedia } from '../../../../../../constants/influencer/form-data/campaign-result/campaign-result.data';
-import { getPromoFields, getPromoStatus } from '../../../../../../constants/influencer/promos/promos.data';
+
+import { getTitleForPromoCard } from '../utils/getTitleForPromoCard';
+import { getPromoFields } from '../../../data/promos.data';
+import type { IPromoDetailsModel, TConfirmationType, TPromoStatus } from '../../../types/promos.types';
+// import { normalizeSocialMedia } from '../../../distributing/components/campaign-result-form/data/campaign-result-form-inputs.data';
+// import type { TCampaignInfo, TSocialMedia } from '../../../distributing/components/campaign-result-form/types/campaign-result-form.types';
+
+import './_promos-details-list-card.scss';
 
 interface Props {
-  promo: IInfluencerPromo;
+  promo: IPromoDetailsModel;
+  status: TPromoStatus;
   index: number;
-  onAccept?: (campaignId: string) => void;
-  onDecline?: (campaignId: string) => void;
-  onFormOpen?: () => void;
-  onMetaChange?: (newMeta: TSocialMedia) => void;
+  isPending?: boolean;
+  pendingAction?: TConfirmationType;
+  onAccept?: () => void;
+  onDecline?: () => void;
+  onSubmitResults?: () => void;
+  // onFormOpen?: () => void;
+  // onMetaChange?: (newMeta: TSocialMedia) => void;
+  // onFormPayloadChange?: (newPayload: TCampaignInfo) => void;
 }
-
-/*
-  TODO: format dateRequest to readable format
-        think about id or unique identifier for copyable fields
-*/
 
 export const PromosDetailsListCard: React.FC<Props> = ({
   promo,
+  status,
   index,
+  isPending,
+  pendingAction,
   onAccept,
   onDecline,
-  onFormOpen,
-  onMetaChange
+  onSubmitResults,
+  // onFormOpen,
+  // onMetaChange,
+  // onFormPayloadChange,
 }) => {
-  const status = getPromoStatus(promo);
   const fields = getPromoFields(promo, status);
 
-  const title = status === 'completed' ? 'Completed' : status === 'distributing' ? 'Distributing' : 'New promo';
-  const isNew = status === 'new';
+  const isNew = status === 'pending';
   const isDistributing = status === 'distributing';
   const isCompleted = status === 'completed';
+
+  const isAcceptLoading =
+    isPending && pendingAction === "accept";
+
+  const isDeclineLoading =
+    isPending && pendingAction === "decline";
 
   return (
     <article className="promos-details-list-card">
       <div className="promos-details-list-card__header">
         {isNew && <span className='promos-details-list-card__number'>#{index + 1}</span>}
-        <span className='promos-details-list-card__status'>{title}</span>
+        <span className='promos-details-list-card__status'>{getTitleForPromoCard(status)}</span>
       </div>
 
       <div className="promos-details-list-card__body">
         <span className="promos-details-list-card__body-header">
-          <img src="/2.jpg" alt="2" />
+          <img src="/promo-preview.png" alt="Promo Preview" />
           <span>{promo.campaignName}</span>
         </span>
 
@@ -57,10 +69,10 @@ export const PromosDetailsListCard: React.FC<Props> = ({
                 label={field.label}
                 value={
                   field.format
-                    ? field.format((promo)[field.key] as number, promo)
+                    ? field.format((promo)[field.key] as unknown as number, promo)
                     : (promo)[field.key]?.toString() ?? ''
                 }
-                copyble={field.copyable}
+                copyable={field.copyable}
               />
             ))}
         </div>
@@ -71,12 +83,14 @@ export const PromosDetailsListCard: React.FC<Props> = ({
           {isNew && (
             <>
               <ButtonSecondary
-                label="Decline"
-                onClick={() => onDecline && onDecline(promo.campaignId)}
+                label={isDeclineLoading ? 'Processing...' : 'Decline'}
+                isDisabled={isPending}
+                onClick={onDecline}
               />
               <ButtonMain
-                label="Accept promo"
-                onClick={() => onAccept && onAccept(promo.campaignId)}
+                label={isAcceptLoading ? 'Processing...' : 'Accept promo'}
+                isDisabled={isPending}
+                onClick={onAccept}
               />
             </>
           )}
@@ -85,15 +99,35 @@ export const PromosDetailsListCard: React.FC<Props> = ({
             <ButtonMain
               label="Submit results & get paid"
               onClick={() => {
-                onFormOpen && onFormOpen();
-                onMetaChange && onMetaChange(normalizeSocialMedia(promo.socialMedia));
+                onSubmitResults && onSubmitResults();
+                // onFormOpen && onFormOpen();
+                // onMetaChange && onMetaChange(normalizeSocialMedia(promo.accountSocialMedia));
+                // onFormPayloadChange && onFormPayloadChange({
+                //   campaignId: promo.campaignId,
+                //   addedAccountsId: promo.addedAccountsId,
+                //   username: promo.username,
+                // });
               }}
             />
           )}
         </div>
       )}
-
-      {/*TODO: Modal for accept/decline new promo */}
     </article>
   );
 };
+
+// config for different promo statuses
+// const PROMO_CARD_CONFIG = {
+//   pending: {
+//     showIndex: true,
+//     actions: ['accept', 'decline'],
+//   },
+//   distributing: {
+//     showIndex: false,
+//     actions: ['submitResults'],
+//   },
+//   completed: {
+//     showIndex: false,
+//     actions: [],
+//   },
+// } as const;

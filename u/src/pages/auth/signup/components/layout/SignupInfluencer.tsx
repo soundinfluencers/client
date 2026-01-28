@@ -6,28 +6,35 @@ import { AccountSetupForm } from "../../../../influencer/components/account-setu
 
 export const SignupInfluencer = () => {
   const { settingsMode, onResetAccountForm } = useAccountSetupStore();
-  const { saveAccount, removeAccount } = useInfluenserSignupStore();
+  const { user, saveAccount, removeAccount } = useInfluenserSignupStore();
 
   useEffect(() => {
     onResetAccountForm();
-  }, []);
+  }, [onResetAccountForm]);
+
+  if (settingsMode.type !== 'account') {
+    return (
+      <MainScreen />
+    );
+  }
+
+  const { platform, accountIdentifier } = settingsMode;
+
+  const idx = accountIdentifier === undefined ? undefined : Number(accountIdentifier);
+  const account = idx === undefined || Number.isNaN(idx) ? undefined : user[platform][idx];
 
   return (
-    settingsMode.type === 'account' ? (
-      <AccountSetupForm
-        platform={settingsMode.platform}
-        mode={settingsMode.mode}
-        account={settingsMode.account}
-        onSave={(data) => saveAccount(settingsMode.platform, data, settingsMode.accountId)}
-        onRemove={() => {
-          if (settingsMode.accountId !== undefined) {
-            removeAccount(settingsMode.platform, settingsMode.accountId);
-          }
-        }}
-        // accountId={settingsMode.accountId}
-      />
-    ) : (
-      <MainScreen />
-    )
-  )
-}
+    <AccountSetupForm
+      platform={settingsMode.platform}
+      account={account}
+      onSave={(data) => {
+        saveAccount(settingsMode.platform, data, idx);
+      }}
+      onRemove={() => {
+        if (idx !== undefined && !Number.isNaN(idx)) {
+          removeAccount(settingsMode.platform, idx);
+        }
+      }}
+    />
+  );
+};

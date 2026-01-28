@@ -1,21 +1,26 @@
-import { useUserStore } from '../../../../../store/influencer/account-settings/useUserStore';
-import { SocialAccountsList } from '../../../components/social-accounts-list/SocialAccountsList';
-
 import './_social-list.scss';
-
-// interface Props {
-//   userData: any;
-// };
+import { useInfluenserProfileStore } from '@/store/influencer/account-settings/useInfluenserProfileStore';
+import { SocialAccountsList } from '../../../components/social-accounts-list/SocialAccountsList';
+import type { TSocialAccounts } from '@/types/user/influencer.types';
 
 export const SocialList: React.FC = () => {
-  const { user } = useUserStore();
+  const { profile } = useInfluenserProfileStore();
+
+  const getProfileAccounts = (platform: TSocialAccounts) => {
+    if (!profile) return [];
+    
+    return profile[platform].map((account) => ({
+      username: account.username,
+      accountId: account.accountId,
+    }));
+  }
 
   return (
     <div className="social-list">
       <div className='social-list__header'>
         <h3 className='social-list__title'>Social accounts</h3>
       </div>
-      <SocialAccountsList user={user} />
+      <SocialAccountsList getAccounts={getProfileAccounts} />
     </div>
   );
 }

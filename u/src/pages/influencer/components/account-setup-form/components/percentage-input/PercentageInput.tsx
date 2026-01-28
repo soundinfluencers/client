@@ -7,7 +7,6 @@ interface Props {
   index: number;
 };
 
-//TODO: need add validation
 export const PercentageInput: React.FC<Props> = ({ placeholder, index }) => {
   const { control } = useFormContext();
   const [isFocused, setIsFocused] = useState(false);
@@ -17,7 +16,8 @@ export const PercentageInput: React.FC<Props> = ({ placeholder, index }) => {
     <Controller
       control={control}
       name={`countries.${index}.percentage`}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
+        const hasError = fieldState.invalid;
         const displayValue = isFocused ? draft : field.value != null ? `${field.value}%` : '';
 
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,6 +33,7 @@ export const PercentageInput: React.FC<Props> = ({ placeholder, index }) => {
 
         const handleBlur = () => {
           setIsFocused(false);
+          field.onBlur();
 
           if (draft === '' || draft === '.') {
             field.onChange(null);
@@ -54,7 +55,7 @@ export const PercentageInput: React.FC<Props> = ({ placeholder, index }) => {
           <input
             type="text"
             inputMode='decimal'
-            className='percentage-input'
+            className={`percentage-input ${hasError ? "percentage-input--error" : ""}`}
             placeholder={placeholder}
             value={displayValue}
             onChange={handleChange}

@@ -1,36 +1,42 @@
 import { create } from "zustand";
-import type { ISocialAccountFormValues, TSettingMode, TSocialAccounts } from "../types/account-setup.types";
-
-//TODO: fix type for account where possible
+import type { TSettingMode } from "../types/account-setup.types";
+import type { TSocialAccounts } from "@/types/user/influencer.types";
 
 interface AccountSetupState {
   settingsMode: TSettingMode;
   onCreateAccount: (platform: TSocialAccounts) => void;
-  onEditAccount: (
-    platform: TSocialAccounts,
-    account?: ISocialAccountFormValues,
-    index?: number
-  ) => void;
+  onEditAccount: (platform: TSocialAccounts, accountIdentifier: string) => void;
   onResetAccountForm: () => void;
-};
+}
 
 export const useAccountSetupStore = create<AccountSetupState>((set) => ({
-  settingsMode: { type: 'main' },
-  onCreateAccount: (platform: TSocialAccounts) => set({
-    settingsMode: {
-      type: 'account',
-      mode: 'create',
-      platform,
-    }
-  }),
-  onEditAccount: (platform: TSocialAccounts, account?: ISocialAccountFormValues, index?: number) => set({
-    settingsMode: {
-      type: 'account',
-      mode: 'edit',
-      platform,
-      account: account,
-      accountId: index,
-    }
-  }),
-  onResetAccountForm: () => set({ settingsMode: { type: 'main' } }),
+  settingsMode: {
+    type: "main",
+    platform: undefined,
+    accountIdentifier: undefined,
+  },
+  onCreateAccount: (platform) =>
+    set({
+      settingsMode: {
+        type: "account",
+        platform,
+        accountIdentifier: undefined,
+      },
+    }),
+  onEditAccount: (platform, accountIdentifier) =>
+    set({
+      settingsMode: {
+        type: "account",
+        platform,
+        accountIdentifier,
+      },
+    }),
+  onResetAccountForm: () =>
+    set({
+      settingsMode: {
+        type: "main",
+        platform: undefined,
+        accountIdentifier: undefined,
+      },
+    }),
 }));

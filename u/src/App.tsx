@@ -25,7 +25,9 @@ import { AccountSettingInfluencer } from "./pages/influencer/account-setting/Acc
 
 import "./app.scss";
 import { RootRedirect } from "./router/components/rootRedirect";
+import { ToastContainer } from "react-toastify";
 import { HomePage } from "./pages/client/client-dashboard/HomePage";
+
 
 function App() {
   const { accessToken, setAccessToken, logout } = useAuth();
@@ -36,6 +38,7 @@ function App() {
 
   return (
     <div>
+      <ToastContainer />
       <TabBar isAuthenticated={!!accessToken} />
 
       <Routes>

@@ -2,11 +2,14 @@
 
 .table-card {
   width: 100%;
-  min-width: 850px;
+  min-width: 900px;
   border-radius: 8px;
   border: 1px solid vars.$blue;
   overflow: hidden;
-  margin-bottom: 1px;
+
+  @media screen and (max-width: 900px) {
+    margin-bottom: 12px;
+  }
 }
 
 .custom-table {
@@ -48,5 +51,6 @@
     height: 38.5px;
     width: 100%;
     background: vars.$light-blue;
+    // background: red;
   }
 }

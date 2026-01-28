@@ -6,10 +6,10 @@ import { useEffect, useRef, useState } from 'react';
 interface Props {
   label: string;
   value: string;
-  copyble?: boolean;
+  copyable?: boolean;
 };
 
-export const DetailsRow: React.FC<Props> = ({ label, value, copyble }) => {
+export const DetailsRow: React.FC<Props> = ({ label, value, copyable }) => {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<number | null>(null);
 
@@ -43,7 +43,7 @@ export const DetailsRow: React.FC<Props> = ({ label, value, copyble }) => {
   return (
     <div className='promos-details-list-card__body-details-item'>
       <p className='promos-details-list-card__body-details-item-name'>{label}</p>
-      {copyble ? (
+      {copyable ? (
         <div className='promos-details-list-card__body-details-item-wrapper'>
           <p className='promos-details-list-card__body-details-item-description'>{value}</p>
           <button

@@ -8,10 +8,11 @@
   gap: 16px;
 
   @media screen and (max-width: 900px) {
-    padding-bottom: 48px;
+    padding-bottom: 32px;
   }
-
-  //TODO: mb for 500px
+  @media screen and (max-width: 500px) {
+    padding-bottom: 24px;
+  }
 
   &__quantity {
     display: flex;

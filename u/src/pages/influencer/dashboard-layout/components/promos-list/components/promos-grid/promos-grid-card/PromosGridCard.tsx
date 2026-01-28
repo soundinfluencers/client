@@ -1,6 +1,6 @@
-import type { IPromo } from '../../../../../../../../api/influencer/promos/influencer-promos.api';
 import { getSocialMediaIcon } from '../../../../../../../../constants/social-medias';
-// import type { IInfluencerPromo } from '../../../../../../../../types/influencer/promos/promos.types';
+import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
+
 import './_promos-grid-card.scss';
 
 interface Props {
@@ -20,8 +20,7 @@ export const PromosGridCard = ({ promo }: Props) => {
           <p className='promos-grid-card__header-status-text'>{normalizeStatus(promo.statusCampaign)}</p>
           <p className='promos-grid-card__header-status-date'>{promo.createdAt}</p>
         </div>
-        {/* {promo.reward && <p className='promos-grid-card__header-status-reward'>{promo.reward}€</p>} */}
-        {<p className='promos-grid-card__header-status-reward'>599€</p>}
+        {promo.reward && <p className='promos-grid-card__header-status-reward'>{promo.reward}€</p>}
       </div>
       <p className='promos-grid-card__campaign-name'>{promo.campaignName}</p>
     </article>
@@ -29,23 +28,23 @@ export const PromosGridCard = ({ promo }: Props) => {
 };
 
 //TODO: Move to utils?
-function dateFormatter(dateString: string) {
-  //DD.MM.YYYY
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
+// function dateFormatter(dateString: string) {
+//   //DD.MM.YYYY
+//   const date = new Date(dateString);
+//   const day = String(date.getDate()).padStart(2, '0');
+//   const month = String(date.getMonth() + 1).padStart(2, '0');
+//   const year = date.getFullYear();
 
-  return `${day}.${month}.${year}`;
-}
+//   return `${day}.${month}.${year}`;
+// }
 
 const normalizeStatus = (status: string) => {
   switch (status) {
-    case 'Pending':
+    case 'pending':
       return 'New Request';
-    case 'Distributing':
+    case 'distributing':
       return 'Distributing';
-    case 'Completed':
+    case 'completed':
       return 'Completed';
     default:
       return status;

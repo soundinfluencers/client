@@ -1,7 +1,14 @@
 import React from "react";
+
+import type { ZodTypeAny } from "zod/v3";
+import { zodResolver } from "@hookform/resolvers/zod";
+// interface FormSection includes data reliable to form //
+// type DynamicFormData = Record<string, string | number | FileList | undefined>;
+
 import { FormProvider, useForm } from "react-hook-form";
 import "./_form.scss";
 type DynamicFormData = Record<string, any>;
+
 
 interface FormSection {
   children: React.ReactNode;
@@ -11,8 +18,15 @@ interface FormSection {
   classNameBtnSection?: string;
 
   defaultValues?: Record<string, any>;
+
+  schema?: ZodTypeAny;
   onSubmit?: (data: DynamicFormData) => Promise<void> | void;
 }
+
+// export const Form = ({
+//   defaultValues?: Record<string, any>;
+//   onSubmit?: (data: DynamicFormData) => Promise<void> | void;
+// }
 
 export const Form: React.FC<FormSection> = ({
   children,
@@ -21,12 +35,16 @@ export const Form: React.FC<FormSection> = ({
   classNameBtnSection,
   onSubmit,
   defaultValues,
+  schema
 }) => {
   const methods = useForm<DynamicFormData>({
     defaultValues,
+    resolver: schema ? zodResolver(schema) : undefined,
+    // mode: "onSubmit",
+    reValidateMode: "onChange",
     mode: "onChange",
     criteriaMode: "all",
-    reValidateMode: "onChange",
+    // reValidateMode: "onChange",
     shouldUnregister: false,
   });
 
@@ -37,7 +55,10 @@ export const Form: React.FC<FormSection> = ({
   // }, [defaultValues, methods]);
 
   const handleFormSubmit = async (formData: DynamicFormData) => {
-    console.log(formData, "dawd");
+    console.log(formData, "form");
+    if (onSubmit) {
+      await onSubmit(formData);
+    }
     if (onSubmit) await onSubmit(formData);
   };
 

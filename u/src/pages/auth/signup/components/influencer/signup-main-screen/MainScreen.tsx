@@ -1,37 +1,78 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useInfluenserSignupStore } from "../../../../../../store/influencer/account-settings/useInfluenserSignupStore";
 import { TextInput } from "../../../../../../components/ui/inputs/text-input/TextInput";
 import { InputPhone } from "../../ui/phone-input/InputPhone";
 import { SocialAccountsList } from "../../../../../influencer/components/social-accounts-list/SocialAccountsList";
 import { ButtonMain } from "../../../../../../components/ui/buttons-fix/ButtonFix";
+import type { TSocialAccounts } from "@/types/user/influencer.types";
+import { influencerSignupApi } from "@/api/auth/auth.api";
 
 import './_main-screen.scss';
-
-/*
-  TODO: check item bg (glass?)
-*/
+import { SignupInfluencerSuccess } from "../signup-influencer-success/SignupInfluencerSuccess";
+import { signupAccountsForList } from "./utils/signupAccountForList.mapper";
 
 export const MainScreen = () => {
-  const { user, errors, validate, setField, resetSignup, isFormReady } = useInfluenserSignupStore();
+  const {
+    user,
+    errors,
+    validate,
+    setField,
+    resetSignup,
+    isFormReady,
+    submitError,
+    setSubmitError,
+  } = useInfluenserSignupStore();
   const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const handleSignup = async () => {
+    if (isLoading) return;
+    setSubmitError(null);
+
     const isValid = validate();
-    if (!isValid) {
+    if (!isValid) return;
+
+    if (!isFormReady()) {
+      setSubmitError("Please add at least one social account.");
       return;
     }
 
-    console.log("Payload influencer", user);
     setIsLoading(true);
-    // simulate api call
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    try {
+      console.log('Data to signup', user)
+      // await influencerSignupApi(user);
 
-    setIsLoading(false);
-    resetSignup();
+      setIsSuccess(true);
+      // resetSignup();
+    } catch (e: any) {
+      // const message =
+      //   e?.response?.data?.message ||
+      //   e?.response?.data?.error ||
+      //   "Something went wrong. Please try again.";
+
+      console.log("STATUS:", e?.response?.status);
+      console.log("DATA:", e?.response?.data);
+      console.log("HEADERS:", e?.response?.headers);
+      setSubmitError(e?.response?.data?.message ?? "Server error");
+
+      // setSubmitError(String(message));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isDisabled = !isFormReady() || isLoading;
+
+  if (isSuccess) {
+    return (
+      <SignupInfluencerSuccess />
+    );
+  }
 
   return (
     <div className="signup-influencer">
@@ -46,6 +87,12 @@ export const MainScreen = () => {
           Terms and Conditions
         </a> */}
       </div>
+
+      {!!submitError && (
+        <div className="signup-influencer__error">
+          {submitError}
+        </div>
+      )}
 
       <div>
         <p className="signup-influencer__inputs-label">Add Your Personal Details</p>
@@ -83,7 +130,7 @@ export const MainScreen = () => {
             type="password"
             value={user.password}
             placeholder="Enter password"
-            setValue={(v) => setField('password', v.trim())}
+            setValue={(v) => setField('password', v)}
             isError={errors.password}
           />
         </div>
@@ -95,11 +142,12 @@ export const MainScreen = () => {
           <p className="signup-influencer__socials-subtitle">Add at least one platform to submit your application</p>
         </div>
 
-        <SocialAccountsList user={user} />
+        <SocialAccountsList
+          getAccounts={(platform: TSocialAccounts) => signupAccountsForList(platform, user)}
+        />
       </div>
 
       <div className="signup-influencer__controls">
-        {/* TODO: Add validation and disable button if necessary */}
         <ButtonMain
           label={isLoading ? "Submitting..." : "Submit Application"}
           onClick={handleSignup}
@@ -107,5 +155,5 @@ export const MainScreen = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
