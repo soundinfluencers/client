@@ -4,15 +4,30 @@ import { Navigation, Pagination, A11y } from "swiper/modules";
 import { Card } from "./Card/Card";
 import chevron from "@/assets/icons/chevron-right.svg";
 import "./_slider.scss";
+
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import {
+  useCampaignStore,
+  useCreateCampaign,
+} from "@/store/client/createCampaign";
+import type { IApiOffer } from "@/types/client/creator-campaign/creator-campaign.types";
 
 interface Props {
-  packages: any[];
+  offers: IApiOffer[];
 }
 
-export const SliderForCard: React.FC<Props> = ({ packages }) => {
+export const SliderForCard: React.FC<Props> = ({ offers }) => {
+  const { offer, activeOfferId } = useCampaignStore();
+  const { getPromoCardsFromOffer } = useCreateCampaign();
+  const { actions } = useCampaignStore();
+
+  React.useEffect(() => {
+    if (!offer) return;
+
+    actions.setPromoCards(offer.connectedAccounts);
+  }, [offer, activeOfferId]);
   return (
     <div className="slider-wrapper" style={{ position: "relative" }}>
       <div className="swiper-button-prev">
@@ -54,8 +69,8 @@ export const SliderForCard: React.FC<Props> = ({ packages }) => {
           },
         }}
         pagination={{ clickable: true }}>
-        {packages?.map((data, i) => (
-          <SwiperSlide key={i}>
+        {offers?.map((data) => (
+          <SwiperSlide key={data._id}>
             <Card dataCard={data} />
           </SwiperSlide>
         ))}

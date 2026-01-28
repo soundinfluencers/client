@@ -1,5 +1,5 @@
-@use '@/styles/mixins/title' as title;
-@use '@/styles/variables/variables' as vars;
+@use "@/styles/mixins/title" as title;
+@use "@/styles/variables/variables" as vars;
 
 .auth-page__wrapper {
   min-height: calc(100vh - 84px); // 100% экрана - высота таб бара
@@ -125,26 +125,26 @@
 
   &__title {
     @include title.title(
-            $font-size: 32px,
-            $tablet-font-size: 20px,
-            $mobile-font-size: 20px,
-            $font-weight: 400,
-            $line-height: normal,
-            $font-style: normal,
-            $font-color: vars.$gray-dark
-    )
+      $font-size: 32px,
+      $tablet-font-size: 20px,
+      $mobile-font-size: 20px,
+      $font-weight: 400,
+      $line-height: normal,
+      $font-style: normal,
+      $font-color: vars.$gray-dark
+    );
   }
 
   &__subtitle {
     @include title.subtitle(
-            $font-size: 16px,
-            $tablet-font-size: 14px,
-            $mobile-font-size: 14px,
-            $font-weight: 400,
-            $line-height: normal,
-            $font-style: normal,
-            $font-color: vars.$gray-dark
-    )
+      $font-size: 16px,
+      $tablet-font-size: 14px,
+      $mobile-font-size: 14px,
+      $font-weight: 400,
+      $line-height: normal,
+      $font-style: normal,
+      $font-color: vars.$gray-dark
+    );
   }
 
   &__controls {
@@ -176,15 +176,15 @@
 }
 
 //set style simple style for buttons without modifiers full simple style for testing
-.btn {
-  width: 100%;
-  background: vars.$blue;
-  border-radius: 8px;
-  height: 48px;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: normal;
-  font-style: normal;
-  color: vars.$black;
-  
-}
+// .btn {
+//   width: 100%;
+//   background: vars.$blue;
+//   border-radius: 8px;
+//   height: 48px;
+//   font-size: 16px;
+//   font-weight: 500;
+//   line-height: normal;
+//   font-style: normal;
+//   color: vars.$black;
+
+// }

@@ -8,12 +8,14 @@ import num from "@/assets/payments-icons/hugeicons_text-number-sign.svg";
 import qr from "@/assets/payments-icons/mage_bar-code-scan.svg";
 import type { CurrencyType } from "@/types/client/form-clients/payment-campaign-inputs";
 import "./styles/_base-confirmations.scss";
+import { useCampaignStore } from "@/store/client/createCampaign";
 
 interface Props {
   currency?: CurrencyType[];
 }
 
 export const BankTransfer: React.FC<Props> = ({ currency }) => {
+  const { totalPrice } = useCampaignStore();
   return (
     <div>
       <h2>Payment confirmation by Bank Transfer UK</h2>
@@ -23,7 +25,7 @@ export const BankTransfer: React.FC<Props> = ({ currency }) => {
             <div className="base-confirmations__count">
               <img src={euro} alt="" />
             </div>
-            <p>Total DUE: 96€</p>
+            <p>Total DUE: {totalPrice}€</p>
           </div>
           <div className="base-confirmations__content_paypal__flex">
             <div className="base-confirmations__count">

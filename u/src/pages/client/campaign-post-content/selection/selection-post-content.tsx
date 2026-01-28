@@ -10,6 +10,9 @@ import type {
   IApiOffer,
   IPromoCard,
 } from "@/types/client/creator-campaign/creator-campaign.types";
+import { getPriceByCurrency } from "../../CampaignCreatorPage/buildCampaign/components/bc_cards/bc_card/utils/usePriceCurrency";
+import { useBuildCampaignFilters } from "@/store/client/createCampaign/useBuildCampaignFilters";
+import { useNavigate } from "react-router-dom";
 interface Props {
   offer: IApiOffer | null;
   promoCard: IPromoCard[];
@@ -21,78 +24,92 @@ export const Selection: React.FC<Props> = ({
   promoCard,
   totalPrice,
 }) => {
+  const { selectedCurrency } = useBuildCampaignFilters();
   const [openId, setOpenId] = React.useState<string | null>(null);
   const toggleFlag = (id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
   };
+  const navigate = useNavigate();
   return (
     <div className={Styles.selection}>
       <div className={Styles.selection__head}>
         <h3>Your Selection</h3>
-        <button>Edit Selection</button>
+        <button onClick={() => navigate("/client/CreateCampaign")}>
+          Edit Selection
+        </button>
       </div>
       <div className={Styles.selection__content}>
-        {offer && (
-          <div className={Styles.offer}>
-            {" "}
-            <div className={Styles.offer__header}>
-              <div className={Styles.queue}>1</div>
-              <h3>{offer?.title}</h3>
-              <p>{offer?.price}</p>
-            </div>
-            <div className={Styles.offer__content}>
-              <ul>
-                {offer?.connectedAccounts.map((acc) => (
-                  <li key={acc._id}>
-                    <img src={acc.logo} alt="" />
-                    {acc.socialMediaUsername}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
-        {promoCard.map((card, i) => {
-          const isOpen = openId === card._id;
-
-          return (
-            <div key={card._id} className={Styles.PromoCards}>
-              <div className={Styles.PromoCards__header}>
-                <div className={Styles.queue}>{offer ? i + 2 : i + 1}</div>
-                <img
-                  src={getSocialMediaIcon(card.socialMedia as SocialMediaType)}
-                  alt=""
-                />
-                <h3>{card.socialMedia}</h3>
+        <div className={Styles.selection__body}>
+          {offer && (
+            <div className={Styles.offer}>
+              {" "}
+              <div className={Styles.offer__header}>
+                <div className={Styles.queue}>1</div>
+                <h3>{offer?.title}</h3>
+                <p>{offer?.price}</p>
               </div>
+              <div className={Styles.offer__content}>
+                <ul>
+                  {offer?.connectedAccounts.map((acc) => (
+                    <li key={acc.accountId}>
+                      <img src={acc.logoUrl} alt="" />
+                      {acc.username}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+          {promoCard.map((card, i) => {
+            const isOpen = openId === card.accountId;
 
-              <div className={Styles.PromoCards__content}>
-                <div className={Styles.title}>
-                  <img src={card.logo} alt="" />
-                  <h3>{card.instagramUsername}</h3>
+            return (
+              <div key={card.accountId} className={Styles.PromoCards}>
+                <div className={Styles.PromoCards__header}>
+                  <div className={Styles.queue}>{offer ? i + 2 : i + 1}</div>
+                  <img
+                    src={getSocialMediaIcon(
+                      card.socialMedia as SocialMediaType,
+                    )}
+                    alt=""
+                  />
+                  <h3>{card.socialMedia}</h3>
                 </div>
 
-                <div className={Styles.PromoCards__content__info}>
-                  <p>
-                    {formatFollowers(card.followersNumber)} followers{" "}
-                    <span>
-                      {card.price} {card.currency}
-                    </span>
-                  </p>
+                <div className={Styles.PromoCards__content}>
+                  <div className={Styles.title}>
+                    <img src={card.logoUrl} alt="" />
+                    <h3>{card.username}</h3>
+                  </div>
 
-                  <div
-                    onClick={() => toggleFlag(card._id)}
-                    className={Styles.genresIcountries}>
-                    <p>Genres, Countries</p>
-                    <img src={chevron} alt="" />
+                  <div className={Styles.PromoCards__content__info}>
+                    <p>
+                      {formatFollowers(card.followers)} followers{" "}
+                      <span>
+                        {getPriceByCurrency(card.prices, selectedCurrency)}
+                      </span>
+                    </p>
 
-                    {isOpen && <GenresCountries flag={true} data={card} />}
+                    <div
+                      onClick={() => toggleFlag(card.accountId)}
+                      className={Styles.genresIcountries}>
+                      <p>Genres, Countries</p>
+                      <img src={chevron} alt="" />
+
+                      {isOpen && (
+                        <GenresCountries
+                          flag={true}
+                          data={card}
+                          isInclude={false}
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
       <div className={Styles.selection__footer}>
         <h2>Total price: {totalPrice}€</h2>

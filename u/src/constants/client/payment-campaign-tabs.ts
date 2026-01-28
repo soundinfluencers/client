@@ -8,22 +8,23 @@ import { PayPal } from "@/pages/client/payment-campaign/components/confirmations
 
 export const PAYMENT_CAMPAIGN_TABS = [
   {
-    id: "BankCard",
+    id: CampaignPaymentMethodEnum.bankCard, // "bank_card"
     label: "Bank Card",
     icon: BankCardIcon,
     component: BankCard,
   },
-  { id: "PayPal", label: "PayPal", icon: PayPalIcon, component: PayPal },
   {
-    id: "BankTransfer",
+    id: CampaignPaymentMethodEnum.paypal, // "paypal"
+    label: "PayPal",
+    icon: PayPalIcon,
+    component: PayPal,
+  },
+  {
+    id: "bank_transfer", // UI-only id
     label: "Bank Transfer",
     icon: BankTransferIcon,
     component: BankTransfer,
   },
-  // {
-  //   id: "Crypto",
-  //   label: "Crypto Payment",
-  //   icon: CryptoIcon,
-  //   component: CryptoPayment,
-  // },
-];
+] as const;
+
+type PaymentTabId = (typeof PAYMENT_CAMPAIGN_TABS)[number]["id"];

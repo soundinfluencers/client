@@ -4,16 +4,22 @@ import "./checkbox.scss";
 interface Props {
   name: string;
   isChecked?: boolean;
+  onChange?: (checked: boolean) => void;
 }
 
-export const Checkbox: React.FC<Props> = ({ name, isChecked }) => {
+export const Checkbox: React.FC<Props> = ({ name, isChecked, onChange }) => {
   return (
-    <div className="AutoReplace">
+    <label className="AutoReplace">
       <div className="input">
-        <input type="checkbox" id={name} />
-        <img className={`${isChecked ? "checked" : ""}`} src={check} alt="" />
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={(e) => onChange(e?.target?.checked || false)}
+        />
+        <img className={isChecked ? "checked" : ""} src={check} alt="" />
       </div>
-      <label htmlFor={name}>{name}</label>
-    </div>
+
+      {name}
+    </label>
   );
 };

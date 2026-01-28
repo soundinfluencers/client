@@ -5,15 +5,20 @@ import { create } from "zustand";
 export const useFilter = create<FilterCampaign>((set) => ({
   selected: [],
 
-  setSelected: (items) => set({ selected: items }),
+  setSelected: (itemsOrUpdater) =>
+    set((state) => ({
+      selected:
+        typeof itemsOrUpdater === "function"
+          ? itemsOrUpdater(state.selected)
+          : itemsOrUpdater,
+    })),
 
   toggleItem: (item, checked, filters) => {
     set((state) => {
       const newSelected = [...state.selected];
 
-      // найти родителя элемента
       const parent = filters.find((f) =>
-        f.children?.some((c) => c.id === item.id)
+        f.children?.some((c) => c.id === item.id),
       );
 
       const findSelected = (id: string) => newSelected.find((f) => f.id === id);
@@ -29,10 +34,8 @@ export const useFilter = create<FilterCampaign>((set) => ({
 
       if (checked) {
         if (item.children?.length) {
-          // добавляем родителя с детьми
           addItem(item);
         } else if (parent) {
-          // добавляем ребёнка к родителю
           let p = findSelected(parent.id);
           if (!p) {
             p = { ...parent, children: [] };
@@ -41,21 +44,19 @@ export const useFilter = create<FilterCampaign>((set) => ({
           if (!p.children!.some((c) => c.id === item.id))
             p.children!.push({ ...item });
         } else {
-          // фильтр без детей
           addItem(item);
         }
       } else {
         if (item.children?.length) {
-          removeItem(item.id); // снимаем родителя
+          removeItem(item.id);
         } else if (parent) {
-          // снимаем ребёнка
           const p = findSelected(parent.id);
           if (p?.children) {
             p.children = p.children.filter((c) => c.id !== item.id);
             if (!p.children.length) removeItem(parent.id);
           }
         } else {
-          removeItem(item.id); // снимаем фильтр без детей
+          removeItem(item.id);
         }
       }
 
@@ -69,7 +70,7 @@ export const useFilter = create<FilterCampaign>((set) => ({
         .map((f) =>
           f.children
             ? { ...f, children: f.children.filter((c) => c.id !== id) }
-            : f
+            : f,
         ),
     }));
   },

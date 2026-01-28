@@ -1,10 +1,10 @@
 import type { SocialMediaType } from "@/types/utils/constants.types";
 
 export type CampaignStatusType =
-  | "Pending"
-  | "Distributing"
-  | "Completed"
-  | "Draft";
+  | "pending"
+  | "distributing"
+  | "completed"
+  | "draft";
 
 export interface CampaignForList {
   _id: string;

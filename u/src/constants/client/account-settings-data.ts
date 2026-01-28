@@ -1,7 +1,7 @@
 export const userFields = [
   { key: "firstName", label: "First name" },
   { key: "lastName", label: "Last name" },
-  { key: "company", label: "Company" },
+  { key: "companyName", label: "Company Name" },
   { key: "email", label: "Email" },
   { key: "phone", label: "Phone number" },
   { key: "password", label: "password" },

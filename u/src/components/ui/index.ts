@@ -7,10 +7,9 @@ export { Loader } from "./loader/loader";
 export { SwitchView } from "../../pages/client/components/switch-view/switch-view";
 export { SwitchButton } from "./switchers/switch-button/SwitchButton";
 export { SubmtiButton } from "./submit-button/submit-button";
-export { Modal } from "./modal/modal";
+
 export { Checkbox } from "./checkbox/checkbox";
 export { BaseInput } from "./inputs/base-input/BaseInput";
 export { ImageUpload } from "./image-upload/ImageUpload";
 export { StarRatingField } from "./star-rating/StarRatingField";
 export { Table } from "./table/table";
-

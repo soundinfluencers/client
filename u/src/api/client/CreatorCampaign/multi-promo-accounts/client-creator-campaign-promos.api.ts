@@ -1,11 +1,9 @@
 import $api from "../../../api";
 import type { MultiPromoAccountsBody } from "./types";
 
-// get multi promo accounts  //
-
 export const getMultiPromoAccounts = async ({
   sortBy = "bestMatch",
-  limit = 12,
+  limit = 100000000,
   page = 1,
   body,
 }: {
@@ -21,6 +19,6 @@ export const getMultiPromoAccounts = async ({
       page,
     },
   });
-
+  console.log(response.data, "dadadadadd");
   return response.data;
 };

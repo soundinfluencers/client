@@ -1,9 +1,12 @@
 import React from "react";
 import "./_payment-bar.scss";
+
+import type { PaymentTab, PaymentTabId } from "../types";
+
 interface Props {
-  data: any[];
-  tab: string;
-  onChange: React.Dispatch<React.SetStateAction<string>>;
+  data: readonly PaymentTab[];
+  tab: PaymentTabId;
+  onChange: (nextTab: PaymentTabId) => void;
 }
 
 export const PaymentBar: React.FC<Props> = ({ tab, onChange, data }) => {
@@ -11,9 +14,9 @@ export const PaymentBar: React.FC<Props> = ({ tab, onChange, data }) => {
     <ul className="ul-bar">
       {data.map((tb) => (
         <li
+          key={tb.id}
           className={tab === tb.id ? "active" : ""}
-          onClick={() => onChange(tb.id)}
-          key={tb.id}>
+          onClick={() => onChange(tb.id)}>
           <img src={tb.icon} alt="" />
           <h3>{tb.label}</h3>
         </li>

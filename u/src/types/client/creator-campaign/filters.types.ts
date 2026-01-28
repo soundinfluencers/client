@@ -5,6 +5,13 @@ export interface AndOrOption {
 }
 
 export interface FilterItem {
+  group:
+    | "socialMedia"
+    | "countries"
+    | "addTopics"
+    | "genres"
+    | "profileType"
+    | "musicCategories";
   id: string;
   filterName: string;
   count: number;

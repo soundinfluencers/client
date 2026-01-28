@@ -1,6 +1,7 @@
 import React from "react";
 import chevronDown from "@/assets/icons/chevron-down.svg";
-import "../_bc_filter.scss";
+import "../../../scss-module/_bc_filter.scss";
+
 interface Props {
   children: React.ReactNode;
   title: string;

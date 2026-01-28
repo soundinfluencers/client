@@ -2,7 +2,6 @@ import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useEffect } from "react";
 
 import { TabBar } from "./components/layout/tab-bar/TabBar";
-import { Proceed } from "./components";
 
 import { useAuth } from "./contexts/AuthContext";
 import { setupInterceptors } from "./api/api";
@@ -23,15 +22,13 @@ import { InvoicesDetails } from "./pages/influencer/invoices-details/InvoicesDet
 import { AccountSettingInfluencer } from "./pages/influencer/account-setting/AccountSettingInfluencer";
 
 // client
-import { HomePage } from "./pages/home/HomePage";
 
 import "./app.scss";
-import { useUser } from "./store/get-user";
 import { RootRedirect } from "./router/components/rootRedirect";
+import { HomePage } from "./pages/client/client-dashboard/HomePage";
 
 function App() {
   const { accessToken, setAccessToken, logout } = useAuth();
-  const { user } = useUser();
 
   useEffect(() => {
     setupInterceptors(setAccessToken, logout);
@@ -40,7 +37,6 @@ function App() {
   return (
     <div>
       <TabBar isAuthenticated={!!accessToken} />
-      {accessToken && user?.role === "client" && <Proceed />}
 
       <Routes>
         {/* ---------- ROOT SWITCH ---------- */}

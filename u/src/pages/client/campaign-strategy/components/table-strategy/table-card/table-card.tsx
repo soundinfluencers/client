@@ -1,43 +1,18 @@
 import React from "react";
-import { Dropdown } from "@/components/table-ui/dropdowns-table";
-import { DateInput } from "@/components/ui/inputs/date-input/date-input";
-import {
-  getDropdownOptions,
-  ReqData,
-  VideoContent,
-} from "../table-strategy.data";
-import trash from "@/assets/icons/trash-2.svg";
-import eye from "@/assets/icons/eye.svg";
-interface Props {
-  data: {
-    network: string;
-    followers: string;
-    genres: string[];
-    countries: string[];
-  };
-  setDropdownsOpen: React.Dispatch<
-    React.SetStateAction<{
-      [rowIndex: number]: {
-        date: boolean;
-        content: boolean;
-        postDescription: boolean;
-      };
-    }>
-  >;
-  dropdownsOpen: {
-    [rowIndex: number]: {
-      date: boolean;
-      content: boolean;
-      postDescription: boolean;
-    };
-  };
-  indexCard: number;
-  changeView: boolean;
-  isMusic?: boolean;
-  items: any;
-}
+import { useCampaignStore } from "@/store/client/createCampaign";
+import { ReqData } from "../table-strategy.data";
+import { getPlatformItems } from "../utils/getPlatformItems";
+import type { TableRowProps } from "../types/tableTypes";
+import { UsernameCell } from "../cells/UsernameCell";
+import { FollowersCell } from "../cells/FollowersCell";
+import { GenresCell } from "../cells/GenresCell";
+import { CountriesCell } from "../cells/CountriesCell";
+import { DateCell } from "../cells/DateCell";
+import { ContentCell } from "../cells/ContentCell";
+import { DescriptionCell } from "../cells/DescriptionCell";
+import { ExtraFieldsCells } from "../cells/ExtraFieldsCells";
 
-export const TableCard: React.FC<Props> = ({
+export const TableCard: React.FC<TableRowProps> = ({
   data,
   indexCard,
   setDropdownsOpen,
@@ -45,178 +20,130 @@ export const TableCard: React.FC<Props> = ({
   changeView,
   isMusic,
   items,
+  columns,
 }) => {
+  const { actions } = useCampaignStore();
+
   const [selectedDate, setSelectedDate] = React.useState<string>(ReqData[0]);
+  const [customDate, setCustomDate] = React.useState<string>("");
+
+  const [selectedContent, setSelectedContent] = React.useState<number>(0);
   const [selectedPd, setSelectedPd] = React.useState<number>(0);
-  const [selectedContent, setSelectedContent] = React.useState<string>(
-    VideoContent[0]
-  );
+
   const isDateOpen = dropdownsOpen[indexCard]?.date ?? false;
   const isContentOpen = dropdownsOpen[indexCard]?.content ?? false;
   const isPostDescriptionOpen =
     dropdownsOpen[indexCard]?.postDescription ?? false;
-  const isDate = selectedDate === "BEFORE" || selectedDate === "AFTER";
+
+  const dateRequest = React.useMemo(() => {
+    if (selectedDate === "ASAP") return "ASAP";
+    if (!customDate) return selectedDate;
+    return `${selectedDate} ${customDate}`;
+  }, [selectedDate, customDate]);
+
+  const platformItems = React.useMemo(
+    () => getPlatformItems(items, data.socialMedia),
+    [items, data.socialMedia],
+  );
+
+  React.useEffect(() => {
+    const contentItem = items?.[selectedContent];
+
+    actions.setCampaignAccount({
+      accountId: data.accountId,
+      influencerId: data.influencerId,
+      socialMedia: data.socialMedia,
+      username: data.username,
+      selectedCampaignContentItem: {
+        campaignContentItemId: contentItem?._id,
+        descriptionId: contentItem?.descriptions?.[selectedPd]?._id,
+      },
+      dateRequest,
+    });
+  }, [
+    actions,
+    data.accountId,
+    data.influencerId,
+    data.socialMedia,
+    data.username,
+    dateRequest,
+    items,
+    selectedContent,
+    selectedPd,
+    platformItems,
+  ]);
+
+  const toggle = (key: "date" | "content" | "postDescription") => {
+    setDropdownsOpen((prev) => ({
+      ...prev,
+      [indexCard]: {
+        date: prev[indexCard]?.date ?? false,
+        content: prev[indexCard]?.content ?? false,
+        postDescription: prev[indexCard]?.postDescription ?? false,
+        [key]: !(prev[indexCard]?.[key] ?? false),
+      },
+    }));
+  };
+
+  const close = (key: "date" | "content" | "postDescription") => {
+    setDropdownsOpen((prev) => ({
+      ...prev,
+      [indexCard]: {
+        date: prev[indexCard]?.date ?? false,
+        content: prev[indexCard]?.content ?? false,
+        postDescription: prev[indexCard]?.postDescription ?? false,
+        [key]: false,
+      },
+    }));
+  };
 
   return (
-    <div className="table-strategy__body-row">
-      <div className="table-strategy__body-data">
-        <p>{data.network} </p>
-      </div>
-      <div className="table-strategy__body-data">
-        <p>{data.followers}</p>
-      </div>
-      {changeView && (
-        <div className="table-strategy__body-data">
-          <ul className="ul">
-            {data.genres.map((item, i) => (
-              <li>{item}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {changeView && (
-        <div className="table-strategy__body-data">
-          <ul className="ul">
-            {data.countries.map((item, i) => (
-              <li>{item} </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <div className="table-strategy__body-data">
-        <Dropdown
-          isOpen={isDateOpen}
-          onToggle={() =>
-            setDropdownsOpen((prev) => ({
-              ...prev,
-              [indexCard]: { ...prev[indexCard], date: !isDateOpen },
-            }))
-          }
-          selected={
-            <div className={`${isDate ? "isDate" : ""}`}>
-              <p>{selectedDate}</p>
-              {isDate && (
-                <DateInput
-                  onChange={function (value: string): void {
-                    throw new Error("Function not implemented.");
-                  }}
-                />
-              )}
-            </div>
-          }>
-          <ul className="table-strategy__body-data__list">
-            {getDropdownOptions("date").map((item, optionIndex) => (
-              <li
-                onClick={() => {
-                  setSelectedDate(item);
-                  setDropdownsOpen((prev) => ({
-                    ...prev,
-                    [indexCard]: { ...prev[indexCard], date: false },
-                  }));
-                }}
-                key={optionIndex}>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </Dropdown>
-      </div>
-      <div className="table-strategy__body-data">
-        <Dropdown
-          isOpen={isContentOpen}
-          selected={
-            <>
-              <p>{selectedContent}</p>
-            </>
-          }
-          onToggle={() =>
-            setDropdownsOpen((prev) => ({
-              ...prev,
-              [indexCard]: { ...prev[indexCard], content: !isContentOpen },
-            }))
-          }>
-          <ul className="table-strategy__body-data__list">
-            {getDropdownOptions("content").map((item, optionIndex) => (
-              <li
-                onClick={() => {
-                  setSelectedContent(item);
-                  setDropdownsOpen((prev) => ({
-                    ...prev,
-                    [indexCard]: { ...prev[indexCard], content: false },
-                  }));
-                }}
-                key={optionIndex}>
-                <div className="eye">
-                  <img src={eye} alt="" />
-                </div>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </Dropdown>
-      </div>{" "}
-      <div className="table-strategy__body-data">
-        <Dropdown
-          isOpen={isPostDescriptionOpen}
-          selected={
-            <>
-              <p>
-                {items?.map(
-                  (pd) => pd.postDescriptions?.[selectedPd].description
-                )}
-              </p>
-            </>
-          }
-          onToggle={() =>
-            setDropdownsOpen((prev) => ({
-              ...prev,
-              [indexCard]: {
-                ...prev[indexCard],
-                postDescription: !isPostDescriptionOpen,
-              },
-            }))
-          }>
-          <ul className="table-strategy__body-data__list">
-            {items?.map((pd) =>
-              pd.postDescriptions?.map((item, optionIndex) => (
-                <li
-                  onClick={() => {
-                    setSelectedPd(optionIndex);
-                    setDropdownsOpen((prev) => ({
-                      ...prev,
-                      [indexCard]: {
-                        ...prev[indexCard],
-                        postDescription: false,
-                      },
-                    }));
-                  }}
-                  key={optionIndex}>
-                  {item?.description}
-                </li>
-              ))
-            )}
-          </ul>
-        </Dropdown>
-      </div>
-      {!changeView &&
-        (() => {
-          const fields = isMusic
-            ? ["spotifyTrackLink", "trackTitle", "Additional brief"]
-            : ["Story tag", "Story link", "Additional brief"];
+    <tr>
+      <UsernameCell data={data} />
+      <FollowersCell data={data} />
 
-          return fields.map((key) => (
-            <div key={key} className="table-strategy__body-data">
-              {items?.map((obj, objIndex) => (
-                <p key={`${key}-${objIndex}`}>{obj[key] || "—"}</p>
-              ))}
-            </div>
-          ));
-        })()}
+      {changeView && <GenresCell data={data} />}
+      {changeView && <CountriesCell data={data} />}
+
       {!changeView && (
-        <div className="table-strategy__body-data">
-          <img src={trash} alt="" />
-        </div>
+        <DateCell
+          isOpen={isDateOpen}
+          onToggle={() => toggle("date")}
+          onClose={() => close("date")}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          customDate={customDate}
+          setCustomDate={setCustomDate}
+        />
       )}
-    </div>
+
+      <ContentCell
+        isOpen={isContentOpen}
+        onToggle={() => toggle("content")}
+        onClose={() => close("content")}
+        platformItems={platformItems}
+        selectedContent={selectedContent}
+        setSelectedContent={setSelectedContent}
+        setSelectedPd={setSelectedPd}
+        socialMedia={data.socialMedia}
+      />
+
+      <DescriptionCell
+        isOpen={isPostDescriptionOpen}
+        onToggle={() => toggle("postDescription")}
+        onClose={() => close("postDescription")}
+        platformItems={platformItems}
+        selectedContent={selectedContent}
+        selectedPd={selectedPd}
+        setSelectedPd={setSelectedPd}
+      />
+
+      <ExtraFieldsCells
+        changeView={changeView}
+        isMusic={isMusic}
+        platformItems={platformItems}
+        selectedContent={selectedContent}
+      />
+    </tr>
   );
 };
