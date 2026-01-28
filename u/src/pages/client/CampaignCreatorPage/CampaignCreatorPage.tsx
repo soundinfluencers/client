@@ -1,67 +1,71 @@
 import React from "react";
 import "./_CampaignCreatorPage.scss";
-import { useCreateCampaign, useFilter } from "@/store/client/createCampaign";
-import { Breadcrumbs, Container, Loader, SaveDraft } from "@/components";
+import {
+  useCreateCampaign,
+  useCreateCampaignPlatform,
+} from "@/store/client/createCampaign";
+import { Breadcrumbs, Container, Loader, Proceed } from "@/components";
 import { ScrollPlatforms } from "./components/scroll/scrollPlatftorms/scrollPlattforms";
 import { ScrollGenres } from "./components/scroll/scrollGenre/scrollGenre";
 import { BuildCampaign } from "./buildCampaign/build-campaign";
 import { SliderForCard } from "./components/SliderForCards/SliderForCards";
-import { useCreateCampaignPlatform } from "@/store/client/createCampaign/useCreate-campaign-fetch";
+import { useIsFetching } from "@tanstack/react-query";
+import { NoData } from "@/components/ui/no-array/no-data";
+import { Footer } from "./components/footer/footer";
 
-import { useProfileDetails } from "@/store/profile-details/useProfile-details";
+export const CampaignCreatorPage: React.FC = () => {
+  const lastKeyRef = React.useRef<string>("");
 
-interface Props {}
+  const setOffers = useCreateCampaign((s) => s.setOffers);
+  const offers = useCreateCampaign((s) => s.offers);
+  const offersLoading = useCreateCampaign((s) => s.loading);
+  const isFetching = useIsFetching();
 
-export const CampaignCreatorPage: React.FC<Props> = () => {
-  const { setOffers, offers, loading } = useCreateCampaign();
+  const globalLoading = offersLoading || isFetching > 0;
+
   const { selectedPlatform, setPlatform } = useCreateCampaignPlatform();
-  const { profile, setProfile } = useProfileDetails();
-  const { setSelected } = useFilter();
   const [selectedGenre, setSelectedGenre] = React.useState(
-    "Techno (Melodic, Minimal)"
+    "Techno (Melodic, Minimal)",
   );
 
   React.useEffect(() => {
+    const key = `${selectedPlatform}__${selectedGenre}`;
+    if (lastKeyRef.current === key) return;
+    lastKeyRef.current = key;
+
     setOffers(selectedPlatform, selectedGenre);
-  }, []);
-  console.log(profile, "profile");
-  const handlePlatformSelect = (platform: string) => {
-    setPlatform(platform);
-    // setSelected()
-    if (selectedGenre) {
-      setOffers(platform, selectedGenre);
-    }
-  };
-
-  const handleGenreSelect = (genre: string) => {
-    setSelectedGenre(genre);
-
-    if (selectedPlatform) {
-      setOffers(selectedPlatform, genre);
-    }
-  };
+  }, [selectedPlatform, selectedGenre, setOffers]);
 
   return (
     <Container className="Campaign_Creator_Page">
-      {loading && <Loader />}
+      <Proceed />
+
+      {globalLoading && <Loader />}
+
       <div className="Campaign_Creator_Page__head">
-        {" "}
         <div className="navmenu">
           <Breadcrumbs />
-          <SaveDraft />
-        </div>{" "}
+        </div>
         <h1>Ready-to-launch offers</h1>
+
         <ScrollPlatforms
           selectedPlatform={selectedPlatform}
-          onPlatformSelect={handlePlatformSelect}
+          onPlatformSelect={setPlatform}
         />
+
         <ScrollGenres
           selectedGenre={selectedGenre}
-          onGenreSelect={handleGenreSelect}
+          onGenreSelect={setSelectedGenre}
         />
-      </div>{" "}
-      <SliderForCard packages={offers} />
+      </div>
+
+      {offers.length > 0 ? (
+        <SliderForCard offers={offers} />
+      ) : (
+        <NoData title={"offers for this genre yet"} />
+      )}
       <BuildCampaign />
+      <Footer />
     </Container>
   );
 };

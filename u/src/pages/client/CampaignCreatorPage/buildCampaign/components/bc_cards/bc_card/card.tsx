@@ -18,7 +18,7 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
   const { actions, promoCard } = useCampaignStore();
   const { selectedCurrency } = useBuildCampaignFilters();
   const activePromo = promoCard.find(
-    (card) => card.influencerId === data.influencerId
+    (card) => card.accountId === data.accountId,
   );
   const [flag, setFlag] = React.useState<boolean>(false);
   const hasGenres = data.musicGenres && data.musicGenres.length > 0;
@@ -27,7 +27,7 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
     <div
       onClick={() => {
         if (isInclude) return null;
-        else actions.setPromoCard(data);
+        else actions.setPromoCards(data);
       }}
       className={`bc_card ${flag ? "open" : ""} ${isInclude ? "include" : ""} ${
         activePromo ? "active" : ""
@@ -68,7 +68,11 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
           </div>
         </div>
         {flag && hasGenres && hasCountries && (
-          <GenresCountries activePromo={activePromo} data={data} />
+          <GenresCountries
+            isInclude={isInclude}
+            activePromo={activePromo}
+            data={data}
+          />
         )}{" "}
       </div>
       {isInclude && (

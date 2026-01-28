@@ -1,5 +1,6 @@
 import React from "react";
 import "./_promo-form.scss";
+
 import { BespokeForm } from "@/pages/client/components/client-forms/bespoke";
 import { SubmtiButton } from "@/components/ui/submit-button/submit-button";
 import { Form } from "@/components";
@@ -10,7 +11,7 @@ interface Props {
 
 export const PromoForm: React.FC<Props> = ({ activeTabId }) => {
   const PromoFormData = BESPOKE_CAMPAIGN_TABS_DATA.find(
-    (data) => data.promoType === activeTabId
+    (data) => data.promoType === activeTabId,
   );
   if (!PromoFormData) return;
   return (

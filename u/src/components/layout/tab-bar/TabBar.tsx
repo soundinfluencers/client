@@ -3,9 +3,9 @@ import { Logo } from "./components/logo/Logo.tsx";
 import { LoginButton, SignupButton } from "./components/buttons/Buttons.tsx";
 import "./_tab-bar.scss";
 import { Link, useNavigate } from "react-router-dom";
-import { useWindowSize } from "@/hooks/useWindowSize.ts";
+import { useWindowSize } from "@/hooks/global/useWindowSize.ts";
 import burgerMenu from "@/assets/icons/burger-menu.svg";
-import { useClickOutside } from "@/hooks/useClickOutside.ts";
+import { useClickOutside } from "@/hooks/global/useClickOutside.ts";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import React from "react";
 import { useUser } from "@/store/get-user/index.ts";
@@ -36,7 +36,7 @@ export const TabBar: FC = () => {
   const navigate = useNavigate();
   const AccountSettings =
     user?.role === "client"
-      ? "/client/AccountSettigns"
+      ? "/client/AccountSetting"
       : "/influencer/account-setting";
 
   const handleClickBurgerMenu = (path: string) => {
@@ -49,9 +49,9 @@ export const TabBar: FC = () => {
   return (
     <div className="tab-bar" ref={tabBarRef}>
       <Container className="tab-bar__content">
-        {" "}
         <Logo onClick={() => navigate("/")} />
-        {isDesktop && (
+
+        {isDesktop ? (
           <div className="tab-bar__controls-desktop">
             {!accessToken ? (
               <>
@@ -83,7 +83,8 @@ export const TabBar: FC = () => {
 
                 <div
                   ref={dropdownRef}
-                  className={`tab-bar__user-menu-dropdown ${isDropdownOpen ? "tab-bar__user-menu-dropdown--open" : ""}`}
+                  className={`tab-bar__user-menu-dropdown ${isDropdownOpen ? "tab-bar__user-menu-dropdown--open" : ""
+                    }`}
                 >
                   <div className="tab-bar__user-menu-dropdown-header">
                     <div className="tab-bar__user-menu-dropdown-header-info">
@@ -129,6 +130,7 @@ export const TabBar: FC = () => {
                     </Link>
 
                     <button
+                      type="button"
                       onClick={() => {
                         setIsDropdownOpen(false);
                         logout();
@@ -139,31 +141,49 @@ export const TabBar: FC = () => {
                     </button>
                   </nav>
                 </div>
+
+                {/* Если этот блок НЕ нужен (дублирует меню) — удали его.
+                  Я оставил, но можно убрать. */}
+                <div onClick={() => navigate(AccountSettings)} role="button" tabIndex={0}>
+                  <p>Account: {user?.firstName}</p>
+                  <button type="button" className="tab-bar__logout" onClick={logout}>
+                    Logout
+                  </button>
+                </div>
               </div>
             )}
           </div>
-        )}
-        {!isDesktop && (
-          <div
-            className="tab-bar__controls-mobile"
-            onClick={() => setIsBurgerOpen(true)}>
-            <img className="tab-bar__burger-toggle" src={burgerMenu} alt="" />
+        ) : (
+          <div className="tab-bar__controls-mobile">
+            <div
+              onClick={() => setIsBurgerOpen(true)}
+              role="button"
+              tabIndex={0}
+            >
+              <img className="tab-bar__burger-toggle" src={burgerMenu} alt="" />
+            </div>
+
+            <div className={`tab-bar__menu ${isBurgerOpen ? "tab-bar__menu--open" : ""}`}>
+              <div
+                className="tab-bar__menu-item tab-bar__menu-item--signup"
+                onClick={() => handleClickBurgerMenu("/signup/client")}
+                role="button"
+                tabIndex={0}
+              >
+                Sign up
+              </div>
+
+              <div
+                className="tab-bar__menu-item tab-bar__menu-item--login"
+                onClick={() => handleClickBurgerMenu("/login")}
+                role="button"
+                tabIndex={0}
+              >
+                Log in
+              </div>
+            </div>
           </div>
         )}
-        <div
-          className={`tab-bar__menu ${isBurgerOpen ? "tab-bar__menu--open" : ""
-            }`}>
-          <div
-            className="tab-bar__menu-item tab-bar__menu-item--signup"
-            onClick={() => handleClickBurgerMenu("/signup/client")}>
-            Sign up
-          </div>
-          <div
-            className="tab-bar__menu-item tab-bar__menu-item--login"
-            onClick={() => handleClickBurgerMenu("/login")}>
-            Log in
-          </div>
-        </div>
       </Container>
     </div>
   );

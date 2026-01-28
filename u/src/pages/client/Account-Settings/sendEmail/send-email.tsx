@@ -1,11 +1,8 @@
-import React from "react";
 import { Form, SubmtiButton } from "@/components";
 import { EmailForm } from "@/pages/client/components/client-forms/account-settings";
 import { useAccountChange } from "@/store/client/account-settings";
 
-interface Props {}
-
-export const SendEmail: React.FC<Props> = () => {
+export const SendEmail = () => {
   const { setConfirm } = useAccountChange();
 
   return (
@@ -13,7 +10,11 @@ export const SendEmail: React.FC<Props> = () => {
       <div className="Account-settings__subtitle">
         <h3>Send a verification email to reset it</h3>
       </div>
-      <Form onSubmit={setConfirm} submitButton={<SubmtiButton data="Send" />}>
+      <Form
+        onSubmit={setConfirm}
+        submitButton={
+          <SubmtiButton className="add-style-profile" data="Send" />
+        }>
         <EmailForm />
       </Form>
     </div>

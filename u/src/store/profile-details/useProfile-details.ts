@@ -1,4 +1,4 @@
-import type { Profile } from "@/types/profile-details/profile-detials.types";
+import type { Profile } from "@/types/client/profile-details/profile-detials.types";
 import type { IProfileDetails } from "@/types/store/index.types";
 import { create } from "zustand";
 

@@ -1,7 +1,7 @@
 import React from "react";
-import "./_campaign-strategy.scss";
+import "../scss-campaign-table/campaignBase.scss";
 
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Breadcrumbs,
   ButtonMain,
@@ -9,35 +9,58 @@ import {
   Checkbox,
   Container,
 } from "@/components";
-import { ViewChange } from "@/pages/client/components/(proposals,strategy)/view-change";
-import { Bar } from "@/pages/client/components/(proposals,strategy)/bar";
-import { LiveViewCard } from "@/pages/client/components/(proposals,strategy)/live-view";
-import { ViewAudience } from "@/pages/client/components/(proposals,strategy)/view-audience";
+import { ViewChange } from "@/pages/client/components/table-components/view-change";
+import { Bar } from "@/pages/client/components/table-components/bar";
+import { ViewAudience } from "@/pages/client/components/table-components/view-audience";
 
-import { TableStrategy } from "./components/table-strategy/table";
-import { useSelectedSocials } from "@/hooks/client/useSelectedSocials";
-import { mockdata } from "@/constants/client/campaign-strategy.data";
 import { useCampaignStore } from "@/store/client/createCampaign";
-import { useResetCampaignOnLeave } from "./hooks/useCampaignLeave";
+
+import { TableStrategy } from "./components/table-strategy/strategy-table";
+
+import { postCampaignDraft } from "@/api/client/post-actions/post-draft-campaign";
+import { postCampaignProposal } from "@/api/client/post-actions/post-proposal-campaign";
+import { LiveViewCard } from "./components/table-strategy/live-view-card/live-view";
+import { useGroupPromos } from "@/hooks/client/campaigns/useGroupPromos";
 
 interface Props {}
 
-export const CamapignStrategy: React.FC<Props> = () => {
-  useResetCampaignOnLeave();
-  const { postContent, campaignName, actions } = useCampaignStore();
+export const CampaignStrategy: React.FC<Props> = () => {
+  const navigate = useNavigate();
 
+  const { campaignContent, actions, promoCard, campaignName } =
+    useCampaignStore();
   const [changeView, setChangeView] = React.useState<boolean>(false);
   const [view, setView] = React.useState<number>(1);
-  const navigate = useNavigate();
-  console.log("postContent", postContent);
+  const [saveProposals, setSaveProposals] = React.useState<boolean>(false);
 
-  const main = postContent.main;
-  const music = postContent.music;
-  console.log("main", main);
-  console.log("music", music);
+  const main = React.useMemo(
+    () => campaignContent.filter((x: any) => x.socialMediaGroup === "main"),
+    [campaignContent],
+  );
 
+  const music = React.useMemo(
+    () => campaignContent.filter((x: any) => x.socialMediaGroup === "music"),
+    [campaignContent],
+  );
+
+  const press = React.useMemo(
+    () => campaignContent.filter((x: any) => x.socialMediaGroup === "press"),
+    [campaignContent],
+  );
+  const { mainPromos, musicPromos, otherPromos } = useGroupPromos(promoCard);
+
+  const onSaveDraft = async () => {
+    const draftPayload = actions.getDraftPayload();
+
+    await postCampaignDraft(draftPayload);
+  };
+  const onSaveProposals = async () => {
+    const proposalsPayload = actions.getProposalPayload("bank_card");
+
+    await postCampaignProposal(proposalsPayload);
+  };
   return (
-    <Container className="campaign-strategy">
+    <Container className="campaignBase">
       <div className="navmenu">
         <Breadcrumbs />
         <ViewChange setView={setView} view={view} />
@@ -52,43 +75,63 @@ export const CamapignStrategy: React.FC<Props> = () => {
       )}
       {view === 0 ? (
         <div className="live-view-campaign">
-          {mockdata.map((data) => (
-            <LiveViewCard data={data} />
-          ))}
+          {main.length >= 1 &&
+            main.map((item) => (
+              <LiveViewCard item={item} networks={mainPromos} />
+            ))}
+          {music.length >= 1 &&
+            music.map((item) => (
+              <LiveViewCard item={item} networks={musicPromos} />
+            ))}
+          {press.length >= 1 &&
+            press.map((item) => (
+              <LiveViewCard item={item} networks={otherPromos} />
+            ))}
         </div>
       ) : (
         <div className="table-wrapper">
           {" "}
+          {main.length >= 1 && (
+            <TableStrategy
+              group="main"
+              networks={mainPromos}
+              changeView={changeView}
+              items={main}
+            />
+          )}
           {music.length >= 1 && (
             <TableStrategy
+              group="music"
               isMusic={true}
+              networks={musicPromos}
               changeView={changeView}
               items={music}
             />
           )}{" "}
-          {main.length >= 1 && (
-            <TableStrategy changeView={changeView} items={main} />
-          )}
+          {press.length >= 1 && (
+            <TableStrategy
+              group="press"
+              networks={otherPromos}
+              changeView={changeView}
+              items={press}
+            />
+          )}{" "}
         </div>
       )}
       <Checkbox name="Allow automatic influencer replacement if a creator opts out." />
-      <div className="campaign-strategy__options">
+      <div className="campaignBase__options">
         <ButtonSecondary
           text={"Save as proposal"}
-          onClick={function (): void {
-            throw new Error("Function not implemented.");
-          }}
+          onClick={() => onSaveProposals()}
           className="btn"
         />{" "}
         <ButtonSecondary
           text={"Save Draft"}
-          onClick={function (): void {
-            throw new Error("Function not implemented.");
-          }}
+          onClick={() => onSaveDraft()}
           className="btn"
         />
       </div>
-      <div className="campaign-strategy__proceedTo">
+      <div className="campaignBase__proceedTo">
         <ButtonMain
           text={"Proceed to payment"}
           onClick={() =>

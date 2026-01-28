@@ -1,11 +1,21 @@
 import type { CampaignState } from "@/types/store/index.types";
 import { calcTotal } from "@/utils/functions/calsTotal";
 import { create } from "zustand";
-import { buildCampaignContent, parseFormsForDisplay } from "../utils";
+import {
+  buildMainCampaignContent,
+  buildMusicCampaignContent,
+  buildPressCampaignContent,
+  parseFormsForDisplay,
+} from "./utils";
+import type {
+  ICampaignAccount,
+  IPromoCard,
+} from "@/types/client/creator-campaign/creator-campaign.types";
 
 export const useCampaignStore = create<CampaignState>((set, get) => ({
   offer: null,
   promoCard: [],
+  selectedAccounts: [],
   postContent: {
     main: [],
     music: [],
@@ -15,125 +25,214 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
   totalPrice: 0,
   activeOfferId: null,
   campaignName: "",
+  campaignContent: [],
   actions: {
     setOffer: (offer) =>
-      set((state) => ({
-        offer,
-        totalPrice: calcTotal(offer, state.promoCard),
-      })),
+      set((state) => {
+        const incomingId = String((offer as any)?._id ?? "");
+        const currentId = String((state.offer as any)?._id ?? "");
+
+        const isSame = incomingId && incomingId === currentId;
+
+        if (isSame) {
+          return {
+            offer: null,
+            activeOfferId: null,
+            promoCard: [],
+            totalPrice: calcTotal(null, []),
+          };
+        }
+
+        return {
+          offer,
+          activeOfferId: incomingId || null,
+          promoCard: [],
+          totalPrice: calcTotal(offer, []),
+        };
+      }),
 
     setActiveOffer: (id) => set({ activeOfferId: id }),
 
-    setPromoCard: (card) =>
+    setPromoCards: (cards) =>
       set((state) => {
-        const exists = state.promoCard.some(
-          (c) => c.accountId === card.accountId
-        );
-        const promoCard = exists
-          ? state.promoCard.map((c) =>
-              c.accountId === card.accountId ? card : c
-            )
-          : [...state.promoCard, card];
-        return { promoCard, totalPrice: calcTotal(state.offer, promoCard) };
+        const incoming = Array.isArray(cards) ? cards : [cards];
+        const map = new Map<string, IPromoCard>();
+
+        state.promoCard.forEach((card) => {
+          if (card?.accountId) map.set(card.accountId, card);
+        });
+
+        incoming.forEach((card) => {
+          const id = card?.accountId;
+          if (!id) return;
+
+          if (map.has(id)) map.delete(id);
+          else map.set(id, card);
+        });
+
+        const promoCard = Array.from(map.values());
+
+        return {
+          promoCard,
+          totalPrice: calcTotal(state.offer, promoCard),
+        };
       }),
 
-    addPostContent: (
-      group: "main" | "music" | "press",
-      formData: Record<string, string>,
-      socialMedia: string
-    ) => {
-      const parsedForms = parseFormsForDisplay(formData, socialMedia);
+    setCampaignAccount: (account: ICampaignAccount) =>
+      set((state) => {
+        const exists = state.selectedAccounts.some(
+          (a) => a.accountId === account.accountId,
+        );
 
-      set((state) => ({
-        postContent: {
-          ...state.postContent,
-          [group]: [...state.postContent[group], ...parsedForms],
-        },
-      }));
+        return {
+          selectedAccounts: exists
+            ? state.selectedAccounts.map((a) =>
+                a.accountId === account.accountId ? account : a,
+              )
+            : [...state.selectedAccounts, account],
+        };
+      }),
+
+    addPostContent: (group, formData, socialMedia) => {
+      const parsed = parseFormsForDisplay(formData, socialMedia, group);
+
+      set((state) => {
+        const prev = state.postContent[group];
+
+        const ids = new Set(parsed.map((x: any) => x._id));
+        const withoutSameIds = prev.filter((it: any) => !ids.has(it._id));
+
+        return {
+          postContent: {
+            ...state.postContent,
+            [group]: [...withoutSameIds, ...parsed],
+          },
+        };
+      });
     },
-
     setCampaignName: (campaignName: string) => set({ campaignName }),
 
-    recalcTotal: () => {
-      const state = get();
-      set({ totalPrice: calcTotal(state.offer, state.promoCard) });
-    },
-
-    prepareCampaignPayload: (
-      formData: Record<string, string>,
-      selectedPlatforms: string[],
-      grouped: Record<"main" | "music" | "press", string[]>,
-      campaignName?: string,
-      campaignPrice?: number
-    ) => {
-      let campaignContent: any[] = [];
+    buildCampaignContentFromForm: (formData, selectedPlatforms, grouped) => {
+      const campaignContent: any[] = [];
 
       (["main", "music", "press"] as const).forEach((group) => {
-        const platformsInGroup = grouped[group];
-        if (!platformsInGroup || platformsInGroup.length === 0) return;
-
-        platformsInGroup.forEach((platform) => {
+        grouped[group]?.forEach((platform) => {
           if (!selectedPlatforms.includes(platform)) return;
 
           if (group === "main") {
-            campaignContent = campaignContent.concat(
-              buildCampaignContent(formData, platform)
+            campaignContent.push(
+              ...buildMainCampaignContent(formData, platform),
             );
           }
 
           if (group === "music") {
-            campaignContent.push({
-              _id: `${Date.now()}-${platform}`,
-              videoLink: formData["TrackLink"] || "",
-              postDescriptions: formData["trackTitle"]
-                ? [
-                    {
-                      _id: `${Date.now()}-0`,
-                      description: formData["trackTitle"],
-                    },
-                  ]
-                : [],
-              storyTag: "",
-              swipeUpLink: "",
-              specialWishes: formData["additionalBrief"] || "",
-              socialMedia: platform,
-              socialMediaGroup: group,
-            });
+            campaignContent.push(
+              ...buildMusicCampaignContent(formData, platform),
+            );
           }
 
           if (group === "press") {
-            campaignContent.push({
-              _id: `${Date.now()}-${platform}`,
-              videoLink: formData["musicLinks"] || "",
-              postDescriptions: formData["artworkLinks"]
-                ? [
-                    {
-                      _id: `${Date.now()}-0`,
-                      description: formData["artworkLinks"],
-                    },
-                  ]
-                : [],
-              storyTag: "",
-              swipeUpLink: "",
-              specialWishes: formData["additionalBrief"] || "",
-              socialMedia: platform,
-              socialMediaGroup: group,
-            });
+            campaignContent.push(
+              ...buildPressCampaignContent(formData, platform),
+            );
           }
         });
       });
 
-      const payload = {
-        campaignContent,
-        campaignName: campaignName || formData["campaignName"] || "",
-        paymentType: "card",
-        paymentStatus: "wait",
-        campaignPrice: campaignPrice || 0,
-        createdAt: new Date().toISOString(),
-        socialMedia: "",
-      };
+      set({ campaignContent });
+    },
+    getCampaignPayload: (paymentMethod: string) => {
+      const state = get();
 
-      set({ campaignPayload: payload });
+      const addedAccounts = state.selectedAccounts.map((card) => ({
+        socialAccountId: card.accountId,
+        influencerId: card.influencerId,
+        socialMedia: (card.socialMedia || "").toLowerCase(),
+        username: String(card.username ?? ""),
+        selectedCampaignContentItem: {
+          campaignContentItemId:
+            card.selectedCampaignContentItem?.campaignContentItemId ?? "",
+          descriptionId: card.selectedCampaignContentItem?.descriptionId ?? "",
+        },
+        dateRequest: card.dateRequest ?? "ASAP",
+      }));
+
+      const socials = Array.from(
+        new Set(addedAccounts.map((x) => x.socialMedia).filter(Boolean)),
+      );
+
+      const socialMedia =
+        socials.length > 1 ? "multipromo" : (socials[0] ?? "");
+
+      return {
+        campaignName: state.campaignName ?? "",
+        socialMedia,
+        campaignPrice: state.totalPrice ?? 0,
+        paymentType: paymentMethod,
+        addedAccounts,
+        campaignContent: state.campaignContent ?? [],
+      };
+    },
+    getDraftPayload: () => {
+      const state = get();
+
+      const firstFromContent = state.campaignContent?.[0]?.socialMedia;
+      const firstFromAccounts = state.selectedAccounts?.[0]?.socialMedia;
+      const fromOffer = state.offer?.socialMedia;
+
+      const draftSocialMedia = String(
+        firstFromContent || firstFromAccounts || fromOffer || "instagram",
+      ).toLowerCase();
+
+      return {
+        campaignName: state.campaignName ?? "",
+        socialMedia: draftSocialMedia,
+        campaignContent: state.campaignContent ?? [],
+
+        addedAccounts: state.selectedAccounts.map((a) => ({
+          influencerId: a.influencerId,
+          socialAccountId: a.accountId,
+          socialMedia: (a.socialMedia || draftSocialMedia).toLowerCase(),
+          username: String(a.username ?? ""),
+
+          selectedContent: {
+            campaignContentItemId:
+              a.selectedCampaignContentItem?.campaignContentItemId ?? "",
+            descriptionId: a.selectedCampaignContentItem?.descriptionId ?? "",
+          },
+        })),
+      };
+    },
+    getProposalPayload: (paymentType: string) => {
+      const state = get();
+
+      const addedAccounts = state.selectedAccounts.map((a) => ({
+        socialAccountId: a.accountId,
+        influencerId: a.influencerId,
+        socialMedia: (a.socialMedia || "instagram").toLowerCase(),
+        username: String(a.username ?? ""),
+        selectedCampaignContentItem: {
+          campaignContentItemId:
+            a.selectedCampaignContentItem?.campaignContentItemId ?? "",
+          descriptionId: a.selectedCampaignContentItem?.descriptionId ?? "",
+        },
+        dateRequest: a.dateRequest ?? "ASAP",
+      }));
+
+      const socials = Array.from(
+        new Set(addedAccounts.map((x) => x.socialMedia).filter(Boolean)),
+      );
+      const socialMedia =
+        socials.length > 1 ? "multipromo" : (socials[0] ?? "instagram");
+
+      return {
+        campaignName: state.campaignName ?? "",
+        socialMedia,
+        campaignPrice: state.totalPrice ?? 0,
+        paymentType,
+        addedAccounts,
+        campaignContent: state.campaignContent ?? [],
+      };
     },
 
     resetCampaign: () =>

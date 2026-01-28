@@ -8,4 +8,7 @@ export interface IPaymentCampaignField {
   formType: "payment";
   inputs: inputs[];
 }
-export type CurrencyType = "UK" | "EU" | "International";
+export type CurrencyType =
+  | "bank_transfer_uk"
+  | "bank_transfer_eu"
+  | "bank_transfer_international";

@@ -1,6 +1,6 @@
-import './_country-input.scss';
+import "./_country-input.scss";
 import { useMemo, useRef, useState } from "react";
-import { useClickOutside } from '../../../../../../hooks/useClickOutside';
+import { useClickOutside } from "../../../../../../hooks/global/useClickOutside";
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { COUNTRY_LIST } from './data/countries.data';
 
@@ -16,7 +16,7 @@ export const CountryInput: React.FC<Props> = ({
   const { control, setValue } = useFormContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isSelectingRef = useRef(false);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
   useClickOutside(dropdownRef, () => {
@@ -50,13 +50,14 @@ export const CountryInput: React.FC<Props> = ({
             .filter(c => c.name.toLowerCase().includes(searchValue.toLowerCase()))
             .filter(c => !selectedSet.has(c.name));
         }, [searchValue, selectedSet]);
-
         const showDropdown = isFocused && filteredCountries.length > 0;
 
-        const displayValue = isFocused ? searchValue : field.value ?? '';
+        const displayValue = isFocused ? searchValue : (field.value ?? "");
 
         return (
-          <div ref={dropdownRef} className={`country-input ${isFocused ? 'country-input--focused' : ''}`}>
+          <div
+            ref={dropdownRef}
+            className={`country-input ${isFocused ? "country-input--focused" : ""}`}>
             <input
               type="text"
               className={`country-input__input ${hasError ? 'country-input__input--error' : ''}`}
@@ -67,7 +68,7 @@ export const CountryInput: React.FC<Props> = ({
                 setIsFocused(true);
               }}
               onFocus={() => {
-                setSearchValue(field.value ?? '');
+                setSearchValue(field.value ?? "");
                 setIsFocused(true);
               }}
               onBlur={() => {
@@ -87,7 +88,8 @@ export const CountryInput: React.FC<Props> = ({
               }}
             />
 
-            <div className={`country-input__list-wrapper ${showDropdown ? 'country-input__list-wrapper--visible' : ''}`}>
+            <div
+              className={`country-input__list-wrapper ${showDropdown ? "country-input__list-wrapper--visible" : ""}`}>
               <ul className={`country-input__list`}>
                 {filteredCountries.map((country) => (
                   <li
@@ -102,8 +104,7 @@ export const CountryInput: React.FC<Props> = ({
                       });
                       setSearchValue('');
                       setTimeout(() => setIsFocused(false), 120);
-                    }}
-                  >
+                    }}>
                     {country.name}
                   </li>
                 ))}

@@ -1,19 +1,22 @@
 import React from "react";
 import { getSocialMediaIcon } from "@/constants/social-medias";
 import type { SocialMediaType } from "@/types/utils/constants.types";
-import chevron from "@/assets/icons/chevron-down.svg";
 import "./_table_row_card.scss";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 import { Checkbox } from "@/components";
 import { getPriceByCurrency } from "./utils/usePriceCurrency";
 import { useBuildCampaignFilters } from "@/store/client/createCampaign/useBuildCampaignFilters";
+import { useCampaignStore } from "@/store/client/createCampaign";
+import { TagsDropdown } from "./TagsDropdown";
+
 interface Props {
   data: IPromoCard;
   setIsSmall: React.Dispatch<React.SetStateAction<boolean>>;
   isSmall: boolean;
   isInclude: boolean;
 }
+
 export const TableRowCard: React.FC<Props> = ({
   data,
   setIsSmall,
@@ -21,6 +24,14 @@ export const TableRowCard: React.FC<Props> = ({
   isInclude,
 }) => {
   const { selectedCurrency } = useBuildCampaignFilters();
+  const { actions } = useCampaignStore();
+  const [checked, setChecked] = React.useState(false);
+
+  const addPromo = (checked: boolean) => {
+    setChecked(checked);
+    if (isInclude) return;
+    actions.setPromoCards(data);
+  };
 
   React.useEffect(() => {
     const el = document.querySelector(`[data-id="${data.accountId}"]`);
@@ -33,24 +44,11 @@ export const TableRowCard: React.FC<Props> = ({
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [data.accountId]);
+  }, [data.accountId, setIsSmall]);
 
-  const renderTags = (arr: string[]) => {
-    if (!isSmall || arr.length < 1)
-      return arr?.slice?.(0, 3)?.map((t, i) => (
-        <span className="tag" key={i}>
-          {t}
-        </span>
-      ));
-
-    return (
-      <>
-        <div className="chevronPopUp">
-          <img src={chevron} alt="" />
-        </div>
-      </>
-    );
-  };
+  const genres = [...(data?.musicGenres || [])];
+  const countries =
+    data?.countries?.map((c) => `${c.country} ${c.percentage}%`) ?? [];
 
   return (
     <div
@@ -58,11 +56,15 @@ export const TableRowCard: React.FC<Props> = ({
       className={`promo-grid-row ${isSmall ? "adaptive" : ""}`}
       key={data.accountId}>
       <div className="name">
-        <Checkbox isChecked={isInclude} name={data.username} />
+        <Checkbox
+          onChange={addPromo}
+          isChecked={isInclude || checked}
+          name={data.username}
+        />
       </div>
 
       <div className="price">
-        <img src={data.logoUrl} />
+        <img src={data.logoUrl} alt="" />
         <span>
           {getPriceByCurrency(data.prices, selectedCurrency)}
           {selectedCurrency.key}
@@ -70,20 +72,19 @@ export const TableRowCard: React.FC<Props> = ({
       </div>
 
       <div className="followers">
-        <img src={getSocialMediaIcon(data.socialMedia as SocialMediaType)} />
+        <img
+          src={getSocialMediaIcon(data.socialMedia as SocialMediaType)}
+          alt=""
+        />
         <span>{formatFollowers(data.followers)}</span>
       </div>
 
       <div className="genres">
-        <div className="tags">{renderTags([...(data?.musicGenres || [])])}</div>
+        <TagsDropdown items={genres} placeholder="No genres" />
       </div>
 
       <div className="countries">
-        <div className="tags">
-          {renderTags(
-            data?.countries?.map((c) => `${c.country} ${c.percentage}%`)
-          )}
-        </div>
+        <TagsDropdown items={countries} placeholder="No countries" />
       </div>
     </div>
   );

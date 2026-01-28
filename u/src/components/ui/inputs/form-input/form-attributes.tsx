@@ -55,12 +55,15 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInput<any>>(
           id={String(name)}
           type={type}
           placeholder={placeholder}
-          {...register(name, { required, ...validation })}
+          {...register(name, {
+            required: required ? "Required" : false,
+            ...validation,
+          })}
         />
         {error && <span className="error-message">{error}</span>}
       </div>
     );
-  }
+  },
 );
 
 FormInput.displayName = "FormInput";

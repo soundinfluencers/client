@@ -1,5 +1,6 @@
 import React from "react";
-import "./_build-compaign.scss";
+import "./scss-module/_build-compaign.scss";
+
 import filterIcon from "@/assets/icons/filter (1).svg";
 import { Search } from "./bar-ui/bc_search/bc_search";
 import { SelectBudget, SortSelect } from "./bar-ui/bc_select/bc-select";
@@ -10,21 +11,26 @@ import { SwitchView } from "@/pages/client/components/switch-view/switch-view";
 import { useCreateCampaign, useFilter } from "@/store/client/createCampaign";
 import x from "@/assets/icons/x.svg";
 import { BcProceed } from "./components/bc_proceed/bc_prooced";
-import {
-  currencyArr,
-  filtersArr,
-} from "./build-campaign.data/build-campaign.data";
-import { usePromoAccountsQuery } from "../../react-query/usePromoAccountQuery";
+
 import { useBuildCampaignFilters } from "@/store/client/createCampaign/useBuildCampaignFilters";
+import { usePromoAccountsOrSearch } from "@/hooks/client/campaign-creator-page/usePromoAccountsOrSearch";
+import { NoData } from "@/components/ui/no-array/no-data";
 
 interface Props {}
 
 export const BuildCampaign: React.FC<Props> = () => {
+  const [search, setSearch] = React.useState("");
+
   const { selected, removeItem } = useFilter();
   const [filterFlag, setFilterFlag] = React.useState<boolean>(true);
   const [view, setView] = React.useState<number>(1);
-  const { setPromoCards } = useCreateCampaign();
+  const { offers } = useCreateCampaign();
   const [isSmall, setIsSmall] = React.useState(false);
+
+  const onChange = (value: string) => {
+    setSearch(value);
+  };
+
   const {
     selectedFilter,
     selectedCurrency,
@@ -34,18 +40,16 @@ export const BuildCampaign: React.FC<Props> = () => {
     setBudget,
   } = useBuildCampaignFilters();
 
-  const { data: promoCards } = usePromoAccountsQuery({
+  const { data: promoCards } = usePromoAccountsOrSearch({
     selected,
     budget: String(selectedBudget),
     currency: selectedCurrency.currency,
     sortBy: selectedFilter.key,
+    query: search,
   });
 
-  React.useEffect(() => {
-    if (promoCards) {
-      setPromoCards(promoCards);
-    }
-  }, [promoCards]);
+  console.log(offers, "offers");
+  console.log(promoCards, "promoCards");
 
   return (
     <div className="build-compaign">
@@ -62,7 +66,7 @@ export const BuildCampaign: React.FC<Props> = () => {
               <img src={filterIcon} alt="" />
               <p>Filters</p>
             </div>
-            <Search />
+            <Search setSearch={onChange} search={search} />
           </div>
           <div className="selects">
             {" "}
@@ -81,14 +85,14 @@ export const BuildCampaign: React.FC<Props> = () => {
         <div className="build-compaign__viewAfilters">
           <ul>
             {selected.map((item) => (
-              <li>
+              <li key={item.id}>
                 {item.filterName}{" "}
                 {item.children?.map((children) =>
                   item.children && item.children.length > 1 ? (
                     <>{children.filterName}, </>
                   ) : (
                     <>{children.filterName}</>
-                  )
+                  ),
                 )}
                 <img onClick={() => removeItem(item.id)} src={x} alt="" />
               </li>
@@ -106,11 +110,16 @@ export const BuildCampaign: React.FC<Props> = () => {
               onToggle={() => setFilterFlag((prev) => !prev)}
             />
           )}
-          <CardsContainer
-            isSmall={isSmall}
-            setIsSmall={setIsSmall}
-            view={view}
-          />
+          {promoCards.length > 0 ? (
+            <CardsContainer
+              promosCards={promoCards}
+              isSmall={isSmall}
+              setIsSmall={setIsSmall}
+              view={view}
+            />
+          ) : (
+            <NoData title={"networks for that filter"} />
+          )}
         </div>
       </div>
       <BcProceed />

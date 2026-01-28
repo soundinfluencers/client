@@ -1,43 +1,66 @@
-import type {
-  IPlattformsDataForm,
-  PlatformConfig,
-} from "@/types/client/form-clients/plattforms-data-form.types";
-import {
-  renderInputs,
-  renderTextAreas,
-} from "../../../../components/form/renderFunctions/input-textAreas";
-import { ButtonSecondary, FormInput, FormTextArea } from "@/components";
-import plus from "@/assets/icons/plus.svg";
 import React from "react";
+import { FormInput, FormTextArea, ButtonSecondary } from "@/components";
+import plus from "@/assets/icons/plus.svg";
+import { renderTextAreas } from "@/components/form/renderFunctions/input-textAreas";
+import { getSocialMediaIcon } from "@/constants/social-medias";
+import type { SocialMediaType } from "@/types/utils/constants.types";
 
-export function PlatformForm({ data }: { data: any }) {
-  console.log(data, "input");
+interface PlatformFormProps {
+  data: any;
+  selectedPlatforms: string[];
+  formPrefix: string;
+  selectedEntity: number;
+}
+
+export function PlatformForm({
+  data,
+  selectedPlatforms,
+  formPrefix,
+  selectedEntity,
+}: PlatformFormProps) {
   const [descriptions, setDescriptions] = React.useState<number[]>([0]);
-  const addDescription = () => {
+
+  const addDescription = () =>
     setDescriptions((prev) => [...prev, prev.length]);
-  };
+
   return (
     <>
-      {data.contentTitle && <p className="labelForm">{data.contentTitle}</p>}
+      {data.contentTitle && selectedPlatforms.length >= 1 && (
+        <div className="legend">
+          <p className="labelForm">
+            {data.contentTitle}{" "}
+            {selectedEntity === 0 ? "(for Creators)" : "(for Communities)"}
+          </p>
+          {selectedPlatforms.map((sp) => (
+            <img
+              key={sp}
+              src={getSocialMediaIcon(sp as SocialMediaType)}
+              alt=""
+            />
+          ))}
+        </div>
+      )}
 
       <div className="inputs">
         {data.inputs.map((input: any, index: number) => (
           <React.Fragment key={input.id}>
             <FormInput
-              id={input.id}
+              required
+              id={`${formPrefix}-${input.id}-${index}`}
+              name={`${formPrefix}-${input.name}-${index}`}
               label={input.name}
-              name={input.name}
               placeholder={input.placeholder}
             />
 
             {input.id === "Contentlink*" && (
               <>
-                {descriptions.map((index) => (
+                {descriptions.map((descIndex) => (
                   <FormTextArea
-                    key={index}
-                    id={`Postdescription-${index + 1}`}
-                    name={`Postdescription-${index + 1}`}
-                    label={`Post description ${index + 1}`}
+                    required
+                    key={descIndex}
+                    id={`${formPrefix}-Postdescription-${descIndex + 1}`}
+                    name={`${formPrefix}-Postdescription-${descIndex + 1}`}
+                    label={`Post description ${descIndex + 1}`}
                     placeholder="Enter description"
                   />
                 ))}
@@ -46,14 +69,14 @@ export function PlatformForm({ data }: { data: any }) {
                   children={<img src={plus} alt="" />}
                   onClick={addDescription}
                   className="add-description-btn"
-                  text={"Add description"}
+                  text="Add description"
                 />
               </>
             )}
           </React.Fragment>
         ))}
 
-        {data.textAreas && renderTextAreas(data.textAreas)}
+        {data.textAreas && renderTextAreas(data.textAreas, false)}
       </div>
     </>
   );

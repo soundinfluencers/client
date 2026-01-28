@@ -1,5 +1,6 @@
 import React from "react";
 import "./_scrollGenre.scss";
+
 import chevron from "@/assets/icons/chevron-right.svg";
 import { useHorizontalScroll } from "../useScrollHorizontal";
 interface Props {

@@ -1,8 +1,11 @@
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
 .campaign-card {
   display: flex;
   align-items: center;
   flex-direction: column;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
   &.active {
     .campaign-card__header {
       border: 1px solid rgba(14, 116, 220, 1);
@@ -112,35 +115,7 @@
       box-sizing: border-box;
       overflow-y: auto;
       height: 252px;
-      &::-webkit-scrollbar-thumb {
-        background: radial-gradient(
-            circle farthest-corner,
-            rgba(231, 232, 241, 1) 0%,
-            rgba(231, 232, 241, 1) 50%,
-            transparent 50%,
-            transparent 100%
-          )
-          no-repeat;
-
-        background-size: auto 11px;
-        background-position: center;
-      }
-
-      &::-webkit-scrollbar {
-        width: 30px;
-      }
-
-      &::-webkit-scrollbar-track {
-        background: linear-gradient(
-          to right,
-          transparent 0,
-          transparent 45%,
-          rgba(185, 208, 255, 1) 45%,
-          rgba(185, 208, 255, 1) 55%,
-          transparent 55%,
-          transparent 100%
-        );
-      }
+      @include sb.scrollbar-dotted-vertical;
 
       li {
         display: flex;

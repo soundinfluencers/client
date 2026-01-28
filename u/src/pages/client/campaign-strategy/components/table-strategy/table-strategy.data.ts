@@ -17,17 +17,7 @@ export const proposalsData = [
 
 export const keys = (isSocial: boolean) => {
   return isSocial
-    ? [
-        "network",
-        "followers",
-        "date",
-        "content",
-        "description",
-        "tracklink",
-        "tracktitle",
-        "brief",
-        "action",
-      ]
+    ? ["network", "followers", "date", "content", "description", "brief"]
     : [
         "network",
         "followers",
@@ -37,7 +27,6 @@ export const keys = (isSocial: boolean) => {
         "tag",
         "link",
         "brief",
-        "action",
       ];
 };
 
@@ -62,21 +51,14 @@ export const titles: Record<string, string> = {
   tracklink: "Track link",
   tracktitle: "Track Title",
   brief: "Additional brief",
-  action: "Actions",
 };
 
 export const ReqData = ["ASAP", "BEFORE", "AFTER"];
-export const VideoContent = ["Video 1", "Video 2", "Video 3"];
 
-export const getDropdownOptions = (
-  key: DropdownKey,
-  postDescriptions?: string[]
-): string[] => {
+export const getDropdownOptions = (key: DropdownKey): string[] => {
   switch (key) {
     case "date":
       return ReqData;
-    case "content":
-      return VideoContent;
     default:
       return [];
   }

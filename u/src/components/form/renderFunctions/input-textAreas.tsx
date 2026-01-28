@@ -6,6 +6,7 @@ import {
 export function renderInputs(inputs: any) {
   return inputs.map((input: any) => (
     <FormInput
+      required
       id={input.id}
       key={input.name}
       label={input.name}
@@ -17,6 +18,7 @@ export function renderInputs(inputs: any) {
 export function renderTextAreas(textAreas: any[], isBespoke = false) {
   return textAreas.map((textArea) => (
     <FormTextArea
+      required
       id={textArea.id}
       key={textArea.name}
       name={textArea.name}

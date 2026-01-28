@@ -2,8 +2,9 @@ import React from "react";
 
 import { TabBar } from "./components/tab-bar";
 import "./_bespoke-campaign.scss";
+
 import { PromoForm } from "./tab/promo-form";
-import { Breadcrumbs, Container, SaveDraft } from "@/components";
+import { Breadcrumbs, Container } from "@/components";
 interface Props {}
 
 export const BespokeCampaign: React.FC<Props> = () => {
@@ -12,7 +13,6 @@ export const BespokeCampaign: React.FC<Props> = () => {
     <Container className="bespoke-campaign">
       <div className="bespoke-campaign__header">
         <Breadcrumbs />
-        <SaveDraft />
       </div>
       <div className="bespoke-campaign__content">
         <div className="bespoke-campaign__title">
