@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+// import { useInfiniteQuery } from '@tanstack/react-query';
 import { useDashboardLayoutStore } from '../../store/useDashboardLayoutStore';
 import { getCampaignHistory } from '@/api/influencer/campaign-history/campaign-history.api';
 import { ButtonMain } from '../../../../../components/ui/buttons-fix/ButtonFix';
@@ -6,14 +6,14 @@ import { CampaignHistoryTable } from './components/campaign-history-table/Campai
 import { Loader } from '@/components';
 
 import './_campaign-history-list.scss';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
 export const CampaignHistoryList = () => {
   const { activeCampaignHistoryFilter, limit } = useDashboardLayoutStore();
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ['campaign-history', activeCampaignHistoryFilter, limit],
-    initialPageParam: 1,
-    queryFn: ({ pageParam }) => getCampaignHistory(pageParam as number, limit),
+    queryFn: ({ pageParam = 1 }) => getCampaignHistory(pageParam as number, limit),
 
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length === 0) return undefined;

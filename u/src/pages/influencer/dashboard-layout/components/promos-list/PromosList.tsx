@@ -18,13 +18,8 @@ export const PromosList = () => {
   const { data, error, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["promos", activePromosFilter, limit],
-      initialPageParam: 1,
-      queryFn: ({ pageParam }) =>
-        getInfluencerPromos({
-          status: activePromosFilter,
-          limit,
-          page: pageParam as number,
-        }),
+      queryFn: ({ pageParam = 1 }) =>
+        getInfluencerPromos(activePromosFilter, limit, pageParam as number),
 
       getNextPageParam: (lastPage, allPages) => {
         if (!lastPage || lastPage.length === 0) return undefined;
@@ -45,7 +40,7 @@ export const PromosList = () => {
 
   if (error) {
     toast.error("Error loading promos.");
-    return <p>Error loading promos.</p>;
+    return <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos.</p>;
   }
 
   if (activePromos.length === 0) {

@@ -46,7 +46,6 @@ export const CampaignResultForm = ({ submitState }: Props) => {
   return (
     <div className="campaign-result">
       <h2 className="campaign-result__title">Campaign result</h2>
-      {/* <button onClick={() => { onFormClose() }}>Close</button> */}
       <Form
         onSubmit={handleSubmit}
         className='campaign-result__form'

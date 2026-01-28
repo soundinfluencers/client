@@ -2,9 +2,9 @@ import './_new-promos.scss';
 import { PromosDetailsList } from '../components/promos-details-list/PromosDetailsList';
 
 // import { NEW_PROMOS_DATA, type IInfluencerPromo } from '../../../../types/influencer/promos/promos.types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from '../../../../components/ui/modal-fix/Modal';
-import { Breadcrumbs, Container } from '../../../../components';
+import { Breadcrumbs, Container, Loader } from '../../../../components';
 import successIcon from '@/assets/icons/success-icon.svg';
 import { ButtonMain } from '../../../../components/ui/buttons-fix/ButtonFix';
 import { useInfluencerNewPromos } from './hooks/useInfluencerNewPromos';
@@ -13,15 +13,23 @@ import { useConfirmInfluencerPromo } from './hooks/useConfirmInfluencerPromo';
 export const NewPromos = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const { data: promos = [], isLoading, error: fetchError } = useInfluencerNewPromos();
   const { mutate: confirmPromo, isPending, error: confirmError, variables } = useConfirmInfluencerPromo();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   if (fetchError) {
-    return <div>Error loading promos</div>;
+    return <div style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos</div>;
+  }
+
+  if (promos.length === 0) {
+    return <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>No new promos found.</p>
   }
 
   return (

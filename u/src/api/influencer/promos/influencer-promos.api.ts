@@ -7,18 +7,7 @@ import $api from "../../api";
 import type { AxiosError } from "axios";
 import type { TCampaignResultDTO } from "@/pages/influencer/promos/distributing/components/campaign-result-form/types/campaign-result-form.types";
 
-//TODO: fix request model types
-export interface RequestInfluencerPromosModel {
-  status: string;
-  limit: number;
-  page: number;
-}
-
-export const getInfluencerPromos = async ({
-  status,
-  limit,
-  page,
-}: RequestInfluencerPromosModel): Promise<IPromo[]> => {
+export const getInfluencerPromos = async (status: string, limit: number, page: number): Promise<IPromo[]> => {
   const res = await $api.get(
     `/promos/dashboard?status=${status}&limit=${limit}&page=${page}`,
   );

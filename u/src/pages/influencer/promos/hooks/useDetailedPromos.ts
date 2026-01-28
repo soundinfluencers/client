@@ -27,9 +27,8 @@ export const useDetailedPromos = ({
       isSingle ? campaignId! : limit,
       isSingle ? addedAccountsId! : null,
     ],
-    initialPageParam: 1,
 
-    queryFn: ({ pageParam }) => {
+    queryFn: ({ pageParam = 1 }) => {
       if (isSingle) {
         return getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId(
           status,
@@ -46,8 +45,16 @@ export const useDetailedPromos = ({
     },
 
     select: (data) => {
-      const promos = isSingle ? (data.pages?.[0] ?? []) : data.pages.flat();
-      return { promos };
+      if (isSingle) {
+        return {
+          pages: [data.pages?.[0] ?? []],
+          pageParams: data.pageParams,
+        };
+      }
+      return {
+        pages: [data.pages.flat()],
+        pageParams: data.pageParams,
+      };
     },
 
     enabled: true,
