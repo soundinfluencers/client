@@ -4,7 +4,7 @@ import { useDetailedPromos } from '../hooks/useDetailedPromos';
 import { PromosDetailsList } from '../components/promos-details-list/PromosDetailsList';
 import { CampaignResultForm } from './components/campaign-result-form/CampaignResultForm';
 import { ButtonMain } from '@/components/ui/buttons-fix/ButtonFix';
-import { Breadcrumbs, Container } from '../../../../components';
+import { Breadcrumbs, Container, Loader } from '../../../../components';
 // import type { TCampaignInfo, TSocialMedia } from './components/campaign-result-form/types/campaign-result-form.types';
 import { isSubmitOpen, isSubmitState, type DistributingNavState, type SubmitResultsNavState } from './components/campaign-result-form/utils/distributing-nav.helper';
 
@@ -26,9 +26,13 @@ export const Distributing: React.FC = () => {
   // const [isFormOpen, setIsFormOpen] = useState(false);
   // const [meta, setMeta] = useState<TSocialMedia | null>(null);
   // const [formPayload, setFormPayload] = useState<TCampaignInfo | null>(null);
-
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
 
   const isFormOpen = isSubmitOpen(location.hash);
 
@@ -68,7 +72,7 @@ export const Distributing: React.FC = () => {
 
   // const isSingle = !!campaignId && !!addedAccountsId;
 
-  const promos = data?.promos || [];
+  const promos = data?.pages.flat() || [];
 
   useEffect(() => {
     if (isFormOpen && !submitState) {
@@ -87,11 +91,15 @@ export const Distributing: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   if (error) {
-    return <div>Error loading promos</div>;
+    return <div style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos</div>;
+  }
+
+  if (promos.length === 0) {
+    return <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>No distributing promos found.</p>
   }
 
   // const mockTestPromo = NEW_PROMOS_DATA.filter(p => p.statusCampaign === 'Distributing');

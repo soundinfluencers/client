@@ -2,12 +2,11 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDetailedPromos } from '../hooks/useDetailedPromos';
 
-import { Breadcrumbs, Container } from '../../../../components';
+import { Breadcrumbs, Container, Loader } from '../../../../components';
 import { PromosDetailsList } from '../components/promos-details-list/PromosDetailsList';
 import { ButtonMain } from '@/components/ui/buttons-fix/ButtonFix';
 
 import './_completed.scss';
-//TODO: REVIEW AND FIX THE FUNCTIONALITY AS NEEDED
 
 export const Completed: React.FC = () => {
   const { state } = useLocation() as {
@@ -34,10 +33,13 @@ export const Completed: React.FC = () => {
   const promos = data?.pages.flat() ?? [];
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
   if (error) {
-    return <div>Error loading promos</div>;
+    return <div style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos</div>;
+  }
+  if (promos.length === 0) {
+    return <div style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>No completed promos found.</div>;
   }
 
   return (
@@ -60,40 +62,3 @@ export const Completed: React.FC = () => {
     </Container>
   );
 };
-
-
-
-// const [promos, setPromos] = useState<any[]>([]);
-// const [promosById, setPromosById] = useState<any[]>([]);
-
-// const getPromos = async () => {
-//   //api call to get completed promos
-//   // const completedPromos = await getInfluencerDetailsPromoByStatus('close', 12, 1);
-//   const distrPromosById = await getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId('ongoing', '6960f68ec9ebda34d05270df', '6960f68ec9ebda34d05270db');
-
-//   // console.log(completedPromos);
-
-//   setPromos(distrPromosById);
-// };
-
-// useEffect(() => {
-//   getPromos();
-// }, []);
-//campaign - 6960f68ec9ebda34d05270df ongoing
-// account - 6960f68ec9ebda34d05270db ongoing
-
-//campaign - 692035745a858bc5e9862cbd close
-// account - 692035735a858bc5e9862cb6 close
-// const getPromosById = async () => {
-//   //api call to get completed promos by campaignId and addedAccountsId
-//   const completedPromosById = await getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId('close', '692035745a858bc5e9862cbd', '692035735a858bc5e9862cb6');
-//   console.log(completedPromosById);
-//   setPromosById(completedPromosById);
-// };
-
-// useEffect(() => {
-//   getPromosById();
-// }, []);
-
-// console.log('Ongoing', promos);
-// console.log('Completed', promosById);

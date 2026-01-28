@@ -11,8 +11,7 @@ const LIMIT = 11;
 export const InvoicesDetails = () => {
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ['invoices', LIMIT],
-    initialPageParam: 1,
-    queryFn: ({ pageParam }) => getInfluencerInvoices(LIMIT, pageParam as number),
+    queryFn: ({ pageParam = 1 }) => getInfluencerInvoices(LIMIT, pageParam as number),
 
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length === 0) return undefined;
