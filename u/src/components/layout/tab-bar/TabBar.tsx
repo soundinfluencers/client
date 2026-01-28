@@ -64,8 +64,7 @@ export const TabBar: FC = () => {
                   className="tab-bar__user-menu-item"
                   onClick={() => setIsDropdownOpen((v) => !v)}
                   tabIndex={0}
-                  role="button"
-                >
+                  role="button">
                   <p className="tab-bar__user-menu-item-text">Account</p>
                   <img
                     className="tab-bar__user-menu-item-avatar"
@@ -73,19 +72,17 @@ export const TabBar: FC = () => {
                     alt="User Avatar"
                   />
                 </div>
-
                 {isDropdownOpen && (
                   <div
                     className="tab-bar__dropdown-overlay"
                     onClick={() => setIsDropdownOpen(false)}
                   />
                 )}
-
                 <div
                   ref={dropdownRef}
-                  className={`tab-bar__user-menu-dropdown ${isDropdownOpen ? "tab-bar__user-menu-dropdown--open" : ""
-                    }`}
-                >
+                  className={`tab-bar__user-menu-dropdown ${
+                    isDropdownOpen ? "tab-bar__user-menu-dropdown--open" : ""
+                  }`}>
                   <div className="tab-bar__user-menu-dropdown-header">
                     <div className="tab-bar__user-menu-dropdown-header-info">
                       <img
@@ -108,24 +105,21 @@ export const TabBar: FC = () => {
                     <Link
                       className="tab-bar__user-menu-dropdown-nav-link"
                       to={AccountSettings}
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
+                      onClick={() => setIsDropdownOpen(false)}>
                       Account settings
                     </Link>
 
                     <Link
                       className="tab-bar__user-menu-dropdown-nav-link"
                       to="/influencer/invoices"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
+                      onClick={() => setIsDropdownOpen(false)}>
                       Invoice details
                     </Link>
 
                     <Link
                       className="tab-bar__user-menu-dropdown-nav-link"
                       to=""
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
+                      onClick={() => setIsDropdownOpen(false)}>
                       Contact support
                     </Link>
 
@@ -135,21 +129,24 @@ export const TabBar: FC = () => {
                         setIsDropdownOpen(false);
                         logout();
                       }}
-                      className="tab-bar__user-menu-dropdown-logout"
-                    >
+                      className="tab-bar__user-menu-dropdown-logout">
                       Logout
                     </button>
                   </nav>
                 </div>
 
-                {/* Если этот блок НЕ нужен (дублирует меню) — удали его.
-                  Я оставил, но можно убрать. */}
-                <div onClick={() => navigate(AccountSettings)} role="button" tabIndex={0}>
+                {/* <div
+                  onClick={() => navigate(AccountSettings)}
+                  role="button"
+                  tabIndex={0}>
                   <p>Account: {user?.firstName}</p>
-                  <button type="button" className="tab-bar__logout" onClick={logout}>
+                  <button
+                    type="button"
+                    className="tab-bar__logout"
+                    onClick={logout}>
                     Logout
                   </button>
-                </div>
+                </div> */}
               </div>
             )}
           </div>
@@ -158,18 +155,17 @@ export const TabBar: FC = () => {
             <div
               onClick={() => setIsBurgerOpen(true)}
               role="button"
-              tabIndex={0}
-            >
+              tabIndex={0}>
               <img className="tab-bar__burger-toggle" src={burgerMenu} alt="" />
             </div>
 
-            <div className={`tab-bar__menu ${isBurgerOpen ? "tab-bar__menu--open" : ""}`}>
+            <div
+              className={`tab-bar__menu ${isBurgerOpen ? "tab-bar__menu--open" : ""}`}>
               <div
                 className="tab-bar__menu-item tab-bar__menu-item--signup"
                 onClick={() => handleClickBurgerMenu("/signup/client")}
                 role="button"
-                tabIndex={0}
-              >
+                tabIndex={0}>
                 Sign up
               </div>
 
@@ -177,8 +173,7 @@ export const TabBar: FC = () => {
                 className="tab-bar__menu-item tab-bar__menu-item--login"
                 onClick={() => handleClickBurgerMenu("/login")}
                 role="button"
-                tabIndex={0}
-              >
+                tabIndex={0}>
                 Log in
               </div>
             </div>

@@ -38,6 +38,7 @@ export const BuildCampaign: React.FC<Props> = () => {
     setFilter,
     setCurrency,
     setBudget,
+    FilterMethod,
   } = useBuildCampaignFilters();
 
   const { data: promoCards } = usePromoAccountsOrSearch({
@@ -46,6 +47,7 @@ export const BuildCampaign: React.FC<Props> = () => {
     currency: selectedCurrency.currency,
     sortBy: selectedFilter.key,
     query: search,
+    FilterMethod,
   });
 
   console.log(offers, "offers");

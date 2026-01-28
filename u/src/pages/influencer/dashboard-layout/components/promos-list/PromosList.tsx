@@ -15,25 +15,31 @@ export const PromosList = () => {
 
   console.log(activePromosFilter);
 
-  const { data, error, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["promos", activePromosFilter, limit],
-      initialPageParam: 1,
-      queryFn: ({ pageParam }) =>
-        getInfluencerPromos({
-          status: activePromosFilter,
-          limit,
-          page: pageParam as number,
-        }),
+  const {
+    data,
+    error,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["promos", activePromosFilter, limit],
 
-      getNextPageParam: (lastPage, allPages) => {
-        if (!lastPage || lastPage.length === 0) return undefined;
-        if (lastPage.length < limit) {
-          return undefined;
-        }
-        return allPages.length + 1;
-      },
-    });
+    queryFn: ({ pageParam = 1 }) =>
+      getInfluencerPromos({
+        status: activePromosFilter,
+        limit,
+        page: pageParam as number,
+      }),
+
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage || lastPage.length === 0) return undefined;
+      if (lastPage.length < limit) {
+        return undefined;
+      }
+      return allPages.length + 1;
+    },
+  });
 
   console.log("Promos data:", data);
 
@@ -49,7 +55,11 @@ export const PromosList = () => {
   }
 
   if (activePromos.length === 0) {
-    return <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>No promos found.</p>;
+    return (
+      <p style={{ fontSize: 48, textAlign: "center", paddingTop: 40 }}>
+        No promos found.
+      </p>
+    );
   }
 
   return (

@@ -14,12 +14,14 @@ interface Props {
 
 export const Filters: React.FC<Props> = ({ onToggle, isSmall }) => {
   const [filter, setFilter] = React.useState<FilterData[]>([]);
+
   const { setSelected } = useFilter();
 
   React.useEffect(() => {
     (async () => {
       try {
         const { data } = await getFilters();
+        console.log(data, "filter");
         setFilter(data.filterArr);
       } catch (e) {
         console.error(e);

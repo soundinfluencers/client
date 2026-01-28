@@ -7,4 +7,5 @@ export interface MultiPromoAccountsBody {
   profileTypes?: string[];
   musicCategories?: string[];
   musicGenres: string[];
+  musicGenresFilterMethod?: string;
 }

@@ -9,11 +9,13 @@ export const usePromoAccountsFilters = (
     budget,
     currency,
     sortBy,
+    FilterMethod,
   }: {
     selected: FilterItem[];
     budget: string;
     currency: string;
     sortBy: string;
+    FilterMethod: string;
   },
   options?: { enabled: boolean },
 ) => {
@@ -61,6 +63,7 @@ export const usePromoAccountsFilters = (
     profileType: [...profileType].sort(),
     Additionaltopics: [...Additionaltopics].sort(),
     MusicCategories: [...MusicCategories].sort(),
+    musicGenresFilterMethod: FilterMethod,
     budget,
     currency,
     sortBy,
@@ -75,6 +78,7 @@ export const usePromoAccountsFilters = (
           additionalTopics: Additionaltopics,
           profileTypes: profileType,
           musicCategories: MusicCategories,
+          musicGenresFilterMethod: FilterMethod,
           musicGenres: genres,
           budget,
           currency,
