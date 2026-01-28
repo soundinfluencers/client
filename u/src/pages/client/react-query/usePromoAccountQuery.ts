@@ -3,36 +3,90 @@ import { getMultiPromoAccounts } from "@/api/client/CreatorCampaign/multi-promo-
 import type { FilterItem } from "@/types/client/creator-campaign/filters.types";
 import { useQuery } from "@tanstack/react-query";
 
-export const usePromoAccountsQuery = ({
-  selected,
-  budget,
-  currency,
-  sortBy,
-}: {
-  selected: FilterItem[];
-  budget: string;
-  currency: string;
-  sortBy: string;
-}) => {
-  const socialMedias = selected.map((item) => item.id);
+export const usePromoAccountsFilters = (
+  {
+    selected,
+    budget,
+    currency,
+    sortBy,
+  }: {
+    selected: FilterItem[];
+    budget: string;
+    currency: string;
+    sortBy: string;
+  },
+  options?: { enabled: boolean },
+) => {
+  const socialMedias = selected
+    .filter((item) => item.group === "socialMedia")
+    .map((item) => item.id);
 
+  const countries = selected
+    .filter((item) => item.group === "countries")
+    .flatMap((item) => {
+      if (item.children && item.children.length > 0) {
+        return item.children.map((child) => child.id);
+      }
+
+      return item.id;
+    });
+  const genres = selected
+    .filter((item) => item.group === "genres")
+    .flatMap((item) => {
+      const parent = item.id;
+
+      if (item.children?.length) {
+        return item.children.map((child) => {
+          return `${parent} ${child.id}`.trim();
+        });
+      }
+
+      return [parent];
+    });
+  console.log(genres, "wlkwwklwk");
+  const profileType = selected
+    .filter((item) => item.group === "profileType")
+    .map((item) => item.id);
+  const Additionaltopics = selected
+    .filter((item) => item.group === "addTopics")
+    .map((item) => item.id);
+
+  const MusicCategories = selected
+    .filter((item) => item.group === "musicCategories")
+    .map((item) => item.id);
+  const key = {
+    socialMedias: [...socialMedias].sort(),
+    countries: [...countries].sort(),
+    genres: [...genres].sort(),
+    profileType: [...profileType].sort(),
+    Additionaltopics: [...Additionaltopics].sort(),
+    MusicCategories: [...MusicCategories].sort(),
+    budget,
+    currency,
+    sortBy,
+  };
   return useQuery({
-    queryKey: ["promoAccounts", socialMedias, budget, currency, sortBy],
+    queryKey: ["promoAccounts", key],
     queryFn: async () => {
       const { data } = await getMultiPromoAccounts({
         body: {
           socialMedias,
-          countries: ["US"],
+          countries: countries,
+          additionalTopics: Additionaltopics,
+          profileTypes: profileType,
+          musicCategories: MusicCategories,
+          musicGenres: genres,
           budget,
           currency,
         },
         sortBy,
-        limit: 12,
+        limit: 100000000,
         page: 1,
       });
       return data.accounts;
     },
-    enabled: socialMedias.length > 0,
+    enabled: options?.enabled ?? socialMedias.length > 0,
     keepPreviousData: true,
+    staleTime: 30_000,
   });
 };

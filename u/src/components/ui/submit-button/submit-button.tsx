@@ -1,4 +1,5 @@
 import React from "react";
+import { useFormContext, useFormState } from "react-hook-form";
 
 interface Props {
   type?: "submit";
@@ -11,8 +12,14 @@ export const SubmtiButton: React.FC<Props> = ({
   data,
   className,
 }) => {
+  const { control } = useFormContext();
+  const { isValid, isSubmitting } = useFormState({ control });
+
   return (
-    <button type={type} className={className}>
+    <button
+      type={type}
+      disabled={!isValid || isSubmitting}
+      className={`${className ?? ""} ${isValid ? "ready" : "disabled"}`}>
       {data}
     </button>
   );

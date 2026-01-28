@@ -9,7 +9,7 @@ import { Outlet, useMatch } from "react-router-dom";
 import { HomePageLink } from "./components/home-page-link/HomePageLink";
 
 import "./_dashboard-layout.scss";
-import { fetchProfileDetails } from "@/api/profile-details/profile-details-fetch";
+import { fetchProfileDetails } from "@/api/client/profile-details/profile-details-fetch";
 import React from "react";
 import { useProfileDetails } from "@/store/profile-details/useProfile-details";
 
@@ -17,26 +17,9 @@ export const DashboardLayout = () => {
   const isDashboard = useMatch("/influencer");
   const isPromos = useMatch("/influencer/promos");
   const isHistory = useMatch("/influencer/campaign-history");
-  const { profile, setProfile } = useProfileDetails();
-
-  const profileMode = profile?.role === "client";
 
   const { viewMode, setViewMode } = useDashboardLayoutStore();
 
-  const fetch = async () => {
-    try {
-      const data = await fetchProfileDetails("influencer");
-      setProfile(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  console.log(profile, "profile");
-
-  React.useEffect(() => {
-    fetch();
-  }, []);
   return (
     <>
       <Container className="dashboard">

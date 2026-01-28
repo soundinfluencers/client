@@ -2,7 +2,8 @@ import React from "react";
 import { ButtonMain } from "@/components";
 import { useCampaignStore } from "@/store/client/createCampaign";
 import { useNavigate } from "react-router-dom";
-import "./_bc_prooced.scss";
+import "../../scss-module/_bc_prooced.scss";
+
 interface Props {}
 
 export const BcProceed: React.FC<Props> = () => {

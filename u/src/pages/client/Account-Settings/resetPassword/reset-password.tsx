@@ -1,11 +1,8 @@
-import React from "react";
 import { Form, SubmtiButton } from "@/components";
 import { ReserPasswordForm } from "@/pages/client/components/client-forms/account-settings";
 import { useAccountChange } from "@/store/client/account-settings";
 
-interface Props {}
-
-export const ReserPassword: React.FC<Props> = () => {
+export const ReserPassword = () => {
   const { onChangeEmail } = useAccountChange();
   return (
     <div className="reset-password">
@@ -14,7 +11,9 @@ export const ReserPassword: React.FC<Props> = () => {
       </div>
       <Form
         onSubmit={onChangeEmail}
-        submitButton={<SubmtiButton data="Save" />}>
+        submitButton={
+          <SubmtiButton className="add-style-profile" data="Save" />
+        }>
         <ReserPasswordForm />
       </Form>
     </div>

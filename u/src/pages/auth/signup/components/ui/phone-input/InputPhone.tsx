@@ -16,7 +16,7 @@ import {
 } from "../../../../../../utils/validators/validators.ts";
 import type { PhoneNumberType } from "../../../../../../types/utils/constants.types.ts";
 import { phoneNumbers } from "../../../../../../constants/phone-numbers.ts";
-import { useClickOutside } from "../../../../../../hooks/useClickOutside.ts";
+import { useClickOutside } from "../../../../../../hooks/global/useClickOutside.ts";
 
 export interface InputPhoneProps {
   value: string;
@@ -77,9 +77,9 @@ export const InputPhone: FC<InputPhoneProps> = ({
   const filteredPhoneNumbers = useMemo(
     () =>
       phoneNumbers.filter((phone) =>
-        phone.countryName.toLowerCase().includes(searchValue.toLowerCase())
+        phone.countryName.toLowerCase().includes(searchValue.toLowerCase()),
       ),
-    [searchValue]
+    [searchValue],
   );
 
   return (

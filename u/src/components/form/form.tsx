@@ -1,58 +1,55 @@
-import { FormProvider, useForm } from "react-hook-form";
-import type { FormSchema } from "./renderFunctions/schemas/schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
-// reusable form with ZOD validation //
-
-import "./_form.scss";
 import React from "react";
-import type { ZodTypeAny } from "zod/v3";
-
-// interface FormSection includes data reliable to form //
+import { FormProvider, useForm } from "react-hook-form";
+import "./_form.scss";
+type DynamicFormData = Record<string, any>;
 
 interface FormSection {
   children: React.ReactNode;
-
   submitButton?: React.ReactNode;
 
   className?: string;
   classNameBtnSection?: string;
 
   defaultValues?: Record<string, any>;
-
-  schema?: ZodTypeAny;
   onSubmit?: (data: DynamicFormData) => Promise<void> | void;
 }
 
-type DynamicFormData = Record<string, any>;
-
-export const Form = ({
+export const Form: React.FC<FormSection> = ({
   children,
   submitButton,
   className,
   classNameBtnSection,
   onSubmit,
-  schema,
-  defaultValues
-}: FormSection) => {
-  const methods = useForm({
+  defaultValues,
+}) => {
+  const methods = useForm<DynamicFormData>({
     defaultValues,
+    mode: "onChange",
+    criteriaMode: "all",
+    reValidateMode: "onChange",
+    shouldUnregister: false,
   });
 
+  // React.useEffect(() => {
+  //   if (!defaultValues) return;
+  //   methods.reset(defaultValues);
+  //   void methods.trigger();
+  // }, [defaultValues, methods]);
+
   const handleFormSubmit = async (formData: DynamicFormData) => {
-    console.log(formData, "form");
-    if (onSubmit) {
-      onSubmit(formData);
-    }
+    console.log(formData, "dawd");
+    if (onSubmit) await onSubmit(formData);
   };
 
   return (
     <FormProvider {...methods}>
       <form
-        className={`form ${className}`}
+        className={`form ${className ?? ""}`}
         onSubmit={methods.handleSubmit(handleFormSubmit)}>
         {children}
+
         {submitButton && (
-          <div className={`form__btn-section ${classNameBtnSection || ""}`}>
+          <div className={`form__btn-section ${classNameBtnSection ?? ""}`}>
             {submitButton}
           </div>
         )}

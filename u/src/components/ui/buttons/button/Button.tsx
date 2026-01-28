@@ -12,7 +12,7 @@ export interface ButtonProps {
 export const ButtonMain: FC<ButtonProps> = ({
   text,
   onClick,
-  isDisabled = false,
+  isDisabled,
   className,
 }) => {
   return (

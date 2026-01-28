@@ -1,5 +1,6 @@
 import React from "react";
 import "./genresICountries.scss";
+
 import type {
   Country,
   IPromoCard,
@@ -12,18 +13,20 @@ interface Props {
   data: musicStyles;
   flag?: boolean;
   activePromo?: IPromoCard | undefined;
+  isInclude: boolean;
 }
 
 export const GenresCountries: React.FC<Props> = ({
   data,
   flag = false,
   activePromo,
+  isInclude,
 }) => {
   return (
     <div
       className={`information_popUp ${flag ? "flag" : ""} ${
         activePromo ? "selected" : ""
-      }`}>
+      } ${isInclude ? "isInclude" : ""}`}>
       {data.musicGenres.length > 0 && (
         <div className="genres">
           <h3>Genres</h3>

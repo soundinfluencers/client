@@ -1,57 +1,37 @@
 import React from "react";
 import {
   useCreateCampaign,
-  useFilter,
   useCampaignStore,
 } from "@/store/client/createCampaign";
-import "./_cards_content.scss";
+import "../../scss-module/_cards_content.scss";
+
 import { Card } from "./bc_card/card";
 import { TableRowCard } from "./bc_card/tableRowCard";
-import { Loader } from "@/components/ui/loader/loader";
-import { useCreateCampaignPlatform } from "@/store/client/createCampaign/useCreate-campaign-fetch";
+import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
+import { Loader } from "@/components";
 
 interface Props {
   view: number;
   setIsSmall: React.Dispatch<React.SetStateAction<boolean>>;
   isSmall: boolean;
+  promosCards: IPromoCard[];
 }
 
 export const CardsContainer: React.FC<Props> = ({
   view,
   setIsSmall,
   isSmall,
+  promosCards,
 }) => {
-  const { promosCards, loading, getMatchedAccountIds } = useCreateCampaign();
+  const offer = useCampaignStore((s) => s.offer);
+  const getMatchedAccountIds = useCreateCampaign((s) => s.getMatchedAccountIds);
 
-  const { offer } = useCampaignStore();
-  console.log(promosCards, "aw;kjmawd;");
-  const observerRef = React.useRef<IntersectionObserver | null>(null);
-  const lastElementRef = React.useRef<HTMLDivElement | null>(null);
+  const matchedIds = React.useMemo(() => {
+    if (!offer) return new Set<string>();
+    return getMatchedAccountIds(offer);
+  }, [offer, getMatchedAccountIds]);
+  console.log(promosCards, "wdad");
 
-  // React.useEffect(() => {
-  //   if (loading) return;
-
-  //   if (observerRef.current) observerRef.current.disconnect();
-
-  //   observerRef.current = new IntersectionObserver((entries) => {
-  //     const target = entries[0];
-
-  //     if (target.isIntersecting) {
-  //       setCardsCount((prev) => prev + 12);
-  //     }
-  //   });
-
-  //   if (lastElementRef.current) {
-  //     observerRef.current.observe(lastElementRef.current);
-  //   }
-
-  //   return () => {
-  //     observerRef.current?.disconnect();
-  //   };
-  // }, [loading]);
-
-  const cards = promosCards.slice(0, 20);
-  const matched = getMatchedAccountIds(offer);
   return (
     <div className="card-container-block">
       <div className={`cards-container ${view === 0 ? "viewed" : ""}`}>
@@ -65,36 +45,26 @@ export const CardsContainer: React.FC<Props> = ({
               <div className={`${isSmall ? "center" : ""}`}>Countries</div>
             </div>
 
-            {cards.map((card) => (
+            {promosCards?.map((card) => (
               <TableRowCard
-                isInclude={matched.has(card.accountId)}
                 key={card.accountId}
+                data={card}
+                isInclude={matchedIds.has(card.accountId)}
                 isSmall={isSmall}
                 setIsSmall={setIsSmall}
-                data={card}
               />
             ))}
           </div>
         ) : (
-          cards.map((card) => (
+          promosCards?.map((card) => (
             <Card
-              isInclude={matched.has(card.accountId)}
               key={card.accountId}
               data={card}
+              isInclude={matchedIds.has(card.accountId)}
             />
           ))
         )}
       </div>
-
-      <div
-        ref={lastElementRef}
-        style={{
-          marginTop: "64px",
-          backgroundColor: "transparent",
-          width: "100%",
-          height: "50px",
-        }}
-      />
     </div>
   );
 };

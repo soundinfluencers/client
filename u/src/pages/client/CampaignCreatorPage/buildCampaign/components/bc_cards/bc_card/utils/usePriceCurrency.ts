@@ -2,8 +2,9 @@ import type { Prices } from "@/types/client/creator-campaign/creator-campaign.ty
 
 export const getPriceByCurrency = (
   pricesObj: Prices,
-  selectedCurrency: { currency: string }
+  selectedCurrency: { currency: string },
 ) => {
-  const key = selectedCurrency.currency as keyof Prices; // говорим TS, что это ключ Prices
-  return pricesObj[key] ?? 0;
+  const key = selectedCurrency.currency as keyof Prices;
+  const price = pricesObj[key] ?? 0;
+  return Math.round(price * 100) / 100;
 };

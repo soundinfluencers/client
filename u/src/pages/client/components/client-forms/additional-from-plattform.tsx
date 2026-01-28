@@ -1,48 +1,79 @@
-// AdditionalPlatformForm.tsx
-import { FormInput, FormTextArea } from "@/components/ui";
+import { ButtonSecondary, FormInput, FormTextArea } from "@/components/ui";
 import React from "react";
+import plus from "@/assets/icons/plus.svg";
 
 interface AdditionalPlatformFormProps {
   data: any;
   index: number;
+  selectedEntity: number;
+  formPrefix: string;
 }
 
 export const AdditionalPlatformForm: React.FC<AdditionalPlatformFormProps> = ({
   data,
   index,
+  formPrefix,
+  selectedEntity,
 }) => {
-  console.log();
+  const [descriptions, setDescriptions] = React.useState<number[]>([0]);
+  const addDescription = () =>
+    setDescriptions((prev) => [...prev, prev.length]);
+
   return (
     <div className="additional-form">
       {data.contentTitle && (
-        <p className="labelForm">
-          {data.contentTitle} {index + 2}
-        </p>
+        <div className="legend">
+          <p className="labelForm">
+            {data.contentTitle} {index + 1}{" "}
+            {selectedEntity === 0 ? "(for Creators)" : "(for Communities)"}
+          </p>
+        </div>
       )}
+
       <div className="inputs">
-        {data.inputs &&
-          data.inputs.map((input, i) => (
+        {data.inputs?.map((input, i) => (
+          <React.Fragment key={i}>
             <FormInput
-              key={i}
-              id={`${input.id}-${index + 2}`}
-              name={`${input.name}-${index + 2}`}
+              id={`${formPrefix}-${input.id}-${i}`}
+              name={`${formPrefix}-${input.name}-${i}`}
               placeholder={input.placeholder}
-              className="form-input"
-              label={`${input.name}-${index + 2}`}
+              label={input.name}
             />
-          ))}
-        {data.textAreas &&
-          data.textAreas.map((textarea, i) => (
-            <FormTextArea
-              id={`${textarea.id}-${index + 2}`}
-              key={i}
-              name={`${textarea.name}-${index + 2}`}
-              placeholder={textarea.placeholder}
-              label={`${textarea.name}-${index + 2}`}
-              className="form-textarea"
-            />
-          ))}
+
+            {input.id === "Contentlink*" && (
+              <>
+                {descriptions.map((descIndex) => (
+                  <FormTextArea
+                    key={descIndex}
+                    id={`${formPrefix}-Postdescription-${descIndex + 1}`}
+                    name={`${formPrefix}-Postdescription-${descIndex + 1}`}
+                    label={`Post description ${descIndex + 1}`}
+                    placeholder="Enter description"
+                  />
+                ))}
+
+                <ButtonSecondary
+                  children={<img src={plus} alt="" />}
+                  onClick={addDescription}
+                  className="add-description-btn"
+                  text="Add description"
+                />
+              </>
+            )}
+          </React.Fragment>
+        ))}
+
+        {data.textAreas?.map((textarea, i) => (
+          <FormTextArea
+            id={`${formPrefix}-${textarea.id}-${i}`}
+            key={i}
+            name={`${formPrefix}-${textarea.name}-${i}`}
+            placeholder={textarea.placeholder}
+            label={textarea.name}
+          />
+        ))}
       </div>
+
       <hr style={{ margin: "20px 0" }} />
     </div>
   );

@@ -1,11 +1,17 @@
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
+
 .selection {
+  position: sticky;
+  top: 10px;
   padding: 24px;
   border-radius: 24px;
   border: 1px solid rgba(185, 208, 255, 1);
   max-width: 544px;
   width: 100%;
   height: 100%;
-
+  @media screen and (max-width: 900px) {
+    position: relative;
+  }
   &__head {
     display: flex;
     align-items: center;
@@ -13,185 +19,201 @@
 
     h3 {
       font-weight: 400;
-      font-style: Regular;
       font-size: 36px;
-      leading-trim: NONE;
       line-height: 100%;
-      letter-spacing: 0%;
-      @media screen and (max-width: 500px) {
+      @media (max-width: 500px) {
         font-size: 24px;
       }
     }
+
     button {
       border-radius: 24px;
       padding: 8px 24px;
       border: 1px solid rgba(32, 41, 52, 1);
-      @media screen and (max-width: 500px) {
+      @media (max-width: 500px) {
         font-size: 14px;
       }
     }
   }
+
   &__content {
     margin-top: 32px;
+    position: relative;
+    overflow: visible;
+  }
+
+  &__body {
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: visible;
+    @include sb.scrollbar-dotted-vertical;
+
     img {
       width: 24px;
       height: 24px;
       border-radius: 50%;
     }
+  }
 
-    .offer {
-      position: relative;
-      margin-left: 52px;
-      &__header {
+  .offer {
+    position: relative;
+    margin-left: 52px;
+
+    &__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .queue {
+        position: absolute;
+        top: 0;
+        left: -52px;
         display: flex;
         align-items: center;
-        gap: 8px;
-        .queue {
-          position: absolute;
-          top: 0;
-          left: -52px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          z-index: 100;
-          border: 1px solid rgba(185, 208, 255, 1);
-        }
-
-        h3,
-        p {
-          font-weight: 400;
-          font-style: Regular;
-          font-size: 16px;
-          leading-trim: NONE;
-          line-height: 100%;
-          letter-spacing: 0%;
-        }
+        justify-content: center;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        z-index: 2;
+        border: 1px solid rgba(185, 208, 255, 1);
+        background: #fff;
       }
-      &__content {
-        margin-top: 8px;
-        ul {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          max-height: 184px;
-          overflow: auto;
-          &::-webkit-scrollbar-thumb {
-            background: radial-gradient(
-                circle farthest-corner,
-                rgba(231, 232, 241, 1) 0%,
-                rgba(231, 232, 241, 1) 50%,
-                transparent 50%,
-                transparent 100%
-              )
-              no-repeat;
 
-            background-size: auto 11px;
-            background-position: center;
-          }
-
-          &::-webkit-scrollbar {
-            width: 30px;
-          }
-
-          &::-webkit-scrollbar-track {
-            background: linear-gradient(
-              to right,
-              transparent 0,
-              transparent 45%,
-              rgba(185, 208, 255, 1) 45%,
-              rgba(185, 208, 255, 1) 55%,
-              transparent 55%,
-              transparent 100%
-            );
-          }
-          li {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            img {
-              filter: grayscale(100%);
-            }
-          }
-        }
+      h3,
+      p {
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 100%;
       }
     }
-    .PromoCards {
-      margin-top: 24px;
-      position: relative;
-      margin-left: 52px;
-      &__header {
+
+    &__content {
+      margin-top: 8px;
+
+      ul {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 8px;
-        .queue {
-          position: absolute;
-          top: 0;
-          left: -52px;
+        max-height: 184px;
+        overflow: auto;
+        @include sb.scrollbar-dotted-vertical;
+
+        li {
           display: flex;
           align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          z-index: 100;
-          border: 1px solid rgba(185, 208, 255, 1);
-        }
-      }
-      &__content {
-        margin-top: 8px;
-        display: flex;
-        align-items: start;
-        justify-content: space-between;
-        gap: 4px;
-        .title {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          h3 {
-            font-size: 16px;
-          }
+          gap: 4px;
+
           img {
             filter: grayscale(100%);
-          }
-        }
-        &__info {
-          max-width: 203px;
-          width: 100%;
-          p {
-            width: 100%;
-            display: flex;
-            font-size: 16px;
-            justify-content: space-between;
-          }
-          .genresIcountries {
-            position: relative;
-            margin-top: 8px;
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 16px;
-            border-radius: 4px;
-            background-color: rgba(255, 255, 255, 1);
-            border: 1px solid rgba(185, 208, 255, 1);
           }
         }
       }
     }
   }
+
+  .PromoCards {
+    margin-top: 24px;
+    position: relative;
+    margin-left: 52px;
+    overflow: visible;
+
+    &__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .queue {
+        position: absolute;
+        top: 0;
+        left: -52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        z-index: 2;
+        border: 1px solid rgba(185, 208, 255, 1);
+        background: #fff;
+      }
+    }
+
+    &__content {
+      margin-top: 8px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 4px;
+
+      .title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        h3 {
+          font-size: 16px;
+        }
+
+        img {
+          filter: grayscale(100%);
+        }
+      }
+
+      &__info {
+        max-width: 203px;
+        width: 100%;
+        overflow: visible;
+
+        p {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          font-size: 16px;
+          gap: 8px;
+
+          span {
+            white-space: nowrap;
+          }
+        }
+
+        .genresIcountries {
+          position: relative;
+          margin-top: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px 16px;
+          border-radius: 4px;
+          background: #fff;
+          border: 1px solid rgba(185, 208, 255, 1);
+          cursor: pointer;
+
+          overflow: visible;
+          z-index: 5;
+
+          > :global(.GenresCountries),
+          > :global(.genresCountries),
+          > :global(.genres-countries) {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            z-index: 9999;
+          }
+        }
+      }
+    }
+  }
+
   &__footer {
     margin-top: 24px;
     border-top: 1px solid rgba(185, 208, 255, 1);
     padding-top: 8px;
+
     h2 {
       font-weight: 400;
-      font-style: Regular;
       font-size: 20px;
-      leading-trim: NONE;
       line-height: 100%;
-      letter-spacing: 0%;
-      @media screen and (max-width: 500px) {
+      @media (max-width: 500px) {
         font-size: 16px;
       }
     }

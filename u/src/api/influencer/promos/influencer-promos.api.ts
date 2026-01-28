@@ -8,10 +8,6 @@ export interface RequestInfluencerPromosModel {
   page: number;
 }
 
-// export interface ResponseInfluencerPromosModel {
-//   promos: IPromos[];
-// }
-
 export interface IPromo {
   campaignId: string;
   selectInfluencersId: string;
@@ -30,7 +26,7 @@ export const getInfluencerPromos = async ({
 }: RequestInfluencerPromosModel): Promise<IPromo[]> => {
   try {
     const res = await $api.get(
-      `/promos?status=${status}&limit=${limit}&page=${page}`
+      `/promos?status=${status}&limit=${limit}&page=${page}`,
     );
     console.log("Success:", res.data);
     return res.data.data.promos;

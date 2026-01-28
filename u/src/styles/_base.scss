@@ -6,6 +6,7 @@ html {
   box-sizing: border-box;
   scroll-behavior: smooth;
   letter-spacing: 0;
+  min-width: 375px;
 }
 
 html,
@@ -54,7 +55,7 @@ button:active {
 body {
   position: relative;
   margin: 0;
-  background-color: #FBFAF9;
+  background-color: #fbfaf9;
   min-height: 100vh;
   font-family: "Satoshi", "Noto Color Emoji", sans-serif;
   overflow-x: clip;

@@ -9,9 +9,8 @@ export interface BuildCampaignFiltersState {
   setBudget: (budget: number) => void;
 }
 
-// Начальные значения
 const defaultFilter = { key: "bestMatch", name: "Best Match" };
-const defaultCurrency = { key: "€", currency: "EUR" };
+const defaultCurrency = { key: "$", currency: "USD" };
 const defaultBudget = 100000;
 
 export const useBuildCampaignFilters = create<BuildCampaignFiltersState>(
@@ -23,5 +22,5 @@ export const useBuildCampaignFilters = create<BuildCampaignFiltersState>(
     setFilter: (filter) => set({ selectedFilter: filter }),
     setCurrency: (currency) => set({ selectedCurrency: currency }),
     setBudget: (budget) => set({ selectedBudget: budget }),
-  })
+  }),
 );

@@ -1,8 +1,8 @@
-import './_modal.scss';
-import { createPortal } from 'react-dom';
-import { type PropsWithChildren } from 'react';
-import { useRef } from 'react';
-import { useClickOutside } from '../../../hooks/useClickOutside';
+import "./_modal.scss";
+import { createPortal } from "react-dom";
+import { type PropsWithChildren } from "react";
+import { useRef } from "react";
+import { useClickOutside } from "../../../hooks/global/useClickOutside";
 import x from "../../../assets/icons/x.svg";
 
 interface Props extends PropsWithChildren {
@@ -26,6 +26,6 @@ export const Modal = ({ onClose, children }: Props) => {
         {children}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };

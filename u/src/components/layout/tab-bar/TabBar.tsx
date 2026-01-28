@@ -3,9 +3,9 @@ import { Logo } from "./components/logo/Logo.tsx";
 import { LoginButton, SignupButton } from "./components/buttons/Buttons.tsx";
 import "./_tab-bar.scss";
 import { useNavigate } from "react-router-dom";
-import { useWindowSize } from "@/hooks/useWindowSize.ts";
+import { useWindowSize } from "@/hooks/global/useWindowSize.ts";
 import burgerMenu from "@/assets/icons/burger-menu.svg";
-import { useClickOutside } from "@/hooks/useClickOutside.ts";
+import { useClickOutside } from "@/hooks/global/useClickOutside.ts";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import React from "react";
 import { useUser } from "@/store/get-user/index.ts";
@@ -27,7 +27,7 @@ export const TabBar: FC = () => {
   const navigate = useNavigate();
   const AccountSettings =
     user?.role === "client"
-      ? "/client/AccountSettigns"
+      ? "/client/AccountSetting"
       : "/influencer/account-setting";
 
   const handleClickBurgerMenu = (path: string) => {
@@ -51,7 +51,7 @@ export const TabBar: FC = () => {
               </>
             ) : (
               <div onClick={() => navigate(AccountSettings)}>
-                <p>Account: ${user?.firstName}</p>
+                <p>Account: {user?.firstName}</p>
                 {/* <button className="tab-bar__logout" onClick={logout}>
                 Logout
               </button> */}

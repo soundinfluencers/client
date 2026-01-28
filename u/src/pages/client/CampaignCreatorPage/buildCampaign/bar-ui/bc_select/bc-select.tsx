@@ -1,16 +1,21 @@
 import React from "react";
-import "./_bc_select.scss";
+import "../../scss-module/_bc_select.scss";
+
 import check from "@/assets/icons/check.svg";
+type Currency = { key: string; currency: string };
+type SortFilter = { key: string; name: string };
+
 interface SelectBudgetProps {
-  setBudget: (budget: any) => void;
-  setCurrency: (currency: any) => void;
-  currencySelected: any;
+  setBudget: (budget: number) => void;
+  setCurrency: (currency: Currency) => void;
+  currencySelected: Currency;
   budgetSelected: number;
 }
 interface SelectSortProps {
-  setSelectedFilter: (any: any) => void;
-  selectedFilter: any;
+  setSelectedFilter: (f: SortFilter) => void;
+  selectedFilter: SortFilter;
 }
+
 import { Dropdown } from "../../../ui/dropdown/dropdown";
 import {
   currencyArr,
@@ -24,7 +29,7 @@ export const SelectBudget: React.FC<SelectBudgetProps> = ({
   setCurrency,
 }) => {
   const [open, setOpen] = React.useState(false);
-
+  console.log(currencySelected, "awdladw");
   return (
     <Dropdown
       selected={`Budget: ${budgetSelected} ${currencySelected.key}`}
@@ -34,6 +39,7 @@ export const SelectBudget: React.FC<SelectBudgetProps> = ({
         <ul>
           {currencyArr.map((cr) => (
             <li
+              className={cr.key === currencySelected.key ? "active" : ""}
               onClick={() => {
                 setCurrency(cr);
                 setOpen(false);
@@ -49,9 +55,10 @@ export const SelectBudget: React.FC<SelectBudgetProps> = ({
         <label htmlFor="price">Price</label>
 
         <input
-          onChange={(e) => setBudget(Number(e.target.value))}
           type="number"
           id="price"
+          value={budgetSelected}
+          onChange={(e) => setBudget(Number(e.target.value) || 0)}
         />
       </div>
     </Dropdown>

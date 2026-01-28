@@ -1,16 +1,12 @@
 // IApiOffer for offers in CreateCampaign //
 
+import type { CampaignAddedAccount } from "@/types/store/index.types";
+
 export interface IApiOffer {
   _id: string;
   title: string;
   socialMedia: string;
-  connectedAccounts: {
-    _id: string;
-    influencerId: string;
-    accountId: string;
-    socialMediaUsername: string;
-    logo: string;
-  }[];
+  connectedAccounts: IPromoCard[];
   price: number;
   genre: string;
   combinedFollowers: string;
@@ -34,8 +30,17 @@ export interface Prices {
   USD: number;
   GBP: number;
 }
-
-export interface IPromoCard {
+export interface ICampaignAccount extends Pick<
+  IPromoCard,
+  "accountId" | "influencerId" | "socialMedia" | "username"
+> {
+  selectedCampaignContentItem: {
+    campaignContentItemId: string;
+    descriptionId: string;
+  };
+  dateRequest: string;
+}
+export interface IPromoCard extends CampaignAddedAccount {
   accountId: string;
   influencerId: string;
   username: string;
