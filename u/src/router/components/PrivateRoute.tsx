@@ -4,27 +4,27 @@ import type {ReactNode} from "react";
 import {Loader} from "@/components";
 
 interface Props {
-  children: ReactNode;
+    children: ReactNode;
 }
 
-export const PrivateRoute = ({ children }: Props) => {
-    const { accessToken, isAuthReady } = useAuth();
+export const PrivateRoute = ({children}: Props) => {
+    const {accessToken, isAuthReady} = useAuth();
 
     if (!isAuthReady) {
         return <div><Loader/></div>;
     }
 
-  if (!isAuthReady) {
-    return (
-      <div>
-        <Loader />
-      </div>
-    );
-  }
+    if (!isAuthReady) {
+        return (
+            <div>
+                <Loader/>
+            </div>
+        );
+    }
 
-  if (!accessToken) {
-    return <Navigate to="/auth" replace />;
-  }
+    if (!accessToken) {
+        return <Navigate to="/auth" replace/>;
+    }
 
-  return <>{children}</>;
+    return <>{children}</>;
 };
