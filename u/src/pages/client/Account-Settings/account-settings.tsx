@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from "react";
 
 import { useAccountChange } from "@/store/client/account-settings";
-import { EditPasswordFlow } from "./sections/edit-field";
-import { Breadcrumbs, Container } from "@/components";
-import { AccountDetailsSection } from "./sections";
+
+import { Breadcrumbs, Container, Loader } from "@/components";
 
 import "./_account-settings.scss";
-import { useProfileDetails } from "@/store/profile-details/useProfile-details";
-import { fetchProfileDetails } from "@/api/client/profile-details/profile-details-fetch";
+
+import { useProfileDetailsQuery } from "./hooks/use-profile-details-query";
+import { AccountDetailsSection, EditPasswordFlow } from "./sections";
+
 export const AccountSetting: React.FC = () => {
-  const { profile, setProfile } = useProfileDetails();
   const { isEdit, resetAll } = useAccountChange();
 
   const [accountFlag, setAccountFlag] = useState(false);
   // const [invoiceFlag, setInvoiceFlag] = useState(false);
 
-  const fetchProfile = async () => {
-    const data = await fetchProfileDetails();
-    setProfile(data);
-  };
+  const { data: profile, isLoading } = useProfileDetailsQuery();
+
   // const invoiceData = {
   //   firstName: "No data",
   //   lastName: "No data",
@@ -27,11 +25,8 @@ export const AccountSetting: React.FC = () => {
   //   company: "No data",
   //   vatNumber: "No data",
   // };
-
-  useEffect(() => {
-    fetchProfile();
-    return () => resetAll();
-  }, [resetAll]);
+  useEffect(() => () => resetAll(), [resetAll]);
+  if (isLoading) return <Loader />;
 
   return (
     <Container className="Account-settings">

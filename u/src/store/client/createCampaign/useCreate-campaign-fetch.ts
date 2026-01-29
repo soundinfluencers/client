@@ -3,17 +3,20 @@ import type {
   IApiOffer,
   IPromoCard,
 } from "@/types/client/creator-campaign/creator-campaign.types";
-import { getPublishedOffers } from "@/api/client/CreatorCampaign/offers/client-creator-campaign-offers.api";
-import type { SocialMediaType } from "@/types/utils/constants.types";
+
+type PendingKey = "offers" | "promoCards";
 
 type CreateCampaignState = {
   promosCards: IPromoCard[];
   offers: IApiOffer[];
-  loading: boolean;
-  offersRequestId: number;
 
+  pending: Record<PendingKey, boolean>;
+
+  loading: boolean;
+
+  setPending: (key: PendingKey, v: boolean) => void;
+  setOffersData: (offers: IApiOffer[]) => void;
   setPromoCards: (promoCards: IPromoCard[]) => void;
-  setOffers: (platform: SocialMediaType, genre: string) => Promise<void>;
 
   getMatchedAccountIds: (offer: IApiOffer | null) => Set<string>;
   getPromoCardsFromOffer: (offer: IApiOffer | null) => IPromoCard[];
@@ -22,29 +25,24 @@ type CreateCampaignState = {
 export const useCreateCampaign = create<CreateCampaignState>((set, get) => ({
   promosCards: [],
   offers: [],
+
+  pending: {
+    offers: false,
+    promoCards: false,
+  },
+
   loading: false,
-  offersRequestId: 0,
 
-  setPromoCards: (promoCards) => {
-    if (get().promosCards === promoCards) return;
-    set({ promosCards: promoCards });
+  setPending: (key, v) => {
+    set((state) => {
+      const pending = { ...state.pending, [key]: v };
+      const loading = Object.values(pending).some(Boolean);
+      return { pending, loading };
+    });
   },
 
-  setOffers: async (platform, genre) => {
-    const requestId = Date.now();
-    set({ loading: true, offersRequestId: requestId });
-
-    try {
-      const data = await getPublishedOffers(platform, genre);
-
-      if (get().offersRequestId !== requestId) return;
-
-      set({ offers: data, loading: false });
-    } catch {
-      if (get().offersRequestId !== requestId) return;
-      set({ loading: false });
-    }
-  },
+  setOffersData: (offers) => set({ offers }),
+  setPromoCards: (promoCards) => set({ promosCards: promoCards }),
 
   getPromoCardsFromOffer: (offer) => {
     if (!offer) return [];

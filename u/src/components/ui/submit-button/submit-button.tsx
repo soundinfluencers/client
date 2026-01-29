@@ -20,7 +20,7 @@ export const SubmtiButton: React.FC<Props> = ({
       type={type}
       disabled={!isValid || isSubmitting}
       className={`${className ?? ""} ${isValid ? "ready" : "disabled"}`}>
-      {data}
+      {isSubmitting ? "Saving..." : data}
     </button>
   );
 };

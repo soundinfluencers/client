@@ -28,7 +28,9 @@ export const resetPasswordApi = async (email: string): Promise<void> => {
 };
 
 // influencer register
-export const influencerSignupApi = async (data: ISignupInfluencerDraft): Promise<void> => {
+export const influencerSignupApi = async (
+  data: ISignupInfluencerDraft,
+): Promise<void> => {
   // console.log(data);
   await $api.post("/auth/create/influencer", data);
 };

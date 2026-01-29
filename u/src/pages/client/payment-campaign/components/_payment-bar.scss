@@ -7,17 +7,46 @@
   max-width: 288px;
   height: 100%;
   width: 100%;
+
   li {
     display: flex;
     gap: 16px;
     align-items: center;
-
     height: 87px;
     padding: 12px 16px;
     background-color: rgba(255, 255, 255, 1);
     border-radius: 8px;
+
     &.active {
       border: 2px solid rgba(185, 208, 255, 1);
+    }
+  }
+
+  @media screen and (max-width: 900px) {
+    max-width: 100%;
+    top: 24px;
+    gap: 12px;
+
+    li {
+      height: 56px;
+      padding: 10px 12px;
+      gap: 12px;
+      img {
+        width: 32px;
+        height: 32px;
+      }
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    position: static;
+    top: auto;
+    max-width: 100%;
+    gap: 10px;
+
+    li {
+      height: 60px;
+      padding: 10px 12px;
     }
   }
 }

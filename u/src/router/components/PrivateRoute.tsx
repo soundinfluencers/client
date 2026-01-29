@@ -4,7 +4,7 @@ import type {ReactNode} from "react";
 import {Loader} from "@/components";
 
 interface Props {
-    children: ReactNode;
+  children: ReactNode;
 }
 
 export const PrivateRoute = ({ children }: Props) => {
@@ -14,9 +14,17 @@ export const PrivateRoute = ({ children }: Props) => {
         return <div><Loader/></div>;
     }
 
-    if (!accessToken) {
-        return <Navigate to="/auth" replace />;
-    }
+  if (!isAuthReady) {
+    return (
+      <div>
+        <Loader />
+      </div>
+    );
+  }
 
-    return <>{children}</>;
+  if (!accessToken) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <>{children}</>;
 };

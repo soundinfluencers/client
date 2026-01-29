@@ -4,13 +4,13 @@ import "../../../scss-campaign-table/table-base.scss";
 import { useCampaignStore } from "@/store/client/createCampaign";
 import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 
-import type { DropdownState, TableGroup } from "./types/tableTypes";
-import { useFollowersSort } from "./sorting/useFollowersSort";
+import type { DropdownState, TableGroup } from "./types/table-types";
+import { useFollowersSort } from "./sorting/use-followers-sort";
 
-import { TableHeader } from "./components/TableHeader";
-import { TableFooter } from "./components/TableFooter";
-import { getColumns } from "./utils/getColums";
-import { TableCard } from "./table-card/table-card";
+import { TableHeader } from "./components/table-header";
+import { TableFooter } from "./components/table-footer";
+import { getColumns } from "./utils/get-colums";
+import { TableCard } from "./card-table/table-card";
 
 const COL_WIDTH_LOCAL: Partial<Record<string, number>> = {
   network: 205,

@@ -7,60 +7,72 @@ import {
   type Path,
   type RegisterOptions,
 } from "react-hook-form";
-interface FormInput<T extends FieldValues> {
+interface FormInputProps<T extends FieldValues> {
   name: Path<T>;
   label?: string;
   id?: string;
   placeholder: string;
-  required?: boolean;
+  required?: boolean; // только для UI
   type?: string;
   className?: string;
-  validation?: RegisterOptions;
+  validation?: RegisterOptions; // опционально: доп rules поверх zod
 }
-interface FormTextArea<T extends FieldValues> {
+interface FormTextAreaProps<T extends FieldValues> {
   name: Path<T>;
   id?: string;
   label?: string;
   placeholder?: string;
-  required?: boolean;
+  required?: boolean; // только UI
   className?: string;
   isBespoke?: boolean;
+  validation?: RegisterOptions;
 }
 
 // input for form //
 
-export const FormInput = React.forwardRef<HTMLInputElement, FormInput<any>>(
-  ({
-    name,
-    label,
-    placeholder,
-    required = false,
-    type = "text",
-    className = "",
-    validation,
-    id,
-  }) => {
+export const FormInput = React.forwardRef<
+  HTMLInputElement,
+  FormInputProps<any>
+>(
+  (
+    {
+      name,
+      label,
+      placeholder,
+      required = false,
+      type = "text",
+      className = "",
+      validation,
+      id,
+    },
+    ref,
+  ) => {
     const {
       register,
-      formState: { errors },
+      formState: { errors, touchedFields, submitCount },
     } = useFormContext();
 
-    const error = get(errors, name)?.message as string;
+    const errorMsg =
+      (get(errors, name)?.message as string | undefined) ?? undefined;
+    const showError =
+      !!errorMsg && (get(touchedFields, name) || submitCount > 0);
 
     return (
-      <div className={`form-input ${className} ${error ? "error" : ""}`}>
-        {label && <label htmlFor={String(name)}>{label}</label>}
+      <div className={`form-input ${className} ${showError ? "is-error" : ""}`}>
+        {label && (
+          <label htmlFor={id ?? name}>
+            {label} {required ? "*" : ""}
+          </label>
+        )}
 
         <input
-          id={String(name)}
+          id={id ?? name}
           type={type}
           placeholder={placeholder}
-          {...register(name, {
-            required: required ? "Required" : false,
-            ...validation,
-          })}
+          {...register(name, validation)} // ✅ zod делает основную валидацию
         />
-        {error && <span className="error-message">{error}</span>}
+
+        {showError && <p className="form-input__error">{errorMsg}</p>}
       </div>
     );
   },
@@ -78,22 +90,33 @@ export function FormTextArea<T extends FieldValues>({
   className = "",
   isBespoke,
   id,
-}: FormTextArea<T>) {
+  validation,
+}: FormTextAreaProps<T>) {
   const {
     register,
-    formState: { errors },
+    formState: { errors, touchedFields, submitCount },
   } = useFormContext();
 
-  const error = get(errors, name)?.message as string;
+  const errorMsg =
+    (get(errors, name)?.message as string | undefined) ?? undefined;
+  const showError = !!errorMsg && (get(touchedFields, name) || submitCount > 0);
+
   return (
-    <div className={`form-field  ${className} ${error ? "error" : ""}`}>
-      {label && <label htmlFor={name}>{label}</label>}
+    <div className={`form-field ${className} ${showError ? "error" : ""}`}>
+      {label && (
+        <label htmlFor={id ?? name}>
+          {label} {required ? "*" : ""}
+        </label>
+      )}
+
       <textarea
-        id={name}
-        {...register(name as any, { required })}
+        id={id ?? name}
         placeholder={placeholder}
         className={isBespoke ? "bespoke" : ""}
+        {...register(name as any, validation)}
       />
+
+      {showError && <p className="form-input__error">{errorMsg}</p>}
     </div>
   );
 }

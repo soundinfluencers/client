@@ -16,12 +16,13 @@ import { AdditionalPlatformForm } from "@/pages/client/components/client-forms/a
 import { Selection } from "./selection/selection-post-content";
 
 import { useCampaignStore } from "@/store/client/createCampaign";
-import { useSelectedPlatforms } from "@/hooks/client/useSelectedPlatforms";
+
 import { groupPlatforms } from "@/utils/functions/groupPlatforms";
 import { platformFormsMap } from "@/constants/client/plattforms-data-form";
 import { getSocialMediaIcon } from "@/constants/social-medias";
 
 import type { SocialMediaType } from "@/types/utils/constants.types";
+import { useSelectedPlatforms } from "./hooks/useSelectedPlatforms";
 
 type GroupKey = "main" | "music" | "press";
 
@@ -39,8 +40,6 @@ export const CampaignPostContent: React.FC = () => {
   const promoCard = useCampaignStore((s) => s.promoCard);
   const totalPrice = useCampaignStore((s) => s.totalPrice);
   const actions = useCampaignStore((s) => s.actions);
-  const фс = useCampaignStore((s) => s.campaignContent);
-  console.log("фс,", фс);
 
   const selectedPlatforms = useSelectedPlatforms(offer, promoCard);
 

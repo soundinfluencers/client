@@ -51,3 +51,12 @@ label {
     }
   }
 }
+.form-input.is-error input {
+  border: 1px solid #ff4d4f;
+}
+
+.form-input__error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #ff4d4f;
+}

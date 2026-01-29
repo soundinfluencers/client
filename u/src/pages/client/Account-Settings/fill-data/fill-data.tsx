@@ -1,6 +1,7 @@
 import React from "react";
-import { FillDataRow } from "./fill-data-row/fill-data-row";
+
 import "./_fill-data.scss";
+import { FillDataRow } from "./fill-data-row/fill-data-row";
 
 interface Props {
   data: Record<string, any>;
@@ -8,8 +9,6 @@ interface Props {
 }
 
 export const FillData: React.FC<Props> = ({ data, fields }) => {
-  console.log(data, "datattataatt");
-  console.log(fields, "fields");
   return (
     <div className="Fill-Data">
       {fields.map(({ key, label }) => (
