@@ -30,7 +30,7 @@ export const Completed: React.FC = () => {
     error,
     isFetchingNextPage } = useDetailedPromos({ status: 'close', campaignId, addedAccountsId });
 
-  const promos = data?.pages.flat() ?? [];
+  const promos = data?.promos || [];
 
   if (isLoading) {
     return <Loader />;

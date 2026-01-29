@@ -27,6 +27,7 @@ export const useDetailedPromos = ({
       isSingle ? campaignId! : limit,
       isSingle ? addedAccountsId! : null,
     ],
+    initialPageParam: 1,
 
     queryFn: ({ pageParam = 1 }) => {
       if (isSingle) {
@@ -45,16 +46,8 @@ export const useDetailedPromos = ({
     },
 
     select: (data) => {
-      if (isSingle) {
-        return {
-          pages: [data.pages?.[0] ?? []],
-          pageParams: data.pageParams,
-        };
-      }
-      return {
-        pages: [data.pages.flat()],
-        pageParams: data.pageParams,
-      };
+      const promos = isSingle ? (data.pages?.[0] ?? []) : data.pages.flat();
+      return { promos };
     },
 
     enabled: true,

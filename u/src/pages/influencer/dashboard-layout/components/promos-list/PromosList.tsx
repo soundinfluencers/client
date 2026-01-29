@@ -18,7 +18,8 @@ export const PromosList = () => {
   const { data, error, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["promos", activePromosFilter, limit],
-      queryFn: ({ pageParam = 1 }) =>
+      initialPageParam: 1,
+      queryFn: ({ pageParam }) =>
         getInfluencerPromos(activePromosFilter, limit, pageParam as number),
 
       getNextPageParam: (lastPage, allPages) => {

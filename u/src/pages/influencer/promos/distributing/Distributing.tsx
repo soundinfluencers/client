@@ -72,7 +72,7 @@ export const Distributing: React.FC = () => {
 
   // const isSingle = !!campaignId && !!addedAccountsId;
 
-  const promos = data?.pages.flat() || [];
+  const promos = data?.promos || [];
 
   useEffect(() => {
     if (isFormOpen && !submitState) {

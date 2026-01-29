@@ -6,11 +6,18 @@ import { useClickOutside } from '@/hooks/global/useClickOutside';
 import { useUser } from '@/store/get-user';
 import X from "@/assets/icons/x.svg";
 import './_drop-down-nav.scss';
+import { useWindowSize } from '@/hooks/global/useWindowSize';
 
-export const DropDownNav = () => {
-  const { logout } = useAuth();
+interface DropDownNavProps {
+  isDropdownOpen: boolean;
+  setIsDropdownOpen: (isOpen: boolean | ((prev: boolean) => boolean)) => void;
+}
+
+export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavProps) => {
+  const { logout, accessToken } = useAuth();
+  const { width } = useWindowSize();
   const { user } = useUser();
-  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(dropdownRef, () => {
@@ -22,21 +29,25 @@ export const DropDownNav = () => {
       ? "/client/AccountSetting"
       : "/influencer/account-setting";
 
+  const isDesktop = width > 900;
+
   return (
     <div className="user-menu">
-      <div
-        className="user-menu__item"
-        onClick={() => setIsDropdownOpen((v) => !v)}
-        tabIndex={0}
-        role="button"
-      >
-        <p className="user-menu__item-text">Account</p>
-        <img
-          className="user-menu__item-avatar"
-          src={PLACEHOLDER_LOGO_URL}
-          alt="User Avatar"
-        />
-      </div>
+      {isDesktop && (
+        <div
+          className="user-menu__item"
+          onClick={() => setIsDropdownOpen((v) => !v)}
+          tabIndex={0}
+          role="button"
+        >
+          <p className="user-menu__item-text">Account</p>
+          <img
+            className="user-menu__item-avatar"
+            src={PLACEHOLDER_LOGO_URL}
+            alt="User Avatar"
+          />
+        </div>
+      )}
 
       {/* {isDropdownOpen && (
         <div

@@ -13,7 +13,8 @@ export const CampaignHistoryList = () => {
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ['campaign-history', activeCampaignHistoryFilter, limit],
-    queryFn: ({ pageParam = 1 }) => getCampaignHistory(pageParam as number, limit),
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => getCampaignHistory(pageParam as number, limit),
 
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length === 0) return undefined;

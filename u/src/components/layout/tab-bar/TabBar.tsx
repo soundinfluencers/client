@@ -16,6 +16,7 @@ export const TabBar: FC = () => {
   const { accessToken } = useAuth();
   const { width } = useWindowSize();
   const [isBurgerOpen, setIsBurgerOpen] = useState<boolean>(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const tabBarRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(tabBarRef, () => {
@@ -42,38 +43,45 @@ export const TabBar: FC = () => {
                 {/* <LoginButton onClick={() => navigate("/login")} /> */}
               </>
             ) : (
-              <DropDownNav />
+              <DropDownNav isDropdownOpen={isDropdownOpen} setIsDropdownOpen={setIsDropdownOpen} />
             )}
           </div>
         ) : (
           <div className="tab-bar__controls-mobile">
             <div
-              onClick={() => setIsBurgerOpen(true)}
+              onClick={() => {
+                setIsBurgerOpen(true);
+                setIsDropdownOpen(true);
+              }}
               role="button"
               tabIndex={0}
             >
               <img className="tab-bar__burger-toggle" src={burgerMenu} alt="" />
             </div>
 
-            <div className={`tab-bar__menu ${isBurgerOpen ? "tab-bar__menu--open" : ""}`}>
-              <div
-                className="tab-bar__menu-item tab-bar__menu-item--signup"
-                onClick={() => handleClickBurgerMenu("/signup/client")}
-                role="button"
-                tabIndex={0}
-              >
-                Sign up
-              </div>
+            {!accessToken ? (
+              <div className={`tab-bar__menu ${isBurgerOpen ? "tab-bar__menu--open" : ""}`}>
+                <div
+                  className="tab-bar__menu-item tab-bar__menu-item--signup"
+                  onClick={() => handleClickBurgerMenu("/signup/client")}
+                  role="button"
+                  tabIndex={0}
+                >
+                  Sign up
+                </div>
 
-              <div
-                className="tab-bar__menu-item tab-bar__menu-item--login"
-                onClick={() => handleClickBurgerMenu("/login")}
-                role="button"
-                tabIndex={0}
-              >
-                Log in
+                <div
+                  className="tab-bar__menu-item tab-bar__menu-item--login"
+                  onClick={() => handleClickBurgerMenu("/login")}
+                  role="button"
+                  tabIndex={0}
+                >
+                  Log in
+                </div>
               </div>
-            </div>
+            ) : (
+              <DropDownNav isDropdownOpen={isDropdownOpen} setIsDropdownOpen={setIsDropdownOpen} />
+            )}
           </div>
         )}
       </Container>
