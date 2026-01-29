@@ -1,4 +1,4 @@
-import api from "@/api/https/api";
+import api from "@/api/api";
 
 export type SocialMediaType =
   | "instagram"

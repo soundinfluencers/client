@@ -12,7 +12,7 @@ import { campaignResultMapper } from "./utils/campaign-result-form.mapper";
 import { toast } from "react-toastify";
 import type { SubmitResultsNavState } from "./utils/distributing-nav.helper";
 import "./_campaign-result-form.scss";
-import { handleApiError } from "@/api/https/error.api";
+import { handleApiError } from "@/api/error.api";
 
 interface Props {
   submitState: SubmitResultsNavState;

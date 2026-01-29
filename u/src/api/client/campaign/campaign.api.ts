@@ -1,4 +1,4 @@
-import $api from "../../https/api.ts";
+import $api from "../../api.ts";
 
 export const getCampaigns = async (
   status: string,

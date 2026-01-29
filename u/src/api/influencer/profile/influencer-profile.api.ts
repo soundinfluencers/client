@@ -1,5 +1,5 @@
 //add create/update type dto
-import $api from "@/api/https/api";
+import $api from "@/api/api";
 import type {
   TDeleteSocialAccountDTO,
   InfluencerProfileApi,

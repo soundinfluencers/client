@@ -1,4 +1,4 @@
-import $api from "../../https/api";
+import $api from "../../api";
 
 export const getFilters = async () => {
   try {

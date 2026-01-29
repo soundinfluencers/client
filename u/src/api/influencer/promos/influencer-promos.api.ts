@@ -3,7 +3,7 @@ import type {
   IPromoDetailsModel,
   TAcceptDeclineRequestPromoModel,
 } from "@/pages/influencer/promos/types/promos.types";
-import $api from "../../https/api";
+import $api from "../../api";
 import type { AxiosError } from "axios";
 import type { TCampaignResultDTO } from "@/pages/influencer/promos/distributing/components/campaign-result-form/types/campaign-result-form.types";
 

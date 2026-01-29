@@ -1,4 +1,4 @@
-import $api from "@/api/https/api";
+import $api from "@/api/api";
 import type { Profile } from "@/types/client/profile-details/profile-detials.types";
 type ProfileUpdate = {
   firstName: string;

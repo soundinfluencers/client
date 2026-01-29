@@ -1,4 +1,4 @@
-import $api from "../../https/api";
+import $api from "../../api";
 import type { IInvoiceResponseModel } from "@/pages/influencer/invoices-details/types/invoice";
 
 export const getInfluencerInvoices = async (

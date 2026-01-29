@@ -1,5 +1,5 @@
 import type { InvoiceCreateRequestDto } from "@/pages/influencer/create-invoice/components/invoice-form-content/types/invoice-form-inputs.types";
-import $api from "../../https/api";
+import $api from "../../api";
 
 export const createInvoice = async (
   data: InvoiceCreateRequestDto,

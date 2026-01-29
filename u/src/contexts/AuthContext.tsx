@@ -5,7 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import $api from "../api/https/api.ts";
+import $api from "../api/api.ts";
 import { logoutApi } from "../api/auth/auth.api.ts";
 
 interface AuthContextType {

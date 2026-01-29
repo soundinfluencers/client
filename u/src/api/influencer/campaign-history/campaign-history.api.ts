@@ -1,5 +1,5 @@
 import type { Campaign } from "@/pages/influencer/dashboard-layout/components/campaign-history-list/types/campaign-history.types";
-import $api from "../../https/api";
+import $api from "../../api";
 
 export const getCampaignHistory = async (
   page: number,

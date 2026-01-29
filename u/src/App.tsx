@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { TabBar } from "./components/layout/tab-bar/TabBar";
 
 import { useAuth } from "./contexts/AuthContext";
-import { setupInterceptors } from "./api/https/api";
+import { setupInterceptors } from "./api/api";
 
 import { PrivateRoute } from "./router/components/PrivateRoute";
 import { PublicRoute } from "./router/components/PublicRoute";

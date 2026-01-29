@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { tokenStorage } from "../../contexts/AuthContext.tsx";
+import { tokenStorage } from "../contexts/AuthContext.tsx";
 
 const $api = axios.create({
   baseURL: import.meta.env.VITE_SERVER,

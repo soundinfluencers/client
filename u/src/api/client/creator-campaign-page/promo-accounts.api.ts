@@ -1,4 +1,4 @@
-import $api from "../../https/api";
+import $api from "../../api";
 import type { MultiPromoAccountsBody } from "./types";
 
 export const getMultiPromoAccounts = async ({

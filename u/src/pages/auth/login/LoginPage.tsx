@@ -7,7 +7,7 @@ import "./_login-page.scss";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { loginApi } from "@/api/auth/auth.api.ts";
 import { useUser } from "@/store/get-user/index.ts";
-import { handleApiError } from "@/api/https/error.api.ts";
+import { handleApiError } from "@/api/error.api.ts";
 
 export const LoginPage: FC = () => {
   const navigate: NavigateFunction = useNavigate();

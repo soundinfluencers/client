@@ -8,7 +8,7 @@ import { resetPasswordApi } from "@/api/auth/auth.api.ts";
 
 import { Modal } from "@/components/ui/modal-fix/Modal.tsx";
 import { useNavigate } from "react-router-dom";
-import { handleApiError } from "@/api/https/error.api.ts";
+import { handleApiError } from "@/api/error.api.ts";
 
 export const ForgotPasswordPage: FC = () => {
   const navigate = useNavigate();
