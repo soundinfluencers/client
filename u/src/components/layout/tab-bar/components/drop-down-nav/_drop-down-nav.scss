@@ -1,0 +1,140 @@
+@use "@/styles/variables/_variables.scss" as vars;
+
+.user-menu {
+  position: relative;
+  cursor: pointer;
+  z-index: 50;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &-text {
+      font-size: 20px;
+    }
+    &-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% - 60px);
+    right: 0;
+
+    max-width: 288px;
+    width: 288px;
+
+    background: white;
+    border: 1px solid vars.$border-secondary;
+    border-radius: 8px;
+    padding: 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    visibility: hidden;
+
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease,
+      visibility 0.2s ease;
+    z-index: 1001;
+
+    @media screen and (max-width: 900px) {
+      gap: 24px;
+      max-width: 100%;
+      width: 100%;
+      top: 0;
+      left: 0;
+      right: 0;
+      position: fixed;
+    }
+
+    &--open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    &-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      &-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+        &-text {
+          font-weight: 500;
+          font-size: 16px;
+          color: vars.$gray-dark;
+        }
+      }
+
+      &-close {
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+        &:hover {
+          opacity: 0.6;
+        }
+      }
+    }
+
+    &-nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+
+      &-link {
+        font-size: 16px;
+        text-align: center;
+        border: 1px solid vars.$white-gray-2;
+        border-radius: 8px;
+        padding: 8px 24px;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: vars.$hover-button-2;
+        }
+      }
+    }
+
+    &-logout {
+      border-radius: 8px;
+      width: 100%;
+      padding: 8px 24px;
+      font-size: 15px;
+      text-align: center;
+      color: white;
+      background: vars.$black-blue;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: vars.$hover-button-1;
+      }
+    }
+  }
+}

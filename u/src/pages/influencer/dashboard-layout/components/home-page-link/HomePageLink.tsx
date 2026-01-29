@@ -4,7 +4,6 @@ import home from "../../../../../assets/icons/home.svg";
 import "./_home-page-link.scss";
 
 export const HomePageLink = () => {
-  // /promos
   return (
     <Link className="home-page-link" to={"promos"}>
       <span className="home-page-link__content">
