@@ -33,6 +33,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         tokenStorage.set(token);
     };
 
+    useEffect(() => {
+        console.log(accessToken, 'accessToken')
+    }, [accessToken]);
+
     const logout = async () => {
         try {
             await logoutApi();
