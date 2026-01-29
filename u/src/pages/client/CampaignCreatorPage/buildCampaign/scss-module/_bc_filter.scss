@@ -91,7 +91,7 @@
           height: 27px;
           border-radius: 24px;
           font-size: 14px;
-          &:first-child {
+          &.active {
             background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
           }
         }

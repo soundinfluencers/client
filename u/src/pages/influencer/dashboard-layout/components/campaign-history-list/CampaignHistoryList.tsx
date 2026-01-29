@@ -1,3 +1,4 @@
+
 // import { useInfiniteQuery } from '@tanstack/react-query';
 import { useDashboardLayoutStore } from '../../store/useDashboardLayoutStore';
 import { getCampaignHistory } from '@/api/influencer/campaign-history/campaign-history.api';
@@ -11,10 +12,18 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 export const CampaignHistoryList = () => {
   const { activeCampaignHistoryFilter, limit } = useDashboardLayoutStore();
 
-  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ['campaign-history', activeCampaignHistoryFilter, limit],
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["campaign-history", activeCampaignHistoryFilter, limit],
     initialPageParam: 1,
-    queryFn: ({ pageParam }) => getCampaignHistory(pageParam as number, limit),
+    queryFn: ({ pageParam }) =>
+      getCampaignHistory(pageParam as number, limit),
 
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length === 0) return undefined;
@@ -25,18 +34,26 @@ export const CampaignHistoryList = () => {
     },
   });
 
-  console.log('Campaign history data:', data);
+  console.log("Campaign history data:", data);
 
   const campaigns = data?.pages.flat() ?? [];
 
   if (isLoading) {
-    return <Loader />
+    return <Loader />;
   }
   if (error) {
-    return <p style={{ fontSize: 40, textAlign: 'center', paddingTop: 40 }}>Error loading campaign history.</p>;
+    return (
+      <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
+        Error loading campaign history.
+      </p>
+    );
   }
   if (campaigns.length === 0) {
-    return <p style={{ fontSize: 40, textAlign: 'center', paddingTop: 40 }}>No campaign history available.</p>;
+    return (
+      <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
+        No campaign history available.
+      </p>
+    );
   }
 
   return (
@@ -48,7 +65,7 @@ export const CampaignHistoryList = () => {
 
         <div className="campaign-history-list__actions">
           <ButtonMain
-            label={isFetchingNextPage ? 'Loading...' : 'View more'}
+            label={isFetchingNextPage ? "Loading..." : "View more"}
             onClick={() => fetchNextPage()}
             isDisabled={!hasNextPage || isFetchingNextPage}
           />

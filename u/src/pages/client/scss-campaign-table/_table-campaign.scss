@@ -1,6 +1,7 @@
 @use "@/styles/scrollbars/_scrollbars.scss" as sb;
 .table-page {
   .live-view-wrapper {
+    margin-top: 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;

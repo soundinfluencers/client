@@ -54,11 +54,9 @@ export const TabBar: FC = () => {
                 setIsDropdownOpen(true);
               }}
               role="button"
-              tabIndex={0}
-            >
+              tabIndex={0}>
               <img className="tab-bar__burger-toggle" src={burgerMenu} alt="" />
             </div>
-
             {!accessToken ? (
               <div className={`tab-bar__menu ${isBurgerOpen ? "tab-bar__menu--open" : ""}`}>
                 <div

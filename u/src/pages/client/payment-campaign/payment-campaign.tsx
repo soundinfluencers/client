@@ -104,7 +104,12 @@ export const PaymentCampaign = () => {
           <Form
             onSubmit={onSent}
             classNameBtnSection={tab === "bank_transfer" ? "margin" : ""}
-            submitButton={<SubmtiButton data={"Confirm payment sent"} />}
+            submitButton={
+              <SubmtiButton
+                className="btn-margin"
+                data={"Confirm payment sent"}
+              />
+            }
             className="payment-campaign__width">
             <PaymentForm data={PAYMENT_CAMPAIGN_TABS_INPUTS} />
 

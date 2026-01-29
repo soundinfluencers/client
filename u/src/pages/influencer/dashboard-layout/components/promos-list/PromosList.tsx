@@ -45,7 +45,11 @@ export const PromosList = () => {
   }
 
   if (activePromos.length === 0) {
-    return <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>No promos found.</p>;
+    return (
+      <p style={{ fontSize: 48, textAlign: "center", paddingTop: 40 }}>
+        No promos found.
+      </p>
+    );
   }
 
   return (
