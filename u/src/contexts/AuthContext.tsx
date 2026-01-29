@@ -5,13 +5,14 @@ import {
   useEffect,
   useState,
 } from "react";
-import $api from "../api/api.ts";
+import { $auth } from "../api/api.ts";
 import { logoutApi } from "../api/auth/auth.api.ts";
 
 interface AuthContextType {
   accessToken: string | null;
   setAccessToken: (token: string | null) => void;
   logout: () => void;
+  isAuthReady: boolean;
 }
 
 let accessTokenStore: string | null = null;
@@ -25,29 +26,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
   const setAccessToken = (token: string | null) => {
     setAccessTokenState(token);
     tokenStorage.set(token);
   };
-
-  useEffect(() => {
-    const refresh = async () => {
-      try {
-        const { data } = await $api.post<{ accessToken: string }>(
-          "/auth/refresh",
-        );
-
-        setAccessToken(data.accessToken);
-      } catch {
-        if (window.location.pathname !== "/auth") {
-          logout();
-        }
-      }
-    };
-
-    refresh();
-  }, []);
 
   const logout = async () => {
     try {
@@ -60,8 +44,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  useEffect(() => {
+    const refresh = async () => {
+      try {
+        const res = await $auth.post("/auth/refresh");
+        setAccessToken(res.data.data.accessToken);
+      } catch {
+        setAccessToken(null);
+      } finally {
+        setIsAuthReady(true);
+      }
+    };
+
+    refresh();
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ accessToken, setAccessToken, logout }}>
+    <AuthContext.Provider
+      value={{ accessToken, setAccessToken, logout, isAuthReady }}>
       {children}
     </AuthContext.Provider>
   );
