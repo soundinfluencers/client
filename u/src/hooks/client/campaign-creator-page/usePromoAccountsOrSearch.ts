@@ -10,12 +10,14 @@ export const usePromoAccountsOrSearch = ({
   currency,
   sortBy,
   query,
+  FilterMethod,
 }: {
   selected: FilterItem[];
   budget: string;
   currency: string;
   sortBy: string;
   query: string;
+  FilterMethod: string;
 }) => {
   const debounced = useDebouncedValue(query, 150);
   const q = debounced.trim();
@@ -26,7 +28,7 @@ export const usePromoAccountsOrSearch = ({
     .map((x) => x.id as SocialMediaType);
 
   const filtered = usePromoAccountsFilters(
-    { selected, budget, currency, sortBy },
+    { selected, budget, currency, sortBy, FilterMethod },
     { enabled: !isSearchMode && socialMedias.length > 0 },
   );
 

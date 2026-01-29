@@ -1,6 +1,7 @@
 import React from "react";
 import chevronDown from "@/assets/icons/chevron-down.svg";
 import "../../../scss-module/_bc_filter.scss";
+import { useBuildCampaignFilters } from "@/store/client/createCampaign/useBuildCampaignFilters";
 
 interface Props {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ export const DropdownFilter: React.FC<Props> = ({
   onToggle,
   AndOr,
 }) => {
+  const { setFiltersMethod, FilterMethod } = useBuildCampaignFilters();
   return (
     <div className="dropdown_filter">
       <div onClick={onToggle} className="dropdown_filter__head">
@@ -25,9 +27,18 @@ export const DropdownFilter: React.FC<Props> = ({
       </div>
       {isOpen && AndOr?.length > 0 && (
         <ul className="blockWithMethod">
-          {AndOr.map((ar: any, i: number) => (
-            <li key={i}>{ar.method}</li>
-          ))}
+          {AndOr.map((ar: any, i: number) => {
+            const methodLower = ar.method.toLowerCase();
+
+            return (
+              <li
+                key={i}
+                className={FilterMethod === methodLower ? "active" : ""}
+                onClick={() => setFiltersMethod(methodLower)}>
+                {ar.method}
+              </li>
+            );
+          })}
         </ul>
       )}
       {isOpen && children}
