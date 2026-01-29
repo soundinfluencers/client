@@ -5,7 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import $api from "../api/api.ts";
+import $api from "../api/https/api.ts";
 import { logoutApi } from "../api/auth/auth.api.ts";
 
 interface AuthContextType {
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const refresh = async () => {
       try {
         const { data } = await $api.post<{ accessToken: string }>(
-          "/auth/refresh"
+          "/auth/refresh",
         );
 
         setAccessToken(data.accessToken);

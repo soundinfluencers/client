@@ -4,8 +4,7 @@ import { useFormContext } from "react-hook-form";
 
 export function AccountSettingsForm({ data }: { data: any }) {
   const { isEdit, onChangeEdit } = useAccountChange();
-  const { watch } = useFormContext();
-  console.log(watch());
+
   return (
     <div className="inputs">
       <FormInput

@@ -159,12 +159,12 @@ export type TSocialAccountFormValues = z.infer<typeof socialAccountFormSchema>;
 //   creatorCategories: z.array(requiredText).default([]),
 // }).superRefine((data, ctx) => {
 //   if (data.profileCategory === "community") {
-//     // например: если musicGenres блок включен и обязателен
+//     // если musicGenres блок включен и обязателен
 //     // ctx.addIssue({ code: "custom", path: ["musicGenres"], message: "required" });
 //   }
 
 //   if (data.profileCategory === "creator") {
-//     // например: хотим хотя бы 1 creatorCategory
+//     // хотим хотя бы 1 creatorCategory
 //     if (data.creatorCategories.length === 0) {
 //       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["creatorCategories"], message: "required" });
 //     }

@@ -11,10 +11,10 @@ import { PAYMENT_CAMPAIGN_TABS_INPUTS } from "@/constants/client/payment-campaig
 import { PaymentBar } from "./components/payment-bar";
 import "./_payment-campaign.scss";
 
-import { postCampaign } from "@/api/client/post-actions/post-campaign";
 import { useCampaignStore } from "@/store/client/createCampaign";
 import { PAYMENT_CAMPAIGN_TABS } from "./components/constant/payment-campaign-tabs";
 import type { PaymentTabId, PaymentMethodId } from "./types";
+import { postCampaign } from "@/api/client/campaign/campaign.api";
 
 export const PaymentCampaign = () => {
   const { actions } = useCampaignStore();
@@ -67,7 +67,7 @@ export const PaymentCampaign = () => {
 
   const onSent = async () => {
     const payload = actions.getCampaignPayload(selectedIdPayment);
-    console.log("FINAL PAYLOAD", JSON.stringify(payload, null, 2));
+
     await postCampaign(payload);
   };
   return (

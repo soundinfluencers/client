@@ -17,10 +17,10 @@ import { useCampaignStore } from "@/store/client/createCampaign";
 
 import { TableStrategy } from "./components/table-strategy/strategy-table";
 
-import { postCampaignDraft } from "@/api/client/post-actions/post-draft-campaign";
-import { postCampaignProposal } from "@/api/client/post-actions/post-proposal-campaign";
 import { LiveViewCard } from "./components/table-strategy/live-view-card/live-view";
 import { useGroupPromos } from "@/hooks/client/campaigns/useGroupPromos";
+import { postCampaignProposal } from "@/api/client/campaign/campaign.api";
+import { postCampaignDraft } from "@/api/client/campaign/draft.api";
 
 interface Props {}
 

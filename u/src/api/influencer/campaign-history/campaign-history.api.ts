@@ -1,10 +1,13 @@
 import type { Campaign } from "@/pages/influencer/dashboard-layout/components/campaign-history-list/types/campaign-history.types";
-import $api from "../../api";
+import $api from "../../https/api";
 
-export const getCampaignHistory = async (page: number, limit: number): Promise<Campaign[]> => {
+export const getCampaignHistory = async (
+  page: number,
+  limit: number,
+): Promise<Campaign[]> => {
   try {
     const response = await $api.get(
-      `/influencer-actions-history/me?limit=${limit}&page=${page}`
+      `/influencer-actions-history/me?limit=${limit}&page=${page}`,
     );
     console.log("history fetched:", response.data);
 

@@ -12,7 +12,7 @@ import { Modal } from '../../../../../../components/ui/modal-fix/Modal';
 
 import { PLATFORM_CONFIG } from '../../data/account-setup-form.data';
 import { ACCOUNT_INPUTS_DATA } from './data/user-inputs.data';
-import { MUSIC_GENERS_DATA } from '../checkbox-button-list/data/music-genres.data';
+import { MUSIC_GENRES_DATA } from '../checkbox-button-list/data/music-genres.data';
 import { THEME_TOPICS_DATA } from '../checkbox-button-list/data/categories.data';
 import { ENTERTAINMENT_CATEGORIES_DATA, MUSIC_CATEGORIES_DATA } from '../checkbox-button-list/data/creator-categories.data';
 
@@ -29,12 +29,12 @@ interface Props {
   onRemove: () => Promise<void> | void;
 };
 
-//TODO: add loading state to buttons
 export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: Props) => {
   const { control, setValue, handleSubmit } = useFormContext<TSocialAccountFormValues>();
   const { onResetAccountForm } = useAccountSetupStore();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSaveLoading, setIsSaveLoading] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const platformConfig = PLATFORM_CONFIG[platform];
@@ -48,7 +48,7 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
   const isCreator = profileCategory === 'creator';
 
   useEffect(() => {
-    // сброс значений чекбоксов при смене типа профиля
+    // reset values of checkboxes when profile type changes
     if (profileCategory === 'community') {
       setValue('creatorCategories', [], {
         shouldDirty: true,
@@ -68,26 +68,26 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
   }, [profileCategory, setValue]);
 
   const handleRemove = async () => {
-    setIsLoading(true);
+    setIsDeleteLoading(true);
 
     try {
       await onRemove();
       onResetAccountForm();
     } finally {
-      setIsLoading(false);
+      setIsDeleteLoading(false);
     }
   };
 
   const handleSave = async (data: TSocialAccountFormValues) => {
     console.log("form data to save:", data);
-    setIsLoading(true);
+    setIsSaveLoading(true);
     try {
       const cleaned = normalizeAccountForApi(data);
       console.log("cleaned form data to save:", cleaned);
       await onSave(cleaned);
       onResetAccountForm();
     } finally {
-      setIsLoading(false);
+      setIsSaveLoading(false);
     }
   };
 
@@ -102,7 +102,7 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
           <>
             {platformConfig.musicGenres && (
               <CheckboxButtonList
-                data={MUSIC_GENERS_DATA}
+                data={MUSIC_GENRES_DATA}
                 title="Music genres"
                 subtitle="Select all the applicable"
                 name="musicGenres"
@@ -153,13 +153,13 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
             />
             <ButtonMain
               onClick={handleSubmit(handleSave)}
-              label="Save"
+              label={isSaveLoading ? "Saving..." : "Save"}
               type='submit'
             />
           </>
         ) : (
           <ButtonMain
-            label={'Add account'}
+            label={isSaveLoading ? "Saving..." : "Add account"}
             onClick={handleSubmit(handleSave)}
             type='submit'
           />
@@ -176,7 +176,7 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
 
             <div className='account-setup-form-content__modal-actions'>
               <ButtonSecondary label='Cancel' onClick={() => setIsModalOpen(false)} />
-              <ButtonMain label='Delete' onClick={handleRemove} />
+              <ButtonMain label={isDeleteLoading ? "Deleting..." : "Delete"} onClick={handleRemove} />
             </div>
           </div>
         </Modal>

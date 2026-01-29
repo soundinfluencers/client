@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { TabBar } from "./components/layout/tab-bar/TabBar";
 
 import { useAuth } from "./contexts/AuthContext";
-import { setupInterceptors } from "./api/api";
+import { setupInterceptors } from "./api/https/api";
 
 import { PrivateRoute } from "./router/components/PrivateRoute";
 import { PublicRoute } from "./router/components/PublicRoute";
@@ -26,8 +26,7 @@ import { AccountSettingInfluencer } from "./pages/influencer/account-setting/Acc
 import "./app.scss";
 import { RootRedirect } from "./router/components/rootRedirect";
 import { ToastContainer } from "react-toastify";
-import { HomePage } from "./pages/client/client-dashboard/HomePage";
-
+import { HomePage } from "./pages/client/client-dashboard/home-page";
 
 function App() {
   const { accessToken, setAccessToken, logout } = useAuth();

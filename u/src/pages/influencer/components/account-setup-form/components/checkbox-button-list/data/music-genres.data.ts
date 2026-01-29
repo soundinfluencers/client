@@ -1,6 +1,6 @@
 import type { ICheckboxButton } from "../types/checkbox-buttons.types";
 
-export const MUSIC_GENERS_DATA: ICheckboxButton[] = [
+export const MUSIC_GENRES_DATA: ICheckboxButton[] = [
   {
     id: "techno",
     label: "Techno",

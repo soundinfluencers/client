@@ -1,5 +1,5 @@
 //add create/update type dto
-import $api from "@/api/api";
+import $api from "@/api/https/api";
 import type {
   TDeleteSocialAccountDTO,
   InfluencerProfileApi,
@@ -14,9 +14,9 @@ import { AxiosError } from "axios";
 // Get influencer profile
 export const getInfluencerProfile = async (): Promise<InfluencerProfileApi> => {
   try {
-    console.log('call get profile')
+    console.log("call get profile");
     const response = await $api.get("/profile/influencer");
-    console.log('Response getProfile:', response.data.data);
+    console.log("Response getProfile:", response.data.data);
     return response.data.data as InfluencerProfileApi;
   } catch (error) {
     if (error instanceof AxiosError) {

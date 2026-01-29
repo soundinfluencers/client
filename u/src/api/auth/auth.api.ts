@@ -2,7 +2,7 @@ import type {
   RequestLoginUserModel,
   ResponseLoginUserModel,
 } from "@/types/auth/auth.types.ts";
-import $api from "../api.ts";
+import $api from "../https/api.ts";
 import type { ISignupInfluencerDraft } from "@/types/user/influencer.types.ts";
 
 export const loginApi = async ({
@@ -28,7 +28,9 @@ export const resetPasswordApi = async (email: string): Promise<void> => {
 };
 
 // influencer register
-export const influencerSignupApi = async (data: ISignupInfluencerDraft): Promise<void> => {
+export const influencerSignupApi = async (
+  data: ISignupInfluencerDraft,
+): Promise<void> => {
   // console.log(data);
   await $api.post("/auth/create/influencer", data);
 };

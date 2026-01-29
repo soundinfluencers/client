@@ -19,7 +19,7 @@ export const BankTransfer: React.FC<Props> = ({ currency }) => {
   return (
     <div>
       <h2>Payment confirmation by Bank Transfer UK</h2>
-      <div className="base-confirmations__content">
+      <div className="base-confirmations__content--banktransfer">
         <div className="base-confirmations__content_paypal">
           <div className="base-confirmations__content_paypal__flex">
             <div className="base-confirmations__count">

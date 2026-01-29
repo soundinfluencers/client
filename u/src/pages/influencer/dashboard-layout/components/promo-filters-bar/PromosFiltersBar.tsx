@@ -18,13 +18,13 @@ export const PromosFiltersBar = () => {
 
   const handleReviewAll = (status: string) => {
     switch (status) {
-      case 'pending':
+      case 'new':
         navigate('/influencer/promos/new-promos');
         break;
-      case 'distributing':
+      case 'ongoing':
         navigate('/influencer/promos/distributing');
         break;
-      case 'completed':
+      case 'close':
         navigate('/influencer/promos/completed');
         break;
       default:
@@ -52,7 +52,7 @@ export const PromosFiltersBar = () => {
                   setActiveFilters(option.value);
                 }
               }}
-            >
+            > 
               {option.label}
             </p>
             <span className={`promos-filters-bar__item-indicator ${activeFilters === option.value ? 'promos-filters-bar__item-indicator--active' : ''}`} />

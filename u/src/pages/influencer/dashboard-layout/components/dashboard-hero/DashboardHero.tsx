@@ -1,15 +1,13 @@
 import { useMatch } from "react-router-dom";
-import { useUserStore } from "../../../../../store/user/useUserStore";
+import { useUser } from "@/store/get-user";
 import { HistoryLink } from "../campaign-history-link/HistoryLink";
 import { InvoiceLink } from "../create-invoice-link/InvoiceLink";
 import { HomePageLink } from "../home-page-link/HomePageLink";
 import blackLogo from "../../../../../assets/logos/small-black-logo.svg";
 
 import "./_dashboard-hero.scss";
-import { useUser } from "@/store/get-user";
 
 export const DashboardHero = () => {
-  // const { user } = useUserStore();
   const { user } = useUser();
   const isDashboard = useMatch("/influencer");
   const isPromos = useMatch("/influencer/promos");

@@ -22,6 +22,6 @@ export const isSubmitState = (v: unknown): v is SubmitResultsNavState => {
   const o = v as any;
   return typeof o.campaignId === "string"
     && typeof o.addedAccountsId === "string"
-    && typeof o.username === "string" // или meta присутствует
+    && typeof o.username === "string"
     && o.meta != null;
 };

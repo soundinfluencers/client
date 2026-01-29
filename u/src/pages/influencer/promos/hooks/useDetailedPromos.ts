@@ -29,7 +29,7 @@ export const useDetailedPromos = ({
     ],
     initialPageParam: 1,
 
-    queryFn: ({ pageParam }) => {
+    queryFn: ({ pageParam = 1 }) => {
       if (isSingle) {
         return getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId(
           status,
