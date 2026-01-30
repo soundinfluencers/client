@@ -1,46 +1,62 @@
 import { useNavigate } from 'react-router-dom';
-import { getSocialMediaIcon } from '../../../../../../../../constants/social-medias';
-import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
+import { getSocialMediaIcon } from '@/constants/social-medias.ts';
+import type { IPromo, TClosedStatusType, TConfirmationType } from '@/pages/influencer/promos/types/promos.types';
+import {
+  normalizePromoStatus
+} from "@/pages/influencer/dashboard-layout/components/promos-list/utils/normalizePromoStatus.ts";
 
 import './_promos-table-item.scss';
 
 interface Props {
   promo: IPromo;
-};
+}
 
 export const PromosTableItem = ({ promo }: Props) => {
   const navigate = useNavigate();
 
-  const handleNavigate = (statusCampaign: string, campaignId?: string, addedAccountsId?: string) => {
-    switch (statusCampaign) {
-      case 'pending':
-        navigate('/influencer/promos/new-promos');
-        break;
-      case "distributing":
-        navigate(`/influencer/promos/distributing`, {
-          state: { campaignId, addedAccountsId }
-        });
-        break;
-      case 'completed':
-        navigate(`/influencer/promos/completed`, {
-          state: { campaignId, addedAccountsId }
-        });
-        break;
-      default:
-        navigate('/influencer/promos');
+  const handleNavigate = (confirmation: TConfirmationType, closedStatus: TClosedStatusType, campaignId?: string, addedAccountsId?: string) => {
+    if (confirmation === 'wait' && closedStatus === "wait") {
+      return navigate('/influencer/promos/new-promos');
+    } else if (confirmation === 'accept' && closedStatus === 'wait') {
+      return navigate(`/influencer/promos/distributing`, {
+        state: { campaignId, addedAccountsId }
+      });
+    } else if (closedStatus === 'close') {
+      return navigate(`/influencer/promos/completed`, {
+        state: { campaignId, addedAccountsId }
+      });
     }
+
+    return navigate('/influencer/promos');
+    // switch (statusCampaign) {
+    //   case 'under_review':
+    //     navigate('/influencer/promos/new-promos');
+    //     break;
+    //   case "distributing":
+    //     navigate(`/influencer/promos/distributing`, {
+    //       state: { campaignId, addedAccountsId }
+    //     });
+    //     break;
+    //   case 'completed':
+    //     navigate(`/influencer/promos/completed`, {
+    //       state: { campaignId, addedAccountsId }
+    //     });
+    //     break;
+    //   default:
+    //     navigate('/influencer/promos');
+    // }
   };
 
   return (
     <tr className="promos-table-item">
       <td className='promos-table-item__status'>
-        <div className="promos-table-item__status-content" onClick={() => handleNavigate(promo.statusCampaign, promo.campaignId, promo.addedAccountsId)}>
+        <div className="promos-table-item__status-content" onClick={() => handleNavigate(promo.confirmation, promo.closedStatus, promo.campaignId, promo.addedAccountsId)}>
           <img
             src={getSocialMediaIcon(promo.socialMedia) || ''}
             alt={promo.socialMedia}
             className="promos-table-item__status-icon"
           />
-          {normalizeStatus(promo.statusCampaign)}
+          {normalizePromoStatus(promo.confirmation, promo.closedStatus)}
         </div>
       </td>
       <td className='promos-table-item__date-post'>
@@ -53,47 +69,3 @@ export const PromosTableItem = ({ promo }: Props) => {
     </tr>
   );
 };
-
-//div table structure
-// <>
-//   <div className="promos-table-item__status">
-//     <img
-//       src={getSocialMediaIcon(promo.socialMedia) || ''}
-//       alt={promo.socialMedia}
-//       className="promos-table-item__status-icon"
-//     />
-//     {normalizeStatus(promo.statusCampaign)}
-//   </div>
-//   <div className="promos-table-item__date-post">
-//     {dateFormatter(promo.dateRequest)}
-//   </div>
-//   <div className="promos-table-item__name">{promo.campaignName}</div>
-//   <div className="promos-table-item__reward">
-//     {promo.reward ? `${promo.reward}€` : '-'}
-//   </div>
-// </>
-
-
-//TODO: Move to utils?
-// function dateFormatter(dateString: string) {
-//   //DD.MM.YYYY
-//   const date = new Date(dateString);
-//   const day = String(date.getDate()).padStart(2, '0');
-//   const month = String(date.getMonth() + 1).padStart(2, '0');
-//   const year = date.getFullYear();
-
-//   return `${day}.${month}.${year}`;
-// }
-
-const normalizeStatus = (status: string) => {
-  switch (status) {
-    case 'pending':
-      return 'New Request';
-    case 'distributing':
-      return 'Distributing';
-    case 'completed':
-      return 'Completed';
-    default:
-      return status;
-  }
-}

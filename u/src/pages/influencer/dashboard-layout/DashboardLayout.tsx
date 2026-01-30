@@ -27,9 +27,11 @@ export const DashboardLayout = () => {
       <div className="dashboard__top-bar">
         <h3 className="dashboard__top-bar-title">Promos</h3>
         <div className="dashboard__top-bar-actions">
-          <PromosFiltersBar />
           {(isPromos || isDashboard) && (
-            <ViewModeTabs />
+            <>
+                <PromosFiltersBar />
+                <ViewModeTabs />
+            </>
           )}
         </div>
       </div>

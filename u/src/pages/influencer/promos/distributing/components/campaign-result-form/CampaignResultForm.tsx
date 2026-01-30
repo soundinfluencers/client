@@ -1,65 +1,77 @@
-import { useState } from "react";
-import { Form } from "../../../../../../components";
-import { ButtonMain } from "../../../../../../components/ui/buttons-fix/ButtonFix";
-import { FormFields } from "../../../../../../components/form/render-fields/FormFields";
+import { useEffect } from 'react';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from 'react-router-dom';
+import { Form } from '@/components';
+import { ButtonMain } from '@components/ui/buttons-fix/ButtonFix.tsx';
+import { FormFields } from '@components/form/render-fields/FormFields.tsx';
 
-import type { ICampaignResultFormData } from "./types/campaign-result-form.types";
-import { CAMPAIGN_RESULT_INPUTS_DATA } from "./data/campaign-result-form-inputs.data";
-import { getCampaignResultSchema } from "./validation/campaignResult.schema";
-import { createInfluencerPromoReview } from "@/api/influencer/promos/influencer-promos.api";
-import { campaignResultMapper } from "./utils/campaign-result-form.mapper";
-
+import { CAMPAIGN_RESULT_INPUTS_DATA } from './data/campaign-result-form-inputs.data';
+import { getCampaignResultSchema } from './validation/campaignResult.schema';
+import { createInfluencerPromoReview } from '@/api/influencer/promos/influencer-promos.api';
+import { campaignResultMapper } from './utils/campaign-result-form.mapper';
+import { handleApiError } from '@/api/error.api';
 import { toast } from "react-toastify";
-import type { SubmitResultsNavState } from "./utils/distributing-nav.helper";
-import "./_campaign-result-form.scss";
-import { handleApiError } from "@/api/error.api";
+import type { SubmitResultsNavState } from './utils/distributing-nav.helper';
+// import type { ICampaignResultFormData } from './types/campaign-result-form.types';
+
+import './_campaign-result-form.scss';
+import { useUser } from '@/store/get-user';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
   submitState: SubmitResultsNavState;
-  // meta: TSocialMedia;
-  // formPayload: TCampaignInfo;
-  // onFormClose: () => void;
 }
 
-// TODO: REVIEW AND FIX THE FUNCTIONALITY AS NEEDED
 export const CampaignResultForm = ({ submitState }: Props) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, setUser } = useUser();
+  const { accessToken} = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = async (data: ICampaignResultFormData) => {
-    console.log("Form submitted with data:", data);
-    setIsLoading(true);
-    try {
-      const dto = campaignResultMapper(submitState, data);
-      console.log("Data after mapping to api:", dto);
-      await createInfluencerPromoReview(dto);
-      console.log("Form data processed successfully:", dto);
-      // open success modal or show success toast message
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: createInfluencerPromoReview,
+
+    onSuccess: async (balance) => {
+      if (user) {
+        setUser({ ...user, accessToken: accessToken ?? null, balance });
+      }
       toast.success("Campaign result submitted successfully!");
-      // onFormClose();
-    } catch (error) {
+
+      await queryClient.invalidateQueries({ queryKey: ["distributingOrCompleted-promos"] });
+
+      await queryClient.refetchQueries({ queryKey: ["influencer-profile"], type: 'active' });
+
+      navigate(
+        { pathname: '/influencer/promos/distributing', hash: '' },
+        { replace: true, state: submitState.from ?? null },
+      );
+    },
+
+    onError: (error) => {
       handleApiError(error);
-    } finally {
-      // Any cleanup actions if necessary
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
   return (
     <div className="campaign-result">
       <h2 className="campaign-result__title">Campaign result</h2>
       <Form
-        onSubmit={handleSubmit}
-        className="campaign-result__form"
-        schema={getCampaignResultSchema(submitState.meta) as any}>
-        <FormFields
-          inputs={CAMPAIGN_RESULT_INPUTS_DATA[submitState.meta].inputs}
-        />
+        onSubmit={(data) => mutate(campaignResultMapper(submitState, data))}
+        className='campaign-result__form'
+        schema={getCampaignResultSchema(submitState.meta) as any}
+      >
+        <FormFields inputs={CAMPAIGN_RESULT_INPUTS_DATA[submitState.meta].inputs} />
 
         <div className="campaign-result__form-submit">
           <ButtonMain
             type="submit"
-            label={isLoading ? "Submitting..." : "Submit"}
-            isDisabled={isLoading}
+            label={isPending ? 'Submitting...' : 'Submit'}
+            isDisabled={isPending}
           />
         </div>
       </Form>

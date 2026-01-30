@@ -8,6 +8,7 @@ import { StarRatingField } from '../../ui/star-rating/StarRatingField';
 // import type { TCampaignResultInput } from '../../../types/influencer/form/campaign-result/campaign-result.types';
 // import type { TInvoiceInputConfig } from '../../../pages/influencer/create-invoice/components/invoice-form-content/types/invoice-form-inputs.types';
 import { Fragment } from 'react/jsx-runtime';
+import { InfluencerDateInput } from '../../ui/influencer-date-input/InfluencerDateInput';
 
 interface Props {
   inputs: any;
@@ -74,6 +75,15 @@ export const FormFields = ({ inputs }: Props) => {
                     onChange={field.onChange}
                   />
                 )}
+              />
+            );
+          case 'date':
+            return (
+              <InfluencerDateInput
+                key={input.name}
+                name={input.name}
+                label={input.label}
+                placeholder={input.placeholder}
               />
             );
           default:

@@ -17,6 +17,7 @@ export const useDetailedPromos = ({
   addedAccountsId,
   limit = 12,
 }: UseDetailedPromosParams) => {
+  console.log('call getInfluencerDetailsPromoByStatus with', { status, campaignId, addedAccountsId, limit });
   const isSingle = !!campaignId && !!addedAccountsId;
 
   return useInfiniteQuery({
@@ -31,6 +32,7 @@ export const useDetailedPromos = ({
 
     queryFn: ({ pageParam = 1 }) => {
       if (isSingle) {
+        console.log('single:', status)
         return getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId(
           status,
           campaignId!,
@@ -46,7 +48,12 @@ export const useDetailedPromos = ({
     },
 
     select: (data) => {
-      const promos = isSingle ? (data.pages?.[0] ?? []) : data.pages.flat();
+      const rawPromos = isSingle ? (data.pages?.[0] ?? []) : data.pages.flat();
+      // TODO: remove when backend filters closed promos correctly
+      const promos = status === "ongoing" ?
+        rawPromos.filter((promo) => promo.closedStatus !== "close") : rawPromos;
+
+        console.log(promos);
       return { promos };
     },
 

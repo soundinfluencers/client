@@ -5,6 +5,7 @@ import { AccountDetailsFormContent } from './components/AccountDetailsFormConten
 import { getDefaultFormValues } from './utils/getDefaultFormValues';
 
 import './_account-details-form.scss';
+import { accountDetailsSchema } from './validation/account-details-schema';
 
 export const AccountDetailsForm: React.FC = () => {
   const { profile } = useInfluenserProfileStore();
@@ -13,6 +14,7 @@ export const AccountDetailsForm: React.FC = () => {
     <Form
       className="account-details-form"
       defaultValues={getDefaultFormValues(profile)}
+      schema={accountDetailsSchema as any}
     >
       <AccountDetailsFormContent />
     </Form>
