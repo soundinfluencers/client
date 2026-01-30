@@ -1,4 +1,4 @@
-import { Form, SubmtiButton } from "@/components";
+import { Form, SubmitButton } from "@/components";
 import { EmailForm } from "@/pages/client/components/client-forms/account-settings";
 import { useAccountChange } from "@/store/client/account-settings";
 
@@ -13,7 +13,7 @@ export const SendEmail = () => {
       <Form
         onSubmit={setConfirm}
         submitButton={
-          <SubmtiButton className="add-style-profile" data="Send" />
+          <SubmitButton className="add-style-profile" data="Send" />
         }>
         <EmailForm />
       </Form>

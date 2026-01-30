@@ -18,7 +18,7 @@ export type TableRowProps = {
   isMusic?: boolean;
   items: any[];
   columns: string[];
-
+  group: TableGroup;
   dropdownsOpen: DropdownState;
   setDropdownsOpen: React.Dispatch<React.SetStateAction<DropdownState>>;
 };

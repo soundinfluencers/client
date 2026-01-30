@@ -8,8 +8,8 @@ import type {
   FilterItem,
 } from "@/types/client/creator-campaign/filters.types";
 import { FilterNode } from "./filter-node/filter-node";
-import { useFilter } from "@/store/client/createCampaign";
-import { useCreateCampaignPlatform } from "@/store/client/createCampaign";
+import { useFilter } from "@/store/client/create-campaign";
+import { useCreateCampaignPlatform } from "@/store/client/create-campaign";
 import { findPlatformFilter } from "@/utils/functions/findPlattformFilter";
 
 interface Props {

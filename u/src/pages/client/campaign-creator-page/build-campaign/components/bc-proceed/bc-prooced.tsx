@@ -1,6 +1,6 @@
 import React from "react";
 import { ButtonMain } from "@/components";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 import { useNavigate } from "react-router-dom";
 import "../../scss-module/_bc_prooced.scss";
 

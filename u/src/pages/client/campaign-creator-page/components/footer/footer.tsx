@@ -1,4 +1,4 @@
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import plus from "@/assets/icons/plus.svg";

@@ -1,7 +1,7 @@
 import React from "react";
 import chevronDown from "@/assets/icons/chevron-down.svg";
 import "../../../scss-module/_bc_filter.scss";
-import { useBuildCampaignFilters } from "@/store/client/createCampaign/useBuildCampaignFilters";
+import { useBuildCampaignFilters } from "@/store/client/create-campaign/useBuildCampaignFilters";
 
 interface Props {
   children: React.ReactNode;

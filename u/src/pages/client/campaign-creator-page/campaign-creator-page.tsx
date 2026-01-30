@@ -4,7 +4,7 @@ import "./_CampaignCreatorPage.scss";
 import {
   useCreateCampaign,
   useCreateCampaignPlatform,
-} from "@/store/client/createCampaign";
+} from "@/store/client/create-campaign";
 
 import { Breadcrumbs, Container, Loader, Proceed } from "@/components";
 import { ScrollPlatforms } from "./components/scroll/scroll-platftorms/scroll-plattforms";

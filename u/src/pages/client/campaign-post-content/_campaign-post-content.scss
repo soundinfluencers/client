@@ -1,4 +1,12 @@
 .campaign-post-content {
+  margin-bottom: 42px;
+
+  @media screen and (max-width: 900px) {
+    margin-bottom: 16px;
+  }
+  @media screen and (max-width: 600px) {
+    margin-bottom: 24px;
+  }
   .navmenu {
     margin-top: 24px;
   }

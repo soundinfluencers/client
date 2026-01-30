@@ -1,7 +1,7 @@
 import React from "react";
 import "../../../scss-campaign-table/table-base.scss";
 
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 
 import type { DropdownState, TableGroup } from "./types/table-types";
@@ -30,11 +30,10 @@ const COL_WIDTH_LOCAL: Partial<Record<string, number>> = {
 export function TableStrategy({
   changeView,
   items,
-  isMusic,
+
   networks,
   group,
 }: {
-  isMusic?: boolean;
   changeView: boolean;
   items: any[];
   networks: any[];
@@ -43,8 +42,8 @@ export function TableStrategy({
   const { totalPrice } = useCampaignStore();
 
   const columns = React.useMemo(
-    () => getColumns(changeView, isMusic),
-    [changeView, isMusic],
+    () => getColumns(changeView, group),
+    [changeView, group],
   );
 
   const [dropdownsOpen, setDropdownsOpen] = React.useState<DropdownState>({});
@@ -55,7 +54,7 @@ export function TableStrategy({
     () => networks.reduce((sum, n) => sum + Number(n.followers ?? 0), 0),
     [networks],
   );
-
+  console.log(items);
   return (
     <div className="tableBase-wrap">
       <table className="tableBase ">
@@ -86,7 +85,7 @@ export function TableStrategy({
               indexCard={index}
               columns={columns}
               items={items}
-              isMusic={isMusic}
+              group={group}
               changeView={changeView}
               dropdownsOpen={dropdownsOpen}
               setDropdownsOpen={setDropdownsOpen}

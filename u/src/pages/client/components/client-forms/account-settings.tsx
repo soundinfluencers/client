@@ -8,27 +8,20 @@ export function AccountSettingsForm({ data }: { data: any }) {
   return (
     <div className="inputs">
       <FormInput
-        required
         label="First name"
         name="firstName"
         placeholder={data.firstName}
       />
 
       <FormInput
-        required
         label="Company name"
         name="company"
         placeholder={data.companyName}
       />
 
-      <FormInput
-        required
-        label="Phone number"
-        name="phone"
-        placeholder={data.phone}
-      />
+      <FormInput label="Phone number" name="phone" placeholder={data.phone} />
 
-      <FormInput required label="Email" name="email" placeholder={data.email} />
+      <FormInput label="Email" name="email" placeholder={data.email} />
 
       <div className="edit-input">
         <FormInput
@@ -49,37 +42,19 @@ export function InvoiceSettingsForm({ data }: { data: any }) {
   return (
     <div className="inputs">
       <FormInput
-        required
         label="First name"
         name="firstName"
         placeholder={data.firstName}
       />
       <FormInput
-        required
         label="Last name"
         name="lastName"
         placeholder={data.lastName}
       />
+      <FormInput label="Address" name="address" placeholder={data.address} />
+      <FormInput label="Company" name="company" placeholder={data.company} />
+      <FormInput label="Country" name="country" placeholder={data.country} />
       <FormInput
-        required
-        label="Address"
-        name="address"
-        placeholder={data.address}
-      />
-      <FormInput
-        required
-        label="Company"
-        name="company"
-        placeholder={data.company}
-      />
-      <FormInput
-        required
-        label="Country"
-        name="country"
-        placeholder={data.country}
-      />
-      <FormInput
-        required
         label="VAT number (only if VAT registered)"
         name="vat"
         placeholder={data.VAT}

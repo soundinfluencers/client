@@ -1,5 +1,5 @@
 export type DropdownKey = "date" | "content" | "description";
-
+export type TableView = "main" | "music" | "press";
 export type RowSelections = {
   date: string;
   dateValue?: string;

@@ -1,6 +1,6 @@
 import React from "react";
 import cross from "@/assets/icons/x.svg";
-import { useFilter } from "@/store/client/createCampaign";
+import { useFilter } from "@/store/client/create-campaign";
 import "../../scss-module/_bc_filter.scss";
 
 import { FilterSelect } from "./filter-select";

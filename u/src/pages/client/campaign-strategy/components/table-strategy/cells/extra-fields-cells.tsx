@@ -1,7 +1,9 @@
 import React from "react";
+import type { TableGroup } from "../types/table-types";
 
 type Props = {
   changeView: boolean;
+  group: TableGroup;
   isMusic?: boolean;
   platformItems: any[];
   selectedContent: number;
@@ -9,15 +11,27 @@ type Props = {
 
 export const ExtraFieldsCells: React.FC<Props> = ({
   changeView,
-  isMusic,
+  group,
   platformItems,
   selectedContent,
 }) => {
   if (changeView) return null;
 
-  const keys = isMusic
-    ? (["additionalBrief"] as const)
-    : (["taggedUser", "taggedLink", "additionalBrief"] as const);
+  const keys = (() => {
+    switch (group) {
+      case "music":
+        return ["additionalBrief"] as const;
+
+      case "main":
+        return ["taggedUser", "taggedLink", "additionalBrief"] as const;
+
+      case "press":
+        return ["additionalBrief"] as const;
+
+      default:
+        return [] as const;
+    }
+  })();
 
   return (
     <>

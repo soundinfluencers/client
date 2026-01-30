@@ -6,9 +6,9 @@ import chevronDown from "@/assets/icons/chevron-down.svg";
 import type { SocialMediaType } from "@/types/utils/constants.types";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { GenresCountries } from "../../../../ui/genre-countries/genre-countries";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 import { getPriceByCurrency } from "./utils/use-price-currency";
-import { useBuildCampaignFilters } from "@/store/client/createCampaign/useBuildCampaignFilters";
+import { useBuildCampaignFilters } from "@/store/client/create-campaign/useBuildCampaignFilters";
 interface Props {
   data: IPromoCard;
   isInclude: boolean;

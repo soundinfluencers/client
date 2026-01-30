@@ -8,11 +8,11 @@ import { Filters } from "./components/bc-filters/bc-filters";
 import { CardsContainer } from "./components/bc-cards/cards-content";
 
 import { SwitchView } from "@/pages/client/components/switch-view/switch-view";
-import { useCreateCampaign, useFilter } from "@/store/client/createCampaign";
+import { useCreateCampaign, useFilter } from "@/store/client/create-campaign";
 import x from "@/assets/icons/x.svg";
 import { BcProceed } from "./components/bc-proceed/bc-prooced";
 
-import { useBuildCampaignFilters } from "@/store/client/createCampaign/useBuildCampaignFilters";
+import { useBuildCampaignFilters } from "@/store/client/create-campaign/useBuildCampaignFilters";
 import { NoData } from "@/components/ui/no-array/no-data";
 import { usePromoAccountsOrSearch } from "../hooks/use-promo-accounts-or-search";
 

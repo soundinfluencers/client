@@ -7,19 +7,20 @@ interface Props {
   className?: string;
 }
 
-export const SubmtiButton: React.FC<Props> = ({
+export const SubmitButton: React.FC<Props> = ({
   type = "submit",
   data,
   className,
 }) => {
   const { control } = useFormContext();
-  const { isValid, isSubmitting } = useFormState({ control });
+
+  const { isSubmitting, isValid } = useFormState({ control });
 
   return (
     <button
       type={type}
-      disabled={!isValid || isSubmitting}
-      className={`${className ?? ""} ${isValid ? "ready" : "disabled"}`}>
+      className={`${className ?? ""} ${isValid ? "ready" : "disabled"}`}
+      disabled={!isValid || isSubmitting}>
       {isSubmitting ? "Saving..." : data}
     </button>
   );

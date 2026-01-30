@@ -8,7 +8,7 @@ import num from "@/assets/payments-icons/hugeicons_text-number-sign.svg";
 import qr from "@/assets/payments-icons/mage_bar-code-scan.svg";
 import type { CurrencyType } from "@/types/client/form-clients/payment-campaign-inputs";
 import "./styles/_base-confirmations.scss";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 
 interface Props {
   currency?: CurrencyType[];

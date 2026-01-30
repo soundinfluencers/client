@@ -61,7 +61,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
             </div>
 
             <div className="home-header__balance-content">
-              <p>{balance}</p>
+              <p>{balance}€</p>
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
           </div>
 
           <div className="home-header__balance-content">
-            <p>{balance}</p>
+            <p>{balance}€</p>
           </div>
         </div>
       </div>
