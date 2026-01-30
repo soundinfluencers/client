@@ -5,8 +5,8 @@ import {
   useEffect,
   useState,
 } from "react";
-import {$auth} from "../api/api.ts";
 import { logoutApi } from "../api/auth/auth.api.ts";
+import {refreshAccessToken} from "@/api/refresh.manager.ts";
 
 interface AuthContextType {
     accessToken: string | null;
@@ -33,6 +33,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         tokenStorage.set(token);
     };
 
+    useEffect(() => {
+        console.log(accessToken, 'accessToken')
+    }, [accessToken]);
+
     const logout = async () => {
         try {
             await logoutApi();
@@ -47,8 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const refresh = async () => {
             try {
-                const res = await $auth.post("/auth/refresh");
-                setAccessToken(res.data.data.accessToken);
+                await refreshAccessToken(setAccessToken);
             } catch {
                 setAccessToken(null);
             } finally {

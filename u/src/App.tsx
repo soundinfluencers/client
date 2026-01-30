@@ -31,9 +31,10 @@ import { HomePage } from "./pages/client/client-dashboard/home-page";
 function App() {
   const { accessToken, setAccessToken, logout } = useAuth();
 
-  useEffect(() => {
-    setupInterceptors(setAccessToken, logout);
-  }, []);
+    useEffect(() => {
+        const cleanup = setupInterceptors(setAccessToken, logout);
+        return cleanup;
+    }, [setAccessToken, logout]);
 
   return (
     <div>

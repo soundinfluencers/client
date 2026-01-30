@@ -4,7 +4,8 @@ import type {
   CampaignForList,
   CampaignStatusType,
 } from "@/types/client/dashboard/campaign.types";
-import { deleteDraft } from "@/api/client/campaign/draft.api";
+
+import { useDeleteDraftMutation } from "@/pages/client/react-query/useDeleteDraft";
 
 interface GridListViewProps {
   list: CampaignForList[];
@@ -12,13 +13,11 @@ interface GridListViewProps {
 }
 
 export const GridListView: React.FC<GridListViewProps> = ({ list, onOpen }) => {
-  const handleDeleteDraft = async (e: React.MouseEvent, draftId: string) => {
+  const { mutate: deleteDraftMutate } = useDeleteDraftMutation();
+
+  const handleDeleteDraft = (e: React.MouseEvent, draftId: string) => {
     e.stopPropagation();
-    try {
-      await deleteDraft(draftId);
-    } catch (err) {
-      console.error(err);
-    }
+    deleteDraftMutate(draftId);
   };
   return (
     <div className="home-campaigns-grid">
