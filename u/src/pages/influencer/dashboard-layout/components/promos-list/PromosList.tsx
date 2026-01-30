@@ -1,8 +1,8 @@
 import { useDashboardLayoutStore } from "../../store/useDashboardLayoutStore";
 import { PromosGrid } from "./components/promos-grid/PromosGrid";
 import { PromosTable } from "./components/promos-table/PromosTable";
-import { ButtonMain } from "../../../../../components/ui/buttons-fix/ButtonFix";
-import { getInfluencerPromos } from "../../../../../api/influencer/promos/influencer-promos.api";
+import { ButtonMain } from "@components/ui/buttons-fix/ButtonFix.tsx";
+import { getInfluencerPromos } from "@/api/influencer/promos/influencer-promos.api.ts";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader } from "@/components";
 
@@ -35,6 +35,9 @@ export const PromosList = () => {
 
   const activePromos = data?.pages.flat() ?? [];
 
+  // useMemo to filter out declined promos
+  const filteredPromos = activePromos.filter(promo => promo.confirmation !== 'decline');
+
   if (isLoading) {
     return <Loader />;
   }
@@ -44,7 +47,7 @@ export const PromosList = () => {
     return <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos.</p>;
   }
 
-  if (activePromos.length === 0) {
+  if (filteredPromos.length === 0) {
     return (
       <p style={{ fontSize: 48, textAlign: "center", paddingTop: 40 }}>
         No promos found.
@@ -52,14 +55,16 @@ export const PromosList = () => {
     );
   }
 
+  console.log('Filtered promos', filteredPromos);
+
   return (
     <div className="promos-list">
       <div className="promos-list__content">
         {viewMode === "grid" ? (
-          <PromosGrid promos={activePromos} />
+          <PromosGrid promos={filteredPromos} />
         ) : (
           <div className="promos-list__scroll">
-            <PromosTable promos={activePromos} />
+            <PromosTable promos={filteredPromos} />
           </div>
         )}
 

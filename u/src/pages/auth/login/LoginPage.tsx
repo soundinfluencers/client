@@ -2,12 +2,12 @@ import { useState, type FC } from "react";
 import { type NavigateFunction, useNavigate } from "react-router-dom";
 import { TextInput } from "@/components/ui/inputs/text-input/TextInput.tsx";
 import { useLoginStore } from "../../../store/features/loginSlice.ts";
-import { ButtonMain } from "@/components/ui/buttons/button/Button.tsx";
-import "./_login-page.scss";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { loginApi } from "@/api/auth/auth.api.ts";
 import { useUser } from "@/store/get-user/index.ts";
 import { handleApiError } from "@/api/error.api.ts";
+import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix.tsx";
+import "./_login-page.scss";
 
 export const LoginPage: FC = () => {
   const navigate: NavigateFunction = useNavigate();
@@ -70,7 +70,7 @@ export const LoginPage: FC = () => {
         </div>
         <div className="login-page__controls">
           <ButtonMain
-            text={isLoading ? "Logging in..." : "Log in now"}
+            label={isLoading ? "Logging in..." : "Log in now"}
             onClick={handleLogin}
             isDisabled={email.length === 0 || password.length === 0 || isLoading}
           />

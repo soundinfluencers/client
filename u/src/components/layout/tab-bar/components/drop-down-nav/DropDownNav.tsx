@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { PLACEHOLDER_LOGO_URL } from '@/pages/influencer/shared/utils/socialAccount.mapper';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useClickOutside } from '@/hooks/global/useClickOutside';
 import { useUser } from '@/store/get-user';
@@ -14,10 +14,10 @@ interface DropDownNavProps {
 }
 
 export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavProps) => {
-  const { logout, accessToken } = useAuth();
+  const { logout } = useAuth();
   const { width } = useWindowSize();
   const { user } = useUser();
-  
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(dropdownRef, () => {
@@ -30,6 +30,9 @@ export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavPr
       : "/influencer/account-setting";
 
   const isDesktop = width > 900;
+
+  // console.log('user in drop down menu', user);
+  // console.log('account settings link', AccountSettings);
 
   return (
     <div className="user-menu">
@@ -48,13 +51,6 @@ export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavPr
           />
         </div>
       )}
-
-      {/* {isDropdownOpen && (
-        <div
-          className="user-menu__dropdown-overlay"
-          onClick={() => setIsDropdownOpen(false)}
-        />
-      )} */}
 
       <div
         ref={dropdownRef}

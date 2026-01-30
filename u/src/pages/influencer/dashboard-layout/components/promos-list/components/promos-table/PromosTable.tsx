@@ -2,10 +2,9 @@ import { PromosTableItem } from './promos-table-item/PromosTableItem';
 import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
 import './_promos-table.scss';
 
-
 interface Props {
   promos: IPromo[];
-};
+}
 
 export const PromosTable = ({ promos }: Props) => {
   return (
@@ -27,23 +26,3 @@ export const PromosTable = ({ promos }: Props) => {
     </table>
   );
 };
-
-//div structure
-// <div className="promos-table">
-//   <div className="promos-table__header">
-//     <div className="promos-table__cell">Status</div>
-//     <div className="promos-table__cell">Date post</div>
-//     <div className="promos-table__cell">Name</div>
-//     <div className="promos-table__cell">Reward</div>
-//   </div>
-
-//   {promos.map((promo) => (
-//     <div
-//       key={promo.campaignId}
-//       className="promos-table__row"
-//       onClick={() => handleNavigate(promo.statusCampaign)}
-//     >
-//       <PromosTableItem promo={promo} />
-//     </div>
-//   ))}
-// </div>

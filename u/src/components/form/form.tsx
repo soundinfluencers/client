@@ -59,7 +59,7 @@ export const Form: React.FC<FormSection> = ({
     if (onSubmit) {
       await onSubmit(formData);
     }
-    if (onSubmit) await onSubmit(formData);
+    // if (onSubmit) await onSubmit(formData);
   };
 
   return (

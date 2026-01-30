@@ -15,7 +15,7 @@ $api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     // console.log(error);
-    // handleApiError(error);
+    handleApiError(error);
     return Promise.reject(error);
   },
 );
