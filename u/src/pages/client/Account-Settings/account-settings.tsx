@@ -7,7 +7,7 @@ import { Breadcrumbs, Container, Loader } from "@/components";
 import "./_account-settings.scss";
 
 import { useProfileDetailsQuery } from "./hooks/use-profile-details-query";
-import { AccountDetailsSection, EditPasswordFlow } from "./sections";
+import { EditPasswordFlow, AccountDetailsSection } from "./sections";
 
 export const AccountSetting: React.FC = () => {
   const { isEdit, resetAll } = useAccountChange();

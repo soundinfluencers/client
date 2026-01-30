@@ -1,4 +1,12 @@
 .bespoke-campaign {
+  margin-bottom: 42px;
+
+  @media screen and (max-width: 900px) {
+    margin-bottom: 16px;
+  }
+  @media screen and (max-width: 600px) {
+    margin-bottom: 24px;
+  }
   &__header {
     display: flex;
     align-items: center;
@@ -36,5 +44,8 @@
   }
   &__tab-content {
     margin-top: 32px;
+  }
+  .bespoke-btn {
+    margin-top: 484px;
   }
 }

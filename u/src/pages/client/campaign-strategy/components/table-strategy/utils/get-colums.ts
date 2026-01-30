@@ -1,6 +1,7 @@
+import type { TableView } from "../table-strategy";
 import { keys } from "../table-strategy.data";
 
-export const getColumns = (changeView: boolean, isSocial?: boolean) => {
+export const getColumns = (changeView: boolean, TableView?: TableView) => {
   if (changeView) {
     return [
       "network",
@@ -11,5 +12,5 @@ export const getColumns = (changeView: boolean, isSocial?: boolean) => {
       "description",
     ];
   }
-  return keys(isSocial || false);
+  return keys(TableView || "main");
 };

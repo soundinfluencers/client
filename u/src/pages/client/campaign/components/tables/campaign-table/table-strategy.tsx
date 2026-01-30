@@ -3,7 +3,7 @@ import "../../../../scss-campaign-table/table-base.scss";
 
 import chevron from "@/assets/icons/chevron-up.svg";
 
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 import {
   columnsStrategy,
   getColumnsStrategy,

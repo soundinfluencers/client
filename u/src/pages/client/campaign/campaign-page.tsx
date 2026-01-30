@@ -65,14 +65,16 @@ export const CampaignPage = () => {
             </li>
           </ul>
         ) : (
-          <div className="share-link-row">
-            <div
-              onClick={() => copyShareLink(campaign.campaignId)}
-              className="share-link">
-              <img src={link} alt="" />
-              {isPending ? "Copying..." : "Copy share link"}
+          status !== "proposal" && (
+            <div className="share-link-row">
+              <div
+                onClick={() => copyShareLink(campaign.campaignId)}
+                className="share-link">
+                <img src={link} alt="" />
+                {isPending ? "Copying..." : "Copy share link"}
+              </div>
             </div>
-          </div>
+          )
         )}
       </div>
 

@@ -6,7 +6,7 @@ import video from "@/assets/bar-campaign-strategy/video.svg";
 import usercheck from "@/assets/bar-campaign-strategy/user-check.svg";
 import "./proposals-strategy.scss";
 import { formatCampaignDate } from "@/utils/functions/formatDate";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 
 export const Bar = () => {

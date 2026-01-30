@@ -2,7 +2,7 @@ import React from "react";
 import {
   useCreateCampaign,
   useCampaignStore,
-} from "@/store/client/createCampaign";
+} from "@/store/client/create-campaign";
 import "../../scss-module/_cards_content.scss";
 
 import { Card } from "./bc-card/card";

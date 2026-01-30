@@ -1,5 +1,5 @@
 import React from "react";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 import { ReqData } from "../table-strategy.data";
 import { getPlatformItems } from "../utils/get-platform-items";
 import type { TableRowProps } from "../types/table-types";
@@ -18,7 +18,7 @@ export const TableCard: React.FC<TableRowProps> = ({
   setDropdownsOpen,
   dropdownsOpen,
   changeView,
-  isMusic,
+  group,
   items,
   columns,
 }) => {
@@ -140,7 +140,7 @@ export const TableCard: React.FC<TableRowProps> = ({
 
       <ExtraFieldsCells
         changeView={changeView}
-        isMusic={isMusic}
+        group={group}
         platformItems={platformItems}
         selectedContent={selectedContent}
       />

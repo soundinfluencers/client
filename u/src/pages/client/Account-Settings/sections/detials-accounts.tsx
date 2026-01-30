@@ -1,13 +1,15 @@
 import React from "react";
-import { Edit, Form, SubmtiButton } from "@/components";
-import { FillData } from "..";
+import { Edit, Form, SubmitButton } from "@/components";
+
 import { AccountSettingsForm } from "@/pages/client/components/client-forms/account-settings";
 import { userFields } from "@/constants/client/account-settings-data";
-import { useUpdateProfileMutation } from "../hooks/use-update-profile-mutation";
+
 import {
   accountSettingsSchema,
   type AccountSettingsValues,
 } from "../../components/client-forms/schemas/schema-account-settings";
+import { useUpdateProfileMutation } from "../hooks/use-update-profile-mutation";
+import { FillData } from "../fill-data/fill-data";
 
 interface Props {
   profile: any;
@@ -33,6 +35,7 @@ export const AccountDetailsSection: React.FC<Props> = ({
   );
 
   const onSubmit = async (formData: any) => {
+    console.log(formData, "wad");
     const payload = {
       firstName: formData.firstName,
       company: formData.company,
@@ -40,8 +43,8 @@ export const AccountDetailsSection: React.FC<Props> = ({
       email: formData.email,
     };
 
-    // await mutateAsync(payload);
-    // toggleEdit();
+    await mutateAsync(payload);
+    toggleEdit();
   };
   return (
     <div className="Account-settings__details">
@@ -52,10 +55,10 @@ export const AccountDetailsSection: React.FC<Props> = ({
       {isEditing ? (
         <Form<AccountSettingsValues>
           schema={accountSettingsSchema}
-          onSubmit={onSubmit}
           defaultValues={defaults}
+          onSubmit={onSubmit}
           submitButton={
-            <SubmtiButton className="add-style-profile" data="Save" />
+            <SubmitButton className="add-style-profile" data="Save" />
           }>
           <AccountSettingsForm data={profile} />
         </Form>

@@ -11,7 +11,7 @@ import type {
   IPromoCard,
 } from "@/types/client/creator-campaign/creator-campaign.types";
 import { getPriceByCurrency } from "../../campaign-creator-page/build-campaign/components/bc-cards/bc-card/utils/use-price-currency";
-import { useBuildCampaignFilters } from "@/store/client/createCampaign/useBuildCampaignFilters";
+import { useBuildCampaignFilters } from "@/store/client/create-campaign/useBuildCampaignFilters";
 import { useNavigate } from "react-router-dom";
 interface Props {
   offer: IApiOffer | null;

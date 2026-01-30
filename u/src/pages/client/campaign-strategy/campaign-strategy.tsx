@@ -13,7 +13,7 @@ import { ViewChange } from "@/pages/client/components/table-components/view-chan
 import { Bar } from "@/pages/client/components/table-components/bar";
 import { ViewAudience } from "@/pages/client/components/table-components/view-audience";
 
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 
 import { TableStrategy } from "./components/table-strategy/strategy-table";
 
@@ -102,7 +102,6 @@ export const CampaignStrategy: React.FC<Props> = () => {
           {music.length >= 1 && (
             <TableStrategy
               group="music"
-              isMusic={true}
               networks={musicPromos}
               changeView={changeView}
               items={music}

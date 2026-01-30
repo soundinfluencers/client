@@ -4,7 +4,7 @@ import { Form } from "@/components";
 import { FillData } from "../fill-data/fill-data";
 import { invoiceFields } from "@/constants/client/account-settings-data";
 import { InvoiceSettingsForm } from "@/pages/client/components/client-forms/account-settings";
-import { SubmtiButton } from "@/components/ui/submit-button/submit-button";
+import { SubmitButton } from "@/components/ui/submit-button/submit-button";
 
 interface Props {
   invoiceData: any;
@@ -24,7 +24,7 @@ export const InvoiceDetailsSection: React.FC<Props> = ({
         <Edit active={isEditing} onChange={toggleEdit} />
       </div>
       {isEditing ? (
-        <Form submitButton={<SubmtiButton data="Save" />}>
+        <Form submitButton={<SubmitButton data="Save" />}>
           <InvoiceSettingsForm data={invoiceData} />
         </Form>
       ) : (

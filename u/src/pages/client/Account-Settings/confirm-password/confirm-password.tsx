@@ -1,4 +1,4 @@
-import { Form, SubmtiButton } from "@/components/";
+import { Form, SubmitButton } from "@/components/";
 import { ConfirmForm } from "../../components/client-forms/account-settings";
 
 export const Confirm = () => {
@@ -9,7 +9,7 @@ export const Confirm = () => {
       </div>
       <Form
         submitButton={
-          <SubmtiButton className="add-style-profile" data={"Save"} />
+          <SubmitButton className="add-style-profile" data={"Save"} />
         }>
         {" "}
         <ConfirmForm />

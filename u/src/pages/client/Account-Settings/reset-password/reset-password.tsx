@@ -1,4 +1,4 @@
-import { Form, SubmtiButton } from "@/components";
+import { Form, SubmitButton } from "@/components";
 import { ReserPasswordForm } from "@/pages/client/components/client-forms/account-settings";
 import { useAccountChange } from "@/store/client/account-settings";
 
@@ -12,7 +12,7 @@ export const ReserPassword = () => {
       <Form
         onSubmit={onChangeEmail}
         submitButton={
-          <SubmtiButton className="add-style-profile" data="Save" />
+          <SubmitButton className="add-style-profile" data="Save" />
         }>
         <ReserPasswordForm />
       </Form>

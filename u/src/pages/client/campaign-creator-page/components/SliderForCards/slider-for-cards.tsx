@@ -8,7 +8,7 @@ import "./_slider.scss";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 import type { IApiOffer } from "@/types/client/creator-campaign/creator-campaign.types";
 
 interface Props {

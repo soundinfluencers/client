@@ -1,4 +1,4 @@
-import type { DropdownKey } from "./table-strategy";
+import type { DropdownKey, TableView } from "./table-strategy";
 
 export const proposalsData = [
   {
@@ -15,10 +15,10 @@ export const proposalsData = [
   },
 ];
 
-export const keys = (isSocial: boolean) => {
-  return isSocial
-    ? ["network", "followers", "date", "content", "description", "brief"]
-    : [
+export const keys = (view: TableView) => {
+  switch (view) {
+    case "main":
+      return [
         "network",
         "followers",
         "date",
@@ -28,6 +28,30 @@ export const keys = (isSocial: boolean) => {
         "link",
         "brief",
       ];
+
+    case "music":
+      return [
+        "network",
+        "followers",
+        "date",
+        "content",
+        "description",
+        "brief",
+      ];
+
+    case "press":
+      return [
+        "network",
+        "followers",
+        "date",
+        "content",
+        "description",
+        "brief",
+      ];
+
+    default:
+      return [];
+  }
 };
 
 export const keyMap: Record<string, string> = {

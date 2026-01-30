@@ -32,7 +32,7 @@ export const Form = <T extends FieldValues>({
   const methods = useForm<T>({
     defaultValues,
     resolver: schema ? (zodResolver(schema as any) as any) : undefined,
-    mode: "onBlur",
+    mode: "onChange",
     reValidateMode: "onChange",
     criteriaMode: "all",
     shouldUnregister: false,

@@ -3,7 +3,7 @@ import "./_card.scss";
 
 import type { IApiOffer } from "@/types/client/creator-campaign/creator-campaign.types";
 import { ButtonMain } from "@/components/ui/buttons/button/Button";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 interface Props {
   dataCard: IApiOffer;
 }
