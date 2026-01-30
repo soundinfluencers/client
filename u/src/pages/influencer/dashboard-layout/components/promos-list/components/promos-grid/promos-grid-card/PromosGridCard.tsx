@@ -1,11 +1,14 @@
-import { getSocialMediaIcon } from '../../../../../../../../constants/social-medias';
+import { getSocialMediaIcon } from '@/constants/social-medias.ts';
 import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
+import {
+  normalizePromoStatus
+} from "@/pages/influencer/dashboard-layout/components/promos-list/utils/normalizePromoStatus.ts";
 
 import './_promos-grid-card.scss';
 
 interface Props {
   promo: IPromo;
-};
+}
 
 export const PromosGridCard = ({ promo }: Props) => {
   return (
@@ -17,7 +20,7 @@ export const PromosGridCard = ({ promo }: Props) => {
             alt={promo.socialMedia}
             className='promos-grid-card__header-icon'
           />
-          <p className='promos-grid-card__header-status-text'>{normalizeStatus(promo.statusCampaign)}</p>
+          <p className='promos-grid-card__header-status-text'>{normalizePromoStatus(promo.confirmation, promo.closedStatus)}</p>
           <p className='promos-grid-card__header-status-date'>{promo.createdAt}</p>
         </div>
         {promo.reward && <p className='promos-grid-card__header-status-reward'>{promo.reward}€</p>}
@@ -26,27 +29,3 @@ export const PromosGridCard = ({ promo }: Props) => {
     </article>
   );
 };
-
-//TODO: Move to utils?
-// function dateFormatter(dateString: string) {
-//   //DD.MM.YYYY
-//   const date = new Date(dateString);
-//   const day = String(date.getDate()).padStart(2, '0');
-//   const month = String(date.getMonth() + 1).padStart(2, '0');
-//   const year = date.getFullYear();
-
-//   return `${day}.${month}.${year}`;
-// }
-
-const normalizeStatus = (status: string) => {
-  switch (status) {
-    case 'pending':
-      return 'New Request';
-    case 'distributing':
-      return 'Distributing';
-    case 'completed':
-      return 'Completed';
-    default:
-      return status;
-  }
-}

@@ -1,7 +1,5 @@
 import './_new-promos.scss';
 import { PromosDetailsList } from '../components/promos-details-list/PromosDetailsList';
-
-// import { NEW_PROMOS_DATA, type IInfluencerPromo } from '../../../../types/influencer/promos/promos.types';
 import { useEffect, useState } from 'react';
 import { Modal } from '../../../../components/ui/modal-fix/Modal';
 import { Breadcrumbs, Container, Loader } from '../../../../components';

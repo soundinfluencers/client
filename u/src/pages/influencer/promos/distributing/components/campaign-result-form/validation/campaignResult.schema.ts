@@ -52,12 +52,12 @@ const toNumberOrUndef = (v: unknown) => {
   return Number.isFinite(n) ? n : NaN;
 };
 
-// optional int >= 0 (если хочешь >0 — замени gte(0) на positive())
+// optional int >= 0 (if >0 — change gte(0) on positive())
 const optionalIntMin0 = z.preprocess(
   toNumberOrUndef,
   z.number().int().gte(0, { message: "" }).optional(),
 );
-// required int >= 0 (если хочешь >0 — замени gte(0) на positive())
+// required int >= 0 (if >0 — change gte(0) на positive())
 const requiredIntMin0 = z.preprocess(
   toNumberOrUndef,
   z.number({ message: "" }).int().gte(0, { message: "" }),
@@ -68,7 +68,7 @@ const optionalRatingMin0 = z.preprocess(
   toNumberOrUndef,
   z.number().gte(0, { message: "" }).optional(),
 );
-// required rating >= 0 (если надо >0 — positive())
+// required rating >= 0 (if >0 — positive())
 const requiredRatingMin0 = z.preprocess(
   toNumberOrUndef,
   z.number({ message: "" }).gte(0, { message: "" }),
@@ -115,3 +115,81 @@ export const getCampaignResultSchema = (meta: TSocialMedia) => {
     screenshotUrl: requiredUrl,
   });
 };
+
+// import { z } from "zod";
+// import type { TSocialMedia } from "../types/campaign-result-form.types";
+
+// const trimString = (v: unknown) => (typeof v === "string" ? v.trim() : v);
+// const emptyToUndef = (v: unknown) =>
+//   typeof v === "string" && v.trim() === "" ? undefined : v;
+
+// // string required
+// const requiredString = z.preprocess(
+//   (v) => trimString(v),
+//   z.string({ message: "" }).min(1, { message: "" }),
+// );
+
+// // string optional
+// const optionalString = z.preprocess(
+//   (v) => emptyToUndef(trimString(v)),
+//   z.string().optional(),
+// );
+
+// // numbers: number, optional
+// const toNumberOrUndef = (v: unknown) => {
+//   v = emptyToUndef(trimString(v));
+//   if (v === undefined) return undefined;
+
+//   const n = typeof v === "string" ? Number(v) : v;
+//   return Number.isFinite(n) ? n : NaN; // NaN поймает z.number()
+// };
+
+// const optionalNumberMin0 = z.preprocess(
+//   toNumberOrUndef,
+//   z.number().gte(0, { message: "" }).optional(),
+// );
+
+// const requiredNumberMin0 = z.preprocess(
+//   toNumberOrUndef,
+//   z.number({ message: "" }).gte(0, { message: "" }),
+// );
+
+// // datePost: string required/optional
+// // const requiredDateString = requiredString;
+// const optionalDateString = optionalString;
+
+// const baseSchema = z.object({
+//   postLink: optionalString,
+//   screenshotUrl: optionalString,
+
+//   impressions: optionalNumberMin0,
+//   like: optionalNumberMin0,
+//   comments: optionalNumberMin0,
+//   shares: optionalNumberMin0,
+//   saves: optionalNumberMin0,
+
+//   rating: optionalNumberMin0,
+//   datePost: optionalDateString,
+// });
+
+// export const getCampaignResultSchema = (meta: TSocialMedia) => {
+//   if (meta === "spotify" || meta === "soundcloud") {
+//     return baseSchema.extend({
+//       rating: requiredNumberMin0,
+//       screenshotUrl: requiredString, // not url, just string
+//     });
+//   }
+
+//   if (meta === "press") {
+//     return baseSchema.extend({
+//       postLink: requiredString,
+//     });
+//   }
+
+//   return baseSchema.extend({
+//     postLink: requiredString,
+//     impressions: requiredNumberMin0,
+//     like: requiredNumberMin0,
+//     screenshotUrl: requiredString,
+//   });
+// };

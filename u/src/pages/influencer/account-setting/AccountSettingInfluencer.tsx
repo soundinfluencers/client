@@ -5,7 +5,7 @@ import { useInfluenserProfileStore } from '@/store/influencer/account-settings/u
 import { useInfluencerProfileQuery } from './hooks/useInfluencerProfileQuery';
 import { useCreateSocialAccountMutation, useDeleteSocialAccountMutation, useSocialAccountQuery, useUpdateSocialAccountMutation } from './hooks/socialAccounts.hooks';
 
-import { Breadcrumbs, Container, Loader } from "../../../components";
+import { Breadcrumbs, Container, Loader } from "@/components";
 import { AccountDetails } from './components/account-details/AccountDetails';
 // import { NotificationsVia } from './components/notifications-via/NotificationsVia';
 import { SocialList } from './components/social-list/SocialList';

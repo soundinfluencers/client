@@ -5,34 +5,19 @@ import { PromosDetailsList } from '../components/promos-details-list/PromosDetai
 import { CampaignResultForm } from './components/campaign-result-form/CampaignResultForm';
 import { ButtonMain } from '@/components/ui/buttons-fix/ButtonFix';
 import { Breadcrumbs, Container, Loader } from '../../../../components';
-// import type { TCampaignInfo, TSocialMedia } from './components/campaign-result-form/types/campaign-result-form.types';
 import { isSubmitOpen, isSubmitState, type DistributingNavState, type SubmitResultsNavState } from './components/campaign-result-form/utils/distributing-nav.helper';
-
-// import { NEW_PROMOS_DATA } from '../types/promos.types';
+import type { IPromoDetailsModel } from '../types/promos.types';
 
 import './_distributing.scss';
-import type { IPromoDetailsModel } from '../types/promos.types';
-//TODO: REVIEW AND FIX THE FUNCTIONALITY AS NEEDED
 
+//TODO: mb add session storage for campaignId and addedAccountsId to persist state on reload
 export const Distributing: React.FC = () => {
-  // const {state} = useLocation() as {
-  //   state?: {
-  //     campaignId?: string;
-  //     addedAccountsId?: string;
-  //   }
-  // };
-
-  // const { campaignId, addedAccountsId } = state || {};
-  // const [isFormOpen, setIsFormOpen] = useState(false);
-  // const [meta, setMeta] = useState<TSocialMedia | null>(null);
-  // const [formPayload, setFormPayload] = useState<TCampaignInfo | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
-
 
   const isFormOpen = isSubmitOpen(location.hash);
 
@@ -70,15 +55,13 @@ export const Distributing: React.FC = () => {
     error,
     isFetchingNextPage } = useDetailedPromos({ status: 'ongoing', campaignId, addedAccountsId });
 
-  // const isSingle = !!campaignId && !!addedAccountsId;
-
   const promos = data?.promos || [];
 
   useEffect(() => {
     if (isFormOpen && !submitState) {
       navigate({ pathname: location.pathname, hash: '' }, { replace: true, state: { campaignId, addedAccountsId } });
     }
-  }, [isFormOpen, submitState, navigate, location.pathname]);
+  }, [isFormOpen, submitState, navigate, location.pathname, addedAccountsId, campaignId]);
 
   const openFormScreen = (promo: IPromoDetailsModel) => {
     const nextState: SubmitResultsNavState = {
@@ -86,6 +69,8 @@ export const Distributing: React.FC = () => {
       addedAccountsId: promo.addedAccountsId,
       username: promo.username,
       meta: promo.accountSocialMedia,
+
+      from: { campaignId, addedAccountsId },
     };
     navigate({ pathname: location.pathname, hash: 'submit' }, { state: nextState });
   };
@@ -102,9 +87,7 @@ export const Distributing: React.FC = () => {
     return <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>No distributing promos found.</p>
   }
 
-  // const mockTestPromo = NEW_PROMOS_DATA.filter(p => p.statusCampaign === 'Distributing');
-
-  // console.log('Distributing promos:', promos);
+  console.log('Distributing promos:', promos);
 
   return (
     <Container className='distributing-page'>
@@ -112,9 +95,6 @@ export const Distributing: React.FC = () => {
       {isFormOpen && submitState ? (
         <CampaignResultForm
           submitState={submitState}
-        // meta={submitState.meta}
-        // onFormClose={() => setIsFormOpen(false)}
-        // formPayload={submitState}
         />
       ) : (
         <div className='distributing-page__wrapper'>
@@ -122,9 +102,6 @@ export const Distributing: React.FC = () => {
             data={promos}
             status='distributing'
             onSubmitResults={openFormScreen}
-          // onFormOpen={() => setIsFormOpen(true)}
-          // onFormPayloadChange={(newPayload) => setFormPayload(newPayload)}
-          // onMetaChange={(newMeta) => setMeta(newMeta)}
           />
 
           {!campaignId && !addedAccountsId && (
