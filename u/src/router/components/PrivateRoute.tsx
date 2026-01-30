@@ -7,15 +7,23 @@ interface Props {
     children: ReactNode;
 }
 
-export const PrivateRoute = ({ children }: Props) => {
-    const { accessToken, isAuthReady } = useAuth();
+export const PrivateRoute = ({children}: Props) => {
+    const {accessToken, isAuthReady} = useAuth();
 
     if (!isAuthReady) {
         return <div><Loader/></div>;
     }
 
+    if (!isAuthReady) {
+        return (
+            <div>
+                <Loader/>
+            </div>
+        );
+    }
+
     if (!accessToken) {
-        return <Navigate to="/auth" replace />;
+        return <Navigate to="/auth" replace/>;
     }
 
     return <>{children}</>;

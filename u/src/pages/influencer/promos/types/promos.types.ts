@@ -1,6 +1,7 @@
 export type TPromoStatus = "pending" | "distributing" | "completed";
 export type TFilterStatus = "new" | "close" | "ongoing";
 export type TConfirmationType = "accept" | "decline" | "wait";
+export type TClosedStatusType = "close" | "wait";
 
 export type socialMediaType =
   | "instagram"
@@ -24,7 +25,7 @@ export interface IPromo {
   socialMedia: socialMediaType;
   createdAt: string;
   statusCampaign: TPromoStatus;
-  closedStatus: "close" | "wait";
+  closedStatus: TClosedStatusType;
   confirmation: "accept" | "decline" | "wait";
 }
 

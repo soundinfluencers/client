@@ -8,7 +8,7 @@ import num from "@/assets/payments-icons/hugeicons_text-number-sign.svg";
 import qr from "@/assets/payments-icons/mage_bar-code-scan.svg";
 import type { CurrencyType } from "@/types/client/form-clients/payment-campaign-inputs";
 import "./styles/_base-confirmations.scss";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 
 interface Props {
   currency?: CurrencyType[];
@@ -19,7 +19,7 @@ export const BankTransfer: React.FC<Props> = ({ currency }) => {
   return (
     <div>
       <h2>Payment confirmation by Bank Transfer UK</h2>
-      <div className="base-confirmations__content">
+      <div className="base-confirmations__content--banktransfer">
         <div className="base-confirmations__content_paypal">
           <div className="base-confirmations__content_paypal__flex">
             <div className="base-confirmations__count">

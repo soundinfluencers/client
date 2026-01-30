@@ -1,5 +1,5 @@
-import { getCampaign } from "@/api/client/get-campaign/get-campaign";
-import { getCampaignDraft } from "@/api/client/get-campaign/get-draft";
+import { getCampaign } from "@/api/client/campaign/campaign.api";
+import { getCampaignDraft } from "@/api/client/campaign/draft.api";
 import type { CampaignFetchState } from "@/types/store/index.types";
 import { create } from "zustand";
 

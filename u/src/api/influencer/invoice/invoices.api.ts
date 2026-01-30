@@ -1,7 +1,10 @@
 import $api from "../../api";
 import type { IInvoiceResponseModel } from "@/pages/influencer/invoices-details/types/invoice";
 
-export const getInfluencerInvoices = async (limit: number, page: number): Promise<IInvoiceResponseModel[]> => {
+export const getInfluencerInvoices = async (
+  limit: number,
+  page: number,
+): Promise<IInvoiceResponseModel[]> => {
   try {
     const response = await $api.get(`/invoice?limit=${limit}&page=${page}`);
     console.log(response);

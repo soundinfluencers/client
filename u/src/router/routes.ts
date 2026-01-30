@@ -6,17 +6,18 @@ import { ForgotPasswordPage } from "../pages/auth/forgot/ForgotPasswordPage.tsx"
 
 // Client Imports
 import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
-import { BespokeCampaign } from "../pages/client/BespokeCampaign/bespoke-campaign.tsx";
-import { CampaignCreatorPage } from "../pages/client/CampaignCreatorPage/CampaignCreatorPage.tsx";
-import { AccountSetting } from "../pages/client/Account-Settings/account-settings.tsx";
+import { BespokeCampaign } from "../pages/client/bespoke-campaign/bespoke-campaign.tsx";
+import { CampaignCreatorPage } from "../pages/client/campaign-creator-page/campaign-creator-page.tsx";
+
 import { CampaignStrategy } from "../pages/client/campaign-strategy/campaign-strategy.tsx";
 import { CampaignPostContent } from "../pages/client/campaign-post-content/campaign-post-content.tsx";
 import { PaymentCampaign } from "../pages/client/payment-campaign/payment-campaign.tsx";
 import { InfluencerTermsPage } from "../pages/auth/terms/influencer/InfluencerTermsPage.tsx";
 
-import { CampaignPage } from "@/pages/client/campaign/campaigPage.tsx";
+import { CampaignPage } from "@/pages/client/campaign/campaign-page.tsx";
 import { CampaignSharePage } from "@/pages/client/campaign-share/campaig-share-page.tsx";
-import { HomePage } from "@/pages/client/client-dashboard/HomePage.tsx";
+import { HomePage } from "@/pages/client/client-dashboard/home-page.tsx";
+import { AccountSetting } from "@/pages/client/account-settings/account-settings.tsx";
 
 export const routes: IRoute[] = [
   {

@@ -5,9 +5,10 @@ import { useLoginStore } from "../../../store/features/loginSlice.ts";
 import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix.tsx";
 import { useMutation } from "@tanstack/react-query";
 import { resetPasswordApi } from "@/api/auth/auth.api.ts";
-import { handleApiError } from "@/api/error.api.ts";
+
 import { Modal } from "@/components/ui/modal-fix/Modal.tsx";
 import { useNavigate } from "react-router-dom";
+import { handleApiError } from "@/api/error.api.ts";
 
 export const ForgotPasswordPage: FC = () => {
   const navigate = useNavigate();
@@ -73,8 +74,11 @@ export const ForgotPasswordPage: FC = () => {
                   Check your inbox
                 </p>
                 <p className="forgot-password-page__modal-subtitle">
-                  We’ve sent you a password reset link (if an account with this email exists).<br />
-                  Please check your inbox and follow the instructions to reset your password.
+                  We’ve sent you a password reset link (if an account with this
+                  email exists).
+                  <br />
+                  Please check your inbox and follow the instructions to reset
+                  your password.
                 </p>
               </div>
               <ButtonMain

@@ -1,4 +1,12 @@
 .campaign-post-content {
+  margin-bottom: 42px;
+
+  @media screen and (max-width: 900px) {
+    margin-bottom: 16px;
+  }
+  @media screen and (max-width: 600px) {
+    margin-bottom: 24px;
+  }
   .navmenu {
     margin-top: 24px;
   }
@@ -12,6 +20,10 @@
       .add-description-btn {
         max-width: 250px;
         margin: 0 auto;
+      }
+      @media screen and (max-width: 900px) {
+        margin-top: 16px;
+        margin-bottom: 32px;
       }
       &__header {
         display: flex;

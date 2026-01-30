@@ -5,7 +5,8 @@ export type TSocialMedia =
   | "facebook"
   | "soundcloud"
   | "spotify"
-  | "press";
+  | "press"
+  | "multipromo";
 
 interface IBaseInput {
   label: string;
@@ -30,17 +31,16 @@ export interface IRatingInput extends IBaseInput {
   maxRating?: number;
 }
 
-// export interface IDateInput extends IBaseInput {
-//   type: "date";
-//   format: 'dd/mm/yyyy';
-// };
+export interface IDateInput extends IBaseInput {
+  type: "date";
+};
 
 export type TCampaignResultInput =
   | ITextInput
   | INumberInput
   | IFileInput
-  | IRatingInput;
-// | IDateInput
+  | IRatingInput
+  | IDateInput;
 
 // Add form type field if needed in future
 export interface ICampaignResultConfig {

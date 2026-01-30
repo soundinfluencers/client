@@ -10,11 +10,10 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         placeholder: "Enter Instagram link",
       },
       {
-        type: "text",
+        type: "date",
         label: "Date post",
         name: "datePost",
         placeholder: "Enter date post dd/mm/yyyy",
-        // format: "dd/mm/yyyy",
       },
       {
         type: "file",
@@ -62,11 +61,10 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         placeholder: "Enter YouTube post link",
       },
       {
-        type: "text",
+        type: "date",
         label: "Date post",
         name: "datePost",
         placeholder: "Enter date post dd/mm/yyyy",
-        // format: "dd/mm/yyyy",
       },
       {
         type: "file",
@@ -113,11 +111,10 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         placeholder: "Enter TikTok post link",
       },
       {
-        type: "text",
+        type: "date",
         label: "Date post",
         name: "datePost",
         placeholder: "Enter date post dd/mm/yyyy",
-        // format: "dd/mm/yyyy",
       },
       {
         type: "file",
@@ -164,11 +161,10 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         placeholder: "Enter Facebook post link",
       },
       {
-        type: "text",
+        type: "date",
         label: "Date post",
         name: "datePost",
         placeholder: "Enter date post dd/mm/yyyy",
-        // format: "dd/mm/yyyy",
       },
       {
         type: "file",
@@ -253,25 +249,8 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
       },
     ],
   },
+  // --- IGNORE --- add multipromo inputs in future
+  multipromo: {
+    inputs: [],
+  },
 };
-
-// export const normalizeSocialMedia = (value: string): TSocialMedia => {
-//   switch (value.toLowerCase()) {
-//     case "instagram":
-//       return "instagram";
-//     case "tiktok":
-//       return "tiktok";
-//     case "youtube":
-//       return "youtube";
-//     case "facebook":
-//       return "facebook";
-//     case "spotify":
-//       return "spotify";
-//     case "soundcloud":
-//       return "soundcloud";
-//     case "press":
-//       return "press";
-//     default:
-//       return "instagram"; // fallback
-//   }
-// };

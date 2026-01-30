@@ -35,6 +35,14 @@ label {
     border-radius: 8px;
     z-index: 100;
   }
+  &.is-error {
+    label {
+      color: red;
+    }
+    input {
+      border: 1px solid red;
+    }
+  }
 }
 .form-field,
 .form-input {

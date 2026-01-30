@@ -8,6 +8,7 @@ import { ButtonMain } from '@/components/ui/buttons-fix/ButtonFix';
 
 import './_completed.scss';
 
+//TODO: mb add session storage for campaignId and addedAccountsId to persist state on reload
 export const Completed: React.FC = () => {
   const { state } = useLocation() as {
     state?: {
@@ -21,6 +22,7 @@ export const Completed: React.FC = () => {
   }, []);
 
   const { campaignId, addedAccountsId } = state || {};
+  console.log(campaignId, addedAccountsId)
 
   const {
     data,
@@ -30,7 +32,11 @@ export const Completed: React.FC = () => {
     error,
     isFetchingNextPage } = useDetailedPromos({ status: 'close', campaignId, addedAccountsId });
 
+    console.log(data);
+
   const promos = data?.promos || [];
+
+  console.log('Completed promos:', promos);
 
   if (isLoading) {
     return <Loader />;

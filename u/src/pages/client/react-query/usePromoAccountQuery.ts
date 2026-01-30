@@ -1,7 +1,7 @@
-import { getMultiPromoAccounts } from "@/api/client/CreatorCampaign/multi-promo-accounts/client-creator-campaign-promos.api";
+import { getMultiPromoAccounts } from "@/api/client/creator-campaign-page/promo-accounts.api";
 
 import type { FilterItem } from "@/types/client/creator-campaign/filters.types";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 export const usePromoAccountsFilters = (
   {
@@ -45,7 +45,7 @@ export const usePromoAccountsFilters = (
 
       return [parent];
     });
-  console.log(genres, "wlkwwklwk");
+
   const profileType = selected
     .filter((item) => item.group === "profileType")
     .map((item) => item.id);
@@ -90,7 +90,7 @@ export const usePromoAccountsFilters = (
       return data.accounts;
     },
     enabled: options?.enabled ?? socialMedias.length > 0,
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     staleTime: 30_000,
   });
 };

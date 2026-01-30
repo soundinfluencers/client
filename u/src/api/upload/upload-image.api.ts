@@ -5,11 +5,11 @@ export const uploadImageApi = async (imageFile: File): Promise<string> => {
 
   formData.append("file", imageFile);
 
-    const response = await $api.post("/file", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+  const response = await $api.post("/file", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 
   return response.data.data;
 };

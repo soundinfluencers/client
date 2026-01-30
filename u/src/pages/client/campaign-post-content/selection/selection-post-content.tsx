@@ -5,13 +5,13 @@ import chevron from "@/assets/icons/chevron-down.svg";
 import { getSocialMediaIcon } from "@/constants/social-medias";
 import type { SocialMediaType } from "@/types/utils/constants.types";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
-import { GenresCountries } from "../../CampaignCreatorPage/ui/genre-countries/genre-countries";
+import { GenresCountries } from "../../campaign-creator-page/ui/genre-countries/genre-countries";
 import type {
   IApiOffer,
   IPromoCard,
 } from "@/types/client/creator-campaign/creator-campaign.types";
-import { getPriceByCurrency } from "../../CampaignCreatorPage/buildCampaign/components/bc_cards/bc_card/utils/usePriceCurrency";
-import { useBuildCampaignFilters } from "@/store/client/createCampaign/useBuildCampaignFilters";
+import { getPriceByCurrency } from "../../campaign-creator-page/build-campaign/components/bc-cards/bc-card/utils/use-price-currency";
+import { useBuildCampaignFilters } from "@/store/client/create-campaign/useBuildCampaignFilters";
 import { useNavigate } from "react-router-dom";
 interface Props {
   offer: IApiOffer | null;
@@ -90,20 +90,23 @@ export const Selection: React.FC<Props> = ({
                       </span>
                     </p>
 
-                    <div
-                      onClick={() => toggleFlag(card.accountId)}
-                      className={Styles.genresIcountries}>
-                      <p>Genres, Countries</p>
-                      <img src={chevron} alt="" />
+                    {card.countries.length > 0 &&
+                      card.musicGenres.length > 0 && (
+                        <div
+                          onClick={() => toggleFlag(card.accountId)}
+                          className={Styles.genresIcountries}>
+                          <p>Genres, Countries</p>
+                          <img src={chevron} alt="" />
 
-                      {isOpen && (
-                        <GenresCountries
-                          flag={true}
-                          data={card}
-                          isInclude={false}
-                        />
+                          {isOpen && (
+                            <GenresCountries
+                              flag={true}
+                              data={card}
+                              isInclude={false}
+                            />
+                          )}
+                        </div>
                       )}
-                    </div>
                   </div>
                 </div>
               </div>

@@ -1,0 +1,44 @@
+.card-container-block {
+  position: relative;
+  width: 100%;
+  .cards-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    justify-items: start;
+    align-items: start;
+    align-self: start;
+    gap: 16px;
+
+    &.viewed {
+      .promos-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+        height: fit-content;
+        &__header {
+          display: grid;
+          grid-template-columns: 27% 110px 100px 1fr 1fr;
+          padding: 8px 0;
+          font-size: 16px;
+          color: #202934;
+          font-weight: 400;
+          .center {
+            text-align: center;
+          }
+          div {
+            white-space: nowrap;
+          }
+          &.adaptive {
+            @media screen and (max-width: 600px) {
+              grid-template-columns: 24% 86px 56px 1fr 1fr;
+              div {
+                font-size: 14px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,21 +1,38 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
-import type { ReactNode } from "react";
-import { useUser } from "@/store/get-user";
+import {Navigate} from "react-router-dom";
+import {useAuth} from "../../contexts/AuthContext";
+import type {ReactNode} from "react";
+import {useUser} from "@/store/get-user";
+import {Loader} from "@/components";
 
 interface Props {
-  children: ReactNode;
+    children: ReactNode;
 }
 
-export const PublicRoute = ({ children }: Props) => {
-  const { accessToken } = useAuth();
-  const { user } = useUser();
+export const PublicRoute = ({children}: Props) => {
+    const {accessToken, isAuthReady} = useAuth();
+    const {user} = useUser();
 
-  if (accessToken) {
-    const route = user?.role === "influencer" ? "/" : "/";
+    if (!isAuthReady) {
+        return <div><Loader/></div>;
+    }
 
-    return <Navigate to={route} replace />;
-  }
+    if (accessToken) {
+        let route: string;
 
-  return <>{children}</>;
+        switch (user?.role) {
+            case 'influencer':
+                route = '/influencer';
+                break;
+            case 'client':
+                route = '/client';
+                break;
+            default:
+                route = '/';
+                break;
+        }
+
+        return <Navigate to={route} replace/>;
+    }
+
+    return <>{children}</>;
 };

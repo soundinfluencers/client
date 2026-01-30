@@ -8,7 +8,7 @@ export const useConfirmInfluencerPromo = () => {
     mutationFn: conformationInfluencerPromo,
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["influencer-new-promos"] });
+      queryClient.invalidateQueries({queryKey: ["influencer-new-promos"]});
     },
   });
 };

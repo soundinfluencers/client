@@ -1,5 +1,11 @@
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
 .breadcrumbs {
   display: flex;
+  @media screen and (max-width: 420px) {
+    max-width: 420px;
+    overflow: auto;
+    @include sb.scrollbar-thin-horizontal;
+  }
   span {
     width: fit-content;
     display: flex;

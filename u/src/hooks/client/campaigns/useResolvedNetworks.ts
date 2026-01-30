@@ -3,7 +3,7 @@ import type {
   CampaignContentDescription,
   CampaignContentItem,
 } from "@/types/store/index.types";
-import type { NetworkRowResolved } from "@/pages/client/campaign/components/tables-campaign/types";
+import type { NetworkRowResolved } from "@/pages/client/campaign/components/tables/types";
 
 export function useResolvedNetworks(
   networksState: any[],

@@ -3,7 +3,7 @@ import "./styles/_base-confirmations.scss";
 import euro from "@/assets/payments-icons/Vector (10).svg";
 import hashtag from "@/assets/payments-icons/clarity_hashtag-solid.svg";
 import method from "@/assets/payments-icons/mdi_recurring-payment.svg";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 interface Props {}
 
 export const PayPal: React.FC<Props> = () => {
@@ -12,7 +12,7 @@ export const PayPal: React.FC<Props> = () => {
     <div className="base-confirmations">
       {" "}
       <h2>Payment confirmation by PayPal</h2>
-      <div className="base-confirmations__content">
+      <div className="base-confirmations__content--paypal">
         <div className="base-confirmations__content_paypal">
           <div className="base-confirmations__content_paypal__flex">
             {" "}

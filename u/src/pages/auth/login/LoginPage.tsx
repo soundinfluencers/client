@@ -2,12 +2,12 @@ import { useState, type FC } from "react";
 import { type NavigateFunction, useNavigate } from "react-router-dom";
 import { TextInput } from "@/components/ui/inputs/text-input/TextInput.tsx";
 import { useLoginStore } from "../../../store/features/loginSlice.ts";
-import { ButtonMain } from "@/components/ui/buttons/button/Button.tsx";
-import "./_login-page.scss";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { loginApi } from "@/api/auth/auth.api.ts";
 import { useUser } from "@/store/get-user/index.ts";
 import { handleApiError } from "@/api/error.api.ts";
+import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix.tsx";
+import "./_login-page.scss";
 
 export const LoginPage: FC = () => {
   const navigate: NavigateFunction = useNavigate();
@@ -17,25 +17,21 @@ export const LoginPage: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    // setIsLoading(true);
-    const response = await loginApi({
-      email,
-      password,
-      role,
-    });
+    if (isLoading) return;
 
-    if (response) {
-      setUser(response);
-      setAccessToken(response.accessToken);
+    setIsLoading(true);
+    try {
+      const response = await loginApi({ email, password, role });
+
+      if (response) {
+        setUser(response);
+        setAccessToken(response.accessToken);
+      }
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setIsLoading(false);
     }
-    // setIsLoading(false);
-    // try {
-
-    // } catch (error) {
-    //   console.log(error);
-    //   handleApiError(error);
-    // } finally {
-    // }
   };
 
   return (
@@ -70,9 +66,11 @@ export const LoginPage: FC = () => {
         </div>
         <div className="login-page__controls">
           <ButtonMain
-            text={isLoading ? "Logging in..." : "Log in now"}
+            label={isLoading ? "Logging in..." : "Log in now"}
             onClick={handleLogin}
-            isDisabled={email.length === 0 || password.length === 0 || isLoading}
+            isDisabled={
+              email.length === 0 || password.length === 0 || isLoading
+            }
           />
         </div>
       </div>
@@ -90,7 +88,6 @@ export const LoginPage: FC = () => {
   );
 };
 
-
 // const Loader = () => {
 //   return (
 //     <div className="loader">
@@ -102,7 +99,6 @@ export const LoginPage: FC = () => {
 //             <stop offset="50%" stop-color="#c084fc" />
 //             <stop offset="100%" stop-color="#7dd3fc" />
 //           </linearGradient>
-
 
 //           <mask id="rayMask">
 //             <rect width="200" height="200" fill="black" />

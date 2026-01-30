@@ -1,5 +1,5 @@
-import { getCampaigns } from "@/api/client/dashboard/client-campaign.api";
-import { useQuery } from "@tanstack/react-query";
+import { getCampaigns } from "@/api/client/campaign/campaign.api";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 export const useGetCampaignsQuery = ({
   status,
@@ -11,9 +11,9 @@ export const useGetCampaignsQuery = ({
   return useQuery({
     queryKey: ["getCampaigns", status, limit],
     queryFn: async () => {
-      return getCampaigns(status, 1, limit); // всегда 1-я страница
+      return getCampaigns(status, 1, limit);
     },
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     staleTime: 15_000,
   });
 };

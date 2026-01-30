@@ -13,14 +13,14 @@ import { ViewChange } from "@/pages/client/components/table-components/view-chan
 import { Bar } from "@/pages/client/components/table-components/bar";
 import { ViewAudience } from "@/pages/client/components/table-components/view-audience";
 
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 
 import { TableStrategy } from "./components/table-strategy/strategy-table";
 
-import { postCampaignDraft } from "@/api/client/post-actions/post-draft-campaign";
-import { postCampaignProposal } from "@/api/client/post-actions/post-proposal-campaign";
 import { LiveViewCard } from "./components/table-strategy/live-view-card/live-view";
 import { useGroupPromos } from "@/hooks/client/campaigns/useGroupPromos";
+import { postCampaignProposal } from "@/api/client/campaign/campaign.api";
+import { postCampaignDraft } from "@/api/client/campaign/draft.api";
 
 interface Props {}
 
@@ -102,7 +102,6 @@ export const CampaignStrategy: React.FC<Props> = () => {
           {music.length >= 1 && (
             <TableStrategy
               group="music"
-              isMusic={true}
               networks={musicPromos}
               changeView={changeView}
               items={music}

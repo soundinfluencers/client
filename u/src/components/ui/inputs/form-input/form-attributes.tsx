@@ -1,67 +1,108 @@
 import React from "react";
 import "./_form-attributes.scss";
 import {
+  Controller,
   get,
+  useController,
   useFormContext,
   type FieldValues,
   type Path,
   type RegisterOptions,
 } from "react-hook-form";
-interface FormInput<T extends FieldValues> {
+interface FormInputProps<T extends FieldValues> {
   name: Path<T>;
   label?: string;
   id?: string;
   placeholder: string;
-  required?: boolean;
+  required?: boolean; // только для UI
   type?: string;
   className?: string;
-  validation?: RegisterOptions;
+  validation?: RegisterOptions; // доп rules поверх zod
 }
-interface FormTextArea<T extends FieldValues> {
+interface FormTextAreaProps<T extends FieldValues> {
   name: Path<T>;
   id?: string;
   label?: string;
   placeholder?: string;
-  required?: boolean;
+  required?: boolean; // только UI
   className?: string;
   isBespoke?: boolean;
+  validation?: RegisterOptions;
 }
 
 // input for form //
 
-export const FormInput = React.forwardRef<HTMLInputElement, FormInput<any>>(
-  ({
-    name,
-    label,
-    placeholder,
-    required = false,
-    type = "text",
-    className = "",
-    validation,
-    id,
-  }) => {
+export const FormInput = React.forwardRef<
+  HTMLInputElement,
+  FormInputProps<any>
+>(
+  (
+    {
+      name,
+      label,
+      placeholder,
+      required = false,
+      type = "text",
+      className = "",
+      id,
+      validation,
+    },
+    ref,
+  ) => {
     const {
-      register,
-      formState: { errors },
+      control,
+      formState: { errors, touchedFields, submitCount },
     } = useFormContext();
 
-    const error = get(errors, name)?.message as string;
+    const errorMsg =
+      (get(errors, name)?.message as string | undefined) ?? undefined;
+
+    const showError =
+      !!errorMsg && (get(touchedFields, name) || submitCount > 0);
 
     return (
-      <div className={`form-input ${className} ${error ? "error" : ""}`}>
-        {label && <label htmlFor={String(name)}>{label}</label>}
+      <Controller
+        control={control}
+        name={name}
+        rules={validation}
+        render={({ field, fieldState }) => {
+          const hasError = fieldState.invalid;
+          return (
+            <div
+              className={`form-input ${className} ${hasError ? "is-error" : ""}`}>
+              {label && (
+                <label htmlFor={id ?? name}>
+                  {label} {required ? "*" : ""}
+                </label>
+              )}
 
-        <input
-          id={String(name)}
-          type={type}
-          placeholder={placeholder}
-          {...register(name, {
-            required: required ? "Required" : false,
-            ...validation,
-          })}
-        />
-        {error && <span className="error-message">{error}</span>}
-      </div>
+              <input
+                id={id ?? name}
+                type={type}
+                placeholder={placeholder}
+                value={field.value ?? ""}
+                onChange={(e) => {
+                  field.onChange(
+                    type === "number" ? Number(e.target.value) : e.target.value,
+                  );
+                }}
+                onBlur={field.onBlur}
+                name={field.name}
+                ref={(el) => {
+                  field.ref(el);
+                  if (typeof ref === "function") ref(el);
+                  else if (ref)
+                    (
+                      ref as React.MutableRefObject<HTMLInputElement | null>
+                    ).current = el;
+                }}
+              />
+
+              {showError && <p className="form-input__error">{errorMsg}</p>}
+            </div>
+          );
+        }}
+      />
     );
   },
 );
@@ -78,22 +119,34 @@ export function FormTextArea<T extends FieldValues>({
   className = "",
   isBespoke,
   id,
-}: FormTextArea<T>) {
+  validation,
+}: FormTextAreaProps<T>) {
   const {
     register,
-    formState: { errors },
+    formState: { errors, touchedFields, submitCount },
   } = useFormContext();
 
-  const error = get(errors, name)?.message as string;
+  const errorMsg =
+    (get(errors, name)?.message as string | undefined) ?? undefined;
+
+  const showError = !!errorMsg && (get(touchedFields, name) || submitCount > 0);
+
   return (
-    <div className={`form-field  ${className} ${error ? "error" : ""}`}>
-      {label && <label htmlFor={name}>{label}</label>}
+    <div className={`form-field ${className} ${showError ? "error" : ""}`}>
+      {label && (
+        <label htmlFor={id ?? name}>
+          {label} {required ? "*" : ""}
+        </label>
+      )}
+
       <textarea
-        id={name}
-        {...register(name as any, { required })}
+        id={id ?? name}
         placeholder={placeholder}
         className={isBespoke ? "bespoke" : ""}
+        {...register(name as any, validation)}
       />
+
+      {showError && <p className="form-input__error">{errorMsg}</p>}
     </div>
   );
 }

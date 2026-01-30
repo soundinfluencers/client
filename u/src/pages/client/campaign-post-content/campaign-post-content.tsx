@@ -8,20 +8,22 @@ import {
   Container,
   Form,
   FormInput,
-  SubmtiButton,
+  SubmitButton,
 } from "@/components";
 
 import { PlatformForm } from "@/pages/client/components/client-forms/plattform";
 import { AdditionalPlatformForm } from "@/pages/client/components/client-forms/additional-from-plattform";
 import { Selection } from "./selection/selection-post-content";
 
-import { useCampaignStore } from "@/store/client/createCampaign";
-import { useSelectedPlatforms } from "@/hooks/client/useSelectedPlatforms";
+import { useCampaignStore } from "@/store/client/create-campaign";
+
 import { groupPlatforms } from "@/utils/functions/groupPlatforms";
 import { platformFormsMap } from "@/constants/client/plattforms-data-form";
 import { getSocialMediaIcon } from "@/constants/social-medias";
 
 import type { SocialMediaType } from "@/types/utils/constants.types";
+import { useSelectedPlatforms } from "./hooks/useSelectedPlatforms";
+import { campaignPostContentSchema } from "../components/client-forms/schemas";
 
 type GroupKey = "main" | "music" | "press";
 
@@ -39,8 +41,6 @@ export const CampaignPostContent: React.FC = () => {
   const promoCard = useCampaignStore((s) => s.promoCard);
   const totalPrice = useCampaignStore((s) => s.totalPrice);
   const actions = useCampaignStore((s) => s.actions);
-  const фс = useCampaignStore((s) => s.campaignContent);
-  console.log("фс,", фс);
 
   const selectedPlatforms = useSelectedPlatforms(offer, promoCard);
 
@@ -181,11 +181,12 @@ export const CampaignPostContent: React.FC = () => {
               <h1>Review this content</h1>
             </div>
 
-            <Form
+            <Form<Record<string, string>>
+              schema={campaignPostContentSchema}
               className="form-width"
               onSubmit={handleSubmit}
               submitButton={
-                <SubmtiButton
+                <SubmitButton
                   className="submit"
                   type="submit"
                   data="Continue"

@@ -17,8 +17,6 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
   item,
   networks,
 }) => {
-  console.log(networks, "networks");
-  console.log(item, "items");
   return (
     <div className="live-view-card">
       <div className="live-view-card__content">

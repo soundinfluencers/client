@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./_proceed.scss";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 
 export const Proceed: React.FC = () => {
   const { offer, totalPrice, promoCard } = useCampaignStore();

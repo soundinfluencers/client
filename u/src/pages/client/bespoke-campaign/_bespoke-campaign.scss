@@ -1,0 +1,51 @@
+.bespoke-campaign {
+  margin-bottom: 42px;
+
+  @media screen and (max-width: 900px) {
+    margin-bottom: 16px;
+  }
+  @media screen and (max-width: 600px) {
+    margin-bottom: 24px;
+  }
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  &__content {
+    margin-top: 40px;
+    max-width: 600px;
+    width: 100%;
+  }
+  &__title {
+    h2 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 48px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+      @media screen and (max-width: 600px) {
+        font-size: 24px;
+      }
+    }
+    p {
+      margin-top: 16px;
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 20px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+      @media screen and (max-width: 600px) {
+        font-size: 16px;
+      }
+    }
+  }
+  &__tab-content {
+    margin-top: 32px;
+  }
+  .bespoke-btn {
+    margin-top: 484px;
+  }
+}

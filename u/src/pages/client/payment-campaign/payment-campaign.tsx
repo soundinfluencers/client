@@ -4,17 +4,21 @@ import {
   ButtonMain,
   Container,
   Form,
-  SubmtiButton,
+  SubmitButton,
 } from "@/components";
 import { PaymentForm } from "@/pages/client/components/client-forms/payment";
 import { PAYMENT_CAMPAIGN_TABS_INPUTS } from "@/constants/client/payment-campaign-tabs.inputs";
 import { PaymentBar } from "./components/payment-bar";
 import "./_payment-campaign.scss";
 
-import { postCampaign } from "@/api/client/post-actions/post-campaign";
-import { useCampaignStore } from "@/store/client/createCampaign";
+import { useCampaignStore } from "@/store/client/create-campaign";
 import { PAYMENT_CAMPAIGN_TABS } from "./components/constant/payment-campaign-tabs";
 import type { PaymentTabId, PaymentMethodId } from "./types";
+import { postCampaign } from "@/api/client/campaign/campaign.api";
+import {
+  paymentCampaignSchema,
+  type PaymentCampaignFormValues,
+} from "../components/client-forms/schemas";
 
 export const PaymentCampaign = () => {
   const { actions } = useCampaignStore();
@@ -67,7 +71,7 @@ export const PaymentCampaign = () => {
 
   const onSent = async () => {
     const payload = actions.getCampaignPayload(selectedIdPayment);
-    console.log("FINAL PAYLOAD", JSON.stringify(payload, null, 2));
+
     await postCampaign(payload);
   };
   return (
@@ -101,11 +105,12 @@ export const PaymentCampaign = () => {
             <h3>Invoice details</h3>
           </div>
 
-          <Form
+          <Form<PaymentCampaignFormValues>
+            schema={paymentCampaignSchema}
             onSubmit={onSent}
             classNameBtnSection={tab === "bank_transfer" ? "margin" : ""}
             submitButton={
-              <SubmtiButton
+              <SubmitButton
                 className="btn-margin"
                 data={"Confirm payment sent"}
               />
