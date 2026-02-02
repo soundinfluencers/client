@@ -13,7 +13,7 @@ interface AuthContextType {
     setAccessToken: (token: string | null) => void;
     logout: () => void;
     isAuthReady: boolean;
-};
+}
 
 let accessTokenStore: string | null = null;
 
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.error("Logout failed", err);
         } finally {
             setAccessToken(null);
-            window.location.href = "/auth";
+            // window.location.href = "/auth";
         }
     };
 

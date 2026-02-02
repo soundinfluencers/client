@@ -45,10 +45,10 @@ export const MainScreen = () => {
     setIsLoading(true);
     try {
       console.log('Data to signup', user)
-      // await influencerSignupApi(user);
+      await influencerSignupApi(user);
 
       setIsSuccess(true);
-      // resetSignup();
+      resetSignup();
     } catch (e: any) {
       // const message =
       //   e?.response?.data?.message ||
