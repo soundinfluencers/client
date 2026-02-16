@@ -63,6 +63,7 @@
     justify-content: space-between;
   }
   .changeView-strategy-checkOUT {
+    cursor: pointer;
     max-width: 103px;
     width: 100%;
     position: relative;
@@ -142,6 +143,7 @@
   }
 }
 .AddinitonalOption {
+  background-color: rgba(255, 255, 255, 0.5);
   flex: 0 0 auto;
   cursor: pointer;
   display: flex;

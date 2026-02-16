@@ -1,4 +1,4 @@
-import type { IBespokeCampaignTabData } from "../types/form/bespoke-campaign-tabs-data";
+import type { IBespokeCampaignTabData } from "@/shared/types/client/form-clients/bespoke-campaign-tabs-data";
 
 export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
   {
@@ -7,19 +7,14 @@ export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
     title: "Artist Promo Campaigns",
     inputs: [
       {
-        label: "What you’re promoting (tour, gig, branding push, announcement)",
-        name: "Enter tour, gig, branding push, announcement",
+        label: "What you’re promoting (Campaign Goal)",
+        name: "What you’re promoting (Campaign Goal)",
         placeholder: "Enter tour, gig, branding push, announcement ",
       },
       {
-        label: "Gig/tour details (dates, locations, lineups if needed)",
-        name: "Gig/tour details (dates, locations, lineups if needed)",
-        placeholder: "Enter dates, locations, lineups if needed",
-      },
-      {
-        label: "Content available (videos, press photos, artwork)",
-        name: "Content available (videos, press photos, artwork)",
-        placeholder: "Enter videos, press photos, artwork",
+        label: "Content available ",
+        name: "Content available",
+        placeholder: "Enter links to your videos, press photos, artwork",
       },
       {
         label: "Your budget",
@@ -45,19 +40,29 @@ export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
     title: "Music Promo Campaigns",
     inputs: [
       {
-        label: "What you’re promoting (tour, gig, branding push, announcement)",
-        name: "Enter tour, gig, branding push, announcement",
+        label: "What you’re promoting (Campaign Goal)",
+        name: "What you’re promoting (Campaign Goal)",
         placeholder: "Enter tour, gig, branding push, announcement ",
       },
       {
-        label: "Gig/tour details (dates, locations, lineups if needed)",
-        name: "Gig/tour details (dates, locations, lineups if needed)",
-        placeholder: "Enter dates, locations, lineups if needed",
+        label: "Content available",
+        name: "Content available",
+        placeholder: "Enter links to your videos, press photos, artwork",
       },
       {
-        label: "Content available (videos, press photos, artwork)",
-        name: "Content available (videos, press photos, artwork)",
-        placeholder: "Enter videos, press photos, artwork",
+        label: "Download or private link to the track",
+        name: "Download or private link to the track",
+        placeholder: "Download or private link to the track",
+      },
+      {
+        label: "Release date",
+        name: "Release date",
+        placeholder: "Enter release date",
+      },
+      {
+        label: "Linkfire / smartlink",
+        name: "Enter linkfire / smartlink",
+        placeholder: "Enter release date",
       },
       {
         label: "Your budget",
@@ -83,19 +88,19 @@ export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
     title: "Event Promo Campaigns",
     inputs: [
       {
-        label: "What you’re promoting (tour, gig, branding push, announcement)",
-        name: "Enter tour, gig, branding push, announcement",
+        label: "What you’re promoting (Campaign Goal)",
+        name: "What you’re promoting (Campaign Goal)",
         placeholder: "Enter tour, gig, branding push, announcement ",
       },
       {
-        label: "Gig/tour details (dates, locations, lineups if needed)",
-        name: "Gig/tour details (dates, locations, lineups if needed)",
-        placeholder: "Enter dates, locations, lineups if needed",
+        label: "Content available",
+        name: "Content available",
+        placeholder: "Enter links to your videos, press photos, artwork",
       },
       {
-        label: "Content available (videos, press photos, artwork)",
-        name: "Content available (videos, press photos, artwork)",
-        placeholder: "Enter videos, press photos, artwork",
+        label: "Ticket link",
+        name: "Ticket link",
+        placeholder: "Enter ticket link",
       },
       {
         label: "Your budget",

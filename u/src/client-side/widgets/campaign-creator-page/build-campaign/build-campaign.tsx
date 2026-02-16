@@ -228,10 +228,13 @@ export const BuildCampaign: React.FC = () => {
           )}
 
           {promoError ? (
-            <div style={{ padding: 16 }}>
-              <p>Failed to load promo cards</p>
-              <button onClick={() => promoRefetch()}>Retry</button>
-            </div>
+            <NoData>
+              <h2>No SocialAccounts for this filter right now</h2>
+              <p>
+                You can still move forward by using Offers to create a <br></br>
+                multi-platform promotion tailored to your needs.
+              </p>
+            </NoData>
           ) : displayCards.length > 0 ? (
             <CardsContainer
               loading={promoFetching}
@@ -241,7 +244,13 @@ export const BuildCampaign: React.FC = () => {
               view={view}
             />
           ) : (
-            <NoData title={"networks for that filter"} />
+            <NoData>
+              <h2>No SocialAccounts for this filter right now</h2>
+              <p>
+                You can still move forward by using Offers to create a <br></br>
+                multi-platform promotion tailored to your needs.
+              </p>
+            </NoData>
           )}
         </div>
       </div>

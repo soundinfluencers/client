@@ -62,16 +62,26 @@ export const CampaignCreatorPage: React.FC = () => {
       </div>
 
       {isError ? (
-        <div style={{ padding: 16 }}>
-          <p>Failed to load offers</p>
-          <button onClick={() => refetch()}>Retry</button>
-        </div>
+        <NoData>
+          <h2>No offers available for this genre right now</h2>
+          <p>
+            You can still move forward by using Build Your Custom Campaign to
+            create a multi <br></br>-platform promotion tailored to your needs.
+          </p>
+        </NoData>
       ) : (
         <>
           {offers.length > 0 ? (
             <SliderForCard isLoading={isFetching} offers={offers} />
           ) : (
-            <NoData title={"offers for this genre yet"} />
+            <NoData>
+              <h2>No offers available for this genre right now</h2>
+              <p>
+                You can still move forward by using Build Your Custom Campaign
+                to create a multi <br></br>-platform promotion tailored to your
+                needs.
+              </p>
+            </NoData>
           )}
         </>
       )}

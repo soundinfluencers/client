@@ -45,7 +45,7 @@ const toBackendSelectedMethod = (
   return "internationalBankTransfer"; // eu + international
 };
 export const PaymentCampaign = () => {
-  const { actions } = useCampaignStore();
+  const { actions, campaignName } = useCampaignStore();
 
   const [tab, setTab] = React.useState<PaymentTabId>("bank_card");
 
@@ -104,10 +104,10 @@ export const PaymentCampaign = () => {
       company: values.company ?? "",
       vatNumber: values.vatNumber ?? "",
       amount: base.campaignPrice ?? 0,
-      selectedPaymentMethod: "paypal",
+      selectedPaymentMethod: selectedIdPayment,
     };
 
-    const payload = { ...base, paymentDetails };
+    const payload = { campaignName, ...base, paymentDetails };
 
     console.log(payload);
     await postCampaign(payload);

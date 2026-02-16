@@ -17,7 +17,7 @@ export const PlattformsDataForm: IPlattformsDataForm = {
       {
         id: "Storytag",
         name: "Story tag",
-        placeholder: "https://",
+        placeholder: "@tagged user",
       },
       {
         id: "Storylink",

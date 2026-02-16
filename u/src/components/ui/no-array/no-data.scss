@@ -4,8 +4,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
   text-align: center;
+  gap: 20px;
+  height: 50vh;
+  h2 {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 40px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: center;
+  }
   p {
-    font-size: 20px;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 18px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: center;
   }
 }

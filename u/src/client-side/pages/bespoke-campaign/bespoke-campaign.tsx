@@ -14,7 +14,7 @@ export const BespokeCampaign: React.FC<Props> = () => {
       </div>
       <div className="bespoke-campaign__content">
         <div className="bespoke-campaign__title">
-          <h2>Bespoke campaign request</h2>
+          <h2>Agency campaign request</h2>
           <p>Minimum budget 1000€</p>
         </div>
         <TabBar activeTab={tab} onChange={setTab} />

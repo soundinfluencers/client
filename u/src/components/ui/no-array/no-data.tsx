@@ -1,16 +1,9 @@
 import React from "react";
 import "./no-data.scss";
 interface Props {
-  title: string;
+  children: React.ReactNode;
 }
 
-export const NoData: React.FC<Props> = ({ title }) => {
-  return (
-    <div className="no-data">
-      {" "}
-      <p>
-        Oops...<br></br> It seems there are no {title}
-      </p>
-    </div>
-  );
+export const NoData: React.FC<Props> = ({ children }) => {
+  return <div className="no-data">{children}</div>;
 };

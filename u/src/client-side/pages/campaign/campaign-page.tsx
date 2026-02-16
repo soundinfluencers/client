@@ -360,35 +360,38 @@ export const CampaignPage = () => {
 
         <div className="campaignBase__proceedTo">
           {data.kind === "proposal" ? (
-            <ButtonSecondary
-              className="proceedTo"
-              text={
-                isRequestSent
-                  ? "Updated"
-                  : isRequesting
-                    ? "Updating..."
-                    : "Update"
-              }
-              onClick={() =>
-                updateProposalOption(
-                  data.campaignId,
-                  activeOption,
-                  data.campaignName,
-                )
-              }
-            />
-          ) : (
-            // <ButtonSecondary
-            //   className="proceedTo"
-            //   text={
-            //     isRequestSent
-            //       ? "Sent"
-            //       : isRequesting
-            //         ? "Sending..."
-            //         : "Request edit"
-            //   }
-            //   onClick={() => requestCampaign(campaignIdForActions ?? "")}
-            // />
+            data?.selectedOption?.canEdit ? (
+              <ButtonSecondary
+                className="proceedTo"
+                text={
+                  isRequestSent
+                    ? "Updated"
+                    : isRequesting
+                      ? "Updating..."
+                      : "Update"
+                }
+                onClick={() =>
+                  updateProposalOption(
+                    data.campaignId,
+                    activeOption,
+                    data.campaignName,
+                  )
+                }
+              />
+            ) : (
+              <ButtonSecondary
+                className="proceedTo"
+                text={
+                  isRequestSent
+                    ? "Sent"
+                    : isRequesting
+                      ? "Sending..."
+                      : "Request edit"
+                }
+                onClick={() => requestCampaign(campaignIdForActions ?? "")}
+              />
+            )
+          ) : data.canEdit ? (
             <ButtonSecondary
               text={
                 isRequestSent
@@ -403,6 +406,18 @@ export const CampaignPage = () => {
                   data.campaignName,
                 )
               }
+            />
+          ) : (
+            <ButtonSecondary
+              className="proceedTo"
+              text={
+                isRequestSent
+                  ? "Sent"
+                  : isRequesting
+                    ? "Sending..."
+                    : "Request edit"
+              }
+              onClick={() => requestCampaign(campaignIdForActions ?? "")}
             />
           )}
         </div>

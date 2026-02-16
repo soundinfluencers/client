@@ -9,11 +9,21 @@ import {
   buildPromoTabSchema,
 } from "@/client-side/schemas";
 import { BespokeForm } from "@/client-side/client-forms";
+import { postBespokeCampaign } from "@/api/client/campaign/campaign-bespoke";
 
 interface Props {
   activeTabId: string;
 }
-
+export const buildPayloadString = (values: Record<string, unknown>) => {
+  return JSON.stringify(values);
+};
+export const mapTabToCategory = (tabId: string): any => {
+  const t = tabId.trim().toLowerCase();
+  if (t === "artist") return "artist";
+  if (t === "music") return "music";
+  if (t === "event") return "event";
+  return "other";
+};
 export const PromoForm: React.FC<Props> = ({ activeTabId }) => {
   const promoFormData = React.useMemo(
     () => BESPOKE_CAMPAIGN_TABS_DATA.find((d) => d.promoType === activeTabId),
@@ -43,8 +53,15 @@ export const PromoForm: React.FC<Props> = ({ activeTabId }) => {
         schema={schema as any}
         defaultValues={defaultValues as any}
         submitButton={<SubmitButton className="bespoke-btn" data="Create" />}
-        onSubmit={(values) => {
-          console.log("VALID", values);
+        onSubmit={async (values) => {
+          const category = mapTabToCategory(activeTabId);
+
+          console.log(category);
+          console.log(values);
+          await postBespokeCampaign({
+            category,
+            payload: values,
+          });
         }}>
         <BespokeForm data={promoFormData} />
       </Form>
