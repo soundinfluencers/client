@@ -1,0 +1,156 @@
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
+.bar-strategy-proposals {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  @media screen and (max-width: 1000px) {
+    justify-content: start;
+    gap: 4px;
+  }
+  .UI-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 40px;
+    border-radius: 16px;
+    border: 1px solid rgb(231, 232, 241);
+    background-color: rgba(255, 255, 255, 0.5);
+    @media screen and (max-width: 900px) {
+      padding: 8px;
+      font-size: 13px;
+      gap: 4px;
+      img {
+        width: 17px;
+        height: 17px;
+      }
+    }
+  }
+}
+.ViewAudience {
+  margin: 16px 0px;
+  display: flex;
+  justify-content: end;
+  height: 34px;
+  &__btn {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(185, 208, 255, 1);
+    background-color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+    &.active {
+      background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+    }
+  }
+}
+.changeView-strategy {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  @media screen and (max-width: 500px) {
+    font-size: 14px;
+    justify-content: end;
+  }
+  &.changeView-proposal {
+    display: flex;
+    max-width: 338px;
+    justify-content: space-between;
+  }
+  .changeView-strategy-checkOUT {
+    max-width: 103px;
+    width: 100%;
+    position: relative;
+    border-radius: 8px;
+    padding: 8px 16px;
+    border: 1px solid rgba(231, 232, 241, 1);
+    height: 38px;
+    opacity: 0.5;
+    &.activeOUT {
+      opacity: 1;
+    }
+    .dot {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      right: 6px;
+      width: 6px;
+      height: 6px;
+      background-color: rgba(185, 208, 255, 1);
+      border-radius: 50%;
+    }
+  }
+  &__content {
+    display: flex;
+    align-items: center;
+
+    max-width: 209px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid rgba(231, 232, 241, 1);
+    height: 36px;
+    overflow: hidden;
+    @media screen and (max-width: 500px) {
+      max-width: 179px;
+      font-size: 12px;
+    }
+    .changeView-strategy-check {
+      cursor: pointer;
+      position: relative;
+      width: 100%;
+      padding: 8px;
+      opacity: 0.5;
+
+      .dot {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background-color: rgba(185, 208, 255, 1);
+        border-radius: 50%;
+      }
+      &:first-child {
+        display: flex;
+        align-items: center;
+        border-right: 1px solid rgba(231, 232, 241, 1);
+        padding-left: 16px;
+      }
+      &:last-child {
+        display: flex;
+        align-items: center;
+        flex-direction: row-reverse;
+        padding-right: 16px;
+      }
+      &.active {
+        opacity: 1;
+        &:first-child {
+          .dot {
+            right: 8px;
+          }
+        }
+        &:last-child {
+          .dot {
+            left: 8px;
+          }
+        }
+      }
+    }
+  }
+}
+.AddinitonalOption {
+  flex: 0 0 auto;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  height: 34px;
+  border: 1px solid rgba(185, 208, 255, 1);
+
+  width: fit-content;
+}

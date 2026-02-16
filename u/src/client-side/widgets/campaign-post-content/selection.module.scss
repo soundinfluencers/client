@@ -1,0 +1,231 @@
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
+
+.selection {
+  position: sticky;
+  top: 10px;
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(185, 208, 255, 1);
+  max-width: 544px;
+  width: 100%;
+  height: 100%;
+  @media screen and (max-width: 900px) {
+    position: relative;
+    padding: 8px;
+  }
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h3 {
+      font-weight: 400;
+      font-size: 36px;
+      line-height: 100%;
+      @media (max-width: 500px) {
+        font-size: 24px;
+      }
+    }
+
+    button {
+      border-radius: 24px;
+      padding: 8px 24px;
+      border: 1px solid rgba(32, 41, 52, 1);
+      @media (max-width: 500px) {
+        font-size: 14px;
+      }
+    }
+  }
+
+  &__content {
+    margin-top: 32px;
+    position: relative;
+    overflow: visible;
+  }
+
+  &__body {
+    overflow-y: auto;
+    max-height: 550px;
+    &::-webkit-scrollbar {
+      width: 0px;
+    }
+    img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+  }
+
+  .offer {
+    position: relative;
+    margin-left: 52px;
+
+    &__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .queue {
+        position: absolute;
+        top: 0;
+        left: -52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        z-index: 2;
+        border: 1px solid rgba(185, 208, 255, 1);
+        background: #fff;
+      }
+
+      h3,
+      p {
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 100%;
+      }
+    }
+
+    &__content {
+      margin-top: 8px;
+
+      ul {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 184px;
+        overflow: auto;
+        @include sb.scrollbar-dotted-vertical;
+
+        li {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          .info {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            img {
+              filter: grayscale(100%);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .PromoCards {
+    margin-top: 24px;
+    position: relative;
+    margin-left: 52px;
+    overflow: visible;
+
+    &__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .queue {
+        position: absolute;
+        top: 0;
+        left: -52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        z-index: 2;
+        border: 1px solid rgba(185, 208, 255, 1);
+        background: #fff;
+      }
+    }
+
+    &__content {
+      margin-top: 8px;
+
+      gap: 4px;
+
+      .title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        &__userinfo {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          h3 {
+            font-size: 16px;
+          }
+
+          img {
+            filter: grayscale(100%);
+          }
+        }
+        .followers {
+          p {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            gap: 8px;
+            @media screen and (max-width: 500px) {
+              font-size: 12px;
+              line-height: 12px;
+            }
+            span {
+              font-size: 16px;
+              white-space: nowrap;
+            }
+          }
+        }
+      }
+
+      &__info {
+        width: 100%;
+        display: flex;
+        justify-content: end;
+        overflow: visible;
+
+        .genresIcountries {
+          max-width: 283px;
+          width: 100%;
+          position: relative;
+          margin-top: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px 16px;
+          border-radius: 4px;
+          background: #fff;
+          border: 1px solid rgba(185, 208, 255, 1);
+          cursor: pointer;
+        }
+        .genresIcountries img {
+          transition: 0.3s ease;
+        }
+        .genresIcountries[data-open="true"] img {
+          transform: rotate(180deg);
+          transition: 0.3s ease;
+        }
+      }
+    }
+  }
+
+  &__footer {
+    margin-top: 24px;
+    border-top: 1px solid rgba(185, 208, 255, 1);
+    padding-top: 8px;
+
+    h2 {
+      font-weight: 400;
+      font-size: 20px;
+      line-height: 100%;
+      @media (max-width: 500px) {
+        font-size: 16px;
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@ export { RadioButton } from "./buttons/radio/RadioButton";
 export { Edit } from "./edit/edit";
 export { FormInput, FormTextArea } from "./inputs/form-input/form-attributes";
 export { Loader } from "./loader/loader";
-export { SwitchView } from "../../pages/client/components/switch-view/switch-view";
+
 export { SwitchButton } from "./switchers/switch-button/SwitchButton";
 export { SubmitButton } from "./submit-button/submit-button";
 

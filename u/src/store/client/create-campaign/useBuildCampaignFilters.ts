@@ -12,7 +12,7 @@ export interface BuildCampaignFiltersState {
 }
 
 const defaultFilter = { key: "bestMatch", name: "Best Match" };
-const defaultCurrency = { key: "$", currency: "USD" };
+const defaultCurrency = { key: "€", currency: "EUR" };
 const defaultBudget = 100000;
 
 export const useBuildCampaignFilters = create<BuildCampaignFiltersState>(

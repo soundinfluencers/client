@@ -1,0 +1,64 @@
+@use '@/styles/mixins/glass-effect' as glass;
+@use '@/styles/variables/variables' as vars;
+
+.switch-button {
+  @include glass.glass-effect();
+
+  width: 100%;
+  max-width: 600px;
+  height: 51px;
+  padding: 4px;
+  box-sizing: border-box;
+  background: #ffffff;
+
+  display: flex;
+  align-items: center;
+  position: relative;
+  border-radius: 32px;
+  // border: 1px solid vars.$white-gray-2;
+
+  @media screen and (max-width: 900px) {
+    height: 44px;
+  }
+
+  &__slider {
+    position: absolute;
+    left: 4px;
+    height: 43px;
+    width: calc(50% - 4px);
+    border-radius: 32px;
+    background: vars.$brightest-gradient;
+    transition: transform 0.18s ease-in-out;
+    z-index: 1;
+
+    @media screen and (max-width: 900px) {
+      height: 36px;
+    }
+  }
+
+  &__content {
+    flex: 1 1 50%;
+    height: 43px;
+    border-radius: 32px;
+
+    cursor: pointer;
+    position: relative;
+    z-index: 20;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    p {
+      color: vars.$gray-dark;
+      font-size: 20px;
+      font-weight: 400;
+      margin: 0;
+      z-index: 2;
+
+      @media screen and (max-width: 900px) {
+        font-size: 15px;
+      }
+    }
+  }
+}

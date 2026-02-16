@@ -3,7 +3,7 @@ import type { MultiPromoAccountsBody } from "./types";
 
 export const getMultiPromoAccounts = async ({
   sortBy = "bestMatch",
-  limit = 100000000,
+  limit,
   page = 1,
   body,
 }: {
@@ -19,6 +19,6 @@ export const getMultiPromoAccounts = async ({
       page,
     },
   });
-
+  console.log(response, "promo");
   return response.data;
 };

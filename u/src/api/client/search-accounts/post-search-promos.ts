@@ -1,4 +1,5 @@
 import api from "@/api/api";
+import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 
 export type SocialMediaType =
   | "instagram"
@@ -17,17 +18,9 @@ export type SearchSocialAccountsBody = {
   limit: number;
 };
 
-export type SocialAccount = {
-  _id: string;
-  username: string;
-  socialMedia: SocialMediaType;
-  logoUrl?: string;
-  followers?: number;
-};
-
 export type SearchSocialAccountsResponse = {
   data: {
-    accounts: SocialAccount[];
+    accounts: IPromoCard[];
   };
   total?: number;
   page?: number;

@@ -1,7 +1,8 @@
 import React from "react";
 import chevronDown from "@/assets/icons/chevron-down.svg";
-import edit from "@/assets/icons/edit.svg";
+
 import "./table-ui.scss";
+import { useClickOutside } from "@/shared/lib/hooks/useClickOutside";
 
 interface DropdownProps {
   isOpen: boolean;
@@ -17,15 +18,19 @@ export const Dropdown: React.FC<DropdownProps> = ({
   children,
 }) => {
   return (
-    <div className="table-dropdown">
+    <div data-open={isOpen} className="table-dropdown">
       <div
         className={`table-dropdown__title ${isOpen ? "active" : ""}`}
         onClick={onToggle}>
         {selected}
-        <img src={chevronDown} className={isOpen ? "active" : ""} alt="" />
+        <img src={chevronDown} className="img" alt="" />
       </div>
 
-      {isOpen && <div className="table-dropdown__select">{children}</div>}
+      {isOpen && (
+        <div className="table-dropdown__select">
+          <div className="table-dropdown__select-contetn">{children}</div>
+        </div>
+      )}
     </div>
   );
 };

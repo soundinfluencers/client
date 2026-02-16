@@ -1,0 +1,186 @@
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
+.build-compaign {
+  margin-bottom: 130px;
+  @media screen and (max-width: 900px) {
+    margin-bottom: 110px;
+  }
+  @media screen and (max-width: 500px) {
+    margin-bottom: 22px;
+  }
+  margin-top: 26px;
+  &__title {
+    h2 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 46px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+      @media screen and (max-width: 500px) {
+        font-size: 30px;
+      }
+    }
+    p {
+      margin-top: 8px;
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 20px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+      @media screen and (max-width: 500px) {
+        font-size: 15px;
+      }
+    }
+  }
+  &__viewAfilters {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 16px;
+    ul {
+      width: 100%;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      max-width: 1100px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      border-radius: 8px;
+      @include sb.scrollbar-thin-horizontal;
+      li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+        padding: 8px 16px;
+        background-color: white;
+        border: 1px solid rgba(231, 232, 241, 1);
+        border-radius: 8px;
+        height: 38px;
+        img {
+          cursor: pointer;
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+    &--add {
+      margin-top: 0px;
+    }
+  }
+  &__content {
+    margin-top: 16px;
+    .toolbar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      @media screen and (max-width: 900px) {
+        flex-direction: column;
+      }
+      &__finput {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+        .search-with-dropdown {
+          position: relative;
+          max-width: 496px;
+          width: 100%;
+          .search-dropdown {
+            position: absolute;
+            left: 0;
+            right: 0;
+            margin-top: -8px;
+            background: rgba(255, 255, 255, 1);
+            padding: 24px;
+            z-index: 5;
+
+            border-left: 1px solid rgba(185, 208, 255, 1);
+            border-right: 1px solid rgba(185, 208, 255, 1);
+            border-bottom: 1px solid rgba(185, 208, 255, 1);
+            border-bottom-left-radius: 26px;
+            border-bottom-right-radius: 26px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            &::-webkit-scrollbar {
+              opacity: 0;
+            }
+            &__item {
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              .title {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                img {
+                  width: 20px;
+                  height: 20px;
+                }
+              }
+            }
+          }
+        }
+        @media screen and (max-width: 900px) {
+          max-width: 100%;
+          flex: 1 1 auto;
+        }
+        .filter_flag {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          max-width: 184px;
+          width: 100%;
+          height: 48px;
+          border-radius: 8px;
+          background-color: rgba(255, 255, 255, 1);
+          border: 1px solid rgba(231, 232, 241, 1);
+          &.active {
+            border: 1px solid rgba(185, 208, 255, 1);
+          }
+          @media screen and (max-width: 900px) {
+            max-width: 42px;
+            height: 42px;
+            p {
+              display: none;
+            }
+          }
+        }
+      }
+      .selects {
+        display: flex;
+        width: 100%;
+        max-width: 472px;
+        gap: 24px;
+        @media screen and (max-width: 900px) {
+          gap: 16px;
+          margin-top: 8px;
+          justify-content: space-between;
+          max-width: 100%;
+        }
+      }
+    }
+
+    .build-compaign__content_functional {
+      margin-top: 16px;
+      display: flex;
+      height: 100%;
+      gap: 16px;
+
+      @media screen and (max-width: 900px) {
+        flex-direction: column;
+      }
+      &.tableAdaptive {
+        @media screen and (max-width: 600px) {
+          flex-direction: column;
+        }
+      }
+    }
+  }
+}

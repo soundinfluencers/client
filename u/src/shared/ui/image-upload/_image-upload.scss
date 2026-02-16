@@ -1,0 +1,205 @@
+@use "@/styles/variables/variables" as vars;
+
+.image-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  @media screen and (max-width: 900px) {
+    gap: 4px;
+  }
+
+  &__label {
+    position: relative;
+    font-size: 16px;
+    color: vars.$gray-dark;
+
+    @media screen and (max-width: 900px) {
+      font-size: 15px;
+    }
+    @media screen and (max-width: 500px) {
+      font-size: 14px;
+    }
+
+    &--error {
+      color: vars.$error;
+    }
+  }
+
+  &__field {
+    position: relative;
+    display: flex;
+    background: #fff;
+    border: 1px solid vars.$white-gray-2;
+    border-radius: 8px;
+    padding: 16px;
+
+    &--preview {
+      &-small {
+        padding: 5px 16px;
+
+        @media screen and (max-width: 900px) {
+          padding: 8.5px 16px;
+        }
+        @media screen and (max-width: 500px) {
+          padding: 8.5px 16px;
+        }
+      }
+      &-large {
+        padding: 16px;
+      }
+    }
+
+    &--error {
+      border: 1px solid vars.$error;
+
+      &:focus {
+        outline: none;
+        border: 1px solid vars.$error;
+      }
+    }
+  }
+
+  &__placeholder {
+    color: vars.$gray;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    @media screen and (max-width: 900px) {
+      font-size: 13px;
+    }
+    @media screen and (max-width: 500px) {
+      font-size: 12px;
+    }
+  }
+
+  &__wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &-remove {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      top: 8px;
+      right: 8px;
+
+      background: #ffffff;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: vars.$hover-button-2;
+      }
+
+      > img {
+        @media screen and (max-width: 900px) {
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      // &:active {
+      //   transform: scale(0.9);
+      // }
+    }
+  }
+
+  &__image {
+    &--small {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+
+      @media screen and (max-width: 900px) {
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    &--large {
+      width: 142px;
+      height: 172px;
+      border-radius: 8px;
+      object-fit: cover;
+
+      @media screen and (max-width: 900px) {
+        width: 130px;
+        height: 150px;
+      }
+    }
+  }
+
+  &__add {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    transition: all 0.3s ease;
+
+    right: 0;
+    top: 0;
+    padding: 16px;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    > img {
+      @media screen and (max-width: 900px) {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  &__remove {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    transition: all 0.2s ease;
+
+    right: 0;
+    top: 0;
+    padding: 16px;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    > img {
+      @media screen and (max-width: 900px) {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  &__description {
+    font-size: 14px;
+    color: vars.$gray-dark;
+
+    @media screen and (max-width: 900px) {
+      font-size: 13px;
+    }
+    @media screen and (max-width: 500px) {
+      font-size: 12px;
+    }
+  }
+}
+
+// .form-input.error .logo-input {
+//   border-color: rgba(225, 25, 32, 1);
+// }

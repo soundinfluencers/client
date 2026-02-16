@@ -32,15 +32,23 @@ export const Form = <T extends FieldValues>({
   const methods = useForm<T>({
     defaultValues,
     resolver: schema ? (zodResolver(schema as any) as any) : undefined,
+
     mode: "onChange",
     reValidateMode: "onChange",
+
     criteriaMode: "all",
     shouldUnregister: false,
   });
 
   React.useEffect(() => {
     if (!defaultValues) return;
-    methods.reset(defaultValues);
+    methods.reset(defaultValues, {
+      keepDirtyValues: true,
+      keepTouched: true,
+      keepErrors: true,
+      keepIsSubmitted: true,
+      keepSubmitCount: true,
+    });
   }, [defaultValues, methods]);
 
   const handleFormSubmit = async (formData: any) => {

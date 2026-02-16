@@ -1,0 +1,41 @@
+.invoice-details-client {
+  &__navigation {
+    margin-top: 24px;
+  }
+  &__title {
+    margin-top: 40px;
+    h2 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 48px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+    }
+  }
+  &__content {
+    margin-top: 24px;
+    max-width: 600px;
+  }
+  &__details {
+    margin-bottom: 56px;
+  }
+  &__subtitle {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(185, 208, 255, 1);
+    padding-bottom: 13px;
+    margin-bottom: 24px;
+    h3 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 20px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+    }
+  }
+  .mt {
+    margin-top: 60px;
+  }
+}

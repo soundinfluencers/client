@@ -1,0 +1,57 @@
+.changeView {
+  margin-top: 16px;
+  width: 100%;
+  display: flex;
+  justify-content: end;
+}
+.changeView.base {
+  display: block;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin-top: 0px;
+}
+.changeView.base .changeView__content {
+  background-color: white;
+  height: 40px;
+}
+.changeView__content {
+  display: flex;
+  align-items: center;
+  max-width: 108px;
+  border-radius: 8px;
+  border: 1px solid rgb(231, 232, 241);
+  height: 36px;
+  overflow: hidden;
+}
+.changeView__content .changeView-check {
+  position: relative;
+  width: 54px;
+  padding: 8px;
+  opacity: 0.5;
+}
+.changeView__content .changeView-check .check {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+}
+.changeView__content .changeView-check:first-child {
+  display: flex;
+  align-items: center;
+  border-right: 1px solid rgb(231, 232, 241);
+  padding-left: 26px;
+}
+.changeView__content .changeView-check:last-child {
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+  padding-right: 26px;
+}
+.changeView__content .changeView-check.active {
+  opacity: 1;
+}
+.changeView__content .changeView-check.active:first-child .check {
+  left: 8px;
+}
+.changeView__content .changeView-check.active:last-child .check {
+  right: 8px;
+}/*# sourceMappingURL=switch-view.css.map */

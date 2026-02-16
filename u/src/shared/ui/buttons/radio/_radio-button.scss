@@ -1,0 +1,68 @@
+@use '@/styles/variables/variables' as vars;
+
+.radio-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  &__circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    cursor: pointer;
+
+    &--lg {
+      border: 2px solid vars.$black-blue;
+      padding: 2px;
+      width: 24px;
+      height: 24px;
+
+      @media screen and (max-width: 900px) {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    &--sm {
+      border: 1px solid vars.$black-blue;
+      padding: 3px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__inner-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: vars.$black-blue;
+    transform: scale(0);
+    transition: transform 0.1s ease-in-out;
+
+    &--checked {
+      transform: scale(1);
+    }
+  }
+
+  &__title {
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    color: black;
+
+    &--lg {
+      margin-left: 19px;
+
+      @media screen and (max-width: 900px) {
+        margin-left: 8px;
+        font-size: 13px;
+      }
+    }
+
+    &--sm {
+      margin-left: 7px;
+    }
+  }
+}

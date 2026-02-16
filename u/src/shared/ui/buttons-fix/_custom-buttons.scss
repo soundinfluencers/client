@@ -1,0 +1,60 @@
+@use "@/styles/variables/variables" as vars;
+
+.custom-button {
+  border-radius: 24px;
+  padding: 12px 24px;
+  width: 250px;
+  height: 46px;
+
+  font-weight: 400;
+  font-size: 16px;
+  text-align: center;
+  text-transform: capitalize;
+  user-select: none;
+  transition: all 0.3s ease-in-out;
+
+  @media screen and (max-width: 500px) {
+    width: 100%;
+  }
+}
+
+.custom-button-main {
+  background: vars.$black-blue;
+  color: #fff;
+
+  &:hover {
+    background: vars.$hover-button-1;
+  }
+  &:active {
+    background: vars.$pressed-button-1;
+    color: vars.$black-blue;
+  }
+  &:disabled {
+    background: vars.$disabled-button-1;
+    color: vars.$gray;
+    cursor: not-allowed;
+    // opacity: 1;
+  }
+}
+
+.custom-button-secondary {
+  border: 1px solid #E7E8F1;
+  background: #fff;
+  color: vars.$black-blue;
+
+  &:hover {
+    background: vars.$hover-button-2;
+  }
+
+  &:active {
+    background: vars.$pressed-button-1;
+    // color: vars.$black-blue;
+  }
+
+  &:disabled {
+    color: vars.$gray;
+    // border: 1px solid vars.$white-gray-2;
+    cursor: not-allowed;
+    background: #fff;
+  }
+}

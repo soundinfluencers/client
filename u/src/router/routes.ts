@@ -6,18 +6,25 @@ import { ForgotPasswordPage } from "../pages/auth/forgot/ForgotPasswordPage.tsx"
 
 // Client Imports
 import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
-import { BespokeCampaign } from "../pages/client/bespoke-campaign/bespoke-campaign.tsx";
-import { CampaignCreatorPage } from "../pages/client/campaign-creator-page/campaign-creator-page.tsx";
 
-import { CampaignStrategy } from "../pages/client/campaign-strategy/campaign-strategy.tsx";
-import { CampaignPostContent } from "../pages/client/campaign-post-content/campaign-post-content.tsx";
-import { PaymentCampaign } from "../pages/client/payment-campaign/payment-campaign.tsx";
 import { InfluencerTermsPage } from "../pages/auth/terms/influencer/InfluencerTermsPage.tsx";
+import {
+  AccountSetting,
+  AddInfluencerBuildCampaign,
+  BespokeCampaign,
+  CampaignCreatorPage,
+  CampaignPage,
+  CampaignPostContent,
+  CampaignSharePage,
+  CampaignStrategy,
+  HomePage,
+  InvoiceDetails,
+  InvoicesHistory,
+  PaymentCampaign,
+  PostContentAdd,
+} from "@/client-side/index.ts";
 
-import { CampaignPage } from "@/pages/client/campaign/campaign-page.tsx";
-import { CampaignSharePage } from "@/pages/client/campaign-share/campaig-share-page.tsx";
-import { HomePage } from "@/pages/client/client-dashboard/home-page.tsx";
-import { AccountSetting } from "@/pages/client/account-settings/account-settings.tsx";
+// import { CampaignAddInfluencer } from "@/pages/client/campaign-add-infuencer/campaign-add-infuencer.tsx";
 
 export const routes: IRoute[] = [
   {
@@ -70,37 +77,37 @@ export const routes: IRoute[] = [
   },
   {
     name: "CreateCampaign",
-    path: "/client/CreateCampaign",
+    path: "/client/create-campaign",
     component: CampaignCreatorPage,
     isProtected: true,
   },
   {
     name: "Content",
-    path: "/client/CreateCampaign/Content",
+    path: "/client/create-campaign/content",
     component: CampaignPostContent,
     isProtected: true,
   },
   {
     name: "Strategy",
-    path: "/client/CreateCampaign/Content/Strategy",
+    path: "/client/create-campaign/content/strategy",
     component: CampaignStrategy,
     isProtected: true,
   },
   {
     name: "Payment",
-    path: "/client/CreateCampaign/Content/Strategy/Payment",
+    path: "/client/create-campaign/content/strategy/payment",
     component: PaymentCampaign,
     isProtected: true,
   },
   {
     name: "BespokeCampaign",
-    path: "/client/BespokeCampaign",
+    path: "/client/beskoke-campaign",
     component: BespokeCampaign,
     isProtected: true,
   },
   {
     name: "AccountSetting",
-    path: "/client/AccountSetting",
+    path: "/client/account-settings",
     component: AccountSetting,
     isProtected: true,
   },
@@ -111,9 +118,33 @@ export const routes: IRoute[] = [
     isProtected: true,
   },
   {
+    name: "CampaignAddInfluencer",
+    path: "/client/campaign/add-influencer",
+    component: AddInfluencerBuildCampaign,
+    isProtected: true,
+  },
+  {
+    name: "AddInfluencerPostContent",
+    path: "/client/campaign/add-influencer/add-influencer-content",
+    component: PostContentAdd,
+    isProtected: true,
+  },
+  {
     name: "PromoShare",
     path: "/promo-share/:id/:type",
     component: CampaignSharePage,
     isProtected: false,
+  },
+  {
+    name: "InvoiceHistory",
+    path: "/client/invoice-history",
+    component: InvoicesHistory,
+    isProtected: true,
+  },
+  {
+    name: "InvoiceDetails",
+    path: "/client/invoice-details",
+    component: InvoiceDetails,
+    isProtected: true,
   },
 ];
