@@ -116,6 +116,8 @@ export type CampaignState = {
 
   campaignPayload: any | null;
 
+  postContentDraft: Record<string, string> | null;
+
   postContent: {
     main: Array<PlatformForm>;
     music: Array<PlatformForm>;
@@ -127,7 +129,7 @@ export type CampaignState = {
 
   actions: {
     getDraftPayload: () => any;
-    getProposalPayload: (getProposalPayload: string) => void;
+    getProposalPayload: () => void;
     setOffer: (offer: IApiOffer) => void;
     setPromoCards: (cards: IPromoCard | IPromoCard[]) => void;
     setCampaignAccount: (data: ICampaignAccount) => void;
@@ -136,10 +138,11 @@ export type CampaignState = {
       formData: Record<string, string>,
       socialMedia: string,
     ) => void;
-
+    setPostContentDraft: (v: Record<string, string>) => void;
+    clearPostContentDraft: () => void;
     setActiveOffer: (id: string) => void;
     setCampaignName: (campaignName: string) => void;
-
+    clearPostContentAll: () => void;
     // ✅ SSOT build step (один раз на PostContent)
     buildCampaignContentFromForm: (
       formData: Record<string, any>,
@@ -237,8 +240,8 @@ export interface CampaignAddedAccount {
   _id: ObjectId;
 
   influencerId: ObjectId;
-  accountId: ObjectId;
-
+  socialAccountId: ObjectId;
+  addedAccountsId: ObjectId;
   socialMedia: SocialMedia;
 
   /** В JSON это username */
@@ -286,7 +289,7 @@ export interface CampaignAddedAccount {
 export interface CampaignResponse {
   campaignId: ObjectId;
   campaignName: string;
-
+  canEdit: boolean;
   socialMedia: SocialMedia;
 
   /** В JSON "09.01.26" — это НЕ ISO. Поэтому string. */
@@ -325,12 +328,4 @@ export type CampaignStatusUI =
   | "completed"
   | "pending"
   | "under_review"
-  | "proposal"; // как у тебя
-
-export interface CampaignFetchState {
-  campaign: CampaignResponse | null;
-  draft: CampaignResponse | null;
-  setDraft: (draftId: string) => Promise<void>;
-  setCampaign: (campaignId: string) => Promise<void>;
-  status: CampaignStatusUI | null;
-}
+  | "proposal";

@@ -1,0 +1,71 @@
+.platforms-scroll {
+  &__header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    h3 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 16px;
+      line-height: 100%;
+      letter-spacing: 0%;
+    }
+    img {
+      cursor: pointer;
+    }
+  }
+
+  &__list {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+
+    list-style: none;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 24px;
+
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 14px;
+      line-height: 100%;
+      letter-spacing: 0%;
+      background-color: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(231, 232, 241, 1);
+      border-radius: 32px;
+      flex-shrink: 0;
+      height: 41px;
+
+      &:first-child {
+        img {
+          max-width: 32px;
+          height: 32px;
+        }
+      }
+
+      &.active {
+        background: linear-gradient(
+          107.52deg,
+          #bce8ff 3.56%,
+          rgba(218, 244, 255, 0.94) 50.39%,
+          rgba(191, 216, 255, 0.895) 79.14%,
+          rgba(164, 188, 255, 0.85) 100%
+        );
+      }
+    }
+  }
+}

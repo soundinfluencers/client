@@ -15,7 +15,7 @@ export const SubmitButton: React.FC<Props> = ({
   const { control } = useFormContext();
 
   const { isSubmitting, isValid } = useFormState({ control });
-
+  console.log(isValid);
   return (
     <button
       type={type}

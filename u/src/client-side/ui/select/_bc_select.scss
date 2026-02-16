@@ -1,0 +1,136 @@
+.BudgetPopUp {
+  position: relative;
+  max-width: 288px;
+  @media screen and (max-width: 500px) {
+    max-width: 100%;
+  }
+  width: 100%;
+  &.less {
+    width: 100%;
+    max-width: 184px;
+    @media screen and (max-width: 500px) {
+      max-width: 164px;
+    }
+  }
+  &__title {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 24px;
+    gap: 26px;
+    border: 1px solid rgba(231, 232, 241, 1);
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 8px;
+    z-index: 11;
+
+    @media screen and (max-width: 500px) {
+      padding: 12px 8px;
+      justify-content: start;
+      p {
+        font-size: 14px;
+      }
+    }
+    // img {
+    //   position: absolute;
+    //   right: 16px;
+    //   &.active {
+    //     transform: rotate(180deg);
+    //   }
+    // }
+    &.active {
+      border: 1px solid rgba(185, 208, 255, 1);
+    }
+  }
+  &__select {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-top: -8px;
+    background: rgba(255, 255, 255, 1);
+    padding: 24px;
+    z-index: 5;
+
+    border-left: 1px solid rgba(231, 232, 241, 1);
+    border-right: 1px solid rgba(231, 232, 241, 1);
+    border-bottom: 1px solid rgba(231, 232, 241, 1);
+    border-bottom-left-radius: 26px;
+    border-bottom-right-radius: 26px;
+    &.active {
+      border-left: 1px solid rgba(185, 208, 255, 1);
+      border-right: 1px solid rgba(185, 208, 255, 1);
+      border-bottom: 1px solid rgba(185, 208, 255, 1);
+      border-bottom-left-radius: 26px;
+      border-bottom-right-radius: 26px;
+    }
+    @media screen and (max-width: 500px) {
+      padding: 16px 12px;
+    }
+    .currency {
+      ul {
+        display: flex;
+        justify-content: space-evenly;
+        li {
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 400;
+          font-style: Regular;
+          font-size: 20px;
+          leading-trim: NONE;
+          line-height: 100%;
+          letter-spacing: 0%;
+          text-align: center;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          border: 1px solid rgba(185, 208, 255, 1);
+
+          &.active {
+            border: 1px solid rgba(185, 208, 255, 1);
+            background-color: rgba(235, 245, 254, 1);
+          }
+        }
+      }
+    }
+    .BudgetPopUp__select_price {
+      margin-top: 16px;
+      max-width: 240px;
+      label {
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 13px;
+        leading-trim: NONE;
+        line-height: 100%;
+        letter-spacing: 0%;
+      }
+      input {
+        width: 100%;
+        border: 1px solid rgba(185, 208, 255, 1);
+        background-color: rgba(235, 245, 254, 1);
+        height: 40px;
+        border-radius: 4px;
+        padding: 0px 8px;
+      }
+    }
+    .my-sort-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      li {
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 14px;
+        leading-trim: NONE;
+        line-height: 100%;
+        letter-spacing: 0%;
+      }
+      img {
+        position: absolute;
+        right: 16px;
+      }
+    }
+  }
+}

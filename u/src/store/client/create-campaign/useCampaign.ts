@@ -26,7 +26,12 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
   activeOfferId: null,
   campaignName: "",
   campaignContent: [],
+  postContentDraft: null,
+
   actions: {
+    setPostContentDraft: (v) => set({ postContentDraft: v }),
+
+    clearPostContentDraft: () => set({ postContentDraft: null }),
     setOffer: (offer) =>
       set((state) => {
         const incomingId = String((offer as any)?._id ?? "");
@@ -203,7 +208,7 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
         })),
       };
     },
-    getProposalPayload: (paymentType: string) => {
+    getProposalPayload: () => {
       const state = get();
 
       const addedAccounts = state.selectedAccounts.map((a) => ({
@@ -229,8 +234,8 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
         campaignName: state.campaignName ?? "",
         socialMedia,
         campaignPrice: state.totalPrice ?? 0,
-        paymentType,
         addedAccounts,
+        paymentType: "",
         campaignContent: state.campaignContent ?? [],
       };
     },

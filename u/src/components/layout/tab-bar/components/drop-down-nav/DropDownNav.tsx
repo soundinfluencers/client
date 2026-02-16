@@ -1,23 +1,27 @@
-import { Link } from 'react-router-dom';
-import { PLACEHOLDER_LOGO_URL } from '@/pages/influencer/shared/utils/socialAccount.mapper';
-import { useRef } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useClickOutside } from '@/hooks/global/useClickOutside';
-import { useUser } from '@/store/get-user';
+import { Link } from "react-router-dom";
+import { PLACEHOLDER_LOGO_URL } from "@/pages/influencer/shared/utils/socialAccount.mapper";
+import { useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useClickOutside } from "@/hooks/global/useClickOutside";
+import { useUser } from "@/store/get-user";
 import X from "@/assets/icons/x.svg";
-import './_drop-down-nav.scss';
-import { useWindowSize } from '@/hooks/global/useWindowSize';
+import "./_drop-down-nav.scss";
+import { useWindowSize } from "@/hooks/global/useWindowSize";
+import { useLocalProfileStore } from "@/client-side/store/mock-photo/mock-photo";
 
 interface DropDownNavProps {
   isDropdownOpen: boolean;
   setIsDropdownOpen: (isOpen: boolean | ((prev: boolean) => boolean)) => void;
 }
 
-export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavProps) => {
+export const DropDownNav = ({
+  isDropdownOpen,
+  setIsDropdownOpen,
+}: DropDownNavProps) => {
   const { logout } = useAuth();
   const { width } = useWindowSize();
   const { user } = useUser();
-
+  const { avatarUrl } = useLocalProfileStore();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(dropdownRef, () => {
@@ -26,9 +30,13 @@ export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavPr
 
   const AccountSettings =
     user?.role === "client"
-      ? "/client/AccountSetting"
+      ? "/client/account-settings"
       : "/influencer/account-setting";
 
+  const InvoiceDetails =
+    user?.role === "client"
+      ? "/client/invoice-details"
+      : "/influencer/invoices";
   const isDesktop = width > 900;
 
   // console.log('user in drop down menu', user);
@@ -45,7 +53,7 @@ export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavPr
           <p className="user-menu__item-text">Account</p>
           <img
             className="user-menu__item-avatar"
-            src={PLACEHOLDER_LOGO_URL}
+            src={avatarUrl || PLACEHOLDER_LOGO_URL}
             alt="User Avatar"
           />
         </div>
@@ -82,15 +90,20 @@ export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavPr
             Account settings
           </Link>
 
-          {user?.role === "influencer" && (
+          <Link
+            className="user-menu__dropdown-nav-link"
+            to={InvoiceDetails}
+            onClick={() => setIsDropdownOpen(false)}>
+            Invoice details
+          </Link>
+          {user?.role === "client" && (
             <Link
               className="user-menu__dropdown-nav-link"
-              to="/influencer/invoices"
+              to="/client/invoice-history"
               onClick={() => setIsDropdownOpen(false)}>
-              Invoice details
+              Invoices History
             </Link>
           )}
-
           <Link
             className="user-menu__dropdown-nav-link"
             to=""

@@ -1,0 +1,31 @@
+.campaign-creator-page {
+  &__head {
+    .navmenu {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    h1 {
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 40px;
+      leading-trim: NONE;
+      line-height: 100%;
+      letter-spacing: 0%;
+      @media screen and (max-width: 500px) {
+        font-size: 30px;
+      }
+    }
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .no-ofers {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+  }
+}

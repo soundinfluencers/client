@@ -57,6 +57,7 @@ export const LoginPage: FC = () => {
               type="password"
               placeholder="Enter password"
             />
+
             <p
               className="login-page__forgot"
               onClick={() => navigate("/forgot-password")}>

@@ -1,0 +1,73 @@
+@use "@/styles/variables/variables" as vars;
+@use "@/styles/mixins/title" as title;
+
+.invoices-history {
+  padding-top: 24px;
+  padding-bottom: 64px;
+
+  @media screen and (max-width: 900px) {
+    padding-bottom: 40px;
+  }
+  @media screen and (max-width: 500px) {
+    padding-bottom: 16px;
+  }
+
+  &__header {
+    margin-top: 40px;
+    margin-bottom: 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &-title {
+      @include title.title();
+    }
+
+    &-subtitle {
+      @include title.subtitle();
+    }
+  }
+
+  &__content {
+    overflow-x: visible;
+  }
+
+  &__scroll-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+
+    box-sizing: border-box;
+
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: vars.$light-blue;
+      border-radius: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: vars.$black-blue;
+      border-radius: 8px;
+    }
+  }
+
+  &__actions {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 64px;
+
+    @media screen and (max-width: 900px) {
+      margin-top: 32px;
+    }
+
+    @media screen and (max-width: 500px) {
+      margin-top: 24px;
+    }
+  }
+}

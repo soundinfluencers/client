@@ -1,0 +1,142 @@
+.campaign-post-content {
+  margin-bottom: 42px;
+
+  @media screen and (max-width: 900px) {
+    margin-bottom: 16px;
+  }
+  @media screen and (max-width: 600px) {
+    margin-bottom: 24px;
+  }
+  .navmenu {
+    margin-top: 24px;
+  }
+  &__row {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    .form-block {
+      width: 100%;
+      .add-description-btn {
+        max-width: 250px;
+        margin: 0 auto;
+      }
+      @media screen and (max-width: 900px) {
+        margin-top: 16px;
+        margin-bottom: 32px;
+      }
+      &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        h1 {
+          font-weight: 400;
+          font-style: Regular;
+          font-size: clamp(24px, 3.2vw, 40px);
+          leading-trim: NONE;
+          line-height: 100%;
+          letter-spacing: 0%;
+        }
+        margin-bottom: 16px;
+      }
+      .platform-group {
+        margin-top: 24px;
+        padding: 24px;
+        background: rgba(246, 250, 255, 1);
+        border: 1px solid;
+
+        border: 1px solid rgba(185, 208, 255, 1);
+        border-radius: 24px;
+        .labelForm {
+          font-weight: 400;
+          font-style: Regular;
+          font-size: 20px;
+          leading-trim: NONE;
+          line-height: 100%;
+          letter-spacing: 0%;
+
+          width: 100%;
+        }
+        .legend {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          border-bottom: 1px solid rgba(185, 208, 255, 1);
+          padding-bottom: 8px;
+          margin: 24px 0px 16px;
+          img {
+            margin-right: 4px;
+          }
+        }
+        .people-chose {
+          margin-top: 16px;
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          @media screen and (max-width: 900px) {
+            flex-direction: column;
+            align-items: center;
+          }
+          .for-class {
+            max-width: 200px;
+            width: 100%;
+            border: 1px solid rgba(185, 208, 255, 1);
+            &.active {
+              background: rgba(185, 208, 255, 0.15);
+            }
+            @media screen and (max-width: 900px) {
+              max-width: 250px;
+            }
+          }
+        }
+        .additional-selection {
+          max-width: 350px;
+          text-align: center;
+          margin: 16px auto 0;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          ul {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            li {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 48px;
+              height: 48px;
+              border-radius: 8px;
+              background: rgba(255, 255, 255, 1);
+              border: 1px solid rgba(185, 208, 255, 1);
+            }
+          }
+        }
+      }
+      &__sticky {
+        position: sticky;
+        top: 50px;
+        width: 100%;
+        @media screen and (max-width: 900px) {
+          .form-width {
+            max-width: 100%;
+          }
+        }
+
+        .additional-button {
+          max-width: 250px;
+          margin: 16px auto 16px auto;
+        }
+      }
+      @media screen and (max-width: 900px) {
+        .postContent {
+          max-width: 100%;
+        }
+      }
+    }
+    @media screen and (max-width: 900px) {
+      flex-direction: column-reverse;
+    }
+  }
+}

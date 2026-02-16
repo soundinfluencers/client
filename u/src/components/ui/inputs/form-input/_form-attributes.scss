@@ -34,6 +34,13 @@ label {
     border: 1px solid rgba(231, 232, 241, 1);
     border-radius: 8px;
     z-index: 100;
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      -webkit-text-fill-color: #000;
+      -webkit-box-shadow: 0 0 0 1000px #fff inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
   }
   &.is-error {
     label {

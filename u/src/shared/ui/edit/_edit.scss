@@ -1,0 +1,15 @@
+.edit {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 85px;
+  height: 38px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(235, 236, 255, 1);
+  background-color: white;
+  &.active {
+    background-color: rgba(185, 208, 255, 0.15);
+  }
+}

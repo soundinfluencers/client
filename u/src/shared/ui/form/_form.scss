@@ -1,0 +1,68 @@
+.form {
+  max-width: 600px;
+  z-index: 11 !important;
+  .labelForm {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+
+    width: 100%;
+  }
+  .legend {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border-bottom: 1px solid rgba(185, 208, 255, 1);
+    padding-bottom: 8px;
+    margin: 24px 0px 16px;
+    img {
+      margin-right: 4px;
+    }
+  }
+  .inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    .edit-input {
+      position: relative;
+      &__pos {
+        position: absolute;
+        top: 50%;
+        right: 16px;
+        transform: translateY(-15%);
+        z-index: 1000;
+      }
+    }
+  }
+  &__btn-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    button {
+      max-width: 250px;
+      width: 100%;
+      height: 46px;
+      padding: 12px 24px;
+      border-radius: 24px;
+    }
+    .disabled {
+      background: rgba(236, 238, 240, 1);
+    }
+    .ready {
+      background: rgba(32, 41, 52, 1);
+      color: white;
+    }
+    .submit {
+      margin-top: 64px;
+      border: none;
+    }
+    .add-style-profile {
+      margin-top: 48px;
+    }
+  }
+}

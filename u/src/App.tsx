@@ -26,15 +26,15 @@ import { AccountSettingInfluencer } from "./pages/influencer/account-setting/Acc
 import "./app.scss";
 import { RootRedirect } from "./router/components/rootRedirect";
 import { ToastContainer } from "react-toastify";
-import { HomePage } from "./pages/client/client-dashboard/home-page";
+import { HomePage } from "./client-side";
 
 function App() {
   const { accessToken, setAccessToken, logout } = useAuth();
 
-    useEffect(() => {
-        const cleanup = setupInterceptors(setAccessToken, logout);
-        return cleanup;
-    }, [setAccessToken, logout]);
+  useEffect(() => {
+    const cleanup = setupInterceptors(setAccessToken, logout);
+    return cleanup;
+  }, [setAccessToken, logout]);
 
   return (
     <div>
