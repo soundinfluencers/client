@@ -51,10 +51,9 @@ export const Form = <T extends FieldValues>({
     });
   }, [defaultValues, methods]);
 
-  const handleFormSubmit = async (formData: any) => {
+  const handleFormSubmit = async (formData: T) => {
     if (onSubmit) await onSubmit(formData);
   };
-
   return (
     <FormProvider {...methods}>
       <form

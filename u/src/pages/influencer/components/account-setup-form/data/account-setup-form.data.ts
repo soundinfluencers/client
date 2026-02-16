@@ -38,7 +38,7 @@ export const PLATFORM_CONFIG: TPlatformConfigRecord = {
     audienceInsights: true,
   },
   press: {
-    switcher: true,
+    switcher: false,
     musicGenres: true,
     themeTopics: false,
     audienceInsights: true,

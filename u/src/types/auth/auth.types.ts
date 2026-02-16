@@ -11,4 +11,5 @@ export interface ResponseLoginUserModel {
   firstName: string;
   balance: number;
   role: UserRoleType | null;
+  logoUrl: string | null;
 }

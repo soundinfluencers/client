@@ -1,5 +1,5 @@
 import { DetailsRow } from './DetailsRow';
-import { ButtonMain, ButtonSecondary } from '../../../../../../components/ui/buttons-fix/ButtonFix';
+import { ButtonMain, ButtonSecondary } from '@components/ui/buttons-fix/ButtonFix.tsx';
 
 import { getTitleForPromoCard } from '../utils/getTitleForPromoCard';
 import { getPromoFields } from '../../../data/promos.data';
@@ -8,6 +8,8 @@ import type { IPromoDetailsModel, TConfirmationType, TPromoStatus } from '../../
 // import type { TCampaignInfo, TSocialMedia } from '../../../distributing/components/campaign-result-form/types/campaign-result-form.types';
 
 import './_promos-details-list-card.scss';
+import React from "react";
+// import { useUser } from "@/store/get-user";
 
 interface Props {
   promo: IPromoDetailsModel;
@@ -36,6 +38,7 @@ export const PromosDetailsListCard: React.FC<Props> = ({
   // onMetaChange,
   // onFormPayloadChange,
 }) => {
+  // const { user } = useUser();
   const fields = getPromoFields(promo, status);
 
   const isNew = status === 'pending';
@@ -57,10 +60,9 @@ export const PromosDetailsListCard: React.FC<Props> = ({
 
       <div className="promos-details-list-card__body">
         <span className="promos-details-list-card__body-header">
-          <img src="/promo-preview.png" alt="Promo Preview" />
+          <img src={`/promo-preview.png`} alt="Promo Preview" />
           <span>{promo.campaignName}</span>
         </span>
-
         <div className="promos-details-list-card__body-details">
           {fields
             .map(field => (
@@ -73,6 +75,7 @@ export const PromosDetailsListCard: React.FC<Props> = ({
                     : (promo)[field.key]?.toString() ?? ''
                 }
                 copyable={field.copyable}
+                linkable={field.linkable}
               />
             ))}
         </div>
@@ -99,14 +102,9 @@ export const PromosDetailsListCard: React.FC<Props> = ({
             <ButtonMain
               label="Submit results & get paid"
               onClick={() => {
-                onSubmitResults && onSubmitResults();
-                // onFormOpen && onFormOpen();
-                // onMetaChange && onMetaChange(normalizeSocialMedia(promo.accountSocialMedia));
-                // onFormPayloadChange && onFormPayloadChange({
-                //   campaignId: promo.campaignId,
-                //   addedAccountsId: promo.addedAccountsId,
-                //   username: promo.username,
-                // });
+                if (onSubmitResults) {
+                  onSubmitResults();
+                }
               }}
             />
           )}
@@ -115,6 +113,14 @@ export const PromosDetailsListCard: React.FC<Props> = ({
     </article>
   );
 };
+
+// onFormOpen && onFormOpen();
+// onMetaChange && onMetaChange(normalizeSocialMedia(promo.accountSocialMedia));
+// onFormPayloadChange && onFormPayloadChange({
+//   campaignId: promo.campaignId,
+//   addedAccountsId: promo.addedAccountsId,
+//   username: promo.username,
+// });
 
 // config for different promo statuses
 // const PROMO_CARD_CONFIG = {

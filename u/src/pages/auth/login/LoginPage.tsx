@@ -1,7 +1,7 @@
 import { useState, type FC } from "react";
 import { type NavigateFunction, useNavigate } from "react-router-dom";
 import { TextInput } from "@/components/ui/inputs/text-input/TextInput.tsx";
-import { useLoginStore } from "../../../store/features/loginSlice.ts";
+import { useLoginStore } from "@/store/features/loginSlice.ts";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { loginApi } from "@/api/auth/auth.api.ts";
 import { useUser } from "@/store/get-user/index.ts";
@@ -17,9 +17,9 @@ export const LoginPage: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (isLoading) return;
+    // if (isLoading) return;
 
-    setIsLoading(true);
+    // setIsLoading(true);
     try {
       const response = await loginApi({ email, password, role });
 
@@ -67,7 +67,7 @@ export const LoginPage: FC = () => {
         </div>
         <div className="login-page__controls">
           <ButtonMain
-            label={isLoading ? "Logging in..." : "Log in now"}
+            label={isLoading ? "Logging in..." : "Log in"}
             onClick={handleLogin}
             isDisabled={
               email.length === 0 || password.length === 0 || isLoading

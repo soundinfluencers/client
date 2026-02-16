@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import type { UserRoleType } from "@/types/user/user.types.ts";
 import { useUser } from "@/store/get-user/index.ts";
 import { ButtonMain, ButtonSecondary } from "@/components/ui/buttons-fix/ButtonFix.tsx";
+
 export const AuthPage: FC = () => {
   const navigate = useNavigate();
   const { setRole, role } = useUser();

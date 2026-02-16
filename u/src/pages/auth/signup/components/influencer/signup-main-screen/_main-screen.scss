@@ -14,13 +14,13 @@
 
   @media screen and (max-width: 900px) {
     width: 545px;
-    padding: 31px 0 32px;
+    padding: 32px 0 32px;
     gap: 0;
   }
 
   @media screen and (max-width: 700px) {
     width: 100%;
-    padding: 24px 25px 12px;
+    padding: 24px 25px 24px;
   }
 
   @media screen and (max-width: 500px) {
@@ -115,10 +115,31 @@
   }
 
   &__controls {
-    width: 250px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    font-size: 15px;
 
     @media screen and (max-width: 500px) {
-      width: 100% !important;
+      width: 100%;
+      font-size: 13px;
+    }
+  }
+
+  &__error {
+    width: 100%;
+    color: vars.$error;
+    font-size: 12px;
+    text-align: center;
+    //margin-top: 24px;
+    //margin-bottom: 24px;
+    border-bottom: 1px solid vars.$error;
+    //padding-bottom: 4px;
+
+    @media screen and (max-width: 500px) {
+      //font-size: 12px;
     }
   }
 }

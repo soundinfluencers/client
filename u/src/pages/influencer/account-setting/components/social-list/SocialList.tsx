@@ -1,10 +1,10 @@
 import './_social-list.scss';
-import { useInfluenserProfileStore } from '@/store/influencer/account-settings/useInfluenserProfileStore';
+import { useInfluencerProfileStore } from '@/store/influencer/account-settings/useInfluencerProfileStore.ts';
 import { SocialAccountsList } from '../../../components/social-accounts-list/SocialAccountsList';
 import type { TSocialAccounts } from '@/types/user/influencer.types';
 
 export const SocialList: React.FC = () => {
-  const { profile } = useInfluenserProfileStore();
+  const { profile } = useInfluencerProfileStore();
 
   const getProfileAccounts = (platform: TSocialAccounts) => {
     if (!profile) return [];

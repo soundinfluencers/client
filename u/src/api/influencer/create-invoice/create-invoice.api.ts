@@ -5,6 +5,7 @@ export const createInvoice = async (
   data: InvoiceCreateRequestDto,
 ): Promise<void> => {
   try {
+    console.log("Creating invoice with data:", data);
     await $api.post(`/invoice`, data);
 
     console.log("Invoice created successfully");

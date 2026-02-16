@@ -6,7 +6,7 @@ type TextUserKey =
   | "telegramUsername"
   | "whatsapp";
 
-type AvatarUserKey = "profilePhotoUrl";
+type AvatarUserKey = "logoUrl";
 type PasswordUserKey = "password";
 
 export type AccountDetailsField =

@@ -13,13 +13,13 @@ export const ACCOUNT_DETAILS_INPUTS_DATA: TDetailsInputs[] = [
     label: "Last Name",
     placeholder: "Enter last name",
   },
-  // {
-  //   type: "file",
-  //   name: "profilePhotoUrl",
-  //   label: "Photo profile",
-  //   placeholder: "Attach the logo for your brand here",
-  //   size: "small",
-  // },
+  {
+    type: "file",
+    name: "logoUrl",
+    label: "Photo profile",
+    placeholder: "Attach the logo for your brand here",
+    size: "small",
+  },
   {
     type: "text",
     name: "email",

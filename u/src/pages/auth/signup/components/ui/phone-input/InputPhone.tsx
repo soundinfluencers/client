@@ -13,10 +13,13 @@ import check from "@/assets/icons/check.svg";
 import {
   validateLetters,
   validatePhoneNumber,
-} from "../../../../../../utils/validators/validators.ts";
-import type { PhoneNumberType } from "../../../../../../types/utils/constants.types.ts";
-import { phoneNumbers } from "../../../../../../constants/phone-numbers.ts";
-import { useClickOutside } from "../../../../../../hooks/global/useClickOutside.ts";
+} from "@/utils/validators/validators.ts";
+import type { PhoneNumberType } from "@/types/utils/constants.types.ts";
+import { phoneNumbers } from "@/constants/phone-numbers.ts";
+import { useClickOutside } from "@/hooks/global/useClickOutside.ts";
+import {
+  useInfluencerSignupStore,
+} from "@/store/influencer/account-settings/useInfluenserSignupStore.ts";
 
 export interface InputPhoneProps {
   value: string;
@@ -24,6 +27,7 @@ export interface InputPhoneProps {
   isMenuOpen: boolean;
   setIsMenuOpen: (isOpen: boolean) => void;
   isError?: boolean;
+  errorMessage?: string;
 }
 
 export const InputPhone: FC<InputPhoneProps> = ({
@@ -32,7 +36,9 @@ export const InputPhone: FC<InputPhoneProps> = ({
   isMenuOpen,
   setIsMenuOpen,
   isError,
+  errorMessage
 }: InputPhoneProps) => {
+  const { setError } = useInfluencerSignupStore();
   const [isValid, setIsValid] = useState(true);
   const [searchValue, setSearchValue] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -82,34 +88,46 @@ export const InputPhone: FC<InputPhoneProps> = ({
     [searchValue],
   );
 
+  const showError = Boolean(isError) || (!isValid && Boolean(value));
+
   return (
     <div
       ref={dropdownRef}
       className={`input-phone ${
-        !isValid || isError ? "input-phone--error" : ""
+        showError ? "input-phone--error" : ""
       }`}>
-      <p className="input-phone__title">Phone*</p>
+      <p className={`input-phone__title ${showError ? 'input-phone__title--error' : ''}`}>Phone*</p>
 
       <div
         className={`input-phone__input-block ${
           isMenuOpen ? "input-phone__input-block--active" : ""
-        }`}>
+        } ${showError ? "input-phone__input-block--error" : ""}`}>
         <div
           className="input-phone__menu-btn"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          onClick={() => {
+            setIsMenuOpen(!isMenuOpen);
+            setError('phone', null);
+          }}>
           <p className="input-phone__flag">
             {selectedPhoneDetails.countryFlag}
           </p>
           <img src={openMenu} alt="" className="input-phone__open-menu-btn" />
         </div>
         <input
-          className="input-phone__input"
+          className={`input-phone__input`}
           type="text"
           value={value}
           onChange={handleChange}
           placeholder={selectedPhoneDetails.placeholder}
         />
       </div>
+
+      {showError && (
+        <p className="input-phone__error-message">
+          {errorMessage ??
+            (value ? "Please enter a valid phone number" : "This field is required")}
+        </p>
+      )}
 
       <div
         className={`input-phone__dropdown ${

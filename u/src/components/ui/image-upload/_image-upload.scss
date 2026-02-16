@@ -13,6 +13,7 @@
     position: relative;
     font-size: 16px;
     color: vars.$gray-dark;
+    transition: all 0.2s ease-in-out;
 
     @media screen and (max-width: 900px) {
       font-size: 15px;
@@ -29,10 +30,13 @@
   &__field {
     position: relative;
     display: flex;
+    align-items: center;
+    height: 51px;
     background: #fff;
     border: 1px solid vars.$white-gray-2;
     border-radius: 8px;
     padding: 16px;
+    transition: all 0.2s ease-in-out;
 
     &--preview {
       &-small {
@@ -47,6 +51,7 @@
       }
       &-large {
         padding: 16px;
+        height: 100%;
       }
     }
 
@@ -65,6 +70,7 @@
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
     @media screen and (max-width: 900px) {
       font-size: 13px;
     }
@@ -198,8 +204,14 @@
       font-size: 12px;
     }
   }
-}
 
-// .form-input.error .logo-input {
-//   border-color: rgba(225, 25, 32, 1);
-// }
+  &__error {
+    margin-top: -4px;
+    color: vars.$error;
+    font-size: 12px;
+
+    @media screen and (max-width: 900px) {
+      margin-top: -2px;
+    }
+  }
+}

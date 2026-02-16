@@ -12,6 +12,7 @@
   &__label {
     font-size: 16px;
     color: vars.$gray-dark;
+    transition: all 0.2s ease-in-out;
 
     @media screen and (max-width: 900px) {
       font-size: 15px;
@@ -31,6 +32,7 @@
     border-radius: 8px;
     max-height: 51px;
     padding: 16px;
+    transition: all 0.2s ease-in-out;
 
     &::placeholder {
       color: vars.$gray;
@@ -67,5 +69,12 @@
   }
 
   &__error-message {
+    margin-top: -4px;
+    color: vars.$error;
+    font-size: 12px;
+
+    @media screen and (max-width: 900px) {
+      margin-top: -2px;
+    }
   }
 }

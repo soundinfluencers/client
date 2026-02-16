@@ -1,110 +1,80 @@
-import { COUNTRY_LIST } from "@/pages/influencer/components/account-setup-form/components/country-input/data/countries.data";
-import type { ICountry } from "@/pages/influencer/components/account-setup-form/components/country-input/types/country.types";
-import { z } from "zod";
+import z from "zod";
+import {
+  optionalCompany, optionalVat, requiredAccountNumber,
+  requiredAddress, requiredBankName, requiredCurrency, requiredIban,
+  requiredPaypalEmail, requiredSelectCountryNullable, requiredSortCode,
+  requiredSwiftBicCode,
+  requiredText,
+} from "@/pages/influencer/create-invoice/components/invoice-form-content/validation/validation-rules/validation-rules.ts";
 
-const normalize = (s: string) => s.trim().replace(/\s+/g, " ").toLowerCase();
-
-const countryMap = new Map<string, string>();
-
-(COUNTRY_LIST as ICountry[]).forEach((c) => {
-  countryMap.set(normalize(c.name), c.name);
-});
-
-const requiredText = z.string().trim().min(1); // without text
-const optionalText = z.string().trim().optional().or(z.literal(""));
-// const optionalNumber = z.coerce.number().optional();
-const requiredAmount = z.coerce.number().finite().positive(); // without number or negative value
-
-// PayPal email without "*" => optional, but if entered — must be an email
-const requiredEmail = z
-  .string()
-  .trim()
-  .min(1)
-  .refine((v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), { message: "" });
-
-const invoiceDetailsSchema = z.object({
+export const invoiceDetailsBaseSchema = z.object({
   firstName: requiredText,
   lastName: requiredText,
-  address: requiredText,
+  address: requiredAddress,
 
-  country: z
-    .string()
-    .min(1)
-    .transform(normalize)
-    .refine((v) => countryMap.has(v), { message: "" })
-    .transform((v) => countryMap.get(v)!),
+  country: requiredSelectCountryNullable,
 
-  company: optionalText,
-  vatNumber: optionalText,
+  company: optionalCompany,
+  vatNumber: optionalVat,
+  amountType: z.enum(["balance", "other"]),
+  amount: z.number().nullable(),
+});
+
+export const invoiceDetailsSchema = invoiceDetailsBaseSchema.superRefine((data, ctx) => {
+  if (data.amountType !== "other") return;
+
+  if (data.amount == null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["amount"],
+      message: "Amount is required",
+    });
+    return;
+  }
+  if (data.amount < 1) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["amount"],
+      message: "Amount must be at least 1",
+    });
+    return;
+  } else if (data.amount > 1000000) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["amount"],
+      message: "Amount must be less than 1,000,000",
+    });
+    return;
+  }
+});
+
+export const ukBankTransferSchema = z.object({
+  selectedPaymentMethod: z.literal("ukBankTransfer"),
+  beneficiary: requiredText,
+  beneficiaryAddress: requiredAddress,
+  sortCode: requiredSortCode,
+  accountNumber: requiredAccountNumber,
+});
+export const internationalBankTransferSchema = z.object({
+  selectedPaymentMethod: z.literal("internationalBankTransfer"),
+  beneficiary: requiredText,
+  beneficiaryAddress: requiredAddress,
+  iban: requiredIban,
+  bankName: requiredBankName,
+  bankCountry: requiredSelectCountryNullable,
+  bankAccountCurrency: requiredCurrency,
+  swiftBicCode: requiredSwiftBicCode,
+});
+export const paypalSchema = z.object({
+  selectedPaymentMethod: z.literal("paypal"),
+  paypalEmail: requiredPaypalEmail,
 });
 
 const paymentMethodDetailsSchema = z.discriminatedUnion(
   "selectedPaymentMethod",
-  [
-    z.object({
-      selectedPaymentMethod: z.literal("ukBankTransfer"),
-      beneficiary: requiredText,
-      beneficiaryAddress: requiredText,
-      sortCode: requiredText,
-      accountNumber: requiredText,
-      amount: requiredAmount,
-    }),
-
-    z.object({
-      selectedPaymentMethod: z.literal("internationalBankTransfer"),
-      beneficiary: requiredText,
-      beneficiaryAddress: requiredText,
-      iban: requiredText,
-      bankName: requiredText,
-      bankCountry: requiredText,
-      bankAccountCurrency: requiredText,
-      swiftBicCode: requiredText,
-      amount: requiredAmount,
-    }),
-
-    z.object({
-      selectedPaymentMethod: z.literal("paypal"),
-      paypalEmail: requiredEmail,
-      amount: requiredAmount,
-    }),
-  ],
+  [ukBankTransferSchema, internationalBankTransferSchema, paypalSchema],
 );
 
-export const invoicePayloadSchema = invoiceDetailsSchema.and(
-  paymentMethodDetailsSchema,
-);
+export const invoicePayloadSchema = z.intersection(invoiceDetailsSchema, paymentMethodDetailsSchema);
 
-export type InvoicePayloadFormData = z.infer<typeof invoicePayloadSchema>;
-
-// const MSG = {
-//   required: "Required field",
-//   invalidCountry: "Select a valid country",
-//   invalidEmail: "Enter a valid email",
-// } as const;
-
-// const requiredText = z.string().trim().min(1, MSG.required);
-
-// const optionalEmail = z
-//   .string()
-//   .trim()
-//   .optional()
-//   .or(z.literal(""))
-//   .refine((v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), {
-//     message: MSG.invalidEmail,
-//   });
-
-// const invoiceDetailsSchema = z.object({
-//   firstName: requiredText,
-//   lastName: requiredText,
-//   address: requiredText,
-
-//   country: z
-//     .string()
-//     .trim()
-//     .min(1, MSG.required)
-//     .transform(normalize)
-//     .refine((v) => normalizedCountryNames.has(v), { message: MSG.invalidCountry }),
-
-//   company: optionalText,
-//   vatNumber: optionalText,
-// });
+export type InvoicePayload = z.infer<typeof invoicePayloadSchema>;

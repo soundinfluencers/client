@@ -26,7 +26,7 @@ export const SignupInfluencerSuccess: React.FC = () => {
                 Thank you for submitting your details - our team will review your application shortly
               </p>
               <p className="signup-influencer-success__description">
-                We’ve received your submission and our team is currently reviewing it. <br />
+                {/*We’ve received your submission and our team is currently reviewing it. <br />*/}
                 If your application meets our criteria, we’ll get in touch with you promptly. <br />
                 We appreciate your patience and look forward to welcoming you soon.
               </p>

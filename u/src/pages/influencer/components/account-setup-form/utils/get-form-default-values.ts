@@ -11,7 +11,6 @@ const makeEmptyCountries = () =>
 export const getDefaultValues = (
   account?: TSocialAccountFormValues,
 ): TSocialAccountFormValues => {
-
   const base: TSocialAccountFormValues = {
     username: "",
     profileLink: "",

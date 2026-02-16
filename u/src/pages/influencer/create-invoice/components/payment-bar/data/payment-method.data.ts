@@ -12,4 +12,4 @@ export const INVOICE_PAYMENT_METHODS_TABS: IInvoicePaymentMethodTab[] = [
 export function getInvoicePaymentMethodLabel(id: TInvoicePaymentMethod): string {
   const method = INVOICE_PAYMENT_METHODS_TABS.find((method) => method.id === id);
   return method ? method.label : '';
-};
+}

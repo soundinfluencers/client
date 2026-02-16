@@ -12,12 +12,20 @@
   }
 
   &__title {
+    display: inline-flex;
+    align-items: flex-end;
+    justify-content: space-between;
     border-bottom: 1px solid vars.$blue;
     padding-bottom: 4px;
     font-size: 24px;
+    transition: all 0.2s ease-in-out;
 
     @media screen and (max-width: 900px) {
       font-size: 20px;
+    }
+
+    &--error {
+      border-bottom: 1px solid vars.$error;
     }
   }
 
@@ -75,5 +83,10 @@
     @media screen and (max-width: 500px) {
       gap: 4px;
     }
+  }
+
+  &__error {
+    color: vars.$error;
+    font-size: 12px;
   }
 }

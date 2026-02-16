@@ -60,7 +60,7 @@ export interface InfluencerProfileApi {
   lastName?: string;
   email?: string;
   phone?: string;
-  profilePhotoUrl?: string;
+  logoUrl?: string;
   telegramUsername?: string;
 
   instagram: TSocialAccountShort[];
@@ -91,7 +91,7 @@ export type TInfluencerProfileDetailsModel = Pick<InfluencerProfileApi,
   | "lastName"
   | "email"
   | "phone"
-  | "profilePhotoUrl"
+  | "logoUrl"
   | "telegramUsername"
 >;
 

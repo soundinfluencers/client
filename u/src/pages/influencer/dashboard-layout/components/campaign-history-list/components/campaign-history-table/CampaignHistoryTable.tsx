@@ -5,7 +5,7 @@ import './_campaign-history-table.scss';
 
 interface Props {
   campaigns: Campaign[];
-};
+}
 
 export const CampaignHistoryTable = ({ campaigns }: Props) => {
   return (

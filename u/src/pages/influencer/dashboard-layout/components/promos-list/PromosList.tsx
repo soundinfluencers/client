@@ -7,15 +7,16 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader } from "@/components";
 
 // import { ScrollToTop } from "@/components/ui/scroll-to-top/ScrollToTop";
+// import { toast } from "react-toastify";
 import "./_promos-list.scss";
-import { toast } from "react-toastify";
+// import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
 
 export const PromosList = () => {
   const { viewMode, activePromosFilter, limit } = useDashboardLayoutStore();
 
   console.log(activePromosFilter);
 
-  const { data, error, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isError, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
     useInfiniteQuery({
       queryKey: ["promos", activePromosFilter, limit],
       initialPageParam: 1,
@@ -29,7 +30,12 @@ export const PromosList = () => {
         }
         return allPages.length + 1;
       },
+      staleTime: 10_000, // 10 seconds
+      // refetchInterval: 60_000, // 1 minute
+      // refetchOnWindowFocus: true,
     });
+
+  console.log("Promos query status:", { isError, isLoading, isFetching, isFetchingNextPage, hasNextPage });
 
   console.log("Promos data:", data);
 
@@ -38,48 +44,49 @@ export const PromosList = () => {
   // useMemo to filter out declined promos
   const filteredPromos = activePromos.filter(promo => promo.confirmation !== 'decline');
 
-  if (isLoading) {
-    return <Loader />;
-  }
-
-  if (error) {
-    toast.error("Error loading promos.");
-    return <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos.</p>;
-  }
-
-  if (filteredPromos.length === 0) {
-    return (
-      <p style={{ fontSize: 48, textAlign: "center", paddingTop: 40 }}>
-        No promos found.
-      </p>
-    );
-  }
-
   console.log('Filtered promos', filteredPromos);
 
   return (
-    <div className="promos-list">
-      <div className="promos-list__content">
-        {viewMode === "grid" ? (
-          <PromosGrid promos={filteredPromos} />
-        ) : (
-          <div className="promos-list__scroll">
-            <PromosTable promos={filteredPromos} />
-          </div>
-        )}
+    <div className="promos-list"  >
+      {isLoading ? (
+        <Loader/>
+      ) : isError ? (
+        <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos.</p>
+      ) : filteredPromos.length === 0 ? (
+        <p style={{ fontSize: 48, textAlign: "center", paddingTop: 40 }}>
+          No promos found.
+        </p>
+      ) : (
+        <div className="promos-list__content">
+          {viewMode === "grid" ? (
+            <PromosGrid promos={filteredPromos}/>
+          ) : (
+            <div className="promos-list__scroll">
+              <PromosTable promos={filteredPromos}/>
+            </div>
+          )}
 
-        <div className="promos-list__actions">
-          <ButtonMain
-            label={isFetchingNextPage ? "Loading..." : "View more"}
-            onClick={() => fetchNextPage()}
-            isDisabled={!hasNextPage || isFetchingNextPage}
-          />
+          <div className="promos-list__actions">
+            <ButtonMain
+              label={isFetchingNextPage ? "Loading..." : "View more"}
+              onClick={() => fetchNextPage()}
+              isDisabled={!hasNextPage || isFetchingNextPage}
+            />
+          </div>
         </div>
-        {/* <ScrollToTop/> */}
-        {/* <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          Scroll to top
-        </button> */}
-      </div>
+      )}
     </div>
   );
 };
+
+{/* <ScrollToTop/> */
+}
+{/* <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          Scroll to top
+        </button> */
+}
+
+// <EmptyPromosList
+//   title={'No new promotions right now'}
+//   description={'You’re all caught up. New promotions will appear here as soon as they’re available.'}
+// />

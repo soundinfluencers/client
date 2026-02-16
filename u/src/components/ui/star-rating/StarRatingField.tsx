@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './_star-rating-field.scss';
+import type { FieldError } from "react-hook-form";
 
 interface Props {
   label: string;
@@ -7,13 +8,15 @@ interface Props {
 
   value: number;
   onChange: (value: number) => void;
-};
+  error?: FieldError;
+}
 
 export const StarRatingField: React.FC<Props> = ({
   label,
   max = 5,
   value,
   onChange,
+  error,
 }) => {
   const [hoverValue, setHoverValue] = useState<number | null>(null);
 
@@ -25,7 +28,7 @@ export const StarRatingField: React.FC<Props> = ({
 
   return (
     <div className="star-rating-field">
-      <label className='star-rating-field__label'>{label}</label>
+      <label className={`star-rating-field__label ${error ? 'star-rating-field__label--error' : ''}`}>{label}</label>
 
       <div className='star-rating-field__stars' onMouseLeave={() => setHoverValue(null)}>
         {Array.from({ length: max }, (_, index) => {
@@ -55,6 +58,8 @@ export const StarRatingField: React.FC<Props> = ({
           );
         })}
       </div>
+
+      {error && <p className="star-rating-field__error-message">{error.message}</p>}
     </div>
   );
 };

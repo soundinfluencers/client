@@ -1,0 +1,34 @@
+@use "@/styles/variables/variables" as vars;
+@use "@/styles/mixins/title" as title;
+
+.payment-details-page {
+  padding-top: 40px;
+  padding-bottom: 64px;
+
+  @media screen and (max-width: 900px) {
+    padding-top: 24px;
+    padding-bottom: 40px;
+  }
+  @media screen and (max-width: 500px) {
+    padding-top: 16px;
+    padding-bottom: 32px;
+  }
+
+  &__title {
+    margin-top: 40px;
+    margin-bottom: 24px;
+    @include title.title();
+
+    @media screen and (max-width: 900px) {
+      margin-top: 32px;
+    }
+    @media screen and (max-width: 500px) {
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+  }
+
+  &__form {
+    max-width: 100%;
+  }
+}

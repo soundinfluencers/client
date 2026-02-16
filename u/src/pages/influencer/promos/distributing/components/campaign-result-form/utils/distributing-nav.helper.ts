@@ -11,7 +11,7 @@ export type SubmitResultsNavState = {
   username: string;
   meta: TSocialMedia;
 
-  from?: DistributingNavState | null;
+  from?: DistributingNavState | null,
 };
 
 const SUBMIT_HASH = "#submit";
@@ -23,17 +23,12 @@ export const isSubmitState = (v: unknown): v is SubmitResultsNavState => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const o = v as any;
 
-  const base =
-    typeof o.campaignId === "string" &&
+  const base = typeof o.campaignId === "string" &&
     typeof o.addedAccountsId === "string" &&
     typeof o.username === "string" &&
     o.meta != null;
 
   if (!base) return false;
-
-  // from — optional, if present, must be an object
   if (o.from == null) return true;
-  if (typeof o.from !== "object") return false;
-
-  return true;
+  return typeof o.from === "object";
 };

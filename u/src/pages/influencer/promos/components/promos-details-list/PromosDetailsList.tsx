@@ -1,7 +1,6 @@
 import type React from 'react';
 import { PromosDetailsListCard } from './promos-details-list-card/PromosDetailsListCard';
 import type { IPromoDetailsModel, TAcceptDeclineRequestPromoModel, TPromoStatus } from '../../types/promos.types';
-// import type { TCampaignInfo, TSocialMedia } from '../../distributing/components/campaign-result-form/types/campaign-result-form.types';
 
 import './_promos-details-list.scss';
 
@@ -15,10 +14,7 @@ interface Props {
   onAccept?: (payload: TAcceptDeclineRequestPromoModel) => void;
   onDecline?: (payload: TAcceptDeclineRequestPromoModel) => void;
   onSubmitResults?: (promo: IPromoDetailsModel) => void;
-  // onFormOpen?: () => void;
-  // onMetaChange?: (newMeta: TSocialMedia) => void;
-  // onFormPayloadChange?: (newPayload: TCampaignInfo) => void;
-};
+}
 
 export const PromosDetailsList: React.FC<Props> = ({
   data,
@@ -27,9 +23,6 @@ export const PromosDetailsList: React.FC<Props> = ({
   onAccept,
   onDecline,
   onSubmitResults,
-  // onFormOpen,
-  // onMetaChange,
-  // onFormPayloadChange
 }) => {
 
   const handleAccept = (promo: IPromoDetailsModel) => {
@@ -56,7 +49,7 @@ export const PromosDetailsList: React.FC<Props> = ({
         const isThisCardPending = mutationState?.isPending && mutationState.variables?.campaignId === promo.campaignId;
 
         return (
-          <li key={promo.campaignId} className="promos-details-list__item">
+          <li key={`${promo.campaignId}:${promo.addedAccountsId}`} className="promos-details-list__item">
             <PromosDetailsListCard
               promo={promo}
               status={status}
@@ -66,9 +59,6 @@ export const PromosDetailsList: React.FC<Props> = ({
               onAccept={() => handleAccept(promo)}
               onDecline={() => handleDecline(promo)}
               onSubmitResults={() => onSubmitResults && onSubmitResults(promo)}
-            // onFormOpen={onFormOpen}
-            // onMetaChange={onMetaChange}
-            // onFormPayloadChange={onFormPayloadChange}
             />
           </li>
         )

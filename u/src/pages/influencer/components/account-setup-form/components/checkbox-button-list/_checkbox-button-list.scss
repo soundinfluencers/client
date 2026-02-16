@@ -16,13 +16,26 @@
   }
 
   &__title {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: flex-end;
     border-bottom: 1px solid vars.$blue;
     padding-bottom: 4px;
     font-size: 24px;
+    transition: border-color 0.2s ease-in-out;
 
     @media screen and (max-width: 900px) {
       font-size: 20px;
     }
+
+    &--error {
+      border-bottom: 1px solid vars.$error;
+    }
+  }
+
+  &__error {
+    color: vars.$error;
+    font-size: 12px;
   }
 
   &__subtitle {

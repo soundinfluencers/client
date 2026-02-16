@@ -1,0 +1,237 @@
+@use "@/styles/variables/variables" as vars;
+@use "@/styles/mixins/title" as title;
+
+.agreement-page {
+  padding-top: 64px;
+  padding-bottom: 64px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  @media screen and (max-width: 900px) {
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+  @media screen and (max-width: 500px) {
+    padding-top: 24px;
+    padding-bottom: 16px;
+  }
+
+  &__wrapper {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 40px;
+
+    @media screen and (max-width: 900px) {
+      gap: 8px;
+    }
+    @media screen and (max-width: 500px) {
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+  }
+
+  &__title {
+    @include title.title();
+  }
+  &__subtitle {
+    @include title.subtitle($font-color: vars.$gray);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &-title {
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 24px;
+
+      @media screen and (max-width: 900px) {
+        font-size: 20px;
+      }
+      @media screen and (max-width: 500px) {
+        font-size: 16px;
+        margin-bottom: 16px;
+      }
+    }
+  }
+
+  &__benefits-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 24px;
+    margin-bottom: 56px;
+
+    @media screen and (max-width: 500px) {
+      margin-bottom: 32px;
+      gap: 16px;
+    }
+  }
+
+  &__benefits-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px;
+    border-radius: 32px;
+    border: 1px solid vars.$white-gray-2;
+    background: vars.$bg-white;
+
+    //@media screen and (max-width: 900px) {
+    //
+    //}
+    //@media screen and (max-width: 500px) {
+    //
+    //}
+  }
+
+  &__benefits-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    @media screen and (max-width: 500px) {
+      font-size: 4px;
+    }
+
+    >img {
+      width: 37px;
+      height: 37px;
+
+      @media screen and (max-width: 500px) {
+        width: 32px;
+        height: 32px;
+      }
+    }
+    >p {
+      @media screen and (max-width: 900px) {
+        font-size: 15xp;
+      }
+      @media screen and (max-width: 500px) {
+        font-size: 14px;
+      }
+    }
+  }
+
+  &__benefits-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 284px;
+    height: 38px;
+    width: 100%;
+    text-align: center;
+    color: vars.$gray-dark;
+    //padding: 8px 24px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #EBECFF 0%, #DFF0FF 100%);
+
+    @media screen and (max-width: 900px) {
+      font-size: 15px;
+      width: 235px;
+      height: 36px;
+    }
+    @media screen and (max-width: 500px) {
+      font-size: 12px;
+      width: 170px;
+      height: 32px;
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 100%;
+  }
+
+  &__earnings {
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 32px;
+
+    @media screen and (max-width: 900px) {
+      font-size: 20px;
+      margin-bottom: 24px;
+    }
+    @media screen and (max-width: 500px) {
+      font-size: 16px;
+    }
+  }
+
+  &__conformation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+
+    @media screen and (max-width: 900px) {
+      gap: 16px;
+      margin-bottom: 16px;
+      width: 100%;
+    }
+
+    &-title {
+      font-size: 20px;
+      font-weight: 400;
+
+      @media screen and (max-width: 500px) {
+        font-size: 15px;
+      }
+    }
+
+    &-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    &-buttons {
+      display: flex;
+      gap: 24px;
+
+      @media screen and (max-width: 600px) {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+      }
+    }
+
+    &-contact {
+      width: 100%;
+      text-align: end;
+      font-size: 14px;
+
+      @media screen and (max-width: 900px) {
+        font-size: 13px;
+      }
+      @media screen and (max-width: 500px) {
+        font-size: 12px;
+      }
+    }
+  }
+
+  &__terms {
+    font-size: 15px;
+
+    @media screen and (max-width: 900px) {
+      font-size: 13px;
+    }
+  }
+}

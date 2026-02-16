@@ -3,4 +3,4 @@ export interface ICheckboxButton {
   label: string;
   value: string;
   children?: ICheckboxButton[];
-};
+}

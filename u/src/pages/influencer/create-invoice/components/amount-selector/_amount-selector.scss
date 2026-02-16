@@ -1,0 +1,95 @@
+@use "@/styles/variables/variables" as vars;
+
+.amount-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__label {
+    font-size: 16px;
+    color: vars.$gray-dark;
+
+    @media screen and (max-width: 900px) {
+      font-size: 14px;
+    }
+    @media screen and (max-width: 500px) {
+      font-size: 13px;
+    }
+
+    &-balance {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+
+      > span {
+        color: vars.$light-gray;
+        font-weight: 500;
+
+        @media screen and (max-width: 900px) {
+          font-size: 14px;
+        }
+        @media screen and (max-width: 500px) {
+          font-size: 12px;
+        }
+      }
+    }
+
+    &-other {
+      cursor: pointer;
+    }
+  }
+
+  &__options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    @media screen and (max-width: 900px) {
+      gap: 12px;
+    }
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    @media screen and (max-width: 900px) {
+      gap: 8px;
+    }
+  }
+
+  &__input {
+    appearance: none;
+    position: relative;
+    width: 24px;
+    height: 24px;
+    border: 2px solid vars.$black-blue;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    &::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: vars.$black-blue;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform 0.2s ease;
+    }
+
+    &:checked::after {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    &--disabled {
+      border: 2px solid vars.$light-gray;
+    }
+  }
+}

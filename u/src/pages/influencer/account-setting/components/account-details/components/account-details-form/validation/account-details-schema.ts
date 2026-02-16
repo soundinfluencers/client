@@ -7,6 +7,14 @@ const requiredString = z.preprocess(
   z.string({ message: "" }).min(1, { message: "" }),
 );
 
+const optionalString = z.preprocess(
+  (v) => {
+    const trimmed = trimString(v);
+    return trimmed === "" ? undefined : trimmed;
+  },
+  z.string().optional(),
+);
+
 export const accountDetailsSchema = z.object({
   firstName: requiredString,
   lastName: requiredString,
@@ -15,5 +23,5 @@ export const accountDetailsSchema = z.object({
   phone: requiredString,
 
   // telegramUsername: optionalString,
-  // profilePhotoUrl: optionalString,
+  profilePhotoUrl: optionalString,
 });

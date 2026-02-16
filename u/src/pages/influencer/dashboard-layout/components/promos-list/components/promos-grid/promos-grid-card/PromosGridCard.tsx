@@ -11,6 +11,7 @@ interface Props {
 }
 
 export const PromosGridCard = ({ promo }: Props) => {
+  // mb fix reward display for 0 value
   return (
     <article className='promos-grid-card'>
       <div className='promos-grid-card__header'>
@@ -23,9 +24,9 @@ export const PromosGridCard = ({ promo }: Props) => {
           <p className='promos-grid-card__header-status-text'>{normalizePromoStatus(promo.confirmation, promo.closedStatus)}</p>
           <p className='promos-grid-card__header-status-date'>{promo.createdAt}</p>
         </div>
-        {promo.reward && <p className='promos-grid-card__header-status-reward'>{promo.reward}€</p>}
+        {promo.reward > 0 && <p className='promos-grid-card__header-status-reward'>{promo.reward}€</p>}
       </div>
-      <p className='promos-grid-card__campaign-name'>{promo.campaignName}</p>
+      <p className='promos-grid-card__campaign-name'>{promo.campaignName.length > 40 ? (promo.campaignName.slice(0, 40).trim().concat('...')) : promo.campaignName}</p>
     </article>
   );
 };

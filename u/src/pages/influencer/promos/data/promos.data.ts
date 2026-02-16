@@ -12,6 +12,7 @@ const NEW_PROMOS_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
@@ -33,6 +34,7 @@ const NEW_PROMOS_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
@@ -54,6 +56,7 @@ const NEW_PROMOS_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
@@ -75,6 +78,7 @@ const NEW_PROMOS_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
@@ -96,18 +100,19 @@ const NEW_PROMOS_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
       label: "Description",
       copyable: true,
     },
-    {
-      key: "taggedLink",
-      label: "Story link",
-      copyable: true,
-    },
-    { key: "taggedUser", label: "Story tag" },
+    // {
+    //   key: "taggedLink",
+    //   label: "Story link",
+    //   copyable: true,
+    // },
+    // { key: "taggedUser", label: "Story tag" },
     { key: "dateRequest", label: "Date request" },
     { key: "additionalBrief", label: "Additional brief" },
   ],
@@ -117,6 +122,7 @@ const NEW_PROMOS_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
@@ -138,6 +144,7 @@ const NEW_PROMOS_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
@@ -183,6 +190,7 @@ const DISTRIBUTING_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
@@ -204,6 +212,7 @@ const DISTRIBUTING_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
@@ -225,6 +234,7 @@ const DISTRIBUTING_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
@@ -246,6 +256,7 @@ const DISTRIBUTING_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Videolink",
+      linkable: true,
     },
     {
       key: "description",
@@ -267,6 +278,7 @@ const DISTRIBUTING_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Spotify Track link",
+      linkable: true,
     },
     { key: "dateRequest", label: "Date request" },
     { key: "additionalBrief", label: "Additional brief" },
@@ -277,6 +289,7 @@ const DISTRIBUTING_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "Press link",
+      linkable: true,
     },
     { key: "dateRequest", label: "Date request" },
     { key: "additionalBrief", label: "Additional brief" },
@@ -287,6 +300,7 @@ const DISTRIBUTING_FIELDS: fieldsConfig = {
     {
       key: "mainLink",
       label: "SoundCloud Track link",
+      linkable: true,
     },
     { key: "dateRequest", label: "Date request" },
     { key: "additionalBrief", label: "Additional brief" },
@@ -321,6 +335,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "postLink",
       label: "Post link",
+      linkable: true,
     },
     {
       key: "reward",
@@ -334,6 +349,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "postLink",
       label: "Post link",
+      linkable: true,
     },
     {
       key: "reward",
@@ -347,6 +363,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "postLink",
       label: "Post link",
+      linkable: true,
     },
     {
       key: "reward",
@@ -360,6 +377,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "postLink",
       label: "Post link",
+      linkable: true,
     },
     {
       key: "reward",
@@ -373,6 +391,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "postLink",
       label: "Playlist link",
+      linkable: true,
     },
     {
       key: "reward",
@@ -386,6 +405,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "postLink",
       label: "Post link",
+      linkable: true,
     },
     {
       key: "reward",
@@ -399,6 +419,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "postLink",
       label: "Repost link",
+      linkable: true,
     },
     {
       key: "reward",

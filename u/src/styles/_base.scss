@@ -22,6 +22,7 @@ html,
   margin: 0;
   padding: 0;
 }
+
 input,
 textarea,
 button,
@@ -52,10 +53,21 @@ button:focus,
 button:active {
   outline: none;
 }
+
+// fix for autofill background color
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+
+  -webkit-text-fill-color: #000;
+  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 body {
   position: relative;
   margin: 0;
-  background-color: #FBFAF9;
+  background-color: #fbfaf9;
   // background-color: red;
   min-height: 100vh;
   font-family: "Satoshi", "Noto Color Emoji", sans-serif;
@@ -76,25 +88,35 @@ body {
     content: "";
     position: fixed;
     border-radius: 50%;
-    z-index: -1;
-    opacity: 0.8;
-    filter: blur(150px);
+    z-index: -100;
+    opacity: 1;
+    filter: blur(200px);
+
+    @media screen and (max-width: 900px) {
+      filter: blur(100px);
+    }
+    @media screen and (max-width: 500px) {
+      filter: blur(50px);
+    }
   }
 
   /* ===== DESKTOP (больше 900px) ===== */
   &::before {
     width: 1025px;
     height: 1025px;
-    top: -300px;
-    left: -350px;
+    top: 0;
+    left: 0;
+    transform: translate(-60%, -65%);
     background: radial-gradient(circle at center, #d6e6f9 40%, #ffffff 100%);
   }
 
   &::after {
     width: 644px;
     height: 644px;
-    bottom: -300px;
-    right: -150px;
+    bottom: 0;
+    right: 0;
+    transform: translate(50%, 50%);
+
     background: radial-gradient(circle at center, #d6e6f9 40%, #ffffff 100%);
   }
 
@@ -103,17 +125,14 @@ body {
     &::before {
       width: 700px;
       height: 700px;
-      top: -250px;
-      left: -250px;
-      filter: blur(120px);
     }
 
     &::after {
       width: 450px;
       height: 450px;
-      bottom: -200px;
-      right: -80px;
-      filter: blur(120px);
+      // bottom: -200px;
+      // right: -80px;
+      // filter: blur(120px);
     }
   }
 
@@ -122,20 +141,19 @@ body {
     &::before {
       width: 420px;
       height: 420px;
-      top: -180px;
-      left: -120px;
-      filter: blur(90px);
+      // filter: blur(90px);
     }
 
     &::after {
       width: 280px;
       height: 280px;
-      bottom: -120px;
-      right: -40px;
-      filter: blur(90px);
+      // bottom: -120px;
+      // right: -40px;
+      // filter: blur(90px);
     }
   }
 }
+
 ul {
   list-style: none;
 }

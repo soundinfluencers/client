@@ -1,7 +1,8 @@
+import React from "react";
 import { useAccountSetupStore } from '../account-setup-form/store/useAccountSetupStore';
 import { AccountsList } from './accounts-list/AccountsList';
 import { SOCIAL_ACCOUNTS_DATA } from './data/social-account.data';
-import type { TSocialAccounts, TSocialAccountShort } from '../../../../types/user/influencer.types';
+import type { TSocialAccounts, TSocialAccountShort } from '@/types/user/influencer.types.ts';
 
 import plus from '@/assets/icons/plus.svg';
 import './_social-accounts-list.scss';
@@ -29,7 +30,8 @@ export const SocialAccountsList: React.FC<Props> = ({ getAccounts }) => {
                 className="social-accounts-list__item-create"
                 onClick={() => onCreateAccount(id)}
               >
-                <img src={plus} alt="Plus" />
+                Add
+                <img  src={plus} alt="Plus" />
               </button>
             </div>
             {accounts.length > 0 && (

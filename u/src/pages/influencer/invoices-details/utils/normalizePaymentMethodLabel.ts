@@ -1,7 +1,7 @@
 import type { TInvoicePaymentMethod } from "../../create-invoice/components/payment-bar/types/payment-method.types";
 
 export const normalizePaymentMethodLabel = (method: TInvoicePaymentMethod): string => {
-  switch (method.toLowerCase()) {
+  switch (method) {
     case 'paypal':
       return 'Paypal';
     case 'ukBankTransfer':

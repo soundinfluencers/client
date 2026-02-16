@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useEffect } from "react";
 
-import { TabBar } from "./components/layout/tab-bar/TabBar";
+import { TabBar } from "@/components";
 
 import { useAuth } from "./contexts/AuthContext";
 import { setupInterceptors } from "./api/api";
@@ -18,18 +18,25 @@ import { NewPromos } from "./pages/influencer/promos/new-promos/NewPromos";
 import { Distributing } from "./pages/influencer/promos/distributing/Distributing";
 import { Completed } from "./pages/influencer/promos/completed/Completed";
 import { InvoicePage } from "./pages/influencer/create-invoice/InvoicePage";
-import { InvoicesDetails } from "./pages/influencer/invoices-details/InvoicesDetails";
-import { AccountSettingInfluencer } from "./pages/influencer/account-setting/AccountSettingInfluencer";
+import { InvoicesHistory } from "./pages/influencer/invoices-details/InvoicesHistory.tsx";
+import { AccountSetting } from "./pages/influencer/account-setting/AccountSetting.tsx";
+import { ContactSupport } from "@/pages/influencer/contact-support/ContactSupport.tsx";
+import { InvoiceDetails } from "@/pages/influencer/invoice-details/InvoiceDetails.tsx";
 
 // client
 
 import "./app.scss";
 import { RootRedirect } from "./router/components/rootRedirect";
 import { ToastContainer } from "react-toastify";
-import { HomePage } from "./client-side";
+import { PaymentDetails } from "@/pages/influencer/payment-details/PaymentDetails.tsx";
+import { SocialAccounts } from "@/pages/influencer/social-accounts/SocialAccounts.tsx";
+import { InfluencerTermsPage } from "@/pages/auth/terms/influencer/InfluencerTermsPage.tsx";
+import { Agreement } from "@/pages/influencer/agreement/Agreement.tsx";
+import { HomePage } from "@/client-side";
+
 
 function App() {
-  const { accessToken, setAccessToken, logout } = useAuth();
+  const { setAccessToken, logout } = useAuth();
 
   useEffect(() => {
     const cleanup = setupInterceptors(setAccessToken, logout);
@@ -39,7 +46,7 @@ function App() {
   return (
     <div>
       <ToastContainer />
-      <TabBar isAuthenticated={!!accessToken} />
+      <TabBar />
 
       <Routes>
         {/* ---------- ROOT SWITCH ---------- */}
@@ -83,17 +90,45 @@ function App() {
           <Route path="promos/completed" element={<Completed />} />
 
           <Route path="create-invoice" element={<InvoicePage />} />
-          <Route path="invoices" element={<InvoicesDetails />} />
+          <Route path="invoices-history" element={<InvoicesHistory />} />
+          {/* ---------- NEW ROUTES ---------- */}
           <Route
             path="account-setting"
-            element={<AccountSettingInfluencer />}
+            element={<AccountSetting />}
+          />
+          <Route
+            path="change-password"
+            element={<AccountSetting />}
+          />
+          <Route
+            path="social-accounts"
+            element={<SocialAccounts />}
+          />
+          <Route
+            path="invoice-details"
+            element={<InvoiceDetails />}
+          />
+          <Route
+            path="payment-details"
+            element={<PaymentDetails />}
+          />
+          <Route
+            path="contact-support"
+            element={<ContactSupport />}
+          />
+          <Route
+            path="agreement"
+            element={<Agreement />}
           />
         </Route>
 
         {/* ---------- PUBLIC & OTHER ROUTES ---------- */}
-        {routes.map(({ path, component: Component, name, isProtected }) => (
+        <Route path="/terms/influencer" element={<InfluencerTermsPage />} />
+
+        {/* ---------- RENDER ROUTES (mb rebuild structure) ---------- */}
+        {routes.map(({ path, component: Component, isProtected }) => (
           <Route
-            key={name}
+            key={path}
             path={path}
             element={
               isProtected ? (

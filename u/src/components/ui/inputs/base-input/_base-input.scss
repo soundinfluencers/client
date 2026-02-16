@@ -1,6 +1,6 @@
 @use "@/styles/variables/variables" as vars;
 
-.custom-input {
+.base-input {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -12,6 +12,7 @@
   &__label {
     font-size: 16px;
     color: vars.$gray-dark;
+    transition: all 0.2s ease-in-out;
 
     @media screen and (max-width: 900px) {
       font-size: 15px;
@@ -23,6 +24,9 @@
     &--error {
       color: vars.$error;
     }
+    &--disabled {
+      color: vars.$light-gray;
+    }
   }
 
   &__field {
@@ -31,6 +35,7 @@
     border-radius: 8px;
     max-height: 51px;
     padding: 16px;
+    transition: all 0.2s ease-in-out;
 
     &::placeholder {
       color: vars.$gray;
@@ -48,13 +53,25 @@
     &:focus {
       outline: none;
       border: 1px solid vars.$blue;
+
     }
 
+    // remove number input spinners
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
+
+    // fix for autofill background color
+    //&:-webkit-autofill,
+    //&:-webkit-autofill:hover,
+    //&:-webkit-autofill:focus {
+    //
+    //  -webkit-text-fill-color: #000;
+    //  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+    //  transition: background-color 5000s ease-in-out 0s;
+    //}
 
     &--error {
       border: 1px solid vars.$error;
@@ -67,5 +84,12 @@
   }
 
   &__error-message {
+    margin-top: -4px;
+    color: vars.$error;
+    font-size: 12px;
+
+    @media screen and (max-width: 900px) {
+      margin-top: -2px;
+    }
   }
 }

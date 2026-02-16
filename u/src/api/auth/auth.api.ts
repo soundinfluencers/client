@@ -4,6 +4,7 @@ import type {
 } from "@/types/auth/auth.types.ts";
 import $api from "../api.ts";
 import type { ISignupInfluencerDraft } from "@/types/user/influencer.types.ts";
+import type { UserRoleType } from "@/types/user/user.types.ts";
 
 export const loginApi = async ({
   email,
@@ -43,4 +44,17 @@ export const updatePasswordApi = async (
     newPassword,
   });
   console.log('Password updated successfully', {currentPassword, newPassword});
+};
+
+interface IGetMeResponse {
+  firstName: string;
+  role: UserRoleType;
+  balance: number;
+  logoUrl: string | null;
+}
+
+export const getMe = async (): Promise<IGetMeResponse> => {
+  const res = await $api.get("/auth/me");
+  console.log("getMe: ", res.data.data);
+  return res.data.data;
 };

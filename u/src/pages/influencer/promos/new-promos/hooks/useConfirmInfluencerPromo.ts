@@ -1,5 +1,6 @@
 import { conformationInfluencerPromo } from "@/api/influencer/promos/influencer-promos.api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { handleApiError } from "@/api/error.api.ts";
 
 export const useConfirmInfluencerPromo = () => {
   const queryClient = useQueryClient();
@@ -7,8 +8,12 @@ export const useConfirmInfluencerPromo = () => {
   return useMutation({
     mutationFn: conformationInfluencerPromo,
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["influencer-new-promos"]});
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ["influencer-new-promos"]});
+      await queryClient.invalidateQueries({queryKey: ["promos"]});
+    },
+    onError: (error) => {
+      handleApiError(error);
     },
   });
 };
@@ -20,7 +25,7 @@ export const useConfirmInfluencerPromo = () => {
 //   return useMutation({
 //     mutationFn: conformationInfluencerPromo,
 
-//     // 🔥 OPTIMISTIC UPDATE
+//     // OPTIMISTIC UPDATE
 //     onMutate: async (variables) => {
 //       // 1. Останавливаем возможный refetch
 //       await queryClient.cancelQueries({
@@ -47,7 +52,7 @@ export const useConfirmInfluencerPromo = () => {
 //       return { previousPromos };
 //     },
 
-//     // ❌ если ошибка — откат
+//     // если ошибка — откат
 //     onError: (_err, _variables, context) => {
 //       if (context?.previousPromos) {
 //         queryClient.setQueryData<IPromoDetailsModel[]>(
@@ -57,7 +62,7 @@ export const useConfirmInfluencerPromo = () => {
 //       }
 //     },
 
-//     // ✅ успех
+//     // успех
 //     onSuccess: () => {
 //       queryClient.invalidateQueries({
 //         queryKey: ["influencer-new-promos"],

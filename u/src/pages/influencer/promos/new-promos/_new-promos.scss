@@ -77,15 +77,19 @@
     &-image {
       width: 100px;
       height: 100px;
+      margin-bottom: 32px;
 
       @media screen and (max-width: 900px) {
         width: 72px;
         height: 72px;
       }
+      @media screen and (max-width: 900px) {
+        margin-bottom: 24px;
+      }
     }
 
     &-header {
-      margin-top: 32px;
+      //margin-top: 32px;
       margin-bottom: 32px;
       display: flex;
       flex-direction: column;
@@ -94,11 +98,11 @@
       gap: 16px;
 
       @media screen and (max-width: 900px) {
-        margin-top: 32px;
+        //margin-top: 32px;
         margin-bottom: 24px;
       }
       @media screen and (max-width: 500px) {
-        margin-top: 24px;
+        //margin-top: 24px;
         margin-bottom: 24px;
       }
     }

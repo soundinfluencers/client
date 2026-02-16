@@ -1,12 +1,13 @@
 import './_custom-buttons.scss';
+import React from "react";
 
 export interface Props {
-  label: string;
+  label: string | React.ReactNode;
   onClick?: () => void;
   isDisabled?: boolean;
   type?: "button" | "submit" | "reset";
   className?: string;
-};
+}
 
 export const ButtonMain: React.FC<Props> = ({
   label,

@@ -8,6 +8,8 @@ interface UserStore {
   hydrated: boolean;
 
   setUser: (data: IUser | null) => void;
+  patchUser: (patch: Partial<IUser>) => void;
+
   setRole: (role: UserRoleType) => void;
   setHydrated: () => void;
 }
@@ -20,6 +22,10 @@ export const useUser = create<UserStore>()(
       hydrated: false,
 
       setUser: (data) => set({ user: data }),
+      patchUser: (patch) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...patch } : ({ ...patch } as IUser),
+        })),
       setRole: (role) => set({ role }),
       setHydrated: () => set({ hydrated: true }),
     }),

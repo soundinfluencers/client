@@ -61,6 +61,11 @@
     }
   }
 
+  &__error-message {
+    color: vars.$error;
+    font-size: 12px;
+  }
+
   &.error {
     .text-input__title {
       color: vars.$error;

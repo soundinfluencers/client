@@ -22,18 +22,20 @@ const initialInfluencer: ISignupInfluencerDraft = {
 };
 
 type BaseField = "firstName" | "lastName" | "email" | "phone" | "password";
+type FieldError = string | null;
 
-const initialErrors: Record<BaseField, boolean> = {
-  firstName: false,
-  lastName: false,
-  email: false,
-  phone: false,
-  password: false,
+const initialErrors: Record<BaseField, FieldError> = {
+  firstName: null,
+  lastName: null,
+  email: null,
+  phone: null,
+  password: null,
 };
 
 interface ISingupInfluencerState {
   user: ISignupInfluencerDraft;
-  errors: Record<BaseField, boolean>;
+  errors: Record<BaseField, FieldError>;
+  accountsError: string | null;
   submitError: string | null;
 }
 
@@ -43,10 +45,16 @@ interface ISingupInfluencerActions {
     value: ISignupInfluencerDraft[K],
   ) => void;
 
-  setError: (field: BaseField, value: boolean) => void;
+  setError: (field: BaseField, message: string | null) => void;
   clearErrors: () => void;
+
+  setAccountsError: (message: string | null) => void;
+  clearAccountsError: () => void;
+  validateAccounts: () => boolean;
+
   setSubmitError: (message: string | null) => void;
   clearSubmitError: () => void;
+
   validate: () => boolean;
   isFormReady: () => boolean;
 
@@ -74,32 +82,43 @@ const cloneInfluencer = (): ISignupInfluencerDraft => ({
   press: [],
 });
 
-export const useInfluenserSignupStore = create<ISingupInfluencerStore>()(
+export const useInfluencerSignupStore = create<ISingupInfluencerStore>()(
   immer((set, get) => ({
     user: cloneInfluencer(),
     errors: { ...initialErrors },
+    accountsError: null,   // <-- NEW
     submitError: null,
 
     setField: (key, value) =>
       set((state) => {
         state.user[key] = value;
 
-        // reset errors only for base fields
         if (key in state.errors) {
-          state.errors[key as BaseField] = false;
+          state.errors[key as BaseField] = null;
         }
 
         state.submitError = null;
+        state.accountsError = null;
       }),
 
-    setError: (field, value) =>
+    setError: (field, message) =>
       set((state) => {
-        state.errors[field] = value;
+        state.errors[field] = message;
       }),
 
     clearErrors: () =>
       set((state) => {
         state.errors = { ...initialErrors };
+      }),
+
+    setAccountsError: (message) =>
+      set((state) => {
+        state.accountsError = message;
+      }),
+
+    clearAccountsError: () =>
+      set((state) => {
+        state.accountsError = null;
       }),
 
     setSubmitError: (message) =>
@@ -115,21 +134,42 @@ export const useInfluenserSignupStore = create<ISingupInfluencerStore>()(
     validate: () => {
       const { user } = get();
 
-      const nextErrors: Record<BaseField, boolean> = {
-        firstName: !baseValidateText(user.firstName),
-        lastName: !baseValidateText(user.lastName),
-        email: !baseValidatedEmail(user.email),
-        phone: !baseValidatedPhone(user.phone),
-        password: !baseValidatePassword(user.password),
+      const nextErrors: Record<BaseField, FieldError> = {
+        firstName: validateName(user.firstName),
+        lastName: validateName(user.lastName),
+        email: validateEmail(user.email),
+        phone: validatePhone(user.phone),
+        password: validatePassword(user.password),
       };
 
-      const isValid = !Object.values(nextErrors).some(Boolean);
+      const isValid = !Object.values(nextErrors).some((m) => m != null);
 
       set((state) => {
         state.errors = nextErrors;
       });
 
       return isValid;
+    },
+
+    validateAccounts: () => {
+      const { user } = get();
+
+      const hasAtLeastOneAccount =
+        (user.instagram?.length ?? 0) > 0 ||
+        (user.tiktok?.length ?? 0) > 0 ||
+        (user.youtube?.length ?? 0) > 0 ||
+        (user.spotify?.length ?? 0) > 0 ||
+        (user.soundcloud?.length ?? 0) > 0 ||
+        (user.facebook?.length ?? 0) > 0 ||
+        (user.press?.length ?? 0) > 0;
+
+      set((state) => {
+        state.accountsError = hasAtLeastOneAccount
+          ? null
+          : "You didn't add any social accounts";
+      });
+
+      return hasAtLeastOneAccount;
     },
 
     isFormReady: () => {
@@ -160,11 +200,12 @@ export const useInfluenserSignupStore = create<ISingupInfluencerStore>()(
 
         if (index === undefined || Number.isNaN(index)) {
           list.push(account);
-          return;
+        } else if (index >= 0 && index < list.length) {
+          list[index] = account;
         }
 
-        if (index < 0 || index >= list.length) return;
-        list[index] = account;
+        state.accountsError = null;
+        state.submitError = null;
       }),
 
     removeAccount: (platform, index) =>
@@ -172,31 +213,50 @@ export const useInfluenserSignupStore = create<ISingupInfluencerStore>()(
         const list = state.user[platform];
         if (index < 0 || index >= list.length) return;
         list.splice(index, 1);
+
+        state.accountsError = null;
+        state.submitError = null;
       }),
 
     resetSignup: () =>
       set((state) => {
         state.user = cloneInfluencer();
         state.errors = { ...initialErrors };
+        state.accountsError = null;
         state.submitError = null;
       }),
   })),
 );
 
 // validators
-const baseValidateText = (text: string) => text.trim().length > 2;
+const REQUIRED = "This field is required";
+const MIN_2 = "Must be at least 2 characters";
+const MAX_50 = "Must be no more than 50 characters";
 
-const baseValidatedEmail = (email: string) => {
+const validateName = (value: string): string | null => {
+  const v = value.trim();
+  if (!v) return REQUIRED;
+  if (v.length < 2) return MIN_2;
+  if (v.length > 50) return MAX_50;
+  return null;
+};
+
+const validateEmail = (value: string): string | null => {
+  const v = value.trim();
+  if (!v) return REQUIRED;
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(String(email).toLowerCase());
+  if (!re.test(v.toLowerCase())) return "Please enter a valid email";
+  return null;
 };
 
-const baseValidatePassword = (password: string) => {
-  // min 8 characters
-  return /^.{8,}$/.test(String(password));
+const validatePhone = (value: string): string | null => {
+  const v = value.trim();
+  if (!v) return REQUIRED;
+  return null;
 };
 
-const baseValidatedPhone = (phone: string) => {
-  // E.164
-  return /^\+?[1-9]\d{1,14}$/.test(String(phone));
+const validatePassword = (value: string): string | null => {
+  if (!value) return REQUIRED;
+  if (value.length < 8) return "Must be at least 8 characters";
+  return null;
 };

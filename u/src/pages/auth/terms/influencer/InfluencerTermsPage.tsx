@@ -1,7 +1,8 @@
 import type { FC } from 'react';
-import { ButtonMain } from '../../../../components/ui';
-import { TERMS_SECTIONS } from '../../../../constants/influencer/terms/terms.data';
+import { TERMS_SECTIONS } from '@/constants/influencer/terms/terms.data.ts';
+
 import './_influencer-terms-page.scss';
+import { ButtonMain } from "@components/ui/buttons-fix/ButtonFix.tsx";
 
 //TODO: refork button link to close window
 export const InfluencerTermsPage: FC = () => {
@@ -58,7 +59,7 @@ export const InfluencerTermsPage: FC = () => {
 
       <div className='terms-page__controls'>
         <ButtonMain
-          text={'Ok'}
+          label={'Ok'}
           onClick={handleClickButton}
           isDisabled={false}
         />

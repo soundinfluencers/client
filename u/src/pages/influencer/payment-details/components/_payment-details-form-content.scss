@@ -1,0 +1,68 @@
+@use "@/styles/variables/variables" as vars;
+
+.payment-details-form-content {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 24px;
+
+  @media screen and (max-width: 900px) {
+    grid-template-columns: repeat(8, 1fr);
+  }
+
+  @media screen and (max-width: 500px) {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__payment {
+    grid-column: 1 / 5;
+
+    @media screen and (max-width: 900px) {
+      grid-column: 1 / 4;
+    }
+  }
+
+  &__inputs-block {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    grid-column: 5 / span 8;
+    max-width: 704px;
+    width: 100%;
+
+    @media screen and (max-width: 900px) {
+      gap: 16px;
+      grid-column: 4 / span 5;
+    }
+  }
+
+  &__title {
+    font-weight: 400;
+    font-size: 20px;
+    padding: 8px 0;
+    border-bottom: 1px solid vars.$blue;
+
+    @media screen and (max-width: 900px) {
+      font-size: 16px;
+    }
+
+    @media screen and (max-width: 500px) {
+      font-size: 15px;
+    }
+  }
+
+  &__submit {
+    margin-top: 48px;
+    display: flex;
+    justify-content: center;
+    grid-column: 1 / -1;
+
+    @media screen and (max-width: 900px) {
+      margin-top: 32px;
+    }
+    @media screen and (max-width: 500px) {
+      margin-top: 24px;
+    }
+  }
+}

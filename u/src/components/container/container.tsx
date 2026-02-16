@@ -10,7 +10,7 @@ interface Props {
 
 export const Container: React.FC<Props> = ({ children, className, ref }) => {
   return (
-    <div ref={ref} className={`${Styles.container} ${className}`}>
+    <div ref={ref} className={`${Styles.container} ${className}`} id={'container'}>
       {children}
     </div>
   );

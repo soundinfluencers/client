@@ -1,195 +1,96 @@
 import { z } from "zod";
-import type { TSocialMedia } from "../types/campaign-result-form.types";
 
-const trimString = (v: unknown) => (typeof v === "string" ? v.trim() : v);
-const emptyToUndef = (v: unknown) =>
-  typeof v === "string" && v.trim() === "" ? undefined : v;
+export type Platform =
+  | "instagram"
+  | "youtube"
+  | "tiktok"
+  | "facebook"
+  | "soundcloud"
+  | "spotify"
+  | "press"
+  | "multipromo";
 
-const withHttpsIfMissing = (v: unknown) => {
-  v = trimString(v);
-  if (typeof v !== "string") return v;
+const REQUIRED = "This field is required";
+const INVALID_URL = "Please enter a valid URL";
 
-  const s = v.trim();
-  if (!s) return s;
-
-  if (/^https?:\/\//i.test(s)) return s;
-
-  return `https://${s}`;
-};
-
-export const optionalPostLink = z.preprocess(
-  (v) => {
-    v = emptyToUndef(v);
-    if (v === undefined) return undefined;
-    return withHttpsIfMissing(v);
-  },
-  z.httpUrl({ message: "" }).optional(),
-);
-
-export const requiredPostLink = z.preprocess(
-  (v) => withHttpsIfMissing(v),
+const requiredString = () =>
   z
-    .string({ message: "" })
-    .min(1, { message: "" })
-    .url({ message: "" }),
-);
+  .string({ error: `${REQUIRED}` })
+  .trim()
+  .min(1, { error: `${REQUIRED}` });
 
-const optionalUrl = z.preprocess(
-  (v) => emptyToUndef(trimString(v)),
-  z.string().url({ message: "" }).optional(),
-);
+const urlField = () =>
+  requiredString().url({ error: `${INVALID_URL}: e.g. https://example.com/p/ABC123` });
 
-const requiredUrl = z.preprocess(
-  (v) => trimString(v),
-  z.string({ message: "" }).min(1, { message: "" }).url({ message: "" }),
-);
+const dateRegex = /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+const dateField = () =>
+  requiredString().regex(dateRegex, {
+    error: `Please enter a valid date in dd/mm/yyyy format`,
+  });
 
-// ---- numbers ----
-const toNumberOrUndef = (v: unknown) => {
-  v = emptyToUndef(trimString(v));
-  if (v === undefined) return undefined;
-  const n = typeof v === "string" ? Number(v) : v;
-  return Number.isFinite(n) ? n : NaN;
-};
+const intField = () =>
+  z
+  .number({ error: `${REQUIRED}` })
+  .min(0, { error: `Must be 0 or more` });
 
-// optional int >= 0 (if >0 — change gte(0) on positive())
-const optionalIntMin0 = z.preprocess(
-  toNumberOrUndef,
-  z.number().int().gte(0, { message: "" }).optional(),
-);
-// required int >= 0 (if >0 — change gte(0) на positive())
-const requiredIntMin0 = z.preprocess(
-  toNumberOrUndef,
-  z.number({ message: "" }).int().gte(0, { message: "" }),
-);
+const ratingField = () =>
+  z.number({ error: `Rating is required` });
 
-// optional rating >= 0
-const optionalRatingMin0 = z.preprocess(
-  toNumberOrUndef,
-  z.number().gte(0, { message: "" }).optional(),
-);
-// required rating >= 0 (if >0 — positive())
-const requiredRatingMin0 = z.preprocess(
-  toNumberOrUndef,
-  z.number({ message: "" }).gte(0, { message: "" }),
-);
-
-// datePost строка, без проверки формата
-const optionalDateString = z.preprocess(
-  (v) => emptyToUndef(trimString(v)),
-  z.string().optional(),
-);
-
-const baseSchema = z.object({
-  postLink: optionalPostLink,
-  screenshotUrl: optionalUrl,
-
-  impressions: optionalIntMin0,
-  like: optionalIntMin0,
-  comments: optionalIntMin0,
-  shares: optionalIntMin0,
-  saves: optionalIntMin0,
-
-  rating: optionalRatingMin0,
-  datePost: optionalDateString,
+const socialsDataSchema = z.object({
+  postLink: urlField(),
+  datePost: dateField(),
+  screenshotUrl: urlField(),
+  impressions: intField(),
+  like: intField(),
+  comments: intField(),
+  shares: intField(),
 });
 
-export const getCampaignResultSchema = (meta: TSocialMedia) => {
-  if (meta === "spotify" || meta === "soundcloud") {
-    return baseSchema.extend({
-      rating: requiredRatingMin0,
-      screenshotUrl: requiredPostLink,
-    });
-  }
+const soundcloudDataSchema = z.object({
+  screenshotUrl: urlField(),
+});
 
-  if (meta === "press") {
-    return baseSchema.extend({
-      postLink: requiredPostLink,
-    });
-  }
+const spotifyDataSchema = z.object({
+  rating: ratingField(),
+  screenshotUrl: urlField(),
+});
 
-  return baseSchema.extend({
-    postLink: requiredPostLink,
-    impressions: requiredIntMin0,
-    like: requiredIntMin0,
-    screenshotUrl: requiredUrl,
+const pressDataSchema = z.object({
+  postLink: urlField(),
+});
+
+const multipromoDataSchema = z.object({}).superRefine((_v, ctx) => {
+  ctx.addIssue({
+    code: "custom",
+    message: "Multipromo is not supported yet",
   });
+});
+
+export const getCampaignResultDataSchema = (platform: Platform) => {
+  switch (platform) {
+    case "instagram":
+    case "youtube":
+    case "tiktok":
+    case "facebook":
+      return socialsDataSchema;
+
+    case "soundcloud":
+      return soundcloudDataSchema;
+
+    case "spotify":
+      return spotifyDataSchema;
+
+    case "press":
+      return pressDataSchema;
+
+    case "multipromo":
+      return multipromoDataSchema;
+
+    default:
+      return socialsDataSchema;
+  }
 };
 
-// import { z } from "zod";
-// import type { TSocialMedia } from "../types/campaign-result-form.types";
-
-// const trimString = (v: unknown) => (typeof v === "string" ? v.trim() : v);
-// const emptyToUndef = (v: unknown) =>
-//   typeof v === "string" && v.trim() === "" ? undefined : v;
-
-// // string required
-// const requiredString = z.preprocess(
-//   (v) => trimString(v),
-//   z.string({ message: "" }).min(1, { message: "" }),
-// );
-
-// // string optional
-// const optionalString = z.preprocess(
-//   (v) => emptyToUndef(trimString(v)),
-//   z.string().optional(),
-// );
-
-// // numbers: number, optional
-// const toNumberOrUndef = (v: unknown) => {
-//   v = emptyToUndef(trimString(v));
-//   if (v === undefined) return undefined;
-
-//   const n = typeof v === "string" ? Number(v) : v;
-//   return Number.isFinite(n) ? n : NaN; // NaN поймает z.number()
-// };
-
-// const optionalNumberMin0 = z.preprocess(
-//   toNumberOrUndef,
-//   z.number().gte(0, { message: "" }).optional(),
-// );
-
-// const requiredNumberMin0 = z.preprocess(
-//   toNumberOrUndef,
-//   z.number({ message: "" }).gte(0, { message: "" }),
-// );
-
-// // datePost: string required/optional
-// // const requiredDateString = requiredString;
-// const optionalDateString = optionalString;
-
-// const baseSchema = z.object({
-//   postLink: optionalString,
-//   screenshotUrl: optionalString,
-
-//   impressions: optionalNumberMin0,
-//   like: optionalNumberMin0,
-//   comments: optionalNumberMin0,
-//   shares: optionalNumberMin0,
-//   saves: optionalNumberMin0,
-
-//   rating: optionalNumberMin0,
-//   datePost: optionalDateString,
-// });
-
-// export const getCampaignResultSchema = (meta: TSocialMedia) => {
-//   if (meta === "spotify" || meta === "soundcloud") {
-//     return baseSchema.extend({
-//       rating: requiredNumberMin0,
-//       screenshotUrl: requiredString, // not url, just string
-//     });
-//   }
-
-//   if (meta === "press") {
-//     return baseSchema.extend({
-//       postLink: requiredString,
-//     });
-//   }
-
-//   return baseSchema.extend({
-//     postLink: requiredString,
-//     impressions: requiredNumberMin0,
-//     like: requiredNumberMin0,
-//     screenshotUrl: requiredString,
-//   });
-// };
+export type CampaignResultDataValues = z.infer<
+  ReturnType<typeof getCampaignResultDataSchema>
+>;

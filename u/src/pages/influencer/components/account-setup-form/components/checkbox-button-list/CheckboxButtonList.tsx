@@ -1,9 +1,9 @@
 import type React from "react";
 import { useController, useFormContext } from 'react-hook-form';
 
-import './_checkbox-button-list.scss';
 import type { ICheckboxButton } from "./types/checkbox-buttons.types";
 import type { TSocialAccountFormValues } from "../../types/account-setup.types";
+import './_checkbox-button-list.scss';
 
 interface Props {
   data: ICheckboxButton[];
@@ -15,12 +15,17 @@ interface Props {
 export const CheckboxButtonList: React.FC<Props> = ({ data, name, title, subtitle }) => {
   const { control } = useFormContext();
 
-  const { field } = useController({
+  const { field, fieldState } = useController({
     name,
     control,
   });
 
-  // const hasError = fieldState.invalid;
+  // console.log(name);
+  // console.log(name, getValues(name), fieldState.error);
+  // console.log(name, field.value, fieldState.error?.message);
+
+  const errorMessage = fieldState.error?.message;
+  // console.log(errorMessage);
 
   const isMusicGenres = name === "musicGenres";
 
@@ -111,7 +116,10 @@ export const CheckboxButtonList: React.FC<Props> = ({ data, name, title, subtitl
   return (
     <div className={`checkbox-button-list`}>
       <div className='checkbox-button-list__header'>
-        <p className="checkbox-button-list__title">{title}</p>
+        <span className={`checkbox-button-list__title ${errorMessage ? 'checkbox-button-list__title--error' : ''}`}>
+          {title}
+          {errorMessage && <p className={`checkbox-button-list__error`}>{errorMessage}</p>}
+        </span>
         <p className="checkbox-button-list__subtitle">{subtitle}</p>
       </div>
 

@@ -1,18 +1,23 @@
 import type React from 'react';
 import { useAccountSettingsStore } from '../../store/useAccountSettingsStore';
-import { EditButton } from '../../../../../components/ui/edit-button/EditButton';
+import { EditButton } from '@components/ui/edit-button/EditButton.tsx';
 import { AccountDetailsList } from './components/account-details-list/AccountDetailsList';
 import { AccountDetailsForm } from './components/account-details-form/AccountDetailsForm';
 
 import './_account-details.scss';
+import type { InfluencerProfileApi } from "@/types/user/influencer.types.ts";
 
-export const AccountDetails: React.FC = () => {
+interface Props {
+  profile: InfluencerProfileApi | undefined;
+}
+
+export const AccountDetails: React.FC<Props> = ({ profile }) => {
   const { mode, setMode } = useAccountSettingsStore();
 
   return (
     <div className="account-details">
-      <div className='account-details__header'>
-        <h3 className='account-details__title'>Account Details</h3>
+      <div className="account-details__header">
+        <h2 className="account-details__title">Account settings</h2>
         <EditButton
           className={mode === "edit-details" ? 'active' : ''}
           variants="account"
@@ -20,7 +25,7 @@ export const AccountDetails: React.FC = () => {
         />
       </div>
 
-      { mode === "edit-details" ? (<AccountDetailsForm />) : (<AccountDetailsList />) }
+      {mode === "edit-details" ? (<AccountDetailsForm profile={profile} />) : (<AccountDetailsList profile={profile} />)}
     </div>
   );
 };
