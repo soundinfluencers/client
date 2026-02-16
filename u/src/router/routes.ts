@@ -7,7 +7,7 @@ import { ForgotPasswordPage } from "../pages/auth/forgot/ForgotPasswordPage.tsx"
 // Client Imports
 import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
 
-import { InfluencerTermsPage } from "../pages/auth/terms/influencer/InfluencerTermsPage.tsx";
+
 import {
   AccountSetting,
   AddInfluencerBuildCampaign,
@@ -63,12 +63,12 @@ export const routes: IRoute[] = [
     component: TermsPage,
     isProtected: false,
   },
-  {
-    name: "Terms",
-    path: "/terms/influencer",
-    component: InfluencerTermsPage,
-    isProtected: false,
-  },
+  // {
+  //   name: "Terms",
+  //   path: "/terms/influencer",
+  //   component: InfluencerTermsPage,
+  //   isProtected: false,
+  // },
   {
     name: "Home",
     path: "/client",

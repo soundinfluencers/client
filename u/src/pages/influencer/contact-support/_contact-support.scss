@@ -1,0 +1,95 @@
+@use "@/styles/variables/variables" as vars;
+
+.contact-support {
+  padding-top: 40px;
+  padding-bottom: 64px;
+
+  @media screen and (max-width: 900px) {
+    padding-top: 24px;
+    padding-bottom: 32px;
+  }
+  @media screen and (max-width: 500px) {
+    padding-top: 16px;
+    padding-bottom: 24px;
+  }
+
+  &__content {
+    width: 600px;
+
+    @media screen and (max-width: 900px) {
+      width: 100%;
+    }
+  }
+
+  &__title {
+    margin-top: 40px;
+    margin-bottom: 32px;
+    padding: 8px 0;
+    font-size: 36px;
+    font-weight: 400;
+    border-bottom: 1px solid vars.$blue;
+
+    @media screen and (max-width: 900px) {
+      margin-top: 32px;
+      margin-bottom: 24px;
+      font-size: 32px;
+    }
+    @media screen and (max-width: 500px) {
+      margin-top: 24px;
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    @media screen and (max-width: 900px) {
+      gap: 16px;
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    gap: 24px;
+
+    @media screen and (max-width: 900px) {
+      gap: 16px;
+    }
+  }
+
+  &__label {
+    color: vars.$gray-dark;
+    max-width: 184px;
+    width: 100%;
+
+    @media screen and (max-width: 900px) {
+      max-width: 120px;
+      font-size: 15px;
+    }
+
+    @media screen and (max-width: 500px) {
+      max-width: 74px;
+      font-size: 13px;
+    }
+  }
+
+  &__value {
+    font-weight: 500;
+    color: vars.$gray-dark;
+    text-decoration: underline;
+    word-break: break-word;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    @media screen and (max-width: 900px) {
+      font-size: 15px;
+    }
+  }
+}

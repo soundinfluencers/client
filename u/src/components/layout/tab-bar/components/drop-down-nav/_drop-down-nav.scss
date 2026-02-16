@@ -1,64 +1,49 @@
 @use "@/styles/variables/_variables.scss" as vars;
 
 .user-menu {
-  position: relative;
-  cursor: pointer;
-  z-index: 50;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
 
-  &__item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 
-    &-text {
-      font-size: 20px;
-    }
-    &-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+
+  &--open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 
   &__dropdown {
-    position: absolute;
-    top: calc(100% - 60px);
+    position: fixed;
+    top: 0;
     right: 0;
+    z-index: 1001;
 
     max-width: 288px;
     width: 288px;
 
-    background: white;
-    border: 1px solid vars.$border-secondary;
-    border-radius: 8px;
-    padding: 24px;
-
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
+    background: #ffffff;
+    border: 1px solid #EBECFF;
+    border-radius: 0 0 0 16px;
+    padding: 32px 0 16px 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 
     opacity: 0;
-    transform: translateY(-6px);
-    pointer-events: none;
+    transform: translateY(-10px);
     visibility: hidden;
+    pointer-events: none;
 
-    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
     transition:
       opacity 0.2s ease,
       transform 0.2s ease,
       visibility 0.2s ease;
-    z-index: 1001;
-
-    @media screen and (max-width: 900px) {
-      gap: 24px;
-      max-width: 100%;
-      width: 100%;
-      top: 0;
-      left: 0;
-      right: 0;
-      position: fixed;
-    }
 
     &--open {
       opacity: 1;
@@ -67,26 +52,56 @@
       visibility: visible;
     }
 
+    @media screen and (max-width: 940px) {
+      padding: 16px 0 16px 0;
+      //border-radius: 0;
+
+      height: 430px;
+      overflow: auto;
+    }
+    @media screen and (max-width: 500px) {
+      border-radius: 0;
+      max-width: 100%;
+      width: 100%;
+      height: fit-content;
+    }
+
     &-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 0 24px 16px 32px;
+
+      @media screen and (max-width: 900px) {
+        padding: 0 40px 16px 16px;
+      }
+      @media screen and (max-width: 500px) {
+        padding: 0 16px 16px 16px;
+      }
 
       &-info {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 9px;
 
         &-avatar {
-          width: 40px;
-          height: 40px;
+          width: 50px;
+          height: 50px;
           border-radius: 50%;
           object-fit: cover;
+
+          @media screen and (max-width: 900px) {
+            width: 44px;
+            height: 44px;
+          }
         }
         &-text {
           font-weight: 500;
-          font-size: 16px;
-          color: vars.$gray-dark;
+          font-size: 20px;
+
+          @media screen and (max-width: 900px) {
+            font-size: 18px;
+          }
         }
       }
 
@@ -103,38 +118,98 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      gap: 8px;
+      padding: 16px 0 16px 0;
+      border-bottom: 1px solid vars.$white-gray-2;
+      border-top: 1px solid vars.$white-gray-2;
+
+      @media screen and (max-width: 900px) {
+        padding: 8px 0 8px 0;
+      }
 
       &-link {
-        font-size: 16px;
-        text-align: center;
-        border: 1px solid vars.$white-gray-2;
-        border-radius: 8px;
-        padding: 8px 24px;
-        width: 100%;
+        display: flex;
+        align-self: stretch;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 24px 12px 32px;
+        font-size: 18px;
+        color: vars.$black;
         cursor: pointer;
         transition: all 0.2s ease;
 
         &:hover {
-          background: vars.$hover-button-2;
+          background: vars.$light-blue;
+          border-radius: 8px;
         }
+
+        @media screen and (max-width: 900px) {
+          font-size: 16px;
+          padding: 8px 40px 8px 16px;
+        }
+        @media screen and (max-width: 500px) {
+          padding: 8px 16px;
+        }
+      }
+
+      &-divider {
+        width: 100%;
+        height: 1px;
+        background: vars.$white-gray-2;
       }
     }
 
     &-logout {
+      margin-top: 8px;
       border-radius: 8px;
       width: 100%;
-      padding: 8px 24px;
-      font-size: 15px;
+      padding: 12px 24px 12px 32px;
+      font-size: 16px;
+      font-weight: 500;
       text-align: center;
-      color: white;
-      background: vars.$black-blue;
+      background: transparent;
       cursor: pointer;
       transition: all 0.2s ease;
 
       &:hover {
-        background: vars.$hover-button-1;
+        background: vars.$light-blue;
       }
+
+      //@media screen and (max-width: 900px) {
+      //  padding: 8px 40px 8px 16px;
+      //}
+      //@media screen and (max-width: 500px) {
+      //  padding: 16px;
+      //}
+    }
+
+    &-terms {
+      text-decoration: underline;
+      padding: 12px 24px 12px 32px;
+      display: flex;
+      align-self: stretch;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      //@media screen and (max-width: 900px) {
+      //  padding: 12px 40px 4px 16px;
+      //}
+      //@media screen and (max-width: 500px) {
+      //  padding: 16px;
+      //}
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .user-menu,
+    .user-menu__dropdown {
+      transition: none !important;
+      transform: none !important;
     }
   }
 }

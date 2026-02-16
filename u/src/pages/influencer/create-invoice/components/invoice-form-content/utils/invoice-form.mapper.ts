@@ -1,21 +1,27 @@
-import type { InvoiceCreateRequestDto, InvoiceFormValues } from "../types/invoice-form-inputs.types";
+import type { InvoiceCreateRequestDto } from "../types/invoice-form-inputs.types";
+import type {
+  InvoicePayload
+} from "@/pages/influencer/create-invoice/components/invoice-form-content/validation/schema.ts";
 
-const required = <T>(value: T | undefined, fieldName: string): T => {
-  if (value === undefined || value === null || (value as unknown) === "") {
-    throw new Error(`Missing required field: ${fieldName}`);
+const mapAmount = (data: InvoicePayload): number => {
+  if (data.amountType === "other") {
+    if (data.amount == null) throw new Error("Amount is required");
+    return data.amount;
   }
-  return value;
+
+  if (data.amount == null) throw new Error("Balance amount is missing");
+  return data.amount;
 };
 
 export const requestDtoMapper = (
-  data: InvoiceFormValues,
+  data: InvoicePayload,
 ): InvoiceCreateRequestDto => {
   const base: InvoiceCreateRequestDto = {
     firstName: data.firstName,
     lastName: data.lastName,
     address: data.address,
     country: data.country,
-    amount: data.amount,
+    amount: mapAmount(data),
     company: data.company || undefined,
     vatNumber: data.vatNumber || undefined,
     selectedPaymentMethod: data.selectedPaymentMethod,
@@ -26,13 +32,10 @@ export const requestDtoMapper = (
       return {
         ...base,
         ukBankTransfer: {
-          beneficiary: required(data.beneficiary, "beneficiary"),
-          beneficiaryAddress: required(
-            data.beneficiaryAddress,
-            "beneficiaryAddress",
-          ),
-          sortCode: required(data.sortCode, "sortCode"),
-          accountNumber: required(data.accountNumber, "accountNumber"),
+          beneficiary: data.beneficiary,
+          beneficiaryAddress: data.beneficiaryAddress,
+          sortCode: data.sortCode,
+          accountNumber: data.accountNumber,
         },
       };
 
@@ -40,19 +43,13 @@ export const requestDtoMapper = (
       return {
         ...base,
         internationalBankTransfer: {
-          beneficiary: required(data.beneficiary, "beneficiary"),
-          beneficiaryAddress: required(
-            data.beneficiaryAddress,
-            "beneficiaryAddress",
-          ),
-          iban: required(data.iban, "iban"),
-          bankName: required(data.bankName, "bankName"),
-          bankCountry: required(data.bankCountry, "bankCountry"),
-          bankAccountCurrency: required(
-            data.bankAccountCurrency,
-            "bankAccountCurrency",
-          ),
-          swiftBicCode: required(data.swiftBicCode, "swiftBicCode"),
+          beneficiary: data.beneficiary,
+          beneficiaryAddress: data.beneficiaryAddress,
+          iban: data.iban,
+          bankName: data.bankName,
+          bankCountry: data.bankCountry,
+          bankAccountCurrency: data.bankAccountCurrency,
+          swiftBicCode: data.swiftBicCode,
         },
       };
 
@@ -60,15 +57,8 @@ export const requestDtoMapper = (
       return {
         ...base,
         paypal: {
-          paypalEmail: required(data.paypalEmail, "paypalEmail"),
+          paypalEmail: data.paypalEmail,
         },
       };
-
-    default: {
-      // to let TS highlight if added a new method and forget to handle it
-      const _exhaustive: never = data.selectedPaymentMethod;
-      void _exhaustive;
-      return base;
-    }
   }
 };

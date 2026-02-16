@@ -1,16 +1,20 @@
-import './_payment-bar.scss'
 import { INVOICE_PAYMENT_METHODS_TABS } from './data/payment-method.data';
 import type { TInvoicePaymentMethod } from './types/payment-method.types';
-
+import './_payment-bar.scss'
 
 interface Props {
   tab: TInvoicePaymentMethod;
   onChange: (tab: TInvoicePaymentMethod) => void;
+  className?: string;
 }
 
-export const PaymentBar = ({ tab, onChange }: Props) => {
+export const PaymentBar = ({
+ tab,
+ onChange,
+ className = '',
+}: Props) => {
   return (
-    <ul className="payment-list">
+    <ul className={`payment-list ${className ? className : ''}`}>
       {INVOICE_PAYMENT_METHODS_TABS.map((tb) => (
         <li
           key={tb.id}

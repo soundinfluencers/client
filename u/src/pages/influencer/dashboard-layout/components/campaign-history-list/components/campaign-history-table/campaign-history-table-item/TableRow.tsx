@@ -1,6 +1,12 @@
 import type { Campaign } from "../../../types/campaign-history.types";
-import { getSocialMediaIcon } from "../../../../../../../../constants/social-medias";
-import { STATUS_ACTIONS_MAP } from "../../../data/campaign-history.data";
+import { getSocialMediaIcon } from "@/constants/social-medias.ts";
+import {
+  campaignNavigate
+} from "@/pages/influencer/dashboard-layout/components/campaign-history-list/utils/getCampaignNavigate.tsx";
+// import { STATUS_ACTIONS_MAP } from "../../../data/campaign-history.data";
+// import { Link } from "react-router-dom";
+// import React from "react";
+
 import "./_table-row.scss";
 
 interface Props {
@@ -30,11 +36,11 @@ export const TableRow = ({ campaign }: Props) => {
         {campaign.statusLabel}
       </td>
       <td className="campaign-history-table-row__actions">
-        {STATUS_ACTIONS_MAP[campaign.status] || (
-          <span className="campaign-history-table-row__result">N/A</span>
-        )}
+        {/*{STATUS_ACTIONS_MAP[campaign.status] || (*/}
+        {/*  <span className="campaign-history-table-row__result">N/A</span>*/}
+        {/*)}*/}
+        {campaignNavigate(campaign)}
       </td>
     </tr>
   );
 };
-

@@ -1,9 +1,10 @@
 import type { IInvoiceResponseModel } from '../../../types/invoice';
 import './_table-row.scss';
+// import { normalizePaymentMethodLabel } from "@/pages/influencer/invoices-details/utils/normalizePaymentMethodLabel.ts";
 
 interface Props {
   item: IInvoiceResponseModel;
-};
+}
 
 export const TableRow = ({ item }: Props) => {
   return (

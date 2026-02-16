@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "react-router-dom";
 
 export const STATUS_ACTIONS_MAP: Record<number, React.ReactNode> = {
@@ -11,6 +12,9 @@ export const STATUS_ACTIONS_MAP: Record<number, React.ReactNode> = {
   1: (
     <Link
       to={"/influencer/promos/distributing"}
+      state={{
+
+      }}
       className="campaign-history-table-row__link">
       Post & Submit Insights
     </Link>

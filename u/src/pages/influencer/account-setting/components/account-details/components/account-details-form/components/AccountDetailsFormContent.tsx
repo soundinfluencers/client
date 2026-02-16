@@ -1,27 +1,35 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { useInfluenserProfileStore } from "@/store/influencer/account-settings/useInfluenserProfileStore";
+// import { useInfluencerProfileStore } from "@/store/influencer/account-settings/useInfluencerProfileStore.ts";
 import { useAccountSettingsStore } from "../../../../../store/useAccountSettingsStore";
 import { useUpdateInfluencerDetails } from "@/pages/influencer/account-setting/hooks/useInfluencerProfileDetails";
 
-import { FormFields } from "../../../../../../../../components/form/render-fields/FormFields";
+import { FormFields } from "@components/form/render-fields/FormFields.tsx";
 import { MaskedPasswordInput } from "./masked-password-input/MaskedPasswordInput";
 import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix";
 import { ACCOUNT_DETAILS_INPUTS_DATA } from "../data/account-details-inputs.data";
-import type { InfluencerProfileApi, TInfluencerProfileDetailsModel } from "@/types/user/influencer.types";
+import type {
+  InfluencerProfileApi,
+  TInfluencerProfileDetailsModel,
+} from "@/types/user/influencer.types";
 
 import './_account-details-form-content.scss'
 
-export const AccountDetailsFormContent = () => {
+interface Props {
+  profile: InfluencerProfileApi | undefined;
+}
+
+export const AccountDetailsFormContent: React.FC<Props> = ({ profile }) => {
   const { handleSubmit } = useFormContext<TInfluencerProfileDetailsModel>();
   const { setMode } = useAccountSettingsStore();
   const [isLoading, setIsLoading] = useState(false);
-  const { profile } = useInfluenserProfileStore();
 
   const updateMutation = useUpdateInfluencerDetails();
 
   const handleSave = async (data: TInfluencerProfileDetailsModel) => {
     if (!profile) return;
+
+    console.log("Form data on submit:", data);
 
     if (compareProfiles(data, profile)) {
       console.log("No changes detected, skipping update.");
@@ -31,7 +39,7 @@ export const AccountDetailsFormContent = () => {
 
     console.log('Form data to save:', data);
     setIsLoading(true);
-    console.log('Profie before update', profile);
+    console.log('Profile before update', profile);
 
     try {
       await updateMutation.mutateAsync(data);
@@ -66,8 +74,8 @@ function compareProfiles(a: TInfluencerProfileDetailsModel, b: InfluencerProfile
     a.firstName === b.firstName &&
     a.email === b.email &&
     a.phone === b.phone &&
-    a.lastName === b.lastName
-    // a.profilePhotoUrl === b.profilePhotoUrl &&
+    a.lastName === b.lastName &&
+    a.logoUrl === b.logoUrl
     // a.telegramUsername === b.telegramUsername
   );
-};
+}

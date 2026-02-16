@@ -8,7 +8,7 @@ export const PLACEHOLDER_LOGO_URL =
 
 export const normalizeLogoUrlForApi = (logoUrl: unknown) => {
   const v = typeof logoUrl === "string" ? logoUrl.trim() : "";
-  return v.length ? v : PLACEHOLDER_LOGO_URL;
+  return v.length ? v : '';
 };
 
 // countries normalize for form -- ensure fixed length array with valid entries

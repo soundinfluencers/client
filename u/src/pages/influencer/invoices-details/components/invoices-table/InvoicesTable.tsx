@@ -11,8 +11,8 @@ interface Props {
 export const InvoicesTable: React.FC<Props> = ({ invoices }) => {
   //
   return (
-    <div className="table-card">
-      <table className="custom-table">
+    <div className="table-card-influencer">
+      <table className="custom-table-influencer">
         <thead className='custom-table__thead'>
           <tr className='custom-table__thead-tr'>
             <th className='custom-table__thead-th'>Invoice ID</th>

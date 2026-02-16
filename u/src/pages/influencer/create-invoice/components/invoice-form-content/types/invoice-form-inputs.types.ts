@@ -1,7 +1,7 @@
 import type { TInvoicePaymentMethod } from "../../payment-bar/types/payment-method.types";
 
 export type TInvoiceInputConfig = {
-  type: "text" | "number" | "email";
+  type: "text" | "number" | "email" | 'country';
   label: string;
   name: string;
   placeholder: string;
@@ -12,36 +12,42 @@ export interface IPaymentMethodField {
   inputs: TInvoiceInputConfig[];
 }
 
-export type InvoiceFormValues = {
-  // invoice details
+export type InvoiceBase = {
   firstName: string;
   lastName: string;
   address: string;
   country: string;
-
   company?: string;
   vatNumber?: string;
-
-  // common
-  selectedPaymentMethod: TInvoicePaymentMethod;
-  amount: number;
-
-  // uk bank transfer fields
-  beneficiary?: string;
-  beneficiaryAddress?: string;
-  sortCode?: string;
-  accountNumber?: string;
-
-  // international bank transfer fields
-  iban?: string;
-  bankName?: string;
-  bankCountry?: string;
-  bankAccountCurrency?: string;
-  swiftBicCode?: string;
-
-  // paypal fields
-  paypalEmail?: string;
+  amountType: "balance" | "other";
+  amount: number | null;
 };
+
+export type UkForm = InvoiceBase & {
+  selectedPaymentMethod: "ukBankTransfer";
+  beneficiary: string;
+  beneficiaryAddress: string;
+  sortCode: string;
+  accountNumber: string;
+};
+
+export type InternationalForm = InvoiceBase & {
+  selectedPaymentMethod: "internationalBankTransfer";
+  beneficiary: string;
+  beneficiaryAddress: string;
+  iban: string;
+  bankName: string;
+  bankCountry: string;
+  bankAccountCurrency: string;
+  swiftBicCode: string;
+};
+
+export type PaypalForm = InvoiceBase & {
+  selectedPaymentMethod: "paypal";
+  paypalEmail: string;
+};
+
+export type InvoiceFormValues = UkForm | InternationalForm | PaypalForm;
 
 export type InvoiceCreateRequestDto = {
   firstName: string;

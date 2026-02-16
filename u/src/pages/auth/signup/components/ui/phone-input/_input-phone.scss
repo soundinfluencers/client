@@ -3,6 +3,7 @@
 .input-phone {
   width: 100%;
   position: relative;
+  transition: all 0.2s ease-in-out;
 
   &__title {
     width: 100%;
@@ -18,6 +19,10 @@
 
     @media screen and (max-width: 500px) {
       font-size: 14px;
+    }
+
+    &--error {
+      color: vars.$error;
     }
   }
 
@@ -43,6 +48,15 @@
     &:focus-within {
       outline: none;
       border: 1px solid vars.$blue;
+    }
+
+    &--error {
+      border: 1px solid vars.$error;
+
+      &:focus {
+        outline: none;
+        border: 1px solid vars.$error;
+      }
     }
   }
 
@@ -226,18 +240,25 @@
     }
   }
 
-  &--error {
-    .text-input__title {
-      color: vars.$error;
-    }
+  //&--error {
+  //  .text-input__title {
+  //    color: vars.$error;
+  //  }
+  //
+  //  .text-input__input {
+  //    border: 1px solid vars.$error;
+  //
+  //    &:focus {
+  //      outline: none;
+  //      border: 1px solid vars.$error;
+  //    }
+  //  }
+  //}
 
-    .text-input__input {
-      border: 1px solid vars.$error;
-
-      &:focus {
-        outline: none;
-        border: 1px solid vars.$error;
-      }
-    }
+  &__error-message {
+    //margin-top: 8px;
+    color: vars.$error;
+    font-size: 12px;
+    text-align: left;
   }
 }

@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { useAccountSetupStore } from '../../store/useAccountSetupStore';
 
-import { FormFields } from '../../../../../../components/form/render-fields/FormFields';
+import { FormFields } from '@components/form/render-fields/FormFields.tsx';
 import { AccountSwitcher } from '../account-type-switcher/AccountSwitcher';
 import { CheckboxButtonList } from '../checkbox-button-list/CheckboxButtonList';
 import { AudienceInsights } from '../audience-insights/AudienceInsights';
 import { PriceInput } from '../price-input/PriceInput';
-import { ButtonMain, ButtonSecondary } from '../../../../../../components/ui/buttons-fix/ButtonFix';
-import { Modal } from '../../../../../../components/ui/modal-fix/Modal';
+import { ButtonMain, ButtonSecondary } from '@components/ui/buttons-fix/ButtonFix.tsx';
+import { Modal } from '@components/ui/modal-fix/Modal.tsx';
 
 import { PLATFORM_CONFIG } from '../../data/account-setup-form.data';
 import { ACCOUNT_INPUTS_DATA } from './data/user-inputs.data';
@@ -16,22 +15,21 @@ import { MUSIC_GENRES_DATA } from '../checkbox-button-list/data/music-genres.dat
 import { THEME_TOPICS_DATA } from '../checkbox-button-list/data/categories.data';
 import { ENTERTAINMENT_CATEGORIES_DATA, MUSIC_CATEGORIES_DATA } from '../checkbox-button-list/data/creator-categories.data';
 
+import { normalizeAccountForApi } from '@/pages/influencer/shared/utils/socialAccount.mapper';
 import type { TSocialAccounts } from '@/types/user/influencer.types';
 import type { TSocialAccountFormValues } from '../../types/account-setup.types';
 
 import './_account-setup-form-content.scss';
-import { normalizeAccountForApi } from '@/pages/influencer/shared/utils/socialAccount.mapper';
 
 interface Props {
   platform: TSocialAccounts;
   isEdit: boolean;
   onSave: (data: TSocialAccountFormValues) => Promise<void> | void;
   onRemove: () => Promise<void> | void;
-};
+}
 
 export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: Props) => {
-  const { control, setValue, handleSubmit } = useFormContext<TSocialAccountFormValues>();
-  const { onResetAccountForm } = useAccountSetupStore();
+  const { control, setValue, handleSubmit, clearErrors } = useFormContext<TSocialAccountFormValues>();
 
   const [isSaveLoading, setIsSaveLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
@@ -52,27 +50,32 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
     if (profileCategory === 'community') {
       setValue('creatorCategories', [], {
         shouldDirty: true,
-        shouldValidate: true,
+        shouldValidate: false,
       });
+
+      clearErrors("musicGenres");
+      clearErrors("creatorCategories");
     }
     if (profileCategory === 'creator') {
       setValue('musicGenres', [], {
         shouldDirty: true,
-        shouldValidate: true,
+        shouldValidate: false,
       });
       setValue('categories', [], {
         shouldDirty: true,
         shouldValidate: true,
       });
+
+      clearErrors("creatorCategories");
+      clearErrors("musicGenres");
     }
-  }, [profileCategory, setValue]);
+  }, [profileCategory, setValue, clearErrors]);
 
   const handleRemove = async () => {
     setIsDeleteLoading(true);
 
     try {
       await onRemove();
-      onResetAccountForm();
     } finally {
       setIsDeleteLoading(false);
     }
@@ -85,7 +88,6 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
       const cleaned = normalizeAccountForApi(data);
       console.log("cleaned form data to save:", cleaned);
       await onSave(cleaned);
-      onResetAccountForm();
     } finally {
       setIsSaveLoading(false);
     }

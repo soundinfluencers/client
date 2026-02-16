@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { UserRoleType } from "../../types/user/user.types";
+import type { UserRoleType } from "@/types/user/user.types.ts";
 
 interface LoginState {
   email: string;

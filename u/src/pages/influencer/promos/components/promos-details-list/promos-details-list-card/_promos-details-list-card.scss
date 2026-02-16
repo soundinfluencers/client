@@ -70,8 +70,8 @@
       > img {
         border-radius: 50%;
         object-fit: cover;
-        height: 67px;
-        width: 67px;
+        height: 57px;
+        width: 57px;
 
         @media screen and (max-width: 900px) {
           width: 48px;
@@ -123,7 +123,7 @@
         &-wrapper {
           display: flex;
           align-items: flex-start;
-          flex-grow: 1;
+          //flex-grow: 1;
           flex: 1;
           gap: 8px;
         }
@@ -138,6 +138,15 @@
           }
           @media screen and (max-width: 500px) {
             font-size: 14px;
+          }
+
+          &--link {
+            //color: #699BFF;
+            text-decoration: underline;
+
+            &:hover {
+              text-decoration: underline;
+            }
           }
         }
 

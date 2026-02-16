@@ -1,4 +1,4 @@
-import type { TPromoStatus } from "@/types/influencer/promos/promos.types";
+import type { TPromoStatus } from "@/pages/influencer/promos/types/promos.types.ts";
 
 export const getTitleForPromoCard = (status: TPromoStatus): string => {
   switch (status) {
@@ -9,5 +9,5 @@ export const getTitleForPromoCard = (status: TPromoStatus): string => {
     case 'pending':
     default:
       return 'New promo';
-  };
+  }
 };

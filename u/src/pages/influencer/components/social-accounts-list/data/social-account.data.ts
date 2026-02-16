@@ -22,3 +22,24 @@ export const SOCIAL_ACCOUNTS_DATA: ISocialAccountMeta[] = [
 export const getSocialMeta = (platform: TSocialAccounts) => {
   return SOCIAL_ACCOUNTS_DATA.find((item) => item.id === platform);
 };
+
+export const getSocialIcon = (platform: TSocialAccounts) => {
+  switch (platform) {
+    case "instagram":
+      return instagramIcon;
+    case "tiktok":
+      return tiktokIcon;
+    case "spotify":
+      return spotifyIcon;
+    case "youtube":
+      return youtubeIcon;
+    case "facebook":
+      return facebookIcon;
+    case "soundcloud":
+      return soundcloudIcon;
+    case "press":
+      return pressIcon;
+    default:
+      return null;
+  }
+};

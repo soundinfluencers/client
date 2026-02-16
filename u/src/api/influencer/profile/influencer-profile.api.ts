@@ -4,12 +4,18 @@ import type {
   TDeleteSocialAccountDTO,
   InfluencerProfileApi,
   SocialAccountDraft,
-  TInfluencerProfileDetailsModel,
   TInfluencerProfileUpdateModel,
   TSocialAccounts,
   TSocialAccountShort,
 } from "@/types/user/influencer.types";
 import { AxiosError } from "axios";
+import type {
+  TInvoiceDetailsApi,
+  TUpdateInvoiceDetailsDto,
+} from "@/pages/influencer/invoice-details/types/invoice-details.types.ts";
+import type {
+  TPaymentDetailsRequestDto, TPaymentDetailsResponseDto
+} from "@/pages/influencer/payment-details/types/payment-details.types.ts";
 
 // Get influencer profile
 export const getInfluencerProfile = async (): Promise<InfluencerProfileApi> => {
@@ -55,6 +61,7 @@ export const getSocialAccountById = async (
 };
 
 // Create social account (mb send platform: TSocialAccounts)
+// Fix returned Promise type
 export const createSocialAccount = async (
   data: SocialAccountDraft,
   socialMedia: TSocialAccounts,
@@ -136,8 +143,9 @@ export const deleteSocialAccount = async (
 };
 
 // Update influencer profile details
+// TODO: change types, make dto,
 export const updateInfluencerProfileDetails = async (
-  data: TInfluencerProfileDetailsModel,
+  data: TInfluencerProfileUpdateModel,
 ): Promise<TInfluencerProfileUpdateModel> => {
   console.log("Update influencer profile details payload:", data);
 
@@ -163,4 +171,51 @@ export const updateInfluencerProfileDetails = async (
     }
     throw error;
   }
+};
+
+// Update influencer invoice details
+export const updateInfluencerInvoiceDetails = async (
+  data: TUpdateInvoiceDetailsDto,
+): Promise<TInvoiceDetailsApi> => {
+  console.log("Update influencer invoice details payload:", data);
+  const response = await $api.patch("/profile/invoice-details", {
+    ...data,
+  });
+  console.log(
+    "Influencer invoice details updated successfully:",
+    response.data.data,
+  );
+  // throw new Error("Function not implemented.");
+  return response.data.data as TInvoiceDetailsApi;
+};
+
+// Get influencer invoice details
+export const getInfluencerInvoiceDetails = async (): Promise<TInvoiceDetailsApi> => {
+  console.log("call get invoice details");
+  const response = await $api.get("/profile/invoice-details");
+  console.log("Response getInvoiceDetails:", response.data.data);
+
+  return response.data.data as TInvoiceDetailsApi;
+};
+
+// Update influencer payment method
+export const updateInfluencerPaymentMethod = async (data: TPaymentDetailsRequestDto): Promise<TPaymentDetailsResponseDto> => {
+  console.log("Update influencer payment method payload:", data);
+
+  const res = await $api.patch("/profile/payment-details", {
+  ...data,
+  });
+  console.log(
+    "Influencer payment method updated successfully:",
+    res.data.data,
+  );
+  return res.data.data as TPaymentDetailsResponseDto;
+};
+
+// Get influencer payment method
+export const getInfluencerPaymentMethod = async (): Promise<TPaymentDetailsResponseDto> => {
+  console.log("call get payment method");
+  const response = await $api.get("/profile/payment-details");
+  console.log("Response getPaymentMethod:", response.data.data);
+  return response.data.data as TPaymentDetailsResponseDto;
 };

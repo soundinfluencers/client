@@ -17,9 +17,10 @@ export const clientCompanyTypes: ClientCompanyType[] = [
 
 // union user included client and influencer
 export interface BaseUser {
-  accessToken: string | null;
+  // accessToken: string | null;
   balance: number;
   firstName: string;
   role: UserRoleType | null;
+  logoUrl: string | null;
 }
 export type IUser = BaseUser;

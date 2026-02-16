@@ -8,6 +8,7 @@
   &__label {
     font-size: 16px;
     color: vars.$gray-dark;
+    transition: all 0.2s ease-in-out;
 
     @media screen and (max-width: 900px) {
       font-size: 15px;
@@ -27,11 +28,17 @@
     border: 1px solid vars.$white-gray-2;
     border-radius: 8px;
     padding: 16px;
+    transition: all 0.2s ease-in-out;
 
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
+    }
+
+    &:focus {
+      outline: none;
+      border: 1px solid vars.$blue;
     }
 
     &--error {
@@ -42,5 +49,55 @@
         border: 1px solid vars.$error;
       }
     }
+
+  }
+
+  &__error-message {
+    margin-top: -4px;
+    color: vars.$error;
+    font-size: 12px;
+
+    @media screen and (max-width: 900px) {
+      margin-top: -2px;
+    }
+  }
+}
+
+.currency-selector {
+  display: flex;
+  justify-content: flex-start;
+  gap: 16px;
+
+  &__option {
+    //display: flex;
+    //align-items: center;
+    //justify-content: center;
+
+    padding: 8px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    background: #ffffff;
+    border: 1px solid vars.$white-gray-2;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+
+    &--selected {
+      background: #F6FAFF;
+      border: 1px solid vars.$blue;
+    }
+  }
+
+  &__input {
+    display: none;
+  }
+
+  &__label {
+    color: vars.$gray-dark;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 14px;
   }
 }

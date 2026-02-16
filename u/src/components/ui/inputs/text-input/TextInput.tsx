@@ -9,6 +9,7 @@ export interface TextInputProps {
   type?: string;
   placeholder?: string;
   isError?: boolean;
+  errorMessage?: string;
 }
 
 export const TextInput: FC<TextInputProps> = ({
@@ -18,6 +19,7 @@ export const TextInput: FC<TextInputProps> = ({
   type = "text",
   placeholder,
   isError = false,
+  errorMessage,
 }: TextInputProps) => {
   const [maskedValue, setMaskedValue] = useState("");
 
@@ -57,6 +59,10 @@ export const TextInput: FC<TextInputProps> = ({
         placeholder={placeholder}
         style={{ marginTop: title ? 8 : 0 }}
       />
+
+      {isError && errorMessage && (
+        <p className="text-input__error-message">{errorMessage}</p>
+      )}
     </div>
   );
 };

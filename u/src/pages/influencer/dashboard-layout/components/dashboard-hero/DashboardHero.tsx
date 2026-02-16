@@ -13,6 +13,10 @@ export const DashboardHero = () => {
   const isPromos = useMatch("/influencer/promos");
   const isHistory = useMatch("/influencer/campaign-history");
 
+  // 20AC - eur
+  //0024 - dollar
+  //00A3 - pound
+
   return (
     <section className="dashboard-hero">
       <div className="dashboard-hero__top">
@@ -37,7 +41,7 @@ export const DashboardHero = () => {
             Balance Due
           </span>
           <span className="dashboard-hero__balance-amount">
-            {user?.balance} €
+            {user?.balance + '\u20AC'}
           </span>
         </div>
       </div>
