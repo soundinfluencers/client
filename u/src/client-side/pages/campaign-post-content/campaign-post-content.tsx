@@ -37,7 +37,7 @@ export const CampaignPostContent: React.FC = () => {
   const totalPrice = useCampaignStore((s) => s.totalPrice);
   const actions = useCampaignStore((s) => s.actions);
   const postContentDraft = useCampaignStore((s) => s.postContentDraft);
-
+  console.log(postContentDraft, "awd");
   const selectedPlatforms = useSelectedPlatforms(offer, promoCard);
 
   type Entity = 0 | 1;
