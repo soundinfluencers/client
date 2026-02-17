@@ -4,19 +4,22 @@ import { PromosTable } from "./components/promos-table/PromosTable";
 import { ButtonMain } from "@components/ui/buttons-fix/ButtonFix.tsx";
 import { getInfluencerPromos } from "@/api/influencer/promos/influencer-promos.api.ts";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader } from "@/components";
+// import { Loader } from "@/components";
 
 // import { ScrollToTop } from "@/components/ui/scroll-to-top/ScrollToTop";
 // import { toast } from "react-toastify";
-import "./_promos-list.scss";
+// import { CardSkeleton } from "@/shared/ui/skeletons/card-skeleton.tsx";
+// import { TableCardSkeleton } from "@/shared/ui/skeletons/table-card-skeleton.tsx";
 // import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
+// import { TableCardSkeleton } from "@/shared/ui/skeletons/table-card-skeleton.tsx";
+import "./_promos-list.scss";
 
 export const PromosList = () => {
   const { viewMode, activePromosFilter, limit } = useDashboardLayoutStore();
 
   console.log(activePromosFilter);
 
-  const { data, isError, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
+  const { data, isError, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isPending } =
     useInfiniteQuery({
       queryKey: ["promos", activePromosFilter, limit],
       initialPageParam: 1,
@@ -35,34 +38,34 @@ export const PromosList = () => {
       // refetchOnWindowFocus: true,
     });
 
-  console.log("Promos query status:", { isError, isLoading, isFetching, isFetchingNextPage, hasNextPage });
+  console.log("Promos query status:", { isError, isLoading, isFetching, isFetchingNextPage, hasNextPage, isPending });
 
   console.log("Promos data:", data);
 
   const activePromos = data?.pages.flat() ?? [];
 
   // useMemo to filter out declined promos
-  const filteredPromos = activePromos.filter(promo => promo.confirmation !== 'decline');
+  // const filteredPromos = activePromos.filter(promo => promo.confirmation !== 'decline');
 
-  console.log('Filtered promos', filteredPromos);
+  // console.log('Filtered promos', filteredPromos);
+
+  // if (true) {
+  //   return (
+  //     <TableCardSkeleton />
+  //   );
+  // }
 
   return (
-    <div className="promos-list"  >
-      {isLoading ? (
-        <Loader/>
-      ) : isError ? (
+    <div className="promos-list">
+      {isError ? (
         <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos.</p>
-      ) : filteredPromos.length === 0 ? (
-        <p style={{ fontSize: 48, textAlign: "center", paddingTop: 40 }}>
-          No promos found.
-        </p>
       ) : (
         <div className="promos-list__content">
           {viewMode === "grid" ? (
-            <PromosGrid promos={filteredPromos}/>
+            <PromosGrid promos={activePromos} isLoading={isLoading} isFetching={isFetching} />
           ) : (
             <div className="promos-list__scroll">
-              <PromosTable promos={filteredPromos}/>
+              <PromosTable promos={activePromos} isLoading={isLoading} isFetching={isFetching} />
             </div>
           )}
 

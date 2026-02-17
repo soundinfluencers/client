@@ -4,7 +4,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { getCampaignHistory } from '@/api/influencer/campaign-history/campaign-history.api';
 import { ButtonMain } from '@components/ui/buttons-fix/ButtonFix.tsx';
 import { CampaignHistoryTable } from './components/campaign-history-table/CampaignHistoryTable';
-import { Loader } from '@/components';
+// import { Loader } from '@/components';
 // import type {
 //   Campaign
 // } from "@/pages/influencer/dashboard-layout/components/campaign-history-list/types/campaign-history.types.ts";
@@ -15,9 +15,10 @@ export const CampaignHistoryList = () => {
 
   const {
     data,
+    isFetching,
     isLoading,
     isError,
-    error,
+    // error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -40,40 +41,33 @@ export const CampaignHistoryList = () => {
 
   const campaigns = data?.pages.flat() ?? [];
 
-  if (isLoading) {
-    return <Loader/>;
-  }
-  if (error) {
-    return (
-      <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
-        Error loading campaign history.
-      </p>
-    );
-  }
-  if (campaigns.length === 0) {
-    return (
-      <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
-        No campaign history available.
-      </p>
-    );
-  }
+  // if (isLoading) {
+  //   return <Loader/>;
+  // }
+  // if (error) {
+  //   return (
+  //     <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
+  //       Error loading campaign history.
+  //     </p>
+  //   );
+  // }
+  // if (campaigns.length === 0) {
+  //   return (
+  //     <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
+  //       No campaign history available.
+  //     </p>
+  //   );
+  // }
 
   return (
     <div className="campaign-history-list">
       <div className="campaign-history-list__content">
         <div className="campaign-history-list__scroll">
-          {isLoading ? (
-              <Loader/>
-            ) :
-            isError ? (
+          {isError ? (
               <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
                 Error loading campaign history.
               </p>
-            ) : campaigns.length === 0 ? (
-              <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
-                No campaign history available.
-              </p>
-            ) : (<CampaignHistoryTable campaigns={campaigns}/>)}
+            ) : (<CampaignHistoryTable campaigns={campaigns} isLoading={isLoading} isFetching={isFetching}/>)}
         </div>
 
         <div className="campaign-history-list__actions">
@@ -87,6 +81,16 @@ export const CampaignHistoryList = () => {
     </div>
   );
 };
+
+// : campaigns.length === 0 ? (
+//   <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
+//     No campaign history available.
+//   </p>
+// )
+
+// isLoading ? (
+//   <Loader/>
+// ) :
 
 // export enum HistoryCampaignActionStatus {
 //   pending = 0,

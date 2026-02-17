@@ -2,7 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import type { ReactNode } from "react";
 import { useUser } from "@/store/get-user";
-import { Loader } from "@/components";
+// import { Loader } from "@/components";
 
 interface Props {
   children: ReactNode;
@@ -16,7 +16,7 @@ export const PublicRoute = ({ children }: Props) => {
   const isShareRoute = location.pathname.startsWith("/promo-share");
 
   if (!isAuthReady) {
-    return <Loader />;
+    // return <Loader />;
   }
 
   if (accessToken && !isShareRoute) {

@@ -2,16 +2,16 @@
 
 .promos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
   gap: 24px;
 
   @media screen and (max-width: 900px) {
-    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
     gap: 16px;
   }
 
   @media screen and (max-width: 500px) {
-    grid-template-columns: repeat(auto-fit, minmax(343px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(343px, 1fr));
     column-gap: 0;
     row-gap: 16px;
   }
