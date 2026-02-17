@@ -21,6 +21,8 @@ import { PaymentBar } from "@/client-side/widgets";
 import { PAYMENT_CAMPAIGN_TABS } from "@/client-side/data/payment-campaign-tabs";
 import { PaymentForm } from "@/client-side/client-forms";
 import { useCampaignStore } from "@/client-side/store";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 export type PaymentMethodId =
   | "bank_card"
@@ -46,7 +48,7 @@ const toBackendSelectedMethod = (
 };
 export const PaymentCampaign = () => {
   const { actions, campaignName } = useCampaignStore();
-
+  const navigate = useNavigate();
   const [tab, setTab] = React.useState<PaymentTabId>("bank_card");
 
   const [selectedIdPayment, setSelectedIdPayment] =
@@ -111,6 +113,8 @@ export const PaymentCampaign = () => {
 
     console.log(payload);
     await postCampaign(payload);
+    navigate("/client");
+    toast.success("Campaign saved succesfully!");
   };
   return (
     <Container className="payment-campaign">

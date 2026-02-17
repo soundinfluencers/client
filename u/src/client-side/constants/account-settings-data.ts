@@ -1,7 +1,7 @@
 export const userFields = [
   { key: "firstName", label: "First name" },
 
-  { key: "avatar", label: "Profile Photo" },
+  { key: "logoUrl", label: "Profile Photo" },
   { key: "companyName", label: "Company Name" },
   { key: "email", label: "Email" },
   { key: "phone", label: "Phone number" },

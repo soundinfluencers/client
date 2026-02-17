@@ -25,7 +25,7 @@
 
     height: 303px;
     border-radius: 8px;
-    background-color: gray;
+    background-color: lightgray;
   }
   &__fill-data {
     h3,
@@ -53,7 +53,7 @@
       align-items: flex-start;
       .check {
         position: absolute;
-        right: 5px;
+        right: 2px;
       }
       li {
         cursor: pointer;
@@ -180,7 +180,7 @@
     min-width: 325px;
     height: 303px;
     border-radius: 8px;
-    background-color: gray;
+    background-color: lightgray;
   }
   &__fill-data {
     h3,

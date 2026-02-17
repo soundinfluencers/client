@@ -72,7 +72,8 @@ export const FormInput = React.forwardRef<
               className={`form-input ${className} ${hasError ? "is-error" : ""}`}>
               {label && (
                 <label htmlFor={id ?? name}>
-                  {label} {required ? "*" : ""}
+                  {label}
+                  {required ? "*" : ""}
                 </label>
               )}
 

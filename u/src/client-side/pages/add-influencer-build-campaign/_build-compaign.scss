@@ -87,6 +87,9 @@
           position: relative;
           max-width: 496px;
           width: 100%;
+          @media screen and (max-width: 900px) {
+            max-width: 100%;
+          }
           .search-dropdown {
             position: absolute;
             left: 0;
@@ -131,6 +134,7 @@
           flex: 1 1 auto;
         }
         .filter_flag {
+          cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;

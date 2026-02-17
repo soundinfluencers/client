@@ -1,0 +1,83 @@
+@use "@/styles/variables/variables" as vars;
+
+.account-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @media screen and (max-width: 900px) {
+    gap: 16px;
+  }
+
+  @media screen and (max-width: 500px) {
+    gap: 24px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: end;
+    height: 38px;
+    gap: 24px;
+    padding: 8px 0;
+
+    &--avatar {
+      align-items: center;
+    }
+
+    @media screen and (max-width: 500px) {
+      gap: 16px;
+      height: 36px;
+    }
+  }
+
+  &__label {
+    color: vars.$gray-dark;
+    width: 184px;
+
+    @media screen and (max-width: 900px) {
+      font-size: 15px;
+    }
+
+    @media screen and (max-width: 500px) {
+      width: 120px;
+      font-size: 13px;
+    }
+  }
+
+  &__value {
+    display: inline-flex;
+    font-weight: 500;
+    color: vars.$gray-dark;
+
+    @media screen and (max-width: 900px) {
+      font-weight: 400;
+    }
+
+    @media screen and (max-width: 500px) {
+      font-size: 15px;
+    }
+  }
+
+  &__img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+
+    @media screen and (max-width: 900px) {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  &__password {
+    font-weight: 900;
+    font-size: 20px;
+    height: 20px;
+    color: vars.$gray-dark;
+
+    @media screen and (max-width: 500px) {
+      height: 18px;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { FormInput, Edit } from "@/components/ui";
 import { useAccountChange } from "@/store/client/account-settings";
 import { RHFImageUpload } from "../ui/image-layout/image-layout";
+import { CountryField } from "@/pages/influencer/shared/components/CountryField";
 
 export function AccountSettingsForm({ data }: { data: any }) {
   const { isEdit, onChangeEdit } = useAccountChange();
@@ -21,7 +22,7 @@ export function AccountSettingsForm({ data }: { data: any }) {
 
       <FormInput label="Phone number" name="phone" placeholder={data.phone} />
       <RHFImageUpload
-        name="avatarUrl"
+        name="logoUrl"
         label="Profile photo"
         placeholder="Upload image"
         size="small"
@@ -58,8 +59,16 @@ export function InvoiceSettingsForm({ data }: { data: any }) {
         placeholder={data.lastName}
       />
       <FormInput label="Address" name="address" placeholder={data.address} />
-      <FormInput label="Company" name="company" placeholder={data.company} />
-      <FormInput label="Country" name="country" placeholder={data.country} />
+      <FormInput
+        label="Company"
+        name="company"
+        placeholder={data.company}
+      />{" "}
+      <CountryField
+        name="country"
+        placeholder={data.country}
+        label="Country*"
+      />
       <FormInput
         label="VAT number (only if VAT registered)"
         name="vatNumber"

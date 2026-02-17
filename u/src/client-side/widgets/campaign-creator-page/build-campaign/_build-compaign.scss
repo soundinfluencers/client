@@ -86,6 +86,9 @@
           position: relative;
           max-width: 496px;
           width: 100%;
+          @media screen and (max-width: 900px) {
+            max-width: 100%;
+          }
           .search-dropdown {
             position: absolute;
             left: 0;

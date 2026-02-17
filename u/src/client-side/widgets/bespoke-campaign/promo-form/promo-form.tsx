@@ -10,12 +10,47 @@ import {
 } from "@/client-side/schemas";
 import { BespokeForm } from "@/client-side/client-forms";
 import { postBespokeCampaign } from "@/api/client/campaign/campaign-bespoke";
+import { toast } from "react-toastify";
 
 interface Props {
   activeTabId: string;
 }
-export const buildPayloadString = (values: Record<string, unknown>) => {
-  return JSON.stringify(values);
+const buildBespokePayload = (
+  category: "artist" | "music" | "event" | "other",
+  values: Record<string, any>,
+) => {
+  if (category === "other") {
+    return {
+      brief: values["Brief"],
+    };
+  }
+
+  const base = {
+    campaignGoal: values["What you’re promoting (Campaign Goal)"],
+    contentLink: values["Content available"],
+    budget: Number(values["Your budget"]),
+    targetTerritories: values["Target territories"],
+    extraBriefs:
+      values["Any extra notes (messaging, influencer type, content ideas)"],
+  };
+
+  if (category === "music") {
+    return {
+      ...base,
+      trackLink: values["Download or private link to the track"],
+      releaseDate: values["Release date"],
+      smartLink: values["Enter linkfire / smartlink"], // у тебя так в константе name
+    };
+  }
+
+  if (category === "event") {
+    return {
+      ...base,
+      ticketLink: values["Ticket link"],
+    };
+  }
+
+  return base; // artist
 };
 export const mapTabToCategory = (tabId: string): any => {
   const t = tabId.trim().toLowerCase();
@@ -55,13 +90,14 @@ export const PromoForm: React.FC<Props> = ({ activeTabId }) => {
         submitButton={<SubmitButton className="bespoke-btn" data="Create" />}
         onSubmit={async (values) => {
           const category = mapTabToCategory(activeTabId);
-
+          const payload = buildBespokePayload(category, values);
           console.log(category);
-          console.log(values);
+          console.log(payload);
           await postBespokeCampaign({
             category,
-            payload: values,
+            payload,
           });
+          toast.success("Agency campaign sent successfully.");
         }}>
         <BespokeForm data={promoFormData} />
       </Form>

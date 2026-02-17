@@ -15,6 +15,7 @@
 
   .trash-action {
     &__content {
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -276,7 +277,7 @@
     overflow: hidden;
     .check {
       position: absolute;
-      right: 5px;
+      right: 2px;
       width: 18px;
       height: 18px;
     }

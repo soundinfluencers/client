@@ -1,16 +1,15 @@
-import { Link } from 'react-router-dom';
-import { PLACEHOLDER_LOGO_URL } from '@/pages/influencer/shared/utils/socialAccount.mapper';
-import { useRef } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useClickOutside } from '@/hooks/global/useClickOutside';
-import { useUser } from '@/store/get-user';
+import { Link } from "react-router-dom";
+import { PLACEHOLDER_LOGO_URL } from "@/pages/influencer/shared/utils/socialAccount.mapper";
+import { useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useClickOutside } from "@/hooks/global/useClickOutside";
+import { useUser } from "@/store/get-user";
 import X from "@/assets/icons/x.svg";
-import './_drop-down-nav.scss';
+import "./_drop-down-nav.scss";
 // import { useWindowSize } from '@/hooks/global/useWindowSize';
 import { createPortal } from "react-dom";
-import {
-  INFLUENCER_NAV_LINKS,
-} from "@components/layout/tab-bar/components/drop-down-nav/influencer-links/influencer-links.data.ts";
+import { INFLUENCER_NAV_LINKS } from "@components/layout/tab-bar/components/drop-down-nav/influencer-links/influencer-links.data.ts";
+import { Client_NAV_LINKS } from "./client-links/client-links.data";
 
 // import type { RefObject } from "react";
 
@@ -20,7 +19,10 @@ interface DropDownNavProps {
   setIsDropdownOpen: (isOpen: boolean | ((prev: boolean) => boolean)) => void;
 }
 
-export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavProps) => {
+export const DropDownNav = ({
+  isDropdownOpen,
+  setIsDropdownOpen,
+}: DropDownNavProps) => {
   const { logout } = useAuth();
   // const { width } = useWindowSize();
   const { user } = useUser();
@@ -40,17 +42,16 @@ export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavPr
 
   // console.log('user in drop down menu', user);
   // console.log('account settings link', AccountSettings);
-
+  const Navlinks =
+    user?.role === "client" ? Client_NAV_LINKS : INFLUENCER_NAV_LINKS;
   return createPortal(
     <div
       className={`user-menu ${isDropdownOpen ? "user-menu--open" : ""}`}
-      onMouseDown={() => setIsDropdownOpen(false)}
-    >
+      onMouseDown={() => setIsDropdownOpen(false)}>
       <div
         ref={dropdownRef}
         className={`user-menu__dropdown ${isDropdownOpen ? "user-menu__dropdown--open" : ""}`}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
+        onMouseDown={(e) => e.stopPropagation()}>
         <div className="user-menu__dropdown-header">
           <div className="user-menu__dropdown-header-info">
             <img
@@ -58,7 +59,9 @@ export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavPr
               src={user?.logoUrl ? user.logoUrl : PLACEHOLDER_LOGO_URL}
               alt="User Avatar"
             />
-            <p className="user-menu__dropdown-header-info-text">{user?.firstName}</p>
+            <p className="user-menu__dropdown-header-info-text">
+              {user?.firstName}
+            </p>
           </div>
           <img
             src={X}
@@ -69,21 +72,19 @@ export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavPr
         </div>
 
         <nav className="user-menu__dropdown-nav">
-          {INFLUENCER_NAV_LINKS.map(link => (
+          {Navlinks.map((link) => (
             <>
               <Link
                 key={link.link}
                 className="user-menu__dropdown-nav-link"
                 to={link.link}
-                onClick={() => setIsDropdownOpen(false)}
-              >
-                <img
-                  src={link.icon}
-                  alt={link.label}
-                />
+                onClick={() => setIsDropdownOpen(false)}>
+                <img src={link.icon} alt={link.label} />
                 {link.label}
               </Link>
-              {link.divider && <div className="user-menu__dropdown-nav-divider"/>}
+              {link.divider && (
+                <div className="user-menu__dropdown-nav-divider" />
+              )}
             </>
           ))}
         </nav>
@@ -98,12 +99,11 @@ export const DropDownNav = ({ isDropdownOpen, setIsDropdownOpen }: DropDownNavPr
           Logout
         </button>
         <Link
-          to={'/terms/influencer'}
+          to={"/terms/influencer"}
           className="user-menu__dropdown-terms"
           onClick={() => setIsDropdownOpen(false)}
-          target={'_blank'}
-          rel="noopener noreferrer"
-        >
+          target={"_blank"}
+          rel="noopener noreferrer">
           Terms and Conditions
         </Link>
       </div>

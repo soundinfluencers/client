@@ -55,9 +55,7 @@ export const DateCell = React.memo(function DateCell({
               key={item}
               onClick={() => {
                 setSelectedDate(item);
-                if (item !== "BEFORE" && item !== "AFTER") {
-                  setCustomDate("");
-                }
+
                 onClose();
               }}>
               {item}

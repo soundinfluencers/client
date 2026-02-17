@@ -16,15 +16,22 @@ import { useSearchParams } from "react-router-dom";
 
 import { Search, SelectBudget, SwitchView } from "@/client-side/ui";
 import { SortSelect } from "@/client-side/ui/select/bc-select";
-import { AddToProposal, CardsContainer, Filters } from "@/client-side/widgets";
+import {
+  AddToProposal,
+  CardsContainer,
+  Filters,
+  FooterAddInfluencer,
+} from "@/client-side/widgets";
 import {
   useBuildCampaignFilters,
   useCreateCampaign,
   useFilter,
 } from "@/client-side/store";
 import { usePromoCardsAndSearch } from "@/client-side/hooks";
+import { useClickOutside } from "@/shared/lib/hooks/useClickOutside";
 
 export const AddInfluencerBuildCampaign: React.FC = () => {
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
   const [sp] = useSearchParams();
   const optionIndex = Number(sp.get("option") ?? 0);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -123,6 +130,11 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
     setIsDropdownOpen(false);
   }, []);
 
+  useClickOutside(dropdownRef, () => {
+    setIsDropdownOpen(false);
+    setSearch("");
+    setPickedFromSearch(null);
+  });
   return (
     <Container className="build-compaign">
       <div className="build-compaign__title">
@@ -140,7 +152,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
               <p>Filters</p>
             </div>
 
-            <div className="search-with-dropdown">
+            <div ref={dropdownRef} className="search-with-dropdown">
               <Search
                 isSearchMode={isSearchMode}
                 setSearch={setSearch}
@@ -232,7 +244,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
             <NoData>
               <h2>No SocialAccounts for this filter right now</h2>
               <p>
-                You can still move forward by using Offers to create a <br></br>
+                You can still choose another filter to create a <br></br>
                 multi-platform promotion tailored to your needs.
               </p>
             </NoData>
@@ -248,7 +260,8 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
             <NoData>
               <h2>No SocialAccounts for this filter right now</h2>
               <p>
-                You can still move forward by using Offers to create a <br></br>
+                You can still choose another option,currency,filter to create a{" "}
+                <br></br>
                 multi-platform promotion tailored to your needs.
               </p>
             </NoData>
@@ -263,7 +276,9 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
           />
         </div>
       )}
+
       <AddToProposal optionIndex={optionIndex} />
+      <FooterAddInfluencer optionIndex={optionIndex} />
     </Container>
   );
 };

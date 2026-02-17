@@ -10,11 +10,12 @@ interface Props {
 }
 
 export const Card: React.FC<Props> = ({ dataCard }) => {
-  const { actions, activeOfferId } = useCampaignStore();
+  const activeOfferId = useCampaignStore((s) => s.activeOfferId);
+  const setOffer = useCampaignStore((s) => s.actions.setOffer);
+
   const onChoose = React.useCallback(() => {
-    actions.setOffer(dataCard);
-    actions.setActiveOffer(dataCard._id);
-  }, [actions, dataCard]);
+    setOffer(dataCard);
+  }, [setOffer, dataCard]);
   return (
     <div
       className={`campaign-card ${
