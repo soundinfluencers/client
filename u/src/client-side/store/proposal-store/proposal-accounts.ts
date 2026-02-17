@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { CampaignAddedAccount } from "@/types/store/index.types";
+import { getGroupBySocial } from "@/client-side/widgets/add-influencer-build-campaign/add-to-proposal/bc-prooced";
 
 export const getAccountKey = (n: CampaignAddedAccount) =>
   String((n as any).addedAccountsId ?? (n as any).accountId);
@@ -152,17 +153,53 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       }));
     },
 
+    // removeAccount: (optionIndex, accountKey) => {
+    //   set((state) => {
+    //     const prev = state.accountsByOption[optionIndex] ?? [];
+    //     const next = prev.filter((a) => getAccountKey(a) !== accountKey);
+    //     if (next.length === prev.length) return state;
+    //     return {
+    //       accountsByOption: { ...state.accountsByOption, [optionIndex]: next },
+    //     };
+    //   });
+    // },
     removeAccount: (optionIndex, accountKey) => {
       set((state) => {
-        const prev = state.accountsByOption[optionIndex] ?? [];
-        const next = prev.filter((a) => getAccountKey(a) !== accountKey);
-        if (next.length === prev.length) return state;
+        const prevAcc = state.accountsByOption[optionIndex] ?? [];
+        const removed = prevAcc.find((a) => getAccountKey(a) === accountKey);
+        if (!removed) return state;
+
+        const nextAcc = prevAcc.filter((a) => getAccountKey(a) !== accountKey);
+        if (nextAcc.length === prevAcc.length) return state;
+
+        // группа удаляемого аккаунта
+        const removedGroup = getGroupBySocial((removed as any).socialMedia);
+
+        // остались ли аккаунты в этой группе после удаления?
+        const stillHasGroup = nextAcc.some(
+          (a) => getGroupBySocial((a as any).socialMedia) === removedGroup,
+        );
+
+        // если группа опустела — удаляем campaignContent этой группы
+        let nextContent = state.contentByOption[optionIndex] ?? [];
+        if (!stillHasGroup) {
+          nextContent = nextContent.filter(
+            (c) => c.socialMediaGroup !== removedGroup,
+          );
+        }
+
         return {
-          accountsByOption: { ...state.accountsByOption, [optionIndex]: next },
+          accountsByOption: {
+            ...state.accountsByOption,
+            [optionIndex]: nextAcc,
+          },
+          contentByOption: {
+            ...state.contentByOption,
+            [optionIndex]: nextContent,
+          },
         };
       });
     },
-
     clearOption: (optionIndex) => {
       set((state) => {
         const nextAcc = { ...state.accountsByOption };

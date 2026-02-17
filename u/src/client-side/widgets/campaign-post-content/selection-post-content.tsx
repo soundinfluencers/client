@@ -37,7 +37,7 @@ export const Selection: React.FC<Props> = ({
     <div className={Styles.selection}>
       <div className={Styles.selection__head}>
         <h3>Your Selection</h3>
-        <button onClick={() => navigate("/client/CreateCampaign")}>
+        <button onClick={() => navigate("/client/create-campaign")}>
           Edit Selection
         </button>
       </div>

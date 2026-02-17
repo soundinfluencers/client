@@ -9,7 +9,7 @@ export function RHFImageUpload({
   description,
   size,
 }: {
-  name: "avatarUrl"; // или string
+  name: "logoUrl"; // или string
   label: string;
   placeholder: string;
   description?: string;
@@ -29,6 +29,7 @@ export function RHFImageUpload({
           size={size}
           value={field.value ?? null}
           onChange={(url) => {
+            field.onChange(url);
             setAvatar(url);
           }}
           error={fieldState.error}

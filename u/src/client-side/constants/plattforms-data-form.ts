@@ -10,8 +10,8 @@ export const PlattformsDataForm: IPlattformsDataForm = {
   mainPlatform: {
     inputs: [
       {
-        id: "Contentlink*",
-        name: "Content link*",
+        id: "Contentlink",
+        name: "Content link",
         placeholder: "https://",
       },
       {
@@ -38,7 +38,7 @@ export const PlattformsDataForm: IPlattformsDataForm = {
     inputs: [
       {
         id: "TrackLink",
-        name: "Track link*",
+        name: "Track link",
         placeholder: "https://",
       },
       {
@@ -58,7 +58,7 @@ export const PlattformsDataForm: IPlattformsDataForm = {
     inputs: [
       {
         id: "musicLinks",
-        name: "Link to music, events, news**",
+        name: "Link to music, events, news",
         placeholder: "https://",
       },
       {

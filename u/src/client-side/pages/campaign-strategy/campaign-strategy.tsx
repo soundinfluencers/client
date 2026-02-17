@@ -18,6 +18,7 @@ import { LiveViewCard, TableStrategy } from "@/client-side/widgets";
 import { Bar, ViewAudience, ViewChange } from "@/client-side/ui";
 import { useCampaignStore } from "@/client-side/store";
 import { useGroupPromos } from "@/client-side/hooks";
+import { toast } from "react-toastify";
 
 interface Props {}
 
@@ -54,6 +55,7 @@ export const CampaignStrategy: React.FC<Props> = () => {
     const draftPayload = actions.getDraftPayload();
 
     await postCampaignDraft(draftPayload);
+    toast.success("Draft saved succesfully!");
     clearPostContentAll();
   };
 
@@ -62,6 +64,7 @@ export const CampaignStrategy: React.FC<Props> = () => {
     const proposalsPayload = actions.getProposalPayload();
 
     await postCampaignProposal(proposalsPayload);
+    toast.success("Proposal saved succesfully!");
     clearPostContentAll();
   };
   return (

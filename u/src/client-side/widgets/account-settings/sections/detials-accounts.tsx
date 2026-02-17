@@ -30,6 +30,7 @@ export const AccountDetailsSection: React.FC<Props> = ({
       company: profile?.companyName ?? "",
       phone: profile?.phone ?? "",
       email: profile?.email ?? "",
+      logoUrl: profile.logoUrl ?? "",
       password: "",
     }),
     [profile?.firstName, profile?.companyName, profile?.phone, profile?.email],
@@ -42,6 +43,7 @@ export const AccountDetailsSection: React.FC<Props> = ({
       company: formData.company,
       phone: formData.phone,
       email: formData.email,
+      logoUrl: formData.logoUrl,
     };
 
     await mutateAsync(payload);

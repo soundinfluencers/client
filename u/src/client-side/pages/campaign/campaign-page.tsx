@@ -38,9 +38,10 @@ import { buildProposalPatchBody, downloadBlob } from "@/client-side/utils";
 import { getPdfFile } from "@/api/client/file/get-pdf";
 import { getCsvFile } from "@/api/client/file/get-csv";
 import { CampaignTablePageDraft } from "@/client-side/widgets/campaign/table-pages/campaign-page-draft";
+import { toast } from "react-toastify";
 
 export const CampaignPage = () => {
-  const { data, isLoading, setProposalOption, addProposalOption, setCampaign } =
+  const { data, isLoading, setProposalOption, addProposalOption } =
     useFetchCampaign();
 
   const [optionModal, setOptionModal] = React.useState(false);
@@ -53,7 +54,11 @@ export const CampaignPage = () => {
   const [localExtraOptions, setLocalExtraOptions] = React.useState<number[]>(
     [],
   );
-
+  const patches = useUpdateCampaign((s) => s.patches);
+  const isDirty = React.useMemo(
+    () => Object.keys(patches ?? {}).length > 0,
+    [patches],
+  );
   const { mutate: copyShareLink, isPending } = useCopyShareLinkMutation();
   const initOption = useProposalAccountsStore((s) => s.initOption);
   const initCampaign = useStrategyCampaignStore((s) => s.initCampaign);
@@ -70,21 +75,39 @@ export const CampaignPage = () => {
       : [];
 
   const getCSV = async (id: string) => {
-    const res = await getCsvFile(id);
+    try {
+      setIsRequesting(true);
+      const res = await getCsvFile(id);
 
-    const blob = res.data as Blob;
+      const blob = res.data as Blob;
 
-    downloadBlob(blob, `campaign-${id}.csv`);
+      downloadBlob(blob, `campaign-${id}.csv`);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      toast.success("CSV created succesfully!");
+      setIsRequesting(false);
+    }
   };
   const getPDF = async (id: string) => {
-    const res = await getPdfFile(id);
-    console.log(res, "pdf");
-    const blob = res.data as Blob;
+    try {
+      setIsRequesting(true);
+      const res = await getPdfFile(id);
 
-    downloadBlob(blob, `campaign-${id}.pdf`);
+      const blob = res.data as Blob;
+
+      downloadBlob(blob, `campaign-${id}.pdf`);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      toast.success("PDF created succesfully!");
+      setIsRequesting(false);
+    }
   };
-  console.log(data, "data");
 
+  React.useEffect(() => {
+    if (isDirty) setIsRequestSent(false);
+  }, [isDirty]);
   React.useEffect(() => {
     if (data?.kind === "proposal") {
       const idx = data.selectedOption.optionIndex ?? 0;
@@ -117,21 +140,6 @@ export const CampaignPage = () => {
     setProposalOption(campaignIdForActions ?? "", optionIndex);
   };
 
-  // const onAddOption = async (inheritFromOption0: boolean) => {
-  //   if (data.kind !== "proposal") return;
-
-  //   const newIndex = data.existingOptions.length;
-  //   const next = await addProposalOption(
-  //     campaignIdForActions ?? "",
-  //     inheritFromOption0,
-  //   );
-
-  //   if (next) {
-  //     setActiveOption(newIndex);
-  //   }
-
-  //   setOptionModal(false);
-  // };
   const onAddOption = async (inheritFromOption0: boolean) => {
     if (data.kind !== "proposal") return;
 
@@ -145,6 +153,7 @@ export const CampaignPage = () => {
     try {
       setIsRequesting(true);
       await addProposalOption(campaignIdForActions ?? "", inheritFromOption0);
+      toast.success("Proposal Option added succesfully!");
     } catch (e) {
       console.error(e);
       setLocalExtraOptions((prev) => prev.filter((x) => x !== newIndex));
@@ -157,6 +166,7 @@ export const CampaignPage = () => {
     try {
       setIsRequesting(true);
       await postCampaignRequest(campaignId);
+      toast.success("Request Campaign sent succesfully!");
       setIsRequestSent(true);
     } catch (e) {
       console.error(e);
@@ -193,6 +203,7 @@ export const CampaignPage = () => {
       await useFetchCampaign
         .getState()
         .setProposalOption(campaignId, optionIndex);
+      toast.success("Proposal Campaign updated succesfully!");
 
       const fresh = useFetchCampaign.getState().data;
       if (fresh?.kind === "proposal") {
@@ -239,7 +250,7 @@ export const CampaignPage = () => {
 
       useUpdateCampaign.getState().reset();
       await useFetchCampaign.getState().setCampaign(campaignId);
-
+      toast.success("Strategy Campaign updated succesfully!");
       const fresh = useFetchCampaign.getState().data;
       if (fresh?.kind === "regular") {
         useStrategyCampaignStore
@@ -260,6 +271,7 @@ export const CampaignPage = () => {
       setIsRequesting(false);
     }
   };
+
   return (
     <>
       <Container className="campaignBase">
@@ -275,12 +287,26 @@ export const CampaignPage = () => {
         {data.status === "completed" ? (
           <ul className="option-buttons">
             <li onClick={() => getCSV(data.campaignId)}>
-              <img src={csv} alt="" /> CSV File
+              <img src={csv} alt="" />
+              {isRequestSent
+                ? "CSV File"
+                : isRequesting
+                  ? "creating..."
+                  : "CSV File"}
             </li>
             <li onClick={() => getPDF(data.campaignId)}>
-              <img src={pdf} alt="" /> PDF File
+              <img src={pdf} alt="" />{" "}
+              {isRequestSent
+                ? "PDF File"
+                : isRequesting
+                  ? "creating..."
+                  : "PDF File"}
             </li>
-            <li onClick={() => copyShareLink(campaignIdForActions ?? "")}>
+            <li
+              onClick={() => {
+                copyShareLink(campaignIdForActions ?? "");
+                toast.success("Shared link created succesfully!");
+              }}>
               <img src={share} alt="" />
               {isPending ? "Copying..." : "Share"}
             </li>
@@ -289,7 +315,10 @@ export const CampaignPage = () => {
           data.kind === "regular" && (
             <div className="share-link-row">
               <div
-                onClick={() => copyShareLink(campaignIdForActions ?? "")}
+                onClick={() => {
+                  copyShareLink(campaignIdForActions ?? "");
+                  toast.success("Shared link created succesfully!");
+                }}
                 className="share-link">
                 <img src={link} alt="" />
                 {isPending ? "Copying..." : "Copy share link"}
@@ -394,17 +423,15 @@ export const CampaignPage = () => {
           ) : data.canEdit ? (
             <ButtonSecondary
               text={
-                isRequestSent
-                  ? "Updated"
-                  : isRequesting
-                    ? "Updating..."
+                isRequesting
+                  ? "Updating..."
+                  : isRequestSent
+                    ? "Updated"
                     : "Update"
               }
+              isDisabled={!isDirty || isRequesting}
               onClick={() =>
-                updateStrategyCampaign(
-                  campaignIdForActions ?? "",
-                  data.campaignName,
-                )
+                updateStrategyCampaign(data.campaignId, data.campaignName)
               }
             />
           ) : (

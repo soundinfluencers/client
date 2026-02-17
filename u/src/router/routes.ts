@@ -7,7 +7,6 @@ import { ForgotPasswordPage } from "../pages/auth/forgot/ForgotPasswordPage.tsx"
 // Client Imports
 import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
 
-
 import {
   AccountSetting,
   AddInfluencerBuildCampaign,
@@ -23,6 +22,7 @@ import {
   PaymentCampaign,
   PostContentAdd,
 } from "@/client-side/index.ts";
+import { ContactSupport } from "@/pages/influencer/contact-support/ContactSupport.tsx";
 
 // import { CampaignAddInfluencer } from "@/pages/client/campaign-add-infuencer/campaign-add-infuencer.tsx";
 
@@ -145,6 +145,12 @@ export const routes: IRoute[] = [
     name: "InvoiceDetails",
     path: "/client/invoice-details",
     component: InvoiceDetails,
+    isProtected: true,
+  },
+  {
+    name: "ContactSupport",
+    path: "/client/contact-support",
+    component: ContactSupport,
     isProtected: true,
   },
 ];

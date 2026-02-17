@@ -1,5 +1,6 @@
 @use "@/styles/scrollbars/_scrollbars.scss" as sb;
 .campaign-card {
+  cursor: pointer;
   display: flex;
   align-items: center;
   flex-direction: column;

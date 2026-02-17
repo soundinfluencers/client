@@ -40,7 +40,7 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
                 onToggle={() => setDropdown((prev) => !prev)}
                 selected={
                   <p className="hidden-text">
-                    {item?.descriptions?.[0].description}
+                    {item?.descriptions?.[selected].description}
                   </p>
                 }>
                 <ul className="dropdown-list">

@@ -10,12 +10,11 @@ interface Props {
 }
 
 export const FillData: React.FC<Props> = ({ data, fields }) => {
-  const { avatarUrl } = useLocalProfileStore();
-
+  console.log(data, "data");
   return (
     <div className="Fill-Data">
       {fields.map(({ key, label }) => {
-        if (key === "avatar") {
+        if (key === "logoUrl") {
           return (
             <div key={key} className="fill-data-row">
               <div className="fill-data-row__label">
@@ -23,14 +22,14 @@ export const FillData: React.FC<Props> = ({ data, fields }) => {
               </div>
 
               <div className="fill-data-row__name">
-                {avatarUrl || data?.avatarUrl ? (
+                {data?.logoUrl ? (
                   <img
                     style={{
                       height: "40px",
                       width: "40px",
                       borderRadius: "50%",
                     }}
-                    src={avatarUrl ?? data?.avatarUrl}
+                    src={data?.logoUrl}
                     alt="Profile"
                     className="profile-photo-row__img"
                   />
