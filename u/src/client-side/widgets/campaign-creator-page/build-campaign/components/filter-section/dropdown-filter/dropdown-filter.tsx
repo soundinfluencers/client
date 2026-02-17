@@ -1,7 +1,7 @@
 import React from "react";
 import chevronDown from "@/assets/icons/chevron-down.svg";
 import "../_bc_filter.scss";
-import { useBuildCampaignFilters } from "@/store/client/create-campaign/useBuildCampaignFilters";
+import { useBuildCampaignFilters } from "@/client-side/store";
 
 interface Props {
   children: React.ReactNode;
@@ -19,6 +19,7 @@ export const DropdownFilter: React.FC<Props> = ({
   AndOr,
 }) => {
   const { setFiltersMethod, FilterMethod } = useBuildCampaignFilters();
+
   return (
     <div className="dropdown_filter">
       <div onClick={onToggle} className="dropdown_filter__head">
