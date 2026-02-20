@@ -16,13 +16,20 @@ const isHttpField = (key: string) => {
 
 const isStoryTagField = (key: string) =>
   key.toLowerCase().includes("story tag");
+const isPostDescriptionField = (key: string) =>
+  key.toLowerCase().includes("postdescription");
 
+const getPostDescriptionIndex = (key: string) => {
+  const m = key.match(/postdescription-(\d+)/i);
+  return m ? Number(m[1]) : null;
+};
 export const campaignPostContentSchema: z.ZodType<Record<string, string>> = z
   .record(z.string(), z.string())
   .superRefine((data, ctx) => {
     for (const [key, value] of Object.entries(data)) {
       const v = String(value ?? "").trim();
-
+      const pdIndex = getPostDescriptionIndex(key);
+      if (pdIndex && pdIndex > 1 && !v) continue;
       if (!v) {
         ctx.addIssue({
           code: "custom",

@@ -4,6 +4,6 @@ export { ReserPasswordForm } from "./account-settings";
 export { EmailForm } from "./account-settings";
 export { ConfirmForm } from "./account-settings";
 export { AdditionalPlatformForm } from "./additional-from-plattform";
-export { BespokeForm } from "./bespoke";
+
 export { PaymentForm } from "./payment";
 export { PlatformForm } from "./plattform";

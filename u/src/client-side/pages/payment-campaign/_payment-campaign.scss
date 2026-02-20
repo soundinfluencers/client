@@ -6,19 +6,28 @@
   @media screen and (max-width: 600px) {
     margin-bottom: 31px;
   }
-  .navmenu {
-    margin-top: 24px;
+  h1 {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 36px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
   }
-
   &__content {
-    margin-top: 40px;
+    margin-top: 13px;
     display: flex;
     gap: 24px;
     @media screen and (max-width: 900px) {
       justify-content: space-between;
     }
   }
-
+  .navmenu {
+    margin: 32px 0px;
+    @media screen and (max-width: 900px) {
+      margin: 16px 0px;
+    }
+  }
   &__width {
     max-width: 930px;
   }
@@ -35,6 +44,7 @@
 
       .btn {
         max-width: 250px;
+        height: 46px;
       }
 
       p {
@@ -48,6 +58,7 @@
   }
 
   &__form {
+    margin-top: 8px;
     width: 100%;
     max-width: 930px;
 
@@ -102,10 +113,6 @@
   }
 
   @media screen and (max-width: 900px) {
-    .navmenu {
-      margin-top: 16px;
-    }
-
     &__content {
       margin-top: 24px;
       gap: 16px;
@@ -174,6 +181,74 @@
           font-size: 18px;
         }
       }
+    }
+  }
+}
+.modal-payment {
+  width: 671px;
+  padding: 32px 24px 40px;
+  text-align: center;
+  h2 {
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 100%;
+    text-align: center;
+  }
+  h3 {
+    margin: 24px 0px 8px;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: center;
+  }
+  p {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+  }
+  .btn {
+    height: 46px;
+    max-width: 250px;
+    width: 100%;
+    margin: 39px auto 0px;
+  }
+}
+
+@media (max-width: 700px) {
+  .modal-proposal {
+    width: min(671px, 92vw);
+    padding: 24px 24px 28px;
+
+    h2 {
+      font-size: 28px;
+    }
+
+    .btn {
+      max-width: 150px;
+      p {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+@media (max-width: 500px) {
+  .modal-proposal {
+    width: 92vw;
+    padding: 20px 16px 22px;
+
+    h2 {
+      font-size: 22px;
+    }
+
+    .btn {
+      max-width: 100%;
     }
   }
 }

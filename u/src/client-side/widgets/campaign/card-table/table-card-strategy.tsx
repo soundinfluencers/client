@@ -18,6 +18,8 @@ import { ReqData } from "@/client-side/data/table-campaign.data";
 import { DateCell } from "../cells/strategy/date-cell";
 import { getAccountKey } from "@/client-side/utils";
 import { useStrategyCampaignStore } from "@/client-side/store";
+import { ContentCellEdit } from "../cells/editable-cells/content-edit-cell";
+import { ContentCellEditStrategy } from "../cells/editable-cells/content-edit-cell-strategy";
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
 const MUSIC_NETWORKS = ["spotify", "soundcloud"];
 export const getGroupBySocial = (
@@ -42,6 +44,7 @@ export const TableCard = React.memo(function TableCard({
   campaignId,
 }: TableRowProps) {
   console.log(data, "qwe");
+  console.log(items, "itemswww");
   const [selectedContent, setSelectedContent] = React.useState<number>(0);
   const [selectedPd, setSelectedPd] = React.useState<number>(0);
 
@@ -82,6 +85,8 @@ export const TableCard = React.memo(function TableCard({
   //     .trim()
   //     .toLowerCase();
   //   return itemsByPlatform[key] ?? [];
+  console.log(selectedContent, "selectedContent");
+  const media0 = items[selectedContent]?.mediaCache?.items?.[0];
   // }, [itemsByPlatform, data.socialMedia]);
 
   const selectedItem = platformItems?.[selectedContent];
@@ -146,8 +151,8 @@ export const TableCard = React.memo(function TableCard({
             isOpen={isDateOpen}
             onToggle={toggleDate}
             onClose={onCloseDropdown}
-            selectedDate={mode} // показываем режим
-            customDate={dateVal} // показываем дату
+            selectedDate={mode}
+            customDate={dateVal}
             setSelectedDate={(nextMode) => {
               if (nextMode === "BEFORE" || nextMode === "AFTER") {
                 const next = dateVal ? `${nextMode}:${dateVal}` : nextMode;
@@ -166,7 +171,7 @@ export const TableCard = React.memo(function TableCard({
             }}
           />
 
-          <ContentCell
+          {/* <ContentCell
             isOpen={isContentOpen}
             onToggle={toggleContent}
             onClose={onCloseDropdown}
@@ -175,7 +180,34 @@ export const TableCard = React.memo(function TableCard({
             setSelectedContent={setSelectedContent}
             setSelectedPd={setSelectedPd}
             socialMedia={data.socialMedia}
-          />
+          /> */}
+          {canEdit ? (
+            <ContentCellEditStrategy
+              media0={media0}
+              campaignId={campaignId ?? ""}
+              selectedItem={selectedItem}
+              isOpen={isContentOpen}
+              onToggle={toggleContent}
+              onClose={onCloseDropdown}
+              platformItems={platformItems}
+              selectedContent={selectedContent}
+              setSelectedContent={setSelectedContent}
+              setSelectedPd={setSelectedPd}
+              socialMedia={data.socialMedia}
+            />
+          ) : (
+            <ContentCell
+              media0={media0}
+              isOpen={isContentOpen}
+              onToggle={toggleContent}
+              onClose={onCloseDropdown}
+              platformItems={platformItems}
+              selectedContent={selectedContent}
+              setSelectedContent={setSelectedContent}
+              setSelectedPd={setSelectedPd}
+              socialMedia={data.socialMedia}
+            />
+          )}
           {canEdit ? (
             <DescriptionCellEdit
               isOpen={isPostDescriptionOpen}

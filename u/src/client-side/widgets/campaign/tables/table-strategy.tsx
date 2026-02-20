@@ -28,6 +28,7 @@ type Props = {
   group: TableGroup;
   canEdit: boolean;
   campaignId: string;
+  changeView?: boolean;
 };
 type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
 const makeRowKey = (n: CampaignAddedAccount, index: number) =>
@@ -45,6 +46,7 @@ export function TableStrategy({
   campaignId,
   group,
   canEdit,
+  changeView,
 }: Props) {
   console.log(items, "items");
 
@@ -80,8 +82,8 @@ export function TableStrategy({
   }, [sortedNetworks]);
 
   const columns = React.useMemo(
-    () => getColumns(false, group, false),
-    [group, canEdit],
+    () => getColumns(changeView ?? false, group, false),
+    [group, canEdit, changeView],
   );
   return (
     <div className="tableBase-wrap">
@@ -91,9 +93,9 @@ export function TableStrategy({
             <col
               key={key}
               style={
-                getWidthColumn(false, false)[key as ColumnKey]
+                getWidthColumn(changeView ?? false, false)[key as ColumnKey]
                   ? {
-                      width: `${getWidthColumn(false, false)[key as ColumnKey]}px`,
+                      width: `${getWidthColumn(changeView ?? false, false)[key as ColumnKey]}px`,
                     }
                   : undefined
               }
@@ -150,6 +152,7 @@ export function TableStrategy({
                 onToggleDropdown={toggleDropdown}
                 onCloseDropdown={closeDropdown}
                 canEdit={canEdit}
+                changeView={changeView}
               />
             );
           })}

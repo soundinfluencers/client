@@ -94,7 +94,7 @@ export const ContentCell = React.memo(function ContentCell({
         <Modal onClose={closeModal}>
           <div className="modal-card">
             <h2>Video {selectedVideo.index}</h2>
-            <div className="card-player"></div>
+            <input type="text" value={selectedLink} />
           </div>
         </Modal>
       )}

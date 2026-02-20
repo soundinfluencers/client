@@ -1,15 +1,18 @@
 .campaign-post-content {
   margin-bottom: 42px;
-
+  .navmenu {
+    margin: 32px 0px;
+    @media screen and (max-width: 900px) {
+      margin: 16px 0px;
+    }
+  }
   @media screen and (max-width: 900px) {
     margin-bottom: 16px;
   }
   @media screen and (max-width: 600px) {
     margin-bottom: 24px;
   }
-  .navmenu {
-    margin-top: 24px;
-  }
+
   &__row {
     margin-top: 40px;
     display: flex;
@@ -60,7 +63,6 @@
         .legend {
           display: flex;
           align-items: center;
-          justify-content: space-between;
 
           border-bottom: 1px solid rgba(185, 208, 255, 1);
           padding-bottom: 8px;

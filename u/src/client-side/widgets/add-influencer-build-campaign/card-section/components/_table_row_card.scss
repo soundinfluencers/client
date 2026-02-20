@@ -1,7 +1,7 @@
 /* ===========================
    PROMO GRID ROW
    =========================== */
-
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
 .promo-grid-row {
   display: grid;
   grid-template-columns: 27% 110px 100px 1fr 1fr;
@@ -122,13 +122,13 @@
   .tags-dd__preview {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 2px;
 
     min-width: 0;
     flex: 1 1 auto;
 
     flex-wrap: nowrap;
-    overflow: hidden;
+
     white-space: nowrap;
     @media (max-width: 600px) {
       display: none;
@@ -155,7 +155,7 @@
 
   .tags-dd__more {
     padding: 2px 8px;
-    border-radius: 999px;
+    border-radius: 50%;
     border: 1px solid rgba(231, 232, 241, 1);
     background: #fff;
     font-size: 12px;

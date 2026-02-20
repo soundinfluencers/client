@@ -16,6 +16,7 @@ import {
 export const useCampaignStore = create<CampaignState>((set, get) => ({
   offer: null,
   promoCard: [],
+  promoCardUI: [],
   selectedAccounts: [],
   postContent: {
     main: [],
@@ -89,7 +90,29 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
           totalPrice: calcTotal(state.offer, promoCard),
         };
       }),
+    setPromoCardsUI: (cards) =>
+      set((state) => {
+        const incoming = Array.isArray(cards) ? cards : [cards];
+        const map = new Map<string, IPromoCard>();
 
+        state.promoCardUI.forEach((card) => {
+          if (card?.accountId) map.set(card.accountId, card);
+        });
+
+        incoming.forEach((card) => {
+          const id = card?.accountId;
+          if (!id) return;
+
+          if (map.has(id)) map.delete(id);
+          else map.set(id, card);
+        });
+
+        const promoCardUI = Array.from(map.values());
+
+        return {
+          promoCardUI,
+        };
+      }),
     setCampaignAccount: (account: ICampaignAccount) =>
       set((state) => {
         const exists = state.selectedAccounts.some(

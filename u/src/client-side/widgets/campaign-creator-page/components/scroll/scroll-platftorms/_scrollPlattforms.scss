@@ -51,13 +51,6 @@
       flex-shrink: 0;
       height: 41px;
 
-      &:first-child {
-        img {
-          max-width: 32px;
-          height: 32px;
-        }
-      }
-
       &.active {
         background: linear-gradient(
           107.52deg,

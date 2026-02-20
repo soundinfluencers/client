@@ -39,17 +39,15 @@ export const CampaignCreatorPage: React.FC = () => {
   React.useEffect(() => {
     if (data) setOffersData(data);
   }, [data, setOffersData]);
-
+  console.log(offers, "of");
   return (
     <Container className="campaign-creator-page">
-      <Proceed />
-
+      {/* <Proceed /> */}
+      <div className="navmenu">
+        <Breadcrumbs />
+      </div>
+      <h1>Ready-to-launch offers</h1>
       <div className="campaign-creator-page__head">
-        <div className="navmenu">
-          <Breadcrumbs />
-        </div>
-        <h1>Ready-to-launch offers</h1>
-
         <ScrollPlatforms
           selectedPlatform={selectedPlatform}
           onPlatformSelect={setPlatform}

@@ -57,9 +57,7 @@ export const CampaignTablePageShare: React.FC<Props> = ({
         <Bar campaign={campaign} />
       )}
 
-      {statusFlag && (
-        <ToggleTables onChange={() => setFlag((prev) => !prev)} flag={flag} />
-      )}
+      <ToggleTables onChange={() => setFlag((prev) => !prev)} flag={flag} />
 
       <div className="table-wrapper">
         {!flag ? (

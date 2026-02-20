@@ -29,7 +29,7 @@ export const LinkCell = React.memo(function LinkCell({
   );
 
   return (
-    <td className="table-campaign-page__td">
+    <td className="tableBase__td">
       <div className="link-block">
         {leftIcon && <img src={leftIcon} alt={leftAlt} />}
         <div className="link-block-icon">

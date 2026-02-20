@@ -1,5 +1,9 @@
 @use "@/styles/scrollbars/_scrollbars.scss" as sb;
 .table-page {
+  .option-chose {
+    margin-top: 28px;
+    text-align: center;
+  }
   .live-view-wrapper {
     margin: 16px 0px;
     display: flex;
@@ -28,6 +32,7 @@
     flex-direction: column;
     gap: 16px;
     overflow-x: auto;
+    overflow-y: auto;
 
     padding-bottom: 8px;
     &::-webkit-scrollbar-thumb {
@@ -36,8 +41,8 @@
     }
 
     &::-webkit-scrollbar {
-      height: 8px;
-      width: 8px;
+      height: 6px;
+      width: 6px;
     }
 
     &::-webkit-scrollbar-track {

@@ -1,0 +1,19 @@
+.budget-currency {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(42, 42, 42, 1);
+    border: 1px solid rgba(231, 232, 241, 1);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    &.active {
+      border: 1px solid rgba(185, 208, 255, 1);
+    }
+  }
+}

@@ -6,9 +6,9 @@ import { formatFollowers } from "@/utils/functions/formatFollowers";
 import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 import { Checkbox } from "@/components";
 import { getPriceByCurrency } from "@/client-side/utils";
-import { useBuildCampaignFilters } from "@/store/client/create-campaign/useBuildCampaignFilters";
-import { useCampaignStore } from "@/store/client/create-campaign";
+
 import { TagsDropdown } from "./tags-dropdown";
+import { useBuildCampaignFilters, useCampaignStore } from "@/client-side/store";
 
 interface Props {
   data: IPromoCard;

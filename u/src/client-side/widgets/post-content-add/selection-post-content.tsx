@@ -30,7 +30,31 @@ export const SelectionAddInfluencer: React.FC<Props> = ({
     setOpenId((prev) => (prev === id ? null : id));
   };
   const navigate = useNavigate();
+  const grouped = React.useMemo(() => {
+    const map = new Map<string, IPromoCard[]>();
 
+    for (const card of promoCard) {
+      const key = (card.socialMedia ?? "other").toLowerCase();
+      map.set(key, [...(map.get(key) ?? []), card]);
+    }
+
+    const titleMap: Record<string, string> = {
+      tiktok: "TikTok",
+      instagram: "Instagram",
+      youtube: "YouTube",
+      facebook: "Facebook",
+      soundcloud: "SoundCloud",
+      spotify: "Spotify",
+      press: "Press",
+    };
+
+    return Array.from(map.entries()).map(([key, items]) => ({
+      key,
+      title: titleMap[key] ?? key,
+      socialMedia: items[0]?.socialMedia,
+      items,
+    }));
+  }, [promoCard]);
   return (
     <div className={Styles.selection}>
       <div className={Styles.selection__head}>
@@ -41,28 +65,31 @@ export const SelectionAddInfluencer: React.FC<Props> = ({
       </div>
       <div className={Styles.selection__content}>
         <div className={Styles.selection__body}>
-          {promoCard.map((card, i) => {
-            const isOpen = openId === card.accountId;
-
-            return (
-              <div key={card.accountId} className={Styles.PromoCards}>
-                <div className={Styles.PromoCards__header}>
-                  <div className={Styles.queue}>{i + 1}</div>
+          {grouped.map((group, gi) => (
+            <div key={group.key} className={Styles.PromoCards}>
+              <div className={Styles.PromoCards__header}>
+                {/* <div className={Styles.queue}>{offer ? gi + 2 : gi + 1}</div> */}
+                <div className={Styles.queue_social}>
+                  {" "}
                   <img
                     src={getSocialMediaIcon(
-                      card.socialMedia as SocialMediaType,
+                      group.socialMedia as SocialMediaType,
                     )}
                     alt=""
                   />
-                  <h3>{card.socialMedia}</h3>
                 </div>
 
-                <div className={Styles.PromoCards__content}>
-                  <div className={Styles.title}>
+                <h3>{group.title}</h3>
+              </div>
+
+              <div className={Styles.PromoCards__content}>
+                {group.items.map((card) => (
+                  <div key={card.accountId} className={Styles.title}>
                     <div className={Styles.title__userinfo}>
                       <img src={card.logoUrl} alt="" />
                       <h3>{card.username}</h3>
                     </div>
+
                     <div className={Styles.followers}>
                       <p>
                         {formatFollowers(card.followers)} followers{" "}
@@ -72,35 +99,10 @@ export const SelectionAddInfluencer: React.FC<Props> = ({
                       </p>
                     </div>
                   </div>
-
-                  <div className={Styles.PromoCards__content__info}>
-                    {card.countries.length > 0 &&
-                      card.musicGenres.length > 0 && (
-                        <div
-                          onClick={() => toggleFlag(card.accountId)}
-                          className={Styles.genresIcountries}
-                          data-open={isOpen}>
-                          <p>Genres, Countries</p>
-                          <img
-                            className={isOpen ? "rotated" : ""}
-                            src={chevron}
-                            alt=""
-                          />
-
-                          {isOpen && (
-                            <GenresCountries
-                              flag={true}
-                              data={card}
-                              isInclude={false}
-                            />
-                          )}
-                        </div>
-                      )}
-                  </div>
-                </div>
+                ))}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
       <div className={Styles.selection__footer}>

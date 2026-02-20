@@ -25,7 +25,7 @@ export const CampaignsList: FC<CampaignsListProps> = ({
   isLoading,
 }) => {
   return listDisplayMode === 0 ? (
-    <div className="table-wrapper">
+    <div className="table-wrapper-list">
       <TableListView
         isLoading={isLoading}
         thead={[...THEAD]}

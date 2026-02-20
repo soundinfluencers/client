@@ -72,8 +72,13 @@ export const PostContentAdd: React.FC = () => {
   const actions = useSelectCampaignProposal((s) => s.actions);
   const postContentDraft = useSelectCampaignProposal((s) => s.postContentDraft);
 
+  const EMPTY: any[] = []; // лучше типизируй под CampaignContentItem[]
+
   const proposalContent = useProposalAccountsStore(
-    (s) => s.contentByOption?.[optionIndex] ?? [],
+    React.useCallback(
+      (s) => s.contentByOption?.[optionIndex] ?? EMPTY,
+      [optionIndex],
+    ),
   );
 
   const existingGroups = React.useMemo(

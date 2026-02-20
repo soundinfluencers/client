@@ -3,7 +3,7 @@ import type { SocialMediaType } from "@/types/utils/constants.types";
 import edit from "@/assets/icons/edit.svg";
 import bookmark from "@/assets/icons/bookmark.svg";
 import link from "@/assets/icons/link (1).svg";
-
+import preview from "@/assets/icons/video (1).png";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import "@/client-side/styles-table/campaign-view-card.scss";
 import { Dropdown } from "@/components/table-ui/dropdowns-table";
@@ -27,7 +27,9 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
     <div className="live-view-card">
       <div className="live-view-card__content">
         <div className="live-view-card__video">
-          <div className="video"></div>
+          <div className="video">
+            <img src={preview} alt="" />
+          </div>
         </div>
         <div className="live-view-card__fill-data">
           <h3>Post description</h3>

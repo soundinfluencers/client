@@ -31,6 +31,7 @@ export const TableRowCard: React.FC<Props> = ({
     setChecked(checked);
     if (isInclude) return;
     actions.setPromoCards(data);
+    actions.setPromoCardsUI(data);
   };
 
   React.useEffect(() => {

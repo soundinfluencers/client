@@ -12,11 +12,11 @@ export const NetworkCell = React.memo(function NetworkCell({ data }: Props) {
   );
 
   return (
-    <td className="table-campaign-page__td">
+    <td className="tableBase__td">
       <div className="username_row">
         <img src={icon} alt="" />
         <p className="hidden-text" title={data.username}>
-          {data.username ?? "-"}
+          {data.username ?? ""}
         </p>
       </div>
     </td>

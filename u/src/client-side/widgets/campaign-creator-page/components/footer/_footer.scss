@@ -1,6 +1,7 @@
 .footer-campaign-creator-page {
   position: fixed;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: 0;
   display: flex;
   align-items: center;
@@ -8,7 +9,10 @@
   padding: 12px 24px;
   background: rgba(185, 208, 255, 0.15);
   z-index: 1000;
+  backdrop-filter: blur(2px);
+  width: fit-content;
   border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
   @media (max-width: 500px) {
     justify-content: center;
     left: 0;
@@ -18,9 +22,21 @@
     align-items: center;
     gap: 4px;
     p {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       font-size: 16px;
       @media (max-width: 500px) {
         font-size: 12px;
+      }
+      .count {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 24px;
+        border-radius: 4px;
+        background-color: white;
       }
     }
     img {

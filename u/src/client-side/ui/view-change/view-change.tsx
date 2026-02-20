@@ -8,40 +8,42 @@ interface Props {
 }
 
 export const ViewChange: React.FC<Props> = ({ setView, view, isProposal }) => {
-  const arrView = ["Live View", "Edit View"];
-  const arrProposalView = ["Pro View", "Edit View"];
+  const proposalTabs = ["Edit View", "Pro View", "Live View"];
+  const regularTabs = ["Live View", "Pro View"];
 
-  const onSelect = (nextView: number) => {
-    setView(nextView);
+  const tabs = isProposal ? proposalTabs : regularTabs;
+
+  console.log(view, "view");
+
+  const active = typeof view === "number" ? view : 0;
+  const onSelect = (label: string, index: number) => {
+    if (label === "Edit View") {
+      setView(-1);
+      return;
+    } else if (label !== "Edit View") {
+      setView(1);
+    }
+
+    if (isProposal) {
+      setView(index);
+    } else {
+      setView(index);
+    }
   };
-
+  console.log(view, "w");
   return (
-    <div
-      className={`changeView-strategy ${
-        isProposal ? "changeView-proposal" : ""
-      }`}>
-      {isProposal && (
-        <div
-          onClick={() => onSelect(-1)}
-          className={`changeView-strategy-checkOUT ${
-            view !== 0 && view !== 1 ? "activeOUT" : ""
-          }`}>
-          {view !== 0 && view !== 1 && <div className="dot"></div>}
-          Live Edit
-        </div>
-      )}
-
-      <div
-        className={`changeView-strategy__content ${isProposal ? "mode" : ""}`}>
-        {(isProposal ? arrProposalView : arrView).map((item, i) => (
+    <div className="changeView-table">
+      <div className="changeView-table__segmented">
+        {tabs.map((label, i) => (
           <div
-            key={i}
-            className={`changeView-strategy-check ${
-              view === i ? "active" : ""
+            key={label}
+            className={`changeView-table__item ${
+              active === (label === "Edit View" ? -1 : i) ? "active" : ""
             }`}
-            onClick={() => onSelect(i)}>
-            {view === i && <div className="dot"></div>}
-            {item}
+            onClick={() => onSelect(label, i)}
+            role="button"
+            tabIndex={0}>
+            {label}
           </div>
         ))}
       </div>

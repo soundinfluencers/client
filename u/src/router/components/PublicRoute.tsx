@@ -20,9 +20,13 @@ export const PublicRoute = ({ children }: Props) => {
   }
 
   if (accessToken && !isShareRoute) {
+    if (!user) {
+      return <Loader />;
+    }
+
     let route = "/";
 
-    switch (user?.role) {
+    switch (user.role) {
       case "influencer":
         route = "/influencer";
         break;

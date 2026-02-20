@@ -20,12 +20,14 @@ export const FilterSelect: React.FC<Props> = ({ data }) => {
   const didInitPlatform = React.useRef(false);
   const { filters, AndOrFlag, title } = data;
   const { setSelected, selected, toggleItem } = useFilter();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(
+    () => data.id === "social-platforms-1",
+  );
   const { selectedPlatform } = useCreateCampaignPlatform();
   const toggle = (item: FilterItem, checked: boolean) => {
     toggleItem(item, checked, filters);
   };
-
+  console.log(data, "data");
   React.useEffect(() => {
     if (!selectedPlatform) return;
     if (didInitPlatform.current) return;

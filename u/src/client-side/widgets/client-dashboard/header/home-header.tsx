@@ -41,7 +41,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
             </div>
           </div>{" "}
           <div
-            onClick={() => navigate("/client/beskoke-campaign")}
+            onClick={() => navigate("/client/agency-campaign")}
             className="home-header__create-wrapper">
             <div className="home-header__create">
               <p>Agency Campaign</p>
@@ -106,7 +106,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
           </div>
         </div>
         <div
-          onClick={() => navigate("/client/beskoke-campaign")}
+          onClick={() => navigate("/client/agency-campaign")}
           className="home-header__create-wrapper">
           <div className="home-header__create">
             <p>Agency Campaign </p>

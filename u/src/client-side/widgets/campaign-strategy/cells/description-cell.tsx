@@ -31,12 +31,14 @@ export const DescriptionCell = React.memo(function DescriptionCell({
         isOpen={isOpen}
         onToggle={onToggle}
         selected={
-          <p className="hidden-text">{descriptions[selectedPd].description}</p>
+          <p className="hidden-text">
+            {descriptions?.[selectedPd]?.description}
+          </p>
         }>
         <ul className="dropdown-list">
-          {descriptions.map((desc: any, optionIndex: number) => (
+          {descriptions?.map((desc: any, optionIndex: number) => (
             <li
-              title={desc.description}
+              title={desc?.description}
               key={desc?._id ?? optionIndex}
               onClick={() => {
                 setSelectedPd(optionIndex);
@@ -45,7 +47,7 @@ export const DescriptionCell = React.memo(function DescriptionCell({
               <span className={selectedPd === optionIndex ? "active" : ""}>
                 {optionIndex + 1}
               </span>{" "}
-              <p className="hidden-text">{desc.description || "-"}</p>
+              <p className="hidden-text">{desc?.description || "-"}</p>
               {selectedPd === optionIndex && (
                 <img className="check" src={check} alt="" />
               )}

@@ -19,6 +19,7 @@ import type { TableRowProposalProps } from "@/client-side/types/table-types";
 import { ReqData } from "@/client-side/data/table-campaign.data";
 import { getAccountKey } from "@/client-side/utils";
 import { useProposalAccountsStore } from "@/client-side/store";
+import { ContentCellEdit } from "../cells/editable-cells/content-edit-cell";
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
 const MUSIC_NETWORKS = ["spotify", "soundcloud"];
 
@@ -94,9 +95,13 @@ export const TableCard = React.memo(function TableCard({
     () => onToggleDropdown(rowKey, "postDescription"),
     [onToggleDropdown, rowKey],
   );
-
+  const isMarked = useProposalAccountsStore(
+    (s) =>
+      !!s.recentlyAddedKeysByOption?.[optionIndex ?? 0]?.[String(accountKey)],
+  );
+  const media0 = items[selectedContent]?.mediaCache?.items?.[0];
   return (
-    <tr className={`table-campaign-page__tr ${false ? "row--hl" : ""}`}>
+    <tr className={`table-campaign-page__tr ${isMarked ? "row--hl" : ""}`}>
       <NetworkCell data={data} />
       <FollowersCell data={data} />
 
@@ -142,8 +147,8 @@ export const TableCard = React.memo(function TableCard({
             isOpen={isDateOpen}
             onToggle={toggleDate}
             onClose={onCloseDropdown}
-            selectedDate={mode} // показываем режим
-            customDate={dateVal} // показываем дату
+            selectedDate={mode}
+            customDate={dateVal}
             setSelectedDate={(nextMode) => {
               if (nextMode === "BEFORE" || nextMode === "AFTER") {
                 const next = dateVal ? `${nextMode}:${dateVal}` : nextMode;
@@ -162,16 +167,33 @@ export const TableCard = React.memo(function TableCard({
             }}
           />
 
-          <ContentCell
-            isOpen={isContentOpen}
-            onToggle={toggleContent}
-            onClose={onCloseDropdown}
-            platformItems={platformItems}
-            selectedContent={selectedContent}
-            setSelectedContent={setSelectedContent}
-            setSelectedPd={setSelectedPd}
-            socialMedia={data.socialMedia}
-          />
+          {canEdit ? (
+            <ContentCellEdit
+              media0={media0}
+              isOpen={isContentOpen}
+              onToggle={toggleContent}
+              onClose={onCloseDropdown}
+              platformItems={platformItems}
+              selectedContent={selectedContent}
+              setSelectedContent={setSelectedContent}
+              setSelectedPd={setSelectedPd}
+              socialMedia={data.socialMedia}
+              optionIndex={optionIndex ?? 0}
+              accountKey={accountKey}
+            />
+          ) : (
+            <ContentCell
+              media0={media0}
+              isOpen={isContentOpen}
+              onToggle={toggleContent}
+              onClose={onCloseDropdown}
+              platformItems={platformItems}
+              selectedContent={selectedContent}
+              setSelectedContent={setSelectedContent}
+              setSelectedPd={setSelectedPd}
+              socialMedia={data.socialMedia}
+            />
+          )}
 
           {canEdit ? (
             <DescriptionCellEdit

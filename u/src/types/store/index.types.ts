@@ -111,7 +111,7 @@ export type CampaignState = {
   promoCard: IPromoCard[];
   selectedAccounts: ICampaignAccount[];
   campaignName?: string;
-
+  promoCardUI: [];
   campaignContent: any[];
 
   campaignPayload: any | null;
@@ -132,6 +132,7 @@ export type CampaignState = {
     getProposalPayload: () => void;
     setOffer: (offer: IApiOffer) => void;
     setPromoCards: (cards: IPromoCard | IPromoCard[]) => void;
+    setPromoCardsUI: (cards: IPromoCard | IPromoCard[]) => void;
     setCampaignAccount: (data: ICampaignAccount) => void;
     addPostContent: (
       group: "main" | "music" | "press",
@@ -264,7 +265,7 @@ export interface CampaignAddedAccount {
   screenshot: string;
 
   impressions: number | null;
-
+  logoUrl: string;
   /** В JSON поле называется like */
   like: number | null;
 

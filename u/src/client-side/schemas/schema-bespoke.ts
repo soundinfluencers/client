@@ -3,11 +3,13 @@ import { z } from "zod";
 
 const urlRegex = /^https?:\/\/\S+/i;
 
-const OPTIONAL_FIELDS = new Set(["Target territories"]);
+const REQUIRED_FIELDS = new Set([
+  "Campaign objective",
+  "Content available",
+  "Your budget",
+]);
 
 const BUDGET_FIELDS = new Set(["Your budget"]);
-
-const DATE_FIELDS = new Set(["Release date"]);
 
 const SMARTLINK_FIELD_NAMES = new Set([
   "Linkfire / smartlink",
@@ -30,34 +32,34 @@ export const buildPromoTabSchema = (tab: IBespokeCampaignTabData) => {
   tab.inputs?.forEach((i) => {
     const name = i.name;
 
-    if (OPTIONAL_FIELDS.has(name)) {
-      shape[name] = z.string().trim().optional().or(z.literal(""));
-      return;
-    }
-
+    // BUDGET: required + currency required
     if (BUDGET_FIELDS.has(name)) {
       shape[name] = z
         .string()
         .trim()
         .min(1, "Budget is required")
-        .refine((v) => !isNaN(Number(v)), "Budget must be a number");
+        .refine((v) => {
+          const cleaned = v.replace(",", ".");
+          return cleaned !== "" && !isNaN(Number(cleaned));
+        }, "Budget must be a number");
+
+      shape["Your budget currency"] = z.enum(["£", "$", "€"]);
       return;
     }
 
-    if (DATE_FIELDS.has(name)) {
-      shape[name] = z
-        .string()
-        .trim()
-        .min(1, "Release date is required")
-        .refine((v) => !isNaN(Date.parse(v)), "Enter a valid date");
+    // REQUIRED fields
+    if (REQUIRED_FIELDS.has(name)) {
+      shape[name] = z.string().trim().min(1, "This field is required");
       return;
     }
 
-    shape[name] = z.string().trim().min(1, "This field is required");
+    // ALL OTHER inputs: optional (allow empty)
+    shape[name] = z.string().trim().optional().or(z.literal(""));
   });
 
   tab.textAreas?.forEach((t) => {
-    shape[t.name] = z.string().trim().min(1, "This field is required");
+    // ALL textareas optional (allow empty)
+    shape[t.name] = z.string().trim().optional().or(z.literal(""));
   });
 
   return z.object(shape).superRefine((data, ctx) => {
@@ -77,10 +79,14 @@ export const buildPromoTabSchema = (tab: IBespokeCampaignTabData) => {
 };
 
 export const buildPromoTabDefaultValues = (tab: IBespokeCampaignTabData) => {
-  const defaults: Record<string, string> = {};
+  const defaults: Record<string, any> = {};
 
   tab.inputs?.forEach((i) => {
     defaults[i.name] = "";
+
+    if (i.name === "Your budget") {
+      defaults["Your budget currency"] = "£";
+    }
   });
 
   tab.textAreas?.forEach((t) => {

@@ -10,6 +10,7 @@ type FormField = {
   id: string;
   name: string;
   placeholder: string;
+  required?: boolean;
 };
 export type PlatformConfig = {
   inputs?: FormField[];

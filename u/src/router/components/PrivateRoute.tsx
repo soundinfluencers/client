@@ -1,26 +1,23 @@
-import {Navigate} from "react-router-dom";
-import {useAuth} from "../../contexts/AuthContext";
-import type {ReactNode} from "react";
-// import {Loader} from "@/components";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { Loader } from "@/components";
+import type { ReactNode } from "react";
 
 interface Props {
-    children: ReactNode;
+  children: ReactNode;
 }
 
-export const PrivateRoute = ({children}: Props) => {
-    const {accessToken, isAuthReady} = useAuth();
+export const PrivateRoute = ({ children }: Props) => {
+  const { accessToken, isAuthReady } = useAuth();
+  const location = useLocation();
 
-    if (!isAuthReady) {
-        // return <div><Loader/></div>;
-    }
+  if (!isAuthReady) {
+    return <Loader />;
+  }
 
-    if (!isAuthReady) {
-        // return  <div><Loader/> </div>;
-    }
+  if (!accessToken) {
+    return <Navigate to="/auth" replace state={{ from: location }} />;
+  }
 
-    if (!accessToken) {
-        return <Navigate to="/auth" replace/>;
-    }
-
-    return <>{children}</>;
+  return <>{children}</>;
 };

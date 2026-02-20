@@ -31,7 +31,6 @@ import { usePromoCardsAndSearch } from "@/client-side/hooks";
 import { useClickOutside } from "@/shared/lib/hooks/useClickOutside";
 
 export const AddInfluencerBuildCampaign: React.FC = () => {
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
   const [sp] = useSearchParams();
   const optionIndex = Number(sp.get("option") ?? 0);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -44,6 +43,8 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
   const [filterFlag, setFilterFlag] = React.useState(true);
   const [view, setView] = React.useState<number>(1);
   const [isSmall, setIsSmall] = React.useState(false);
+  const loadMoreRef = React.useRef<HTMLDivElement | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = React.useState(false);
 
   const {
     selectedFilter,
@@ -82,7 +83,10 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
   const promoPending = useCreateCampaign((s) => s.pending.promoCards);
   const setPending = useCreateCampaign((s) => s.setPending);
   const setPromoCards = useCreateCampaign((s) => s.setPromoCards);
-
+  const canLoadMore =
+    !isSearchMode &&
+    (promoCards as IPromoCard[]).length >= limit &&
+    !promoFetching;
   React.useEffect(() => {
     if (search.trim().length === 0) {
       setPickedFromSearch(null);
@@ -95,10 +99,36 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
 
   const displayCards: IPromoCard[] = React.useMemo(() => {
     if (search.trim().length === 0) return promoCards as IPromoCard[];
-    console.log(displayCards, "awdawd");
     return pickedFromSearch ? [pickedFromSearch] : (promoCards as IPromoCard[]);
   }, [search, promoCards, pickedFromSearch]);
+  React.useEffect(() => {
+    if (!canLoadMore) return;
 
+    const el = loadMoreRef.current;
+    if (!el) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry?.isIntersecting) return;
+        setIsLoadingMore(true);
+        setLimit((prev) => prev + 50);
+
+        setLimit((prev) => prev + 50);
+      },
+      {
+        root: null,
+        rootMargin: "100px 0px",
+        threshold: 0,
+      },
+    );
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [canLoadMore]);
+  React.useEffect(() => {
+    if (!promoFetching) setIsLoadingMore(false);
+  }, [promoFetching]);
   React.useEffect(() => {
     setPromoCards(displayCards);
   }, [displayCards, setPromoCards]);
@@ -129,12 +159,11 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
     setPickedFromSearch(item as IPromoCard);
     setIsDropdownOpen(false);
   }, []);
+  const hasCards = (promoCards as IPromoCard[]).length > 0;
 
-  useClickOutside(dropdownRef, () => {
-    setIsDropdownOpen(false);
-    setSearch("");
-    setPickedFromSearch(null);
-  });
+  const isInitialLoading = !hasCards && (promoLoading || promoFetching);
+  const isFetchingMore = hasCards && promoFetching && isLoadingMore;
+  const isRefetching = hasCards && promoFetching && !isLoadingMore;
   return (
     <Container className="build-compaign">
       <div className="build-compaign__title">
@@ -152,7 +181,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
               <p>Filters</p>
             </div>
 
-            <div ref={dropdownRef} className="search-with-dropdown">
+            <div className="search-with-dropdown">
               <Search
                 isSearchMode={isSearchMode}
                 setSearch={setSearch}
@@ -250,11 +279,14 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
             </NoData>
           ) : displayCards.length > 0 ? (
             <CardsContainer
-              loading={promoFetching}
               promosCards={displayCards}
               isSmall={isSmall}
               setIsSmall={setIsSmall}
               view={view}
+              isInitialLoading={isInitialLoading}
+              isFetchingMore={isFetchingMore}
+              isRefetching={isRefetching}
+              loading={false}
             />
           ) : (
             <NoData>
@@ -269,11 +301,16 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
         </div>
       </div>
       {!isSearchMode && (promoCards as IPromoCard[]).length >= limit && (
-        <div style={{ margin: "16px auto", maxWidth: "250px" }}>
-          <ButtonMain
-            text={promoFetching ? "Loading..." : "View more"}
-            onClick={() => setLimit((prev) => prev + 24)}
-          />
+        <div
+          ref={loadMoreRef}
+          style={{
+            margin: "16px auto",
+            maxWidth: "250px",
+            padding: "12px 0",
+            textAlign: "center",
+            opacity: promoFetching ? 0.6 : 1,
+          }}>
+          {promoFetching ? "Loading…" : "Scroll to load more"}
         </div>
       )}
 
