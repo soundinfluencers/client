@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  optionalLogoUrl, profileCategoryEnum, profileCurrencyEnum,
+  requiredLogoUrl, profileCurrencyEnum,
   requiredAccountName, requiredFollowers, requiredPrice, requiredProfileLink,
 } from "@/pages/influencer/components/account-setup-form/validation/validation-rules/base-fields.ts";
 import {
@@ -13,16 +13,17 @@ import {
 import {
   audienceInsightsSchema
 } from "@/pages/influencer/components/account-setup-form/validation/validation-rules/audience-insights.ts";
+import type { TSocialAccounts } from "@/types/user/influencer.types.ts";
 
-export const baseCommon = z.object({
+export const baseCommonStrict = z.object({
   accountId: z.string().optional(),
 
   username: requiredAccountName,
   profileLink: requiredProfileLink,
   followers: requiredFollowers,
 
-  logoUrl: optionalLogoUrl,
-  profileCategory: profileCategoryEnum,
+  logoUrl: requiredLogoUrl,
+  // profileCategory: profileCategoryEnum,
   currency: profileCurrencyEnum,
   price: requiredPrice,
 
@@ -30,22 +31,82 @@ export const baseCommon = z.object({
   countries: audienceInsightsSchema,
 });
 
-const communitySchema = baseCommon.extend({
+export const baseCommonNoCountriesCheck = z.object({
+  accountId: z.string().optional(),
+
+  username: requiredAccountName,
+  profileLink: requiredProfileLink,
+  followers: requiredFollowers,
+
+  logoUrl: requiredLogoUrl,
+  // profileCategory: profileCategoryEnum,
+  currency: profileCurrencyEnum,
+  price: requiredPrice,
+
+  categories: optionalThemeTopics,
+
+  countries: z.any(),
+});
+
+const communityStrict = baseCommonStrict.extend({
   profileCategory: z.literal("community"),
   musicGenres: requiredMusicGenres,
   creatorCategories: z.array(z.string()).default([]),
 });
 
-const creatorSchema = baseCommon.extend({
+const creatorStrict = baseCommonStrict.extend({
   profileCategory: z.literal("creator"),
   musicGenres: z.array(musicGenresSchema).default([]),
   creatorCategories: creatorCategoriesSchema,
 });
 
-export const socialAccountBaseSchema = z.discriminatedUnion("profileCategory", [
-  communitySchema,
-  creatorSchema,
+export const socialAccountStrictSchema = z.discriminatedUnion("profileCategory", [
+  communityStrict,
+  creatorStrict,
 ]);
+
+const communityNoCountries = baseCommonNoCountriesCheck.extend({
+  profileCategory: z.literal("community"),
+  musicGenres: requiredMusicGenres,
+  creatorCategories: z.array(z.string()).default([]),
+});
+
+const creatorNoCountries = baseCommonNoCountriesCheck.extend({
+  profileCategory: z.literal("creator"),
+  musicGenres: z.array(musicGenresSchema).default([]),
+  creatorCategories: creatorCategoriesSchema,
+});
+export const socialAccountBaseSchema = z.discriminatedUnion("profileCategory", [
+  communityNoCountries,
+  creatorNoCountries,
+]);
+
+export const getAccountSchemaForPlatform = (platform: TSocialAccounts) => {
+  if (platform === "spotify" || platform === "soundcloud") {
+    return socialAccountBaseSchema;
+  }
+  return socialAccountStrictSchema;
+};
+
+
+// export const makeSocialAccountSchema = (platform: TSocialAccounts) => {
+//   const audienceEnabled = platform !== "spotify" && platform !== "soundcloud";
+//
+//   return socialAccountBaseSchema.superRefine((data, ctx) => {
+//     if (!audienceEnabled) return;
+//
+//     const res = audienceInsightsSchema.safeParse(data.countries);
+//     if (!res.success) {
+//       ctx.addIssue({
+//         code: "custom",
+//         path: ["countries"],
+//         message: res.error.issues[0]?.message ?? "Audience insights is invalid",
+//       });
+//     }
+//   });
+// };
+
+
 
 // .superRefine((data, ctx) => {
 //   if (data.profileCategory === "community") {
@@ -56,7 +117,7 @@ export const socialAccountBaseSchema = z.discriminatedUnion("profileCategory", [
 //         message: "Select at least one music genre",
 //       });
 //     }
-//     return; // 👈 важно: дальше creator-правила не нужны
+//     return;
 //   }
 //
 //   // creator => creatorCategories must contain 1 from each set
@@ -69,9 +130,52 @@ export const socialAccountBaseSchema = z.discriminatedUnion("profileCategory", [
 //     if (!hasEntertainment || !hasMusic) {
 //       ctx.addIssue({
 //         code: 'custom',
-//         path: ["creatorCategories"], // одна ошибка на оба блока
+//         path: ["creatorCategories"],
 //         message: "Select at least one option",
 //       });
 //     }
 //   }
 // });
+
+
+// export const makeSocialAccountSchema = (platform: TSocialAccounts) => {
+//   const audienceEnabled = platform !== "spotify" && platform !== "soundcloud";
+//
+//   return z
+//   .discriminatedUnion("profileCategory", [communitySchema, creatorSchema])
+//   .superRefine((data, ctx) => {
+//     if (!audienceEnabled) return;
+//
+//     const res = audienceInsightsSchema.safeParse(data.countries);
+//
+//     if (!res.success) {
+//       const first = res.error.issues[0];
+//       ctx.addIssue({
+//         code: "custom",
+//         path: ["countries"],
+//         message: first?.message ?? "Audience insights is invalid",
+//       });
+//     }
+//   });
+// };
+
+// export const makeSocialAccountSchema = (platform: TSocialAccounts) => {
+//   const audienceEnabled =
+//     platform !== "spotify" && platform !== "soundcloud";
+//
+//   return z.discriminatedUnion("profileCategory", [
+//     baseCommon.extend({
+//       profileCategory: z.literal("community"),
+//       musicGenres: requiredMusicGenres,
+//       creatorCategories: z.array(z.string()).default([]),
+//       countries: makeAudienceInsightsSchema(audienceEnabled),
+//     }),
+//
+//     baseCommon.extend({
+//       profileCategory: z.literal("creator"),
+//       musicGenres: z.array(musicGenresSchema).default([]),
+//       creatorCategories: creatorCategoriesSchema,
+//       countries: makeAudienceInsightsSchema(audienceEnabled),
+//     }),
+//   ]);
+// };

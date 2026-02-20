@@ -44,6 +44,7 @@ export const DropDownNav = ({
   // console.log('account settings link', AccountSettings);
   const Navlinks =
     user?.role === "client" ? Client_NAV_LINKS : INFLUENCER_NAV_LINKS;
+
   return createPortal(
     <div
       className={`user-menu ${isDropdownOpen ? "user-menu--open" : ""}`}

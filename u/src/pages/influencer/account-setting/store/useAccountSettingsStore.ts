@@ -2,10 +2,7 @@ import { create } from "zustand";
 
 type AccountSettingsMode =
   | "view"
-  | "edit-details"
-  | "edit-password"
-  | "send-email"
-  | "new-password";
+  | "edit-details";
 
 interface AccountSettingsState {
   mode: AccountSettingsMode;

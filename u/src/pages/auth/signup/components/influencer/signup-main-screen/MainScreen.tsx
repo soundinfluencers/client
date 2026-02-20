@@ -46,6 +46,7 @@ export const MainScreen = () => {
 
     setIsLoading(true);
     try {
+      console.log(user);
       await influencerSignupApi(user);
       setIsSuccess(true);
       resetSignup();

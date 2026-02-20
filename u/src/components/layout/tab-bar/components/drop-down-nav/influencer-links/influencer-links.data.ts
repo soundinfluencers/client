@@ -45,9 +45,4 @@ export const INFLUENCER_NAV_LINKS: InfluencerNavLink[] = [
     label: "Contact support",
     link: '/influencer/contact-support',
   },
-  {
-    icon: settingsIcon,
-    label: "Example link",
-    link: '/influencer/agreement',
-  },
 ];

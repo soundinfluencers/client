@@ -11,26 +11,24 @@ import type {
 import { useEffect } from "react";
 
 export const AudienceInsights = () => {
-  const { control, clearErrors } = useFormContext<TSocialAccountFormValues>();
-  const { fieldState } = useController({
-    control,
-    name: "countries",
-  })
+  const { control, trigger, formState } = useFormContext<TSocialAccountFormValues>();
 
-  const countries = useWatch({
+  const { fieldState } = useController({
     control,
     name: "countries",
   });
 
-  useEffect(() => {
-    if (fieldState.error) {
-      clearErrors("countries");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countries]);
+  const countries = useWatch({ control, name: "countries" });
 
-  const errorMessage = fieldState.error?.root?.message || fieldState.error?.message;
-  // console.log('Error message in AudienceInsights: ', errorMessage);
+  const errorMessage =
+    (fieldState.error)?.root?.message || fieldState.error?.message;
+
+  useEffect(() => {
+    if (!formState.isSubmitted && !fieldState.error) return;
+
+    void trigger("countries");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countries, trigger, formState.isSubmitted]);
 
   return (
     <div className="audience-insights">

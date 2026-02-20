@@ -2,6 +2,9 @@ import './_contact-support.scss';
 import { Breadcrumbs, Container } from "@/components";
 
 export const ContactSupport = () => {
+  const normalizeEmail = (s: string) => s.trim().replace(/\s+/g, "");
+  const buildMailto = (email: string) => `mailto:${normalizeEmail(email)}`;
+  // mailto:admin@soundinfluencers.com?subject=Support%20Request
   return (
     <Container className="contact-support">
       <Breadcrumbs />
@@ -14,7 +17,20 @@ export const ContactSupport = () => {
             <li key={index} className="contact-support__item">
               <span className="contact-support__label">{item.label}</span>
               {item.type === 'email' ? (
-                <a href={`mailto:${item.value}`} className="contact-support__value">{item.value}</a>
+                <a
+                  href={buildMailto(item.value)}
+                  className="contact-support__value"
+                  onClick={(e) => {
+                    // Prevent default mailto behavior to ensure it works across all browsers
+                    e.preventDefault();
+                    if (e.defaultPrevented) {
+                      window.location.href = buildMailto(item.value);
+                    }
+                    // console.log("mailto click", { defaultPrevented: e.defaultPrevented });
+                  }}
+                >
+                  {item.value}
+                </a>
               ) : (
                 <a href={item.value} target="_blank" rel="noopener noreferrer" className="contact-support__value">{item.value}</a>
               )}

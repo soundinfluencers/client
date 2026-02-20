@@ -1,21 +1,21 @@
 import './_form-fields.scss';
 
-import {Controller, useFormContext} from 'react-hook-form';
-import {BaseInput} from '@/components';
-import {ImageUpload} from '@/components';
-import {StarRatingField} from '@/components';
+import { Controller, useFormContext } from 'react-hook-form';
+import { BaseInput } from '@/components';
+import { ImageUpload } from '@/components';
+import { StarRatingField } from '@/components';
 
 // import type { TCampaignResultInput } from '../../../types/influencer/form/campaign-result/campaign-result.types';
 // import type { TInvoiceInputConfig } from '../../../pages/influencer/create-invoice/components/invoice-form-content/types/invoice-form-inputs.types';
 // import {Fragment} from 'react/jsx-runtime';
-import {InfluencerDateInput} from '../../ui/influencer-date-input/InfluencerDateInput';
+import { InfluencerDateInput } from '../../ui/influencer-date-input/InfluencerDateInput';
 import { CountryField } from "@/pages/influencer/shared/components/CountryField.tsx";
 
 interface Props {
   inputs: any;
 }
 
-export const FormFields = ({inputs}: Props) => {
+export const FormFields = ({ inputs }: Props) => {
   const { control } = useFormContext();
 
   return (
@@ -35,39 +35,20 @@ export const FormFields = ({inputs}: Props) => {
                 placeholder={input.placeholder}
                 type={input.type}
               />
-              // <Fragment key={input.name}>
-              //   <BaseInput
-              //     name={input.name}
-              //     label={input.label}
-              //     placeholder={input.placeholder}
-              //     type={input.type}
-              //   />
-              //
-              //   {input.description && (
-              //     <p className='description'>
-              //       {input.description}
-              //     </p>
-              //   )}
-              // </Fragment>
+
             );
           case 'file':
             return (
-              <Controller
+              <ImageUpload
                 key={input.name}
-                control={control}
                 name={input.name}
-                render={({field, fieldState}) => (
-                  <ImageUpload
-                    name={input.name}
-                    label={input.label}
-                    placeholder={input.placeholder}
-                    description={input.description}
-                    value={field.value}
-                    onChange={field.onChange}
-                    size={input.size}
-                    error={fieldState.error}
-                  />
-                )}
+                label={input.label}
+                placeholder={input.placeholder}
+                description={input.description}
+                size={input.size}
+                // value={field.value}
+                // onChange={field.onChange}
+                // error={fieldState.error}
               />
             );
           case 'rating':
@@ -76,7 +57,7 @@ export const FormFields = ({inputs}: Props) => {
                 key={input.name}
                 control={control}
                 name={input.name}
-                render={({field, fieldState}) => (
+                render={({ field, fieldState }) => (
                   <StarRatingField
                     label={input.label}
                     value={field.value}
@@ -112,3 +93,39 @@ export const FormFields = ({inputs}: Props) => {
     </div>
   );
 }
+
+// <Fragment key={input.name}>
+//   <BaseInput
+//     name={input.name}
+//     label={input.label}
+//     placeholder={input.placeholder}
+//     type={input.type}
+//   />
+//
+//   {input.description && (
+//     <p className='description'>
+//       {input.description}
+//     </p>
+//   )}
+// </Fragment>
+
+// case 'file':
+//   return (
+//     <Controller
+//       key={input.name}
+//       control={control}
+//       name={input.name}
+//       render={({field, fieldState}) => (
+//         <ImageUpload
+//           name={input.name}
+//           label={input.label}
+//           placeholder={input.placeholder}
+//           description={input.description}
+//           size={input.size}
+//           // value={field.value}
+//           // onChange={field.onChange}
+//           // error={fieldState.error}
+//         />
+//       )}
+//     />
+//   );

@@ -12,6 +12,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 // import { TableCardSkeleton } from "@/shared/ui/skeletons/table-card-skeleton.tsx";
 // import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
 // import { TableCardSkeleton } from "@/shared/ui/skeletons/table-card-skeleton.tsx";
+// import { SmallLoader } from "@components/ui/small-loader/SmallLoader.tsx";
 import "./_promos-list.scss";
 
 export const PromosList = () => {
@@ -19,7 +20,7 @@ export const PromosList = () => {
 
   console.log(activePromosFilter);
 
-  const { data, isError, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isPending } =
+  const { data, isError, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isPending } =
     useInfiniteQuery({
       queryKey: ["promos", activePromosFilter, limit],
       initialPageParam: 1,
@@ -33,12 +34,13 @@ export const PromosList = () => {
         }
         return allPages.length + 1;
       },
-      staleTime: 10_000, // 10 seconds
+      staleTime: 1_000, // 10 seconds
       // refetchInterval: 60_000, // 1 minute
       // refetchOnWindowFocus: true,
+      placeholderData: (prev) => prev,
     });
 
-  console.log("Promos query status:", { isError, isLoading, isFetching, isFetchingNextPage, hasNextPage, isPending });
+  console.log("Promos query status:", { isError, isFetching, isFetchingNextPage, hasNextPage, isPending });
 
   console.log("Promos data:", data);
 
@@ -55,33 +57,50 @@ export const PromosList = () => {
   //   );
   // }
 
+  const isInitialLoading = isPending && !data;
+  const isLoadingMore = isFetchingNextPage;
+  const isRefreshing = isFetching && !isFetchingNextPage && !!data;
+
+  if (isError) {
+    return (
+      <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos.</p>
+    );
+  }
+
   return (
     <div className="promos-list">
-      {isError ? (
-        <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos.</p>
-      ) : (
+      {
         <div className="promos-list__content">
           {viewMode === "grid" ? (
-            <PromosGrid promos={activePromos} isLoading={isLoading} isFetching={isFetching} />
+            <PromosGrid
+              promos={activePromos}
+              isInitialLoading={isInitialLoading}
+              isRefreshing={isRefreshing}
+            />
           ) : (
             <div className="promos-list__scroll">
-              <PromosTable promos={activePromos} isLoading={isLoading} isFetching={isFetching} />
+              <PromosTable
+                promos={activePromos}
+                isInitialLoading={isInitialLoading}
+                isRefreshing={isRefreshing}
+              />
             </div>
           )}
 
           <div className="promos-list__actions">
             <ButtonMain
-              label={isFetchingNextPage ? "Loading..." : "View more"}
-              onClick={() => fetchNextPage()}
-              isDisabled={!hasNextPage || isFetchingNextPage}
+              label={isLoadingMore ? "Loading..." : "View more"}
+              onClick={() => hasNextPage && fetchNextPage()}
+              isDisabled={!hasNextPage || isLoadingMore}
             />
           </div>
         </div>
-      )}
+      }
     </div>
   );
 };
 
+// <SmallLoader />
 {/* <ScrollToTop/> */
 }
 {/* <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
