@@ -5,46 +5,72 @@ import './_promos-table.scss';
 
 interface Props {
   promos: IPromo[];
-  isLoading?: boolean;
-  isFetching?: boolean;
+  isInitialLoading?: boolean;
+  isRefreshing?: boolean;
 }
 
-export const PromosTable = ({ promos, isLoading, isFetching }: Props) => {
-  return (
-    <table className='promos-table'>
-      <thead className='promos-table__thead'>
-        <tr className='promos-table__thead-tr'>
-          <th className='promos-table__thead-th'>Status</th>
-          <th className='promos-table__thead-th'>Date post</th>
-          <th className='promos-table__thead-th'>Name</th>
-          <th className='promos-table__thead-th'>Reward</th>
-        </tr>
-      </thead>
+export const PromosTable = ({ promos, isInitialLoading, isRefreshing }: Props) => {
 
-      <tbody className='promos-table__tbody'>
-        {isLoading || isFetching ? (
-          Array.from({ length: 12 }).map((_, index) => (
-            <tr key={index} className='promos-table__tbody-tr'>
-              <td colSpan={4}>
-                <TableCardSkeleton />
-              </td>
-            </tr>
-          ))
-        ) : promos.length === 0 ? (
-          <tr className='promos-table__tbody-tr'>
-            <td colSpan={4} style={{ fontSize: 48, textAlign: 'center', padding: 40 }}>
-              No promos found.
+  if (isInitialLoading) {
+    return (
+      <table className="promos-table">
+        <thead className="promos-table__thead">
+        <tr className="promos-table__thead-tr">
+          <th className="promos-table__thead-th">Status</th>
+          <th className="promos-table__thead-th">Date post</th>
+          <th className="promos-table__thead-th">Name</th>
+          <th className="promos-table__thead-th">Reward</th>
+        </tr>
+        </thead>
+
+        <tbody className="promos-table__tbody">
+        {Array.from({ length: 12 }).map((_, index) => (
+          <tr key={index}>
+            <td colSpan={4}>
+              <TableCardSkeleton />
             </td>
           </tr>
-        ) : (
-          promos.map((promo) => (
+        ))}
+        </tbody>
+      </table>
+    );
+  }
+
+  if (promos.length === 0) {
+    return (
+      <div style={{ fontSize: 40, textAlign: "center", padding: 40 }}>
+        No promos found.
+      </div>
+    );
+  }
+
+  return (
+    <div className="promos-table-wrap">
+      <table className={`promos-table ${isRefreshing ? "promos-table--dimmed" : ""}`}>
+        <thead className="promos-table__thead">
+        <tr className="promos-table__thead-tr">
+          <th className="promos-table__thead-th">Status</th>
+          <th className="promos-table__thead-th">Date post</th>
+          <th className="promos-table__thead-th">Name</th>
+          <th className="promos-table__thead-th">Reward</th>
+        </tr>
+        </thead>
+
+        <tbody className="promos-table__tbody">
+          {promos.map((promo) => (
             <PromosTableItem key={promo.addedAccountsId + promo.campaignId} promo={promo} />
-          ))
-        )}
-        {/*{promos.map((promo) => (*/}
-        {/*  <PromosTableItem key={promo.addedAccountsId} promo={promo} />*/}
-        {/*))}*/}
-      </tbody>
-    </table>
+          ))}
+        </tbody>
+      </table>
+
+      {isRefreshing && (
+        <div className="promos-table-overlay" aria-live="polite">
+          {/*<div className="promos-table-overlay__content">*/}
+          {/*  <div className="spinner" />*/}
+          {/*  <span>Updating…</span>*/}
+          {/*</div>*/}
+        </div>
+      )}
+    </div>
   );
 };

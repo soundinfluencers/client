@@ -7,6 +7,7 @@ import {
 } from "react";
 import { logoutApi } from "../api/auth/auth.api.ts";
 import {refreshAccessToken} from "@/api/refresh.manager.ts";
+import { queryClient } from "@/main.tsx";
 
 interface AuthContextType {
     accessToken: string | null;
@@ -40,6 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = async () => {
         try {
             await logoutApi();
+            queryClient.clear();
         } catch (err) {
             console.error("Logout failed", err);
         } finally {

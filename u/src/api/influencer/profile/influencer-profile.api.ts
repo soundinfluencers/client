@@ -8,7 +8,7 @@ import type {
   TSocialAccounts,
   TSocialAccountShort,
 } from "@/types/user/influencer.types";
-import { AxiosError } from "axios";
+// import { AxiosError } from "axios";
 import type {
   TInvoiceDetailsApi,
   TUpdateInvoiceDetailsDto,
@@ -16,25 +16,30 @@ import type {
 import type {
   TPaymentDetailsRequestDto, TPaymentDetailsResponseDto
 } from "@/pages/influencer/payment-details/types/payment-details.types.ts";
+import type {
+  TNotificationVia, TNotificationViaApi,
+} from "@/pages/influencer/account-setting/components/notifications-via/types/notification-via.types.ts";
 
 // Get influencer profile
 export const getInfluencerProfile = async (): Promise<InfluencerProfileApi> => {
-  try {
-    console.log("call get profile");
-    const response = await $api.get("/profile/influencer");
-    console.log("Response getProfile:", response.data.data);
-    return response.data.data as InfluencerProfileApi;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error(
-        "Error fetching influencer profile:",
-        error.response?.data || error.message,
-      );
-    } else {
-      console.error("Unexpected error:", error);
-    }
-    throw error;
-  }
+  console.log("call get profile");
+  const response = await $api.get("/profile/influencer");
+  console.log("Response getProfile:", response.data.data);
+  return response.data.data as InfluencerProfileApi;
+
+  // try {
+  //
+  // } catch (error) {
+  //   if (error instanceof AxiosError) {
+  //     console.error(
+  //       "Error fetching influencer profile:",
+  //       error.response?.data || error.message,
+  //     );
+  //   } else {
+  //     console.error("Unexpected error:", error);
+  //   }
+  //   throw error;
+  // }
 };
 
 // Get social account by ID
@@ -42,51 +47,55 @@ export const getSocialAccountById = async (
   platform: TSocialAccounts,
   accountId: string,
 ): Promise<SocialAccountDraft> => {
-  try {
-    const response = await $api.get(
-      `/profile/social-account/${accountId}/${platform}`,
-    );
-    return response.data.data as SocialAccountDraft;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error(
-        "Error fetching social account by ID:",
-        error.response?.data || error.message,
-      );
-    } else {
-      console.error("Unexpected error:", error);
-    }
-    throw error;
-  }
+  const response = await $api.get(
+    `/profile/social-account/${accountId}/${platform}`,
+  );
+  return response.data.data as SocialAccountDraft;
+
+  // try {
+  //
+  // } catch (error) {
+  //   if (error instanceof AxiosError) {
+  //     console.error(
+  //       "Error fetching social account by ID:",
+  //       error.response?.data || error.message,
+  //     );
+  //   } else {
+  //     console.error("Unexpected error:", error);
+  //   }
+  //   throw error;
+  // }
 };
 
-// Create social account (mb send platform: TSocialAccounts)
+// Create social account
 // Fix returned Promise type
 export const createSocialAccount = async (
   data: SocialAccountDraft,
   socialMedia: TSocialAccounts,
 ): Promise<unknown> => {
   console.log("Create social account payload:", { socialMedia, ...data });
-  try {
-    const response = await $api.post("/profile/social-account", {
-      socialMedia,
-      payload: data,
-    });
+  const response = await $api.post("/profile/social-account", {
+    socialMedia,
+    payload: data,
+  });
 
-    console.log("Profile created successfully:", response.data.data);
+  console.log("Profile created successfully:", response.data.data);
 
-    return response.data.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error(
-        "Error creating influencer profile:",
-        error.response?.data || error.message,
-      );
-    } else {
-      console.error("Unexpected error:", error);
-    }
-    throw error;
-  }
+  return response.data.data;
+
+  // try {
+  //
+  // } catch (error) {
+  //   if (error instanceof AxiosError) {
+  //     console.error(
+  //       "Error creating influencer profile:",
+  //       error.response?.data || error.message,
+  //     );
+  //   } else {
+  //     console.error("Unexpected error:", error);
+  //   }
+  //   throw error;
+  // }
 };
 
 // Update social account
@@ -97,27 +106,29 @@ export const updateSocialAccount = async (
   platform: TSocialAccounts,
 ): Promise<TSocialAccountShort> => {
   console.log("Update social account payload:", { platform, accountId, data });
-  try {
-    const response = await $api.patch("/profile/social-account", {
-      ...data,
-      accountId,
-      socialMedia: platform,
-    });
+  const response = await $api.patch("/profile/social-account", {
+    ...data,
+    accountId,
+    socialMedia: platform,
+  });
 
-    console.log("Profile updated successfully:", response.data.data);
+  console.log("Profile updated successfully:", response.data.data);
 
-    return response.data.data as TSocialAccountShort;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error(
-        "Error updating influencer social account:",
-        error.response?.data || error.message,
-      );
-    } else {
-      console.error("Unexpected error:", error);
-    }
-    throw error;
-  }
+  return response.data.data as TSocialAccountShort;
+
+  // try {
+  //
+  // } catch (error) {
+  //   if (error instanceof AxiosError) {
+  //     console.error(
+  //       "Error updating influencer social account:",
+  //       error.response?.data || error.message,
+  //     );
+  //   } else {
+  //     console.error("Unexpected error:", error);
+  //   }
+  //   throw error;
+  // }
 };
 
 // Delete social account
@@ -125,21 +136,22 @@ export const deleteSocialAccount = async (
   data: TDeleteSocialAccountDTO,
 ): Promise<void> => {
   console.log("Delete social account payload:", data);
+  await $api.delete("/profile/social-account", { data });
+  console.log("Social account deleted successfully.");
 
-  try {
-    await $api.delete("/profile/social-account", { data });
-    console.log("Social account deleted successfully.");
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error(
-        "Error deleting social account:",
-        error.response?.data || error.message,
-      );
-    } else {
-      console.error("Unexpected error:", error);
-    }
-    throw error;
-  }
+  // try {
+  //
+  // } catch (error) {
+  //   if (error instanceof AxiosError) {
+  //     console.error(
+  //       "Error deleting social account:",
+  //       error.response?.data || error.message,
+  //     );
+  //   } else {
+  //     console.error("Unexpected error:", error);
+  //   }
+  //   throw error;
+  // }
 };
 
 // Update influencer profile details
@@ -148,29 +160,41 @@ export const updateInfluencerProfileDetails = async (
   data: TInfluencerProfileUpdateModel,
 ): Promise<TInfluencerProfileUpdateModel> => {
   console.log("Update influencer profile details payload:", data);
+  const response = await $api.patch("/profile/influencer/personal", {
+    ...data,
+  });
 
-  try {
-    const response = await $api.patch("/profile/influencer/personal", {
-      ...data,
-    });
+  console.log(
+    "Influencer profile details updated successfully:",
+    response.data.data,
+  );
 
-    console.log(
-      "Influencer profile details updated successfully:",
-      response.data.data,
-    );
+  return response.data.data as TInfluencerProfileUpdateModel;
 
-    return response.data.data as TInfluencerProfileUpdateModel;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error(
-        "Error updating influencer profile details:",
-        error.response?.data || error.message,
-      );
-    } else {
-      console.error("Unexpected error:", error);
-    }
-    throw error;
-  }
+  // try {
+  //
+  // } catch (error) {
+  //   if (error instanceof AxiosError) {
+  //     console.error(
+  //       "Error updating influencer profile details:",
+  //       error.response?.data || error.message,
+  //     );
+  //   } else {
+  //     console.error("Unexpected error:", error);
+  //   }
+  //   throw error;
+  // }
+};
+
+// Update influencer notification methods
+export const updateInfluencerNotificationMethods = async (payload: TNotificationVia): Promise<TNotificationViaApi> => {
+  console.log("Update influencer notification methods payload:", payload);
+
+  const response  = await $api.patch(`/profile/influencer/notification/${payload}`);
+
+  console.log('Influencer notification methods updated successfully:', response.data.data);
+
+  return response.data.data as TNotificationViaApi;
 };
 
 // Update influencer invoice details

@@ -21,6 +21,8 @@ export const InvoiceDetails = () => {
     saveInvoiceDetails,
     closeForm } = useInfluencerInvoice();
 
+  console.log("Payment details query result:", invoiceDetails);
+
   if (isLoadingInvoiceDetails) {
     return <Loader />;
   }

@@ -1,6 +1,9 @@
 .account-details-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 
-  &__actions {
+  &__submit {
     display: flex;
     justify-content: center;
     margin-top: 48px;

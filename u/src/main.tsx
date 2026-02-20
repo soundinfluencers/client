@@ -7,7 +7,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
 import "react-toastify/dist/ReactToastify.css";
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
+// export const
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

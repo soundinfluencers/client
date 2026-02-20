@@ -108,7 +108,7 @@ export const CountryAutocomplete: React.FC<Props> = (
         }}
       />
 
-      {error && <p className={'country-input__error-message'}>{error?.message}</p>}
+      {error?.message?.trim() ?  <p className={'country-input__error-message'}>{error?.message}</p> : null}
 
       <div className={`country-input__list-wrapper ${showDropdown ? "country-input__list-wrapper--visible" : ""}`}>
         <ul className="country-input__list">

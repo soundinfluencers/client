@@ -15,10 +15,8 @@ export const CampaignHistoryList = () => {
 
   const {
     data,
-    isFetching,
-    isLoading,
+    isPending,
     isError,
-    // error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -41,6 +39,9 @@ export const CampaignHistoryList = () => {
 
   const campaigns = data?.pages.flat() ?? [];
 
+  const isInitialLoading = isPending && !data;
+  const isLoadingMore = isFetchingNextPage;
+
   // if (isLoading) {
   //   return <Loader/>;
   // }
@@ -59,22 +60,26 @@ export const CampaignHistoryList = () => {
   //   );
   // }
 
+  if (isError) {
+    return  (
+      <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
+        Error loading campaign history.
+      </p>
+    )
+  }
+
   return (
     <div className="campaign-history-list">
       <div className="campaign-history-list__content">
         <div className="campaign-history-list__scroll">
-          {isError ? (
-              <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
-                Error loading campaign history.
-              </p>
-            ) : (<CampaignHistoryTable campaigns={campaigns} isLoading={isLoading} isFetching={isFetching}/>)}
+          <CampaignHistoryTable campaigns={campaigns} isInitialLoading={isInitialLoading} />
         </div>
 
         <div className="campaign-history-list__actions">
           <ButtonMain
-            label={isFetchingNextPage ? "Loading..." : "View more"}
-            onClick={() => fetchNextPage()}
-            isDisabled={!hasNextPage || isFetchingNextPage}
+            label={isLoadingMore ? "Loading..." : "View more"}
+            onClick={() => hasNextPage && fetchNextPage()}
+            isDisabled={!hasNextPage || isLoadingMore}
           />
         </div>
       </div>

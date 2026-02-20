@@ -1,8 +1,9 @@
 import type { TSocialAccountFormValues } from "../types/account-setup.types";
+// import type { TSocialAccounts } from "@/types/user/influencer.types.ts";
 
 const TOP_COUNTRIES = 5;
 
-const makeEmptyCountries = () =>
+export const makeEmptyCountries = () =>
   Array.from({ length: TOP_COUNTRIES }, () => ({
     country: null as string | null,
     percentage: null as number | null,

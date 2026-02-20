@@ -52,15 +52,16 @@ export const NewPromos = () => {
         onAccept={(payload) => {
           confirmPromo(payload, {
             onSuccess: () => {
+              setIsDecline(false);
               setIsAccepted(true);
               setIsModalOpen(true);
-
             },
           });
         }}
         onDecline={(payload) => {
           confirmPromo(payload, {
             onSuccess: () => {
+              setIsAccepted(false);
               setIsDecline(true);
               setIsModalOpen(true);
             },
