@@ -7,30 +7,32 @@ export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
     title: "Artist Promo Campaigns",
     inputs: [
       {
-        label: "What you’re promoting (Campaign Goal)",
-        name: "What you’re promoting (Campaign Goal)",
+        label: "Campaign objective",
+        name: "Campaign objective",
         placeholder: "Enter tour, gig, branding push, announcement ",
       },
       {
-        label: "Content available ",
+        label: "Content available*",
         name: "Content available",
         placeholder: "Enter links to your videos, press photos, artwork",
       },
       {
-        label: "Your budget",
+        label: "Your budget*",
         name: "Your budget",
         placeholder: "Enter your budget",
       },
       {
         label: "Target territories",
         name: "Target territories",
-        placeholder:
-          "Enter target territories (leave it empty for worldwide campaign)",
+        placeholder: "Leave it empty for worldwide campaign",
       },
+    ],
+    textAreas: [
       {
-        label: "Any extra notes (messaging, influencer type, content ideas)",
-        name: "Any extra notes (messaging, influencer type, content ideas)",
-        placeholder: "Enter messaging, influencer type, content ideas",
+        label: "Any Extra Briefs",
+        name: "Any Extra Briefs",
+        placeholder:
+          "Enter here any details or ideas you'd like us to consider while designing your campaign",
       },
     ],
   },
@@ -40,8 +42,8 @@ export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
     title: "Music Promo Campaigns",
     inputs: [
       {
-        label: "What you’re promoting (Campaign Goal)",
-        name: "What you’re promoting (Campaign Goal)",
+        label: "Campaign objective",
+        name: "Campaign objective",
         placeholder: "Enter tour, gig, branding push, announcement ",
       },
       {
@@ -65,7 +67,7 @@ export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
         placeholder: "Enter release date",
       },
       {
-        label: "Your budget",
+        label: "Your budget*",
         name: "Your budget",
         placeholder: "Enter your budget",
       },
@@ -75,6 +77,8 @@ export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
         placeholder:
           "Enter target territories (leave it empty for worldwide campaign)",
       },
+    ],
+    textAreas: [
       {
         label: "Any extra notes (messaging, influencer type, content ideas)",
         name: "Any extra notes (messaging, influencer type, content ideas)",
@@ -88,8 +92,8 @@ export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
     title: "Event Promo Campaigns",
     inputs: [
       {
-        label: "What you’re promoting (Campaign Goal)",
-        name: "What you’re promoting (Campaign Goal)",
+        label: "Campaign objective",
+        name: "Campaign objective",
         placeholder: "Enter tour, gig, branding push, announcement ",
       },
       {
@@ -103,7 +107,7 @@ export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
         placeholder: "Enter ticket link",
       },
       {
-        label: "Your budget",
+        label: "Your budget*",
         name: "Your budget",
         placeholder: "Enter your budget",
       },
@@ -113,6 +117,8 @@ export const BESPOKE_CAMPAIGN_TABS_DATA: IBespokeCampaignTabData[] = [
         placeholder:
           "Enter target territories (leave it empty for worldwide campaign)",
       },
+    ],
+    textAreas: [
       {
         label: "Any extra notes (messaging, influencer type, content ideas)",
         name: "Any extra notes (messaging, influencer type, content ideas)",

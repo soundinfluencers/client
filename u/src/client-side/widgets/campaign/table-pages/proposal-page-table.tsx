@@ -73,9 +73,9 @@ export const ProposalCampaignPage: React.FC<Props> = ({
 
   return (
     <div className="table-page">
-      <Bar campaign={campaign} />
+      {/* <Bar campaign={campaign} /> */}
 
-      {view === 1 ? (
+      {view === 2 ? (
         <div className="live-view-wrapper">
           {byGroup.main.length >= 1 &&
             byGroup.main.map((item) => (

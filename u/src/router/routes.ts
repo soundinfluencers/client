@@ -100,8 +100,14 @@ export const routes: IRoute[] = [
     isProtected: true,
   },
   {
+    name: "PaymentDraft",
+    path: "/client/campaign/payment",
+    component: PaymentCampaign,
+    isProtected: true,
+  },
+  {
     name: "BespokeCampaign",
-    path: "/client/beskoke-campaign",
+    path: "/client/agency-campaign",
     component: BespokeCampaign,
     isProtected: true,
   },

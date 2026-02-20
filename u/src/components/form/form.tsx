@@ -49,6 +49,7 @@ export const Form = <T extends FieldValues>({
       keepIsSubmitted: true,
       keepSubmitCount: true,
     });
+    methods.trigger();
   }, [defaultValues, methods]);
 
   const handleFormSubmit = async (formData: T) => {

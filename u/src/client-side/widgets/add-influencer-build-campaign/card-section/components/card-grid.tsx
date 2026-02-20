@@ -6,10 +6,11 @@ import chevronDown from "@/assets/icons/chevron-down.svg";
 import type { SocialMediaType } from "@/types/utils/constants.types";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 
-import { useBuildCampaignFilters } from "@/store/client/create-campaign/useBuildCampaignFilters";
-
 import { getPriceByCurrency } from "@/client-side/utils";
-import { useSelectCampaignProposal } from "@/client-side/store";
+import {
+  useBuildCampaignFilters,
+  useSelectCampaignProposal,
+} from "@/client-side/store";
 import { GenresCountries } from "@/shared/ui";
 interface Props {
   data: IPromoCard;

@@ -1,6 +1,6 @@
 import { CountryField } from "@/pages/influencer/shared/components/CountryField";
 import { FormInput } from "@/shared/ui";
-import { renderInputs } from "@/shared/ui/form/renderFunctions/input-textAreas";
+
 import type { IPaymentCampaignField } from "@/types/client/form-clients/payment-campaign-inputs";
 
 export function PaymentForm({ data }: { data: IPaymentCampaignField }) {

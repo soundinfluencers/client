@@ -70,8 +70,6 @@ export function toCampaignPageModelFromDraft(
     campaignContentDraft: api.campaignContent,
 
     price: 0,
-    addedAccounts: [],
-    campaignContent: [],
 
     creationDate: null,
     shareLink: null,

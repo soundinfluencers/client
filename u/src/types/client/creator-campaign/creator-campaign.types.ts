@@ -52,4 +52,5 @@ export interface IPromoCard extends CampaignAddedAccount {
   musicGenres: string[];
   creatorCategories: string[];
   categories: string[];
+  fromOffer?: boolean;
 }

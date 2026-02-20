@@ -2,6 +2,7 @@ import React from "react";
 import {
   Breadcrumbs,
   ButtonMain,
+  ButtonSecondary,
   Container,
   Form,
   SubmitButton,
@@ -20,9 +21,16 @@ import {
 import { PaymentBar } from "@/client-side/widgets";
 import { PAYMENT_CAMPAIGN_TABS } from "@/client-side/data/payment-campaign-tabs";
 import { PaymentForm } from "@/client-side/client-forms";
-import { useCampaignStore } from "@/client-side/store";
+import {
+  useCampaignStore,
+  useDraftCampaignStore,
+  useUpdateCampaign,
+} from "@/client-side/store";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { deleteDraft } from "@/api/client/campaign/draft.api";
+import { useInvoceDetailsQuery } from "@/client-side/react-query";
+import { Modal } from "@/shared/ui/modal-fix/Modal";
 
 export type PaymentMethodId =
   | "bank_card"
@@ -47,10 +55,15 @@ const toBackendSelectedMethod = (
   return "internationalBankTransfer"; // eu + international
 };
 export const PaymentCampaign = () => {
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get("draft");
+  const { data: invoiceDetails, isLoading: invoiceLoading } =
+    useInvoceDetailsQuery();
+  const draftStore = useDraftCampaignStore();
   const { actions, campaignName } = useCampaignStore();
   const navigate = useNavigate();
   const [tab, setTab] = React.useState<PaymentTabId>("bank_card");
-
+  const [modalCompleted, setModalCompleted] = React.useState(false);
   const [selectedIdPayment, setSelectedIdPayment] =
     React.useState<PaymentMethodId>("bank_card");
 
@@ -94,34 +107,75 @@ export const PaymentCampaign = () => {
     setCurrency(id);
     setSelectedIdPayment(id);
   };
-
   const onSent = async (values: PaymentCampaignFormValues) => {
-    const base = actions.getCampaignPayload(selectedIdPayment);
+    try {
+      let base: any;
 
-    const paymentDetails = {
-      firstName: values.firstName,
-      lastName: values.lastName,
-      address: values.address,
-      country: values.country,
-      company: values.company ?? "",
-      vatNumber: values.vatNumber ?? "",
-      amount: base.campaignPrice ?? 0,
-      selectedPaymentMethod: selectedIdPayment,
-    };
+      if (draftId) {
+        const patches = useUpdateCampaign.getState().patches ?? {};
 
-    const payload = { campaignName, ...base, paymentDetails };
+        base = draftStore.getCampaignPayload(
+          draftId,
+          campaignName ?? "",
+          selectedIdPayment,
+          patches,
+        );
+      } else {
+        base = actions.getCampaignPayload(selectedIdPayment);
+      }
 
-    console.log(payload);
-    await postCampaign(payload);
-    navigate("/client");
-    toast.success("Campaign saved succesfully!");
+      const finalCampaignName = String(
+        base?.campaignName ?? campaignName ?? "",
+      );
+
+      const paymentDetails = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        address: values.address,
+        country: values.country,
+        company: values.company ?? "",
+        vatNumber: values.vatNumber ?? "",
+        amount: Number(base?.campaignPrice ?? 0),
+        selectedPaymentMethod: selectedIdPayment,
+      };
+
+      const payload = {
+        ...base,
+        campaignName: finalCampaignName,
+        paymentDetails,
+      };
+
+      console.log(payload, "payload");
+      await postCampaign(payload);
+
+      if (draftId) {
+        await deleteDraft(draftId);
+        draftStore.clearCampaign(draftId);
+      }
+      setModalCompleted(true);
+      toast.success("Campaign saved successfully!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to save campaign");
+    }
   };
+  const defaultValues = React.useMemo<Partial<PaymentCampaignFormValues>>(
+    () => ({
+      firstName: invoiceDetails?.firstName ?? "",
+      lastName: invoiceDetails?.lastName ?? "",
+      address: invoiceDetails?.address ?? "",
+      country: invoiceDetails?.country ?? "",
+      company: invoiceDetails?.company ?? "",
+      vatNumber: invoiceDetails?.vatNumber ?? "",
+    }),
+    [invoiceDetails],
+  );
   return (
     <Container className="payment-campaign">
       <div className="navmenu">
         <Breadcrumbs />
       </div>
-
+      <h1>Payment method</h1>
       <div className="payment-campaign__content">
         <PaymentBar
           data={PAYMENT_CAMPAIGN_TABS}
@@ -150,6 +204,7 @@ export const PaymentCampaign = () => {
           <Form<PaymentCampaignFormValues>
             schema={paymentCampaignSchema}
             onSubmit={onSent}
+            defaultValues={defaultValues}
             classNameBtnSection={tab === "bank_transfer" ? "margin" : ""}
             submitButton={
               <SubmitButton
@@ -165,10 +220,10 @@ export const PaymentCampaign = () => {
                 <CurrentConfirmation currency={currency ? [currency] : []} />
               )}
 
-              {tab === "bank_transfer" && (
+              {/* {tab === "bank_transfer" && (
                 <div className="PO">
                   <p>If you need PO click here</p>
-                  <ButtonMain
+                  <ButtonSecondary
                     className="btn"
                     text={"PO request"}
                     onClick={() => {
@@ -176,11 +231,35 @@ export const PaymentCampaign = () => {
                     }}
                   />
                 </div>
-              )}
+              )} */}
             </div>
           </Form>
         </div>
       </div>
+      {modalCompleted && (
+        <Modal
+          onClose={() => {
+            setModalCompleted(false);
+            navigate("/client");
+          }}>
+          <div className="modal-payment">
+            <h2>Campaign Received</h2>
+            <h3>Thanks for your payment!</h3>
+            <p>
+              We're reviewing your campaign and will notify you once it's
+              approved and sent to distribution.
+            </p>
+            <ButtonMain
+              className="btn"
+              text={"Ok"}
+              onClick={() => {
+                setModalCompleted(false);
+                navigate("/client");
+              }}
+            />
+          </div>
+        </Modal>
+      )}
     </Container>
   );
 };

@@ -51,10 +51,10 @@ export const TableCard = React.memo(function TableCard({
 
   const payload = React.useMemo(() => {
     return {
-      accountId: (data as any).accountId,
-      influencerId: (data as any).influencerId,
-      socialMedia: (data as any).socialMedia,
-      username: (data as any).username,
+      accountId: (data as any)?.accountId,
+      influencerId: (data as any)?.influencerId,
+      socialMedia: (data as any)?.socialMedia,
+      username: (data as any)?.username,
       selectedCampaignContentItem: {
         campaignContentItemId: contentItem?._id,
         descriptionId: contentItem?.descriptions?.[selectedPd]?._id,

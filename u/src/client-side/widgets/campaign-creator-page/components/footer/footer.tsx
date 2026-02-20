@@ -6,20 +6,27 @@ import { useCampaignStore } from "@/client-side/store";
 interface Props {}
 
 export const Footer: React.FC<Props> = () => {
-  const { offer, totalPrice, promoCard } = useCampaignStore();
+  const { offer, totalPrice, promoCardUI } = useCampaignStore();
   const navigate = useNavigate();
-
-  const canProceed = offer?._id || promoCard.length >= 1;
+  console.log(promoCardUI, "ui");
+  const canProceed = offer?._id || promoCardUI.length >= 1;
 
   return (
     <div className="footer-campaign-creator-page">
       <div className="footer-campaign-creator-page__content">
-        <p>{offer?._id ? offer.title : "No offer selected"}</p>
+        <p>
+          Offer: <span className="count">{offer?._id ? 1 : 0}</span>
+        </p>
         <img src={plus} alt="" />
         <p>
-          {promoCard.length > 0 ? `${promoCard.length} networks` : "0 networks"}
+          Networks:
+          <span className="count">
+            {promoCardUI.length > 0 ? promoCardUI.length : 0}
+          </span>
         </p>
-        <p>Total: {totalPrice}€</p>
+        <p>
+          Total: <span className="count">{totalPrice}€</span>
+        </p>
       </div>
       <button
         className={canProceed ? "active" : ""}

@@ -23,7 +23,7 @@ export const TableListView: React.FC<TableListViewProps> = ({
   if (isLoading) {
     return (
       <div className="table-list">
-        {Array.from({ length: 12 }).map((_, index) => (
+        {Array.from({ length: 6 }).map((_, index) => (
           <TableCardSkeleton key={index} />
         ))}
       </div>
@@ -61,7 +61,7 @@ export const TableListView: React.FC<TableListViewProps> = ({
                   src={getSocialMediaIcon(tb.socialMedia)}
                   alt=""
                 />
-                <p>{tb.status ?? "-"}</p>
+                <p>{tb.status ?? ""}</p>
               </div>
 
               {tb.status === "draft" && (
@@ -77,15 +77,15 @@ export const TableListView: React.FC<TableListViewProps> = ({
           </div>
 
           <div className="table-list__body-data date-post">
-            <p>{tb.creationDate ?? "-"}</p>
+            <p>{tb.creationDate ?? ""}</p>
           </div>
 
           <div className="table-list__body-data">
-            <p>{tb.campaignName ?? "-"}</p>
+            <p>{tb.campaignName ?? ""}</p>
           </div>
 
           <div className="table-list__body-data">
-            <p>{tb.price ? `${tb.price}€` : "—"}</p>
+            <p>{tb.price ? `${tb.price}€` : ""}</p>
           </div>
         </div>
       ))}

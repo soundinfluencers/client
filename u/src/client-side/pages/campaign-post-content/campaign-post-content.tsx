@@ -199,10 +199,10 @@ export const CampaignPostContent: React.FC = () => {
           formPrefix={basePrefix}
         />
 
-        <PeopleChose
+        {/* <PeopleChose
           value={baseEntity}
           onChange={(v) => setEntity(basePrefix, v)}
-        />
+        /> */}
 
         {additional.map((f) => {
           const n = getAdditionalIndex(f.id);
@@ -223,10 +223,10 @@ export const CampaignPostContent: React.FC = () => {
                 formPrefix={prefix}
               />
 
-              <PeopleChose
+              {/* <PeopleChose
                 value={entity}
                 onChange={(v) => setEntity(prefix, v)}
-              />
+              /> */}
             </React.Fragment>
           );
         })}

@@ -49,15 +49,20 @@ export const FooterAddInfluencer: React.FC<Props> = ({ optionIndex }) => {
     <div className="footer-campaign-creator-page">
       <div className="footer-campaign-creator-page__content">
         <p>
-          {promoCard.length > 0 ? `${promoCard.length} networks` : "0 networks"}
+          Networks:
+          <span className="count">
+            {promoCard.length > 0 ? promoCard.length : 0}
+          </span>
         </p>
-        <p>Total: {totalPrice}€</p>
+        <p>
+          Total: <span className="count">{totalPrice}€</span>
+        </p>
       </div>
-      <ButtonMain
+      <button
         className={totalPrice > 0 ? "active" : "nonActive"}
-        text={"Add"}
-        onClick={onAdd}
-      />
+        onClick={onAdd}>
+        Add
+      </button>
     </div>
   );
 };

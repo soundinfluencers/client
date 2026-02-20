@@ -11,9 +11,36 @@
   border: 1px solid rgba(185, 208, 255, 1);
   border-radius: 8px;
   border-collapse: separate;
-  border-spacing: 0;
+  border-spacing: 0px;
 
   .trash-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 4px;
+    &__same {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 1);
+      opacity: 0.7;
+      img {
+        width: 18px;
+        height: 18px;
+      }
+    }
+    &__confirm-block {
+    }
+    &__confirm-block-row {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
     &__content {
       cursor: pointer;
       display: flex;
@@ -29,20 +56,29 @@
         height: 16px;
       }
     }
+    &__confirm,
+    &__delete {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   th,
   td {
     padding: 8px 12px;
-    border: 1px solid rgba(191, 212, 255, 0.4);
+    border-right: 1px solid rgba(191, 212, 255, 0.4);
     text-align: center;
     vertical-align: middle;
-    overflow: visible;
+    &:last-child {
+      border-right: 0px;
+    }
   }
 
   thead th {
     font-weight: 600;
     background: rgba(185, 208, 255, 0.15);
+    border-bottom: 1px solid rgba(191, 212, 255, 0.4);
     border-color: rgba(185, 208, 255, 1);
   }
 
@@ -98,7 +134,7 @@
 
     p {
       font-weight: 400;
-      font-size: 18px;
+      font-size: 15px;
       line-height: 1;
     }
 
@@ -115,6 +151,8 @@
     min-width: 0;
 
     img {
+      width: 18px;
+      height: 18px;
       flex: 0 0 auto;
     }
   }
@@ -122,7 +160,7 @@
   .followers {
     overflow: hidden;
     font-weight: 400;
-    font-size: 18px;
+    font-size: 15px;
     line-height: 1.1;
   }
 
@@ -267,6 +305,7 @@
   }
 
   .dropdown-list {
+    position: relative;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -275,14 +314,15 @@
     padding: 0;
     align-items: flex-start;
     overflow: hidden;
+    img {
+      width: 16px;
+      height: 16px;
+    }
     .check {
       position: absolute;
-      right: 2px;
-      width: 18px;
-      height: 18px;
+      right: 0px;
     }
     li {
-      position: relative;
       width: 100%;
       cursor: pointer;
       display: flex;
@@ -304,6 +344,12 @@
         padding: 2px 6px;
         border: 1px solid rgb(231, 232, 241);
         flex: 0 0 auto;
+        width: 22px;
+        height: 18px;
+        img {
+          width: 14px;
+          height: 14px;
+        }
       }
       .trash {
         position: absolute;
@@ -410,7 +456,15 @@
   align-items: center;
   gap: 24px;
   padding: 32px 48px 40px;
-
+  .modal-card-video {
+    max-width: 575px;
+    height: 303px;
+    video {
+      max-width: 575px;
+      width: 100%;
+      height: 303px;
+    }
+  }
   h2 {
     font-weight: 400;
     font-size: 36px;
@@ -546,7 +600,87 @@
     }
   }
 }
+.modal-card {
+  width: 671px;
+  position: relative;
+  background-color: #fff;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 32px 48px 40px;
+  input {
+    max-width: 575px;
+    width: 100%;
+    padding: 24px;
+    border-radius: 8px;
+    height: 52px;
+    background: #fff;
+    border: 1px solid rgba(191, 212, 255, 0.4);
+  }
+  h2 {
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 100%;
+    text-align: center;
+  }
+  p {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+  }
+  .cross {
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+  }
 
+  .modal-card-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+
+    .btn {
+      max-width: 250px;
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 700px) {
+  .modal-card {
+    width: min(671px, 92vw);
+    padding: 24px 24px 28px;
+    gap: 16px;
+
+    h2 {
+      font-size: 28px;
+    }
+
+    .cross {
+      right: 12px;
+      top: 12px;
+    }
+  }
+}
+
+@media (max-width: 500px) {
+  .modal-card {
+    width: 92vw;
+    padding: 20px 16px 22px;
+    border-radius: 14px;
+
+    h2 {
+      font-size: 22px;
+    }
+  }
+}
 .create-option {
   width: 671px;
   position: relative;

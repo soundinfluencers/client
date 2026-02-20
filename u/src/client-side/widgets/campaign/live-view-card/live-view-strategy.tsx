@@ -3,6 +3,7 @@ import type { SocialMediaType } from "@/types/utils/constants.types";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import type { CampaignAddedAccount } from "@/types/store/index.types";
 import "@/client-side/styles-table/campaign-view-card.scss";
+import preview from "@/assets/icons/video (1).png";
 
 import { ExtraFieldsCard } from "./card-editor/ExtraFieldsCard";
 import { PostDescriptionsEditor } from "./card-editor/PostDescriptionsEditor";
@@ -30,7 +31,9 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
     <div className="live-view-card">
       <div className="live-view-card__content">
         <div className="live-view-card__video">
-          <div className="video"></div>
+          <div className="video">
+            <img src={preview} alt="" />
+          </div>
         </div>
 
         <PostDescriptionsEditor
@@ -67,6 +70,8 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
           {networks.map((net, i) => (
             <div className="network__row" key={(net as any)._id ?? i}>
               <div className="network__row-logo">
+                {net.logoUrl && <img src={net.logoUrl} alt="logo" />}
+
                 <p>{formatFollowers((net as any).followers)}</p>
               </div>
               <p>{(net as any).username}</p>

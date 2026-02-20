@@ -14,7 +14,7 @@ export const InputCell: React.FC<Props> = ({
   placeholder = "—",
 }) => {
   return (
-    <td className="table-campaign-page__td">
+    <td className="tableBase__td">
       {multiline ? (
         <textarea
           className="table-input table-input--textarea"

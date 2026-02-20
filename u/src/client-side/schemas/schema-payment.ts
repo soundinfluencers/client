@@ -9,10 +9,9 @@ export const paymentCampaignSchema = z.object({
   company: z.string(),
   vatNumber: z
     .string()
-    .refine(
-      (val) => !val || /^[A-Z0-9\-]+$/i.test(val),
-      "Invalid VAT number format",
-    ),
+    .optional()
+    .transform((v) => (v ?? "").trim())
+    .refine((val) => !val || /^\d+$/.test(val), "VAT number must be numeric"),
 });
 
 export type PaymentCampaignFormValues = z.infer<typeof paymentCampaignSchema>;

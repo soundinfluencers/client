@@ -27,8 +27,6 @@ import { ButtonMain } from "@/components";
 import { useClickOutside } from "@/shared/lib/hooks/useClickOutside";
 
 export const BuildCampaign: React.FC = () => {
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const ddRef = React.useRef<HTMLDivElement | null>(null);
   const [search, setSearch] = React.useState("");
@@ -40,6 +38,8 @@ export const BuildCampaign: React.FC = () => {
   const [filterFlag, setFilterFlag] = React.useState(true);
   const [view, setView] = React.useState<number>(1);
   const [isSmall, setIsSmall] = React.useState(false);
+  const [isLoadingMore, setIsLoadingMore] = React.useState(false);
+  const loadMoreRef = React.useRef<HTMLDivElement | null>(null);
 
   const {
     selectedFilter,
@@ -73,7 +73,10 @@ export const BuildCampaign: React.FC = () => {
     FilterMethod,
     limit,
   });
-
+  const canLoadMore =
+    !isSearchMode &&
+    (promoCards as IPromoCard[]).length >= limit &&
+    !promoFetching;
   const promoPending = useCreateCampaign((s) => s.pending.promoCards);
   const setPending = useCreateCampaign((s) => s.setPending);
   const setPromoCards = useCreateCampaign((s) => s.setPromoCards);
@@ -83,7 +86,34 @@ export const BuildCampaign: React.FC = () => {
       setPickedFromSearch(null);
     }
   }, [search]);
+  React.useEffect(() => {
+    if (!canLoadMore) return;
 
+    const el = loadMoreRef.current;
+    if (!el) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry?.isIntersecting) return;
+        setIsLoadingMore(true);
+        setLimit((prev) => prev + 24);
+
+        setLimit((prev) => prev + 24);
+      },
+      {
+        root: null,
+        rootMargin: "100px 0px",
+        threshold: 0,
+      },
+    );
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [canLoadMore]);
+  React.useEffect(() => {
+    if (!promoFetching) setIsLoadingMore(false);
+  }, [promoFetching]);
   React.useEffect(() => {
     setPending("promoCards", promoLoading || promoFetching);
   }, [promoLoading, promoFetching, setPending]);
@@ -124,12 +154,11 @@ export const BuildCampaign: React.FC = () => {
     setPickedFromSearch(item as IPromoCard);
     setIsDropdownOpen(false);
   }, []);
-  useClickOutside(dropdownRef, () => {
-    setIsDropdownOpen(false);
-    setSearch("");
-    setPickedFromSearch(null);
-  });
+  const hasCards = (promoCards as IPromoCard[]).length > 0;
 
+  const isInitialLoading = !hasCards && (promoLoading || promoFetching);
+  const isFetchingMore = hasCards && promoFetching && isLoadingMore;
+  const isRefetching = hasCards && promoFetching && !isLoadingMore;
   return (
     <div className="build-compaign">
       <div className="build-compaign__title">
@@ -147,7 +176,7 @@ export const BuildCampaign: React.FC = () => {
               <p>Filters</p>
             </div>
 
-            <div ref={dropdownRef} className="search-with-dropdown">
+            <div className="search-with-dropdown">
               <Search
                 isSearchMode={isSearchMode}
                 setSearch={setSearch}
@@ -245,11 +274,13 @@ export const BuildCampaign: React.FC = () => {
             </NoData>
           ) : displayCards.length > 0 ? (
             <CardsContainer
-              loading={promoFetching}
               promosCards={displayCards}
               isSmall={isSmall}
               setIsSmall={setIsSmall}
               view={view}
+              isInitialLoading={isInitialLoading}
+              isFetchingMore={isFetchingMore}
+              isRefetching={isRefetching}
             />
           ) : (
             <NoData>
@@ -264,11 +295,16 @@ export const BuildCampaign: React.FC = () => {
         </div>
       </div>
       {!isSearchMode && (promoCards as IPromoCard[]).length >= limit && (
-        <div style={{ margin: "16px auto", maxWidth: "250px" }}>
-          <ButtonMain
-            text={promoFetching ? "Loading..." : "View more"}
-            onClick={() => setLimit((prev) => prev + 24)}
-          />
+        <div
+          ref={loadMoreRef}
+          style={{
+            margin: "16px auto",
+            maxWidth: "250px",
+            padding: "12px 0",
+            textAlign: "center",
+            opacity: promoFetching ? 0.6 : 1,
+          }}>
+          {promoFetching ? "Loading…" : "Scroll to load more"}
         </div>
       )}
 

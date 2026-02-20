@@ -27,7 +27,10 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
     <div
       onClick={() => {
         if (isInclude) return null;
-        else actions.setPromoCards(data);
+        else {
+          actions.setPromoCards(data);
+          actions.setPromoCardsUI(data);
+        }
       }}
       className={`bc_card ${flag ? "open" : ""} ${isInclude ? "include" : ""} ${
         activePromo ? "active" : ""

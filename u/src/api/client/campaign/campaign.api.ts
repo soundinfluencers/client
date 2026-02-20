@@ -47,9 +47,14 @@ export const postCampaign = async (payload: any) => {
   }
 };
 
-export const postCampaignRequest = async (campaignId: string) => {
+export const postCampaignRequest = async (
+  campaignId: string,
+  textaretValue: string,
+) => {
   try {
-    await $api.post(`/campaigns/${campaignId}/request-edit`);
+    await $api.post(`/campaigns/${campaignId}/request-edit`, {
+      message: textaretValue,
+    });
   } catch (error) {
     console.log(error, "[POST]: error with post postCampaignRequest");
     throw error;
@@ -93,14 +98,23 @@ export async function postAddProposalOption(
     params: { campaignId },
   });
 }
-
 export const postCampaignProposal = async (payload: any) => {
   try {
-    await $api.post("/proposal-system", payload);
+    const response = await $api.post("/proposal-system", payload);
+    return response;
   } catch (error) {
     console.log(error, "[POST-PROPOSAL]: error with post data campaign");
     throw error;
   }
+};
+
+export const deleteProposalOption = async (
+  campaignId: string,
+  optionIndex: number,
+) => {
+  await $api.delete(`/proposal-system/${campaignId}`, {
+    params: { optionIndex },
+  });
 };
 
 export const getShareLink = async (campaignId: string): Promise<any> => {

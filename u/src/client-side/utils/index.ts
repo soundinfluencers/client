@@ -17,3 +17,4 @@ export { getPlatformItems } from "./get-platform-items";
 export { buildProposalPatchBody } from "./proposalPayload";
 export { groupPlatforms } from "./groupPlatforms";
 export { downloadBlob } from "./download-file";
+export { pickPrice } from "./pick-price";

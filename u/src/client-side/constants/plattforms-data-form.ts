@@ -13,15 +13,19 @@ export const PlattformsDataForm: IPlattformsDataForm = {
         id: "Contentlink",
         name: "Content link",
         placeholder: "https://",
+        required: true,
       },
       {
         id: "Storytag",
         name: "Story tag",
         placeholder: "@tagged user",
+        required: true,
       },
       {
         id: "Storylink",
         name: "Story link",
+        required: true,
+
         placeholder: "https://",
       },
     ],
@@ -40,6 +44,7 @@ export const PlattformsDataForm: IPlattformsDataForm = {
         id: "TrackLink",
         name: "Track link",
         placeholder: "https://",
+        required: true,
       },
       {
         id: "trackTitle",
@@ -60,6 +65,7 @@ export const PlattformsDataForm: IPlattformsDataForm = {
         id: "musicLinks",
         name: "Link to music, events, news",
         placeholder: "https://",
+        required: true,
       },
       {
         id: "artworkLinks",

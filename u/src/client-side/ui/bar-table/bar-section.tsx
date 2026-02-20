@@ -85,7 +85,7 @@ export const BarSection: React.FC<Props> = ({ campaign }) => {
               CPM: <span>{cpm}</span>
             </p>{" "}
             <p>
-              Average Instagram CPM: <span>{cpm}</span>
+              Average Instagram CPM: <span>5€ to 12€</span>
             </p>{" "}
             <p>
               Result: <span>{resultCPM}</span>

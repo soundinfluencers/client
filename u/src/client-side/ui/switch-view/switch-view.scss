@@ -20,9 +20,12 @@
     height: 36px;
     overflow: hidden;
     .changeView-check {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       position: relative;
-      width: 54px !important;
+      width: 48px !important;
       padding: 8px;
       opacity: 0.5;
       .check {
@@ -30,18 +33,18 @@
         width: 16px;
         height: 16px;
       }
-      &:first-child {
-        display: flex;
-        align-items: center;
-        border-right: 1px solid rgba(231, 232, 241, 1);
-        padding-left: 26px !important;
-      }
-      &:last-child {
-        display: flex;
-        align-items: center;
-        flex-direction: row-reverse;
-        padding-right: 26px !important;
-      }
+      // &:first-child {
+      //   display: flex;
+      //   align-items: center;
+      //   border-right: 1px solid rgba(231, 232, 241, 1);
+      //   padding-left: 26px !important;
+      // }
+      // &:last-child {
+      //   display: flex;
+      //   align-items: center;
+      //   flex-direction: row-reverse;
+      //   padding-right: 26px !important;
+      // }
       &.active {
         background-color: white;
         opacity: 1;

@@ -1,10 +1,12 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { CampaignAddedAccount } from "@/types/store/index.types";
+import { ObjectId } from "bson";
+import { getGroupBySocial } from "@/client-side/widgets/add-influencer-build-campaign/add-to-proposal/bc-prooced";
 
 export const getStrategyAccountKey = (n: CampaignAddedAccount) =>
   String((n as any).addedAccountsId ?? (n as any).accountId ?? (n as any)._id);
-
+const oid = () => new ObjectId().toHexString();
 type CampaignContentItem = {
   _id: string;
   socialMedia?: string;
@@ -26,7 +28,14 @@ type StrategyCampaignStore = {
     serverContent: CampaignContentItem[],
     opts?: { force?: boolean },
   ) => void;
+  addContentForSocial: (
+    campaignId: string,
+    socialMedia: string,
+    payload: { mainLink: string },
+    inheritFromContentId?: string,
+  ) => string;
 
+  removeContentItem: (campaignId: string, contentId: string) => void;
   setAccountDateRequest: (
     campaignId: string,
     accountKey: string,
@@ -88,7 +97,72 @@ export const useStrategyCampaignStore = create<StrategyCampaignStore>()(
         };
       });
     },
+    addContentForSocial: (
+      campaignId,
+      socialMedia,
+      payload,
+      inheritFromContentId,
+    ) => {
+      const key = String(campaignId ?? "");
+      if (!key) return "";
 
+      const sm = String(socialMedia ?? "").toLowerCase();
+      const group = getGroupBySocial(sm);
+      const newId = oid();
+
+      set((state) => {
+        const prev = state.contentByCampaignId[key] ?? [];
+
+        const base =
+          (inheritFromContentId
+            ? prev.find((c) => String(c._id) === String(inheritFromContentId))
+            : prev.find(
+                (c) => String(c.socialMedia ?? "").toLowerCase() === sm,
+              )) ?? prev.find((c) => c.socialMediaGroup === group);
+
+        const nextItem: CampaignContentItem = {
+          _id: newId,
+          socialMedia: sm,
+          socialMediaGroup: group,
+          mainLink: payload?.mainLink ?? "",
+
+          taggedUser: base?.taggedUser ?? "",
+          taggedLink: base?.taggedLink ?? "",
+          additionalBrief: base?.additionalBrief ?? "",
+          descriptions: (base?.descriptions ?? []).map((d) => ({
+            _id: oid(), // ✅ уникальный id для каждой desc
+            description: d?.description ?? "",
+          })),
+        };
+
+        return {
+          contentByCampaignId: {
+            ...state.contentByCampaignId,
+            [key]: [...prev, nextItem],
+          },
+        };
+      });
+
+      return newId;
+    },
+
+    removeContentItem: (campaignId, contentId) => {
+      const key = String(campaignId ?? "");
+      if (!key) return;
+
+      set((state) => {
+        const prev = state.contentByCampaignId[key] ?? [];
+        const next = prev.filter((c) => String(c._id) !== String(contentId));
+        if (next.length === prev.length) return state;
+
+        return {
+          contentByCampaignId: {
+            ...state.contentByCampaignId,
+            [key]: next,
+          },
+        };
+      });
+    },
     mergeContent: (campaignId, contentToAdd) => {
       set((state) => {
         const key = String(campaignId ?? "");

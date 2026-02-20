@@ -13,6 +13,7 @@ import { useFetchCampaign } from "@/client-side/store";
 export type ListDisplayMode = "grid" | "table";
 export type CampaignFilterStatus = CampaignStatusType | "all";
 export const HomePage = () => {
+  const STEP = 12;
   const navigate = useNavigate();
   const { user } = useUser();
   const { setCampaign, setDraft, setProposalOption } = useFetchCampaign();
@@ -20,7 +21,7 @@ export const HomePage = () => {
   const [view, setView] = React.useState<number>(1);
   const [status, setStatus] = React.useState<CampaignFilterStatus>("all");
 
-  const [limit, setLimit] = React.useState(12);
+  const [limit, setLimit] = React.useState(STEP);
 
   const {
     data: campaigns,
@@ -28,32 +29,43 @@ export const HomePage = () => {
     isLoading,
     refetch,
     isFetching,
+    isPlaceholderData,
+    isSuccess,
   } = useGetCampaignsQuery({ status, limit });
 
+  const campaignsList = Array.isArray(campaigns) ? campaigns : [];
+  const hasMore = !isLoading && !isFetching && campaignsList.length === limit;
+  // const openCampaign = React.useCallback(
+  //   async (id: string, status: CampaignStatusType) => {
+  //     switch (status) {
+  //       case "draft":
+  //         await setDraft(id);
+  //         break;
+
+  //       case "proposal":
+  //         await setProposalOption(id, 0);
+  //         break;
+
+  //       default:
+  //         await setCampaign(id);
+  //         break;
+  //     }
+
+  //     navigate("/client/campaign");
+  //   },
+  //   [navigate, setCampaign, setDraft, setProposalOption],
+  // );
   const openCampaign = React.useCallback(
-    async (id: string, status: CampaignStatusType) => {
-      switch (status) {
-        case "draft":
-          await setDraft(id);
-          break;
-
-        case "proposal":
-          await setProposalOption(id, 0);
-          break;
-
-        default:
-          await setCampaign(id);
-          break;
-      }
+    (id: string, status: CampaignStatusType) => {
+      sessionStorage.setItem(
+        "lastCampaign",
+        JSON.stringify({ id, status, optionIndex: 0 }),
+      );
 
       navigate("/client/campaign");
     },
-    [navigate, setCampaign, setDraft, setProposalOption],
+    [navigate],
   );
-
-  React.useEffect(() => {
-    setLimit(12);
-  }, [status]);
 
   if (isError) {
     return (
@@ -89,11 +101,15 @@ export const HomePage = () => {
         onRefresh={refetch}
       />
 
-      <ButtonMain
-        className="button-view-more"
-        text={isFetching ? "Loading..." : "View more"}
-        onClick={() => setLimit((prev) => prev + 12)}
-      />
+      {hasMore ? (
+        <ButtonMain
+          className="button-view-more"
+          text={isFetching ? "Loading..." : "View more"}
+          onClick={() => setLimit((prev) => prev + 12)}
+        />
+      ) : (
+        <div className="mt"></div>
+      )}
     </Container>
   );
 };

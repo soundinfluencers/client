@@ -13,6 +13,7 @@ import {
   useStrategyCampaignStore,
   useUpdateCampaign,
 } from "@/client-side/store";
+import { Modal } from "@/components/ui/modal-fix/Modal";
 
 // type RegularModel = Extract<CampaignPageModel, { kind: "regular" }>;
 
@@ -20,6 +21,7 @@ interface Props {
   campaign: any;
   statusFlag: boolean;
   view: number;
+  flag: boolean;
 }
 export function applyPatches<T extends { _id: string }>(
   base: T[],
@@ -35,8 +37,8 @@ export const CampaignTablePage: React.FC<Props> = ({
   campaign,
   statusFlag,
   view,
+  flag,
 }) => {
-  const [flag, setFlag] = React.useState(true);
   const storeContent = useStrategyCampaignStore(
     (s) => s.contentByCampaignId[campaign.campaignId],
   );
@@ -70,15 +72,11 @@ export const CampaignTablePage: React.FC<Props> = ({
 
   return (
     <div className="table-page">
-      {statusFlag ? (
+      {/* {statusFlag ? (
         <BarSection campaign={campaign} />
       ) : (
         <Bar campaign={campaign} />
-      )}
-
-      {statusFlag && (
-        <ToggleTables onChange={() => setFlag((prev) => !prev)} flag={flag} />
-      )}
+      )} */}
 
       {view === 0 ? (
         <div className="live-view-wrapper">

@@ -1,7 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import { getShareLink } from "@/api/client/campaign/campaign.api";
 
-export const useShareCampaignQuery = (id?: string) => {
+export const useShareCampaignQuery = (
+  id?: string,
+  options?: Omit<UseQueryOptions<any>, "queryKey" | "queryFn">,
+) => {
   return useQuery({
     queryKey: ["shareCampaign", id],
     queryFn: async () => {
@@ -9,6 +12,7 @@ export const useShareCampaignQuery = (id?: string) => {
       return data;
     },
     enabled: !!id,
+    ...options,
     staleTime: 60_000,
   });
 };

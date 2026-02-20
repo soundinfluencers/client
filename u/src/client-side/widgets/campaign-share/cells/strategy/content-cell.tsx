@@ -74,7 +74,7 @@ export const ContentCell = React.memo(function ContentCell({
                 onClick={() => onClickSelect(optionIndex)}>
                 <span
                   onClick={(e) => {
-                    e.stopPropagation(); // 🔥 чтобы не выбрать пункт, когда жмешь "eye"
+                    e.stopPropagation();
                     onClickVideo(optionIndex, item.mainLink);
                   }}
                   className="eye">
@@ -96,7 +96,7 @@ export const ContentCell = React.memo(function ContentCell({
         <Modal onClose={closeModal}>
           <div className="modal-card">
             <h2>Video {selectedVideo.index}</h2>
-            <div className="card-player"></div>
+            <input type="text" value={selectedLink} />
           </div>
         </Modal>
       )}

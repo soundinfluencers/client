@@ -17,6 +17,9 @@ interface Props {
   isSmall: boolean;
   promosCards: IPromoCard[];
   loading: boolean;
+  isInitialLoading: boolean;
+  isFetchingMore: boolean;
+  isRefetching: boolean;
 }
 
 export const CardsContainer: React.FC<Props> = ({
@@ -25,43 +28,65 @@ export const CardsContainer: React.FC<Props> = ({
   isSmall,
   promosCards,
   loading,
+  isInitialLoading,
+  isFetchingMore,
+  isRefetching,
 }) => {
+  const dimStyle = isRefetching ? { opacity: 0.6 } : undefined;
   return (
     <div className="card-container-block">
-      <div className={`cards-container ${view === 0 ? "viewed" : ""}`}>
-        {view === 0 ? (
-          <div className="promos-grid">
-            <div className={`promos-grid__header ${isSmall ? "adaptive" : ""}`}>
-              <div>Name</div>
-              <div>Price</div>
-              <div>Followers</div>
-              <div className={`${isSmall ? "center" : ""}`}>Genres</div>
-              <div className={`${isSmall ? "center" : ""}`}>Countries</div>
+      <div className="cards-main" style={dimStyle}>
+        <div className={`cards-container ${view === 0 ? "viewed" : ""}`}>
+          {view === 0 ? (
+            <div className="promos-grid">
+              <div
+                className={`promos-grid__header ${isSmall ? "adaptive" : ""}`}>
+                <div>Name</div>
+                <div>Price</div>
+                <div>Followers</div>
+                <div className={`${isSmall ? "center" : ""}`}>Genres</div>
+                <div className={`${isSmall ? "center" : ""}`}>Countries</div>
+              </div>
+
+              {isInitialLoading
+                ? Array.from({ length: 24 }).map((_, i) => (
+                    <TableCardSkeleton key={i} />
+                  ))
+                : promosCards.map((card) => (
+                    <TableRowCard
+                      key={card.accountId}
+                      data={card}
+                      isInclude={false}
+                      isSmall={isSmall}
+                      setIsSmall={setIsSmall}
+                    />
+                  ))}
             </div>
-            {loading
-              ? Array.from({ length: 12 }).map((_, index) => (
-                  <TableCardSkeleton key={index} />
-                ))
-              : promosCards?.map((card) => (
-                  <TableRowCard
-                    key={card.accountId}
-                    data={card}
-                    isInclude={false}
-                    isSmall={isSmall}
-                    setIsSmall={setIsSmall}
-                  />
-                ))}
-          </div>
-        ) : loading ? (
-          Array.from({ length: 12 }).map((_, index) => (
-            <CardSkeleton key={index} />
-          ))
-        ) : (
-          promosCards?.map((card) => (
-            <Card key={card.accountId} data={card} isInclude={false} />
-          ))
+          ) : isInitialLoading ? (
+            Array.from({ length: 24 }).map((_, i) => <CardSkeleton key={i} />)
+          ) : (
+            promosCards.map((card) => (
+              <Card key={card.accountId} data={card} isInclude={false} />
+            ))
+          )}
+        </div>
+
+        {isRefetching && (
+          <div style={{ padding: 8, textAlign: "center" }}>Updating…</div>
         )}
       </div>
+
+      {isFetchingMore && !isInitialLoading && (
+        <div style={{ marginTop: "8px" }} className="cards-container">
+          {view === 0
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <TableCardSkeleton key={`more-${i}`} />
+              ))
+            : Array.from({ length: 6 }).map((_, i) => (
+                <CardSkeleton key={`more-${i}`} />
+              ))}
+        </div>
+      )}
     </div>
   );
 };

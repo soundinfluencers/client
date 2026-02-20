@@ -29,7 +29,7 @@ export const GridListView: React.FC<GridListViewProps> = ({
   if (isLoading) {
     return (
       <div className="home-campaigns-grid">
-        {Array.from({ length: 12 }).map((_, index) => (
+        {Array.from({ length: 4 }).map((_, index) => (
           <CardSkeleton key={index} />
         ))}
       </div>
@@ -47,22 +47,22 @@ export const GridListView: React.FC<GridListViewProps> = ({
             <div className="home-campaigns-grid__item-info">
               <div className="home-campaigns-grid__item-meta">
                 <img src={getSocialMediaIcon(item.socialMedia)} alt="" />
-                <p>{item.status ?? "—"}</p>
+                <p>{item.status ?? ""}</p>
               </div>
 
               <div className="home-campaigns-grid__item-date">
-                <p>{item.creationDate ?? "-"}</p>
+                <p>{item.creationDate ?? ""}</p>
               </div>
             </div>
 
             <div className="home-campaigns-grid__item-price">
-              <p>{item.price ? `${item.price}€` : "—"}</p>
+              <p>{item.price ? `${item.price}€` : ""}</p>
             </div>
           </div>
 
           <div className="home-campaigns-grid__footer">
             <div className="home-campaigns-grid__item-title">
-              <p>{item.campaignName ?? "-"}</p>
+              <p>{item.campaignName ?? ""}</p>
             </div>
 
             {item.status === "draft" && (

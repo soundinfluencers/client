@@ -11,6 +11,6 @@ export { SubmitButton } from "./submit-button/submit-button";
 export { Checkbox } from "./checkbox/checkbox";
 export { BaseInput } from "./inputs/base-input/BaseInput";
 export { ImageUpload } from "./image-upload/ImageUpload";
-export { StarRatingField } from "./star-rating/StarRatingField";
+
 export { Table } from "./table/table";
 export * from "./dropdowns";

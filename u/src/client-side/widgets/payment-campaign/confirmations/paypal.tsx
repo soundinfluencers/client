@@ -3,7 +3,8 @@ import "./styles/_base-confirmations.scss";
 import euro from "@/assets/payments-icons/Vector (10).svg";
 import hashtag from "@/assets/payments-icons/clarity_hashtag-solid.svg";
 import method from "@/assets/payments-icons/mdi_recurring-payment.svg";
-import { useCampaignStore } from "@/store/client/create-campaign";
+import { useCampaignStore } from "@/client-side/store";
+
 interface Props {}
 
 export const PayPal: React.FC<Props> = () => {

@@ -8,7 +8,10 @@
     margin-bottom: 24px;
   }
   &__header {
-    margin: 16px 0px;
+    margin: 32px 0px;
+    @media screen and (max-width: 900px) {
+      margin: 16px 0px;
+    }
     display: flex;
     align-items: center;
     justify-content: space-between;

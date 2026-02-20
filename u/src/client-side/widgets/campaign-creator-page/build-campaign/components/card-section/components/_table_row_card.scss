@@ -1,7 +1,7 @@
 /* ===========================
    PROMO GRID ROW
    =========================== */
-
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
 .promo-grid-row {
   display: grid;
   grid-template-columns: 27% 110px 100px 1fr 1fr;
@@ -122,13 +122,13 @@
   .tags-dd__preview {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 2px;
 
     min-width: 0;
     flex: 1 1 auto;
 
     flex-wrap: nowrap;
-    overflow: hidden;
+
     white-space: nowrap;
     @media (max-width: 600px) {
       display: none;
@@ -198,7 +198,7 @@
 
     max-height: 220px;
     overflow-y: auto;
-
+    @include sb.scrollbar-dotted-vertical;
     box-shadow: 0 10px 24px rgba(20, 30, 70, 0.08);
     @media (max-width: 600px) {
       width: 175px;

@@ -68,7 +68,7 @@ export function TableStrategy({
     useFollowersSort(networks);
 
   const totalFollowers = React.useMemo(
-    () => networks.reduce((sum, n) => sum + Number(n.followers ?? 0), 0),
+    () => networks?.reduce((sum, n) => sum + Number(n.followers ?? 0), 0),
     [networks],
   );
   const isOpen = React.useCallback(
@@ -86,7 +86,7 @@ export function TableStrategy({
   const closeAny = React.useCallback(() => setActiveDropdown(null), []);
   const uniqueNetworks = React.useMemo(() => {
     const seen = new Set<string>();
-    return sortedNetworks.filter((n) => {
+    return sortedNetworks?.filter((n) => {
       const key = String((n as any).accountId ?? (n as any)._id);
       if (seen.has(key)) return false;
       seen.add(key);
