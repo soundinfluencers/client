@@ -1,8 +1,8 @@
 import settingsIcon from "../../../../../../assets/nav-bar/settings.svg";
-import socialAccountsIcon from "../../../../../../assets/nav-bar/user-check.svg";
+// import socialAccountsIcon from "../../../../../../assets/nav-bar/user-check.svg";
 import invoicesHistoryIcon from "../../../../../../assets/nav-bar/clock.svg";
 import invoiceDetailsIcon from "../../../../../../assets/nav-bar/trending-up.svg";
-import paymentDetailsIcon from "../../../../../../assets/nav-bar/file-text.svg";
+// import paymentDetailsIcon from "../../../../../../assets/nav-bar/file-text.svg";
 import contactSupportIcon from "../../../../../../assets/nav-bar/globe.svg";
 
 interface ClientNavLink {

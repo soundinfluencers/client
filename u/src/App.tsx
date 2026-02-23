@@ -1,5 +1,5 @@
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
-import { useEffect } from "react";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { useEffect, useRef } from "react";
 
 import { TabBar } from "@/components";
 
@@ -13,7 +13,9 @@ import { routes } from "./router/routes";
 // influencer
 import { DashboardLayout } from "./pages/influencer/dashboard-layout/DashboardLayout";
 import { PromosList } from "./pages/influencer/dashboard-layout/components/promos-list/PromosList";
-import { CampaignHistoryList } from "./pages/influencer/dashboard-layout/components/campaign-history-list/CampaignHistoryList";
+import {
+  CampaignHistoryList,
+} from "./pages/influencer/dashboard-layout/components/campaign-history-list/CampaignHistoryList";
 import { NewPromos } from "./pages/influencer/promos/new-promos/NewPromos";
 import { Distributing } from "./pages/influencer/promos/distributing/Distributing";
 import { Completed } from "./pages/influencer/promos/completed/Completed";
@@ -24,7 +26,6 @@ import { ContactSupport } from "@/pages/influencer/contact-support/ContactSuppor
 import { InvoiceDetails } from "@/pages/influencer/invoice-details/InvoiceDetails.tsx";
 
 // client
-
 import "./app.scss";
 import { RootRedirect } from "./router/components/rootRedirect";
 import { ToastContainer } from "react-toastify";
@@ -34,20 +35,39 @@ import { InfluencerTermsPage } from "@/pages/auth/terms/influencer/InfluencerTer
 import { Agreement } from "@/pages/influencer/agreement/Agreement.tsx";
 import { HomePage } from "@/client-side";
 import {
-  EditPassword
+  EditPassword,
 } from "@/pages/influencer/account-setting/components/edit-password-flow/edit-password/EditPassword.tsx";
 import {
-  AccountSettingMain
+  AccountSettingMain,
 } from "@/pages/influencer/account-setting/components/account-setting-main/AccountSettingMain.tsx";
 
 
 function App() {
   const { setAccessToken, logout } = useAuth();
 
+  const setAccessTokenRef = useRef(setAccessToken);
+  const logoutRef = useRef(logout);
+
+  // always keep refs updated with latest setAccessToken and logout
   useEffect(() => {
-    const cleanup = setupInterceptors(setAccessToken, logout);
-    return cleanup;
+    setAccessTokenRef.current = setAccessToken;
+    logoutRef.current = logout;
   }, [setAccessToken, logout]);
+
+  // setup interceptors one time on mount, using refs to access latest setAccessToken and logout
+  useEffect(() => {
+    return setupInterceptors(
+      (token) => setAccessTokenRef.current(token),
+      () => logoutRef.current(),
+    );
+  }, []);
+
+  // useEffect(() => {
+  //   console.count("App useEffect: setupInterceptors effect ran");
+  //
+  //   const cleanup = setupInterceptors(setAccessToken, logout);
+  //   return cleanup;
+  // }, [setAccessToken, logout]);
 
   return (
     <div>

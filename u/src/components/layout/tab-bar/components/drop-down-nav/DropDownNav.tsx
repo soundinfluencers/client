@@ -10,6 +10,7 @@ import "./_drop-down-nav.scss";
 import { createPortal } from "react-dom";
 import { INFLUENCER_NAV_LINKS } from "@components/layout/tab-bar/components/drop-down-nav/influencer-links/influencer-links.data.ts";
 import { Client_NAV_LINKS } from "./client-links/client-links.data";
+import React from "react";
 
 // import type { RefObject } from "react";
 
@@ -42,7 +43,7 @@ export const DropDownNav = ({
 
   // console.log('user in drop down menu', user);
   // console.log('account settings link', AccountSettings);
-  const Navlinks =
+  const symlinks =
     user?.role === "client" ? Client_NAV_LINKS : INFLUENCER_NAV_LINKS;
   const terms = user?.role === "client" ? "/terms/client" : "/terms/influencer";
   return createPortal(
@@ -73,20 +74,20 @@ export const DropDownNav = ({
         </div>
 
         <nav className="user-menu__dropdown-nav">
-          {Navlinks.map((link) => (
-            <>
+          {symlinks.map((link) => (
+            <React.Fragment key={link.link}>
               <Link
-                key={link.link}
                 className="user-menu__dropdown-nav-link"
                 to={link.link}
-                onClick={() => setIsDropdownOpen(false)}>
+                onClick={() => setIsDropdownOpen(false)}
+              >
                 <img src={link.icon} alt={link.label} />
                 {link.label}
               </Link>
               {link.divider && (
-                <div className="user-menu__dropdown-nav-divider" />
+                <div className="user-menu__dropdown-nav-divider" aria-hidden/>
               )}
-            </>
+            </React.Fragment>
           ))}
         </nav>
 

@@ -11,10 +11,10 @@ export type SubmitResultsNavState = {
   username: string;
   meta: TSocialMedia;
 
-  from?: DistributingNavState | null,
+  // from?: DistributingNavState | null,
 };
 
-const SUBMIT_HASH = "#submit";
+export const SUBMIT_HASH = "#submit";
 
 export const isSubmitOpen = (hash: string) => hash === SUBMIT_HASH;
 
@@ -29,6 +29,6 @@ export const isSubmitState = (v: unknown): v is SubmitResultsNavState => {
     o.meta != null;
 
   if (!base) return false;
-  if (o.from == null) return true;
-  return typeof o.from === "object";
+  // if (o.from == null) return true;
+  return base;
 };

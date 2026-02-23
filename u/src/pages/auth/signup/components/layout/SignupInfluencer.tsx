@@ -6,16 +6,20 @@ import { useAccountSetupStore } from "@/pages/influencer/components/account-setu
 import { MainScreen } from "../influencer/signup-main-screen/MainScreen";
 import { AccountSetupForm } from "../../../../influencer/components/account-setup-form/AccountSetupForm";
 
-export const SignupInfluencer = () => {
+const SignupInfluencer = () => {
+  console.count("SignupInfluencer render");
   const { settingsMode, onResetAccountForm } = useAccountSetupStore();
-  const { user, saveAccount, removeAccount } = useInfluencerSignupStore();
+  const { user, saveAccount, removeAccount, clearAccountsError, clearSubmitError } = useInfluencerSignupStore();
 
   // Reset on unmount
   useEffect(() => {
     return () => {
       onResetAccountForm();
+      clearAccountsError();
+      clearSubmitError();
     }
-  }, [onResetAccountForm]);
+  }, [onResetAccountForm, clearAccountsError, clearSubmitError]);
+
 
   if (settingsMode.type !== 'account') {
     return (
@@ -45,3 +49,5 @@ export const SignupInfluencer = () => {
     />
   );
 };
+
+export default SignupInfluencer;

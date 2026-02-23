@@ -13,7 +13,6 @@ interface Props {
 
 export const SocialAccountsList: React.FC<Props> = ({ getAccounts }) => {
   const { onCreateAccount } = useAccountSetupStore();
-
   return (
     <ul className="social-accounts-list">
       {SOCIAL_ACCOUNTS_DATA.map(({ id, label, icon }) => {
@@ -30,8 +29,8 @@ export const SocialAccountsList: React.FC<Props> = ({ getAccounts }) => {
                 className="social-accounts-list__item-create"
                 onClick={() => onCreateAccount(id)}
               >
-                Add
                 <img  src={plus} alt="Plus" />
+                Add
               </button>
             </div>
             {accounts.length > 0 && (

@@ -49,7 +49,7 @@ export const InvoicesHistory = () => {
     <Container className="invoices-details">
       <Breadcrumbs />
       <header className="invoices-details__header">
-        <h1 className='invoices-details__header-title'>Invoices history</h1>
+        <h2 className='invoices-details__header-title'>Invoices history</h2>
         <p className='invoices-details__header-subtitle'>View and track your submitted invoices and payment status</p>
       </header>
       <div className="invoices-details__content">

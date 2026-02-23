@@ -1,3 +1,4 @@
+import React from "react";
 import { useAccountSetupStore } from '../../account-setup-form/store/useAccountSetupStore';
 import { EditButton } from '@components/ui/edit-button/EditButton.tsx';
 import type { TSocialAccounts, TSocialAccountShort } from '@/types/user/influencer.types.ts';
@@ -15,6 +16,7 @@ export const AccountsList: React.FC<Props> = ({ id, accounts }) => {
 
   console.log(accounts);
 
+  // TODO: mobile and tablet styles, waiting for design
   return (
     <ul className="accounts-list">
       {accounts && accounts.map((account, index) => (

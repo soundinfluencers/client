@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useInfluencerSignupStore,
 } from "@/store/influencer/account-settings/useInfluenserSignupStore.ts";
-import { TextInput } from "@components/ui/inputs/text-input/TextInput.tsx";
-import { InputPhone } from "../../ui/phone-input/InputPhone";
 import { SocialAccountsList } from "@/pages/influencer/components/social-accounts-list/SocialAccountsList.tsx";
 import { ButtonMain } from "@components/ui/buttons-fix/ButtonFix.tsx";
 import type { TSocialAccounts } from "@/types/user/influencer.types";
@@ -12,21 +10,27 @@ import { influencerSignupApi } from "@/api/auth/auth.api";
 import './_main-screen.scss';
 import { SignupInfluencerSuccess } from "../signup-influencer-success/SignupInfluencerSuccess";
 import { signupAccountsForList } from "./utils/signupAccountForList.mapper";
+import {
+  SignupPersonalDetailsForm,
+} from "@/pages/auth/signup/components/influencer/signup-personal-details-form/SignupPersonalDetailsForm.tsx";
+import type { UseFormReturn } from "react-hook-form";
+import type {
+  PersonalDetailsValues,
+} from "@/pages/auth/signup/components/influencer/signup-personal-details-form/types/personal-details-form.types.ts";
 
 export const MainScreen = () => {
-  const {
-    user,
-    errors,
-    validate,
-    setField,
-    resetSignup,
-    // isFormReady,
-    // submitError,
-    accountsError,
-    setSubmitError,
-    validateAccounts
-  } = useInfluencerSignupStore();
-  const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState(false);
+  console.count("MainScreen render");
+
+  const formApiRef = useRef<UseFormReturn<PersonalDetailsValues> | null>(null);
+
+  const accountsError = useInfluencerSignupStore((s) => s.accountsError);
+  // const submitError = useInfluencerSignupStore((s) => s.submitError);
+
+  const validateAccounts = useInfluencerSignupStore((s) => s.validateAccounts);
+  const setSubmitError = useInfluencerSignupStore((s) => s.setSubmitError);
+  const resetSignup = useInfluencerSignupStore((s) => s.resetSignup);
+  const setPersonalFields = useInfluencerSignupStore((s) => s.setPersonalFields);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -34,20 +38,30 @@ export const MainScreen = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  const getAccounts = useCallback(
+    (platform: TSocialAccounts) => signupAccountsForList(platform, useInfluencerSignupStore.getState().user),
+    [],
+  );
+
   const handleSignup = async () => {
     if (isLoading) return;
 
     setSubmitError(null);
 
-    const isValid = validate();
+    const api = formApiRef.current;
+    if (!api) return;
+
+    const isPersonalValid = await api.trigger();
     const hasAccounts = validateAccounts();
 
-    if (!isValid || !hasAccounts) return;
+    if (!isPersonalValid || !hasAccounts) return;
+
+    setPersonalFields(api.getValues());
 
     setIsLoading(true);
     try {
-      console.log(user);
-      await influencerSignupApi(user);
+      console.log("Submitting influencer signup with data: ", useInfluencerSignupStore.getState().user);
+      // await influencerSignupApi(useInfluencerSignupStore.getState().user);
       setIsSuccess(true);
       resetSignup();
     } catch (e: any) {
@@ -57,71 +71,21 @@ export const MainScreen = () => {
     }
   };
 
-  // const isDisabled = !isFormReady() || isLoading;
-
   if (isSuccess) {
     return (
-      <SignupInfluencerSuccess />
+      <SignupInfluencerSuccess/>
     );
   }
-
-  // console.log(errors.phone)
-  // console.log(accountsError)
 
   return (
     <div className="signup-influencer">
       <div className="signup-influencer__header">
-        <p className="signup-influencer__title">Complete your application</p>
+        <h1 className="signup-influencer__title">Complete your application</h1>
         <p className="signup-influencer__subtitle">Get approved to join the SoundInfluencers network</p>
       </div>
 
-      <div>
-        <p className="signup-influencer__inputs-label">Add Your Personal Details</p>
-        <div className="signup-influencer__inputs">
-          <TextInput
-            title="First name*"
-            placeholder="Enter first name"
-            value={user.firstName}
-            setValue={(v) => setField('firstName', v.trim())}
-            isError={Boolean(errors.firstName)}
-            errorMessage={errors.firstName ?? ''}
-          />
-          <TextInput
-            title="Last name*"
-            placeholder="Enter last name"
-            value={user.lastName}
-            setValue={(v) => setField('lastName', v.trim())}
-            isError={Boolean(errors.lastName)}
-            errorMessage={errors.lastName ?? ''}
-          />
-          <TextInput
-            title="Email*"
-            type="email"
-            placeholder="Enter email"
-            value={user.email}
-            setValue={(v) => setField('email', v.trim())}
-            isError={Boolean(errors.email)}
-            errorMessage={errors.email ?? ''}
-          />
-          <InputPhone
-            value={user.phone}
-            setValue={(v) => setField('phone', v.trim())}
-            isMenuOpen={isPhoneDropdownOpen}
-            setIsMenuOpen={setIsPhoneDropdownOpen}
-            isError={Boolean(errors.phone)}
-            errorMessage={errors.phone ?? ''}
-          />
-          <TextInput
-            title="Password*"
-            type="password"
-            value={user.password}
-            placeholder="Enter password"
-            setValue={(v) => setField('password', v)}
-            isError={Boolean(errors.password)}
-            errorMessage={errors.password ?? ''}
-          />
-        </div>
-      </div>
+      {/*<p className="signup-influencer__inputs-label">Add Your Personal Details</p>*/}
+      <SignupPersonalDetailsForm exposeForm={(api) => (formApiRef.current = api)}/>
 
       <div className="signup-influencer__socials">
         <div className="signup-influencer__socials-header">
@@ -129,14 +93,16 @@ export const MainScreen = () => {
           <p className="signup-influencer__socials-subtitle">Add at least one platform to submit your application</p>
         </div>
 
-        {!!accountsError && (
-          <div className="signup-influencer__error">
-            {accountsError}
-          </div>
-        )}
+
+        <p className={`signup-influencer__error ${accountsError ? 'signup-influencer__error--show' : ''}`}
+           aria-live={'polite'}
+        >
+          {accountsError}
+        </p>
+
 
         <SocialAccountsList
-          getAccounts={(platform: TSocialAccounts) => signupAccountsForList(platform, user)}
+          getAccounts={getAccounts}
         />
       </div>
 
@@ -149,10 +115,10 @@ export const MainScreen = () => {
         <span>
           By clicking Submit Application, you confirm and approve the rates listed above and agree to our{'\n'}
           <a
-           href="/terms/influencer"
-           target="_blank"
-           rel="noopener noreferrer"
-           style={{ textDecoration: "underline", color: "black" }}
+            href="/terms/influencer"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ textDecoration: "underline", color: "black" }}
           >
            Terms & Conditions.
           </a>

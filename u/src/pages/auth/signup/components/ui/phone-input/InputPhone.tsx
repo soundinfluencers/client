@@ -38,7 +38,7 @@ export const InputPhone: FC<InputPhoneProps> = ({
   isError,
   errorMessage
 }: InputPhoneProps) => {
-  const { setError } = useInfluencerSignupStore();
+  // const { setError } = useInfluencerSignupStore();
   const [isValid, setIsValid] = useState(true);
   const [searchValue, setSearchValue] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -106,7 +106,7 @@ export const InputPhone: FC<InputPhoneProps> = ({
           className="input-phone__menu-btn"
           onClick={() => {
             setIsMenuOpen(!isMenuOpen);
-            setError('phone', null);
+            // setError('phone', null);
           }}>
           <p className="input-phone__flag">
             {selectedPhoneDetails.countryFlag}

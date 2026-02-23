@@ -9,13 +9,13 @@ export const MUSIC_GENRES_DATA: ICheckboxButton[] = [
       {
         id: "techno-melodic",
         label: "Melodic, Minimal",
-        value: "Melodic, minimal",
+        value: "Melodic, Minimal",
         // value: "melodic_minimal",
       },
       {
         id: "techno-hard",
         label: "Hard, Peak",
-        value: "Hard, peak",
+        value: "Hard, Peak",
         // value: "hard_peak",
       },
     ],
@@ -28,7 +28,7 @@ export const MUSIC_GENRES_DATA: ICheckboxButton[] = [
       {
         id: "tech-house",
         label: "Tech House",
-        value: "Tech house",
+        value: "Tech House",
       },
       { id: "melodic-house", label: "Melodic House", value: "Melodic house" },
       { id: "afro-house", label: "Afro House", value: "Afro house" },
@@ -37,7 +37,7 @@ export const MUSIC_GENRES_DATA: ICheckboxButton[] = [
   {
     id: "edm",
     label: "EDM",
-    value: "Edm",
+    value: "EDM",
   },
   {
     id: "d&b",

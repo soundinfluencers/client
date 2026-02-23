@@ -16,12 +16,12 @@ interface BaseMaskedPasswordInputProps<T extends FieldValues> {
 }
 
 export function BaseMaskedPasswordInput<T extends FieldValues>({
-name,
-label,
-placeholder,
-autoComplete,
-disabled = false,
-}: BaseMaskedPasswordInputProps<T>) {
+                                                                 name,
+                                                                 label,
+                                                                 placeholder,
+                                                                 autoComplete,
+                                                                 disabled = false,
+                                                               }: BaseMaskedPasswordInputProps<T>) {
   const { control } = useFormContext<T>();
   const { field, fieldState } = useController({ name, control });
 
@@ -69,11 +69,14 @@ disabled = false,
         />
       )}
 
-      {fieldState.error?.message && (
-        <p className="base-masked-password-input__error-message">
-          {fieldState.error.message}
-        </p>
-      )}
+      <p
+        className={`base-masked-password-input__error-message ${
+          fieldState.error ? 'base-masked-password-input__error-message--show' : ''
+        }`}
+        aria-live="polite"
+      >
+        {fieldState.error?.message}
+      </p>
     </div>
   );
 }

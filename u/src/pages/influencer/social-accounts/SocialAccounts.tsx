@@ -101,7 +101,7 @@ export const SocialAccounts = () => {
     return <p>Error loading profile data.</p>;
   }
 
-  console.log(rqProfileData);
+  // console.log(rqProfileData);
 
   const getProfileAccounts = (platform: TSocialAccounts) => {
     if (!rqProfileData) return [];
@@ -119,7 +119,7 @@ export const SocialAccounts = () => {
 
       <div className="social-accounts-page__content">
         <div className="social-accounts-page__header">
-          <h3 className="social-accounts-page__title">Social accounts</h3>
+          <h2 className="social-accounts-page__title">Social accounts</h2>
         </div>
         <SocialAccountsList getAccounts={getProfileAccounts} />
       </div>

@@ -32,15 +32,15 @@ export const cleanCountriesForApi = (countries: CountryItem[]) => {
   const arr = Array.isArray(countries) ? countries : [];
 
   return arr
-    .map((c: CountryItem) => ({
-      country: typeof c?.country === "string" ? c.country.trim() : "",
-      percentage: typeof c?.percentage === "number" ? c.percentage : NaN,
-    }))
-    .filter((c) => c.country.length > 0 && Number.isFinite(c.percentage))
-    .map((c) => ({
-      country: c.country,
-      percentage: Math.max(0, Math.min(100, c.percentage)),
-    }));
+  .map((c: CountryItem) => ({
+    country: typeof c?.country === "string" ? c.country.trim() : "",
+    percentage: typeof c?.percentage === "number" ? c.percentage : NaN,
+  }))
+  .filter((c) => c.country.length > 0 && Number.isFinite(c.percentage))
+  .map((c) => ({
+    country: c.country,
+    percentage: Math.max(0, Math.min(100, c.percentage)),
+  }));
 };
 
 // account normalize for form
@@ -56,12 +56,26 @@ export const normalizeAccountForForm = (a: SocialAccountDraft): SocialAccountDra
 });
 
 // account normalize for API
-export const normalizeAccountForApi = (a: SocialAccountDraft): SocialAccountDraft => ({
-  ...a,
-  currency: a.currency ?? "EUR",
-  logoUrl: normalizeLogoUrlForApi(a.logoUrl),
-  countries: cleanCountriesForApi(a.countries),
-});
+export const normalizeAccountForApi = (a: SocialAccountDraft): SocialAccountDraft => {
+  if (a.profileCategory === 'community') {
+    return {
+      ...a,
+      currency: a.currency ?? "EUR",
+      logoUrl: normalizeLogoUrlForApi(a.logoUrl),
+      countries: cleanCountriesForApi(a.countries),
+      creatorCategories: [],
+    }
+  }
+
+  return {
+    ...a,
+    currency: a.currency ?? "EUR",
+    logoUrl: normalizeLogoUrlForApi(a.logoUrl),
+    countries: cleanCountriesForApi(a.countries),
+    musicGenres: [],
+    categories: [],
+  }
+};
 
 // profile short list updates
 export const upsertShortInList = (list: TSocialAccountShort[], short: TSocialAccountShort): TSocialAccountShort[] => {

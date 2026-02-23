@@ -18,7 +18,6 @@ import {
   // socialAccountBaseSchema,
 } from "@/pages/influencer/components/account-setup-form/validation/socialAccount.schema.ts";
 
-
 // /*
 //   TODO: Account setup flow - all ready (need minor fixes);
 //         12) Add optimization for component (memo, useCallback)?

@@ -46,10 +46,10 @@ export const CampaignResultForm = ({ submitState }: Props) => {
       await queryClient.invalidateQueries({ queryKey: ["distributingOrCompleted-promos"] });
 
       // await queryClient.refetchQueries({ queryKey: ["distributingOrCompleted-promos"], type: 'active' });
-
+      // state: submitState.from ?? null
       navigate(
         { pathname: '/influencer/promos/distributing', hash: '' },
-        { replace: true, state: submitState.from ?? null }
+        { replace: true, state: null }
       );
     },
 

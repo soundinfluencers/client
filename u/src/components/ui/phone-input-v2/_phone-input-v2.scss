@@ -1,0 +1,326 @@
+@use "@/styles/variables/variables" as vars;
+
+.phone-input-v2 {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &--open {
+    z-index: 50;
+  }
+
+  &__label {
+    font-size: 16px;
+    color: vars.$gray-dark;
+    transition: all 0.2s ease-in-out;
+
+    &--error {
+      color: vars.$error;
+    }
+  }
+
+  &__wrapper {
+    position: relative;
+    display: flex;
+  }
+
+  &__country-code-selector {
+    position: absolute;
+    z-index: 3;
+    height: 51px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 12px 12px 16px;
+    border-radius: 8px 0 0 8px;
+    background-color: vars.$light-blue;
+
+    &-icon {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.2s ease-in-out;
+      transform-origin: center;
+
+      &--open {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  &__flag {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    display: grid;
+    place-items: center;
+  }
+
+  &__input {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid vars.$white-gray-2;
+    border-radius: 8px;
+    max-height: 51px;
+    padding: 16px 16px 16px 100px;
+    z-index: 2;
+    transition: all 0.2s ease-in-out;
+
+    &::placeholder {
+      color: vars.$gray;
+      font-size: 14px;
+    }
+
+    &:focus {
+      outline: none;
+      border: 1px solid vars.$blue;
+    }
+
+    &--open {
+      outline: none;
+      border: 1px solid vars.$blue;
+    }
+
+    &--error {
+      border: 1px solid vars.$error;
+
+      &:focus {
+        outline: none;
+        border: 1px solid vars.$error;
+      }
+    }
+  }
+
+  &__error-message {
+    min-height: 0;
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity .15s ease, height .15s ease;
+    margin-top: -4px;
+    color: vars.$error;
+    font-size: 12px;
+
+    @media screen and (max-width: 900px) {
+      margin-top: -2px;
+    }
+
+    &--show {
+      height: auto;
+      min-height: 16px;
+      opacity: 1;
+    }
+  }
+
+  &__list-wrapper {
+    padding: 8px;
+    border: 1px solid vars.$blue;
+    border-radius: 0 0 8px 8px;
+    background: rgba(255, 255, 255, 1);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+
+    position: absolute;
+    will-change: transform, opacity;
+    width: 100%;
+    top: calc(100% - 12px);
+    left: 0;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    transform: translateY(-4px);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+
+    &--open {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+
+  &__search-wrapper {
+    position: relative;
+    width: 100%;
+    padding-inline: 8px;
+  }
+
+  &__search-icon {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.5;
+    }
+  }
+
+  &__search {
+    max-height: 43px;
+    padding: 12px 8px 12px 30px;
+
+    border-bottom: 1px solid vars.$white-gray-2;
+
+    &::placeholder {
+      color: vars.$light-gray;
+      font-size: 14px;
+    }
+  }
+
+  &__list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+    max-height: 193px;
+
+    //Scrollbar styles for Firefox
+    // scrollbar-width: thin;
+    // scrollbar-color: vars.$light-gray rgba(0, 0, 0, 0.05);
+
+    //Scrollbar styles WebKit browsers
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 2px;
+      width: 2px;
+      background: vars.$blue;
+    }
+    &::-webkit-scrollbar-track {
+      background: vars.$white-gray-2;
+      border-radius: 4px;
+    }
+
+    &-item {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      padding: 8px;
+      margin-right: 8px;
+      border-radius: 8px;
+      color: vars.$gray-dark;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+
+      &-label {
+        font-size: 15px;
+        color: vars.$gray-dark;
+      }
+      &-check {
+        width: 24px;
+        height: 24px;
+        margin-left: auto;
+      }
+
+      &:hover {
+        background-color: vars.$light-blue;
+      }
+    }
+
+
+  }
+
+  .phone-flag {
+    display: block !important;
+    width: 24px !important;
+    height: 18px !important;
+
+    font-size: 0 !important;
+    line-height: 0 !important;
+    vertical-align: top;
+    position: static !important;
+
+    border-radius: 3px;
+    overflow: hidden;
+    background-size: 100% 100%;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  //TODO: impl Responsive styles
+  @media screen and (max-width: 900px) {
+    gap: 4px;
+
+    &__label {
+      font-size: 15px;
+    }
+    &__wrapper {}
+    &__country-code-selector {
+      &-icon {}
+    }
+    &__flag {}
+    &__input {
+      padding: 16px 16px 16px 100px;
+
+      &::placeholder {
+        font-size: 13px;
+      }
+    }
+
+    &__list-wrapper {
+    }
+
+    &__list {
+      &-item {}
+      &-label {
+        font-size: 13px;
+      }
+    }
+  }
+
+  @media screen and (max-width: 500px) {
+    &__label {
+      font-size: 14px;
+    }
+
+    &__wrapper {}
+
+    &__country-code-selector {
+
+      &-icon {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    &__flag {
+      width: 20px;
+      height: 20px;
+      flex-basis: 20px;
+    }
+
+    &__input {
+      padding: 16px 16px 16px 100px;
+
+      &::placeholder {
+        font-size: 12px;
+      }
+    }
+    &__list-wrapper {}
+    &__list {
+      &-item {}
+      &-label {}
+    }
+
+    .phone-flag {
+      width: 20px !important;
+      height: 15px !important;
+    }
+  }
+}

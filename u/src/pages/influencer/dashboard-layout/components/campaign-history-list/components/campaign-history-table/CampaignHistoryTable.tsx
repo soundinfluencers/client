@@ -59,7 +59,7 @@ export const CampaignHistoryTable = ({ campaigns, isInitialLoading }: Props) => 
       <tbody className="campaign-history-table__tbody">
       {
         campaigns.map((campaign) => (
-          <TableRow key={campaign.campaignId} campaign={campaign}/>
+          <TableRow key={`${campaign.campaignId + campaign.addedAccountsId}`} campaign={campaign}/>
         ))
       }
       </tbody>

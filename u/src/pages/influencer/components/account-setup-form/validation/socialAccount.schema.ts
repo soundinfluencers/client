@@ -76,6 +76,7 @@ const creatorNoCountries = baseCommonNoCountriesCheck.extend({
   musicGenres: z.array(musicGenresSchema).default([]),
   creatorCategories: creatorCategoriesSchema,
 });
+
 export const socialAccountBaseSchema = z.discriminatedUnion("profileCategory", [
   communityNoCountries,
   creatorNoCountries,

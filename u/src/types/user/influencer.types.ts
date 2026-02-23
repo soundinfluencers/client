@@ -24,7 +24,7 @@ export type SocialAccountDraft = {
   username: string;
   profileLink: string;
   followers: number | null;
-  logoUrl?: string;
+  logoUrl: string | null;
 
   profileCategory: ProfileCategory;
   price: number | null;

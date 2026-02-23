@@ -3,7 +3,7 @@ import {
   FormProvider,
   useForm,
   type FieldValues,
-  type DefaultValues,
+  type DefaultValues, type UseFormReturn,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ZodSchema } from "zod";
@@ -18,6 +18,8 @@ interface FormSection<T extends FieldValues> {
   defaultValues?: DefaultValues<T>;
   schema?: ZodSchema<T>;
   onSubmit?: (data: T) => Promise<void> | void;
+
+  expose?: (methods: UseFormReturn<T>) => void;
 }
 
 export const Form = <T extends FieldValues>({
@@ -28,6 +30,8 @@ export const Form = <T extends FieldValues>({
   onSubmit,
   defaultValues,
   schema,
+
+  expose,
 }: FormSection<T>) => {
   const methods = useForm<T>({
     defaultValues,
@@ -38,10 +42,47 @@ export const Form = <T extends FieldValues>({
 
     criteriaMode: "all",
     shouldUnregister: false,
+    // shouldFocusError: true,
   });
 
   React.useEffect(() => {
+    expose?.(methods);
+  }, [expose, methods]);
+
+  // React.useEffect(() => {
+  //   if (!defaultValues) return;
+  //   methods.reset(defaultValues, {
+  //     keepDirtyValues: true,
+  //     keepTouched: true,
+  //     keepErrors: true,
+  //     keepIsSubmitted: true,
+  //     keepSubmitCount: true,
+  //   });
+  //   // methods.trigger();
+  // }, [defaultValues, methods]);
+
+  // React.useEffect(() => {
+  //   if (!defaultValues) return;
+  //
+  //   methods.reset(defaultValues, {
+  //     keepDirtyValues: true,
+  //     keepTouched: false,
+  //     keepErrors: false,
+  //     keepIsSubmitted: false,
+  //     keepSubmitCount: false,
+  //   });
+  // }, [defaultValues, methods]);
+
+  const prevDefaultsRef = React.useRef<string>("");
+
+  React.useEffect(() => {
     if (!defaultValues) return;
+
+    const next = JSON.stringify(defaultValues);
+    if (next === prevDefaultsRef.current) return;
+
+    prevDefaultsRef.current = next;
+
     methods.reset(defaultValues, {
       keepDirtyValues: true,
       keepTouched: true,

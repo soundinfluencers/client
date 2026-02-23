@@ -19,6 +19,7 @@ export const setupInterceptors = (
     setAccessToken: (token: string | null) => void,
     logout: () => void,
 ) => {
+  console.count("setupInterceptors called");
     const isAuthRoute = (url?: string) =>
         !!url && (url.includes("/auth/login") || url.includes("/auth/refresh"));
 
@@ -31,6 +32,8 @@ export const setupInterceptors = (
     const resId = $api.interceptors.response.use(
         (res) => res,
         async (error: AxiosError) => {
+          console.count("RESPONSE INTERCEPTOR ERROR");
+          console.log("url:", error.config?.url, "status:", error.response?.status);
             const originalRequest: any = error.config;
 
             if (!error.response) {

@@ -73,12 +73,13 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background-color: vars.$blue;
-      opacity: 0;
+      background-color: transparent;
+      //opacity: 0;
       transition: all 0.2s ease;
 
       &--active {
-        opacity: 1;
+        background-color: vars.$blue;
+        //opacity: 1;
       }
 
       @media screen and (max-width: 900px) {

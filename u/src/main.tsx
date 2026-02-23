@@ -8,7 +8,6 @@ import { AuthProvider } from "./contexts/AuthContext.tsx";
 import "react-toastify/dist/ReactToastify.css";
 
 export const queryClient = new QueryClient();
-// export const
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

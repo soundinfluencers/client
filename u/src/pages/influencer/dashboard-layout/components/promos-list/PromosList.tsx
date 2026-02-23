@@ -34,7 +34,7 @@ export const PromosList = () => {
         }
         return allPages.length + 1;
       },
-      staleTime: 1_000, // 10 seconds
+      staleTime: 1_000, // 1 seconds
       // refetchInterval: 60_000, // 1 minute
       // refetchOnWindowFocus: true,
       placeholderData: (prev) => prev,

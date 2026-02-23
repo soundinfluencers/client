@@ -10,7 +10,7 @@ export const requiredAccountName = z
 export const requiredProfileLink = z
 .string({ message: "Please enter a valid account link" })
 .trim()
-.min(1, { message: "This field is required" })
+.min(1, { message: "Account link is required" })
 .transform((val) => (/^https?:\/\//i.test(val) ? val : `https://${val}`))
 .pipe(z.url({ message: "Please enter a valid account link" }))
 .superRefine((val, ctx) => {
