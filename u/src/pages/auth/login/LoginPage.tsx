@@ -1,25 +1,32 @@
-import { useState, type FC } from "react";
-import { type NavigateFunction, useNavigate } from "react-router-dom";
-import { TextInput } from "@/components/ui/inputs/text-input/TextInput.tsx";
-import { useLoginStore } from "@/store/features/loginSlice.ts";
+import { useState, type FC, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext.tsx";
-import { loginApi } from "@/api/auth/auth.api.ts";
 import { useUser } from "@/store/get-user/index.ts";
+import { loginApi } from "@/api/auth/auth.api.ts";
 import { handleApiError } from "@/api/error.api.ts";
 import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix.tsx";
+import { type LoginFormData, loginSchema } from "@/pages/auth/login/validation/login.schema.ts";
+import { BaseInput, Form } from "@/components";
+import { BaseMaskedPasswordInput } from "@components/ui/base-masked-password-input/BaseMaskedPasswordInput.tsx";
+
 import "./_login-page.scss";
 
 export const LoginPage: FC = () => {
-  const navigate: NavigateFunction = useNavigate();
-  const { role, setUser } = useUser();
-  const { email, password, setEmail, setPassword } = useLoginStore();
   const { setAccessToken } = useAuth();
+  const { role, setUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
-    // if (isLoading) return;
+  const defaultValues: LoginFormData = useMemo(() => {
+    return {
+      email: "",
+      password: "",
+    };
+  }, []);
 
-    // setIsLoading(true);
+  const handleLogin = async (formData: LoginFormData) => {
+    const { email, password } = formData;
+
+    setIsLoading(true);
     try {
       const response = await loginApi({ email, password, role });
 
@@ -35,54 +42,50 @@ export const LoginPage: FC = () => {
   };
 
   return (
-    <div className="login-page__wrapper">
-      <p className="login-page__title">
+    <div className="login-page">
+      <h1 className="login-page__title">
         Log in to your {role === "client" ? "Client" : "Influencer"} Dashboard
-      </p>
-      <div className="login-page">
-        <div className="login-page__inputs">
-          <TextInput
-            title="Email"
-            isError={false}
-            value={email}
-            setValue={(value) => setEmail(value)}
-            placeholder="Enter email"
-          />
-          <div className="login-page__password-block">
-            <TextInput
-              title="Password"
-              isError={false}
-              value={password}
-              setValue={(value) => setPassword(value)}
-              type="password"
-              placeholder="Enter password"
-            />
+      </h1>
 
-            <p
-              className="login-page__forgot"
-              onClick={() => navigate("/forgot-password")}>
-              Forgot password?
-            </p>
-          </div>
-        </div>
-        <div className="login-page__controls">
-          <ButtonMain
-            label={isLoading ? "Logging in..." : "Log in"}
-            onClick={handleLogin}
-            isDisabled={
-              email.length === 0 || password.length === 0 || isLoading
-            }
+      <Form<LoginFormData>
+        className={"login-page__form"}
+        submitButton={<ButtonMain type={'submit'} className={"login-page__submit-btn"} label={isLoading ? "Logging in..." : "Log in"} />}
+        onSubmit={handleLogin}
+        defaultValues={defaultValues}
+        schema={loginSchema}
+        // validateMode={'all'}
+      >
+        <BaseInput
+          name={"email"}
+          label={"Email"}
+          placeholder={"Enter email"}
+          type={"email"}
+        />
+        <div className="login-page__password-block">
+          <BaseMaskedPasswordInput
+            name={"password"}
+            label={"Password"}
+            placeholder={"Enter password"}
           />
+          <Link
+            className="login-page__forgot"
+            to={"/forgot-password"}
+          >
+            Forgot password?
+          </Link>
         </div>
-      </div>
+      </Form>
+
+
       <div className="login-page__footer">
         <p className="login-page__footer--text">
           Don’t have an account?{" "}
-          <a
+          <Link
             className="login-page__footer--link"
-            onClick={() => navigate("/signup/client")}>
+            to={role === "client" ? "/client-signup" : "/influencer-signup"}
+          >
             Sign up here
-          </a>
+          </Link>
         </p>
       </div>
     </div>

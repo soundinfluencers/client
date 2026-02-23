@@ -35,7 +35,7 @@ export const ViewModeTabs:React.FC = () => {
         onClick={() => {
           if (viewMode !== 'grid') {
             setViewMode('grid');
-          };
+          }
         }}
       >
         <img

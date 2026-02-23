@@ -17,6 +17,7 @@ interface FormSection<T extends FieldValues> {
 
   defaultValues?: DefaultValues<T>;
   schema?: ZodSchema<T>;
+  validateMode?: "onChange" | "onBlur" | "onSubmit" | "onTouched" |"all";
   onSubmit?: (data: T) => Promise<void> | void;
 
   expose?: (methods: UseFormReturn<T>) => void;
@@ -30,6 +31,7 @@ export const Form = <T extends FieldValues>({
   onSubmit,
   defaultValues,
   schema,
+  validateMode = "onChange",
 
   expose,
 }: FormSection<T>) => {
@@ -37,7 +39,7 @@ export const Form = <T extends FieldValues>({
     defaultValues,
     resolver: schema ? (zodResolver(schema as any) as any) : undefined,
 
-    mode: "onChange",
+    mode: validateMode,
     reValidateMode: "onChange",
 
     criteriaMode: "all",
@@ -93,13 +95,16 @@ export const Form = <T extends FieldValues>({
   }, [defaultValues, methods]);
 
   const handleFormSubmit = async (formData: T) => {
+    console.log("Form submitted with data:", formData);
     if (onSubmit) await onSubmit(formData);
   };
+
   return (
     <FormProvider {...methods}>
       <form
         className={`form ${className ?? ""}`}
-        onSubmit={methods.handleSubmit(handleFormSubmit)}>
+        onSubmit={methods.handleSubmit(handleFormSubmit)}
+      >
         {children}
         {submitButton && (
           <div className={`form__btn-section ${classNameBtnSection ?? ""}`}>

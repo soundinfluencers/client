@@ -43,18 +43,13 @@ export const PromosFiltersBar = () => {
           className='promos-filters-bar__item'
         >
           <div className='promos-filters-bar__item-label-wrapper'>
-            <p
+            <button
+              type='button'
               className={`promos-filters-bar__item-label ${activeFilters === option.value ? 'promos-filters-bar__item-label--active' : ''}`}
-              onClick={() => {
-                if (activeFilters === option.value) {
-                  setActiveFilters('all');
-                } else {
-                  setActiveFilters(option.value);
-                }
-              }}
-            > 
+              onClick={() => setActiveFilters(activeFilters === option.value ? 'all' : option.value)}
+            >
               {option.label}
-            </p>
+            </button>
             <span className={`promos-filters-bar__item-indicator ${activeFilters === option.value ? 'promos-filters-bar__item-indicator--active' : ''}`} />
           </div>
           <button

@@ -1,7 +1,5 @@
 import { useState, type FC } from "react";
 import "./_forgot_password_page.scss";
-import { TextInput } from "../../../components/ui/inputs/text-input/TextInput.tsx";
-import { useLoginStore } from "../../../store/features/loginSlice.ts";
 import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix.tsx";
 import { useMutation } from "@tanstack/react-query";
 import { resetPasswordApi } from "@/api/auth/auth.api.ts";
@@ -12,7 +10,7 @@ import { handleApiError } from "@/api/error.api.ts";
 
 export const ForgotPasswordPage: FC = () => {
   const navigate = useNavigate();
-  const { email, setEmail, errorEmail, setErrorEmail } = useLoginStore();
+  // const { email, setEmail, errorEmail, setErrorEmail } = useLoginStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { mutate, isPending } = useMutation({
@@ -35,34 +33,34 @@ export const ForgotPasswordPage: FC = () => {
           password
         </p>
       </div>
-      <div className="forgot-password-page__input">
-        <TextInput
-          value={email}
-          setValue={(value) => {
-            setEmail(value);
-            if (errorEmail) {
-              setErrorEmail("");
-            }
-          }}
-          isError={Boolean(errorEmail)}
-          placeholder="Enter email"
-          title="Email"
-        />
-      </div>
-      <div className="forgot-password-page__controls">
-        <ButtonMain
-          label={isPending ? "Sending..." : "Send reset link"}
-          onClick={() => {
-            if (!baseValidatedEmail(email)) {
-              setErrorEmail("Please enter a valid email address.");
-              return;
-            }
-            setErrorEmail("");
-            mutate(email);
-          }}
-          isDisabled={email.length === 0 || isPending || Boolean(errorEmail)}
-        />
-      </div>
+      {/*<div className="forgot-password-page__input">*/}
+      {/*  <TextInput*/}
+      {/*    value={email}*/}
+      {/*    setValue={(value) => {*/}
+      {/*      setEmail(value);*/}
+      {/*      if (errorEmail) {*/}
+      {/*        setErrorEmail("");*/}
+      {/*      }*/}
+      {/*    }}*/}
+      {/*    isError={Boolean(errorEmail)}*/}
+      {/*    placeholder="Enter email"*/}
+      {/*    title="Email"*/}
+      {/*  />*/}
+      {/*</div>*/}
+      {/*<div className="forgot-password-page__controls">*/}
+      {/*  <ButtonMain*/}
+      {/*    label={isPending ? "Sending..." : "Send reset link"}*/}
+      {/*    onClick={() => {*/}
+      {/*      if (!baseValidatedEmail(email)) {*/}
+      {/*        setErrorEmail("Please enter a valid email address.");*/}
+      {/*        return;*/}
+      {/*      }*/}
+      {/*      setErrorEmail("");*/}
+      {/*      mutate(email);*/}
+      {/*    }}*/}
+      {/*    isDisabled={email.length === 0 || isPending || Boolean(errorEmail)}*/}
+      {/*  />*/}
+      {/*</div>*/}
 
       {/* Modal*/}
       {isModalOpen && (
@@ -91,9 +89,4 @@ export const ForgotPasswordPage: FC = () => {
       )}
     </div>
   );
-};
-
-const baseValidatedEmail = (email: string) => {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(String(email).toLowerCase());
 };
