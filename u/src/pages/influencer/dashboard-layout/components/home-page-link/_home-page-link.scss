@@ -9,10 +9,6 @@
   border: 1px solid #ecedff;
   height: fit-content;
 
-  &:hover {
-    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
-  }
-
   @media screen and (max-width: 900px) {
     padding: 8px 12px;
   }
@@ -26,12 +22,16 @@
     width: 100%;
   }
 
+  @media (hover: hover) and (pointer: fine) {
+    &:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);  }
+  }
+
   &__content {
     display: flex;
     align-items: center;
     font-size: 16px;
     color: vars.$gray-dark;
-    gap: 57px;
+    gap: 24px;
     width: 100%;
 
     @media screen and (max-width: 900px) {
@@ -43,7 +43,7 @@
       }
     }
 
-    @media screen and (max-width: 500px) {
+    @media screen and (max-width: 600px) {
       justify-content: space-between;
       > img {
         width: 24px;

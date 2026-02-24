@@ -13,7 +13,9 @@ export const usePromoNavigate = () => {
       addedAccountsId: string,
     ) => {
     if (confirmation === 'wait' && closedStatus === "wait") {
-      navigate('/influencer/promos/new-promos');
+      navigate('/influencer/promos/new-promos', {
+        state: { campaignId, addedAccountsId }
+      });
       return;
     }
 

@@ -1,19 +1,22 @@
 import { useState, type FC } from "react";
-import "./_forgot_password_page.scss";
 import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix.tsx";
 import { useMutation } from "@tanstack/react-query";
 import { resetPasswordApi } from "@/api/auth/auth.api.ts";
-
 import { Modal } from "@/components/ui/modal-fix/Modal.tsx";
 import { useNavigate } from "react-router-dom";
 import { handleApiError } from "@/api/error.api.ts";
+import { BaseInput, Form } from "@/components";
+import { type ForgotFormData, forgotSchema } from "@/pages/auth/forgot/validation/forgot.schema.ts";
+
+import "./_forgot_password_page.scss";
+import { useUser } from "@/store/get-user";
 
 export const ForgotPasswordPage: FC = () => {
   const navigate = useNavigate();
-  // const { email, setEmail, errorEmail, setErrorEmail } = useLoginStore();
+  const { role } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { mutate, isPending } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: resetPasswordApi,
     onSuccess: () => {
       setIsModalOpen(true);
@@ -27,40 +30,27 @@ export const ForgotPasswordPage: FC = () => {
   return (
     <div className="forgot-password-page">
       <div className="forgot-password-page__title-block">
-        <p className="forgot-password-page__title">Reset your password</p>
+        <h1 className="forgot-password-page__title">Reset your password</h1>
         <p className="forgot-password-page__subtitle">
           Enter your email address below and we’ll send you a link to reset your
           password
         </p>
       </div>
-      {/*<div className="forgot-password-page__input">*/}
-      {/*  <TextInput*/}
-      {/*    value={email}*/}
-      {/*    setValue={(value) => {*/}
-      {/*      setEmail(value);*/}
-      {/*      if (errorEmail) {*/}
-      {/*        setErrorEmail("");*/}
-      {/*      }*/}
-      {/*    }}*/}
-      {/*    isError={Boolean(errorEmail)}*/}
-      {/*    placeholder="Enter email"*/}
-      {/*    title="Email"*/}
-      {/*  />*/}
-      {/*</div>*/}
-      {/*<div className="forgot-password-page__controls">*/}
-      {/*  <ButtonMain*/}
-      {/*    label={isPending ? "Sending..." : "Send reset link"}*/}
-      {/*    onClick={() => {*/}
-      {/*      if (!baseValidatedEmail(email)) {*/}
-      {/*        setErrorEmail("Please enter a valid email address.");*/}
-      {/*        return;*/}
-      {/*      }*/}
-      {/*      setErrorEmail("");*/}
-      {/*      mutate(email);*/}
-      {/*    }}*/}
-      {/*    isDisabled={email.length === 0 || isPending || Boolean(errorEmail)}*/}
-      {/*  />*/}
-      {/*</div>*/}
+      <Form<ForgotFormData>
+        className={"forgot-password-page__form"}
+        onSubmit={(data) => mutateAsync({email: data.email, role})}
+        schema={forgotSchema}
+        submitButton={ <ButtonMain type={'submit'} className={"forgot-password-page__submit-btn"} label={isPending ? "Sending..." : "Send reset link"} />}
+        // validateMode={"all"}
+      >
+        <BaseInput
+          name={"email"}
+          label={"Email"}
+          placeholder={"Enter email"}
+          type={"email"}
+        />
+      </Form>
+
 
       {/* Modal*/}
       {isModalOpen && (
@@ -74,6 +64,7 @@ export const ForgotPasswordPage: FC = () => {
                 <p className="forgot-password-page__modal-subtitle">
                   We’ve sent you a password reset link (if an account with this
                   email exists).
+                  <br />
                   <br />
                   Please check your inbox and follow the instructions to reset
                   your password.

@@ -23,7 +23,7 @@ export const Completed: React.FC = () => {
   }, []);
 
   const { campaignId, addedAccountsId } = state || {};
-  console.log(campaignId, addedAccountsId)
+  console.log(campaignId, addedAccountsId);
 
   const {
     data,

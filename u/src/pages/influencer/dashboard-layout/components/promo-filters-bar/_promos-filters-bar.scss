@@ -113,7 +113,7 @@
 
       // TODO: @media (hover: hover) and (pointer: fine) for better UX on touch devices
       @media (hover: hover) and (pointer: fine) {
-        &:hover { color: vars.$black-blue; }
+        &:hover { background-color: vars.$hover-button-2; }
       }
     }
   }

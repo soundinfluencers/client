@@ -10,7 +10,7 @@ import "flag-icons/css/flag-icons.min.css";
 import {
   type PhoneCountry,
   UN_COUNTRY,
-  ALL_PHONE_COUNTRIES,
+  ALL_PHONE_COUNTRIES, getTailDigitsByDialCode, sanitizePhone, pickCountryByPhone,
 } from "@components/ui/phone-input-v2/data/phoneCountries.ts";
 import { hasFlag } from "@components/ui/phone-input-v2/utils/hasFlag.ts";
 
@@ -21,22 +21,6 @@ interface PhoneInputProps {
   placeholder?: string;
   label?: string;
 }
-
-const sanitizePhone = (raw: string) => {
-  let cleaned = raw.replace(/[^\d+]/g, "");
-  if (cleaned.includes("+")) cleaned = "+" + cleaned.replace(/\+/g, "");
-  return cleaned;
-};
-
-const getTailDigits = (val: string) => {
-  const v = sanitizePhone(val);
-
-  if (!v.startsWith("+")) return v.replace(/\D/g, "");
-
-  const m = v.match(/^\+\d{1,4}/);
-  const prefix = m?.[0] ?? "+";
-  return v.slice(prefix.length).replace(/\D/g, "");
-};
 
 export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placeholder }) => {
   const { control, setValue, clearErrors } = useFormContext();
@@ -75,30 +59,23 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
   useEffect(() => {
     if (isMenuOpen) return;
 
-    const v = sanitizePhone(value);
-
-    let next = UN_COUNTRY;
-
-    if (v.startsWith("+")) {
-      const match = ALL_PHONE_COUNTRIES
-      .filter((c) => c.dialCode && v.startsWith(c.dialCode))
-      .sort((a, b) => b.dialCode.length - a.dialCode.length)[0];
-
-      next = match ?? UN_COUNTRY;
-    }
-
+    const next = pickCountryByPhone(value, selectedCountry);
     setSelectedCountry((prev) => (prev.iso2 === next.iso2 ? prev : next));
-  }, [value, isMenuOpen]);
+  }, [value, isMenuOpen, selectedCountry]);
 
   const handleSelectCountry = (c: PhoneCountry) => {
-    const tail = getTailDigits(value);
+    const tail = getTailDigitsByDialCode(value, selectedCountry.dialCode);
     const nextValue = c.dialCode ? `${c.dialCode}${tail}` : "";
 
     setSelectedCountry(c);
     setSearch("");
     setIsMenuOpen(false);
 
-    setValue(name, nextValue, { shouldDirty: true, shouldTouch: false, shouldValidate: false });
+    setValue(name, nextValue, {
+      shouldDirty: true,
+      shouldTouch: false,
+      shouldValidate: false,
+    });
 
     clearErrors(name);
 
@@ -216,7 +193,7 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
         </div>
 
         <ul className="phone-input-v2__list">
-          {true
+          {isMenuOpen
             ? filtered.map((c) => (
               <li
                 key={c.iso2}

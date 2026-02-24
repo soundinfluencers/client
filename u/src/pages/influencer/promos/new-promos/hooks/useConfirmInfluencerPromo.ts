@@ -1,15 +1,27 @@
 import { conformationInfluencerPromo } from "@/api/influencer/promos/influencer-promos.api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { handleApiError } from "@/api/error.api.ts";
+import { useNavigate } from "react-router-dom";
 
-export const useConfirmInfluencerPromo = () => {
+export const useConfirmInfluencerPromo = (isSingle?: boolean) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: conformationInfluencerPromo,
 
     onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: ["influencer-new-promos"]});
+      // await queryClient.invalidateQueries({queryKey: ["influencer-new-promos"]});
+      if (isSingle) {
+        await queryClient.invalidateQueries({queryKey: ["promos"]});
+        navigate('/influencer/promos/new-promos', {
+          replace: true,
+          state: null
+        });
+        return;
+      }
+
+      await queryClient.invalidateQueries({queryKey: ["distributingOrCompleted-promos"]});
       await queryClient.invalidateQueries({queryKey: ["promos"]});
     },
     onError: (error) => {
@@ -27,17 +39,17 @@ export const useConfirmInfluencerPromo = () => {
 
 //     // OPTIMISTIC UPDATE
 //     onMutate: async (variables) => {
-//       // 1. Останавливаем возможный refetch
+//
 //       await queryClient.cancelQueries({
 //         queryKey: ["influencer-new-promos"],
 //       });
 
-//       // 2. Сохраняем предыдущее состояние
+//
 //       const previousPromos = queryClient.getQueryData<IPromoDetailsModel[]>([
 //         "influencer-new-promos",
 //       ]);
 
-//       // 3. Убираем карточку сразу
+//
 //       queryClient.setQueryData<IPromoDetailsModel[]>(["influencer-new-promos"], (old = []) =>
 //         old.filter(
 //           (promo) =>
@@ -48,11 +60,11 @@ export const useConfirmInfluencerPromo = () => {
 //         ),
 //       );
 
-//       // 4. Вернём это, если будет ошибка
+//
 //       return { previousPromos };
 //     },
 
-//     // если ошибка — откат
+//
 //     onError: (_err, _variables, context) => {
 //       if (context?.previousPromos) {
 //         queryClient.setQueryData<IPromoDetailsModel[]>(

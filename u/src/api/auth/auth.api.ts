@@ -24,8 +24,12 @@ export const logoutApi = async () => {
   await $api.post("/auth/logout");
 };
 
-export const resetPasswordApi = async (email: string): Promise<void> => {
-  await $api.post("/forgot/email", { email });
+export type TResetPasswordRequest = {
+  email: string;
+  role: UserRoleType;
+};
+export const resetPasswordApi = async ({ email, role }: TResetPasswordRequest): Promise<void> => {
+  await $api.post("/forgot", { email, role });
 };
 
 // influencer register

@@ -56,12 +56,16 @@
     }
   }
 
-  &:hover {
-    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
-    // background: vars.$hover-button-2;
+  //&:hover {
+  //  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  //}
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);  }
   }
 }
 
+// gradient border
 // z-index: 1;
 // &::before {
 //   content: "";

@@ -58,9 +58,10 @@ export const CampaignResultForm = ({ submitState }: Props) => {
     },
   });
 
+  const schema = useMemo(() => getCampaignResultDataSchema(submitState.meta), [submitState.meta]);
+
   // mutate(campaignResultMapper(submitState, data))
   // console.log(campaignResultMapper(submitState, data))
-  const schema = useMemo(() => getCampaignResultDataSchema(submitState.meta), [submitState.meta]);
 
   return (
     <div className="campaign-result">
@@ -69,6 +70,7 @@ export const CampaignResultForm = ({ submitState }: Props) => {
         onSubmit={(data) => mutate(campaignResultMapper(submitState, data))}
         className="campaign-result__form"
         schema={schema}
+        validateMode={'all'}
       >
         <FormFields inputs={CAMPAIGN_RESULT_INPUTS_DATA[submitState.meta].inputs}/>
 

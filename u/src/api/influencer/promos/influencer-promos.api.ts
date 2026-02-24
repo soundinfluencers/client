@@ -17,7 +17,7 @@ export const getInfluencerPromos = async (
   );
   console.log("Success get influencer all promos:", res.data);
   return res.data.data.promos;
-  
+
   // throw new Error("Function not implemented.");
   // try {
   // } catch (error: unknown) {
@@ -64,7 +64,7 @@ export const getInfluencerDetailsPromoByStatus = async (
   const res = await $api.get(
     `/promos/detailed?status=${status}&limit=${limit}&page=${page}`,
   );
-  console.log("Success get detailed promos:", res.data);
+  console.log("Success get detailed promos:", res.data.data.promos);
   return res.data.data.promos;
 };
 

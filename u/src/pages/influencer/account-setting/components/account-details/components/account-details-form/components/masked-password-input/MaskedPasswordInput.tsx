@@ -14,7 +14,7 @@ export const MaskedPasswordInput= () => {
         Password
       </p>
       <div className="masked-password-input__field">
-        <span className="masked-password-input__masked">{`********`}</span>
+        <span className="masked-password-input__masked">{`••••••••••`}</span>
         <EditButton
           className="masked-password-input__edit-button"
           variants="social"
