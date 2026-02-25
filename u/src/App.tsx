@@ -40,6 +40,9 @@ import {
 import {
   AccountSettingMain,
 } from "@/pages/influencer/account-setting/components/account-setting-main/AccountSettingMain.tsx";
+import {
+  NewPassword
+} from "@/pages/influencer/account-setting/components/edit-password-flow/new-password/NewPassword.tsx";
 
 
 function App() {
@@ -153,6 +156,10 @@ function App() {
         <Route
           path="/profile/agreement/:influencerId"
           element={<Agreement />}
+        />
+        <Route
+          path="/reset-password/:token"
+          element={<NewPassword />}
         />
 
         {/* ---------- RENDER ROUTES (mb rebuild structure) ---------- */}

@@ -8,19 +8,15 @@ import { getDefaultValues } from "./utils/get-form-default-values";
 import { normalizePlatform } from "./utils/normalize-social-media-name";
 import type { TSocialAccountFormValues } from "./types/account-setup.types";
 import type { TSocialAccounts } from "@/types/user/influencer.types";
-
 import arrowLeft from '../../../../assets/icons/arrow-left.svg';
-
-import './_account-setup-form.scss';
 import {
-  getAccountSchemaForPlatform,
-  // makeSocialAccountSchema,
-  // socialAccountBaseSchema,
+  getAccountSchemaByPlatform,
 } from "@/pages/influencer/components/account-setup-form/validation/socialAccount.schema.ts";
 
+import './_account-setup-form.scss';
+
 // /*
-//   TODO: Account setup flow - all ready (need minor fixes);
-//         12) Add optimization for component (memo, useCallback)?
+//   TODO: 12) Add optimization for component (memo, useCallback)?
 // */
 
 interface Props {
@@ -44,7 +40,9 @@ export const AccountSetupForm: React.FC<Props> = ({ platform, account, onRemove,
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  console.log(account);
+  // console.log(account);
+  // console.log(getAccountSchemaByPlatform(platform));
+  // console.log(getDefaultValues(account));
 
   return (
     <div className="account-setup-form">
@@ -64,7 +62,7 @@ export const AccountSetupForm: React.FC<Props> = ({ platform, account, onRemove,
         key={formKey}
         className="account-setup-form__form"
         defaultValues={getDefaultValues(account)}
-        schema={getAccountSchemaForPlatform(platform)}
+        schema={getAccountSchemaByPlatform(platform)}
       >
         <AccountSetupFormContent
           platform={platform}

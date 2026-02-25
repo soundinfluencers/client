@@ -67,7 +67,7 @@
       gap: 8px;
       width: 88px;
       padding: 8px 16px;
-      border-radius: 8px;
+      border-radius: 4px;
       border: 1px solid vars.$white-gray-2;
       background: rgba(255, 255, 255, 1);
       transition: all 0.2s ease;
@@ -93,36 +93,6 @@
     }
   }
 }
-
-.accounts-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-
-  &__item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  &__info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    > span {
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border: 1px solid vars.$white-gray-2;
-      border-radius: 4px;
-    }
-  }
-}
-
 /*
       TODO: variants of glass effect for list item
       1)

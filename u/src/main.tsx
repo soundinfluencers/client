@@ -1,13 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import App from "./App";
-import "./styles/_base.scss";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/app/queryClient.ts";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
 import "react-toastify/dist/ReactToastify.css";
 
-export const queryClient = new QueryClient();
+import App from "./App";
+import "./styles/_base.scss";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

@@ -177,19 +177,12 @@
     }
   }
 
-  &__list {
+  &__list-viewport {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    overflow-y: auto;
     max-height: 193px;
+    overflow-y: auto;
+    padding-right: 8px;
 
-    //Scrollbar styles for Firefox
-    // scrollbar-width: thin;
-    // scrollbar-color: vars.$light-gray rgba(0, 0, 0, 0.05);
-
-    //Scrollbar styles WebKit browsers
     &::-webkit-scrollbar {
       width: 4px;
     }
@@ -202,6 +195,16 @@
       background: vars.$white-gray-2;
       border-radius: 4px;
     }
+  }
+
+  &__list {
+    width: 100%;
+    position: relative;
+    display: block;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
 
     &-item {
       display: flex;
@@ -209,7 +212,6 @@
       text-align: center;
       gap: 16px;
       padding: 8px;
-      margin-right: 8px;
       border-radius: 8px;
       color: vars.$gray-dark;
       cursor: pointer;
@@ -229,8 +231,6 @@
         background-color: vars.$light-blue;
       }
     }
-
-
   }
 
   .phone-flag {

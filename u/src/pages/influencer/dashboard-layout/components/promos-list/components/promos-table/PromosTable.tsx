@@ -44,8 +44,9 @@ export const PromosTable = ({ promos, isInitialLoading, isRefreshing }: Props) =
     );
   }
 
+  // ${isRefreshing ? "promos-table-wrap--overlay" : ""}
   return (
-    <div className="promos-table-wrap">
+    <div className={`promos-table-wrap`}>
       <table className={`promos-table ${isRefreshing ? "promos-table--dimmed" : ""}`}>
         <thead className="promos-table__thead">
         <tr className="promos-table__thead-tr">

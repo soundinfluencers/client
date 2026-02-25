@@ -1,7 +1,7 @@
 export type TPromoStatus = "pending" | "distributing" | "completed";
 export type TConfirmationType = "accept" | "decline" | "wait";
 export type TClosedStatusType = "close" | "wait";
-export type TFilterStatus = "new" | "close" | "ongoing";
+export type TFilterStatus = "new" | "close" | "ongoing" | "all";
 
 export type socialMediaType =
   | "instagram"

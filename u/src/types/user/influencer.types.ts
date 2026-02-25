@@ -32,7 +32,9 @@ export type SocialAccountDraft = {
 
   musicGenres: MusicGenreItem[];
   categories: string[];
+
   creatorCategories: string[];
+
   countries: CountryItem[];
 };
 

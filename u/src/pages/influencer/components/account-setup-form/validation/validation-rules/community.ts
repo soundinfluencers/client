@@ -8,4 +8,5 @@ export const musicGenresSchema = z.object({
 export const requiredMusicGenres = z
 .array(musicGenresSchema)
 .min(1, { message: "Select at least 1 music genre" });
+
 export const optionalThemeTopics = z.array(z.string()).optional().default([]);

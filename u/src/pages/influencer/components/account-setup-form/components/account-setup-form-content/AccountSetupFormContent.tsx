@@ -35,12 +35,12 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const platformConfig = PLATFORM_CONFIG[platform];
-
   const profileCategory = useWatch({
     control,
     name: 'profileCategory',
   });
+
+  const platformConfig = PLATFORM_CONFIG[platform];
 
   const isCommunity = profileCategory === 'community';
   const isCreator = profileCategory === 'creator';

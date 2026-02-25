@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+const asTrimmedString = (v: unknown) => {
+  if (v == null) return "";
+  if (typeof v !== "string") return "";
+  return v.trim();
+};
+
 export const requiredAccountName = z
 .string()
 .trim()
@@ -37,12 +43,34 @@ export const requiredProfileLink = z
 
 export const requiredFollowers = z.number({ error: "Followers is required" }).min(0, { message: "Followers must be >= 0" });
 
-export const requiredLogoUrl = z
-.union([z.string(), z.null()])
-.transform((v) => (typeof v === "string" ? v.trim() : v))
-.refine((v) => typeof v === "string" && v.length > 0, {
-  message: "Logo is required",
-});
+export const requiredLogoUrl =
+  z.preprocess(
+    asTrimmedString,
+    z
+    .string()
+    .min(1, { error: "Logo is required" })
+    .transform((val) => (/^https?:\/\//i.test(val) ? val : `https://${val}`))
+    .pipe(z.url({ error: "Please enter a valid logo URL" }))
+    .superRefine((val, ctx) => {
+
+      try {
+        const u = new URL(val);
+        const host = u.hostname.toLowerCase();
+
+        if (!host.includes(".")) {
+          ctx.addIssue({ code: "custom", message: "Please enter a valid logo URL" });
+          return;
+        }
+
+        const tld = host.split(".").pop() ?? "";
+        if (tld.length < 2) {
+          ctx.addIssue({ code: "custom", message: "Please enter a valid logo URL" });
+        }
+      } catch {
+        ctx.addIssue({ code: "custom", message: "Please enter a valid logo URL" });
+      }
+    })
+  );
 
 export const profileCategoryEnum = z.enum(["community", "creator"] as const);
 export const profileCurrencyEnum = z.enum(["EUR", "USD", "GBP"] as const);

@@ -41,7 +41,7 @@ export const ForgotPasswordPage: FC = () => {
         onSubmit={(data) => mutateAsync({email: data.email, role})}
         schema={forgotSchema}
         submitButton={ <ButtonMain type={'submit'} className={"forgot-password-page__submit-btn"} label={isPending ? "Sending..." : "Send reset link"} />}
-        // validateMode={"all"}
+        validateMode={"onSubmit"}
       >
         <BaseInput
           name={"email"}

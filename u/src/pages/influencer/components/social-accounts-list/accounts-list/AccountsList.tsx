@@ -21,10 +21,13 @@ export const AccountsList: React.FC<Props> = ({ id, accounts }) => {
     <ul className="accounts-list">
       {accounts && accounts.map((account, index) => (
         <li key={account.accountId ? account.accountId : `${id}-${index}`} className="accounts-list__item">
-          <div className="accounts-list__info">
-            <span className={`accounts-list__number ${account.agreementStatus === 'wait' ? 'accounts-list__number--wait' : ''}`}>{index + 1}</span>
-            <p>{account.username}</p>
-          </div>
+          <span
+            className={`accounts-list__number ${account.agreementStatus === 'wait' ? 'accounts-list__number--wait' : ''}`}
+          >
+            {index + 1}
+          </span>
+
+          <p className={'accounts-list__name'}>{account.username}</p>
 
           {account.agreementStatus === 'wait' ? (
             <div className="accounts-list__status">
@@ -34,10 +37,10 @@ export const AccountsList: React.FC<Props> = ({ id, accounts }) => {
           ) : (
             <EditButton variants="social" onClick={() => {
               onEditAccount(id, account.accountId ? account.accountId : String(index));
-            }} />
+            }}/>
           )}
         </li>
       ))}
     </ul>
   );
-}
+};

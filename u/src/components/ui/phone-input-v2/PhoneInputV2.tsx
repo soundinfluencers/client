@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import { useClickOutside } from "@/hooks/global/useClickOutside.ts";
 
@@ -15,6 +15,7 @@ import {
 import { hasFlag } from "@components/ui/phone-input-v2/utils/hasFlag.ts";
 
 import "./_phone-input-v2.scss";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface PhoneInputProps {
   name: string;
@@ -29,6 +30,7 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
   const phoneInputRef = useRef<HTMLInputElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const listParentRef = useRef<HTMLDivElement>(null);
 
   const [selectedCountry, setSelectedCountry] = useState<PhoneCountry>(UN_COUNTRY);
   const [search, setSearch] = useState("");
@@ -45,6 +47,13 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
       c.iso2.includes(q),
     );
   }, [search]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: isMenuOpen ? filtered.length : 0,
+    getScrollElement: () => listParentRef.current,
+    estimateSize: () => 48,
+    overscan: 8,
+  });
 
   const closeMenu = useCallback(() => {
     setIsMenuOpen((open) => {
@@ -63,7 +72,7 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
     setSelectedCountry((prev) => (prev.iso2 === next.iso2 ? prev : next));
   }, [value, isMenuOpen, selectedCountry]);
 
-  const handleSelectCountry = (c: PhoneCountry) => {
+  const handleSelectCountry = useCallback((c: PhoneCountry) => {
     const tail = getTailDigitsByDialCode(value, selectedCountry.dialCode);
     const nextValue = c.dialCode ? `${c.dialCode}${tail}` : "";
 
@@ -81,7 +90,7 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
 
     searchInputRef.current?.blur();
     setTimeout(() => phoneInputRef.current?.focus(), 0);
-  };
+  }, [value, selectedCountry.dialCode, setValue, name, clearErrors]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleaned = sanitizePhone(e.target.value);
@@ -192,37 +201,53 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
           />
         </div>
 
-        <ul className="phone-input-v2__list">
-          {isMenuOpen
-            ? filtered.map((c) => (
-              <li
-                key={c.iso2}
-                className="phone-input-v2__list-item"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  handleSelectCountry(c);
-                }}
-              >
+        <div ref={listParentRef} className="phone-input-v2__list-viewport">
+          <ul
+            className="phone-input-v2__list"
+            style={{
+              height: rowVirtualizer.getTotalSize(),
+              position: "relative",
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const c = filtered[virtualRow.index];
+
+              return (
+                <li
+                  key={virtualRow.key}
+                  className="phone-input-v2__list-item"
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleSelectCountry(c);
+                  }}
+                >
                   <span className="phone-input-v2__flag">
                     <CountryFlag iso2={c.iso2}/>
                   </span>
-
-                <span className="phone-input-v2__list-item-label">
+                  <span className="phone-input-v2__list-item-label">
                     {c.countryName} ({c.dialCode})
                   </span>
 
-                {selectedCountry.iso2 === c.iso2 && (
-                  <img
-                    src={check}
-                    alt=""
-                    className="phone-input-v2__list-item-check"
-                    aria-hidden
-                  />
-                )}
-              </li>
-            ))
-            : null}
-        </ul>
+                  {selectedCountry.iso2 === c.iso2 && (
+                    <img
+                      src={check}
+                      alt=""
+                      className="phone-input-v2__list-item-check"
+                      aria-hidden
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
     </div>
   );
@@ -233,9 +258,9 @@ export interface CountryFlagProps {
   className?: string;
 }
 
-export const CountryFlag: React.FC<CountryFlagProps> = ({ iso2, className }) => {
+export const CountryFlag: React.FC<CountryFlagProps> = memo(({ iso2, className }) => {
   const code = hasFlag(iso2) ? iso2 : "un";
   return <span className={`fi fi-${code} phone-flag ${className ?? ""}`} aria-hidden="true"/>;
-};
+});
 
 // export default PhoneInputV2;

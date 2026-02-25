@@ -1,4 +1,4 @@
-import { useState, type FC, useMemo } from "react";
+import { useState, type FC } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { useUser } from "@/store/get-user/index.ts";
@@ -15,13 +15,6 @@ export const LoginPage: FC = () => {
   const { setAccessToken } = useAuth();
   const { role, setUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
-
-  const defaultValues: LoginFormData = useMemo(() => {
-    return {
-      email: "",
-      password: "",
-    };
-  }, []);
 
   const handleLogin = async (formData: LoginFormData) => {
     const { email, password } = formData;
@@ -51,9 +44,8 @@ export const LoginPage: FC = () => {
         className={"login-page__form"}
         submitButton={<ButtonMain type={'submit'} className={"login-page__submit-btn"} label={isLoading ? "Logging in..." : "Log in"} />}
         onSubmit={handleLogin}
-        defaultValues={defaultValues}
         schema={loginSchema}
-        // validateMode={'all'}
+        validateMode={'onSubmit'}
       >
         <BaseInput
           name={"email"}

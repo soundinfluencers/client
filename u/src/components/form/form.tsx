@@ -104,6 +104,7 @@ export const Form = <T extends FieldValues>({
       <form
         className={`form ${className ?? ""}`}
         onSubmit={methods.handleSubmit(handleFormSubmit)}
+        noValidate={true}
       >
         {children}
         {submitButton && (

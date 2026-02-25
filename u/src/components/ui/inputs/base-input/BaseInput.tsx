@@ -119,7 +119,6 @@ export function BaseInput<T extends FieldValues>({
         placeholder={placeholder}
         type={'text'}
         inputMode={'numeric'}
-        pattern={type === 'numeric' ? "[0-9]*" : undefined}
         disabled={disabled}
         value={displayValue}
         onChange={(e) => {

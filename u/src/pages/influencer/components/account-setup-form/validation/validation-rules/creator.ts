@@ -20,7 +20,7 @@ export const creatorCategoriesSchema = z
     ctx.addIssue({
       code: "custom",
       path: [],
-      message: "Select at least one option", // You didn't select any option.
+      message: "Select at least one option",
     });
   }
 });

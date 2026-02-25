@@ -47,6 +47,16 @@
 
     @media screen and (max-width: 900px) {
       font-size: 14px;
+      padding: 4px 9px;
+    }
+
+    @media screen and (max-width: 500px) {
+      width: 66px;
+
+      > img {
+        width: 16px;
+        height: 16px;
+      }
     }
   }
 

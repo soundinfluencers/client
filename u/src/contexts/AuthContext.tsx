@@ -7,7 +7,8 @@ import {
 } from "react";
 import { logoutApi } from "../api/auth/auth.api.ts";
 import { refreshAccessToken } from "@/api/refresh.manager.ts";
-import { queryClient } from "@/main.tsx";
+import { queryClient } from "@/app/queryClient.ts";
+
 
 interface AuthContextType {
   accessToken: string | null;
