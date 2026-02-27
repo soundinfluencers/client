@@ -4,7 +4,10 @@ import type {
   ISignupInfluencerDraft,
   SocialAccountDraft,
   TSocialAccounts,
-} from "../../../types/user/influencer.types";
+} from "@/types/user/influencer.types.ts";
+import type {
+  PersonalDetailsValues,
+} from "@/pages/auth/signup/components/influencer/signup-personal-details-form/types/personal-details-form.types.ts";
 
 const initialInfluencer: ISignupInfluencerDraft = {
   firstName: "",
@@ -21,32 +24,14 @@ const initialInfluencer: ISignupInfluencerDraft = {
   press: [],
 };
 
-type BaseField = "firstName" | "lastName" | "email" | "phone" | "password";
-type FieldError = string | null;
-
-const initialErrors: Record<BaseField, FieldError> = {
-  firstName: null,
-  lastName: null,
-  email: null,
-  phone: null,
-  password: null,
-};
-
-interface ISingupInfluencerState {
+interface ISignupInfluencerState {
   user: ISignupInfluencerDraft;
-  errors: Record<BaseField, FieldError>;
   accountsError: string | null;
   submitError: string | null;
 }
 
-interface ISingupInfluencerActions {
-  setField: <K extends keyof ISignupInfluencerDraft>(
-    key: K,
-    value: ISignupInfluencerDraft[K],
-  ) => void;
-
-  setError: (field: BaseField, message: string | null) => void;
-  clearErrors: () => void;
+interface ISignupInfluencerActions {
+  setPersonalFields: (patch: Partial<PersonalDetailsValues>) => void;
 
   setAccountsError: (message: string | null) => void;
   clearAccountsError: () => void;
@@ -54,9 +39,6 @@ interface ISingupInfluencerActions {
 
   setSubmitError: (message: string | null) => void;
   clearSubmitError: () => void;
-
-  validate: () => boolean;
-  isFormReady: () => boolean;
 
   saveAccount: (
     platform: TSocialAccounts,
@@ -69,7 +51,7 @@ interface ISingupInfluencerActions {
   resetSignup: () => void;
 }
 
-type ISingupInfluencerStore = ISingupInfluencerState & ISingupInfluencerActions;
+type ISignupInfluencerStore = ISignupInfluencerState & ISignupInfluencerActions;
 
 const cloneInfluencer = (): ISignupInfluencerDraft => ({
   ...initialInfluencer,
@@ -82,33 +64,15 @@ const cloneInfluencer = (): ISignupInfluencerDraft => ({
   press: [],
 });
 
-export const useInfluencerSignupStore = create<ISingupInfluencerStore>()(
+export const useInfluencerSignupStore = create<ISignupInfluencerStore>()(
   immer((set, get) => ({
     user: cloneInfluencer(),
-    errors: { ...initialErrors },
-    accountsError: null,   // <-- NEW
+    accountsError: null,
     submitError: null,
 
-    setField: (key, value) =>
-      set((state) => {
-        state.user[key] = value;
-
-        if (key in state.errors) {
-          state.errors[key as BaseField] = null;
-        }
-
-        state.submitError = null;
-        state.accountsError = null;
-      }),
-
-    setError: (field, message) =>
-      set((state) => {
-        state.errors[field] = message;
-      }),
-
-    clearErrors: () =>
-      set((state) => {
-        state.errors = { ...initialErrors };
+    setPersonalFields: (patch) =>
+      set((s) => {
+        Object.assign(s.user, patch);
       }),
 
     setAccountsError: (message) =>
@@ -131,26 +95,6 @@ export const useInfluencerSignupStore = create<ISingupInfluencerStore>()(
         state.submitError = null;
       }),
 
-    validate: () => {
-      const { user } = get();
-
-      const nextErrors: Record<BaseField, FieldError> = {
-        firstName: validateName(user.firstName),
-        lastName: validateName(user.lastName),
-        email: validateEmail(user.email),
-        phone: validatePhone(user.phone),
-        password: validatePassword(user.password),
-      };
-
-      const isValid = !Object.values(nextErrors).some((m) => m != null);
-
-      set((state) => {
-        state.errors = nextErrors;
-      });
-
-      return isValid;
-    },
-
     validateAccounts: () => {
       const { user } = get();
 
@@ -170,28 +114,6 @@ export const useInfluencerSignupStore = create<ISingupInfluencerStore>()(
       });
 
       return hasAtLeastOneAccount;
-    },
-
-    isFormReady: () => {
-      const { user } = get();
-
-      const hasRequiredFields =
-        user.firstName.trim().length > 0 &&
-        user.lastName.trim().length > 0 &&
-        user.email.trim().length > 0 &&
-        user.phone.trim().length > 0 &&
-        user.password.length > 0;
-
-      const hasAtLeastOneAccount =
-        (user.instagram?.length ?? 0) > 0 ||
-        (user.tiktok?.length ?? 0) > 0 ||
-        (user.youtube?.length ?? 0) > 0 ||
-        (user.spotify?.length ?? 0) > 0 ||
-        (user.soundcloud?.length ?? 0) > 0 ||
-        (user.facebook?.length ?? 0) > 0 ||
-        (user.press?.length ?? 0) > 0;
-
-      return hasRequiredFields && hasAtLeastOneAccount;
     },
 
     saveAccount: (platform, account, index) =>
@@ -221,42 +143,8 @@ export const useInfluencerSignupStore = create<ISingupInfluencerStore>()(
     resetSignup: () =>
       set((state) => {
         state.user = cloneInfluencer();
-        state.errors = { ...initialErrors };
         state.accountsError = null;
         state.submitError = null;
       }),
   })),
 );
-
-// validators
-const REQUIRED = "This field is required";
-const MIN_2 = "Must be at least 2 characters";
-const MAX_50 = "Must be no more than 50 characters";
-
-const validateName = (value: string): string | null => {
-  const v = value.trim();
-  if (!v) return REQUIRED;
-  if (v.length < 2) return MIN_2;
-  if (v.length > 50) return MAX_50;
-  return null;
-};
-
-const validateEmail = (value: string): string | null => {
-  const v = value.trim();
-  if (!v) return REQUIRED;
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!re.test(v.toLowerCase())) return "Please enter a valid email";
-  return null;
-};
-
-const validatePhone = (value: string): string | null => {
-  const v = value.trim();
-  if (!v) return REQUIRED;
-  return null;
-};
-
-const validatePassword = (value: string): string | null => {
-  if (!value) return REQUIRED;
-  if (value.length < 8) return "Must be at least 8 characters";
-  return null;
-};

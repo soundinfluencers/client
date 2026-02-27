@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import { FormFields } from '@components/form/render-fields/FormFields.tsx';
@@ -29,47 +29,21 @@ interface Props {
 }
 
 export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: Props) => {
-  const { control, setValue, handleSubmit, clearErrors } = useFormContext<TSocialAccountFormValues>();
+  const { control, handleSubmit} = useFormContext<TSocialAccountFormValues>();
 
   const [isSaveLoading, setIsSaveLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const platformConfig = PLATFORM_CONFIG[platform];
 
   const profileCategory = useWatch({
     control,
     name: 'profileCategory',
   });
 
+  const platformConfig = PLATFORM_CONFIG[platform];
+
   const isCommunity = profileCategory === 'community';
   const isCreator = profileCategory === 'creator';
-
-  useEffect(() => {
-    // reset values of checkboxes when profile type changes
-    if (profileCategory === 'community') {
-      setValue('creatorCategories', [], {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
-
-      clearErrors("musicGenres");
-      clearErrors("creatorCategories");
-    }
-    if (profileCategory === 'creator') {
-      setValue('musicGenres', [], {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
-      setValue('categories', [], {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-
-      clearErrors("creatorCategories");
-      clearErrors("musicGenres");
-    }
-  }, [profileCategory, setValue, clearErrors]);
 
   const handleRemove = async () => {
     setIsDeleteLoading(true);

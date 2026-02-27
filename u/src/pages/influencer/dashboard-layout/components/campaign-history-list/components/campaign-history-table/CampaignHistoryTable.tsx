@@ -3,6 +3,7 @@ import type { Campaign } from '../../types/campaign-history.types';
 
 import './_campaign-history-table.scss';
 import { TableCardSkeleton } from "@/shared/ui/skeletons/table-card-skeleton.tsx";
+import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
 
 interface Props {
   campaigns: Campaign[];
@@ -39,9 +40,13 @@ export const CampaignHistoryTable = ({ campaigns, isInitialLoading }: Props) => 
 
   if (campaigns.length === 0) {
     return (
-      <div style={{ fontSize: 40, textAlign: "center", padding: 40 }}>
-        Campaigns history is empty. Try to check your promos.
-      </div>
+      <EmptyPromosList
+        title={"No History Available"}
+        description={"There is no activity to display yet."}
+        additionalDescription={"Your campaign history will appear here once you begin working with brands."}
+        isHistory
+        isDashboard
+      />
     );
   }
 
@@ -59,7 +64,7 @@ export const CampaignHistoryTable = ({ campaigns, isInitialLoading }: Props) => 
       <tbody className="campaign-history-table__tbody">
       {
         campaigns.map((campaign) => (
-          <TableRow key={campaign.campaignId} campaign={campaign}/>
+          <TableRow key={`${campaign.campaignId + campaign.addedAccountsId}`} campaign={campaign}/>
         ))
       }
       </tbody>

@@ -3,7 +3,7 @@ import { Logo } from "./components/logo/Logo.tsx";
 import { PLACEHOLDER_LOGO_URL } from '@/pages/influencer/shared/utils/socialAccount.mapper';
 // import { LoginButton, SignupButton } from "./components/buttons/Buttons.tsx";
 import "./_tab-bar.scss";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useWindowSize } from "@/hooks/global/useWindowSize.ts";
 import burgerMenu from "@/assets/icons/burger-menu.svg";
 import { useClickOutside } from "@/hooks/global/useClickOutside.ts";
@@ -16,6 +16,7 @@ import { useLockBodyScroll } from "@/hooks/global/useLockBodyScroll.ts";
 
 export const TabBar: FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useUser();
   const { accessToken } = useAuth();
   const { width } = useWindowSize();
@@ -39,6 +40,11 @@ export const TabBar: FC = () => {
 
   // console.log(user);
 
+  // console.log("Location in TabBar: ", location.pathname.split('/')[1]);
+
+  const isTermsPage = location.pathname.startsWith("/terms");
+  const isAgreementPage = location.pathname.startsWith("/profile/agreement");
+
   return (
     <div className="tab-bar" ref={tabBarRef}>
       <Container className="tab-bar__content">
@@ -52,24 +58,29 @@ export const TabBar: FC = () => {
                 {/* <LoginButton onClick={() => navigate("/login")} /> */}
               </>
             ) : (
-              <>
-                <div
-                  className={`tab-bar__user-menu ${isDropdownOpen ? "tab-bar__user-menu--close" : ""}`}
-                  onClick={() => setIsDropdownOpen((v) => !v)}
-                  tabIndex={0}
-                  role="button">
-                  {isDesktop && <p className="tab-bar__user-menu-text">Account</p>}
-                  <img
-                    className="tab-bar__user-menu-avatar"
-                    src={user?.logoUrl ? user.logoUrl : PLACEHOLDER_LOGO_URL}
-                    alt="User Avatar"
+              !isTermsPage && !isAgreementPage && (
+                <>
+                  <div
+                    className={`tab-bar__user-menu ${isDropdownOpen ? "tab-bar__user-menu--close" : ""}`}
+                    onClick={() => setIsDropdownOpen((v) => !v)}
+                    tabIndex={0}
+                    role="button"
+                  >
+                    <p className="tab-bar__user-menu-text">Account</p>
+
+                    <img
+                      className="tab-bar__user-menu-avatar"
+                      src={user?.logoUrl ? user.logoUrl : PLACEHOLDER_LOGO_URL}
+                      alt="User Avatar"
+                    />
+                  </div>
+
+                  <DropDownNav
+                    isDropdownOpen={isDropdownOpen}
+                    setIsDropdownOpen={setIsDropdownOpen}
                   />
-                </div>
-                <DropDownNav
-                  isDropdownOpen={isDropdownOpen}
-                  setIsDropdownOpen={setIsDropdownOpen}
-                />
-              </>
+                </>
+              )
             )}
           </div>
         ) : (
@@ -78,14 +89,17 @@ export const TabBar: FC = () => {
               <>
                 <div
                   className="tab-bar__burger-icon"
-                  onClick={() => {
-                    setIsBurgerOpen((prevState) => !prevState);
-                  }}
+                  onClick={() => setIsBurgerOpen((prev) => !prev)}
                   role="button"
                   tabIndex={0}
                 >
-                  <img className="tab-bar__burger-toggle" src={burgerMenu} alt=""/>
+                  <img
+                    className="tab-bar__burger-toggle"
+                    src={burgerMenu}
+                    alt="Open menu"
+                  />
                 </div>
+
                 <div className={`tab-bar__menu ${isBurgerOpen ? "tab-bar__menu--open" : ""}`}>
                   <div
                     className="tab-bar__menu-item tab-bar__menu-item--signup"
@@ -107,24 +121,27 @@ export const TabBar: FC = () => {
                 </div>
               </>
             ) : (
-              <>
-                <div
-                  className="tab-bar__user-menu"
-                  onClick={() => setIsDropdownOpen((v) => !v)}
-                  tabIndex={0}
-                  role="button">
-                  {isDesktop && <p className="tab-bar__user-menu-text">Account</p>}
-                  <img
-                    className="tab-bar__user-menu-avatar"
-                    src={user?.logoUrl ? user.logoUrl : PLACEHOLDER_LOGO_URL}
-                    alt="User Avatar"
+              !isTermsPage && (
+                <>
+                  <div
+                    className="tab-bar__user-menu"
+                    onClick={() => setIsDropdownOpen((v) => !v)}
+                    tabIndex={0}
+                    role="button"
+                  >
+                    <img
+                      className="tab-bar__user-menu-avatar"
+                      src={user?.logoUrl ? user.logoUrl : PLACEHOLDER_LOGO_URL}
+                      alt="User Avatar"
+                    />
+                  </div>
+
+                  <DropDownNav
+                    isDropdownOpen={isDropdownOpen}
+                    setIsDropdownOpen={setIsDropdownOpen}
                   />
-                </div>
-                <DropDownNav
-                  isDropdownOpen={isDropdownOpen}
-                  setIsDropdownOpen={setIsDropdownOpen}
-                />
-              </>
+                </>
+              )
             )}
           </div>
         )}

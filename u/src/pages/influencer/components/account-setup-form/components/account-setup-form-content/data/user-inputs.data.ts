@@ -189,12 +189,12 @@ export const ACCOUNT_INPUTS_DATA: TAccountUserInputsData = {
         name: "profileLink",
         placeholder: "Enter press link",
       },
-      {
-        type: "number",
-        label: "Followers number",
-        name: "followers",
-        placeholder: "Enter followers number",
-      },
+      // {
+      //   type: "number",
+      //   label: "Followers number",
+      //   name: "followers",
+      //   placeholder: "Enter followers number",
+      // },
       {
         type: "file",
         label: "Logo",

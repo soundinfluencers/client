@@ -1,7 +1,7 @@
 export type TPromoStatus = "pending" | "distributing" | "completed";
 export type TConfirmationType = "accept" | "decline" | "wait";
 export type TClosedStatusType = "close" | "wait";
-export type TFilterStatus = "new" | "close" | "ongoing";
+export type TFilterStatus = "new" | "close" | "ongoing" | "all";
 
 export type socialMediaType =
   | "instagram"
@@ -40,6 +40,7 @@ export interface IPromoDetailsModel {
   createdAt: string;
   clientName: string;
   reward: number;
+  logoUrl: string;
   postLink: string;
   dateRequest: string;
   mainLink: string;
@@ -65,6 +66,7 @@ export type TDetailsField = {
   format?: (value: number, promo: IPromoDetailsModel) => string;
   copyable?: boolean;
   linkable?: boolean;
+  icon?: string;
 };
 
 export type fieldsConfig = Record<socialMediaType, TDetailsField[]>;

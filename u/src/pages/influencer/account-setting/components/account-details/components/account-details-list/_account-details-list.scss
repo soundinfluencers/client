@@ -71,13 +71,15 @@
   }
 
   &__password {
+    display: flex;
+    //height: 50px;
     font-weight: 900;
-    font-size: 20px;
-    height: 20px;
+    //font-size: 20px;
+    //height: 20px;
     color: vars.$gray-dark;
 
     @media screen and (max-width: 500px) {
-      height: 18px;
+      //height: 18px;
     }
   }
 }

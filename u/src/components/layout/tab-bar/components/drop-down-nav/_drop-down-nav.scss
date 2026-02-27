@@ -12,7 +12,7 @@
   visibility: hidden;
   pointer-events: none;
 
-  transition: opacity 0.18s ease, visibility 0.18s ease;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 
   &--open {
     opacity: 1;
@@ -212,4 +212,5 @@
       transform: none !important;
     }
   }
+
 }

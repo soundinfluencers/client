@@ -1,5 +1,5 @@
 import { useConfirmInfluencerPromo } from './hooks/useConfirmInfluencerPromo';
-import { useInfluencerNewPromos } from './hooks/useInfluencerNewPromos';
+// import { useInfluencerNewPromos } from './hooks/useInfluencerNewPromos';
 import { useEffect, useState } from 'react';
 import { PromosDetailsList } from '../components/promos-details-list/PromosDetailsList';
 import { Modal } from '@components/ui/modal-fix/Modal.tsx';
@@ -9,25 +9,50 @@ import successIcon from '@/assets/icons/success-icon.svg';
 // import type { IPromoDetailsModel } from "@/pages/influencer/promos/types/promos.types.ts";
 import './_new-promos.scss';
 import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
+import { useDetailedPromos } from "@/pages/influencer/promos/hooks/useDetailedPromos.ts";
+import { useLocation } from "react-router-dom";
+import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 
 export const NewPromos = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDecline, setIsDecline] = useState(false);
   const [isAccepted, setIsAccepted] = useState(false);
 
+  const { state } = useLocation() as {
+    state?: {
+      campaignId?: string;
+      addedAccountsId?: string;
+    }
+  };
+
+  const { campaignId, addedAccountsId } = state || {};
+  const isSinglePromoView = !!campaignId && !!addedAccountsId;
+  // console.log(campaignId, addedAccountsId);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const { data: promos = [], isLoading, error: fetchError } = useInfluencerNewPromos();
-  const { mutate: confirmPromo, isPending, variables } = useConfirmInfluencerPromo();
+  // const { data: promos = [], isLoading, error: fetchError } = useInfluencerNewPromos();
+  const {
+    data,
+    isPending: isFetchPending,
+    error: fetchError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useDetailedPromos({ status: 'new', campaignId, addedAccountsId });
 
-  if (isLoading) {
+  const { mutate: confirmPromo, isPending, variables } = useConfirmInfluencerPromo(isSinglePromoView);
+
+  const promos = data?.promos || [];
+
+  if (isFetchPending) {
     return <Loader/>;
   }
 
   if (fetchError) {
-    return <div style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos</div>;
+    return <Error />;
   }
 
   if (promos.length === 0) {
@@ -46,32 +71,43 @@ export const NewPromos = () => {
         <p className="new-promos__label">New promos</p>
         <span className="new-promos__number">{promos.length}</span>
       </div>
-      <PromosDetailsList
-        data={promos}
-        status="pending"
-        onAccept={(payload) => {
-          confirmPromo(payload, {
-            onSuccess: () => {
-              setIsDecline(false);
-              setIsAccepted(true);
-              setIsModalOpen(true);
-            },
-          });
-        }}
-        onDecline={(payload) => {
-          confirmPromo(payload, {
-            onSuccess: () => {
-              setIsAccepted(false);
-              setIsDecline(true);
-              setIsModalOpen(true);
-            },
-          });
-        }}
-        mutationState={{
-          isPending,
-          variables,
-        }}
-      />
+
+      <div className={'new-promos__wrapper'}>
+        <PromosDetailsList
+          data={promos}
+          status="pending"
+          onAccept={(payload) => {
+            confirmPromo(payload, {
+              onSuccess: () => {
+                setIsDecline(false);
+                setIsAccepted(true);
+                setIsModalOpen(true);
+              },
+            });
+          }}
+          onDecline={(payload) => {
+            confirmPromo(payload, {
+              onSuccess: () => {
+                setIsAccepted(false);
+                setIsDecline(true);
+                setIsModalOpen(true);
+              },
+            });
+          }}
+          mutationState={{
+            isPending,
+            variables,
+          }}
+        />
+
+        {!campaignId && !addedAccountsId && (
+          <ButtonMain
+            label={isFetchingNextPage ? "Loading..." : "View more"}
+            onClick={() => fetchNextPage()}
+            isDisabled={!hasNextPage}
+          />
+        )}
+      </div>
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>

@@ -1,6 +1,10 @@
+import { useDashboardLayoutStore } from "@/pages/influencer/dashboard-layout/store/useDashboardLayoutStore.ts";
 import { PromosTableItem } from './promos-table-item/PromosTableItem';
-import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
 import { TableCardSkeleton } from "@/shared/ui/skeletons/table-card-skeleton.tsx";
+import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
+import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
+import { EMPTY_MESSAGE } from "@/pages/influencer/dashboard-layout/data/emptyListMessage.ts";
+
 import './_promos-table.scss';
 
 interface Props {
@@ -10,6 +14,7 @@ interface Props {
 }
 
 export const PromosTable = ({ promos, isInitialLoading, isRefreshing }: Props) => {
+  const { activePromosFilter } = useDashboardLayoutStore();
 
   if (isInitialLoading) {
     return (
@@ -38,14 +43,17 @@ export const PromosTable = ({ promos, isInitialLoading, isRefreshing }: Props) =
 
   if (promos.length === 0) {
     return (
-      <div style={{ fontSize: 40, textAlign: "center", padding: 40 }}>
-        No promos found.
-      </div>
+      <EmptyPromosList
+        title={EMPTY_MESSAGE[activePromosFilter].title}
+        description={EMPTY_MESSAGE[activePromosFilter].description}
+        isDashboard={true}
+      />
     );
   }
 
+  // ${isRefreshing ? "promos-table-wrap--overlay" : ""}
   return (
-    <div className="promos-table-wrap">
+    <div className={`promos-table-wrap`}>
       <table className={`promos-table ${isRefreshing ? "promos-table--dimmed" : ""}`}>
         <thead className="promos-table__thead">
         <tr className="promos-table__thead-tr">

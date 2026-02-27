@@ -8,9 +8,10 @@ interface Props {
   value: string;
   copyable?: boolean;
   linkable?: boolean;
+  icon?: string;
 }
 
-export const DetailsRow: React.FC<Props> = ({ label, value, copyable, linkable }) => {
+export const DetailsRow: React.FC<Props> = ({ label, value, copyable, linkable, icon }) => {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<number | null>(null);
 
@@ -29,7 +30,7 @@ export const DetailsRow: React.FC<Props> = ({ label, value, copyable, linkable }
       }, 300);
 
     } catch (err) {
-      //set some error in toast notification
+      //TODO: set some error in toast notification
       console.error('Copy failed', err);
     }
   };
@@ -44,7 +45,10 @@ export const DetailsRow: React.FC<Props> = ({ label, value, copyable, linkable }
 
   return (
     <div className="promos-details-list-card__body-details-item">
-      <p className="promos-details-list-card__body-details-item-name">{label}</p>
+      <span className={`promos-details-list-card__body-details-item-label ${icon ? 'promos-details-list-card__body-details-item-label--with-icon' : ''}`}>
+        {icon && <img src={icon} alt={`${label}-icon`} className="promos-details-list-card__body-details-item-icon"/>}
+        <p className="promos-details-list-card__body-details-item-name">{label}</p>
+      </span>
       {copyable ? (
         <div className="promos-details-list-card__body-details-item-wrapper">
           <p className="promos-details-list-card__body-details-item-description">{value}</p>

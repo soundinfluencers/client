@@ -1,69 +1,60 @@
 import type { FC } from 'react';
-import { TERMS_SECTIONS } from '@/constants/influencer/terms/terms.data.ts';
-
-import './_influencer-terms-page.scss';
+import {
+  TERMS_MAIN_TEXT,
+  TERMS_SECTIONS,
+  TERMS_SUBTITLE,
+  TERMS_TITLE,
+} from '@/constants/influencer/terms/terms.data.ts';
 import { ButtonMain } from "@components/ui/buttons-fix/ButtonFix.tsx";
 
-//TODO: refork button link to close window
+import './_influencer-terms-page.scss';
+import { Container } from "@/components";
+
 export const InfluencerTermsPage: FC = () => {
   const handleClickButton = () => {
     window.close();
   };
 
   return (
-    <div className='terms-page__wrapper'>
-      <div className='terms-page'>
-        <div className='terms-page__title-block'>
-          <p className='terms-page__title'>
-            User agreement between Soundinfluencers.com users
-          </p>
-          <p className='terms-page__subtitle'>
-            and Techno TV LTD
-          </p>
-        </div>
+    <Container className="terms-page">
+      <div className="terms-page__title-block">
+        <h1 className="terms-page__title">
+          {TERMS_TITLE}
+        </h1>
+        <p className="terms-page__subtitle">
+          {TERMS_SUBTITLE}
+        </p>
+      </div>
 
-        <p className='terms-page__main-text'>
-          This Agreement is entered into between collaborator users of soundinfluencers.com
-          (referred to as "collaborators") and TECHNO TV LTD (referred to as the "client"),
-          a company incorporated in England and Wales, presently representing
-          soundinfluencers.com.
+      <div className="terms-page__wrapper-influencer">
+        <p className="terms-page__main-text">
+          {TERMS_MAIN_TEXT}
         </p>
 
-        <ul className='terms-page__list'>
+        <ul className="terms-page__list">
           {TERMS_SECTIONS.map((section) => (
-            <li key={section.id} className='terms-page__list-item'>
-              <p className='terms-page__list-item-header'>
+            <li key={section.id} className="terms-page__list-item">
+              <p className="terms-page__list-item-header">
                 {section.id}. {section.title}
               </p>
 
-              {'paragraphs' in section &&
-                section.paragraphs.map((text, index) => (
-                  <p key={index} className='terms-page__main-text'>
-                    {text}
-                  </p>
-                ))}
-
-              {'bullets' in section && (
-                <ul className='terms-page__bullet-list'>
-                  {section.bullets.map((item, index) => (
-                    <li key={index} className='terms-page__bullet-item'>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {section.paragraphs.map(({ number, boldText, text }) => (
+                <p key={number} className="terms-page__list-item-text">
+                  {number} {boldText && <span>{boldText}</span>} {text}
+                </p>
+              ))}
             </li>
           ))}
         </ul>
       </div>
 
-      <div className='terms-page__controls'>
+      <div className="terms-page__accept-button">
         <ButtonMain
           label={'Ok'}
           onClick={handleClickButton}
           isDisabled={false}
         />
       </div>
-    </div>
+    </Container>
   );
 };

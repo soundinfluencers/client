@@ -2,6 +2,10 @@
 
 .promos-table-wrap {
   position: relative;
+
+  //&--overlay {
+  //  padding-left: 3px;
+  //}
 }
 
 .promos-table {
@@ -46,10 +50,9 @@
   display: grid;
   place-items: center;
   backdrop-filter: blur(2px);
+  pointer-events: auto;
 
   //background: rgba(255, 255, 255, 0.35);
-  // если хочешь блокировать клики во время refresh — оставь pointer-events: auto
-  //pointer-events: auto;
   //cursor: progress;
 }
 

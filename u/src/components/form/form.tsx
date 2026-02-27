@@ -3,7 +3,7 @@ import {
   FormProvider,
   useForm,
   type FieldValues,
-  type DefaultValues,
+  type DefaultValues, type UseFormReturn,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ZodSchema } from "zod";
@@ -17,7 +17,10 @@ interface FormSection<T extends FieldValues> {
 
   defaultValues?: DefaultValues<T>;
   schema?: ZodSchema<T>;
+  validateMode?: "onChange" | "onBlur" | "onSubmit" | "onTouched" |"all";
   onSubmit?: (data: T) => Promise<void> | void;
+
+  expose?: (methods: UseFormReturn<T>) => void;
 }
 
 export const Form = <T extends FieldValues>({
@@ -28,20 +31,60 @@ export const Form = <T extends FieldValues>({
   onSubmit,
   defaultValues,
   schema,
+  validateMode = "onChange",
+
+  expose,
 }: FormSection<T>) => {
   const methods = useForm<T>({
     defaultValues,
     resolver: schema ? (zodResolver(schema as any) as any) : undefined,
 
-    mode: "onChange",
+    mode: validateMode,
     reValidateMode: "onChange",
 
     criteriaMode: "all",
     shouldUnregister: false,
+    // shouldFocusError: true,
   });
 
   React.useEffect(() => {
+    expose?.(methods);
+  }, [expose, methods]);
+
+  // React.useEffect(() => {
+  //   if (!defaultValues) return;
+  //   methods.reset(defaultValues, {
+  //     keepDirtyValues: true,
+  //     keepTouched: true,
+  //     keepErrors: true,
+  //     keepIsSubmitted: true,
+  //     keepSubmitCount: true,
+  //   });
+  //   // methods.trigger();
+  // }, [defaultValues, methods]);
+
+  // React.useEffect(() => {
+  //   if (!defaultValues) return;
+  //
+  //   methods.reset(defaultValues, {
+  //     keepDirtyValues: true,
+  //     keepTouched: false,
+  //     keepErrors: false,
+  //     keepIsSubmitted: false,
+  //     keepSubmitCount: false,
+  //   });
+  // }, [defaultValues, methods]);
+
+  const prevDefaultsRef = React.useRef<string>("");
+
+  React.useEffect(() => {
     if (!defaultValues) return;
+
+    const next = JSON.stringify(defaultValues);
+    if (next === prevDefaultsRef.current) return;
+
+    prevDefaultsRef.current = next;
+
     methods.reset(defaultValues, {
       keepDirtyValues: true,
       keepTouched: true,
@@ -52,13 +95,17 @@ export const Form = <T extends FieldValues>({
   }, [defaultValues, methods]);
 
   const handleFormSubmit = async (formData: T) => {
+    console.log("Form submitted with data:", formData);
     if (onSubmit) await onSubmit(formData);
   };
+
   return (
     <FormProvider {...methods}>
       <form
         className={`form ${className ?? ""}`}
-        onSubmit={methods.handleSubmit(handleFormSubmit)}>
+        onSubmit={methods.handleSubmit(handleFormSubmit)}
+        noValidate={true}
+      >
         {children}
         {submitButton && (
           <div className={`form__btn-section ${classNameBtnSection ?? ""}`}>

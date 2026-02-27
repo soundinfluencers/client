@@ -22,7 +22,7 @@ export const useInfluencerInvoice = () => {
   const refreshMe = useRefreshMe();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // ------ INVOICE DETAILS FORM: query + mutation ------
+  // INVOICE DETAILS FORM: query + mutation
   const invoiceDetailsQuery = useQuery({
     queryKey: [INVOICE_DETAILS_PAGE_QUERY_KEY],
     queryFn: getInfluencerInvoiceDetails,
@@ -36,9 +36,9 @@ export const useInfluencerInvoice = () => {
     },
     onError: handleApiError,
   });
-  // ------ END OF INVOICE DETAILS FORM: query + mutation ------
+  // END OF INVOICE DETAILS FORM: query + mutation
 
-  // ----- PAYMENT DETAILS: query + mutation ------
+  // PAYMENT DETAILS: query + mutation
   const paymentDetailsQuery = useQuery({
     queryKey: [INFLUENCER_PAYMENT_DETAILS_QUERY_KEY],
     queryFn: getInfluencerPaymentMethod,
@@ -57,9 +57,9 @@ export const useInfluencerInvoice = () => {
       handleApiError(error);
     },
   });
-  // ----- END OF PAYMENT DETAILS: query + mutation ------
+  // END OF PAYMENT DETAILS: query + mutation
 
-  // ----- CREATE INVOICE FORM: mutation ------
+  // CREATE INVOICE FORM: mutation
   const createInvoiceMutation = useMutation({
     mutationFn: createInvoice,
     onSuccess: async () => {
@@ -68,14 +68,14 @@ export const useInfluencerInvoice = () => {
       console.log('User data refreshed successfully');
       setIsModalOpen(true);
     },
-    onError: (error) => {
-      handleApiError(error);
-    },
+    // onError: (error) => {
+    //   handleApiError(error);
+    // },
   });
-  // ----- END OF CREATE INVOICE FORM: mutation ------
+  // END OF CREATE INVOICE FORM: mutation
 
   return {
-    // ---- INVOICE DETAILS FORM STATE & HANDLERS ----
+    // INVOICE DETAILS FORM STATE & HANDLERS
     isFormOpen,
     closeForm: () => setIsFormOpen(false),
     toggleForm: () => setIsFormOpen((prev) => !prev),
@@ -85,22 +85,22 @@ export const useInfluencerInvoice = () => {
     errorInvoiceDetails: invoiceDetailsQuery.error,
     saveInvoiceDetails: invoiceDetailsMutation.mutate,
     isSavingInvoiceDetails: invoiceDetailsMutation.isPending,
-    // ---- END OF INVOICE DETAILS FORM STATE & HANDLERS ----
+    // END OF INVOICE DETAILS FORM STATE & HANDLERS
 
-    // ---- PAYMENT DETAILS STATE & HANDLERS ----
+    // PAYMENT DETAILS STATE & HANDLERS
     paymentDetails: paymentDetailsQuery.data,
     isLoadingPaymentDetails: paymentDetailsQuery.isLoading,
     isErrorPaymentDetails: paymentDetailsQuery.isError,
     errorPaymentDetails: paymentDetailsQuery.error,
     savePaymentDetails: paymentDetailsMutation.mutate,
     isSavingPaymentDetails: paymentDetailsMutation.isPending,
-    // ---- END OF PAYMENT DETAILS STATE & HANDLERS ----
+    // END OF PAYMENT DETAILS STATE & HANDLERS
 
-    // ---- CREATE INVOICE FORM: state & handlers ----
+    // CREATE INVOICE FORM: state & handlers
     isModalOpen,
     setIsModalOpen,
     saveInvoice: createInvoiceMutation.mutate,
     isSavingInvoice: createInvoiceMutation.isPending,
-    // ---- END OF CREATE INVOICE FORM: state & handlers ----
+    // END OF CREATE INVOICE FORM: state & handlers
   };
 };

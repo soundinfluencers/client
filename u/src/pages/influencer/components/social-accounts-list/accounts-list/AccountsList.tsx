@@ -1,3 +1,4 @@
+import React from "react";
 import { useAccountSetupStore } from '../../account-setup-form/store/useAccountSetupStore';
 import { EditButton } from '@components/ui/edit-button/EditButton.tsx';
 import type { TSocialAccounts, TSocialAccountShort } from '@/types/user/influencer.types.ts';
@@ -13,29 +14,36 @@ interface Props {
 export const AccountsList: React.FC<Props> = ({ id, accounts }) => {
   const { onEditAccount } = useAccountSetupStore();
 
-  console.log(accounts);
+  console.log('Accounts:', accounts);
 
+  // TODO: mobile and tablet styles, waiting for design
   return (
     <ul className="accounts-list">
       {accounts && accounts.map((account, index) => (
         <li key={account.accountId ? account.accountId : `${id}-${index}`} className="accounts-list__item">
-          <div className="accounts-list__info">
-            <span className={`accounts-list__number ${account.agreementStatus === 'wait' ? 'accounts-list__number--wait' : ''}`}>{index + 1}</span>
-            <p>{account.username}</p>
-          </div>
+          <span
+            className={`accounts-list__number ${account.verifiedStatus === 'new' || account.verifiedStatus === "priceChanged" ? 'accounts-list__number--wait' : ''}`}
+          >
+            {index + 1}
+          </span>
 
-          {account.agreementStatus === 'wait' ? (
+          <p className={'accounts-list__name'}>{account.username}</p>
+
+          {account.verifiedStatus === 'new' || account.verifiedStatus === "priceChanged" ? (
             <div className="accounts-list__status">
               <img src={refreshIcon} alt="Waiting for agreement" className={'accounts-list__status-img'}/>
-              <span className={'accounts-list__status-text'}>Under Approval</span>
+              <span className={'accounts-list__status-text'}>
+                {account.verifiedStatus === 'new' && 'Under Approval'}
+                {account.verifiedStatus === "priceChanged" && 'Price Change Requested'}
+              </span>
             </div>
           ) : (
             <EditButton variants="social" onClick={() => {
               onEditAccount(id, account.accountId ? account.accountId : String(index));
-            }} />
+            }}/>
           )}
         </li>
       ))}
     </ul>
   );
-}
+};

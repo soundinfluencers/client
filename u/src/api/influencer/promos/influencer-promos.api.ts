@@ -17,7 +17,7 @@ export const getInfluencerPromos = async (
   );
   console.log("Success get influencer all promos:", res.data);
   return res.data.data.promos;
-  
+
   // throw new Error("Function not implemented.");
   // try {
   // } catch (error: unknown) {
@@ -64,17 +64,8 @@ export const getInfluencerDetailsPromoByStatus = async (
   const res = await $api.get(
     `/promos/detailed?status=${status}&limit=${limit}&page=${page}`,
   );
-  console.log("Success get detailed promos:", res.data);
+  console.log("Success get detailed promos:", res.data.data.promos);
   return res.data.data.promos;
-
-  // try {
-  // } catch (error: unknown) {
-  //   console.error("Error fetching influencer promo details by status:", error);
-  //   const axiosError = error as AxiosError;
-  //   console.error("Response status:", axiosError.response?.status);
-  //   console.error("Response data:", axiosError.response?.data);
-  //   throw error;
-  // }
 };
 
 //getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId
@@ -89,20 +80,7 @@ export const getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId =
       `/promos/detailed/${status}/${campaignId}/${addedAccountsId}`,
     );
     console.log("Success get detailed promo by status, campaignId and addedAccountsId:", res.data.data);
-    return [res.data.data];
-
-    // try {
-
-    // } catch (error: unknown) {
-    //   console.error(
-    //     "Error fetching influencer promo details by status, campaignId and addedAccountsId:",
-    //     error,
-    //   );
-    //   const axiosError = error as AxiosError;
-    //   console.error("Response status:", axiosError.response?.status);
-    //   console.error("Response data:", axiosError.response?.data);
-    //   throw error;
-    // }
+    return [res.data.data] as IPromoDetailsModel[];
   };
 
 //create review for promo

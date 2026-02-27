@@ -8,14 +8,14 @@ export interface IAccountUserInput {
 
 export interface ITextInput extends IAccountUserInput {
   type: "text";
-};
+}
 export interface INumberInput extends IAccountUserInput {
   type: "number";
-};
+}
 export interface IFileInput extends IAccountUserInput {
   type: "file";
   size: "small";
-};
+}
 
 export type TAccountUserInputs =
   | ITextInput

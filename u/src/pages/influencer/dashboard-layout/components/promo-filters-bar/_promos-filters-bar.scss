@@ -50,10 +50,15 @@
     }
 
     &-label {
+      background: none;
+      border: 0;
+      padding: 0;
+      font: inherit;
       color: vars.$light-gray;
-      white-space: nowrap;
-      transition: all 0.2s ease;
       cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      transition: color 0.2s ease;
 
       &--active {
         color: vars.$black-blue;
@@ -63,8 +68,8 @@
         font-size: 14px;
       }
 
-      &:hover {
-        color: vars.$black-blue;
+      @media (hover: hover) and (pointer: fine) {
+        &:hover { color: vars.$black-blue; }
       }
     }
 
@@ -75,9 +80,10 @@
       border-radius: 50%;
       background-color: vars.$blue;
       opacity: 0;
-      transition: all 0.2s ease;
+      transition: opacity 0.2s ease;
 
       &--active {
+        //background-color: vars.$blue;
         opacity: 1;
       }
 
@@ -95,7 +101,7 @@
       font-size: 13px;
       line-height: 105%;
       text-align: center;
-      transition: all 0.2s ease;
+      transition: background-color 0.2s ease;
 
       @media screen and (max-width: 900px) {
         padding: 4px 8px;
@@ -105,8 +111,9 @@
         padding: 8px;
       }
 
-      &:hover {
-        background-color: vars.$hover-button-2;
+      // TODO: @media (hover: hover) and (pointer: fine) for better UX on touch devices
+      @media (hover: hover) and (pointer: fine) {
+        &:hover { background-color: vars.$hover-button-2; }
       }
     }
   }

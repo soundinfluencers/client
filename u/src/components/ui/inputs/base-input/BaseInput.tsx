@@ -89,7 +89,13 @@ export function BaseInput<T extends FieldValues>({
           onChange={field.onChange}
           onBlur={field.onBlur}
         />
-        {error && <p className="base-input__error-message">{error?.message}</p>}
+        <p className={`base-input__error-message ${
+            error ? 'base-input__error-message--show' : ''
+          }`}
+           aria-live="polite"
+        >
+          {error?.message}
+        </p>
       </div>
     );
   }
@@ -113,15 +119,16 @@ export function BaseInput<T extends FieldValues>({
         placeholder={placeholder}
         type={'text'}
         inputMode={'numeric'}
-        pattern={type === 'numeric' ? "[0-9]*" : undefined}
         disabled={disabled}
         value={displayValue}
         onChange={(e) => {
-          if (/\D/.test(e.target.value)) {
-            // If non-digit characters are present, ignore the change
+          const raw = e.target.value;
+
+          if (type === 'numeric' && /\D/.test(raw)) {
+            // if non-digit characters are present, ignore the change
             return;
           }
-          const raw = e.target.value;
+
           const next = type === "numeric" ? sanitizeDigits(raw) : sanitizeNumber(raw);
 
           setDisplayValue(next);
@@ -135,67 +142,13 @@ export function BaseInput<T extends FieldValues>({
           });
         }}
       />
-      {error && <p className="base-input__error-message">{error?.message}</p>}
+      <p className={`base-input__error-message ${
+          error ? 'base-input__error-message--show' : ''
+        }`}
+         aria-live="polite"
+      >
+        {error?.message}
+      </p>
     </div>
   );
 }
-
-
-// interface Props {
-//   name: string;
-//   label: string;
-//   placeholder?: string;
-//   type?: string;
-//   disabled?: boolean;
-// }
-//
-// export const BaseInput: React.FC<Props> = ({
-//                                              name,
-//                                              label,
-//                                              placeholder,
-//                                              type = "text",
-//                                            }) => {
-//   const { control } = useFormContext();
-//
-//   return (
-//     <Controller
-//       control={control}
-//       name={name}
-//       render={({ field, fieldState }) => {
-//         const error = fieldState.error;
-//
-//         // console.log(error?.message);
-//         // console.log('Rendering BaseInput with:', { name, label, placeholder, type, error });
-//
-//         return (
-//           <div className="custom-input">
-//             {label && (
-//               <label
-//                 className={`custom-input__label ${error ? "custom-input__label--error" : ""}`}
-//                 htmlFor={name}
-//               >
-//                 {label}
-//               </label>
-//             )}
-//
-//             <input
-//               className={`custom-input__field ${error ? "custom-input__field--error" : ""}`}
-//               id={name}
-//               type={type}
-//               placeholder={placeholder}
-//               value={field.value ?? ""}
-//               onBlur={field.onBlur}
-//               name={field.name}
-//               ref={field.ref}
-//               onChange={(e) => {
-//                 //correct handle number value
-//                 field.onChange(type === "number" ? Number(e.target.value) : e.target.value);
-//               }}
-//             />
-//             {error && <p className="custom-input__error-message">{error?.message}</p>}
-//           </div>
-//         );
-//       }}
-//     />
-//   );
-// };

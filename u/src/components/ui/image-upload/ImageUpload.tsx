@@ -145,7 +145,7 @@ export function ImageUpload<T extends FieldValues>({
           </>
         )}
       </div>
-      {error && <p className="image-input__error">{error.message}</p>}
+      {error && <p className={`image-input__error-message ${error ? 'image-input__error-message--show' : ''}`}>{error.message}</p>}
       {description && <p className="image-input__description">{description}</p>}
     </div>
   );

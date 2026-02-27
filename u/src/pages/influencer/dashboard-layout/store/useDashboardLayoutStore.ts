@@ -1,12 +1,13 @@
 import { create } from "zustand";
-import type { ListDisplayMode } from "../../../../types/utils/constants.types";
+import type { ListDisplayMode } from "@/types/utils/constants.types.ts";
+import type { TFilterStatus } from "@/pages/influencer/promos/types/promos.types.ts";
 
 interface DashboardLayoutState {
   viewMode: ListDisplayMode;
   setViewMode: (mode: ListDisplayMode) => void;
 
-  activePromosFilter: string;
-  setActivePromosFilter: (option: string) => void;
+  activePromosFilter: TFilterStatus;
+  setActivePromosFilter: (option: TFilterStatus) => void;
   limit: number;
 
   activeCampaignHistoryFilter: string;

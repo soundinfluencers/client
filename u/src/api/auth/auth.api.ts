@@ -24,8 +24,12 @@ export const logoutApi = async () => {
   await $api.post("/auth/logout");
 };
 
-export const resetPasswordApi = async (email: string): Promise<void> => {
-  await $api.post("/forgot/email", { email });
+export type TResetPasswordRequest = {
+  email: string;
+  role: UserRoleType;
+};
+export const resetPasswordApi = async ({ email, role }: TResetPasswordRequest): Promise<void> => {
+  await $api.post("/forgot", { email, role });
 };
 
 // influencer register
@@ -49,6 +53,18 @@ export const updatePasswordApi = async (
     currentPassword,
     newPassword,
   });
+};
+
+
+// TODO: ask Nazar about token undefined case ?
+export type TResetPasswordWithTokenRequest = {
+  token?: string;
+  newPassword: string;
+};
+export const resetPasswordWithTokenApi = async (requestBody: TResetPasswordWithTokenRequest): Promise<void> => {
+  console.log('Resetting password with token...')
+  await $api.patch("/forgot", requestBody);
+  console.log('Password reset successfully with token', requestBody);
 };
 
 interface IGetMeResponse {

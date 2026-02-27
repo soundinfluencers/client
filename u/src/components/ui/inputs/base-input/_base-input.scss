@@ -74,9 +74,20 @@
   }
 
   &__error-message {
+    min-height: 0;
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity .15s ease, height .15s ease;
     margin-top: -4px;
     color: vars.$error;
     font-size: 12px;
+
+    &--show {
+      height: auto;
+      min-height: 16px;
+      opacity: 1;
+    }
 
     @media screen and (max-width: 900px) {
       margin-top: -2px;

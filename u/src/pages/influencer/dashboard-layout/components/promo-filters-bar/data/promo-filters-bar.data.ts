@@ -5,9 +5,3 @@ export const FILTER_OPTIONS: TFilterOption[] = [
   { label: 'Distributing', value: 'ongoing' },
   { label: 'Completed', value: 'close' },
 ];
-
-// export const SECOND_FILTER_OPTIONS = [
-//   { label: 'New Requests', value: '' },
-//   { label: 'Distributing', value: '' },
-//   { label: 'Completed', value: '' },
-// ];

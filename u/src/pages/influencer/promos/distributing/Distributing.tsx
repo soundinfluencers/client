@@ -1,20 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDetailedPromos } from '../hooks/useDetailedPromos';
 import { PromosDetailsList } from '../components/promos-details-list/PromosDetailsList';
 import { CampaignResultForm } from './components/campaign-result-form/CampaignResultForm';
 import { ButtonMain } from '@/components/ui/buttons-fix/ButtonFix';
 import { Breadcrumbs, Container, Loader } from '@/components';
-import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
 import {
   isSubmitOpen,
   isSubmitState,
+  SUBMIT_HASH,
   type DistributingNavState,
   type SubmitResultsNavState,
 } from './components/campaign-result-form/utils/distributing-nav.helper';
 import type { IPromoDetailsModel } from '../types/promos.types';
 
 import './_distributing.scss';
+import {
+  EmptyDistributingList
+} from "@/pages/influencer/promos/distributing/components/empty-distributing-list/EmptyDistributingList.tsx";
+import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 
 //TODO: mb add session storage for campaignId and addedAccountsId to persist state on reload
 export const Distributing: React.FC = () => {
@@ -26,32 +30,17 @@ export const Distributing: React.FC = () => {
   }, []);
 
   const isFormOpen = isSubmitOpen(location.hash);
-
   const isSubmit = isSubmitState(location.state);
   const submitState = isSubmit ? (location.state as SubmitResultsNavState) : null;
 
-  const [pagesIds, setPagesIds] = useState<DistributingNavState>({
-    campaignId: undefined,
-    addedAccountsId: undefined,
-  });
+  const distributingState = !isSubmit
+    ? ((location.state as DistributingNavState | null) ?? null)
+    : null;
 
-  useEffect(() => {
-    if (isSubmit) return;
+  const campaignId = distributingState?.campaignId;
+  const addedAccountsId = distributingState?.addedAccountsId;
 
-    const distributingState = (location.state as DistributingNavState | null) ?? null;
-    const next = {
-      campaignId: distributingState?.campaignId,
-      addedAccountsId: distributingState?.addedAccountsId,
-    };
-
-    setPagesIds((prev) =>
-      prev.campaignId === next.campaignId && prev.addedAccountsId === next.addedAccountsId
-        ? prev
-        : next,
-    );
-  }, [location.state, isSubmit]);
-
-  const { campaignId, addedAccountsId } = pagesIds;
+  const shouldFetchPromos = !(isFormOpen && submitState);
 
   const {
     data,
@@ -60,7 +49,7 @@ export const Distributing: React.FC = () => {
     isLoading,
     error,
     isFetchingNextPage,
-  } = useDetailedPromos({ status: 'ongoing', campaignId, addedAccountsId });
+  } = useDetailedPromos({ status: 'ongoing', campaignId, addedAccountsId, enabled: shouldFetchPromos });
 
   const promos = data?.promos || [];
 
@@ -68,7 +57,7 @@ export const Distributing: React.FC = () => {
     if (isFormOpen && !submitState) {
       navigate({ pathname: location.pathname, hash: '' }, { replace: true });
     }
-  }, [isFormOpen, submitState, navigate, location.pathname, addedAccountsId, campaignId]);
+  }, [isFormOpen, submitState, navigate, location.pathname]);
 
   const openFormScreen = (promo: IPromoDetailsModel) => {
     const nextState: SubmitResultsNavState = {
@@ -77,37 +66,33 @@ export const Distributing: React.FC = () => {
       username: promo.username,
       meta: promo.accountSocialMedia,
 
-      from: { campaignId, addedAccountsId },
+      // from: { campaignId, addedAccountsId },
     };
-    navigate({ pathname: location.pathname, hash: 'submit' }, { state: nextState });
+    navigate({ pathname: location.pathname, hash: SUBMIT_HASH }, { state: nextState });
   };
 
-  // const d = useMemo(() => {
-  //   if (campaignId && addedAccountsId) {
-  //     return ongoingAccept.filter(
-  //       (promo) =>
-  //         promo.campaignId === campaignId && promo.socialAccountId === addedAccountsId,
-  //     );
-  //   }
-  //   return ongoingAccept;
-  // }, [campaignId, addedAccountsId]);
-
   // console.log("Distributing page data:", { campaignId, addedAccountsId, data: d });
+
+  if (isFormOpen && submitState) {
+    return (
+      <Container className="distributing-page">
+        <Breadcrumbs/>
+        <CampaignResultForm submitState={submitState}/>
+      </Container>
+    );
+  }
 
   if (isLoading) {
     return <Loader/>;
   }
 
   if (error) {
-    return <div style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos</div>;
+    return <Error />;
   }
 
   if (promos.length === 0) {
     return (
-      <EmptyPromosList
-        title={'No promos yet'}
-        description={'Once you have promos, they will appear here.'}
-      />
+      <EmptyDistributingList />
     );
   }
 
@@ -116,30 +101,34 @@ export const Distributing: React.FC = () => {
   return (
     <Container className="distributing-page">
       <Breadcrumbs/>
-      {isFormOpen && submitState ? (
-        <CampaignResultForm
-          submitState={submitState}
+      <div className="distributing-page__wrapper">
+        <PromosDetailsList
+          data={promos}
+          status="distributing"
+          onSubmitResults={openFormScreen}
         />
-      ) : (
-        <div className="distributing-page__wrapper">
-          <PromosDetailsList
-            data={promos}
-            status="distributing"
-            onSubmitResults={openFormScreen}
-          />
 
-          {!campaignId && !addedAccountsId && (
-            <ButtonMain
-              label={isFetchingNextPage ? 'Loading...' : 'View more'}
-              onClick={() => fetchNextPage()}
-              isDisabled={!hasNextPage}
-            />
-          )}
-        </div>
-      )}
+        {!campaignId && !addedAccountsId && (
+          <ButtonMain
+            label={isFetchingNextPage ? "Loading..." : "View more"}
+            onClick={() => fetchNextPage()}
+            isDisabled={!hasNextPage}
+          />
+        )}
+      </div>
     </Container>
   );
 };
+
+// const d = useMemo(() => {
+//   if (campaignId && addedAccountsId) {
+//     return ongoingAccept.filter(
+//       (promo) =>
+//         promo.campaignId === campaignId && promo.socialAccountId === addedAccountsId,
+//     );
+//   }
+//   return ongoingAccept;
+// }, [campaignId, addedAccountsId]);
 
 // export const ongoingAccept: IPromoDetailsModel[] = [
 //   {

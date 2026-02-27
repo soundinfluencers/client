@@ -9,6 +9,7 @@ interface UseDetailedPromosParams {
   campaignId?: string;
   addedAccountsId?: string;
   limit?: number;
+  enabled?: boolean;
 }
 
 export const useDetailedPromos = ({
@@ -16,29 +17,38 @@ export const useDetailedPromos = ({
   campaignId,
   addedAccountsId,
   limit = 12,
+  enabled = true,
 }: UseDetailedPromosParams) => {
-  console.log('call getInfluencerDetailsPromoByStatus with', { status, campaignId, addedAccountsId, limit });
+  // console.log('call getInfluencerDetailsPromoByStatus with', { status, campaignId, addedAccountsId, limit });
+
+  // Determine if we are fetching a single promo (when both campaignId and addedAccountsId are provided)
   const isSingle = !!campaignId && !!addedAccountsId;
+  // Determine if we are fetching a list of promos (when neither campaignId nor addedAccountsId is provided)
+  const isList = !campaignId && !addedAccountsId;
+  // We should only fetch if we are either fetching a single promo or a list of promos, and if enabled is true
+  const canFetch = enabled && (isSingle || isList);
 
   return useInfiniteQuery({
     queryKey: [
       "distributingOrCompleted-promos",
       status,
       isSingle ? "single" : "list",
-      isSingle ? campaignId! : limit,
-      isSingle ? addedAccountsId! : null,
+      campaignId ?? null,
+      addedAccountsId ?? null,
+      limit,
     ],
     initialPageParam: 1,
 
     queryFn: ({ pageParam = 1 }) => {
       if (isSingle) {
-        console.log('single:', status)
+        console.log("FETCH SINGLE", { status, campaignId, addedAccountsId });
         return getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId(
           status,
           campaignId!,
           addedAccountsId!,
         );
       }
+      console.log("FETCH LIST", { status, limit, pageParam });
       return getInfluencerDetailsPromoByStatus(status, limit, pageParam);
     },
 
@@ -53,10 +63,10 @@ export const useDetailedPromos = ({
       const promos = status === "ongoing" ?
         rawPromos.filter((promo) => promo.closedStatus !== "close") : rawPromos;
 
-        console.log(promos);
+      console.log(promos);
       return { promos };
     },
 
-    enabled: true,
+    enabled: canFetch,
   });
 };

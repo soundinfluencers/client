@@ -47,4 +47,49 @@
       font-size: 24px;
     }
   }
+
+  &__modal-content {
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+
+    &-icon {
+      width: 100px;
+      height: 100px;
+    }
+
+    &-title-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    &-title {
+      font-size: 40px;
+      font-weight: 400;
+      text-align: center;
+    }
+
+    &-subtitle-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    &-subtitle {
+      font-size: 20px;
+      color: vars.$gray;
+      text-align: center;
+    }
+
+    &-text {
+      font-size: 16px;
+      color: vars.$gray;
+      text-align: center;
+    }
+  }
 }
