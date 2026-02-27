@@ -42,7 +42,7 @@ import {
 } from "@/pages/influencer/account-setting/components/account-setting-main/AccountSettingMain.tsx";
 import {
   NewPassword
-} from "@/pages/influencer/account-setting/components/edit-password-flow/new-password/NewPassword.tsx";
+} from "@/pages/auth/new-password/NewPassword.tsx";
 
 
 function App() {

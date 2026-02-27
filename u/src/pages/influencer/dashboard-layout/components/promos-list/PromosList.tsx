@@ -14,6 +14,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 // import { TableCardSkeleton } from "@/shared/ui/skeletons/table-card-skeleton.tsx";
 // import { SmallLoader } from "@components/ui/small-loader/SmallLoader.tsx";
 import "./_promos-list.scss";
+import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 
 export const PromosList = () => {
   const { viewMode, activePromosFilter, limit } = useDashboardLayoutStore();
@@ -45,17 +46,7 @@ export const PromosList = () => {
   console.log("Promos data:", data);
 
   const activePromos = data?.pages.flat() ?? [];
-
-  // useMemo to filter out declined promos
-  // const filteredPromos = activePromos.filter(promo => promo.confirmation !== 'decline');
-
   // console.log('Filtered promos', filteredPromos);
-
-  // if (true) {
-  //   return (
-  //     <TableCardSkeleton />
-  //   );
-  // }
 
   const isInitialLoading = isPending && !data;
   const isLoadingMore = isFetchingNextPage;
@@ -63,7 +54,7 @@ export const PromosList = () => {
 
   if (isError) {
     return (
-      <p style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos.</p>
+      <Error />
     );
   }
 
@@ -87,13 +78,15 @@ export const PromosList = () => {
             </div>
           )}
 
-          <div className="promos-list__actions">
-            <ButtonMain
-              label={isLoadingMore ? "Loading..." : "View more"}
-              onClick={() => hasNextPage && fetchNextPage()}
-              isDisabled={!hasNextPage || isLoadingMore}
-            />
-          </div>
+          {activePromos.length !== 0 && (
+            <div className="promos-list__actions">
+              <ButtonMain
+                label={isLoadingMore ? "Loading..." : "View more"}
+                onClick={() => hasNextPage && fetchNextPage()}
+                isDisabled={!hasNextPage || isLoadingMore}
+              />
+            </div>
+          )}
         </div>
       }
     </div>
@@ -107,8 +100,3 @@ export const PromosList = () => {
           Scroll to top
         </button> */
 }
-
-// <EmptyPromosList
-//   title={'No new promotions right now'}
-//   description={'You’re all caught up. New promotions will appear here as soon as they’re available.'}
-// />

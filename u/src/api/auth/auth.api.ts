@@ -55,6 +55,18 @@ export const updatePasswordApi = async (
   });
 };
 
+
+// TODO: ask Nazar about token undefined case ?
+export type TResetPasswordWithTokenRequest = {
+  token?: string;
+  newPassword: string;
+};
+export const resetPasswordWithTokenApi = async (requestBody: TResetPasswordWithTokenRequest): Promise<void> => {
+  console.log('Resetting password with token...')
+  await $api.patch("/forgot", requestBody);
+  console.log('Password reset successfully with token', requestBody);
+};
+
 interface IGetMeResponse {
   firstName: string;
   role: UserRoleType;

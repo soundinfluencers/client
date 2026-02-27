@@ -1,3 +1,4 @@
+import React from "react";
 import { DetailsRow } from './DetailsRow';
 import { ButtonMain, ButtonSecondary } from '@components/ui/buttons-fix/ButtonFix.tsx';
 
@@ -8,7 +9,6 @@ import type { IPromoDetailsModel, TConfirmationType, TPromoStatus } from '../../
 // import type { TCampaignInfo, TSocialMedia } from '../../../distributing/components/campaign-result-form/types/campaign-result-form.types';
 
 import './_promos-details-list-card.scss';
-import React from "react";
 // import { useUser } from "@/store/get-user";
 
 interface Props {
@@ -60,7 +60,16 @@ export const PromosDetailsListCard: React.FC<Props> = ({
 
       <div className="promos-details-list-card__body">
         <span className="promos-details-list-card__body-header">
-          <img src={`/promo-preview.png`} alt="Promo Preview" />
+          <img
+            src={promo.logoUrl?.trim() || '/promo-preview.png'}
+            alt={promo.username}
+            onError={(e) => {
+              const img = e.currentTarget;
+              img.onerror = null;
+              img.src = '/promo-preview.png';
+            }}
+            loading={'lazy'}
+          />
           <span>{promo.campaignName}</span>
         </span>
         <div className="promos-details-list-card__body-details">
@@ -76,6 +85,7 @@ export const PromosDetailsListCard: React.FC<Props> = ({
                 }
                 copyable={field.copyable}
                 linkable={field.linkable}
+                icon={field.icon}
               />
             ))}
         </div>

@@ -1,0 +1,122 @@
+@use "@/styles/variables/variables" as vars;
+
+.empty-distributing-list {
+  max-width: 600px;
+  padding: 48px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 32px;
+
+  &__main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__title-block {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__title {
+    font-size: 40px;
+    font-weight: 400;
+  }
+
+  &__description {
+    color: vars.$gray;
+    font-size: 20px;
+    font-weight: 400;
+  }
+
+  &__img {
+    width: 272px;
+    height: 200px;
+    background: transparent;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 24px;
+  }
+
+  &__additional-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    &-title {
+      font-size: 20px;
+      font-weight: 400;
+    }
+
+    &-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      &__item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+
+    &-icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__footer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+
+  @media screen and (max-width: 900px) {
+    padding: 32px 0;
+
+    &__main-content {}
+    &__title-block {}
+    &__title {}
+    &__description {}
+    &__img {}
+    &__actions {}
+    &__additional-info {
+      &-title {
+      }
+      &-options {
+        &__item {}
+      }
+      &-icon {}
+    }
+    &__footer {}
+  }
+
+  @media screen and (max-width: 500px) {
+    padding: 24px 0;
+
+    &__main-content {}
+    &__title-block {}
+    &__title {}
+    &__description {}
+    &__img {}
+    &__actions {}
+    &__additional-info {
+      &-title {
+      }
+      &-options {
+        &__item {}
+      }
+      &-icon {}
+    }
+    &__footer {}
+  }
+}

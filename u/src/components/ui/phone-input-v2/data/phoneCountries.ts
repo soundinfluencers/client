@@ -60,20 +60,18 @@ export const pickCountryByPhone = (
   const v = sanitizePhone(raw);
   if (!v.startsWith("+")) return current ?? UN_COUNTRY;
 
-  //Try to determine the country correctly (including NANP +1)
   const pn = parsePhoneNumberFromString(v);
+
   const iso2 = pn?.country?.toLowerCase();
-  if (iso2) return COUNTRY_BY_ISO2.get(iso2) ?? UN_COUNTRY;
+  if (iso2) {
+    const detected = COUNTRY_BY_ISO2.get(iso2);
 
-  //If it didn't parse (short number) - fallback to dialCode
-  const match = ALL_PHONE_COUNTRIES
-  .filter((c) => c.dialCode && v.startsWith(c.dialCode))
-  .sort((a, b) => b.dialCode.length - a.dialCode.length)[0];
+    if (current && detected && current.dialCode === detected.dialCode) {
+      return current;
+    }
 
-  // for "+1" we don't want to pick a random country until libphonenumber is sure about it
-  if (match?.dialCode === "+1") {
-    return current ?? UN_COUNTRY; // or COUNTRY_BY_ISO2.get("us") ?? current ?? UN_COUNTRY
+    return detected ?? current ?? UN_COUNTRY;
   }
 
-  return match ?? current ?? UN_COUNTRY;
+  return current ?? UN_COUNTRY;
 };

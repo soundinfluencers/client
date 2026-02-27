@@ -43,6 +43,7 @@ export const TabBar: FC = () => {
   // console.log("Location in TabBar: ", location.pathname.split('/')[1]);
 
   const isTermsPage = location.pathname.startsWith("/terms");
+  const isAgreementPage = location.pathname.startsWith("/profile/agreement");
 
   return (
     <div className="tab-bar" ref={tabBarRef}>
@@ -57,7 +58,7 @@ export const TabBar: FC = () => {
                 {/* <LoginButton onClick={() => navigate("/login")} /> */}
               </>
             ) : (
-              !isTermsPage && (
+              !isTermsPage && !isAgreementPage && (
                 <>
                   <div
                     className={`tab-bar__user-menu ${isDropdownOpen ? "tab-bar__user-menu--close" : ""}`}

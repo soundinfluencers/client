@@ -11,9 +11,9 @@ import './_new-promos.scss';
 import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
 import { useDetailedPromos } from "@/pages/influencer/promos/hooks/useDetailedPromos.ts";
 import { useLocation } from "react-router-dom";
+import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 
 export const NewPromos = () => {
-  // const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDecline, setIsDecline] = useState(false);
   const [isAccepted, setIsAccepted] = useState(false);
@@ -52,7 +52,7 @@ export const NewPromos = () => {
   }
 
   if (fetchError) {
-    return <div style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos</div>;
+    return <Error />;
   }
 
   if (promos.length === 0) {
@@ -82,10 +82,6 @@ export const NewPromos = () => {
                 setIsDecline(false);
                 setIsAccepted(true);
                 setIsModalOpen(true);
-                // navigate('/influencer/promos/new-promos', {
-                //   replace: true,
-                //   state: null
-                // });
               },
             });
           }}
@@ -95,10 +91,6 @@ export const NewPromos = () => {
                 setIsAccepted(false);
                 setIsDecline(true);
                 setIsModalOpen(true);
-                // navigate('/influencer/promos/new-promos', {
-                //   replace: true,
-                //   state: null
-                // });
               },
             });
           }}

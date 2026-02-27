@@ -26,7 +26,7 @@ export const InfluencerTermsPage: FC = () => {
         </p>
       </div>
 
-      <div className="terms-page__wrapper">
+      <div className="terms-page__wrapper-influencer">
         <p className="terms-page__main-text">
           {TERMS_MAIN_TEXT}
         </p>

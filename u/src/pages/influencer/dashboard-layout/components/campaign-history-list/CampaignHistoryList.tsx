@@ -9,6 +9,7 @@ import { CampaignHistoryTable } from './components/campaign-history-table/Campai
 //   Campaign
 // } from "@/pages/influencer/dashboard-layout/components/campaign-history-list/types/campaign-history.types.ts";
 import './_campaign-history-list.scss';
+import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 
 export const CampaignHistoryList = () => {
   const { activeCampaignHistoryFilter, limit } = useDashboardLayoutStore();
@@ -62,9 +63,7 @@ export const CampaignHistoryList = () => {
 
   if (isError) {
     return  (
-      <p style={{ fontSize: 40, textAlign: "center", paddingTop: 40 }}>
-        Error loading campaign history.
-      </p>
+      <Error />
     )
   }
 
@@ -75,13 +74,15 @@ export const CampaignHistoryList = () => {
           <CampaignHistoryTable campaigns={campaigns} isInitialLoading={isInitialLoading} />
         </div>
 
-        <div className="campaign-history-list__actions">
-          <ButtonMain
-            label={isLoadingMore ? "Loading..." : "View more"}
-            onClick={() => hasNextPage && fetchNextPage()}
-            isDisabled={!hasNextPage || isLoadingMore}
-          />
-        </div>
+        {campaigns.length > 0 && (
+          <div className="campaign-history-list__actions">
+            <ButtonMain
+              label={isLoadingMore ? "Loading..." : "View more"}
+              onClick={() => hasNextPage && fetchNextPage()}
+              isDisabled={!hasNextPage || isLoadingMore}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

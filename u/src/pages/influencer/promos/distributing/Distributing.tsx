@@ -5,7 +5,6 @@ import { PromosDetailsList } from '../components/promos-details-list/PromosDetai
 import { CampaignResultForm } from './components/campaign-result-form/CampaignResultForm';
 import { ButtonMain } from '@/components/ui/buttons-fix/ButtonFix';
 import { Breadcrumbs, Container, Loader } from '@/components';
-import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
 import {
   isSubmitOpen,
   isSubmitState,
@@ -16,6 +15,10 @@ import {
 import type { IPromoDetailsModel } from '../types/promos.types';
 
 import './_distributing.scss';
+import {
+  EmptyDistributingList
+} from "@/pages/influencer/promos/distributing/components/empty-distributing-list/EmptyDistributingList.tsx";
+import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 
 //TODO: mb add session storage for campaignId and addedAccountsId to persist state on reload
 export const Distributing: React.FC = () => {
@@ -84,15 +87,12 @@ export const Distributing: React.FC = () => {
   }
 
   if (error) {
-    return <div style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading promos</div>;
+    return <Error />;
   }
 
   if (promos.length === 0) {
     return (
-      <EmptyPromosList
-        title={'No promos yet'}
-        description={'Once you have promos, they will appear here.'}
-      />
+      <EmptyDistributingList />
     );
   }
 
