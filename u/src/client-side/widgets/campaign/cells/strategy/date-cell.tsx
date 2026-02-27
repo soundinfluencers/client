@@ -13,6 +13,7 @@ type Props = {
 
   customDate: string;
   setCustomDate: (v: string) => void;
+  canEdit?: boolean;
 };
 
 export const DateCell = React.memo(function DateCell({
@@ -23,8 +24,21 @@ export const DateCell = React.memo(function DateCell({
   setSelectedDate,
   customDate,
   setCustomDate,
+  canEdit,
 }: Props) {
+  const value = String(selectedDate ?? "");
   const isDate = selectedDate === "BEFORE" || selectedDate === "AFTER";
+  if (!canEdit) {
+    return (
+      <td className="tableBase__td ">
+        <div className={`no-edit ${isDate ? "isDate" : undefined}`}>
+          {" "}
+          <p className="hidden-text">{value}</p>
+          {isDate && <p>{customDate}</p>}
+        </div>
+      </td>
+    );
+  }
 
   return (
     <td className="tableBase__td">

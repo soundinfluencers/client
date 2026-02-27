@@ -13,20 +13,27 @@ interface Props {
 
 export const ScrollGenres: React.FC<Props> = React.memo(
   ({ selectedGenre, onGenreSelect }) => {
-    const { ref, showArrow, scrollRight } = useHorizontalScroll();
+    const { ref, showRightArrow, showLeftArrow, scrollRight, scrollLeft } =
+      useHorizontalScroll();
 
     return (
       <div className="platforms-scroll">
         <div className="platforms-scroll__header">
           <h3>Select your music genre</h3>
-          {showArrow && (
-            <img
-              src={chevron}
-              alt="scroll right"
-              onClick={() => scrollRight()}
-              className="platforms-scroll__arrow"
-            />
-          )}
+          <div className="arrows">
+            {showLeftArrow && (
+              <img
+                onClick={() => scrollLeft()}
+                src={chevron}
+                alt="Left"
+                style={{ transform: "rotate(180deg)" }}
+              />
+            )}
+
+            {showRightArrow && (
+              <img onClick={() => scrollRight()} src={chevron} alt="Right" />
+            )}
+          </div>
         </div>
 
         <ul ref={ref} className="platforms-scroll__list">

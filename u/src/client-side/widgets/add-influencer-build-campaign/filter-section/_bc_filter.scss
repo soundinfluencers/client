@@ -6,22 +6,9 @@
   border: 1px solid;
   border: 1px solid rgba(231, 232, 241, 1);
   border-radius: 8px;
-  @media screen and (max-width: 900px) {
-    max-width: 100%;
-  }
-  &.bc_filterForTable {
-    @media screen and (max-width: 600px) {
-      max-width: 100%;
-      .blockWithMethod {
-        max-width: 100%;
-        width: 100%;
-      }
-    }
-  }
-  &__sticky {
-    position: sticky;
-    top: 30px;
-  }
+
+  height: 100%;
+
   &__head {
     position: relative;
     display: flex;
@@ -114,7 +101,8 @@
             appearance: none;
             width: 18px;
             height: 18px;
-            border: 2px solid #000;
+            border: 0.1em solid #000;
+
             border-radius: 50%;
             display: inline-block;
             position: relative;
@@ -143,16 +131,40 @@
               display: flex;
               align-items: center;
               gap: 8px;
+              label {
+                cursor: pointer;
+              }
             }
             .children {
               display: flex;
               flex-direction: column;
               gap: 8px;
               margin-top: 10px;
-              margin-left: 40px;
+              margin-left: 27px;
             }
           }
         }
+      }
+    }
+  }
+}
+.sticky-filter {
+  max-width: 312px;
+  width: 100%;
+  position: sticky;
+  top: 30px;
+  height: 100%;
+  @media screen and (max-width: 900px) {
+    position: relative;
+    max-width: 100%;
+  }
+  margin-bottom: 26px;
+  &.bc_filterForTable {
+    @media screen and (max-width: 600px) {
+      max-width: 100%;
+      .blockWithMethod {
+        max-width: 100%;
+        width: 100%;
       }
     }
   }

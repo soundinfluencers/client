@@ -1,82 +1,97 @@
-import type { IBespokeCampaignTabData } from "@/shared/types/client/form-clients/bespoke-campaign-tabs-data";
+import type { IBespokeCampaignTabData } from "@/types/client/form-clients/bespoke-campaign-tabs-data";
 import { z } from "zod";
 
-const urlRegex = /^https?:\/\/\S+/i;
+type Category = "artist" | "music" | "event" | "other";
+type Values = Record<string, any>;
 
-const REQUIRED_FIELDS = new Set([
-  "Campaign objective",
-  "Content available",
-  "Your budget",
-]);
-
-const BUDGET_FIELDS = new Set(["Your budget"]);
-
-const SMARTLINK_FIELD_NAMES = new Set([
-  "Linkfire / smartlink",
-  "Enter linkfire / smartlink",
-]);
-
-const isUrlField = (name: string) => {
-  const lower = name.toLowerCase();
-  return (
-    lower.includes("link") ||
-    lower.includes("links") ||
-    lower.includes("smartlink") ||
-    SMARTLINK_FIELD_NAMES.has(name)
-  );
+const REQUIRED_FIELDS: Record<Category, string[]> = {
+  artist: ["Campaign objective", "Content available", "Your budget"],
+  music: ["Content available", "Your budget"],
+  event: ["Content available", "Your budget"],
+  other: ["Brief"],
 };
 
-export const buildPromoTabSchema = (tab: IBespokeCampaignTabData) => {
-  const shape: Record<string, z.ZodTypeAny> = {};
+const parseAmount = (v: any) => {
+  const s = String(v ?? "");
+  const numeric = s
+    .replace(/\s/g, "")
+    .replace(",", ".")
+    .replace(/[^\d.]/g, "");
+  return numeric ? Number(numeric) : 0;
+};
 
-  tab.inputs?.forEach((i) => {
-    const name = i.name;
+const isEmpty = (v: any) =>
+  v == null || (typeof v === "string" && v.trim().length === 0);
 
-    // BUDGET: required + currency required
-    if (BUDGET_FIELDS.has(name)) {
-      shape[name] = z
-        .string()
-        .trim()
-        .min(1, "Budget is required")
-        .refine((v) => {
-          const cleaned = v.replace(",", ".");
-          return cleaned !== "" && !isNaN(Number(cleaned));
-        }, "Budget must be a number");
+// Бюджет: приводим к number и валидируем > 0
+const budgetSchema = z.preprocess(
+  (v) => parseAmount(v),
+  z.number().gt(0, "Budget is required."),
+);
 
-      shape["Your budget currency"] = z.enum(["£", "$", "€"]);
-      return;
-    }
+// Все возможные поля (можешь добавлять новые — просто допиши тут ключ)
+const baseBespokeSchema = z.object({
+  ["Campaign objective"]: z.string().optional(),
+  ["Content available"]: z.string().optional(),
+  ["Your budget"]: z.any().optional(),
+  ["Your budget currency"]: z.string().optional(), // если у тебя реально есть это поле
+  ["Target territories"]: z.string().optional(),
+  ["Any Extra Briefs"]: z.string().optional(),
 
-    // REQUIRED fields
-    if (REQUIRED_FIELDS.has(name)) {
-      shape[name] = z.string().trim().min(1, "This field is required");
-      return;
-    }
+  ["Download or private link to the track"]: z.string().optional(),
+  ["Release date"]: z.string().optional(),
+  ["Enter linkfire / smartlink"]: z.string().optional(),
+  ["What you’re promoting (Campaign Goal)"]: z.string().optional(),
+  ["Ticket link"]: z.string().optional(),
 
-    // ALL OTHER inputs: optional (allow empty)
-    shape[name] = z.string().trim().optional().or(z.literal(""));
-  });
+  ["Any extra notes (messaging, influencer type, content ideas)"]: z
+    .string()
+    .optional(),
 
-  tab.textAreas?.forEach((t) => {
-    // ALL textareas optional (allow empty)
-    shape[t.name] = z.string().trim().optional().or(z.literal(""));
-  });
+  ["Brief"]: z.string().optional(),
+});
 
-  return z.object(shape).superRefine((data, ctx) => {
-    for (const [key, value] of Object.entries(data)) {
-      const v = String(value ?? "").trim();
-      if (!v) continue;
+export const buildBespokeSchema = (category: Category) =>
+  baseBespokeSchema.superRefine((values, ctx) => {
+    // required поля (кроме бюджета — он отдельно)
+    for (const field of REQUIRED_FIELDS[category]) {
+      if (field === "Your budget") continue;
 
-      if (isUrlField(key) && !urlRegex.test(v)) {
+      if (isEmpty(values[field])) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: [key],
-          message: "Enter a valid URL (https://...)",
+          path: [field],
+          message: "Required.",
         });
       }
     }
+
+    // required бюджет (если в списке required)
+    if (REQUIRED_FIELDS[category].includes("Your budget")) {
+      const res = budgetSchema.safeParse(values["Your budget"]);
+      if (!res.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["Your budget"],
+          message: res.error.issues[0]?.message ?? "Budget is required.",
+        });
+      }
+    }
+
+    // пример “расширения по необходимости”:
+    // если указан trackLink — тогда Release date обязателен
+    if (
+      category === "music" &&
+      !isEmpty(values["Download or private link to the track"]) &&
+      isEmpty(values["Release date"])
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["Release date"],
+        message: "Release date is required when track link is provided.",
+      });
+    }
   });
-};
 
 export const buildPromoTabDefaultValues = (tab: IBespokeCampaignTabData) => {
   const defaults: Record<string, any> = {};

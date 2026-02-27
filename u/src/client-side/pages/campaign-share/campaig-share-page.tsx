@@ -9,9 +9,18 @@ import {
   CampaignTablePageShare,
   ProposalCampaignPageShare,
 } from "@/client-side/widgets";
-import { useFetchCampaign } from "@/client-side/store";
+import {
+  useFetchCampaign,
+  useProposalCampaignStore,
+} from "@/client-side/store";
 import { OptionsSlider } from "@/client-side/widgets/campaign-share/components/option-slider";
-import { Bar } from "@/client-side/ui";
+import {
+  Bar,
+  BarSection,
+  ToggleTables,
+  ViewAudience,
+  ViewChange,
+} from "@/client-side/ui";
 interface Props {}
 
 export const CampaignSharePage: React.FC<Props> = () => {
@@ -21,6 +30,9 @@ export const CampaignSharePage: React.FC<Props> = () => {
   const [localExtraOptions, setLocalExtraOptions] = React.useState<number[]>(
     [],
   );
+  const [changeView, setChangeView] = React.useState(false);
+  const [view, setView] = React.useState<number>(0);
+  const [flag, setFlag] = React.useState<boolean>(true);
   const { data, setProposalOption } = useFetchCampaign();
 
   const {
@@ -35,17 +47,32 @@ export const CampaignSharePage: React.FC<Props> = () => {
   React.useEffect(() => {
     if (!id || !isProposal) return;
 
-    // инициализируем proposal с текущей выбранной опцией,
-    // а не всегда с 0
     const idx = data?.selectedOption?.optionIndex ?? 0;
-
+    useProposalCampaignStore
+      .getState()
+      .initOption(
+        data?.campaignId,
+        idx,
+        data?.selectedOption?.addedAccounts ?? [],
+        data?.selectedOption?.campaignContent ?? [],
+        { force: true },
+      );
     setProposalOption(id, idx);
     setActiveOption(idx);
-  }, [id, isProposal]); // ← убрали лишние зависимости
+  }, [id, isProposal, data?.selectedOption?.optionIndex]);
   if (isLoading) {
     return <Loader />;
   }
 
+  const isBarSection =
+    campaign && ["distributing", "completed"].includes(campaign?.status);
+  const BarComponent = campaign
+    ? isBarSection
+      ? BarSection
+      : Bar
+    : data
+      ? Bar
+      : null;
   // if (isError || !campaign || !data) {
   //   return (
   //     <Container>
@@ -67,7 +94,7 @@ export const CampaignSharePage: React.FC<Props> = () => {
   const statusFlag = ["distributing", "completed"].includes(
     campaign?.status ?? "",
   );
-
+  console.log(campaign, "cam");
   return (
     <Container className="campaignBase">
       <div className="campaignBase__title">
@@ -75,30 +102,51 @@ export const CampaignSharePage: React.FC<Props> = () => {
           {campaign?.campaignName || data?.campaignName} - Campaign
           SoundInfluencers
         </h1>
-      </div>
-      {data && <Bar campaign={data} />}
+      </div>{" "}
+      {BarComponent && <BarComponent campaign={campaign || data} />}
       {data && (
         <OptionsSlider
           optionIndexes={optionIndexes}
           activeOption={activeOption}
           onClickOption={onClickOption}
         />
-      )}
-
+      )}{" "}
+      <div className="controls-second">
+        {" "}
+        {data && view !== 0 && (
+          <ViewAudience
+            flag={changeView}
+            onChange={() => setChangeView((prev) => !prev)}
+          />
+        )}{" "}
+        {campaign && campaign.status !== "under_review" && (
+          <ToggleTables onChange={() => setFlag((prev) => !prev)} flag={flag} />
+        )}
+        <div className="controls-second__content">
+          <ViewChange isProposal={false} setView={setView} view={view} />
+        </div>
+      </div>
       <div className="campaignBase__content">
         <div className="campaignBase__table-wrapper">
           {campaign && (
             <CampaignTablePageShare
+              flag={flag}
               statusFlag={statusFlag}
+              view={view}
               campaign={campaign}
             />
           )}
           {data && (
             <ProposalCampaignPageShare
               campaign={data}
-              changeView={false}
-              view={0}
+              changeView={changeView}
+              view={view}
             />
+          )}
+          {data && (
+            <p className="option-chose">
+              Option {activeOption + 1} is already selected
+            </p>
           )}
         </div>
       </div>

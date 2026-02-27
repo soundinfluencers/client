@@ -1,5 +1,5 @@
 import React from "react";
-import edit from "@/assets/icons/edit.svg";
+import edit from "@/assets/icons/edit-3 (1).svg";
 import insight from "@/assets/icons/bar-chart-2.svg";
 import activity from "@/assets/icons/activity.svg";
 import type { CampaignResponse } from "@/types/store/index.types";
@@ -28,7 +28,7 @@ export const BarSection: React.FC<Props> = ({ campaign }) => {
               <span>{formatCampaignDate(campaign.creationDate)}</span>
             </p>{" "}
             <p>
-              Budget: <span>{campaign.price}</span>
+              Budget: <span>{campaign.price}€</span>
             </p>{" "}
             <p>
               Posts: <span>{campaign.addedAccounts.length}</span>

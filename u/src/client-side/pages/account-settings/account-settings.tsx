@@ -24,9 +24,6 @@ export const AccountSetting: React.FC = () => {
       <div className="Account-settings__navigation">
         <Breadcrumbs />
       </div>
-      <div className="Account-settings__title">
-        <h2>Account setting</h2>
-      </div>
 
       {isEdit ? (
         <div className="Account-settings__content">

@@ -7,7 +7,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 24px;
-  background: rgba(185, 208, 255, 0.15);
+  background: rgba(241, 244, 250, 0.6);
   z-index: 1000;
   backdrop-filter: blur(2px);
   width: fit-content;
@@ -46,7 +46,6 @@
   }
 
   button {
-    padding: 8px 35px;
     font-size: 13px;
     background: rgba(236, 238, 240, 1);
     width: 109px;

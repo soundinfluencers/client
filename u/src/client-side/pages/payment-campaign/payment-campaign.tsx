@@ -24,6 +24,7 @@ import { PaymentForm } from "@/client-side/client-forms";
 import {
   useCampaignStore,
   useDraftCampaignStore,
+  useProposalCampaignStore,
   useUpdateCampaign,
 } from "@/client-side/store";
 import { toast } from "react-toastify";
@@ -57,6 +58,8 @@ const toBackendSelectedMethod = (
 export const PaymentCampaign = () => {
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get("draft");
+  const proposalId = searchParams.get("proposal");
+  const optionIndex = Number(searchParams.get("option") ?? 0);
   const { data: invoiceDetails, isLoading: invoiceLoading } =
     useInvoceDetailsQuery();
   const draftStore = useDraftCampaignStore();
@@ -107,19 +110,86 @@ export const PaymentCampaign = () => {
     setCurrency(id);
     setSelectedIdPayment(id);
   };
+  // const onSent = async (values: PaymentCampaignFormValues) => {
+  //   try {
+  //     let base: any;
+
+  //     if (draftId) {
+  //       const patches = useUpdateCampaign.getState().patches ?? {};
+
+  //       base = draftStore.getCampaignPayload(
+  //         draftId,
+  //         campaignName ?? "",
+  //         selectedIdPayment,
+  //         patches,
+  //       );
+  //     } else {
+  //       base = actions.getCampaignPayload(selectedIdPayment);
+  //     }
+
+  //     const finalCampaignName = String(
+  //       base?.campaignName ?? campaignName ?? "",
+  //     );
+
+  //     const paymentDetails = {
+  //       firstName: values.firstName,
+  //       lastName: values.lastName,
+  //       address: values.address,
+  //       country: values.country,
+  //       company: values.company ?? "",
+  //       vatNumber: values.vatNumber ?? "",
+  //       amount: Number(base?.campaignPrice ?? 0),
+  //       selectedPaymentMethod: selectedIdPayment,
+  //     };
+
+  //     const payload = {
+  //       ...base,
+  //       campaignName: finalCampaignName,
+  //       paymentDetails,
+  //     };
+
+  //     console.log(payload, "payload");
+  //     await postCampaign(payload);
+
+  //     if (draftId) {
+  //       await deleteDraft(draftId);
+  //       draftStore.clearCampaign(draftId);
+  //     }
+  //     setModalCompleted(true);
+  //     toast.success("Campaign saved successfully!");
+  //   } catch (e) {
+  //     console.error(e);
+  //     toast.error("Failed to save campaign");
+  //   }
+  // };
   const onSent = async (values: PaymentCampaignFormValues) => {
     try {
       let base: any;
 
       if (draftId) {
         const patches = useUpdateCampaign.getState().patches ?? {};
-
         base = draftStore.getCampaignPayload(
           draftId,
           campaignName ?? "",
           selectedIdPayment,
           patches,
         );
+      } else if (proposalId) {
+        const cached = useProposalCampaignStore
+          .getState()
+          .getProposalPayload(proposalId, optionIndex);
+
+        const patches = useUpdateCampaign.getState().patches ?? {};
+        base =
+          cached ??
+          useProposalCampaignStore
+            .getState()
+            .getCampaignPayload(
+              proposalId,
+              optionIndex,
+              campaignName ?? "",
+              patches,
+            );
       } else {
         base = actions.getCampaignPayload(selectedIdPayment);
       }

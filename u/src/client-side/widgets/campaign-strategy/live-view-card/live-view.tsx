@@ -10,6 +10,7 @@ import { Dropdown } from "@/components/table-ui/dropdowns-table";
 import React from "react";
 import check from "@/assets/icons/check.svg";
 import { Link } from "react-router-dom";
+import editIcon from "@/assets/icons/edit.svg";
 
 interface LiveViewCardProps {
   isMusic?: boolean;
@@ -33,39 +34,45 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
         </div>
         <div className="live-view-card__fill-data">
           <h3>Post description</h3>
-          <div className="fill-input">
-            <img src={edit} alt="" />
-            <div className="descr">
-              <Dropdown
-                isOpen={dropdown}
-                onToggle={() => setDropdown((prev) => !prev)}
-                selected={
-                  <p className="hidden-text">
-                    {item?.descriptions?.[0].description}
+          <div className="descr">
+            <Dropdown
+              isOpen={dropdown}
+              onToggle={() => setDropdown((prev) => !prev)}
+              selected={
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    height: "26px",
+                  }}>
+                  {" "}
+                  <img src={editIcon} alt="" />
+                  <p className="hidden-text desc">
+                    {item?.descriptions[selected].description}
                   </p>
-                }>
-                <ul className="dropdown-list">
-                  {item?.descriptions.map((desc: any, optionIndex: number) => (
-                    <li
-                      title={desc.description}
-                      key={desc?._id ?? optionIndex}
-                      onClick={() => {
-                        setSelected(optionIndex);
-                        setDropdown(false);
-                      }}>
-                      <span
-                        className={selected === optionIndex ? "active" : ""}>
-                        {optionIndex + 1}
-                      </span>{" "}
-                      <p className="hidden-text">{desc.description || "-"}</p>
-                      {selected === optionIndex && (
-                        <img className="check" src={check} alt="" />
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </Dropdown>
-            </div>
+                </div>
+              }>
+              <ul className="dropdown-list">
+                {item?.descriptions.map((desc: any, optionIndex: number) => (
+                  <li
+                    title={desc.description}
+                    key={desc?._id ?? optionIndex}
+                    onClick={() => {
+                      setSelected(optionIndex);
+                      setDropdown(false);
+                    }}>
+                    <span className={selected === optionIndex ? "active" : ""}>
+                      {optionIndex + 1}
+                    </span>{" "}
+                    <p className="hidden-text">{desc.description || "-"}</p>
+                    {selected === optionIndex && (
+                      <img className="check" src={check} alt="" />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </Dropdown>
           </div>
         </div>
 

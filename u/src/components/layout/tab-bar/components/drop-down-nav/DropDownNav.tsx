@@ -44,7 +44,7 @@ export const DropDownNav = ({
   // console.log('account settings link', AccountSettings);
   const Navlinks =
     user?.role === "client" ? Client_NAV_LINKS : INFLUENCER_NAV_LINKS;
-
+  const terms = user?.role === "client" ? "/terms/client" : "/terms/influencer";
   return createPortal(
     <div
       className={`user-menu ${isDropdownOpen ? "user-menu--open" : ""}`}
@@ -100,7 +100,7 @@ export const DropDownNav = ({
           Logout
         </button>
         <Link
-          to={"/terms/influencer"}
+          to={terms}
           className="user-menu__dropdown-terms"
           onClick={() => setIsDropdownOpen(false)}
           target={"_blank"}

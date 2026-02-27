@@ -22,6 +22,7 @@ type Props = {
 
   setSelectedPd: (v: number) => void;
   socialMedia?: string;
+  group: string;
 };
 
 export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
@@ -35,6 +36,7 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
   setSelectedContent,
   setSelectedPd,
   socialMedia,
+  group,
 }: Props) {
   const addContentForSocial = useDraftCampaignStore(
     (s) => s.addContentForSocial,
@@ -138,7 +140,23 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
   ]);
 
   const closePreview = React.useCallback(() => setPopUp(false), []);
-
+  const onClickHeaderEye = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const link = platformItems?.[selectedContent]?.mainLink ?? "";
+    onClickVideo(selectedContent, link);
+  };
+  const groupTitle = (group: string) => {
+    switch (group) {
+      case "main":
+        return "Video";
+      case "music":
+        return "Song";
+      case "press":
+        return "Press";
+      default:
+        return "";
+    }
+  };
   return (
     <>
       <td className="tableBase__td">
@@ -146,9 +164,16 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
           isOpen={isOpen}
           onToggle={onToggle}
           selected={
-            <p title={selectedLink}>
-              {selectedLink ? `Video ${selectedContent + 1}` : "—"}
-            </p>
+            <div className="content-cell-static">
+              <span onClick={onClickHeaderEye} className="eye">
+                <img src={eye} alt="" />
+              </span>
+              <p title={selectedLink}>
+                {selectedLink
+                  ? `${groupTitle(group)} ${selectedContent + 1}`
+                  : "—"}
+              </p>
+            </div>
           }>
           <div className="post-description-block">
             <ul className="dropdown-list">
@@ -233,7 +258,7 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
         <Modal onClose={closePreview}>
           <div className="modal-card">
             <h2>Video {selectedVideo.index}</h2>
-            <div className="card-player"></div>
+            <input type="text" value={selectedLink} />
           </div>
         </Modal>
       )}

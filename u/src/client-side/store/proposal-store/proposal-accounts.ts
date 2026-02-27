@@ -34,7 +34,7 @@ type ProposalAccountsStore = {
     optionIndex: number,
     serverAccounts: CampaignAddedAccount[],
     serverContent: any[],
-    opts?: { force?: boolean }, // ✅
+    opts?: { force?: boolean },
   ) => void;
   addContentForSocial: (
     optionIndex: number,

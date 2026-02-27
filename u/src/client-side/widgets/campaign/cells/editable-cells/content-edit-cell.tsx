@@ -27,6 +27,7 @@ type Props = {
   setSelectedPd: (v: number) => void;
   socialMedia?: string;
   media0: any;
+  group: string;
 };
 
 export const ContentCellEdit = React.memo(function ContentCellEdit({
@@ -37,7 +38,7 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
   isOpen,
   onToggle,
   onClose,
-
+  group,
   platformItems,
   selectedContent,
   setSelectedContent,
@@ -117,9 +118,7 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
     closeAddModal,
     onClose,
   ]);
-  const closeModal = React.useCallback(() => {
-    setPopUp(false);
-  }, []);
+
   const openDelete = React.useCallback((idx: number) => {
     setDeleteIdx(idx);
     setDeleteModal(true);
@@ -153,6 +152,19 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
   ]);
   const pathLower = media0?.pathLower;
   const videoUrl = media0?.url ?? null;
+
+  const groupTitle = (group: string) => {
+    switch (group) {
+      case "main":
+        return "Video";
+      case "music":
+        return "Song";
+      case "press":
+        return "Press";
+      default:
+        return "";
+    }
+  };
   return (
     <>
       <td className="tableBase__td">
@@ -161,13 +173,18 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
           onToggle={onToggle}
           selected={
             <p title={selectedLink}>
-              {selectedLink ? `Video ${selectedContent + 1}` : "—"}
+              {selectedLink
+                ? `${groupTitle(group)} ${selectedContent + 1}`
+                : "—"}
             </p>
           }>
           <div className="post-description-block">
             <ul className="dropdown-list">
               {platformItems.map((item: any, idx: number) => (
-                <li key={item?._id ?? idx} onClick={() => selectContent(idx)}>
+                <li
+                  className={`content-cell ${selectedContent === idx ? "active-content" : ""}`}
+                  key={item?._id ?? idx}
+                  onClick={() => selectContent(idx)}>
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
@@ -180,7 +197,7 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
                   <p
                     className="hidden-text desc-li"
                     title={item?.mainLink ?? ""}>
-                    {item?.mainLink ? `Video ${idx + 1}` : "—"}
+                    {item?.mainLink ? `${groupTitle(group)} ${idx + 1}` : "—"}
                   </p>
 
                   <img
@@ -196,11 +213,11 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
               ))}
             </ul>
 
-            <div onClick={openAddModal} className="add-desc">
+            <div onClick={openAddModal} className="add-video">
               <div className="add-desc__icon">
                 <img src={plus} alt="" />
               </div>
-              <p>Add new video</p>
+              <p>Add new {groupTitle(group)}</p>
             </div>
           </div>
         </Dropdown>

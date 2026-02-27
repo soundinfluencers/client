@@ -26,6 +26,9 @@ label {
   }
 }
 .form-input {
+  &__error {
+    color: red;
+  }
   input {
     padding: 16px;
     margin-top: 4px;
@@ -40,14 +43,6 @@ label {
       -webkit-text-fill-color: #000;
       -webkit-box-shadow: 0 0 0 1000px #fff inset;
       transition: background-color 5000s ease-in-out 0s;
-    }
-  }
-  &.is-error {
-    label {
-      color: red;
-    }
-    input {
-      border: 1px solid red;
     }
   }
 }

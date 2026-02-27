@@ -1,5 +1,6 @@
 @use "@/styles/scrollbars/_scrollbars.scss" as sb;
-.options-slider {
+.options-slider-proposal {
+  margin-top: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -59,20 +60,23 @@
 .option-list--scroll > li {
   flex: 0 0 auto;
 }
-.option-list {
+.option-list-proposal {
   display: flex;
   align-items: center;
   gap: 16px;
   overflow-y: auto;
   @include sb.scrollbar-thin-horizontal;
   li {
+    max-width: 111px;
+    width: 100%;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     flex: 0 0 auto;
     cursor: pointer;
     padding: 8px;
-    height: 35px;
+    height: 44px;
     border: 1px solid rgba(255, 255, 255, 1);
     border-radius: 8px;
     font-size: 14px;

@@ -14,6 +14,7 @@ import {
   useUpdateCampaign,
 } from "@/client-side/store";
 import { Modal } from "@/components/ui/modal-fix/Modal";
+import { calcGroupPrices } from "@/client-side/utils";
 
 // type RegularModel = Extract<CampaignPageModel, { kind: "regular" }>;
 
@@ -59,7 +60,10 @@ export const CampaignTablePage: React.FC<Props> = ({
   const { mainPromos, musicPromos, otherPromos } = useGroupPromos(accounts);
 
   console.log(content, "content");
-
+  const { groupPrices } = React.useMemo(
+    () => calcGroupPrices(accounts),
+    [accounts],
+  );
   const byGroup = React.useMemo(
     () => ({
       main: content.filter((x) => x.socialMediaGroup === "main"),
@@ -99,20 +103,9 @@ export const CampaignTablePage: React.FC<Props> = ({
             </>
           ) : (
             <>
-              {byGroup.main.length >= 1 &&
-                byGroup.main.map((item) => (
-                  <LiveViewCardInsight campaign={campaign} item={item} />
-                ))}
-
-              {byGroup.music.length >= 1 &&
-                byGroup.music.map((item) => (
-                  <LiveViewCardInsight campaign={campaign} item={item} />
-                ))}
-
-              {byGroup.press.length >= 1 &&
-                byGroup.press.map((item) => (
-                  <LiveViewCardInsight item={item} campaign={campaign} />
-                ))}
+              {accounts.map((instightCard, i) => (
+                <LiveViewCardInsight campaign={campaign} item={instightCard} />
+              ))}
             </>
           )}
         </div>
@@ -123,11 +116,12 @@ export const CampaignTablePage: React.FC<Props> = ({
               {byGroup.main.length >= 1 && (
                 <TableStrategy
                   campaignId={campaign.campaignId}
-                  totalPrice={campaign.price}
+                  totalPrice={groupPrices.main}
                   items={byGroup.main}
                   networks={mainPromos}
                   group="main"
                   canEdit={campaign.canEdit}
+                  title="Video Content Section"
                 />
               )}
 
@@ -135,10 +129,11 @@ export const CampaignTablePage: React.FC<Props> = ({
                 <TableStrategy
                   campaignId={campaign.campaignId}
                   canEdit={campaign.canEdit}
-                  totalPrice={campaign.price}
+                  totalPrice={groupPrices.music}
                   items={byGroup.music}
                   networks={musicPromos}
                   group="music"
+                  title="Music Section"
                 />
               )}
 
@@ -146,10 +141,11 @@ export const CampaignTablePage: React.FC<Props> = ({
                 <TableStrategy
                   campaignId={campaign.campaignId}
                   canEdit={campaign.canEdit}
-                  totalPrice={campaign.price}
+                  totalPrice={groupPrices.press}
                   items={byGroup.press}
                   networks={otherPromos}
                   group="press"
+                  title="Press Section"
                 />
               )}
             </>

@@ -4,10 +4,7 @@ import "./_promo-form.scss";
 import { SubmitButton } from "@/components/ui/submit-button/submit-button";
 import { Form } from "@/components";
 import { BESPOKE_CAMPAIGN_TABS_DATA } from "@/client-side/constants/bespoke-capaign-tabs.data";
-import {
-  buildPromoTabDefaultValues,
-  buildPromoTabSchema,
-} from "@/client-side/schemas";
+
 import { postBespokeCampaign } from "@/api/client/campaign/campaign-bespoke";
 import { toast } from "react-toastify";
 
@@ -17,6 +14,10 @@ import {
   BespokeEventForm,
   BespokeOtherForm,
 } from "@/client-side/client-forms/bespoke";
+import {
+  buildBespokeSchema,
+  buildPromoTabDefaultValues,
+} from "@/client-side/schemas/schema-bespoke";
 
 interface Props {
   activeTabId: string;
@@ -156,10 +157,7 @@ export const PromoForm: React.FC<Props> = ({ activeTabId }) => {
 
   if (!promoFormData) return null;
 
-  const schema = React.useMemo(
-    () => buildPromoTabSchema(promoFormData),
-    [promoFormData],
-  );
+  const schema = React.useMemo(() => buildBespokeSchema(category), [category]);
 
   const defaultValues = React.useMemo(
     () => buildPromoTabDefaultValues(promoFormData),

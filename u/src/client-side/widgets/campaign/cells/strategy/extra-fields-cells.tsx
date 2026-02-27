@@ -13,6 +13,8 @@ export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
   platformItems,
   selectedContent,
 }: Props) {
+  const [hoveredKey, setHoveredKey] = React.useState<string | null>(null);
+
   const keys = React.useMemo(() => {
     switch (group) {
       case "music":
@@ -33,23 +35,33 @@ export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
   return (
     <>
       {keys.map((key) => {
-        const value = platformItems?.[selectedContent]?.[key];
+        const raw = platformItems?.[selectedContent]?.[key];
+        const value = String(raw ?? "").trim();
+        const shown = value || "—";
+        const needTip = Boolean(value);
 
         return (
           <td key={key} className="tableBase__td">
-            {key === "taggedLink" && value ? (
-              <Link
-                className="hidden-text tagged-link"
-                to={normalizeLink(value)}
-                target="_blank"
-                title={value}>
-                {value}
-              </Link>
-            ) : (
-              <p className="hidden-text" title={value}>
-                {value || "—"}
-              </p>
-            )}
+            <span
+              className={needTip ? "tooltip-wrap" : undefined}
+              onMouseEnter={() => needTip && setHoveredKey(key)}
+              onMouseLeave={() => setHoveredKey(null)}>
+              {key === "taggedLink" && value ? (
+                <Link
+                  className="hidden-text tagged-link"
+                  to={normalizeLink(value)}
+                  target="_blank"
+                  rel="noreferrer">
+                  {shown}
+                </Link>
+              ) : (
+                <p className="hidden-text">{shown}</p>
+              )}
+
+              {needTip && hoveredKey === key && (
+                <span className="tooltip-box">{value}</span>
+              )}
+            </span>
           </td>
         );
       })}

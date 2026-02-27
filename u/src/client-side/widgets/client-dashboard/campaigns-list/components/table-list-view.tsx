@@ -6,6 +6,7 @@ import type {
 } from "@/types/client/dashboard/campaign.types";
 import { deleteDraft } from "@/api/client/campaign/draft.api";
 import { TableCardSkeleton } from "@/components/ui/skeletons/table-card-skeleton";
+import { NoData } from "@/components/ui/no-array/no-data";
 
 interface TableListViewProps {
   thead: string[];
@@ -13,7 +14,7 @@ interface TableListViewProps {
   onOpen: (id: string, status: CampaignStatusType) => Promise<void> | void;
   isLoading: boolean;
 }
-
+const COLS = [287, 250, 515, 100] as const;
 export const TableListView: React.FC<TableListViewProps> = ({
   thead,
   list,
@@ -23,10 +24,19 @@ export const TableListView: React.FC<TableListViewProps> = ({
   if (isLoading) {
     return (
       <div className="table-list">
-        {Array.from({ length: 6 }).map((_, index) => (
+        {Array.from({ length: 2 }).map((_, index) => (
           <TableCardSkeleton key={index} />
         ))}
       </div>
+    );
+  }
+  if (list.length < 1) {
+    return (
+      <NoData>
+        {" "}
+        <h2>No Campaigns for this status right now</h2>
+        <p>You can still create a campaign</p>
+      </NoData>
     );
   }
   const handleDeleteDraft = async (e: React.MouseEvent, draftId: string) => {
@@ -42,7 +52,10 @@ export const TableListView: React.FC<TableListViewProps> = ({
     <div className="table-list">
       <div className="table-list__header">
         {thead.map((th, i) => (
-          <div key={i} className="table-list__header-data">
+          <div
+            key={i}
+            className="table-list__header-data"
+            style={{ width: COLS[i] }}>
             <p>{th}</p>
           </div>
         ))}
@@ -53,7 +66,7 @@ export const TableListView: React.FC<TableListViewProps> = ({
           onClick={() => onOpen(tb._id, tb.status)}
           key={tb._id}
           className="table-list__body-row">
-          <div className="table-list__body-data">
+          <div className="table-list__body-data" style={{ width: COLS[0] }}>
             <div className="header">
               <div className="socialMedia">
                 <img
@@ -76,15 +89,17 @@ export const TableListView: React.FC<TableListViewProps> = ({
             </div>
           </div>
 
-          <div className="table-list__body-data date-post">
+          <div
+            className="table-list__body-data date-post"
+            style={{ width: COLS[1] }}>
             <p>{tb.creationDate ?? ""}</p>
           </div>
 
-          <div className="table-list__body-data">
+          <div className="table-list__body-data" style={{ width: COLS[2] }}>
             <p>{tb.campaignName ?? ""}</p>
           </div>
 
-          <div className="table-list__body-data">
+          <div className="table-list__body-data" style={{ width: COLS[3] }}>
             <p>{tb.price ? `${tb.price}€` : ""}</p>
           </div>
         </div>

@@ -4,27 +4,36 @@
     margin-top: 28px;
     text-align: center;
   }
-  .live-view-wrapper {
-    margin: 16px 0px;
+  &__options {
+    margin-top: 24px;
     display: flex;
     align-items: center;
-
+    justify-content: center;
     gap: 16px;
-    max-width: 1224px;
-    overflow-x: auto;
-    height: 100%;
-    padding-bottom: 8px;
-    &::-webkit-scrollbar-thumb {
-      background-color: black;
-      border-radius: 8px;
+    .btn {
+      max-width: 250px;
+    }
+    @media screen and (max-width: 800px) {
+      flex-direction: column;
+    }
+  }
+  .live-view-wrapper {
+    margin: 16px 0;
+    display: grid;
+    gap: 16px;
+
+    grid-template-columns: repeat(3, minmax(0, 357px));
+
+    justify-content: space-between;
+
+    width: 100%;
+    @media (max-width: 1100px) {
+      grid-template-columns: repeat(2, minmax(0, 357px));
     }
 
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background-color: rgba(185, 208, 255, 0.15);
+    @media (max-width: 720px) {
+      grid-template-columns: minmax(0, 357px);
+      justify-content: center; // с начала
     }
   }
   .table-wrapper {

@@ -11,6 +11,7 @@ type Props = {
   selectedContent: number;
 
   selectedPd: number;
+  group: string;
   setSelectedPd: (v: number) => void;
 };
 
@@ -22,9 +23,10 @@ export const DescriptionCell = React.memo(function DescriptionCell({
   selectedContent,
   selectedPd,
   setSelectedPd,
+  group,
 }: Props) {
   const descriptions = platformItems?.[selectedContent]?.descriptions ?? [];
-
+  const [show, setShow] = React.useState(false);
   const selectPd = React.useCallback(
     (idx: number) => {
       setSelectedPd(idx);
@@ -32,15 +34,44 @@ export const DescriptionCell = React.memo(function DescriptionCell({
     },
     [setSelectedPd, onClose],
   );
+  if (descriptions.length <= 1) {
+    const text = String(descriptions?.[0]?.description ?? "").trim();
+    const shown = text || "—";
 
+    return (
+      <td className="tableBase__td">
+        <div className="no-edit">
+          <span
+            onMouseEnter={() => setShow(true)}
+            onMouseLeave={() => setShow(false)}>
+            <p className="hidden-text desc">{shown}</p>
+
+            {show && (
+              <div className="tooltip-box">
+                {descriptions?.[selectedPd]?.description}
+              </div>
+            )}
+          </span>
+        </div>
+      </td>
+    );
+  }
   return (
     <td className="tableBase__td">
       <Dropdown
         isOpen={isOpen}
         onToggle={onToggle}
         selected={
-          <p className="hidden-text desc">
-            {descriptions?.[selectedPd]?.description}
+          <p
+            onMouseEnter={() => setShow(true)}
+            onMouseLeave={() => setShow(false)}
+            className="hidden-text desc">
+            {descriptions?.[selectedPd]?.description}{" "}
+            {show && (
+              <div className="tooltip-box">
+                {descriptions?.[selectedPd]?.description}
+              </div>
+            )}
           </p>
         }>
         <ul className="dropdown-list">

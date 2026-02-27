@@ -68,7 +68,7 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
 
   const barUIs = [
     { name: `Submitted: ${submitted}`, img: calendar, row: true },
-    { name: `Budget: ${budget}`, img: creditcard, row: true },
+    { name: `Budget: ${budget}€`, img: creditcard, row: true },
     {
       name: `Reach: ${formatFollowers(reachFollowers)} followers`,
       img: usercheck,

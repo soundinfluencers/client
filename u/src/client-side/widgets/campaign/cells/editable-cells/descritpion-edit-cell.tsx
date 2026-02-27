@@ -1,8 +1,8 @@
 import React from "react";
 import { Dropdown } from "@/components/table-ui/dropdowns-table";
 
-import check from "@/assets/icons/check (1).svg";
-import x from "@/assets/icons/x.svg";
+import check from "@/assets/icons/check (2).svg";
+import x from "@/assets/icons/x (2).svg";
 import plus from "@/assets/icons/plus.svg";
 import trash from "@/assets/icons/trash-2.svg";
 import { Modal } from "@/components/ui/modal-fix/Modal";
@@ -21,6 +21,7 @@ type Props = {
 
   selectedPd: number;
   setSelectedPd: (v: number) => void;
+  group: string;
 };
 
 export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
@@ -31,6 +32,7 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
   selectedContent,
   selectedPd,
   setSelectedPd,
+  group,
 }: Props) {
   const baseItem = platformItems?.[selectedContent];
   const contentId: string | undefined = baseItem?._id;
@@ -44,6 +46,7 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
   const updateDescription = useUpdateCampaign((s) => s.updateDescription);
   const removeDescription = useUpdateCampaign((s) => s.removeDescription);
   const setDescriptions = useUpdateCampaign((s) => s.setDescriptions);
+  const [deleteIdx, setDeleteIdx] = React.useState<number | null>(null);
 
   const [modal, setModal] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<number>(0);
@@ -71,6 +74,9 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
     setNewText("");
   }, [contentId]);
 
+  React.useEffect(() => {
+    setDeleteIdx(null);
+  }, [contentId]);
   const selectPd = React.useCallback(
     (idx: number) => {
       setSelectedPd(idx);
@@ -94,21 +100,21 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
     setModal(true);
     setSelectedId(idx);
   };
-  const deleteDescription = () => {
-    setModal(false);
-    if (!contentId) return;
+  // const deleteDescription = () => {
+  //   setModal(false);
+  //   if (!contentId) return;
 
-    ensurePatchDescs();
-    removeDescription(contentId, selectedId);
+  //   ensurePatchDescs();
+  //   removeDescription(contentId, selectedId);
 
-    if (selectedPd === selectedId) setSelectedPd(Math.max(0, selectedId - 1));
-    else if (selectedPd > selectedId) setSelectedPd(selectedPd - 1);
+  //   if (selectedPd === selectedId) setSelectedPd(Math.max(0, selectedId - 1));
+  //   else if (selectedPd > selectedId) setSelectedPd(selectedPd - 1);
 
-    if (editIdx === selectedId) {
-      setEditIdx(null);
-      setEditText("");
-    }
-  };
+  //   if (editIdx === selectedId) {
+  //     setEditIdx(null);
+  //     setEditText("");
+  //   }
+  // };
   const commitAdd = React.useCallback(
     (e?: React.MouseEvent) => {
       e?.stopPropagation();
@@ -138,7 +144,39 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
       editingDescs.length,
     ],
   );
+  const confirmDelete = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (deleteIdx === null || !contentId) return;
 
+      ensurePatchDescs();
+      removeDescription(contentId, deleteIdx);
+
+      if (selectedPd === deleteIdx) setSelectedPd(Math.max(0, deleteIdx - 1));
+      else if (selectedPd > deleteIdx) setSelectedPd(selectedPd - 1);
+
+      if (editIdx === deleteIdx) {
+        setEditIdx(null);
+        setEditText("");
+      }
+
+      setDeleteIdx(null);
+    },
+    [
+      deleteIdx,
+      contentId,
+      ensurePatchDescs,
+      removeDescription,
+      selectedPd,
+      setSelectedPd,
+      editIdx,
+    ],
+  );
+
+  const cancelDelete = React.useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteIdx(null);
+  }, []);
   if (!contentId) {
     return (
       <td className="tableBase__td">
@@ -150,6 +188,18 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
     setEditIdx(null);
     setEditText("");
   }, [contentId]);
+  const groupTitle = (group: string) => {
+    switch (group) {
+      case "main":
+        return "post description";
+      case "music":
+        return "track title";
+      case "press":
+        return "artwork link";
+      default:
+        return "";
+    }
+  };
   return (
     <>
       <td className="tableBase__td">
@@ -160,9 +210,13 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
           <div className="post-description-block">
             <ul className="dropdown-list">
               {editingDescs.map((desc, idx) => (
-                <li key={desc?._id ?? idx} onClick={() => selectPd(idx)}>
-                  <span>{idx + 1}</span>
-
+                <li
+                  className="desc-li"
+                  key={desc?._id ?? idx}
+                  onClick={() => selectPd(idx)}>
+                  <span className={selectedPd === idx ? "active" : ""}>
+                    {idx + 1}
+                  </span>{" "}
                   {editIdx === idx ? (
                     <input
                       className="hidden-text desc-li"
@@ -191,16 +245,32 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
                       {desc?.description}
                     </p>
                   )}
-
-                  <img
-                    className="trash"
-                    src={trash}
-                    alt=""
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenModal(idx);
-                    }}
-                  />
+                  {deleteIdx === idx ? (
+                    <div className="confirm-delete">
+                      <img
+                        src={check}
+                        alt=""
+                        onClick={confirmDelete}
+                        style={{ cursor: "pointer" }}
+                      />
+                      <img
+                        src={x}
+                        alt=""
+                        onClick={cancelDelete}
+                        style={{ cursor: "pointer" }}
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      className="trash"
+                      src={trash}
+                      alt=""
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteIdx(idx);
+                      }}
+                    />
+                  )}
                 </li>
               ))}
 
@@ -214,23 +284,24 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
                   <input
                     autoFocus
                     value={newText}
-                    placeholder="New description..."
+                    placeholder={`New ${groupTitle(group)}...`}
                     onChange={(e) => setNewText(e.target.value)}
                     onClick={(e) => e.stopPropagation()}
                   />
-
-                  <img
-                    src={check}
-                    alt=""
-                    onClick={commitAdd}
-                    style={{ cursor: "pointer" }}
-                  />
-                  <img
-                    src={x}
-                    alt=""
-                    onClick={cancelAdd}
-                    style={{ cursor: "pointer" }}
-                  />
+                  <div className="confirm-delete">
+                    <img
+                      src={check}
+                      alt=""
+                      onClick={commitAdd}
+                      style={{ cursor: "pointer" }}
+                    />
+                    <img
+                      src={x}
+                      alt=""
+                      onClick={cancelAdd}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </div>
                 </li>
               )}
             </ul>
@@ -240,29 +311,12 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
                 <div className="add-desc__icon">
                   <img src={plus} alt="" />
                 </div>
-                <p>Add new post description</p>
+                <p>Add new {groupTitle(group)}</p>
               </div>
             )}
           </div>
         </Dropdown>
       </td>
-      {modal && (
-        <Modal onClose={() => setModal(false)}>
-          <div className="onDeleteModal">
-            <h2>
-              Are you sure you want to <br></br> delete this description?
-            </h2>
-            <p>You won’t be able to restore this!</p>
-            <div className="onDeleteModal-btn">
-              <ButtonSecondary
-                text={"Cancel"}
-                onClick={() => setModal(false)}
-              />
-              <ButtonMain text={"Delete"} onClick={deleteDescription} />
-            </div>
-          </div>
-        </Modal>
-      )}
     </>
   );
 });

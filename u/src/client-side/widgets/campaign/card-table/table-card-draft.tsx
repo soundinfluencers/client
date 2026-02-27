@@ -120,6 +120,7 @@ export const TableCard = React.memo(function TableCard({
             setSelectedContent={setSelectedContent}
             setSelectedPd={setSelectedPd}
             socialMedia={data.socialMedia}
+            group={group}
           />
           {canEdit ? (
             <DescriptionCellEdit
@@ -130,6 +131,7 @@ export const TableCard = React.memo(function TableCard({
               selectedContent={selectedContent}
               selectedPd={selectedPd}
               setSelectedPd={setSelectedPd}
+              group={group}
             />
           ) : (
             <DescriptionCell
@@ -140,6 +142,7 @@ export const TableCard = React.memo(function TableCard({
               selectedContent={selectedContent}
               selectedPd={selectedPd}
               setSelectedPd={setSelectedPd}
+              group={group}
             />
           )}
         </>
@@ -191,6 +194,7 @@ export const TableCard = React.memo(function TableCard({
               setSelectedContent={setSelectedContent}
               setSelectedPd={setSelectedPd}
               socialMedia={data.socialMedia}
+              group={group}
             />
           ) : (
             <ContentCell
@@ -202,6 +206,7 @@ export const TableCard = React.memo(function TableCard({
               setSelectedContent={setSelectedContent}
               setSelectedPd={setSelectedPd}
               socialMedia={data.socialMedia}
+              group={group}
             />
           )}
           {canEdit ? (
@@ -213,6 +218,7 @@ export const TableCard = React.memo(function TableCard({
               selectedContent={selectedContent}
               selectedPd={selectedPd}
               setSelectedPd={setSelectedPd}
+              group={group}
             />
           ) : (
             <DescriptionCell
@@ -223,6 +229,7 @@ export const TableCard = React.memo(function TableCard({
               selectedContent={selectedContent}
               selectedPd={selectedPd}
               setSelectedPd={setSelectedPd}
+              group={group}
             />
           )}
           {canEdit ? (

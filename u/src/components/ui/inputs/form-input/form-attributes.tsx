@@ -57,9 +57,6 @@ export const FormInput = React.forwardRef<
     const errorMsg =
       (get(errors, name)?.message as string | undefined) ?? undefined;
 
-    const showError =
-      !!errorMsg && (get(touchedFields, name) || submitCount > 0);
-
     return (
       <Controller
         control={control}
@@ -67,6 +64,12 @@ export const FormInput = React.forwardRef<
         rules={validation}
         render={({ field, fieldState }) => {
           const hasError = fieldState.invalid;
+          const errorMsg =
+            (get(errors, name)?.message as string | undefined) ?? undefined;
+
+          const showError =
+            !!errorMsg &&
+            (fieldState.isTouched || fieldState.isDirty || submitCount > 0);
           return (
             <div
               className={`form-input ${className} ${hasError ? "is-error" : ""}`}>

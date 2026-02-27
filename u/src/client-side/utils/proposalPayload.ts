@@ -152,19 +152,16 @@ const mapContentToApi = (c: AnyContent) => ({
   additionalBrief: String(c.additionalBrief ?? ""),
 });
 
-/**
- * ✅ Клонируем шаблон под новую соцсеть, но создаём НОВЫЕ mongo id
- */
 const cloneContentForSocial = (template: AnyContent, socialMedia: string) => {
   const sm = String(socialMedia).toLowerCase();
 
   const cloned: AnyContent = {
     ...template,
-    _id: objectId(), // ✅ новый _id
+    _id: objectId(),
     socialMedia: sm,
     socialMediaGroup: getGroupBySocial(sm),
     descriptions: (template.descriptions ?? []).map((d: any) => ({
-      _id: objectId(), // ✅ новый _id
+      _id: objectId(),
       description: String(d.description ?? ""),
     })),
   };
@@ -202,6 +199,7 @@ export function buildProposalPatchBody(args: {
   accounts: AnyAccount[];
   content: AnyContent[];
   patches?: Record<string, ContentPatch>;
+  totalPublicPrice?: number;
   inheritContentTemplateFrom?: "main" | "music" | "press";
 }) {
   const {
@@ -210,6 +208,7 @@ export function buildProposalPatchBody(args: {
     content,
     patches = {},
     inheritContentTemplateFrom,
+    totalPublicPrice,
   } = args;
   const contentPatched = applyPatchesToContent(content ?? [], patches);
   const baseContent = ensureMongoIdsForContent(contentPatched ?? []);
@@ -258,5 +257,6 @@ export function buildProposalPatchBody(args: {
       .map((a) => mapAccountToApi(a, normalizedNext))
       .filter((a) => a.socialAccountId && a.influencerId && a.socialMedia),
     campaignContent: normalizedNext.map(mapContentToApi),
+    totalPrice: totalPublicPrice,
   };
 }

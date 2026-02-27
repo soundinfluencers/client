@@ -15,19 +15,28 @@ interface ScrollPlatformsProps {
 
 export const ScrollPlatforms: React.FC<ScrollPlatformsProps> = React.memo(
   ({ selectedPlatform, onPlatformSelect }) => {
-    const { ref, showArrow, scrollRight } = useHorizontalScroll();
+    const { ref, showRightArrow, showLeftArrow, scrollRight, scrollLeft } =
+      useHorizontalScroll();
 
     return (
       <div className="platforms-scroll">
         <div className="platforms-scroll__header">
           <h3>Choose your platforms</h3>
-          {showArrow && (
-            <img
-              onClick={() => scrollRight()}
-              src={chevron}
-              alt="Chevron icon"
-            />
-          )}
+
+          <div className="arrows">
+            {showLeftArrow && (
+              <img
+                onClick={() => scrollLeft()}
+                src={chevron}
+                alt="Left"
+                style={{ transform: "rotate(180deg)" }}
+              />
+            )}
+
+            {showRightArrow && (
+              <img onClick={() => scrollRight()} src={chevron} alt="Right" />
+            )}
+          </div>
         </div>
 
         <ul ref={ref} className="platforms-scroll__list">

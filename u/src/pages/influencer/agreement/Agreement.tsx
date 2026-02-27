@@ -1,5 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useAgreementHandlerMutation, useAgreementQuery } from "@/pages/influencer/agreement/hooks/useAgreement.ts";
+import {
+  useAgreementHandlerMutation,
+  useAgreementQuery,
+} from "@/pages/influencer/agreement/hooks/useAgreement.ts";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { useUser } from "@/store/get-user";
 
@@ -8,8 +11,9 @@ import { ButtonMain } from "@components/ui/buttons-fix/ButtonFix.tsx";
 
 import { getSocialIcon } from "@/pages/influencer/components/social-accounts-list/data/social-account.data.ts";
 import { getArticle } from "@/pages/influencer/agreement/utils/getArticlesForAgreement.ts";
+import type { TAgreementType } from "@/pages/influencer/agreement/types/agreement.types.ts";
 
-import './_agreement.scss';
+import "./_agreement.scss";
 
 export const Agreement = () => {
   const { influencerId } = useParams();
@@ -17,17 +21,12 @@ export const Agreement = () => {
   const { setAccessToken } = useAuth();
   const { setUser } = useUser();
 
-  const { data, isPending, isError } = useAgreementQuery(influencerId ?? '');
-  const { mutateAsync, isPending: isMutatePending } = useAgreementHandlerMutation();
-
-  // console.log(isFetching);
-  const accountList = data ?? [];
-  const totalEarnings = accountList.reduce((acc, current) => acc + current.price, 0);
+  const { data, isPending, isError } = useAgreementQuery(influencerId ?? "");
+  const { mutateAsync, isPending: isMutatePending } =
+    useAgreementHandlerMutation();
 
   if (isPending) {
-    return (
-      <Loader />
-    );
+    return <Loader />;
   }
 
   if (isError || !data) {
@@ -40,11 +39,34 @@ export const Agreement = () => {
 
   // console.log("Data after normalize", data);
 
-
   // console.log("Total earnings", totalEarnings);
 
-  const normalizeEmail = (s: string) => s.trim().replace(/\s+/g, "");
+  const agreementType = data.agreementType;
+  const accountList = data.items;
+
+  const totalEarnings = accountList.reduce((acc, cur) => acc + cur.price, 0);
+
+  const normalizeEmail = (s: string) =>
+    s
+      .replace(/[\u200B-\u200D\uFEFF]/g, "")
+      .trim()
+      .replace(/\s+/g, "");
   const buildMailto = (email: string) => `mailto:${normalizeEmail(email)}`;
+
+  const agreementMessages: Record<
+    TAgreementType,
+    { subtitle: string; conformationTitle: string }
+  > = {
+    accountAdd: {
+      subtitle: "Your new social media accounts have been approved.",
+      conformationTitle:
+        "Do you want to add these new pages to your account with the agreed fees?",
+    },
+    profileCreate: {
+      subtitle: "Your account has been approved!",
+      conformationTitle: "Do you want to create your account now?",
+    },
+  };
 
   return (
     <Container className="agreement-page">
@@ -52,19 +74,24 @@ export const Agreement = () => {
         <div className="agreement-page__header">
           <h1 className="agreement-page__title">Congratulations</h1>
           <p className="agreement-page__subtitle">
-            Your account has been approved!
+            {agreementMessages[agreementType]?.subtitle ||
+              "Your agreement details are ready."}
           </p>
         </div>
 
         <div className="agreement-page__content">
-          <h2 className="agreement-page__content-title">Here’s what you’ll earn</h2>
+          <h2 className="agreement-page__content-title">
+            Here's what you'll earn
+          </h2>
 
           <ul className="agreement-page__benefits-list">
-            {data.map(({ socialMedia, username, price }) => (
-              <li className="agreement-page__benefits-item" key={socialMedia}>
+            {accountList.map(({ socialMedia, username, price }) => (
+              <li
+                className="agreement-page__benefits-item"
+                key={`${socialMedia}:${username}`}>
                 <div className="agreement-page__benefits-social">
                   <img
-                    src={getSocialIcon(socialMedia) ?? ''}
+                    src={getSocialIcon(socialMedia) ?? ""}
                     alt={socialMedia}
                   />
                   <p>{username}</p>
@@ -77,65 +104,67 @@ export const Agreement = () => {
           </ul>
 
           <div className="agreement-page__info">
-            <h2 className="agreement-page__earnings">Estimated total earnings: {totalEarnings}€</h2>
+            <h2 className="agreement-page__earnings">{`Estimated total earnings: ${totalEarnings}\u20AC`}</h2>
             <div className="agreement-page__conformation">
-              <h3 className="agreement-page__conformation-title">Do you want to create your account now?</h3>
+              <h3 className="agreement-page__conformation-title">
+                {agreementMessages[agreementType]?.conformationTitle || ""}
+              </h3>
               <div className="agreement-page__conformation-actions">
-
-                  <ButtonMain
-                    label={isMutatePending ? 'Processing...' : 'Yes'}
-                    isDisabled={isMutatePending}
-                    onClick={async () => {
-                      const res = await mutateAsync({ influencerId: influencerId ?? '', action: 'accept' });
-                      console.log('Account creation accepted', res);
-                      setUser(res);
-                      setAccessToken(res.accessToken);
-                      navigate("/influencer", { replace: true });
-                    }}
-                  />
-                  {/*<ButtonSecondary*/}
-                  {/*  label={isMutatePending ? 'Processing...' : 'No'}*/}
-                  {/*  isDisabled={isMutatePending}*/}
-                  {/*  onClick={() => {*/}
-                  {/*    const res = mutateAsync({ influencerId: influencerId ?? '', action: 'decline' });*/}
-                  {/*    console.log('Account creation declined', res);*/}
-                  {/*    navigate("/auth", { replace: true });*/}
-                  {/*  }}*/}
-                  {/*/>*/}
+                <ButtonMain
+                  label={isMutatePending ? "Processing..." : "Yes"}
+                  isDisabled={isMutatePending}
+                  onClick={async () => {
+                    const res = await mutateAsync({
+                      influencerId: influencerId ?? "",
+                      action: "accept",
+                    });
+                    console.log("Account creation accepted", res);
+                    setUser(res);
+                    setAccessToken(res.accessToken);
+                    navigate("/influencer", { replace: true });
+                  }}
+                />
+                {/*<ButtonSecondary*/}
+                {/*  label={isMutatePending ? 'Processing...' : 'No'}*/}
+                {/*  isDisabled={isMutatePending}*/}
+                {/*  onClick={() => {*/}
+                {/*    const res = mutateAsync({ influencerId: influencerId ?? '', action: 'decline' });*/}
+                {/*    console.log('Account creation declined', res);*/}
+                {/*    navigate("/auth", { replace: true });*/}
+                {/*  }}*/}
+                {/*/>*/}
 
                 <a
-                  href={buildMailto('admin@soundinfluencers.com')}
+                  href={buildMailto("admin@soundinfluencers.com")}
                   target="_blank"
                   rel="noopener noreferrer"
                   // style={{ textDecoration: "underline", color: "black" }}
                   className="agreement-page__conformation-contact"
-                  onClick={(e) => {
-                    // Prevent default mailto behavior to ensure it works across all browsers
-                    e.preventDefault();
-                    if (e.defaultPrevented) {
-                      window.location.href = buildMailto('admin@soundinfluencers.com');
-                    }
-                    // console.log("mailto click", { defaultPrevented: e.defaultPrevented });
-                  }}
+                  // onClick={(e) => {
+                  //   // Prevent default mailto behavior to ensure it works across all browsers
+                  //   e.preventDefault();
+                  //   if (e.defaultPrevented) {
+                  //     window.location.href = buildMailto('admin@soundinfluencers.com');
+                  //   }
+                  //   // console.log("mailto click", { defaultPrevented: e.defaultPrevented });
+                  // }}
                 >
                   No, Review Details
                 </a>
-
-                {/*<p className="agreement-page__conformation-contact">No, Review Details</p>*/}
               </div>
             </div>
           </div>
         </div>
       </div>
       <span className="agreement-page__terms">
-            By clicking Yes, you confirm and approve the rates listed above and agree to our{'\n'}
+        By clicking Yes, you confirm and approve the rates listed above and
+        agree to our{"\n"}
         <a
           href="/terms/influencer"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ textDecoration: "underline", color: "black" }}
-        >
-             Terms & Conditions.
+          style={{ textDecoration: "underline", color: "black" }}>
+          Terms & Conditions.
         </a>
       </span>
     </Container>

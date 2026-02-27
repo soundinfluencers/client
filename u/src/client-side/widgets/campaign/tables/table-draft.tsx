@@ -13,8 +13,8 @@ import { TableCard } from "../card-table/table-card-draft";
 import { useFetchCampaign } from "@/store/client/campaign-page";
 import {
   columnsStrategy,
+  getTitle,
   getWidthColumn,
-  titles,
 } from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
 import type { TableGroup } from "@/client-side/types/table-types";
@@ -29,6 +29,7 @@ type Props = {
   canEdit: boolean;
   campaignId: string;
   changeView?: boolean;
+  title: string;
 };
 type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
 const makeRowKey = (n: CampaignAddedAccount, index: number) =>
@@ -47,6 +48,7 @@ export function TableDraft({
   group,
   canEdit,
   changeView,
+  title,
 }: Props) {
   console.log(items, "items");
 
@@ -87,6 +89,7 @@ export function TableDraft({
   );
   return (
     <div className="tableBase-wrap">
+      <h1>{title}</h1>
       <table className="tableBase">
         <colgroup>
           {columns.map((key) => (
@@ -108,7 +111,7 @@ export function TableDraft({
             {columns.map((key) => (
               <th key={key} className="tableBase__th">
                 <div className="header-content">
-                  <span className="th-title">{titles[key]}</span>
+                  <span className="th-title">{getTitle(group, key)}</span>
 
                   {key === "followers" && (
                     <div className="switch" aria-label="Sort by followers">

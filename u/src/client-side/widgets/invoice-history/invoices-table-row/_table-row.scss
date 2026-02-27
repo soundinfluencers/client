@@ -32,13 +32,19 @@
       font-size: 13px;
     }
   }
-  &__pdf {
+  &__row-actions {
+    display: flex;
+    gap: 8px;
+  }
+  &__action {
+    min-width: 96px;
     cursor: pointer;
     border-radius: 8px;
     width: fit-content;
     padding: 4px 12px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     background: rgba(185, 208, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 1);

@@ -17,6 +17,8 @@ type Props = {
   setSelectedPd: (v: number) => void;
   socialMedia?: string;
   media0?: any;
+  group: string;
+  canEdit?: boolean;
 };
 
 export const ContentCell = React.memo(function ContentCell({
@@ -29,6 +31,8 @@ export const ContentCell = React.memo(function ContentCell({
   setSelectedPd,
   socialMedia,
   media0,
+  group,
+  canEdit,
 }: Props) {
   const [popUp, setPopUp] = React.useState(false);
   const [selectedVideo, setSelectedVideo] = React.useState({
@@ -60,6 +64,38 @@ export const ContentCell = React.memo(function ContentCell({
   const selectedLink = platformItems?.[selectedContent]?.mainLink;
   const pathLower = media0?.pathLower;
   const videoUrl = media0?.url ?? null;
+  const groupTitle = (group: string) => {
+    switch (group) {
+      case "main":
+        return "Video";
+      case "music":
+        return "Song";
+      case "press":
+        return "Press";
+      default:
+        return "";
+    }
+  };
+
+  const onClickHeaderEye = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const link = platformItems?.[selectedContent]?.mainLink ?? "";
+    onClickVideo(selectedContent, link);
+  };
+  if (!canEdit) {
+    return (
+      <td className="tableBase__td">
+        <div className="content-cell-static no-edit ">
+          <span onClick={onClickHeaderEye} className="eye">
+            <img src={eye} alt="" />
+          </span>
+          <p title={selectedLink}>
+            {selectedLink ? `${groupTitle(group)} ${selectedContent + 1}` : "—"}
+          </p>
+        </div>
+      </td>
+    );
+  }
   return (
     <>
       <td className="tableBase__td">
@@ -67,13 +103,21 @@ export const ContentCell = React.memo(function ContentCell({
           isOpen={isOpen}
           onToggle={onToggle}
           selected={
-            <p title={selectedLink}>
-              {selectedLink ? `Video ${selectedContent + 1}` : "—"}
-            </p>
+            <div className="content-cell-static">
+              <span onClick={onClickHeaderEye} className="eye">
+                <img src={eye} alt="" />
+              </span>
+              <p title={selectedLink}>
+                {selectedLink
+                  ? `${groupTitle(group)} ${selectedContent + 1}`
+                  : "—"}
+              </p>
+            </div>
           }>
           <ul className="dropdown-list">
             {platformItems.map((item: any, optionIndex: number) => (
               <li
+                className={`content-cell ${selectedContent === optionIndex ? "active-content" : ""}`}
                 key={`${item?._id ?? optionIndex}-${socialMedia}`}
                 onClick={() => onClickSelect(optionIndex)}>
                 <span
@@ -85,7 +129,9 @@ export const ContentCell = React.memo(function ContentCell({
                   <img src={eye} alt="" />
                 </span>
 
-                {item.mainLink ? `Video ${optionIndex + 1}` : "—"}
+                {item.mainLink
+                  ? `${groupTitle(group)} ${optionIndex + 1}`
+                  : "—"}
 
                 {selectedContent === optionIndex && (
                   <img className="check" src={check} alt="" />

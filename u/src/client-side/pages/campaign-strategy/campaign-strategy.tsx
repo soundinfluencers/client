@@ -76,7 +76,7 @@ export const CampaignStrategy: React.FC<Props> = () => {
     toast.success("Proposal saved succesfully!");
   };
   const buildPromoShareUrl = (campaignIdProposalId: string) => {
-    const origin = "https://test.soundinfluencers.com/"; // https://your-domain.com
+    const origin = "https://test.soundinfluencers.com"; // https://your-domain.com
     const id = encodeURIComponent(campaignIdProposalId);
 
     return `${origin}/promo-share/${id}/proposal`;
@@ -118,7 +118,9 @@ export const CampaignStrategy: React.FC<Props> = () => {
         <div className="navmenu">
           <Breadcrumbs />
         </div>{" "}
-        <h1>{campaignName || ""} - Campaign SoundInfluencers</h1>
+        <div className="campaignBase__title">
+          <h1>{campaignName || ""} - Campaign SoundInfluencers</h1>
+        </div>
         <Bar campaign={undefined} />
         <div className="contols-strategy">
           {" "}

@@ -29,7 +29,9 @@ export const resetPasswordApi = async (email: string): Promise<void> => {
 };
 
 // influencer register
-export const influencerSignupApi = async (data: ISignupInfluencerDraft): Promise<void> => {
+export const influencerSignupApi = async (
+  data: ISignupInfluencerDraft,
+): Promise<void> => {
   // console.log(data);
   await $api.post("/auth/create/influencer", data);
 };
@@ -38,12 +40,15 @@ export const updatePasswordApi = async (
   currentPassword: string,
   newPassword: string,
 ): Promise<void> => {
-  console.log('Updating password...')
+  console.log("Updating password...");
   await $api.patch("/profile/password", {
     currentPassword,
     newPassword,
   });
-  console.log('Password updated successfully', {currentPassword, newPassword});
+  console.log("Password updated successfully", {
+    currentPassword,
+    newPassword,
+  });
 };
 
 interface IGetMeResponse {
