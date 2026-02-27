@@ -1,9 +1,11 @@
 import React from "react";
 import "./option-slider.scss";
 import chevron from "@/assets/icons/chevron-right.svg";
-import x from "@/assets/icons/x.svg";
+import x from "@/assets/icons/x (1).svg";
 import { deleteProposalOption } from "@/api/client/campaign/campaign.api";
 import { toast } from "react-toastify";
+import { Modal } from "@/components/ui/modal-fix/Modal";
+import { ButtonMain, ButtonSecondary } from "@/shared/ui";
 type Props = {
   optionIndexes: number[];
   activeOption: number;
@@ -23,7 +25,8 @@ export function OptionsSlider({
   const [canScroll, setCanScroll] = React.useState(false);
   const [atStart, setAtStart] = React.useState(true);
   const [atEnd, setAtEnd] = React.useState(false);
-
+  const [modal, setModal] = React.useState<boolean>(false);
+  const [activeChooseOption, setActiveOption] = React.useState(activeOption);
   const update = React.useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -83,7 +86,8 @@ export function OptionsSlider({
             <img
               onClick={(e) => {
                 e.stopPropagation();
-                onDeleteOption(idx);
+                setActiveOption(idx);
+                setModal(true);
               }}
               src={x}
               alt=""
@@ -101,6 +105,29 @@ export function OptionsSlider({
           <img src={chevron} alt="" />
         </button>
       )}{" "}
+      {modal && (
+        <Modal onClose={() => setModal(false)}>
+          <div className="create-option">
+            <h2>
+              Are you sure you want to <br></br> delete this Option{" "}
+              {activeChooseOption + 1}?
+            </h2>
+            <p>You won’t be able to restore this!</p>
+            <div className="create-option-btn">
+              <ButtonSecondary
+                className="btn"
+                text="Cancle"
+                onClick={() => setModal(false)}
+              />
+              <ButtonMain
+                className="btn"
+                text="Delete"
+                onClick={() => onDeleteOption(activeChooseOption)}
+              />
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

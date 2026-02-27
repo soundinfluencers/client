@@ -1,4 +1,4 @@
-import type { TableView } from "@/pages/client/types";
+import type { TableView } from "../utils/getColumns";
 
 export const keys = (view: TableView) => {
   switch (view) {
@@ -15,14 +15,7 @@ export const keys = (view: TableView) => {
       ];
 
     case "music":
-      return [
-        "network",
-        "followers",
-        "date",
-        "content",
-        "description",
-        "brief",
-      ];
+      return ["network", "followers", "date", "content", "tracktitle", "brief"];
 
     case "press":
       return [
@@ -30,7 +23,7 @@ export const keys = (view: TableView) => {
         "followers",
         "date",
         "content",
-        "description",
+        "artworkLink",
         "brief",
       ];
 

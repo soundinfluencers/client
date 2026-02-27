@@ -2,31 +2,54 @@ import { useEffect, useRef, useState } from "react";
 
 export const useHorizontalScroll = () => {
   const ref = useRef<HTMLUListElement | null>(null);
-  const [showArrow, setShowArrow] = useState(false);
+
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    const checkOverflow = () => {
-      setShowArrow(el.scrollWidth > el.clientWidth);
+    const check = () => {
+      const hasOverflow = el.scrollWidth > el.clientWidth;
+
+      setShowRightArrow(
+        hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+      );
+
+      setShowLeftArrow(hasOverflow && el.scrollLeft > 0);
     };
 
-    checkOverflow();
-    window.addEventListener("resize", checkOverflow);
+    check();
 
-    return () => window.removeEventListener("resize", checkOverflow);
+    el.addEventListener("scroll", check);
+    window.addEventListener("resize", check);
+
+    return () => {
+      el.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
   }, []);
 
   const scrollRight = (offset = 150) => {
     const el = ref.current;
     if (!el) return;
 
-    el.scrollBy({
-      left: offset,
-      behavior: "smooth",
-    });
+    el.scrollBy({ left: offset, behavior: "smooth" });
   };
 
-  return { ref, showArrow, scrollRight };
+  const scrollLeft = (offset = 150) => {
+    const el = ref.current;
+    if (!el) return;
+
+    el.scrollBy({ left: -offset, behavior: "smooth" });
+  };
+
+  return {
+    ref,
+    showRightArrow,
+    showLeftArrow,
+    scrollRight,
+    scrollLeft,
+  };
 };

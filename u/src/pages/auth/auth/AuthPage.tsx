@@ -5,7 +5,10 @@ import { SwitchButton } from "../../../components/ui/switchers/switch-button/Swi
 import { useNavigate } from "react-router-dom";
 import type { UserRoleType } from "@/types/user/user.types.ts";
 import { useUser } from "@/store/get-user/index.ts";
-import { ButtonMain, ButtonSecondary } from "@/components/ui/buttons-fix/ButtonFix.tsx";
+import {
+  ButtonMain,
+  ButtonSecondary,
+} from "@/components/ui/buttons-fix/ButtonFix.tsx";
 
 export const AuthPage: FC = () => {
   const navigate = useNavigate();
@@ -15,6 +18,7 @@ export const AuthPage: FC = () => {
     setSelectedRole(role);
     setRole(role);
   };
+
   const handleSignupClick = () => {
     if (selectedRole === "client") navigate("/signup/client");
     else navigate("/signup/influencer");

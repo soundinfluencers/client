@@ -1,19 +1,6 @@
 import type { DropdownKey } from "../types/table-types";
+import type { TableGroup } from "@/client-side/types/table-types";
 
-export const proposalsData = [
-  {
-    network: "Dance music BPM",
-    followers: "12M",
-    genres: ["Techno (All)", "Bass", "EDM", "Psy", "Techno (All)"],
-    countries: ["DE 16.5%", "UK 8%", "FR 16.5%", "ES 8%", "IT 16.5%"],
-  },
-  {
-    network: "Techno TV",
-    followers: "112M",
-    genres: ["Techno (All)", "Bass", "EDM", "Psy", "Techno (All)"],
-    countries: ["DE 16.5%", "UK 8%", "FR 16.5%", "ES 8%", "IT 16.5%"],
-  },
-];
 export const columns = [
   "network",
   "followers",
@@ -24,7 +11,8 @@ export const columns = [
   "comments",
   "saves",
   "shares",
-];
+] as const;
+
 export const columnsStrategy = [
   "network",
   "followers",
@@ -34,7 +22,8 @@ export const columnsStrategy = [
   "tag",
   "link",
   "brief",
-];
+] as const;
+
 export const columnsProposals = [
   "network",
   "followers",
@@ -43,10 +32,12 @@ export const columnsProposals = [
   "content",
   "description",
   "action",
-];
+] as const;
+
 export const getColumnsStrategy = (flag: boolean) => {
   return flag ? columnsProposals : columnsStrategy;
 };
+
 export const getWidthColumn = (flag: boolean, isProposal: boolean) => {
   return flag
     ? {
@@ -70,11 +61,11 @@ export const getWidthColumn = (flag: boolean, isProposal: boolean) => {
           date: 120,
           content: 150,
           description: 270,
+          tracktitle: 270,
           taggedUser: 160,
           taggedLink: 220,
           additionalBrief: 260,
           tracklink: 200,
-          tracktitle: 200,
           action: 66,
         }
       : {
@@ -89,6 +80,62 @@ export const getWidthColumn = (flag: boolean, isProposal: boolean) => {
           tracklink: 200,
           tracktitle: 200,
         };
+};
+
+export type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
+
+// ---------- group-specific titles ----------
+const baseTitles: Record<string, string> = {
+  network: "Networks",
+  followers: "Followers",
+  postlink: "Post link",
+  screenshot: "Screenshot",
+  impressions: "Impressions",
+  likes: "Likes",
+  genres: "Genres",
+  countries: "Top 5 Countries",
+  comments: "Comments",
+  saves: "Saves",
+  shares: "Shares",
+  date: "Req. date",
+  content: "Content",
+  description: "Post description",
+  tag: "Story tag",
+  link: "Story link",
+  tracklink: "Track link",
+  tracktitle: "Track Title",
+  brief: "Additional brief",
+  action: "Actions",
+  artworkLink: "Artwork Link",
+};
+
+const titlesByGroup: Partial<
+  Record<TableGroup, Partial<Record<string, string>>>
+> = {
+  main: {
+    description: "Post description",
+  },
+  music: {
+    tracktitle: "Track Title",
+  },
+  press: {
+    artworkLink: "Artwork Link",
+  },
+};
+
+export const getTitle = (group: TableGroup, key: string) =>
+  titlesByGroup[group]?.[key] ?? baseTitles[key] ?? key;
+
+// ---------- dropdown ----------
+export const ReqData = ["ASAP", "BEFORE", "AFTER"] as const;
+
+export const getDropdownOptions = (key: DropdownKey): string[] => {
+  switch (key) {
+    case "date":
+      return [...ReqData];
+    default:
+      return [];
+  }
 };
 export const titles: Record<string, string> = {
   network: "Networks",
@@ -111,15 +158,4 @@ export const titles: Record<string, string> = {
   tracktitle: "Track Title",
   brief: "Additional brief",
   action: "Actions",
-};
-
-export const ReqData = ["ASAP", "BEFORE", "AFTER"];
-
-export const getDropdownOptions = (key: DropdownKey): string[] => {
-  switch (key) {
-    case "date":
-      return ReqData;
-    default:
-      return [];
-  }
 };

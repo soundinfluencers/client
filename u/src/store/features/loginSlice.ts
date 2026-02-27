@@ -16,7 +16,7 @@ interface LoginState {
 }
 
 export const useLoginStore = create<LoginState>((set) => ({
-  email: "nazarkozynets030606@gmail.com",
+  email: "test@gmail.com",
   password: "1234",
   role: "client",
   errorEmail: "",

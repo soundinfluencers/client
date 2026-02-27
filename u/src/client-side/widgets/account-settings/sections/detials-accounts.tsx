@@ -52,7 +52,7 @@ export const AccountDetailsSection: React.FC<Props> = ({
   return (
     <div className="Account-settings__details">
       <div className="Account-settings__subtitle">
-        <h3>Account details</h3>
+        <h2>Account Settings</h2>
         <Edit active={isEditing} onChange={toggleEdit} />
       </div>
       {isEditing ? (

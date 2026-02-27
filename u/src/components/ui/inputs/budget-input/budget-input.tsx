@@ -41,19 +41,16 @@ export function BudgetField({
               <ul className="budget-currency">
                 {CURRENCIES.map((c) => (
                   <li
+                    onClick={() => currencyField.onChange(c)}
                     className={selectedCurrency === c ? "active" : ""}
                     key={c}>
-                    <button
-                      type="button"
-                      onClick={() => currencyField.onChange(c)}
-                      aria-pressed={selectedCurrency === c}>
+                    <button type="button" aria-pressed={selectedCurrency === c}>
                       {c}
                     </button>
                   </li>
                 ))}
               </ul>
 
-              {/* amount field */}
               <Controller
                 control={control}
                 name={name as any}

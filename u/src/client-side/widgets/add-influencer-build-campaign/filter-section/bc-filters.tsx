@@ -19,7 +19,7 @@ export const Filters: React.FC<Props> = ({ onToggle, isSmall }) => {
   const [loading, setLoading] = React.useState(false);
 
   const { setSelected } = useFilter();
-
+  console.log(filter, "filter");
   React.useEffect(() => {
     setLoading(true);
     (async () => {
@@ -52,19 +52,23 @@ export const Filters: React.FC<Props> = ({ onToggle, isSmall }) => {
   }, [filter, setSelected]);
 
   return (
-    <div className={`bc_filter ${isSmall ? "bc_filterForTable" : ""}`}>
-      <div className="bc_filter__sticky">
-        <div className="bc_filter__head">
-          <h3>Filters</h3>
-          <img onClick={onToggle} src={cross} alt="" />
-        </div>
+    <div className={`sticky-filter ${isSmall ? "bc_filterForTable" : ""}`}>
+      <div className={`bc_filter `}>
+        <div className="bc_filter__sticky">
+          <div className="bc_filter__head">
+            <h3>Filters</h3>
+            <img onClick={onToggle} src={cross} alt="" />
+          </div>
 
-        <div className="bc_filter__content">
-          {loading
-            ? Array.from({ length: 12 }).map((_, index) => (
-                <FilterSkeleton key={index} />
-              ))
-            : filter.map((data) => <FilterSelect key={data.id} data={data} />)}
+          <div className="bc_filter__content">
+            {loading
+              ? Array.from({ length: 12 }).map((_, index) => (
+                  <FilterSkeleton key={index} />
+                ))
+              : filter.map((data) => (
+                  <FilterSelect key={data.id} data={data} />
+                ))}
+          </div>
         </div>
       </div>
     </div>

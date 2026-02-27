@@ -17,8 +17,8 @@ import type {
 } from "@/client-side/types/table-types";
 import {
   columnsStrategy,
+  getTitle,
   getWidthColumn,
-  titles,
 } from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
 
@@ -109,7 +109,7 @@ export function TableStrategy({
             {columnsStrategy.map((key) => (
               <th key={key} className="tableBase__th">
                 <div className="header-content">
-                  <span className="th-title">{titles[key]}</span>
+                  <span className="th-title">{getTitle(group, key)}</span>
 
                   {key === "followers" && (
                     <div className="switch" aria-label="Sort by followers">

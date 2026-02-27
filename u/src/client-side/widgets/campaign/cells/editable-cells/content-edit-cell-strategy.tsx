@@ -7,6 +7,7 @@ import plus from "@/assets/icons/plus.svg";
 import trash from "@/assets/icons/trash-2.svg";
 import { ButtonMain, ButtonSecondary } from "@/components";
 import { useStrategyCampaignStore } from "@/client-side/store";
+import { VideoPreview } from "../../live-view-card/preview/preview-video-component";
 
 type Props = {
   campaignId: string;
@@ -22,6 +23,8 @@ type Props = {
 
   setSelectedPd: (v: number) => void;
   socialMedia?: string;
+  group: string;
+  media0?: any;
 };
 
 export const ContentCellEditStrategy = React.memo(
@@ -36,6 +39,8 @@ export const ContentCellEditStrategy = React.memo(
     setSelectedContent,
     setSelectedPd,
     socialMedia,
+    group,
+    media0,
   }: Props) {
     const addContentForSocial = useStrategyCampaignStore(
       (s) => s.addContentForSocial,
@@ -57,7 +62,8 @@ export const ContentCellEditStrategy = React.memo(
     const [deleteIdx, setDeleteIdx] = React.useState<number>(-1);
 
     const selectedLink = platformItems?.[selectedContent]?.mainLink;
-
+    const pathLower = media0?.pathLower;
+    const videoUrl = media0?.url ?? null;
     const selectContent = React.useCallback(
       (idx: number) => {
         setSelectedContent(idx);
@@ -114,12 +120,18 @@ export const ContentCellEditStrategy = React.memo(
       closeAddModal,
       onClose,
     ]);
-
+    const onClickHeaderEye = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const link = platformItems?.[selectedContent]?.mainLink ?? "";
+      onClickVideo(selectedContent, link);
+    };
     const openDelete = React.useCallback((idx: number) => {
       setDeleteIdx(idx);
       setDeleteModal(true);
     }, []);
-
+    const closeModal = React.useCallback(() => {
+      setPopUp(false);
+    }, []);
     const confirmDelete = React.useCallback(() => {
       const item = platformItems?.[deleteIdx];
       const contentId = item?._id;
@@ -147,6 +159,18 @@ export const ContentCellEditStrategy = React.memo(
 
     const closePreview = React.useCallback(() => setPopUp(false), []);
 
+    const groupTitle = (group: string) => {
+      switch (group) {
+        case "main":
+          return "Video";
+        case "music":
+          return "Song";
+        case "press":
+          return "Press";
+        default:
+          return "";
+      }
+    };
     return (
       <>
         <td className="tableBase__td">
@@ -154,9 +178,16 @@ export const ContentCellEditStrategy = React.memo(
             isOpen={isOpen}
             onToggle={onToggle}
             selected={
-              <p title={selectedLink}>
-                {selectedLink ? `Video ${selectedContent + 1}` : "—"}
-              </p>
+              <div className="content-cell-static">
+                <span onClick={onClickHeaderEye} className="eye">
+                  <img src={eye} alt="" />
+                </span>
+                <p title={selectedLink}>
+                  {selectedLink
+                    ? `${groupTitle(group)} ${selectedContent + 1}`
+                    : "—"}
+                </p>
+              </div>
             }>
             <div className="post-description-block">
               <ul className="dropdown-list">
@@ -165,7 +196,7 @@ export const ContentCellEditStrategy = React.memo(
                     <span
                       onClick={(e) => {
                         e.stopPropagation();
-                        onClickVideo(idx, item.mainLink); // ✅ idx
+                        onClickVideo(idx, item.mainLink);
                       }}
                       className="eye">
                       <img src={eye} alt="" />
@@ -199,7 +230,6 @@ export const ContentCellEditStrategy = React.memo(
             </div>
           </Dropdown>
         </td>
-
         {addModal && (
           <Modal onClose={closeAddModal}>
             <div className="modal-card">
@@ -218,7 +248,6 @@ export const ContentCellEditStrategy = React.memo(
             </div>
           </Modal>
         )}
-
         {deleteModal && (
           <Modal onClose={() => setDeleteModal(false)}>
             <div className="onDeleteModal">
@@ -238,10 +267,18 @@ export const ContentCellEditStrategy = React.memo(
         )}
 
         {popUp && (
-          <Modal onClose={closePreview}>
+          <Modal onClose={closeModal}>
             <div className="modal-card">
               <h2>Video {selectedVideo.index}</h2>
-              <div className="card-player"></div>
+              {media0 ? (
+                <VideoPreview
+                  className="modal-card-video"
+                  videoUrl={videoUrl}
+                  pathLower={pathLower}
+                />
+              ) : (
+                <input type="text" value={selectedLink} />
+              )}
             </div>
           </Modal>
         )}

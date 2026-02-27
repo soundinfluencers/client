@@ -3,7 +3,6 @@ import type { CampaignContentItem } from "@/types/store/index.types";
 
 import { NetworkCell } from "../cells/strategy/network-cell";
 import { FollowersCell } from "../cells/strategy/followers-cell";
-import { DateCell } from "../cells/strategy/date-cell";
 
 import { ContentCell } from "../cells/strategy/content-cell";
 
@@ -20,6 +19,7 @@ import { ReqData } from "@/client-side/data/table-campaign.data";
 import { getAccountKey } from "@/client-side/utils";
 import { useProposalAccountsStore } from "@/client-side/store";
 import { ContentCellEdit } from "../cells/editable-cells/content-edit-cell";
+import { DateCell } from "../cells/strategy/date-cell";
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
 const MUSIC_NETWORKS = ["spotify", "soundcloud"];
 
@@ -81,7 +81,9 @@ export const TableCard = React.memo(function TableCard({
   const setAccountDateRequest = useProposalAccountsStore(
     (s) => s.setAccountDateRequest,
   );
+
   const dateRequestRaw = String(data.dateRequest ?? "ASAP");
+
   const [mode, dateVal = ""] = dateRequestRaw.split(":");
   const toggleDate = React.useCallback(
     () => onToggleDropdown(rowKey, "date"),
@@ -110,6 +112,7 @@ export const TableCard = React.memo(function TableCard({
           <GenresCell data={data} />
           <CountriesCell data={data} />{" "}
           <ContentCell
+            group={group}
             isOpen={isContentOpen}
             onToggle={toggleContent}
             onClose={onCloseDropdown}
@@ -121,6 +124,7 @@ export const TableCard = React.memo(function TableCard({
           />
           {canEdit ? (
             <DescriptionCellEdit
+              group={group}
               isOpen={isPostDescriptionOpen}
               onToggle={togglePD}
               onClose={onCloseDropdown}
@@ -131,6 +135,7 @@ export const TableCard = React.memo(function TableCard({
             />
           ) : (
             <DescriptionCell
+              group={group}
               isOpen={isPostDescriptionOpen}
               onToggle={togglePD}
               onClose={onCloseDropdown}
@@ -144,6 +149,7 @@ export const TableCard = React.memo(function TableCard({
       ) : (
         <>
           <DateCell
+            canEdit={canEdit}
             isOpen={isDateOpen}
             onToggle={toggleDate}
             onClose={onCloseDropdown}
@@ -169,6 +175,7 @@ export const TableCard = React.memo(function TableCard({
 
           {canEdit ? (
             <ContentCellEdit
+              group={group}
               media0={media0}
               isOpen={isContentOpen}
               onToggle={toggleContent}
@@ -183,6 +190,7 @@ export const TableCard = React.memo(function TableCard({
             />
           ) : (
             <ContentCell
+              group={group}
               media0={media0}
               isOpen={isContentOpen}
               onToggle={toggleContent}
@@ -197,6 +205,7 @@ export const TableCard = React.memo(function TableCard({
 
           {canEdit ? (
             <DescriptionCellEdit
+              group={group}
               isOpen={isPostDescriptionOpen}
               onToggle={togglePD}
               onClose={onCloseDropdown}
@@ -207,6 +216,7 @@ export const TableCard = React.memo(function TableCard({
             />
           ) : (
             <DescriptionCell
+              group={group}
               isOpen={isPostDescriptionOpen}
               onToggle={togglePD}
               onClose={onCloseDropdown}

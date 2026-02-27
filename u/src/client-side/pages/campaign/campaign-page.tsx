@@ -42,7 +42,11 @@ import {
   useStrategyCampaignStore,
   useUpdateCampaign,
 } from "@/client-side/store";
-import { buildProposalPatchBody, downloadBlob } from "@/client-side/utils";
+import {
+  buildProposalPatchBody,
+  calcGroupPrices,
+  downloadBlob,
+} from "@/client-side/utils";
 
 import { getPdfFile } from "@/api/client/file/get-pdf";
 import { getCsvFile } from "@/api/client/file/get-csv";
@@ -94,7 +98,7 @@ export const CampaignPage = () => {
   const [isRequesting, setIsRequesting] = React.useState(false);
   const [isRequestSent, setIsRequestSent] = React.useState(false);
   const [isRequestingPDF, setisRequestingPDF] = React.useState(false);
-  const [isRequestSentPDF, setIsRequestSentPDF] = React.useState(false);
+
   const [localExtraOptions, setLocalExtraOptions] = React.useState<number[]>(
     [],
   );
@@ -150,7 +154,7 @@ export const CampaignPage = () => {
   };
   const getPDF = async (id: string) => {
     try {
-      setIsRequestSentPDF(true);
+      setisRequestingPDF(true);
       const res = await getPdfFile(id);
 
       const blob = res.data as Blob;
@@ -160,7 +164,7 @@ export const CampaignPage = () => {
       console.log(error);
     } finally {
       toast.success("PDF created succesfully!");
-      setIsRequestSentPDF(false);
+      setisRequestingPDF(false);
     }
   };
 
@@ -185,6 +189,8 @@ export const CampaignPage = () => {
   React.useEffect(() => {
     if (data?.kind === "proposal") {
       setView(-1);
+    } else {
+      setView(0);
     }
   }, [data?.kind]);
   React.useEffect(() => {
@@ -214,11 +220,12 @@ export const CampaignPage = () => {
 
   const onAddOption = async (inheritFromOption0: boolean) => {
     if (data.kind !== "proposal") return;
-
+    console.log(inheritFromOption0, "wfalse");
     const base = data.existingOptions ?? [];
     const all = [...base, ...localExtraOptions];
+    console.log(base, "base");
     const newIndex = all.length ? Math.max(...all) + 1 : 0;
-
+    console.log(newIndex, "newIndex");
     setLocalExtraOptions((prev) => [...prev, newIndex]);
     setOptionModal(false);
 
@@ -236,22 +243,61 @@ export const CampaignPage = () => {
   const onDeleteOption = async (idx: number) => {
     if (data.kind !== "proposal") return;
 
+    const prevLocal = localExtraOptions;
+    setLocalExtraOptions((prev) => prev.filter((x) => x !== idx));
+
+    const nextOptionIndexes = optionIndexes.filter((x) => x !== idx);
+
+    const nextActive =
+      activeOption === idx
+        ? nextOptionIndexes.length
+          ? nextOptionIndexes[0]
+          : 0
+        : activeOption;
+
+    if (nextActive !== activeOption) {
+      setActiveOption(nextActive);
+      setProposalOption(campaignIdForActions ?? "", nextActive);
+    }
+
     try {
       setIsRequesting(true);
+
       await deleteProposalOption(data.campaignId, idx);
 
       await useFetchCampaign
         .getState()
-        .setProposalOption(data.campaignId, activeOption);
+        .setProposalOption(data.campaignId, nextActive);
 
       toast.success("Proposal option deleted successfully!");
     } catch (e) {
       console.error(e);
       toast.error("Failed to delete option");
+
+      setLocalExtraOptions(prevLocal);
     } finally {
       setIsRequesting(false);
     }
   };
+  // const onDeleteOption = async (idx: number) => {
+  //   if (data.kind !== "proposal") return;
+
+  //   try {
+  //     setIsRequesting(true);
+  //     await deleteProposalOption(data.campaignId, idx);
+
+  //     await useFetchCampaign
+  //       .getState()
+  //       .setProposalOption(data.campaignId, activeOption);
+
+  //     toast.success("Proposal option deleted successfully!");
+  //   } catch (e) {
+  //     console.error(e);
+  //     toast.error("Failed to delete option");
+  //   } finally {
+  //     setIsRequesting(false);
+  //   }
+  // };
   // const onDeleteOption = async (idx: number) => {
   //   if (data.kind !== "proposal") return;
 
@@ -286,6 +332,7 @@ export const CampaignPage = () => {
     } catch (e) {
       console.error(e);
     } finally {
+      setRequestModal(false);
       setIsRequesting(false);
     }
   };
@@ -303,12 +350,14 @@ export const CampaignPage = () => {
       const content = st.contentByOption[optionIndex] ?? [];
 
       const patches = useUpdateCampaign.getState().patches ?? {};
+      const { totalPublicPrice } = calcGroupPrices(accounts);
 
       const body = buildProposalPatchBody({
         campaignName,
         accounts,
         content,
         patches,
+        totalPublicPrice,
       });
       console.log(body, "body");
       await patchAddProposalOption(campaignId, optionIndex, body);
@@ -407,7 +456,7 @@ export const CampaignPage = () => {
     navigate(`/client/campaign/payment?draft=${draftId}`);
   };
   const buildPromoShareUrl = (campaignIdProposalId: string) => {
-    const origin = "https://test.soundinfluencers.com/"; // https://your-domain.com
+    const origin = "https://test.soundinfluencers.com"; // https://your-domain.com
     const id = encodeURIComponent(campaignIdProposalId);
 
     return `${origin}/promo-share/${id}/proposal`;
@@ -448,10 +497,12 @@ export const CampaignPage = () => {
                 />{" "}
               </div>
               <div className="controls-second">
-                <ViewAudience
-                  flag={changeView}
-                  onChange={() => setChangeView((prev) => !prev)}
-                />
+                {view !== 2 && (
+                  <ViewAudience
+                    flag={changeView}
+                    onChange={() => setChangeView((prev) => !prev)}
+                  />
+                )}
                 <div className="controls-second__content">
                   <ViewChange
                     isProposal={isProposal}
@@ -496,68 +547,76 @@ export const CampaignPage = () => {
               </div> */}
             </>
           ) : (
-            <div className="controls">
-              <ToggleTables
-                onChange={() => setFlag((prev) => !prev)}
-                flag={flag}
-              />
-              <ViewChange
-                isProposal={isProposal}
-                setView={setView}
-                view={view}
-              />
-              {data.status === "completed" ? (
-                <ul className="option-buttons">
-                  <li onClick={() => getCSV(data.campaignId)}>
-                    <img src={csv} alt="" />
-                    {isRequestSent
-                      ? "CSV File"
-                      : isRequesting
-                        ? "creating..."
-                        : "CSV File"}
-                  </li>
-                  <li onClick={() => getPDF(data.campaignId)}>
-                    <img src={pdf} alt="" />{" "}
-                    {isRequestSentPDF
-                      ? "PDF File"
-                      : isRequestSentPDF
-                        ? "creating..."
-                        : "PDF File"}
-                  </li>
-                  <li
-                    onClick={() => {
-                      copyShareLink(campaignIdForActions ?? "");
-                      toast.success("Shared link created succesfully!");
-                    }}>
-                    <img src={share} alt="" />
-                    {isPending ? "Copying..." : "Share"}
-                  </li>
-                </ul>
-              ) : (
-                data.kind === "regular" && (
-                  <div className="share-link-row">
-                    <div
+            <>
+              {" "}
+              <div className="controls">
+                {data.status !== "under_review" && (
+                  <ToggleTables
+                    onChange={() => setFlag((prev) => !prev)}
+                    flag={flag}
+                  />
+                )}
+                <ViewChange
+                  isProposal={isProposal}
+                  setView={setView}
+                  view={view}
+                />
+                {data.status === "completed" ? (
+                  <ul className="option-buttons">
+                    <li onClick={() => getCSV(data.campaignId)}>
+                      <img src={csv} alt="" />
+                      {isRequestSent
+                        ? "CSV File"
+                        : isRequesting
+                          ? "creating..."
+                          : "CSV File"}
+                    </li>
+                    <li onClick={() => getPDF(data.campaignId)}>
+                      <img src={pdf} alt="" />{" "}
+                      {isRequestSent
+                        ? "PDF File"
+                        : isRequestingPDF
+                          ? "creating..."
+                          : "PDF File"}
+                    </li>
+                    <li
                       onClick={() => {
                         copyShareLink(campaignIdForActions ?? "");
                         toast.success("Shared link created succesfully!");
-                      }}
-                      className="share-link">
-                      <img src={link} alt="" />
+                      }}>
+                      <img src={share} alt="" />
                       {isPending ? "Copying..." : "Share link"}
+                    </li>
+                  </ul>
+                ) : (
+                  data.kind === "regular" && (
+                    <div className="share-link-row">
+                      <div
+                        onClick={() => {
+                          copyShareLink(campaignIdForActions ?? "");
+                          toast.success("Shared link created succesfully!");
+                        }}
+                        className="share-link">
+                        <img src={link} alt="" />
+                        {isPending ? "Copying..." : "Share link"}
+                      </div>
                     </div>
+                  )
+                )}
+              </div>
+              <div className="controls-second">
+                {data.kind !== "proposal" && data.kind !== "regular" && (
+                  <div className="ViewAudience-block">
+                    <ViewAudience
+                      flag={changeView}
+                      onChange={() => setChangeView((prev) => !prev)}
+                    />
                   </div>
-                )
-              )}
-            </div>
+                )}
+              </div>
+            </>
           )}
-          {data.kind !== "proposal" && data.kind !== "regular" && (
-            <div className="ViewAudience-block">
-              <ViewAudience
-                flag={changeView}
-                onChange={() => setChangeView((prev) => !prev)}
-              />
-            </div>
-          )}
+
           {data.kind === "proposal" ? (
             <ProposalCampaignPage
               campaign={data}
@@ -661,17 +720,13 @@ export const CampaignPage = () => {
             />
           )}
         </div> */}
-        <div className="campaignBase__proceedTo">
+        {/* <div className="campaignBase__proceedTo">
           {data.kind === "proposal" ? (
             data?.selectedOption?.canEdit ? (
               <ButtonSecondary
                 className="proceedTo"
                 text={
-                  isRequestSent
-                    ? "Updated"
-                    : isRequesting
-                      ? "Updating..."
-                      : "Update"
+                  isRequestSent ? "Saved" : isRequesting ? "Saving..." : "Save"
                 }
                 onClick={() =>
                   updateProposalOption(
@@ -697,11 +752,7 @@ export const CampaignPage = () => {
           ) : data.canEdit ? (
             <ButtonSecondary
               text={
-                isRequesting
-                  ? "Updating..."
-                  : isRequestSent
-                    ? "Updated"
-                    : "Update"
+                isRequestSent ? "Saved" : isRequesting ? "Saving..." : "Save"
               }
               isDisabled={!isDirty || isRequesting}
               onClick={() =>
@@ -727,6 +778,65 @@ export const CampaignPage = () => {
               onClick={() => setRequestModal(true)}
             />
           ) : null}
+        </div> */}
+        <div className="campaignBase__proceedTo">
+          {data.kind === "proposal" ? (
+            data?.selectedOption?.canEdit ? (
+              <ButtonSecondary
+                className="proceedTo"
+                text={
+                  isRequestSent ? "Saved" : isRequesting ? "Saving..." : "Save"
+                }
+                onClick={() =>
+                  updateProposalOption(
+                    data.campaignId,
+                    activeOption,
+                    data.campaignName,
+                  )
+                }
+              />
+            ) : data.status === "under_review" ? (
+              <ButtonSecondary
+                className="proceedTo"
+                text={
+                  isRequestSent
+                    ? "Sent"
+                    : isRequesting
+                      ? "Sending..."
+                      : "Request edit"
+                }
+                onClick={() => setRequestModal(true)}
+              />
+            ) : null
+          ) : data.canEdit ? (
+            <ButtonSecondary
+              text={
+                isRequestSent ? "Saved" : isRequesting ? "Saving..." : "Save"
+              }
+              isDisabled={!isDirty || isRequesting}
+              onClick={() =>
+                updateStrategyCampaign(data.campaignId, data.campaignName)
+              }
+            />
+          ) : data.kind === "draft" ? (
+            <ButtonMain
+              className="proceedTo"
+              text="Proceed to payment"
+              onClick={() => proceedDraftToPayment(data)}
+            />
+          ) : data.status === "under_review" ? (
+            <ButtonSecondary
+              className="proceedTo"
+              text={
+                isRequestSent
+                  ? "Sent"
+                  : isRequesting
+                    ? "Sending..."
+                    : "Request edit"
+              }
+              onClick={() => setRequestModal(true)}
+            />
+          ) : null}
         </div>
       </Container>
       {optionModal && (
@@ -734,7 +844,8 @@ export const CampaignPage = () => {
           <div className="create-option">
             <h2>Proposal option</h2>
             <p>
-              Do you want to include the current Pages & Content from Option 1?
+              Do you want to include the current Pages & Content from Option{" "}
+              {activeOption + 1}?
             </p>
             <div className="create-option-btn">
               <ButtonSecondary

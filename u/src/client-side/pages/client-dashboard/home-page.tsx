@@ -8,7 +8,6 @@ import type { CampaignStatusType } from "@/types/client/dashboard/campaign.types
 import { useNavigate } from "react-router-dom";
 import { useGetCampaignsQuery } from "@/client-side/react-query";
 import { BarDashboard, CampaignsList, HomeHeader } from "@/client-side/widgets";
-import { useFetchCampaign } from "@/client-side/store";
 
 export type ListDisplayMode = "grid" | "table";
 export type CampaignFilterStatus = CampaignStatusType | "all";
@@ -16,7 +15,6 @@ export const HomePage = () => {
   const STEP = 12;
   const navigate = useNavigate();
   const { user } = useUser();
-  const { setCampaign, setDraft, setProposalOption } = useFetchCampaign();
 
   const [view, setView] = React.useState<number>(1);
   const [status, setStatus] = React.useState<CampaignFilterStatus>("all");

@@ -89,6 +89,7 @@ export const useFetchCampaign = create<any>((set, get) => ({
           campaignPrice: base?.price ?? 0,
           paymentType: "",
         };
+    console.log(body, "body");
     set({ isLoading: true });
     try {
       await postAddProposalOption(campaignId, body);

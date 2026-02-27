@@ -15,11 +15,12 @@ import { GenresCell } from "../cells/strategy/genres-cell";
 
 import type { TableRowProps } from "@/client-side/types/table-types";
 import { ReqData } from "@/client-side/data/table-campaign.data";
-import { DateCell } from "../cells/strategy/date-cell";
+
 import { getAccountKey } from "@/client-side/utils";
 import { useStrategyCampaignStore } from "@/client-side/store";
 import { ContentCellEdit } from "../cells/editable-cells/content-edit-cell";
 import { ContentCellEditStrategy } from "../cells/editable-cells/content-edit-cell-strategy";
+import { DateCell } from "../cells/strategy/date-cell";
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
 const MUSIC_NETWORKS = ["spotify", "soundcloud"];
 export const getGroupBySocial = (
@@ -79,7 +80,9 @@ export const TableCard = React.memo(function TableCard({
     (s) => s.setAccountDateRequest,
   );
   const dateRequestRaw = String(data.dateRequest ?? "ASAP");
+
   const [mode, dateVal = ""] = dateRequestRaw.split(":");
+
   // const platformItems = React.useMemo(() => {
   //   const key = String(data.socialMedia ?? "")
   //     .trim()
@@ -114,6 +117,7 @@ export const TableCard = React.memo(function TableCard({
           <GenresCell data={data} />
           <CountriesCell data={data} />{" "}
           <ContentCell
+            canEdit={canEdit}
             isOpen={isContentOpen}
             onToggle={toggleContent}
             onClose={onCloseDropdown}
@@ -122,6 +126,7 @@ export const TableCard = React.memo(function TableCard({
             setSelectedContent={setSelectedContent}
             setSelectedPd={setSelectedPd}
             socialMedia={data.socialMedia}
+            group={group}
           />
           {canEdit ? (
             <DescriptionCellEdit
@@ -132,6 +137,7 @@ export const TableCard = React.memo(function TableCard({
               selectedContent={selectedContent}
               selectedPd={selectedPd}
               setSelectedPd={setSelectedPd}
+              group={group}
             />
           ) : (
             <DescriptionCell
@@ -142,12 +148,14 @@ export const TableCard = React.memo(function TableCard({
               selectedContent={selectedContent}
               selectedPd={selectedPd}
               setSelectedPd={setSelectedPd}
+              group={group}
             />
           )}
         </>
       ) : (
         <>
           <DateCell
+            canEdit={canEdit}
             isOpen={isDateOpen}
             onToggle={toggleDate}
             onClose={onCloseDropdown}
@@ -194,6 +202,7 @@ export const TableCard = React.memo(function TableCard({
               setSelectedContent={setSelectedContent}
               setSelectedPd={setSelectedPd}
               socialMedia={data.socialMedia}
+              group={group}
             />
           ) : (
             <ContentCell
@@ -206,6 +215,7 @@ export const TableCard = React.memo(function TableCard({
               setSelectedContent={setSelectedContent}
               setSelectedPd={setSelectedPd}
               socialMedia={data.socialMedia}
+              group={group}
             />
           )}
           {canEdit ? (
@@ -217,6 +227,7 @@ export const TableCard = React.memo(function TableCard({
               selectedContent={selectedContent}
               selectedPd={selectedPd}
               setSelectedPd={setSelectedPd}
+              group={group}
             />
           ) : (
             <DescriptionCell
@@ -227,6 +238,7 @@ export const TableCard = React.memo(function TableCard({
               selectedContent={selectedContent}
               selectedPd={selectedPd}
               setSelectedPd={setSelectedPd}
+              group={group}
             />
           )}
           {canEdit ? (

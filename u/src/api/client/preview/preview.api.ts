@@ -23,7 +23,7 @@ export const getFilePreview = async (payload: FilePreviewRequest) => {
   const res = await $api.post("/file/preview", payload, {
     responseType: "blob",
   });
-
+  console.log(res, "res-data");
   return res.data as Blob;
 };
 const apiNoCred = axios.create({

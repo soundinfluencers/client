@@ -89,6 +89,7 @@ export const CampaignTablePageDraft: React.FC<Props> = ({
               networks={mainPromos}
               group="main"
               canEdit={true}
+              title="Video Content Section"
               changeView={changeView}
             />
           )}
@@ -101,6 +102,7 @@ export const CampaignTablePageDraft: React.FC<Props> = ({
               networks={musicPromos}
               group="music"
               canEdit={true}
+              title="Music Section"
               changeView={changeView}
             />
           )}
@@ -113,6 +115,7 @@ export const CampaignTablePageDraft: React.FC<Props> = ({
               networks={otherPromos}
               group="press"
               canEdit={true}
+              title="Press Section"
               changeView={changeView}
             />
           )}

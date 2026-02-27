@@ -46,7 +46,7 @@ export const BarDashboard: React.FC<Props> = ({
       <div className="bar-home__content">
         <div className="bar-home__feutures">
           {feutures.map((item, i) => {
-            const isActive = status === item.key;
+            const isActive = status === "all" || status === item.key;
 
             return (
               <div

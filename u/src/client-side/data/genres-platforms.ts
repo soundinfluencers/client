@@ -9,8 +9,6 @@ export const GENRES = [
   "Psy",
   "Trance",
   "Dubstep",
-  "Garage",
-  "Dance",
 ] as const;
 export const PLATFORMS = [
   { id: "instagram", label: "Instagram", icon: "instagram" },

@@ -54,28 +54,29 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
   };
 
   return (
-    <td className="tableBase__td trash-action">
+    <td
+      className={`tableBase__td trash-action ${isRecentlyAdded ? "td-wide" : ""} ${isConfirming ? "td-wide" : ""}`}>
       {" "}
       {isRecentlyAdded && (
-        <div className="trash-action__content">
-          <button
-            type="button"
-            onClick={onConfirmAdded}
-            className="trash-action__confirm"
-            aria-label="Confirm added"
-            title="Confirm added">
-            <img src={check} alt="" />
-          </button>
-        </div>
-      )}
-      {isRecentlyAdded && (
-        <div className="trash-action__content">
-          <button
-            type="button"
-            onClick={onDeleteClick}
-            className="trash-action__delete">
-            <img src={trash} alt="" />
-          </button>
+        <div className="isRecentlyAdded">
+          <div className="trash-action__content">
+            <button
+              type="button"
+              onClick={onConfirmAdded}
+              className="trash-action__confirm"
+              aria-label="Confirm added"
+              title="Confirm added">
+              <img src={check} alt="" />
+            </button>
+          </div>
+          <div className="trash-action__content">
+            <button
+              type="button"
+              onClick={onDeleteClick}
+              className="trash-action__delete">
+              <img src={trash} alt="" />
+            </button>
+          </div>
         </div>
       )}
       {!isRecentlyAdded && isConfirming && (

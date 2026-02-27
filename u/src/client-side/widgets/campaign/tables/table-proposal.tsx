@@ -13,7 +13,10 @@ import { TableCard } from "../card-table/table-card-proposal";
 
 import { Link } from "react-router-dom";
 import type { TableGroup } from "@/client-side/types/table-types";
-import { getWidthColumn, titles } from "@/client-side/data/table-campaign.data";
+import {
+  getTitle,
+  getWidthColumn,
+} from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
 import { getAccountKey, getColumns } from "@/client-side/utils";
 
@@ -25,6 +28,7 @@ type Props = {
   group: TableGroup;
   canEdit: boolean;
   optionIndex: number;
+  title: string;
 };
 
 type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
@@ -45,6 +49,7 @@ export function TableProposal({
   group,
   canEdit,
   optionIndex,
+  title,
 }: Props) {
   const totalFollowers = React.useMemo(
     () =>
@@ -87,6 +92,7 @@ export function TableProposal({
 
   return (
     <div className="tableBase-wrap">
+      <h1>{title}</h1>
       <table className="tableBase">
         <colgroup>
           {columns.map((key) => (
@@ -108,7 +114,7 @@ export function TableProposal({
             {columns.map((key) => (
               <th key={key} className="tableBase__th">
                 <div className="header-content">
-                  <span className="th-title">{titles[key]}</span>
+                  <span className="th-title">{getTitle(group, key)}</span>
 
                   {key === "followers" && (
                     <div className="switch" aria-label="Sort by followers">

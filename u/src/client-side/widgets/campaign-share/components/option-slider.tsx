@@ -58,18 +58,20 @@ export function OptionsSlider({
   };
 
   return (
-    <div className="options-slider">
+    <div className="options-slider-proposal">
       {canScroll && (
         <button
           type="button"
-          className="options-slider__arrow left"
+          className="options-slider-proposal__arrow left"
           onClick={() => scrollByPage(-1)}
           disabled={atStart}
           aria-label="Scroll left">
           <img style={{ transform: "rotate(180deg)" }} src={chevron} alt="" />
         </button>
       )}
-      <ul ref={scrollerRef} className="option-list option-list--scroll">
+      <ul
+        ref={scrollerRef}
+        className="option-list-proposal option-list--scroll">
         {optionIndexes.map((idx) => (
           <li
             key={idx}
@@ -82,7 +84,7 @@ export function OptionsSlider({
       {canScroll && (
         <button
           type="button"
-          className="options-slider__arrow right"
+          className="options-slider-proposal__arrow right"
           onClick={() => scrollByPage(1)}
           disabled={atEnd}
           aria-label="Scroll right">
