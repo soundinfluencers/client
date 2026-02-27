@@ -7,6 +7,6 @@ export const useInfluencerProfileQuery = () => {
   return useQuery({
     queryKey: qk.influencerProfile,
     queryFn: async () => normalizeProfileLists(await getInfluencerProfile()),
-    staleTime: 30_000, // 30 seconds
+    staleTime: 30_000, // 30 seconds (mb adjust based on how often profile data changes or disable invalidation if data is relatively static)
   });
 };

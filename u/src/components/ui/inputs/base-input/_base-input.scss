@@ -63,16 +63,6 @@
       margin: 0;
     }
 
-    // fix for autofill background color
-    //&:-webkit-autofill,
-    //&:-webkit-autofill:hover,
-    //&:-webkit-autofill:focus {
-    //
-    //  -webkit-text-fill-color: #000;
-    //  -webkit-box-shadow: 0 0 0 1000px #fff inset;
-    //  transition: background-color 5000s ease-in-out 0s;
-    //}
-
     &--error {
       border: 1px solid vars.$error;
 

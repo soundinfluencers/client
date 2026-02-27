@@ -1,4 +1,4 @@
-import type React from "react"
+import React from "react"
 import { useEffect } from 'react';
 import { useAccountSetupStore } from "./store/useAccountSetupStore";
 import { Form } from '@/components';
@@ -13,7 +13,9 @@ import arrowLeft from '../../../../assets/icons/arrow-left.svg';
 
 import './_account-setup-form.scss';
 import {
-  socialAccountBaseSchema
+  getAccountSchemaForPlatform,
+  // makeSocialAccountSchema,
+  // socialAccountBaseSchema,
 } from "@/pages/influencer/components/account-setup-form/validation/socialAccount.schema.ts";
 
 
@@ -43,6 +45,8 @@ export const AccountSetupForm: React.FC<Props> = ({ platform, account, onRemove,
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  console.log(account);
+
   return (
     <div className="account-setup-form">
       <button
@@ -61,7 +65,7 @@ export const AccountSetupForm: React.FC<Props> = ({ platform, account, onRemove,
         key={formKey}
         className="account-setup-form__form"
         defaultValues={getDefaultValues(account)}
-        schema={socialAccountBaseSchema}
+        schema={getAccountSchemaForPlatform(platform)}
       >
         <AccountSetupFormContent
           platform={platform}

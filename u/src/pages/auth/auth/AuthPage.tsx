@@ -66,9 +66,9 @@ export const AuthPage: FC = () => {
           </div>
         </div>
       </div>
-      <div className="auth-page__footer">
-        <p>Amplify your influence</p>
-      </div>
+      {/*<div className="auth-page__footer">*/}
+      {/*  <p>Amplify your influence</p>*/}
+      {/*</div>*/}
     </div>
   );
 };

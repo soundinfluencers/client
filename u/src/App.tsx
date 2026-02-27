@@ -33,6 +33,12 @@ import { SocialAccounts } from "@/pages/influencer/social-accounts/SocialAccount
 import { InfluencerTermsPage } from "@/pages/auth/terms/influencer/InfluencerTermsPage.tsx";
 import { Agreement } from "@/pages/influencer/agreement/Agreement.tsx";
 import { HomePage } from "@/client-side";
+import {
+  EditPassword
+} from "@/pages/influencer/account-setting/components/edit-password-flow/edit-password/EditPassword.tsx";
+import {
+  AccountSettingMain
+} from "@/pages/influencer/account-setting/components/account-setting-main/AccountSettingMain.tsx";
 
 
 function App() {
@@ -95,11 +101,11 @@ function App() {
           <Route
             path="account-setting"
             element={<AccountSetting />}
-          />
-          <Route
-            path="change-password"
-            element={<AccountSetting />}
-          />
+          >
+            <Route index element={<AccountSettingMain />} />
+            <Route path="edit-password" element={<EditPassword />} />
+          </Route>
+
           <Route
             path="social-accounts"
             element={<SocialAccounts />}
@@ -116,14 +122,18 @@ function App() {
             path="contact-support"
             element={<ContactSupport />}
           />
-          <Route
-            path="agreement"
-            element={<Agreement />}
-          />
+          {/*<Route*/}
+          {/*  path="agreement"*/}
+          {/*  element={<Agreement />}*/}
+          {/*/>*/}
         </Route>
 
         {/* ---------- PUBLIC & OTHER ROUTES ---------- */}
         <Route path="/terms/influencer" element={<InfluencerTermsPage />} />
+        <Route
+          path="/profile/agreement/:influencerId"
+          element={<Agreement />}
+        />
 
         {/* ---------- RENDER ROUTES (mb rebuild structure) ---------- */}
         {routes.map(({ path, component: Component, isProtected }) => (

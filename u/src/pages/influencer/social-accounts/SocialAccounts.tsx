@@ -101,12 +101,15 @@ export const SocialAccounts = () => {
     return <p>Error loading profile data.</p>;
   }
 
+  console.log(rqProfileData);
+
   const getProfileAccounts = (platform: TSocialAccounts) => {
     if (!rqProfileData) return [];
 
     return rqProfileData[platform].map((account) => ({
       username: account.username,
       accountId: account.accountId,
+      agreementStatus: account.agreementStatus,
     }));
   }
 

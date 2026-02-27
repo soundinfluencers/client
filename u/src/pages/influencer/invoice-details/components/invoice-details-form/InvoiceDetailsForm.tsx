@@ -27,6 +27,8 @@ export const InvoiceDetailsForm: React.FC<Props> = ({ invoiceDetails, onSave, is
     [invoiceDetails],
   );
 
+  console.log("Default values for form:", defaultValues);
+
   const handleSubmit = (data: TInvoiceDetailsFormValues) => {
     const payload = cleanPayload<TUpdateInvoiceDetailsDto>(data);
     console.log('Payload after cleaning:', payload);

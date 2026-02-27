@@ -1,0 +1,15 @@
+.account-setting-main {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 600px;
+
+  @media screen and (max-width: 900px) {
+    gap: 48px;
+    width: 100%;
+  }
+
+  @media screen and (max-width: 500px) {
+    gap: 40px;
+  }
+}

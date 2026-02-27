@@ -24,7 +24,7 @@ export const TableListView: React.FC<TableListViewProps> = ({
   if (isLoading) {
     return (
       <div className="table-list">
-        {Array.from({ length: 6 }).map((_, index) => (
+        {Array.from({ length: 2 }).map((_, index) => (
           <TableCardSkeleton key={index} />
         ))}
       </div>

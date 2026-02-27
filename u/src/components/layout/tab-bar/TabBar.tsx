@@ -37,7 +37,7 @@ export const TabBar: FC = () => {
     navigate(path);
   };
 
-  console.log(user);
+  // console.log(user);
 
   return (
     <div className="tab-bar" ref={tabBarRef}>

@@ -1,4 +1,4 @@
-import { Container } from "../../../components";
+import { Container } from "@/components";
 import { HistoryLink } from "./components/campaign-history-link/HistoryLink";
 import { InvoiceLink } from "./components/create-invoice-link/InvoiceLink";
 import { DashboardHero } from "./components/dashboard-hero/DashboardHero";

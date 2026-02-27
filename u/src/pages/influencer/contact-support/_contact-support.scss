@@ -81,11 +81,24 @@
   &__value {
     font-weight: 500;
     color: vars.$gray-dark;
-    text-decoration: underline;
     word-break: break-word;
 
-    &:hover {
-      text-decoration: underline;
+    text-decoration: underline !important;
+    text-decoration-thickness: from-font;
+    text-underline-offset: 2px;
+
+    -webkit-text-decoration-skip: none;
+    text-decoration-skip-ink: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &:link,
+    &:visited,
+    &:hover,
+    &:active,
+    &:focus,
+    &:focus-visible {
+      color: vars.$gray-dark;
+      text-decoration: underline !important;
     }
 
     @media screen and (max-width: 900px) {

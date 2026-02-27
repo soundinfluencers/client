@@ -99,14 +99,14 @@ const NEW_PROMOS_FIELDS: fieldsConfig = {
     { key: "clientName", label: "Client" },
     {
       key: "mainLink",
-      label: "Videolink",
+      label: "Spotify Track link",
       linkable: true,
     },
-    {
-      key: "description",
-      label: "Description",
-      copyable: true,
-    },
+    // {
+    //   key: "description",
+    //   label: "Description",
+    //   copyable: true,
+    // },
     // {
     //   key: "taggedLink",
     //   label: "Story link",
@@ -121,20 +121,20 @@ const NEW_PROMOS_FIELDS: fieldsConfig = {
     { key: "clientName", label: "Client" },
     {
       key: "mainLink",
-      label: "Videolink",
+      label: "Press link",
       linkable: true,
     },
-    {
-      key: "description",
-      label: "Description",
-      copyable: true,
-    },
-    {
-      key: "taggedLink",
-      label: "Story link",
-      copyable: true,
-    },
-    { key: "taggedUser", label: "Story tag" },
+    // {
+    //   key: "description",
+    //   label: "Description",
+    //   copyable: true,
+    // },
+    // {
+    //   key: "taggedLink",
+    //   label: "Story link",
+    //   copyable: true,
+    // },
+    // { key: "taggedUser", label: "Story tag" },
     { key: "dateRequest", label: "Date request" },
     { key: "additionalBrief", label: "Additional brief" },
   ],
@@ -143,20 +143,20 @@ const NEW_PROMOS_FIELDS: fieldsConfig = {
     { key: "clientName", label: "Client" },
     {
       key: "mainLink",
-      label: "Videolink",
+      label: "SoundCloud Track link",
       linkable: true,
     },
-    {
-      key: "description",
-      label: "Description",
-      copyable: true,
-    },
-    {
-      key: "taggedLink",
-      label: "Story link",
-      copyable: true,
-    },
-    { key: "taggedUser", label: "Story tag" },
+    // {
+    //   key: "description",
+    //   label: "Description",
+    //   copyable: true,
+    // },
+    // {
+    //   key: "taggedLink",
+    //   label: "Story link",
+    //   copyable: true,
+    // },
+    // { key: "taggedUser", label: "Story tag" },
     { key: "dateRequest", label: "Date request" },
     { key: "additionalBrief", label: "Additional brief" },
   ],

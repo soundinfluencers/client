@@ -26,6 +26,8 @@ export const useSocialAccountQuery = (
       const data = await getSocialAccountById(platform!, accountId!);
       return normalizeAccountForForm(data);
     },
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 };
 

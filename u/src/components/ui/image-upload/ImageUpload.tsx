@@ -1,44 +1,46 @@
 import React, { useMemo, useRef, useState } from "react";
-import type { FieldError } from "react-hook-form";
+import { type FieldValues, type Path, useController, useFormContext } from "react-hook-form";
 import paperClip from "../../../assets/icons/paperclip.svg";
 import trash from "../../../assets/icons/trash-2.svg";
 import x from "../../../assets/icons/x.svg";
 import "./_image-upload.scss";
 import { uploadImageApi } from "@/api/upload/upload-image.api";
 import { SmallLoader } from "@components/ui/small-loader/SmallLoader.tsx";
+import { handleApiError } from "@/api/error.api.ts";
 
-interface Props {
-  name: string;
+interface Props<T extends FieldValues> {
+  name: Path<T>;
   label: string;
   placeholder: string;
   description?: string;
 
   size: "small" | "large";
-  value: string | null;
-  onChange: (file: string | null) => void;
-  error?: FieldError;
+  // value: string | null;
+  // onChange: (file: string | null) => void;
+  // error?: FieldError;
 }
 
-//TODO: api load image during setup img, mb setup loader absolut positioned on input
-
-export const ImageUpload: React.FC<Props> = ({
-  value,
-  onChange,
-  error,
+export function ImageUpload<T extends FieldValues>({
+  // value,
+  // onChange,
+  // error,
   description,
   name,
   label,
   placeholder,
   size = "small",
-}) => {
+}: Props<T>) {
+  const { control } = useFormContext<T>();
+  const { field, fieldState } = useController({ control, name });
+
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const preview = useMemo(() => {
-    if (!value) return null;
+    if (!field.value) return null;
     // return typeof value === 'string' ? value : URL.createObjectURL(value);
-    return value;
-  }, [value]);
+    return field.value;
+  }, [field.value]);
 
   const openFileDialog = () => {
     inputRef.current?.click();
@@ -54,22 +56,26 @@ export const ImageUpload: React.FC<Props> = ({
       setIsLoading(true);
       const imageUrl = await uploadImageApi(file);
       // console.log(imageUrl);
-      onChange(imageUrl);
+      // onChange(imageUrl);
+      field.onChange(imageUrl);
     } catch (error) {
       //TODO: impl toaster error message
-      console.error("Error uploading image:", error);
+      // console.error("Error uploading image:", error);
+      handleApiError(error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleRemove = () => {
-    onChange(null);
-
+    // onChange(null);
+    field.onChange(null);
     if (inputRef.current) {
       inputRef.current.value = "";
     }
   };
+
+  const error = fieldState.error;
 
   return (
     <div className="image-input">
@@ -143,4 +149,4 @@ export const ImageUpload: React.FC<Props> = ({
       {description && <p className="image-input__description">{description}</p>}
     </div>
   );
-};
+}

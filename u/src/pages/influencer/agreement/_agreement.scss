@@ -200,29 +200,41 @@
       flex-direction: column;
       align-items: center;
       width: 100%;
+      gap: 16px;
+
+      @media screen and (max-width: 900px) {
+        //gap: 8px;
+      }
     }
 
     &-buttons {
       display: flex;
-      gap: 24px;
+      //gap: 24px;
 
       @media screen and (max-width: 600px) {
         flex-direction: column;
         width: 100%;
-        gap: 8px;
+        //gap: 8px;
       }
     }
 
     &-contact {
-      width: 100%;
-      text-align: end;
-      font-size: 14px;
+      text-decoration: underline !important;
+      text-decoration-thickness: from-font;
+      text-underline-offset: 2px;
 
-      @media screen and (max-width: 900px) {
-        font-size: 13px;
-      }
-      @media screen and (max-width: 500px) {
-        font-size: 12px;
+      -webkit-text-decoration-skip: none;
+      text-decoration-skip-ink: none;
+      -webkit-tap-highlight-color: transparent;
+
+      &:link,
+      &:visited,
+      &:hover,
+      &:active,
+      &:focus,
+      &:focus-visible {
+        color: vars.$gray-dark;
+        text-decoration: underline !important;
       }
     }
   }
