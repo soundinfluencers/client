@@ -105,15 +105,12 @@ export const CampaignCreatorPage: React.FC = () => {
                 <Modal onClose={closeDraftModal}>
                     <div className="create-option">
                         <h2>Save draft</h2>
-                        <p>Enter draft name</p>
-
-                        <div style={{ marginTop: 16 }}>
-                            <input
-                                value={draftName}
-                                onChange={(e) => setDraftName(e.target.value)}
-                                placeholder="Enter draft name"
-                            />
-                        </div>
+                        <input
+                            className="create-option-input"
+                            value={draftName}
+                            onChange={(e) => setDraftName(e.target.value)}
+                            placeholder="Enter draft name"
+                        />
 
                         <div className="create-option-btn">
                             <ButtonSecondary
