@@ -45,8 +45,6 @@ import {
 } from "@/pages/auth/new-password/NewPassword.tsx";
 import { Negotiation } from "@/pages/influencer/negotiation/Negotiation.tsx";
 import {DashboardPage} from "@/pages/client-side/dashboard";
-import { Negotiation } from "@/pages/influencer/negotiation/Negotiation.tsx";
-
 
 function App() {
   const { setAccessToken, logout } = useAuth();
