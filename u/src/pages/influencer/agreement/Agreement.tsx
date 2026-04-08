@@ -9,17 +9,23 @@ import { ButtonMain } from "@components/ui/buttons-fix/ButtonFix.tsx";
 import { getSocialIcon } from "@/pages/influencer/components/social-accounts-list/data/social-account.data.ts";
 import { getArticle } from "@/pages/influencer/agreement/utils/getArticlesForAgreement.ts";
 import type { TAgreementType } from "@/pages/influencer/agreement/types/agreement.types.ts";
+import { getMe } from "@/api/auth/auth.api.ts";
 
 import './_agreement.scss';
 
 export const Agreement = () => {
+  console.log('Rendering Agreement component');
   const { influencerId } = useParams();
   const navigate = useNavigate();
-  const { setAccessToken } = useAuth();
+  const { setAccessToken, accessToken } = useAuth();
   const { setUser } = useUser();
 
-  const { data, isPending, isError } = useAgreementQuery(influencerId ?? '');
+  console.log('Influencer ID from params:', influencerId);
+
+  const { data, isPending, isError } = useAgreementQuery(influencerId ?? accessToken ?? '');
   const { mutateAsync, isPending: isMutatePending } = useAgreementHandlerMutation();
+
+  console.log(data)
 
   if (isPending) {
     return (
@@ -35,10 +41,7 @@ export const Agreement = () => {
     );
   }
 
-  // console.log("Data after normalize", data);
-
-
-  // console.log("Total earnings", totalEarnings);
+  console.log("Data after normalize", data);
 
   const agreementType = data.agreementType;
   const accountList = data.items;
@@ -47,7 +50,6 @@ export const Agreement = () => {
 
   const normalizeEmail = (s: string) => s.replace(/[\u200B-\u200D\uFEFF]/g, "").trim().replace(/\s+/g, "");
   const buildMailto = (email: string) => `mailto:${normalizeEmail(email)}`;
-
 
   const agreementMessages: Record<TAgreementType, { subtitle: string; conformationTitle: string }> = {
     'accountAdd': {
@@ -59,6 +61,8 @@ export const Agreement = () => {
       conformationTitle: 'Do you want to create your account now?'
     }
   };
+
+  console.log("Agreement type:", agreementType);
 
   return (
     <Container className="agreement-page">
@@ -100,28 +104,18 @@ export const Agreement = () => {
                     label={isMutatePending ? 'Processing...' : 'Yes'}
                     isDisabled={isMutatePending}
                     onClick={async () => {
-                      const res = await mutateAsync({ influencerId: influencerId ?? '', action: 'accept' });
+                      const res = await mutateAsync({ status: "accept", influencerId: influencerId ?? accessToken ?? '' });
                       console.log('Account creation accepted', res);
-                      setUser(res);
                       setAccessToken(res.accessToken);
+                      const userData = await getMe();
+                      setUser(userData);
                       navigate("/influencer", { replace: true });
                     }}
                   />
-                  {/*<ButtonSecondary*/}
-                  {/*  label={isMutatePending ? 'Processing...' : 'No'}*/}
-                  {/*  isDisabled={isMutatePending}*/}
-                  {/*  onClick={() => {*/}
-                  {/*    const res = mutateAsync({ influencerId: influencerId ?? '', action: 'decline' });*/}
-                  {/*    console.log('Account creation declined', res);*/}
-                  {/*    navigate("/auth", { replace: true });*/}
-                  {/*  }}*/}
-                  {/*/>*/}
-
                 <a
                   href={buildMailto('admin@soundinfluencers.com')}
                   target="_blank"
                   rel="noopener noreferrer"
-                  // style={{ textDecoration: "underline", color: "black" }}
                   className="agreement-page__conformation-contact"
                   // onClick={(e) => {
                   //   // Prevent default mailto behavior to ensure it works across all browsers
@@ -153,47 +147,3 @@ export const Agreement = () => {
     </Container>
   );
 };
-
-// interface IAgreement {
-//   socialMedia: TSocialAccounts;
-//   username: string;
-//   price: number;
-// }
-//
-// const AGREEMENT_MOCK: IAgreement[] = [
-//   {
-//     socialMedia: 'instagram',
-//     username: '@instagram account',
-//     price: 10,
-//   },
-//   {
-//     socialMedia: 'tiktok',
-//     username: '@tiktok account',
-//     price: 10,
-//   },
-//   {
-//     socialMedia: 'spotify',
-//     username: '@spotify account',
-//     price: 200,
-//   },
-//   {
-//     socialMedia: 'youtube',
-//     username: '@youtube account',
-//     price: 10,
-//   },
-//   {
-//     socialMedia: 'facebook',
-//     username: '@facebook account',
-//     price: 50,
-//   },
-//   {
-//     socialMedia: 'soundcloud',
-//     username: '@soundcloud account',
-//     price: 25,
-//   },
-//   {
-//     socialMedia: 'press',
-//     username: '@press account',
-//     price: 100,
-//   },
-// ];

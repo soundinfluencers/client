@@ -79,12 +79,13 @@
       height: 6px;
       border-radius: 50%;
       background-color: vars.$blue;
-      opacity: 0;
-      transition: opacity 0.2s ease;
+      transform: scale(0);
+      transition: transform 0.2s ease;
+      will-change: transform;
 
       &--active {
         //background-color: vars.$blue;
-        opacity: 1;
+        transform: scale(1);
       }
 
       @media screen and (max-width: 900px) {

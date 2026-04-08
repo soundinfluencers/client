@@ -40,9 +40,9 @@ export const AccountSetupForm: React.FC<Props> = ({ platform, account, onRemove,
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // console.log(account);
+  console.log(account);
   // console.log(getAccountSchemaByPlatform(platform));
-  // console.log(getDefaultValues(account));
+  console.log(getDefaultValues(account));
 
   return (
     <div className="account-setup-form">

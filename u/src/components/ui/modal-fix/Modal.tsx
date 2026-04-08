@@ -32,8 +32,8 @@ export const Modal = ({ onClose, children, isShowCloseButton = true, isCloseOnCl
   });
 
   return createPortal(
-    <div className="modal">
-      <div className="modal__content" ref={modalRef}>
+    <div className="modal" aria-hidden={false}>
+      <div className="modal__content" ref={modalRef} role={'dialog'} aria-modal={true} tabIndex={-1}>
         {isShowCloseButton && (
           <img
             className="modal__close-button"

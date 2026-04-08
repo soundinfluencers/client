@@ -5,6 +5,10 @@ import { InvoicesTable } from './components/invoices-table/InvoicesTable';
 import { ButtonMain } from '@/components/ui/buttons-fix/ButtonFix';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getInfluencerInvoices } from '@/api/influencer/invoice/invoices.api';
+import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
+import {
+  EmptyInvoicesHistory
+} from "@/pages/influencer/invoices-details/components/empty-invoices-history/EmptyInvoicesHistory.tsx";
 
 const LIMIT = 11;
 
@@ -35,23 +39,23 @@ export const InvoicesHistory = () => {
 
   if (error) {
     return (
-      <div style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>Error loading invoices.</div>
+      <Error />
     );
   }
 
   if (invoices.length === 0) {
     return (
-      <div style={{ fontSize: 48, textAlign: 'center', paddingTop: 40 }}>No invoices found.</div>
+      <EmptyInvoicesHistory />
     );
   }
 
   return (
     <Container className="invoices-details">
       <Breadcrumbs />
-      <header className="invoices-details__header">
+      <div className="invoices-details__header">
         <h2 className='invoices-details__header-title'>Invoices history</h2>
         <p className='invoices-details__header-subtitle'>View and track your submitted invoices and payment status</p>
-      </header>
+      </div>
       <div className="invoices-details__content">
         <div className='invoices-details__scroll-container'>
           <InvoicesTable invoices={invoices} />

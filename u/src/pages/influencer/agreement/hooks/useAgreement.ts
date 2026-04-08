@@ -1,5 +1,8 @@
 // import { handleApiError } from "@/api/error.api.ts";
-import { agreementHandler, getAgreement } from "@/api/influencer/agreement/agreement.api.ts";
+import {
+  getSignupAgreement,
+  signupAgreementAccept,
+} from "@/api/influencer/agreement/agreement.api.ts";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { TAgreementStats } from "@/pages/influencer/agreement/types/agreement.types.ts";
 import { normalizeAgreementResponse } from "@/pages/influencer/agreement/utils/normalizeAgreementResponse.ts";
@@ -7,12 +10,12 @@ import { normalizeAgreementResponse } from "@/pages/influencer/agreement/utils/n
 export const useAgreementQuery = (influencerId: string) => {
   return useQuery({
     queryKey: ["agreement", influencerId],
-    enabled: Boolean(influencerId),
-    queryFn: () => getAgreement(influencerId),
+    // enabled: Boolean(influencerId),
+    queryFn: () => getSignupAgreement(influencerId),
 
     select: (data) => normalizeAgreementResponse(data),
 
-    staleTime: Infinity,
+    staleTime: 0,
     gcTime: Infinity,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -24,14 +27,13 @@ export const useAgreementHandlerMutation = () => {
   // const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      influencerId,
-      action,
+    mutationFn: async ({ status,
+       influencerId,
     }: {
+      status: TAgreementStats;
       influencerId: string;
-      action: TAgreementStats;
     }) => {
-      return agreementHandler(influencerId, action);
+      return signupAgreementAccept(status, influencerId);
     },
     onSuccess: () => {
       console.log("Agreement action successful");

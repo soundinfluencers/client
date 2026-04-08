@@ -43,7 +43,7 @@ export const CampaignResultForm = ({ submitState }: Props) => {
       }
       toast.success("Campaign result submitted successfully!");
 
-      await queryClient.invalidateQueries({ queryKey: ["distributingOrCompleted-promos"] });
+      await queryClient.invalidateQueries({ queryKey: ["detailedPromos"] });
 
       // await queryClient.refetchQueries({ queryKey: ["distributingOrCompleted-promos"], type: 'active' });
       // state: submitState.from ?? null

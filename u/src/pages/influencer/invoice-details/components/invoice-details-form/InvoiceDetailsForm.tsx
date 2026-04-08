@@ -11,7 +11,6 @@ import { cleanPayload } from "@/pages/influencer/invoice-details/utils/cleanPayl
 import {
   INVOICE_DETAILS_INPUTS_DRAFT_DATA,
 } from "@/pages/influencer/invoice-details/data/invoice-details-list.data.ts";
-import { SmallLoader } from "@components/ui/small-loader/SmallLoader.tsx";
 import { getDefaultInvoiceDetailsValues } from "@/pages/influencer/invoice-details/utils/getDefaultFormValues.ts";
 
 interface Props {
@@ -54,7 +53,7 @@ export const InvoiceDetailsForm: React.FC<Props> = ({ invoiceDetails, onSave, is
       <div className={"invoice-details-form__actions"}>
         <ButtonMain
           className={'invoice-details-form__submit'}
-          label={isSaving ? <SmallLoader/> : 'Save'}
+          label={isSaving ? "Saving..." : 'Save'}
           isDisabled={isSaving}
           type={'submit'}
         />

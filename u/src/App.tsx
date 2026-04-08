@@ -43,6 +43,7 @@ import {
 import {
   NewPassword
 } from "@/pages/auth/new-password/NewPassword.tsx";
+import { Negotiation } from "@/pages/influencer/negotiation/Negotiation.tsx";
 
 
 function App() {
@@ -145,18 +146,32 @@ function App() {
             path="contact-support"
             element={<ContactSupport />}
           />
+
           {/*<Route*/}
-          {/*  path="agreement"*/}
+          {/*  path="profile/agreement"*/}
           {/*  element={<Agreement />}*/}
           {/*/>*/}
+
+          <Route
+            path="profile/agreement"
+            element={<Agreement />}
+          />
+
+          <Route
+            path="negotiation"
+            element={<Negotiation />}
+          />
         </Route>
 
         {/* ---------- PUBLIC & OTHER ROUTES ---------- */}
         <Route path="/terms/influencer" element={<InfluencerTermsPage />} />
+
         <Route
-          path="/profile/agreement/:influencerId"
+          path="influencer/profile/agreement/:influencerId"
           element={<Agreement />}
         />
+
+
         <Route
           path="/reset-password/:token"
           element={<NewPassword />}

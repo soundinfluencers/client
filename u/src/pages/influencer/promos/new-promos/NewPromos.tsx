@@ -10,30 +10,30 @@ import successIcon from '@/assets/icons/success-icon.svg';
 import './_new-promos.scss';
 import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
 import { useDetailedPromos } from "@/pages/influencer/promos/hooks/useDetailedPromos.ts";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
+
+type TNewPromosLocationState = {
+  campaignId?: string;
+  addedAccountsId?: string;
+}
 
 export const NewPromos = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDecline, setIsDecline] = useState(false);
   const [isAccepted, setIsAccepted] = useState(false);
-
-  const { state } = useLocation() as {
-    state?: {
-      campaignId?: string;
-      addedAccountsId?: string;
-    }
-  };
+  const location = useLocation();
+  const state = location.state as TNewPromosLocationState | undefined;
+  const navigate = useNavigate();
 
   const { campaignId, addedAccountsId } = state || {};
-  const isSinglePromoView = !!campaignId && !!addedAccountsId;
+  // const isSinglePromoView = !!campaignId && !!addedAccountsId;
   // console.log(campaignId, addedAccountsId);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // const { data: promos = [], isLoading, error: fetchError } = useInfluencerNewPromos();
   const {
     data,
     isPending: isFetchPending,
@@ -43,7 +43,15 @@ export const NewPromos = () => {
     isFetchingNextPage,
   } = useDetailedPromos({ status: 'new', campaignId, addedAccountsId });
 
-  const { mutate: confirmPromo, isPending, variables } = useConfirmInfluencerPromo(isSinglePromoView);
+  const { mutate: confirmPromo, isPending, variables } = useConfirmInfluencerPromo();
+
+  // TODO: if error dont clear state and show error message, if success clear state to prevent modal from showing again on page reload
+  useEffect(() => {
+    navigate(location.pathname, {
+      replace: true,
+      state: null,
+    });
+  }, [confirmPromo, location.pathname, navigate]);
 
   const promos = data?.promos || [];
 
@@ -52,7 +60,7 @@ export const NewPromos = () => {
   }
 
   if (fetchError) {
-    return <Error />;
+    return <Error/>;
   }
 
   if (promos.length === 0) {
@@ -64,6 +72,7 @@ export const NewPromos = () => {
     );
   }
 
+  // TODO: add changing check staus fro data loading error empty
   return (
     <Container className="new-promos">
       <Breadcrumbs/>
@@ -100,13 +109,11 @@ export const NewPromos = () => {
           }}
         />
 
-        {!campaignId && !addedAccountsId && (
-          <ButtonMain
-            label={isFetchingNextPage ? "Loading..." : "View more"}
-            onClick={() => fetchNextPage()}
-            isDisabled={!hasNextPage}
-          />
-        )}
+        <ButtonMain
+          label={isFetchingNextPage ? "Loading..." : "View more"}
+          onClick={() => fetchNextPage()}
+          isDisabled={!hasNextPage}
+        />
       </div>
 
       {isModalOpen && (

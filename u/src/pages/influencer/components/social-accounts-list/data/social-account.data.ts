@@ -23,7 +23,7 @@ export const getSocialMeta = (platform: TSocialAccounts) => {
   return SOCIAL_ACCOUNTS_DATA.find((item) => item.id === platform);
 };
 
-export const getSocialIcon = (platform: TSocialAccounts) => {
+export const getSocialIcon = (platform: TSocialAccounts | null) => {
   switch (platform) {
     case "instagram":
       return instagramIcon;

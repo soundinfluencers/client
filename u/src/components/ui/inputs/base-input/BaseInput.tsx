@@ -27,12 +27,12 @@ const sanitizeNumber = (raw: string) => {
 };
 
 export function BaseInput<T extends FieldValues>({
-                                                   name,
-                                                   label,
-                                                   placeholder,
-                                                   type = "text",
-                                                   disabled = false,
-                                                 }: BaseInputProps<T>) {
+  name,
+  label,
+  placeholder,
+  type = "text",
+  disabled = false,
+}: BaseInputProps<T>) {
   const { control, setValue, getValues, clearErrors } = useFormContext<T>();
 
   const { field, fieldState } = useController({ control, name });
@@ -90,8 +90,8 @@ export function BaseInput<T extends FieldValues>({
           onBlur={field.onBlur}
         />
         <p className={`base-input__error-message ${
-            error ? 'base-input__error-message--show' : ''
-          }`}
+          error ? 'base-input__error-message--show' : ''
+        }`}
            aria-live="polite"
         >
           {error?.message}
@@ -143,8 +143,8 @@ export function BaseInput<T extends FieldValues>({
         }}
       />
       <p className={`base-input__error-message ${
-          error ? 'base-input__error-message--show' : ''
-        }`}
+        error ? 'base-input__error-message--show' : ''
+      }`}
          aria-live="polite"
       >
         {error?.message}

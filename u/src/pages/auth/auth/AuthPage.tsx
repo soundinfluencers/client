@@ -1,6 +1,6 @@
 import { type FC, useState } from "react";
 import "./_auth-page.scss";
-import { SwitchButton } from "../../../components/ui/switchers/switch-button/SwitchButton.tsx";
+import { SwitchButton } from "@/components";
 
 import { useNavigate } from "react-router-dom";
 import type { UserRoleType } from "@/types/user/user.types.ts";

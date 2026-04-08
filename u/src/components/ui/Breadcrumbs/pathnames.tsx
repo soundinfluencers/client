@@ -7,53 +7,73 @@ import { useUser } from "@/store/get-user";
 const HIDDEN_SEGMENTS = ["client", "influencer"];
 
 const formatLabel = (segment: string) => {
-    const decoded = decodeURIComponent(segment).replace(/-/g, " ");
-    return decoded.charAt(0).toUpperCase() + decoded.slice(1);
+  const decoded = decodeURIComponent(segment).replace(/-/g, " ");
+  return decoded.charAt(0).toUpperCase() + decoded.slice(1);
 };
 
 export const Breadcrumbs: React.FC = () => {
-    const { user } = useUser();
-    const location = useLocation();
+  const { user } = useUser();
+  const location = useLocation();
 
-    const dashboardLink = user?.role === "client" ? "/client" : "/influencer";
+  const dashboardLink = user?.role === "client" ? "/client" : "/influencer";
 
-    const visibleSegments = location.pathname
-        .split("/")
-        .filter(Boolean)
-        .filter((segment) => !HIDDEN_SEGMENTS.includes(segment));
+  const visibleSegments = location.pathname
+  .split("/")
+  .filter(Boolean)
+  .filter((segment) => !HIDDEN_SEGMENTS.includes(segment));
 
-    return (
-        <nav className="breadcrumbs" aria-label="Breadcrumb">
+  return (
+    <nav className="breadcrumbs" aria-label="Breadcrumb">
       <span className="breadcrumbs__item">
         <Link to={dashboardLink}>Dashboard</Link>
-          {visibleSegments.length > 0 && <img src={chevron} alt="" />}
+        {visibleSegments.length > 0 && <img src={chevron} alt="" />}
       </span>
 
-            {visibleSegments.map((segment, index) => {
-                const isLast = index === visibleSegments.length - 1;
+      {visibleSegments.map((segment, index) => {
+        const isLast = index === visibleSegments.length - 1;
 
-                const href =
-                    "/" +
-                    [
-                        user?.role === "client" ? "client" : "influencer",
-                        ...visibleSegments.slice(0, index + 1),
-                    ].join("/");
+        const href =
+          "/" +
+          [
+            user?.role === "client" ? "client" : "influencer",
+            ...visibleSegments.slice(0, index + 1),
+          ].join("/");
 
-                const label = formatLabel(segment);
+        const label = formatLabel(segment);
 
-                return (
-                    <span key={`${segment}-${index}`} className="breadcrumbs__item">
+        return (
+          <span key={`${segment}-${index}`} className="breadcrumbs__item">
             {isLast ? (
-                <span className="breadcrumbs__current">{label}</span>
+              <span className="breadcrumbs__current">{label}</span>
             ) : (
-                <>
-                    <Link to={href}>{label}</Link>
-                    <img src={chevron} alt="" />
-                </>
+              <>
+                <Link to={href}>{label}</Link>
+                <img src={chevron} alt="" />
+              </>
             )}
           </span>
-                );
-            })}
-        </nav>
-    );
+        );
+      })}
+    </nav>
+  );
 };
+
+// const HIDDEN_SEGMENTS = ["client", "influencer", "promos"];
+//
+// const SEGMENT_LABELS: Record<string, string> = {
+//   "social-accounts": "Social Accounts",
+//   "account-setting": "Account Setting",
+//   "edit-password": "Edit Password",
+//   "campaign-history": "Campaign History",
+//   "create-invoice": "Create Invoice",
+//   "invoices-history": "Invoices History",
+//   "invoice-details": "Invoice Details",
+//   "payment-details": "Payment Details",
+//   "contact-support": "Contact Support",
+//   "new-promos": "New Promos",
+//   "distributing": "Distributing",
+//   "completed": "Completed",
+//   "profile": "Profile",
+//   "agreement": "Agreement",
+//   "negotiation": "Negotiation",
+// };

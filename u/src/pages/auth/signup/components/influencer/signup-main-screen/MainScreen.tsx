@@ -73,7 +73,7 @@ export const MainScreen = () => {
 
   if (isSuccess) {
     return (
-      <SignupInfluencerSuccess/>
+      <SignupInfluencerSuccess />
     );
   }
 

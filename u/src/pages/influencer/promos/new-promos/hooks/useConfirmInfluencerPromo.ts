@@ -1,27 +1,14 @@
 import { conformationInfluencerPromo } from "@/api/influencer/promos/influencer-promos.api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { handleApiError } from "@/api/error.api.ts";
-import { useNavigate } from "react-router-dom";
 
-export const useConfirmInfluencerPromo = (isSingle?: boolean) => {
+export const useConfirmInfluencerPromo = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: conformationInfluencerPromo,
-
     onSuccess: async () => {
-      // await queryClient.invalidateQueries({queryKey: ["influencer-new-promos"]});
-      if (isSingle) {
-        await queryClient.invalidateQueries({queryKey: ["promos"]});
-        navigate('/influencer/promos/new-promos', {
-          replace: true,
-          state: null
-        });
-        return;
-      }
-
-      await queryClient.invalidateQueries({queryKey: ["distributingOrCompleted-promos"]});
+      await queryClient.invalidateQueries({queryKey: ["detailedPromos"]});
       await queryClient.invalidateQueries({queryKey: ["promos"]});
     },
     onError: (error) => {

@@ -19,8 +19,14 @@ export const AccountDetailsList: React.FC<Props> = ({ profile }) => {
             className={`account-details-list__item ${type === "avatar" ? "account-details-list__item--avatar" : ""}`}>
           <span className="account-details-list__label">{label}</span>
           <span className="account-details-list__value">
-            {type === "avatar" && <img src={profile?.[key] ? profile?.[key] : '/user.png'} alt="Profile Avatar"
-                                       className="account-details-list__img"/>}
+            {type === "avatar" &&
+                <img
+                    src={profile?.[key] ? profile?.[key] : '/user.png'}
+                    alt="Profile Avatar"
+                    className="account-details-list__img"
+                    loading={'lazy'}
+                />
+            }
             {type === "password" &&
                 <span className="account-details-list__password">
                   {"••••••••••"}

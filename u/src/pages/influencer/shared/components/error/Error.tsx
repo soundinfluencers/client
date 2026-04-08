@@ -23,7 +23,6 @@ export const Error = () => {
         <ButtonMain
           label={"Notify me when it’s back"}
           onClick={() => alert("You will be notified when the service is back.")}
-
         />
       </div>
 
