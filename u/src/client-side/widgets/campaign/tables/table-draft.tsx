@@ -18,6 +18,7 @@ import {
 import { useFollowersSort } from "@/client-side/hooks";
 import type { TableGroup } from "@/client-side/types/table-types";
 import { getColumns } from "@/client-side/utils";
+import {useDraftCampaignStore} from "@/client-side/store";
 
 type Props = {
   items: CampaignContentItem[];
@@ -56,7 +57,9 @@ export function TableDraft({
       networks.reduce((sum, n) => sum + Number((n as any).followers ?? 0), 0),
     [networks],
   );
-
+  const localItems = useDraftCampaignStore(
+      (s) => s.contentByCampaignId[campaignId] ?? items ?? [],
+  );
   const { followersSort, toggleFollowersSort, sortedNetworks } =
     useFollowersSort(networks);
   const [active, setActive] = React.useState<ActiveDropdown>(null);
@@ -160,7 +163,7 @@ export function TableDraft({
                 key={rowKey}
                 rowKey={rowKey}
                 data={network}
-                items={items}
+                items={localItems}
                 group={group}
                 activeDropdown={active}
                 onToggleDropdown={toggleDropdown}

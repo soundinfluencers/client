@@ -7,12 +7,13 @@ interface PreviewVideoProps {
   previewUrl?: string | null; // если уже есть url
   pathLower?: string;
   fileId?: string;
+  urlInsight?: string
 }
 
 export const PreviewPhoto: React.FC<PreviewVideoProps> = ({
   previewUrl,
   pathLower,
-  fileId,
+  fileId,urlInsight
 }) => {
   const [url, setUrl] = React.useState<string | null>(previewUrl ?? null);
   const [loading, setLoading] = React.useState(false);
@@ -65,7 +66,7 @@ export const PreviewPhoto: React.FC<PreviewVideoProps> = ({
       ) : url && !error ? (
         <img src={url} alt="preview" />
       ) : (
-        <img src={previewFallback} alt="no preview" />
+        <img src={urlInsight || previewFallback} alt="no preview" />
       )}
     </div>
   );

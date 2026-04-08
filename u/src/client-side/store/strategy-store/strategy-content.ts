@@ -23,28 +23,38 @@ type StrategyCampaignStore = {
   contentByCampaignId: Record<string, CampaignContentItem[]>;
 
   initCampaign: (
-    campaignId: string,
-    serverAccounts: CampaignAddedAccount[],
-    serverContent: CampaignContentItem[],
-    opts?: { force?: boolean },
+      campaignId: string,
+      serverAccounts: CampaignAddedAccount[],
+      serverContent: CampaignContentItem[],
+      opts?: { force?: boolean },
   ) => void;
+
+  setAccountSelectedContent: (
+      campaignId: string,
+      accountKey: string,
+      selected: {
+        campaignContentItemId: string;
+        descriptionId: string;
+      },
+  ) => void;
+
   addContentForSocial: (
-    campaignId: string,
-    socialMedia: string,
-    payload: { mainLink: string },
-    inheritFromContentId?: string,
+      campaignId: string,
+      socialMedia: string,
+      payload: { mainLink: string },
+      inheritFromContentId?: string,
   ) => string;
 
   removeContentItem: (campaignId: string, contentId: string) => void;
   setAccountDateRequest: (
-    campaignId: string,
-    accountKey: string,
-    dateRequest: string,
+      campaignId: string,
+      accountKey: string,
+      dateRequest: string,
   ) => void;
 
   mergeContent: (
-    campaignId: string,
-    contentToAdd: CampaignContentItem[],
+      campaignId: string,
+      contentToAdd: CampaignContentItem[],
   ) => void;
 
   clearCampaign: (campaignId: string) => void;
@@ -76,7 +86,31 @@ export const useStrategyCampaignStore = create<StrategyCampaignStore>()(
         };
       });
     },
+    setAccountSelectedContent: (campaignId, accountKey, selected) => {
+      set((state) => {
+        const key = String(campaignId ?? "");
+        if (!key) return state;
 
+        const prev = state.accountsByCampaignId[key] ?? [];
+
+        const next = prev.map((account: any) =>
+            getStrategyAccountKey(account) === String(accountKey)
+                ? {
+                  ...account,
+                  selectedContent: selected,
+                  selectedCampaignContentItem: selected,
+                }
+                : account,
+        );
+
+        return {
+          accountsByCampaignId: {
+            ...state.accountsByCampaignId,
+            [key]: next,
+          },
+        };
+      });
+    },
     setAccountDateRequest: (campaignId, accountKey, dateRequest) => {
       set((state) => {
         const key = String(campaignId ?? "");

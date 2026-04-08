@@ -16,6 +16,7 @@ import {getTableColumnWidths, getTitle} from "@/client-side/data/table-campaign.
 
 import { useFollowersSort } from "@/client-side/hooks";
 import { getAccountKey, getColumns } from "@/client-side/utils";
+import {useProposalAccountsStore} from "@/client-side/store";
 
 type Props = {
   items: CampaignContentItem[];
@@ -37,164 +38,175 @@ type ActiveDropdown = {
 } | null;
 
 export function TableProposal({
-                                items,
-                                networks,
-                                totalPrice,
-                                changeView,
-                                group,
-                                canEdit,
-                                optionIndex,
-                                title,
+                                  items,
+                                  networks,
+                                  totalPrice,
+                                  changeView,
+                                  group,
+                                  canEdit,
+                                  optionIndex,
+                                  title,
                               }: Props) {
-  const totalFollowers = React.useMemo(
-      () =>
-          networks.reduce((sum, n) => sum + Number((n as any).followers ?? 0), 0),
-      [networks],
-  );
+    const localItems = useProposalAccountsStore(
+        (s) => s.contentByOption[optionIndex] ?? items ?? [],
+    );
 
-  const { followersSort, toggleFollowersSort, sortedNetworks } =
-      useFollowersSort(networks);
+    const localNetworks = useProposalAccountsStore(
+        (s) => s.accountsByOption[optionIndex] ?? networks ?? [],
+    );
 
-  const [active, setActive] = React.useState<ActiveDropdown>(null);
+    const totalFollowers = React.useMemo(
+        () =>
+            localNetworks.reduce(
+                (sum, n) => sum + Number((n as any).followers ?? 0),
+                0,
+            ),
+        [localNetworks],
+    );
 
-  const toggleDropdown = React.useCallback(
-      (rowKey: string, key: ActiveDropdown extends null ? never : any) => {
-        setActive((prev) =>
-            prev && prev.rowKey === rowKey && prev.key === key
-                ? null
-                : { rowKey, key },
-        );
-      },
-      [],
-  );
+    const { followersSort, toggleFollowersSort, sortedNetworks } =
+        useFollowersSort(localNetworks);
 
-  const closeDropdown = React.useCallback(() => setActive(null), []);
+    const [active, setActive] = React.useState<ActiveDropdown>(null);
 
-  const uniqueNetworks = React.useMemo(() => {
-    const seen = new Set<string>();
-    return sortedNetworks.filter((n) => {
-      const key = getAccountKey(n);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [sortedNetworks]);
-
-  const columns = React.useMemo(
-      () => getColumns(changeView, group, canEdit),
-      [changeView, group, canEdit],
-  );
-
-  const widths = React.useMemo(
-      () =>
-          getTableColumnWidths({
-            group,
-            changeView,
-            canEdit,
-          }),
-      [group, changeView, canEdit],
-  );
-
-  return (
-      <div className="tableBase-wrap">
-        <h1>{title}</h1>
-
-        <table className="tableBase">
-          <colgroup>
-            {columns.map((key) => (
-                <col
-                    key={key}
-                    style={widths[key] ? { width: `${widths[key]}px` } : undefined}
-                />
-            ))}
-          </colgroup>
-
-          <thead>
-          <tr>
-            {columns.map((key) => (
-                <th key={key} className="tableBase__th">
-                  <div className="header-content">
-                    <span className="th-title">{getTitle(group, key)}</span>
-
-                    {key === "followers" && (
-                        <div className="switch" aria-label="Sort by followers">
-                          <button
-                              type="button"
-                              className={`switch-btn ${followersSort === "desc" ? "active" : ""}`}
-                              onClick={() => toggleFollowersSort("desc")}
-                              aria-pressed={followersSort === "desc"}
-                              title="Sort desc"
-                          >
-                            <img className="up" src={chevron} alt="" />
-                          </button>
-
-                          <button
-                              type="button"
-                              className={`switch-btn ${followersSort === "asc" ? "active" : ""}`}
-                              onClick={() => toggleFollowersSort("asc")}
-                              aria-pressed={followersSort === "asc"}
-                              title="Sort asc"
-                          >
-                            <img className="down" src={chevron} alt="" />
-                          </button>
-                        </div>
-                    )}
-                  </div>
-                </th>
-            ))}
-          </tr>
-          </thead>
-
-          <tbody>
-          {uniqueNetworks.map((network, index) => {
-            const rowKey = makeRowKey(network, index);
-
-            return (
-                <TableCard
-                    columns={columns}
-                    optionIndex={optionIndex}
-                    key={rowKey}
-                    rowKey={rowKey}
-                    data={network}
-                    items={items}
-                    group={group}
-                    activeDropdown={active}
-                    onToggleDropdown={toggleDropdown}
-                    onCloseDropdown={closeDropdown}
-                    canEdit={canEdit}
-                    changeView={changeView}
-                />
+    const toggleDropdown = React.useCallback(
+        (rowKey: string, key: ActiveDropdown extends null ? never : any) => {
+            setActive((prev) =>
+                prev && prev.rowKey === rowKey && prev.key === key
+                    ? null
+                    : { rowKey, key },
             );
-          })}
-          </tbody>
+        },
+        [],
+    );
 
-          <tfoot>
-          <tr>
-            {columns.map((col, index) => {
-              const isAddInfluencer =
-                  col === "network" && canEdit && !changeView;
+    const closeDropdown = React.useCallback(() => setActive(null), []);
 
-              return (
-                  <td
-                      key={index}
-                      className={`td--footer ${isAddInfluencer ? "is-left" : ""} ${col.includes("followers") ? "followers" : ""}`}
-                  >
-                    {isAddInfluencer && (
-                        <Link to={`/client/campaign/add-influencer?option=${optionIndex}`}>
-                          <div className="add-influencer">
-                            <img src={plus} alt="" />
-                            <p>Add Influencer</p>
-                          </div>
-                        </Link>
-                    )}
+    const uniqueNetworks = React.useMemo(() => {
+        const seen = new Set<string>();
+        return sortedNetworks.filter((n) => {
+            const key = getAccountKey(n);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }, [sortedNetworks]);
 
-                    {col === "followers" && <p>{totalFollowers}</p>}
-                  </td>
-              );
-            })}
-          </tr>
-          </tfoot>
-        </table>
-      </div>
-  );
+    const columns = React.useMemo(
+        () => getColumns(changeView, group, canEdit),
+        [changeView, group, canEdit],
+    );
+
+    const widths = React.useMemo(
+        () =>
+            getTableColumnWidths({
+                group,
+                changeView,
+                canEdit,
+            }),
+        [group, changeView, canEdit],
+    );
+
+    return (
+        <div className="tableBase-wrap">
+            <h1>{title}</h1>
+
+            <table className="tableBase">
+                <colgroup>
+                    {columns.map((key) => (
+                        <col
+                            key={key}
+                            style={widths[key] ? { width: `${widths[key]}px` } : undefined}
+                        />
+                    ))}
+                </colgroup>
+
+                <thead>
+                <tr>
+                    {columns.map((key) => (
+                        <th key={key} className="tableBase__th">
+                            <div className="header-content">
+                                <span className="th-title">{getTitle(group, key)}</span>
+
+                                {key === "followers" && (
+                                    <div className="switch" aria-label="Sort by followers">
+                                        <button
+                                            type="button"
+                                            className={`switch-btn ${followersSort === "desc" ? "active" : ""}`}
+                                            onClick={() => toggleFollowersSort("desc")}
+                                            aria-pressed={followersSort === "desc"}
+                                            title="Sort desc"
+                                        >
+                                            <img className="up" src={chevron} alt="" />
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className={`switch-btn ${followersSort === "asc" ? "active" : ""}`}
+                                            onClick={() => toggleFollowersSort("asc")}
+                                            aria-pressed={followersSort === "asc"}
+                                            title="Sort asc"
+                                        >
+                                            <img className="down" src={chevron} alt="" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </th>
+                    ))}
+                </tr>
+                </thead>
+
+                <tbody>
+                {uniqueNetworks.map((network, index) => {
+                    const rowKey = makeRowKey(network, index);
+
+                    return (
+                        <TableCard
+                            columns={columns}
+                            optionIndex={optionIndex}
+                            key={rowKey}
+                            rowKey={rowKey}
+                            data={network}
+                            items={localItems}
+                            group={group}
+                            activeDropdown={active}
+                            onToggleDropdown={toggleDropdown}
+                            onCloseDropdown={closeDropdown}
+                            canEdit={canEdit}
+                            changeView={changeView}
+                        />
+                    );
+                })}
+                </tbody>
+
+                <tfoot>
+                <tr>
+                    {columns.map((col, index) => {
+                        const isAddInfluencer =
+                            col === "network" && canEdit && !changeView;
+
+                        return (
+                            <td
+                                key={index}
+                                className={`td--footer ${isAddInfluencer ? "is-left" : ""} ${col.includes("followers") ? "followers" : ""}`}
+                            >
+                                {isAddInfluencer && (
+                                    <Link to={`/client/campaign/add-influencer?option=${optionIndex}`}>
+                                        <div className="add-influencer">
+                                            <img src={plus} alt="" />
+                                            <p>Add Influencer</p>
+                                        </div>
+                                    </Link>
+                                )}
+
+                                {col === "followers" && <p>{totalFollowers}</p>}
+                            </td>
+                        );
+                    })}
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    );
 }

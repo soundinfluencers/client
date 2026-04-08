@@ -37,7 +37,7 @@
     }
 
     &-bottom {
-      height: 99px;
+      height: 117px;
       border: 1px solid white;
       border-radius: 0 0 16px 16px;
       border-top: none;
@@ -45,7 +45,7 @@
       background: vars.$light-blue;
 
       @media screen and (max-width: 900px) {
-        height: 67px;
+        height: 168px;
       }
     }
   }

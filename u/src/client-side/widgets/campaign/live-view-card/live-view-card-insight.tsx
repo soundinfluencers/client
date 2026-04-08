@@ -43,6 +43,7 @@ export const LiveViewCardInsight: React.FC<LiveViewCardProps> = ({
             setIsVideoOpen(true);
           }}>
           <PreviewPhoto
+            urlInsight={item.screenshot}
             previewUrl={media0?.previewUrl}
             pathLower={media0?.pathLower}
             fileId={media0?.fileId}

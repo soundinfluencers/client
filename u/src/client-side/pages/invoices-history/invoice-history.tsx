@@ -60,13 +60,15 @@ export const InvoicesHistory = () => {
         </div>
       </div>
 
-      <div className="invoices-history__actions">
-        <ButtonMain
-          label={isFetchingNextPage ? "Loading..." : "View more"}
-          onClick={() => fetchNextPage()}
-          isDisabled={!hasNextPage || isFetchingNextPage}
-        />
-      </div>
+        {hasNextPage && (
+            <div className="invoices-history__actions">
+                <ButtonMain
+                    label={isFetchingNextPage ? "Loading..." : "View more"}
+                    onClick={() => fetchNextPage()}
+                    isDisabled={isFetchingNextPage}
+                />
+            </div>
+        )}
     </Container>
   );
 };

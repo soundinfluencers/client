@@ -14,7 +14,7 @@ interface Props {
 export const BarSection: React.FC<Props> = ({ campaign }) => {
   const cpm = getCPM(campaign.cpm);
   const resultCPM = getResultCPM(cpm);
-  console.log(campaign);
+  console.log(campaign,'campaign-work');
   return (
     <div className="BarSection">
       <div className="BarSection-info block">

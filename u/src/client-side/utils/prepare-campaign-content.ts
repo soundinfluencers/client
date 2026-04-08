@@ -1,4 +1,5 @@
 import { ObjectId } from "bson";
+import {getCampaignContentFromForm} from "@/client-side/utils/get-campaign-content-from-form.ts";
 
 type Group = "main" | "music" | "press";
 
@@ -11,6 +12,9 @@ export type AnyItem = {
   taggedUser: string;
   taggedLink: string;
   additionalBrief: string;
+
+
+  accountId?: string;
 };
 
 const oid = () => new ObjectId().toHexString();
@@ -239,3 +243,40 @@ export function buildPressCampaignContent(
 ) {
   return parseFormsForDisplay(formData, platform, "press");
 }
+export const getCampaignContentFromFormByAccounts = (
+    formData,
+    selectedPlatforms,
+    grouped,
+    accounts,
+) => {
+  const templates = getCampaignContentFromForm(
+      formData,
+      selectedPlatforms,
+      grouped,
+  );
+
+  const result = [];
+
+  for (const acc of accounts) {
+    const accountId = String(acc.accountId);
+    const social = String(acc.socialMedia).toLowerCase();
+
+    const templatesForPlatform = templates.filter(
+        (t) => String(t.socialMedia).toLowerCase() === social,
+    );
+
+    for (const tpl of templatesForPlatform) {
+      result.push({
+        ...tpl,
+        _id: oid(), // 🔥 новый id для каждого аккаунта
+        accountId,
+        descriptions: tpl.descriptions.map((d) => ({
+          ...d,
+          _id: oid(), // 🔥 новые description id
+        })),
+      });
+    }
+  }
+
+  return result;
+};

@@ -86,6 +86,7 @@ export interface CampaignStoreState {
     campaignContent: CampaignContentItem[];
     campaignPayload: unknown | null;
     postContentDraft: Record<string, string> | null;
+
     postContent: {
         main: PlatformForm[];
         music: PlatformForm[];
@@ -102,7 +103,17 @@ export interface CampaignStoreActions {
     setPostContentDraft: (value: Record<string, string> | null) => void;
     clearPostContentDraft: () => void;
     clearPostContentAll: () => void;
-
+    setSelectedCampaignContentItem: (
+             accountId: string,
+             selectedCampaignContentItem: {
+                 campaignContentItemId: string;
+                 descriptionId: string;
+             }) => void;
+    buildCampaignContentAndSyncAccounts: (
+        formData: Record<string, any>,
+        selectedPlatforms: string[],
+        grouped: Record<"main" | "music" | "press", string[]>,
+    ) => void;
     setOffer: (offer: Offer | null) => void;
     setActiveOffer: (id: string | null) => void;
 

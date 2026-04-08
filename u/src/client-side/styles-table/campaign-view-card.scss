@@ -114,7 +114,6 @@
 
       font-weight: 400;
       font-size: 13px;
-      line-height: 1.1;
 
       width: 100%;
       min-width: 0;
@@ -467,11 +466,11 @@
 }
 .hidden-text {
   max-width: 120px;
-  white-space: nowrap; // запрет переноса строки
-  overflow: hidden; // обрезаем лишнее
-  text-overflow: ellipsis; // троеточие …
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
-  display: block; // важно для ellipsis
+  display: block;
 }
 
 .tagged-link {
