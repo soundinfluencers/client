@@ -4,6 +4,7 @@
   background-color: #fff;
   display: flex;
   align-items: center;
+  justify-content: center;
   cursor: pointer;
   gap: 8px;
   transition: background 0.2s ease;
@@ -44,14 +45,15 @@
     padding: 4px 16px;
     border-radius: 4px;
     border: 1px solid vars.$blue;
+    font-size: 14px;
 
     @media screen and (max-width: 900px) {
-      font-size: 14px;
       padding: 4px 9px;
     }
 
     @media screen and (max-width: 500px) {
       width: 66px;
+      height: 24px;
 
       > img {
         width: 16px;

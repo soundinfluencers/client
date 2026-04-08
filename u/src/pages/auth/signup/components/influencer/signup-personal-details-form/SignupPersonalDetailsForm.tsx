@@ -11,6 +11,7 @@ import {
   personalDetailsSchema,
 } from "@/pages/auth/signup/components/influencer/signup-personal-details-form/validation/personalDetails.schema.ts";
 import './_signup-personal-details-form.scss';
+import { isValidFullPhone } from "@components/ui/phone-input-v2/data/phoneCountries.ts";
 
 // TODO: optimize with lazy loading (need to check if it causes any issues with form context)
 // const PhoneInputV2 = React.lazy(() => import("@components/ui/phone-input-v2/PhoneInputV2.tsx"));
@@ -19,6 +20,15 @@ export const SignupPersonalDetailsForm = ({ exposeForm }: {
   exposeForm: (api: UseFormReturn<PersonalDetailsValues>) => void
 }) => {
   const user = useInfluencerSignupStore((s) => s.user);
+  const setPersonalFields = useInfluencerSignupStore((s) => s.setPersonalFields);
+
+  React.useEffect(() => {
+    if (!isValidFullPhone(user.phone)) {
+      setPersonalFields({ phone: "+44" });
+    }
+  }, []);
+
+  const phoneDefault = isValidFullPhone(user.phone) ? user.phone : "+44";
 
   return (
     <div className={'personal-details-form'}>
@@ -29,7 +39,7 @@ export const SignupPersonalDetailsForm = ({ exposeForm }: {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          phone: user.phone,
+          phone: phoneDefault,
           password: user.password,
         }}
         schema={personalDetailsSchema}

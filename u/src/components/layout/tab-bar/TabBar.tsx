@@ -43,7 +43,7 @@ export const TabBar: FC = () => {
   // console.log("Location in TabBar: ", location.pathname.split('/')[1]);
 
   const isTermsPage = location.pathname.startsWith("/terms");
-  const isAgreementPage = location.pathname.startsWith("/profile/agreement");
+  const isAgreementPage = location.pathname.includes("/profile/agreement");
 
   return (
     <div className="tab-bar" ref={tabBarRef}>
@@ -72,6 +72,7 @@ export const TabBar: FC = () => {
                       className="tab-bar__user-menu-avatar"
                       src={user?.logoUrl ? user.logoUrl : PLACEHOLDER_LOGO_URL}
                       alt="User Avatar"
+                      loading={'lazy'}
                     />
                   </div>
 

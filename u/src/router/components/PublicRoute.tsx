@@ -24,18 +24,22 @@ export const PublicRoute = ({ children }: Props) => {
   }
 
   if (accessToken && !isAllowedPublicRoute) {
+    console.log('User is authenticated, checking role for redirection:', user);
     if (!user) return <Loader />;
 
     let route = "/";
     switch (user.role) {
       case "influencer":
+        console.log('User role is influencer, redirecting to influencer dashboard');
         route = "/influencer";
         break;
       case "client":
+        console.log('User role is client, redirecting to client dashboard');
         route = "/client";
         break;
     }
 
+    console.log(`Redirecting authenticated user to ${route} from ${location.pathname}`);
     return <Navigate to={route} replace />;
   }
 

@@ -5,9 +5,10 @@ import {
   useEffect, useMemo,
   useState,
 } from "react";
-import { logoutApi } from "../api/auth/auth.api.ts";
+import { getMe, logoutApi } from "../api/auth/auth.api.ts";
 import { refreshAccessToken } from "@/api/refresh.manager.ts";
 import { queryClient } from "@/app/queryClient.ts";
+import { useUser } from "@/store/get-user";
 
 
 interface AuthContextType {
@@ -27,6 +28,7 @@ export const tokenStorage = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const { setUser } = useUser();
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
@@ -47,19 +49,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = useCallback(async () => {
     try {
       await logoutApi();
-      queryClient.clear();
     } catch (err) {
       console.error("Logout failed", err);
     } finally {
       setAccessToken(null);
+      setUser(null);
+      queryClient.clear();
       // window.location.href = "/auth";
     }
-  }, [setAccessToken]);
+  }, [setAccessToken, setUser]);
 
   useEffect(() => {
+    console.log("Checking authentication status...");
     const refresh = async () => {
       try {
         await refreshAccessToken(setAccessToken);
+        console.log("Access token refreshed successfully");
+        // const userData = await getMe();
+        // setUser(userData);
       } catch {
         setAccessToken(null);
       } finally {
@@ -67,6 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    console.log("Attempting to refresh access token...");
     refresh();
   }, [setAccessToken]);
 

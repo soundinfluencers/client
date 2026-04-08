@@ -4,18 +4,27 @@ import { SocialAccountsList } from "@/pages/influencer/components/social-account
 import { AccountSetupForm } from "@/pages/influencer/components/account-setup-form/AccountSetupForm.tsx";
 import { normalizeAccountForApi } from "@/pages/influencer/shared/utils/socialAccount.mapper.ts";
 import type { TSocialAccounts } from "@/types/user/influencer.types.ts";
-
 import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
-import { useState } from "react";
-import { Modal } from "@components/ui/modal-fix/Modal.tsx";
-import successImg from '@/assets/icons/success-icon.svg';
+import { useSocialAccountStatusStore } from "@/pages/influencer/social-accounts/store/store.ts";
+import { useEffect } from "react";
 
-import { ButtonMain } from "@components/ui/buttons-fix/ButtonFix.tsx";
+import {
+  ReviewOfferModal
+} from "@/pages/influencer/social-accounts/components/review-offer-modal/ReviewOfferModal.tsx";
+
 import './_social-accounts.scss';
 
+
 export const SocialAccounts = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
+  const { isModalOpen, onCloseModal } = useSocialAccountStatusStore();
+
+  useEffect(() => {
+    // console.log('SocialAccounts mounted');
+    return () => {
+      // console.log('SocialAccounts unmounted, closing any open modals');
+      onCloseModal();
+    }
+  }, [onCloseModal]);
 
   const {
     isAccountFormMode,
@@ -68,21 +77,21 @@ export const SocialAccounts = () => {
                 payload: cleanedData,
               });
               onResetAccountForm();
-              setIsModalOpen(true);
+              // setIsModalOpen(true);
               return;
             }
 
-            console.log('Update data:', cleanedData);
-            console.log("New price", cleanedData.price);
-            console.log("Old price", account?.price);
+            // console.log('Update data:', cleanedData);
+            // console.log("New price", cleanedData.price);
+            // console.log("Old price", account?.price);
             await updateMutation.mutateAsync({
               platform: platform!,
               accountId: accountId!,
               payload: cleanedData,
             });
             onResetAccountForm();
-            if (cleanedData.price && cleanedData.price !== account?.price) {
-              setIsPriceModalOpen(true);
+            if (cleanedData.initialPrice && cleanedData.initialPrice !== account?.initialPrice) {
+              // setIsPriceModalOpen(true);
             }
           } catch (error) {
             console.error('Error saving social account:', error);
@@ -126,7 +135,7 @@ export const SocialAccounts = () => {
     return rqProfileData[platform].map((account) => ({
       username: account.username,
       accountId: account.accountId,
-      verifiedStatus: account.verifiedStatus,
+      labelStatus: account.labelStatus,
     }));
   }
 
@@ -141,64 +150,8 @@ export const SocialAccounts = () => {
         <SocialAccountsList getAccounts={getProfileAccounts} />
       </div>
 
-      {isModalOpen && (
-        <Modal
-          onClose={() => setIsModalOpen(false)}
-        >
-          <div className="social-accounts-page__modal-content">
-            <img
-              src={successImg}
-              alt="Success"
-              className="social-accounts-page__modal-content-icon"
-            />
-
-            <div className={'social-accounts-page__modal-content-title-wrapper'}>
-              <h3 className="social-accounts-page__modal-content-title">Application under review</h3>
-              <div className={'social-accounts-page__modal-content-subtitle-wrapper'}>
-                <p className={'social-accounts-page__modal-content-subtitle'}>Thank you for submitting your details - our team will review your application shortly</p>
-                <p className={"social-accounts-page__modal-content-text"}>If your application meets our criteria, we’ll get in touch with you promptly.</p>
-              </div>
-            </div>
-
-            <ButtonMain
-              label={"Ok"}
-              onClick={() => setIsModalOpen(false)}
-              className={"social-accounts-page__modal-content-button"}
-            />
-          </div>
-        </Modal>
-      )}
-
-      {isPriceModalOpen && (
-        <Modal
-          onClose={() => setIsPriceModalOpen(false)}
-        >
-          <div className="social-accounts-page__modal-content">
-            <img
-              src={successImg}
-              alt="Success"
-              className="social-accounts-page__modal-content-icon"
-            />
-
-            <div className={'social-accounts-page__modal-content-title-wrapper'}>
-              <h3 className="social-accounts-page__modal-content-title">Price change submitted</h3>
-              <div className={'social-accounts-page__modal-content-subtitle-wrapper'}>
-                <p className={'social-accounts-page__modal-content-subtitle'}>Your new price has been recorded and is now under review.</p>
-                <p className={"social-accounts-page__modal-content-text"}>We’ll notify you as soon as it’s approved.</p>
-              </div>
-            </div>
-
-            <ButtonMain
-              label={"Ok"}
-              onClick={() => {
-
-                console.log('Price change acknowledged');
-                setIsPriceModalOpen(false)
-              }}
-              className={"social-accounts-page__modal-content-button"}
-            />
-          </div>
-        </Modal>
+      {isModalOpen === 'reviewOffer' && (
+        <ReviewOfferModal />
       )}
     </Container>
   );

@@ -28,14 +28,35 @@ export const ALL_PHONE_COUNTRIES: PhoneCountry[] = getCountries()
 })
 .sort((a, b) => a.countryName.localeCompare(b.countryName));
 
+export const DEFAULT_CODE =
+  ALL_PHONE_COUNTRIES.find((c) => c.iso2 === "gb") ?? UN_COUNTRY;
+
 const COUNTRY_BY_ISO2 = new Map(
   ALL_PHONE_COUNTRIES.map((c) => [c.iso2.toLowerCase(), c]),
 );
+
+export const isValidFullPhone = (raw?: string) => {
+  if (!raw) return false;
+  const pn = parsePhoneNumberFromString(raw);
+  return !!pn?.isValid();
+};
 
 export const sanitizePhone = (raw: string) => {
   let cleaned = raw.replace(/[^\d+]/g, "");
   if (cleaned.includes("+")) cleaned = "+" + cleaned.replace(/\+/g, "");
   return cleaned;
+};
+
+export const getDialCodeFromValue = (raw: string) => {
+  const v = sanitizePhone(raw);
+
+  if (!v.startsWith("+")) return "";
+
+  const match = ALL_PHONE_COUNTRIES
+  .filter((c) => c.dialCode && v.startsWith(c.dialCode))
+  .sort((a, b) => b.dialCode.length - a.dialCode.length)[0];
+
+  return match?.dialCode ?? "";
 };
 
 // It's better to consider the 'tail' relative to a specific dialCode, rather than a regex of 1..4 digits
@@ -58,7 +79,7 @@ export const pickCountryByPhone = (
   current?: PhoneCountry,
 ): PhoneCountry => {
   const v = sanitizePhone(raw);
-  if (!v.startsWith("+")) return current ?? UN_COUNTRY;
+  if (!v.startsWith("+")) return current ?? DEFAULT_CODE;
 
   const pn = parsePhoneNumberFromString(v);
 
@@ -70,8 +91,8 @@ export const pickCountryByPhone = (
       return current;
     }
 
-    return detected ?? current ?? UN_COUNTRY;
+    return detected ?? current ?? DEFAULT_CODE;
   }
 
-  return current ?? UN_COUNTRY;
+  return current ?? DEFAULT_CODE;
 };

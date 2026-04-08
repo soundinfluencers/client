@@ -14,6 +14,7 @@ export function normalizeAgreementAccounts(
     [TSocialAccounts, TAgreementAccount[] | undefined]
   >).flatMap(([socialMedia, accounts]) =>
     (accounts ?? []).map((acc) => ({
+      // accountId: acc.accountId,
       socialMedia,
       username: acc.username,
       price: acc.price,

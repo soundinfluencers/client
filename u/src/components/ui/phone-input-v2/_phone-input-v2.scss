@@ -123,7 +123,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 6px;
 
     position: absolute;
     will-change: transform, opacity;
@@ -205,7 +205,6 @@
     margin: 0;
     list-style: none;
 
-
     &-item {
       display: flex;
       align-items: center;
@@ -221,6 +220,7 @@
         font-size: 15px;
         color: vars.$gray-dark;
       }
+
       &-check {
         width: 24px;
         height: 24px;
@@ -253,33 +253,41 @@
     backface-visibility: hidden;
   }
 
-  //TODO: impl Responsive styles
   @media screen and (max-width: 900px) {
     gap: 4px;
 
     &__label {
       font-size: 15px;
     }
-    &__wrapper {}
-    &__country-code-selector {
-      &-icon {}
-    }
-    &__flag {}
-    &__input {
-      padding: 16px 16px 16px 100px;
 
-      &::placeholder {
-        font-size: 13px;
+    &__country-code-selector {
+      gap: 8px;
+      padding: 12px;
+
+      &-icon {
+        width: 18px;
+        height: 18px;
       }
     }
 
-    &__list-wrapper {
+    &__input {
+      padding: 16px 16px 16px 82px;
+
+      &::placeholder {
+        font-size: 14px;
+      }
     }
 
     &__list {
-      &-item {}
-      &-label {
-        font-size: 13px;
+      &-item {
+        &-label {
+          font-size: 13px;
+        }
+        &-check {
+          width: 18px;
+          height: 18px;
+          margin-left: auto;
+        }
       }
     }
   }
@@ -289,33 +297,10 @@
       font-size: 14px;
     }
 
-    &__wrapper {}
-
-    &__country-code-selector {
-
-      &-icon {
-        width: 18px;
-        height: 18px;
-      }
-    }
-
     &__flag {
       width: 20px;
       height: 20px;
       flex-basis: 20px;
-    }
-
-    &__input {
-      padding: 16px 16px 16px 100px;
-
-      &::placeholder {
-        font-size: 12px;
-      }
-    }
-    &__list-wrapper {}
-    &__list {
-      &-item {}
-      &-label {}
     }
 
     .phone-flag {

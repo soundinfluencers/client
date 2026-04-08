@@ -1,0 +1,44 @@
+@use "@/styles/variables/variables" as vars;
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 4px 8px;
+  background: vars.$bg-white;
+  border: 1px solid vars.$white-gray-2;
+  border-radius: 4px;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.link {
+  //font-weight: 500;
+  //color: vars.$gray-dark;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+
+  text-decoration: underline !important;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 2px;
+
+  -webkit-text-decoration-skip: none;
+  text-decoration-skip-ink: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:link,
+  &:visited,
+  &:hover,
+  &:active,
+  &:focus,
+  &:focus-visible {
+    color: vars.$gray-dark;
+    text-decoration: underline !important;
+  }
+}
+

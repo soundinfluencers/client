@@ -31,7 +31,7 @@ const socialAccountDraftBase = z.object({
   logoUrl: requiredLogoUrl,
 
   profileCategory: profileCategoryEnum,
-  price: requiredPrice,
+  initialPrice: requiredPrice,
   currency: profileCurrencyEnum,
 
   musicGenres: z.array(musicGenresSchema).default([]),
@@ -75,7 +75,6 @@ const pressSchema = socialAccountDraftBase.extend({
   profileCategory: z.literal("community"),
   followers: z.preprocess(() => 0, z.literal(0)),
   musicGenres: requiredMusicGenres,
-  countries: audienceInsightsSchema,
 });
 
 export const getAccountSchemaByPlatform = (platform: TSocialAccounts) => {

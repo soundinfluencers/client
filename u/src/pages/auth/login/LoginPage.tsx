@@ -2,7 +2,7 @@ import { useState, type FC } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { useUser } from "@/store/get-user/index.ts";
-import { loginApi } from "@/api/auth/auth.api.ts";
+import { getMe, loginApi } from "@/api/auth/auth.api.ts";
 import { handleApiError } from "@/api/error.api.ts";
 import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix.tsx";
 import { type LoginFormData, loginSchema } from "@/pages/auth/login/validation/login.schema.ts";
@@ -21,11 +21,17 @@ export const LoginPage: FC = () => {
 
     setIsLoading(true);
     try {
+      console.log(`Attempting login with email: ${email}, role: ${role}, password: ${password}`);
       const response = await loginApi({ email, password, role });
 
       if (response) {
-        setUser(response);
+        console.log('Login successful:', response);
         setAccessToken(response.accessToken);
+        console.log('Access token set in context:', response.accessToken);
+        const userData = await getMe();
+        console.log('Fetched user data after login:', userData);
+        setUser(userData);
+        console.log('User data set in context:', userData);
       }
     } catch (error) {
       handleApiError(error);

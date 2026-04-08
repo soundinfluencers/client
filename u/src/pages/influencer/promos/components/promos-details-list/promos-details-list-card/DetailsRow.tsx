@@ -46,8 +46,16 @@ export const DetailsRow: React.FC<Props> = ({ label, value, copyable, linkable, 
   return (
     <div className="promos-details-list-card__body-details-item">
       <span className={`promos-details-list-card__body-details-item-label ${icon ? 'promos-details-list-card__body-details-item-label--with-icon' : ''}`}>
-        {icon && <img src={icon} alt={`${label}-icon`} className="promos-details-list-card__body-details-item-icon"/>}
-        <p className="promos-details-list-card__body-details-item-name">{label}</p>
+        {icon ? (
+          <img
+            className="promos-details-list-card__body-details-item-icon"
+            src={icon} alt={`${label}-icon`}
+          />)
+          :
+          (<p className="promos-details-list-card__body-details-item-name">{label}</p>)
+        }
+        {/*<p className="promos-details-list-card__body-details-item-name">{label}</p>*/}
+        {/*{icon && <img src={icon} alt={`${label}-icon`} className="promos-details-list-card__body-details-item-icon"/>}*/}
       </span>
       {copyable ? (
         <div className="promos-details-list-card__body-details-item-wrapper">

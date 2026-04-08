@@ -5,7 +5,13 @@ import type { ProfileCurrency, TSocialAccounts } from '@/types/user/influencer.t
 
 import './_price-input.scss';
 
-export const PriceInput = ({ platform }: { platform: TSocialAccounts }) => {
+interface Props {
+  platform?: TSocialAccounts;
+  placeholder?: string;
+  label?: string;
+}
+
+export const PriceInput: React.FC<Props> = ({ platform, placeholder, label }) => {
   const { control } = useFormContext();
   const [isFocused, setIsFocused] = useState(false);
   const [draft, setDraft] = useState('');
@@ -14,9 +20,12 @@ export const PriceInput = ({ platform }: { platform: TSocialAccounts }) => {
   const currencySymbol =
     currency === "GBP" ? "\u00A3" : currency === "USD" ? "\u0024" : "\u20AC";
 
+  const placeholderBase = placeholder ? placeholder : `100${currencySymbol}`;
+  const baseLabel = label ? label : normalizePriceLabel(platform);
+
   return (
     <Controller
-      name="price"
+      name="initialPrice"
       control={control}
       render={({ field, fieldState }) => {
         const error = fieldState.error;
@@ -50,7 +59,7 @@ export const PriceInput = ({ platform }: { platform: TSocialAccounts }) => {
         return (
           <div className="price-input">
             <label htmlFor="price" className={`price-input__label ${error ? 'price-input__label--error' : ''}`}>
-              {normalizePriceLabel(platform)}
+              {baseLabel}
             </label>
 
             <CurrencySelector/>
@@ -59,14 +68,19 @@ export const PriceInput = ({ platform }: { platform: TSocialAccounts }) => {
               id="price"
               className={`price-input__input ${error ? 'price-input__input--error' : ''}`}
               type="text"
-              placeholder={`100${currencySymbol}`}
+              placeholder={placeholderBase}
               value={displayValue}
               onChange={handleChange}
               onFocus={handleFocus}
               onBlur={handleBlur}
             />
 
-            {error && <p className="price-input__error-message">{error.message}</p>}
+            <p
+              className={`price-input__error-message ${error ? 'price-input__error-message--show' : ''}`}
+              aria-live="polite"
+            >
+              {error?.message}
+            </p>
           </div>
         );
       }}

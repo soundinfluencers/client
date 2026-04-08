@@ -1,6 +1,7 @@
 import './_contact-support.scss';
 import { Breadcrumbs, Container } from "@/components";
 
+// TODO: fix mailto link to work across all browsers and email clients, including mobile
 export const ContactSupport = () => {
   const normalizeEmail = (s: string) =>
     s.replace(/[\u200B-\u200D\uFEFF]/g, "").trim().replace(/\s+/g, "");
@@ -21,7 +22,7 @@ export const ContactSupport = () => {
                 <a
                   href={buildMailto(item.value)}
                   className="contact-support__value"
-                  style={{ position: "relative", zIndex: "9999" }}
+                  // style={{ position: "relative", zIndex: "9999" }}
                   // onClick={() => console.log("mailto href:", buildMailto(item.value))}
                   // onClick={(e) => {
                   //   // Prevent default mailto behavior to ensure it works across all browsers

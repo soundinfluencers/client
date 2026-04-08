@@ -16,12 +16,12 @@ interface BaseMaskedPasswordInputProps<T extends FieldValues> {
 }
 
 export function BaseMaskedPasswordInput<T extends FieldValues>({
-                                                                 name,
-                                                                 label,
-                                                                 placeholder,
-                                                                 autoComplete,
-                                                                 disabled = false,
-                                                               }: BaseMaskedPasswordInputProps<T>) {
+  name,
+  label,
+  placeholder,
+  autoComplete,
+  disabled = false,
+}: BaseMaskedPasswordInputProps<T>) {
   const { control } = useFormContext<T>();
   const { field, fieldState } = useController({ name, control });
 
@@ -59,7 +59,6 @@ export function BaseMaskedPasswordInput<T extends FieldValues>({
         <img
           src={isVisible ? closeEye : eye}
           alt={isVisible ? "Hide password" : "Show password"}
-          className="base-masked-password-input__input__icon"
           onClick={() => setIsVisible((v) => !v)}
           role="button"
           tabIndex={0}

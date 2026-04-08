@@ -72,6 +72,7 @@ interface IGetMeResponse {
   role: UserRoleType;
   balance: number;
   logoUrl: string | null;
+  needAgreementRedirect?: boolean;
 }
 
 export const getMe = async (): Promise<IGetMeResponse> => {

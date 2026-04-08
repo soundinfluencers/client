@@ -29,7 +29,7 @@ export const getInfluencerPromos = async (
   // }
 };
 
-// getInfluencerNewPromo
+// TODO: getInfluencerNewPromo not used
 export const getInfluencerNewPromo = async (): Promise<
   IPromoDetailsModel[]
 > => {
@@ -55,33 +55,22 @@ export const conformationInfluencerPromo = async (
   // }
 };
 
-// getInfluencerDetailsPromoByStatus
-export const getInfluencerDetailsPromoByStatus = async (
-  status: string,
-  limit: number,
-  page: number,
-): Promise<IPromoDetailsModel[]> => {
-  const res = await $api.get(
-    `/promos/detailed?status=${status}&limit=${limit}&page=${page}`,
-  );
-  console.log("Success get detailed promos:", res.data.data.promos);
-  return res.data.data.promos;
+export type TGetDetailedPromoParams = {
+  campaignId?: string;
+  addedAccountsId?: string;
+  status?: string;
+  limit?: number;
+  page?: number;
 };
 
-//getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId
-export const getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId =
-  async (
-    status: string,
-    campaignId: string,
-    addedAccountsId: string,
-  ): Promise<IPromoDetailsModel[]> => {
-    console.log('Start fetching');
-    const res = await $api.get(
-      `/promos/detailed/${status}/${campaignId}/${addedAccountsId}`,
-    );
-    console.log("Success get detailed promo by status, campaignId and addedAccountsId:", res.data.data);
-    return [res.data.data] as IPromoDetailsModel[];
-  };
+export const getDetailedPromo = async (data: TGetDetailedPromoParams): Promise<IPromoDetailsModel[]> => {
+  console.log('Start fetching detailed promos');
+  const res = await $api.get(`/promos/detailed`, {
+    params: data,
+  });
+  console.log("Success get detailed promos:", res);
+  return res.data.data.promos as IPromoDetailsModel[];
+};
 
 //create review for promo
 export const createInfluencerPromoReview = async (
@@ -90,12 +79,36 @@ export const createInfluencerPromoReview = async (
   const res = await $api.patch(`/promos`, data);
   console.log("Success create promo review:", res.data.data.balance);
   return res.data.data.balance;
-  // try {
-  // } catch (error) {
-  //   console.error("Error creating influencer promo review:", error);
-  //   const axiosError = error as AxiosError;
-  //   console.error("Response status:", axiosError.response?.status);
-  //   console.error("Response data:", axiosError.response?.data);
-  //   throw axiosError;
-  // }
 };
+
+
+
+
+
+// // getInfluencerDetailsPromoByStatus
+// export const getInfluencerDetailsPromoByStatus = async (
+//   status: string,
+//   limit: number,
+//   page: number,
+// ): Promise<IPromoDetailsModel[]> => {
+//   const res = await $api.get(
+//     `/promos/detailed?status=${status}&limit=${limit}&page=${page}`,
+//   );
+//   console.log("Success get detailed promos:", res.data.data.promos);
+//   return res.data.data.promos;
+// };
+//
+// //getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId
+// export const getInfluencerDetailsPromoByStatusByCampaignIdByAddedAccountsId =
+//   async (
+//     status: string,
+//     campaignId: string,
+//     addedAccountsId: string,
+//   ): Promise<IPromoDetailsModel[]> => {
+//     console.log('Start fetching');
+//     const res = await $api.get(
+//       `/promos/detailed/${status}/${campaignId}/${addedAccountsId}`,
+//     );
+//     console.log("Success get detailed promo by status, campaignId and addedAccountsId:", res.data.data);
+//     return [res.data.data] as IPromoDetailsModel[];
+//   };

@@ -97,7 +97,7 @@ export const Distributing: React.FC = () => {
   }
 
   console.log('Distributing promos:', promos);
-
+  // TODO: add changing check staus fro data loading error empty
   return (
     <Container className="distributing-page">
       <Breadcrumbs/>
