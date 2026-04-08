@@ -78,6 +78,7 @@ export const LoginPage: FC = () => {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="login-page">
       <h1 className="login-page__title">
@@ -86,16 +87,10 @@ export const LoginPage: FC = () => {
 
       <Form<LoginFormData>
         className={"login-page__form"}
-        submitButton={
-          <ButtonMain
-            type={"submit"}
-            className={"login-page__submit-btn"}
-            label={isLoading ? "Logging in..." : "Log in"}
-          />
-        }
+        submitButton={<ButtonMain type={'submit'} className={"login-page__submit-btn"} label={isLoading ? "Logging in..." : "Log in"} />}
         onSubmit={handleLogin}
         schema={loginSchema}
-        validateMode={"onSubmit"}>
+            validateMode={"onSubmit"}>
         <BaseInput
           name={"email"}
           label={"Email"}
@@ -108,18 +103,23 @@ export const LoginPage: FC = () => {
             label={"Password"}
             placeholder={"Enter password"}
           />
-          <Link className="login-page__forgot" to={"/forgot-password"}>
+          <Link
+            className="login-page__forgot"
+            to={"/forgot-password"}
+          >
             Forgot password?
           </Link>
         </div>
       </Form>
+
 
       <div className="login-page__footer">
         <p className="login-page__footer--text">
           Don't have an account?{" "}
           <Link
             className="login-page__footer--link"
-            to={role === "client" ? "/client-signup" : "/influencer-signup"}>
+            to={role === "client" ? "/client-signup" : "/influencer-signup"}
+          >
             Sign up here
           </Link>
         </p>

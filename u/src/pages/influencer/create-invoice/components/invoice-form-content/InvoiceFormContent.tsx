@@ -116,6 +116,11 @@ export const InvoiceFormContent: React.FC<Props> = ({ tab, setTab }) => {
                       You'll be notified once the payment is completed or if there's any issue with your payment details.
                     </p>
                     <p className="invoice-form-content__modal-header-description">
+                </p>
+                <p className="invoice-form-content__modal-header-description">
+                  You’ll be notified once the payment is completed or if there’s any issue with your payment details.
+                </p>
+                <p className="invoice-form-content__modal-header-description">
                       We appreciate your collaboration and look forward to working together on upcoming campaigns.
                     </p>
                   </div>

@@ -25,7 +25,7 @@ export const PriceInput: React.FC<Props> = ({ platform, placeholder, label }) =>
 
   return (
     <Controller
-      name="price"
+      name="initialPrice"
       control={control}
       render={({ field, fieldState }) => {
         const error = fieldState.error;
