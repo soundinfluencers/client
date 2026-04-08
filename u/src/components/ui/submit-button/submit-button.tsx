@@ -2,26 +2,28 @@ import React from "react";
 import { useFormContext, useFormState } from "react-hook-form";
 
 interface Props {
-  type?: "submit";
-  data: string;
-  className?: string;
+    type?: "submit";
+    data: string;
+    className?: string;
 }
 
 export const SubmitButton: React.FC<Props> = ({
-  type = "submit",
-  data,
-  className,
-}) => {
-  const { control } = useFormContext();
+                                                  type = "submit",
+                                                  data,
+                                                  className,
+                                              }) => {
+    const { control } = useFormContext();
+    const { isSubmitting, isValid, submitCount } = useFormState({ control });
 
-  const { isSubmitting, isValid } = useFormState({ control });
-  console.log(isValid);
-  return (
-    <button
-      type={type}
-      className={`${className ?? ""} ${isValid ? "ready" : "disabled"}`}
-      disabled={!isValid || isSubmitting}>
-      {isSubmitting ? "Saving..." : data}
-    </button>
-  );
+    const showInvalidState = submitCount > 0 && !isValid;
+
+    return (
+        <button
+            type={type}
+            className={`${className ?? ""} ready`}
+            disabled={isSubmitting}
+        >
+            {isSubmitting ? "Saving..." : data}
+        </button>
+    );
 };

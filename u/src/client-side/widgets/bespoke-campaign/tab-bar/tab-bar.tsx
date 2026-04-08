@@ -1,27 +1,31 @@
 import React from "react";
-import { BESPOKE_CAMPAIGN_TABS } from "@/client-side/constants/bespoke-campaign-tabs";
 import "./_tab-bar.scss";
+import type {BespokeCampaignTabId} from "@/client-side/pages/bespoke-campaign/model/bespoke-сampaign.types.ts";
+import {BESPOKE_CAMPAIGN_TABS} from "@/client-side/constants/bespoke-campaign-tabs.ts";
+
 
 interface Props {
-  activeTab: string;
-  onChange: React.Dispatch<React.SetStateAction<string>>;
+    activeTab: BespokeCampaignTabId;
+    onChange: (tab: BespokeCampaignTabId) => void;
 }
 
 export const TabBar: React.FC<Props> = ({ activeTab, onChange }) => {
-  return (
-    <div className="tab-bar-bespoke">
-      <p>Promo type</p>
-      <ul>
-        {BESPOKE_CAMPAIGN_TABS.map((tabs) => (
-          <li
-            className={activeTab === tabs.id ? "active" : ""}
-            onClick={() => onChange(tabs.id)}
-            key={tabs.id}>
-            <img src={tabs.icon} alt="" />
-            {tabs.label}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+    return (
+        <div className="tab-bar-bespoke">
+            <p>Promo type</p>
+
+            <ul>
+                {BESPOKE_CAMPAIGN_TABS.map((tab) => (
+                    <li
+                        key={tab.id}
+                        className={activeTab === tab.id ? "active" : ""}
+                        onClick={() => onChange(tab.id as BespokeCampaignTabId)}
+                    >
+                        <img src={tab.icon} alt="" />
+                        {tab.label}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 };

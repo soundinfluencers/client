@@ -5,6 +5,7 @@ import arrowIcon from "@/assets/icons/arrow-down-right.svg";
 import logoIcon from "@/assets/logos/small-black-logo.svg";
 import { useWindowSize } from "@/hooks/global/useWindowSize";
 import { useNavigate } from "react-router-dom";
+import {useCampaignStore} from "@/client-side/store";
 
 export interface HomeHeaderProps {
   firstName?: string;
@@ -17,6 +18,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
 }) => {
   const { width } = useWindowSize();
   const navigate = useNavigate();
+  const resetCampaign = useCampaignStore((s) => s.actions.resetCampaign);
   return width > 812 ? (
     <div className="home-header">
       <div className="home-header__left">
@@ -27,7 +29,10 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
         <div className="home-header__row">
           {" "}
           <div
-            onClick={() => navigate("/client/create-campaign")}
+            onClick={() => {
+              navigate("/client/create-campaign");
+              resetCampaign();
+            }}
             className="home-header__create-wrapper">
             <div className="home-header__create">
               <p>Create a campaign</p>
@@ -95,7 +100,10 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
       <div className="home-header-mobile__row">
         {" "}
         <div
-          onClick={() => navigate("/client/create-campaign")}
+            onClick={() => {
+              navigate("/client/create-campaign");
+              resetCampaign();
+            }}
           className="home-header__create-wrapper">
           <div className="home-header__create">
             <p>Create a campaign</p>

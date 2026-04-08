@@ -11,7 +11,12 @@ import plus from "@/assets/icons/plus-square.svg";
 
 import { Link } from "react-router-dom";
 import type { TableGroup } from "@/client-side/types/table-types";
-import { getWidthColumn, titles } from "@/client-side/data/table-campaign.data";
+import {
+  getTableColumnWidths,
+  getTitle,
+  getWidthColumn,
+  titles,
+} from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
 import { getAccountKey, getColumns } from "@/client-side/utils";
 import { TableCard } from "../card-table/table-card-proposal";
@@ -24,6 +29,7 @@ type Props = {
   group: TableGroup;
   canEdit: boolean;
   optionIndex: number;
+  title: string;
 };
 
 type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
@@ -44,6 +50,7 @@ export function TableProposal({
   group,
   canEdit,
   optionIndex,
+  title,
 }: Props) {
   const totalFollowers = React.useMemo(
     () =>
@@ -80,25 +87,30 @@ export function TableProposal({
   }, [sortedNetworks]);
 
   const columns = React.useMemo(
-    () => getColumns(changeView, group, canEdit),
-    [changeView, group, canEdit],
+      () => getColumns(changeView, group, canEdit),
+      [changeView, group, canEdit],
+  );
+
+  const widths = React.useMemo(
+      () =>
+          getTableColumnWidths({
+            group,
+            changeView,
+            canEdit,
+          }),
+      [group, changeView, canEdit],
   );
 
   return (
     <div className="tableBase-wrap">
+      <h1>{title}</h1>
       <table className="tableBase">
         <colgroup>
           {columns.map((key) => (
-            <col
-              key={key}
-              style={
-                getWidthColumn(changeView ?? false, canEdit)[key as ColumnKey]
-                  ? {
-                      width: `${getWidthColumn(changeView ?? false, canEdit)[key as ColumnKey]}px`,
-                    }
-                  : undefined
-              }
-            />
+              <col
+                  key={key}
+                  style={widths[key] ? { width: `${widths[key]}px` } : undefined}
+              />
           ))}
         </colgroup>
 
@@ -107,7 +119,7 @@ export function TableProposal({
             {columns.map((key) => (
               <th key={key} className="tableBase__th">
                 <div className="header-content">
-                  <span className="th-title">{titles[key]}</span>
+                  <span className="th-title">{getTitle(group, key)}</span>
 
                   {key === "followers" && (
                     <div className="switch" aria-label="Sort by followers">
@@ -141,6 +153,7 @@ export function TableProposal({
             const rowKey = makeRowKey(network, index);
             return (
               <TableCard
+                columns={columns}
                 optionIndex={optionIndex}
                 key={rowKey}
                 rowKey={rowKey}
@@ -172,16 +185,21 @@ export function TableProposal({
             </tr>
           )}
 
-          <tr>
-            {columns.map((_, index) => (
+          {columns.map((col) => {
+            const isPrice = col === "network";
+            const isFollowers = col === "followers";
+
+            return (
               <td
-                key={index}
-                className={`td--footer ${index === 0 || index === 1 ? "is-left" : ""}`}>
-                {index === 0 && <p>Price: {totalPrice}€</p>}
-                {index === 1 && <p>{totalFollowers}</p>}
+                key={col}
+                className={`tableBase__td td--footer ${isPrice ? "td--footer-strategy" : ""} ${isFollowers ? "td--footer-strategy" : ""}`}>
+                {isPrice && <p className="td__price">Price: {totalPrice}€</p>}
+                {isFollowers && (
+                  <p className="td__followers">{totalFollowers}</p>
+                )}
               </td>
-            ))}
-          </tr>
+            );
+          })}
         </tfoot>
       </table>
     </div>

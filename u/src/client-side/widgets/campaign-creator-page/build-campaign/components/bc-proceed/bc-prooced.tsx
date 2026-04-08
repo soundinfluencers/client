@@ -1,15 +1,16 @@
-import React from "react";
+
 import { ButtonMain } from "@/components";
 
 import { useNavigate } from "react-router-dom";
 import "./_bc_prooced.scss";
 import { useCampaignStore } from "@/client-side/store";
 
-interface Props {}
 
-export const BcProceed: React.FC<Props> = () => {
-  const { totalPrice } = useCampaignStore();
-  const navigate = useNavigate();
+export const BcProceed = () => {
+    const { offer, totalPrice, promoCardUI } = useCampaignStore();
+    const navigate = useNavigate();
+    console.log(promoCardUI, "ui");
+    const canProceed = offer?._id || promoCardUI.length >= 1;
   return (
     <div className="bc_proceed">
       <p className="bc_proceed__text">
@@ -18,11 +19,9 @@ export const BcProceed: React.FC<Props> = () => {
       <ButtonMain
         className={totalPrice <= 0 ? "nonActive" : ""}
         text={"Proceed"}
-        onClick={() => {
-          if (totalPrice > 0) {
-            navigate("/client/create-campaign/content");
-          } else null;
-        }}
+        onClick={() =>
+            canProceed && navigate("/client/create-campaign/content")
+        }
       />
     </div>
   );

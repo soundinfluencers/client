@@ -28,6 +28,34 @@ export const getPdffileInvoiceHistory = async (invoiceId: string) => {
     params: { invoiceId },
     responseType: "blob",
   });
-
   return res.data as Blob;
+};
+
+
+export const getInvoiceById = async (invoiceId: string) => {
+  try {
+    const res = await $api.get(`/invoice/${invoiceId}`);
+    return res.data.data;
+  } catch (error) {
+    console.log(error, "get invoice by id error");
+    throw error;
+  }
+};
+
+export const patchInvoiceById = async (
+    invoiceId: string,
+    payload: {
+      poNumber: string;
+      company: string;
+      address: string;
+      country: string;
+    },
+) => {
+  try {
+    const res = await $api.patch(`/invoice/${invoiceId}`, payload);
+    return res.data;
+  } catch (error) {
+    console.log(error, "patch invoice by id error");
+    throw error;
+  }
 };

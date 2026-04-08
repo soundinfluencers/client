@@ -6,8 +6,11 @@ import { Breadcrumbs, Container, Loader } from "@/components";
 
 import "./_account-settings.scss";
 
-import { AccountDetailsSection, EditPasswordFlow } from "@/client-side/widgets";
+import { AccountDetailsSection } from "@/client-side/widgets";
 import { useProfileDetailsQuery } from "@/client-side/react-query";
+import {
+  EditPassword
+} from "@/pages/influencer/account-setting/components/edit-password-flow/edit-password/EditPassword.tsx";
 
 export const AccountSetting: React.FC = () => {
   const { isEdit, resetAll } = useAccountChange();
@@ -27,7 +30,7 @@ export const AccountSetting: React.FC = () => {
 
       {isEdit ? (
         <div className="Account-settings__content">
-          <EditPasswordFlow />
+          <EditPassword/>
         </div>
       ) : (
         <div className="Account-settings__content">

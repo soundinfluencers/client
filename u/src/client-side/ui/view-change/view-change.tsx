@@ -1,15 +1,40 @@
 import React from "react";
 import "../styles/table-components.scss";
-
+import edit from "@/assets/icons/edit.svg";
+import proview from "@/assets/icons/Vector (15).svg";
+import liveview from "@/assets/icons/Vector (16).svg";
+import type {ViewMode} from "@/client-side/pages/campaign-strategy/types/campaign-strategy.types.ts";
 interface Props {
-  setView: (i: number) => void;
+  setView: React.Dispatch<React.SetStateAction<ViewMode>>;
   view: number | null;
   isProposal?: boolean;
 }
 
 export const ViewChange: React.FC<Props> = ({ setView, view, isProposal }) => {
-  const proposalTabs = ["Edit View", "Pro View", "Live View"];
-  const regularTabs = ["Live View", "Pro View"];
+  const proposalTabs = [
+    {
+      label: "Edit View",
+      icon: edit,
+    },
+    {
+      label: "Pro View",
+      icon: proview,
+    },
+    {
+      label: "Live View",
+      icon: liveview,
+    },
+  ];
+  const regularTabs = [
+    {
+      label: "Live View",
+      icon: liveview,
+    },
+    {
+      label: "Pro View",
+      icon: proview,
+    },
+  ];
 
   const tabs = isProposal ? proposalTabs : regularTabs;
 
@@ -34,16 +59,16 @@ export const ViewChange: React.FC<Props> = ({ setView, view, isProposal }) => {
   return (
     <div className="changeView-table">
       <div className="changeView-table__segmented">
-        {tabs.map((label, i) => (
+        {tabs.map((tab, i) => (
           <div
-            key={label}
+            key={tab.label}
             className={`changeView-table__item ${
-              active === (label === "Edit View" ? -1 : i) ? "active" : ""
+              active === (tab.label === "Edit View" ? -1 : i) ? "active" : ""
             }`}
-            onClick={() => onSelect(label, i)}
+            onClick={() => onSelect(tab.label, i)}
             role="button"
             tabIndex={0}>
-            {label}
+            <img src={tab.icon} alt="" />
           </div>
         ))}
       </div>

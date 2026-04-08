@@ -1,6 +1,5 @@
 import { getSocialMediaIcon } from "@/constants/social-medias";
 import type { SocialMediaType } from "@/types/utils/constants.types";
-import edit from "@/assets/icons/edit.svg";
 import bookmark from "@/assets/icons/bookmark.svg";
 import link from "@/assets/icons/link (1).svg";
 import preview from "@/assets/icons/video (1).png";
@@ -11,6 +10,8 @@ import React from "react";
 import check from "@/assets/icons/check.svg";
 import { Link } from "react-router-dom";
 import editIcon from "@/assets/icons/edit.svg";
+import {PreviewPhoto} from "@/client-side/widgets/campaign/live-view-card/preview/preview-component.tsx";
+
 
 interface LiveViewCardProps {
   isMusic?: boolean;
@@ -24,12 +25,19 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
 }) => {
   const [selected, setSelected] = React.useState(0);
   const [dropdown, setDropdown] = React.useState(false);
+  const media0 = item?.mediaCache?.items?.[0];
+  const pathLower = media0?.pathLower;
+  const videoUrl = media0?.url ?? null;
   return (
     <div className="live-view-card">
       <div className="live-view-card__content">
         <div className="live-view-card__video">
-          <div className="video">
-            <img src={preview} alt="" />
+          <div className="live-view-card__video">
+            <PreviewPhoto
+                previewUrl={media0?.previewUrl}
+                pathLower={media0?.pathLower}
+                fileId={media0?.fileId}
+            />
           </div>
         </div>
         <div className="live-view-card__fill-data">
@@ -77,27 +85,29 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
         </div>
 
         {item.socialMediaGroup !== "music" &&
-          item.socialMediaGroup !== "press" && (
-            <>
-              <div className="live-view-card__fill-data">
-                <h3>Story Tag</h3>
-                <div className="fill-input">
-                  <img src={bookmark} alt="" />
-                  <p>{item.taggedUser}</p>
-                </div>
-              </div>
-
-              <div className="live-view-card__fill-data">
-                <h3>Story Links</h3>
-                <Link target="_blank" to={item.taggedLink}>
+            item.socialMediaGroup !== "press" && (
+                <div className="live-view-card__fill-data">
+                  <h3>Story Tag</h3>
                   <div className="fill-input">
-                    <img src={link} alt="" />
-                    <p className="tagged-link">{item.taggedLink}</p>
+                    <img src={bookmark} alt="" />
+                    <p>{item.taggedUser}</p>
                   </div>
-                </Link>
-              </div>
-            </>
-          )}
+                </div>
+            )}
+
+
+
+        {item.socialMediaGroup !== "music" && (
+            <div className="live-view-card__fill-data">
+              <h3>Story Links</h3>
+              <Link target="_blank" to={item.taggedLink}>
+                <div className="fill-input">
+                  <img src={link} alt="" />
+                  <p className="tagged-link">{item.taggedLink}</p>
+                </div>
+              </Link>
+            </div>
+        )}
 
         <div className="live-view-card__fill-data">
           <h3>Audience reach</h3>

@@ -1,17 +1,17 @@
 import { useMemo } from "react";
-import type { CampaignAddedAccount } from "@/types/store/index.types";
+import type {ConnectedAccount} from "@/client-side/types/offers.ts";
 
 const MUSIC_NETWORKS = ["soundcloud", "spotify"] as const;
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"] as const;
 
 type GroupedPromos = {
-  musicPromos: CampaignAddedAccount[];
-  mainPromos: CampaignAddedAccount[];
-  otherPromos: CampaignAddedAccount[];
+  musicPromos: ConnectedAccount[];
+  mainPromos: ConnectedAccount[];
+  otherPromos: ConnectedAccount[];
 };
 
 export const useGroupPromos = (
-  promos: CampaignAddedAccount[],
+  promos: ConnectedAccount[],
 ): GroupedPromos => {
   return useMemo(() => {
     const grouped: GroupedPromos = {

@@ -1,5 +1,10 @@
 import React from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import {
+    Controller,
+    get,
+    useFormContext,
+    useFormState,
+} from "react-hook-form";
 import "./budget-input.scss";
 
 const CURRENCIES = ["£", "$", "€"] as const;
@@ -8,78 +13,90 @@ type Currency = (typeof CURRENCIES)[number];
 const keepNumeric = (v: string) => v.replace(/[^\d.,]/g, "").trim();
 
 export function BudgetField({
-  name,
-  currencyName = "Your budget currency",
-  label = "Your budget",
-  placeholder = "Enter your budget",
-  className = "",
-  id,
-}: {
-  name: string; // "Your budget" (amount)
-  currencyName?: string; // "Your budget currency"
-  label?: string;
-  placeholder?: string;
-  className?: string;
-  id?: string;
+                                name,
+                                currencyName = "Your budget currency",
+                                label = "Your budget",
+                                placeholder = "Enter your budget",
+                                className = "",
+                                id,
+                                required = false,
+                            }: {
+    name: string;
+    currencyName?: string;
+    label?: string;
+    placeholder?: string;
+    className?: string;
+    id?: string;
+    required?: boolean;
 }) {
-  const { control } = useFormContext();
+    const { control } = useFormContext();
+    const { errors, isSubmitted } = useFormState({ control });
 
-  return (
-    <div className={`form-input ${className}`}>
-      <label htmlFor={id ?? name}>{label}</label>
+    const errorMsg =
+        (get(errors, name)?.message as string | undefined) ?? undefined;
 
-      {/* currency field */}
-      <Controller
-        control={control}
-        name={currencyName as any}
-        defaultValue={"£"}
-        render={({ field: currencyField }) => {
-          const selectedCurrency = (currencyField.value as Currency) ?? "£";
+    const showError = !!errorMsg && isSubmitted;
 
-          return (
-            <>
-              <ul className="budget-currency">
-                {CURRENCIES.map((c) => (
-                  <li
-                    onClick={() => currencyField.onChange(c)}
-                    className={selectedCurrency === c ? "active" : ""}
-                    key={c}>
-                    <button type="button" aria-pressed={selectedCurrency === c}>
-                      {c}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+    return (
+        <div className={`form-input ${className} ${showError ? "error" : ""}`}>
+            <label htmlFor={id ?? name}>
+                {label} {required ? "*" : ""}
+            </label>
 
-              <Controller
+            <Controller
                 control={control}
-                name={name as any}
-                render={({ field: amountField, fieldState }) => {
-                  const current = String(amountField.value ?? "");
+                name={currencyName as any}
+                defaultValue={"£"}
+                render={({ field: currencyField }) => {
+                    const selectedCurrency = (currencyField.value as Currency) ?? "£";
 
-                  return (
-                    <div
-                      className={`budget-input ${fieldState.invalid ? "is-error" : ""}`}>
-                      <input
-                        id={id ?? name}
-                        type="text"
-                        placeholder={placeholder}
-                        value={current}
-                        onChange={(e) =>
-                          amountField.onChange(keepNumeric(e.target.value))
-                        }
-                        onBlur={amountField.onBlur}
-                        name={amountField.name}
-                        ref={amountField.ref}
-                      />
-                    </div>
-                  );
+                    return (
+                        <>
+                            <ul className="budget-currency">
+                                {CURRENCIES.map((c) => (
+                                    <li
+                                        key={c}
+                                        onClick={() => currencyField.onChange(c)}
+                                        className={selectedCurrency === c ? "active" : ""}
+                                    >
+                                        <button type="button" aria-pressed={selectedCurrency === c}>
+                                            {c}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <Controller
+                                control={control}
+                                name={name as any}
+                                defaultValue=""
+                                render={({ field }) => {
+                                    const current = String(field.value ?? "");
+
+                                    return (
+                                        <div className={`budget-input ${showError ? "error" : ""}`}>
+                                            <input
+                                                id={id ?? name}
+                                                type="text"
+                                                placeholder={placeholder}
+                                                value={current}
+                                                onChange={(e) =>
+                                                    field.onChange(keepNumeric(e.target.value))
+                                                }
+                                                onBlur={field.onBlur}
+                                                name={field.name}
+                                                ref={field.ref}
+                                            />
+                                        </div>
+                                    );
+                                }}
+                            />
+
+                            {showError && <p className="form-input__error">{errorMsg}</p>}
+                        </>
+                    );
                 }}
-              />
-            </>
-          );
-        }}
-      />
-    </div>
-  );
+            />
+        </div>
+    );
 }

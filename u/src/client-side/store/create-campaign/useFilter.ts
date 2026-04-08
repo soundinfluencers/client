@@ -1,77 +1,88 @@
-import type { FilterItem } from "@/types/client/creator-campaign/filters.types";
-import type { FilterCampaign } from "@/types/store/index.types";
 import { create } from "zustand";
+import type { FilterItem } from "@/types/client/creator-campaign/filters.types";
+import type { FilterCampaignState } from "./types";
 
-export const useFilter = create<FilterCampaign>((set) => ({
+export const useFilter = create<FilterCampaignState>((set) => ({
   selected: [],
 
   setSelected: (itemsOrUpdater) =>
-    set((state) => ({
-      selected:
-        typeof itemsOrUpdater === "function"
-          ? itemsOrUpdater(state.selected)
-          : itemsOrUpdater,
-    })),
+      set((state) => ({
+        selected:
+            typeof itemsOrUpdater === "function"
+                ? itemsOrUpdater(state.selected)
+                : itemsOrUpdater,
+      })),
 
   toggleItem: (item, checked, filters) => {
     set((state) => {
-      const newSelected = [...state.selected];
+      const nextSelected = [...state.selected];
 
-      const parent = filters.find((f) =>
-        f.children?.some((c) => c.id === item.id),
+      const parent = filters.find((filter) =>
+          filter.children?.some((child) => child.id === item.id),
       );
 
-      const findSelected = (id: string) => newSelected.find((f) => f.id === id);
+      const findSelected = (id: string) =>
+          nextSelected.find((filter) => filter.id === id);
 
-      const addItem = (it: FilterItem) => {
-        if (!findSelected(it.id)) newSelected.push({ ...it });
+      const addItem = (filter: FilterItem) => {
+        if (!findSelected(filter.id)) nextSelected.push({ ...filter });
       };
 
-      const removeItem = (id: string) => {
-        const index = newSelected.findIndex((f) => f.id === id);
-        if (index !== -1) newSelected.splice(index, 1);
+      const removeItemById = (id: string) => {
+        const index = nextSelected.findIndex((filter) => filter.id === id);
+        if (index !== -1) nextSelected.splice(index, 1);
       };
 
       if (checked) {
         if (item.children?.length) {
           addItem(item);
         } else if (parent) {
-          let p = findSelected(parent.id);
-          if (!p) {
-            p = { ...parent, children: [] };
-            newSelected.push(p);
+          let selectedParent = findSelected(parent.id);
+          if (!selectedParent) {
+            selectedParent = { ...parent, children: [] };
+            nextSelected.push(selectedParent);
           }
-          if (!p.children!.some((c) => c.id === item.id))
-            p.children!.push({ ...item });
+
+          if (!selectedParent.children?.some((child) => child.id === item.id)) {
+            selectedParent.children = [...(selectedParent.children ?? []), { ...item }];
+          }
         } else {
           addItem(item);
         }
       } else {
         if (item.children?.length) {
-          removeItem(item.id);
+          removeItemById(item.id);
         } else if (parent) {
-          const p = findSelected(parent.id);
-          if (p?.children) {
-            p.children = p.children.filter((c) => c.id !== item.id);
-            if (!p.children.length) removeItem(parent.id);
+          const selectedParent = findSelected(parent.id);
+          if (selectedParent?.children) {
+            selectedParent.children = selectedParent.children.filter(
+                (child) => child.id !== item.id,
+            );
+
+            if (!selectedParent.children.length) {
+              removeItemById(parent.id);
+            }
           }
         } else {
-          removeItem(item.id);
+          removeItemById(item.id);
         }
       }
 
-      return { selected: newSelected };
+      return { selected: nextSelected };
     });
   },
-  removeItem: (id: string) => {
-    set((state) => ({
-      selected: state.selected
-        .filter((f) => f.id !== id)
-        .map((f) =>
-          f.children
-            ? { ...f, children: f.children.filter((c) => c.id !== id) }
-            : f,
-        ),
-    }));
-  },
+
+  removeItem: (id) =>
+      set((state) => ({
+        selected: state.selected
+            .filter((filter) => filter.id !== id)
+            .map((filter) =>
+                filter.children
+                    ? {
+                      ...filter,
+                      children: filter.children.filter((child) => child.id !== id),
+                    }
+                    : filter,
+            ),
+      })),
 }));

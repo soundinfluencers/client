@@ -10,17 +10,17 @@ import type {
 import plus from "@/assets/icons/plus-square.svg";
 
 import { TableCard } from "../card-table/table-card-strategy";
-import { useFetchCampaign } from "@/store/client/campaign-page";
 import type {
   DropdownState,
   TableGroup,
 } from "@/client-side/types/table-types";
 import {
-  columnsStrategy,
+  columnsStrategy, getTableColumnWidths,
   getTitle,
   getWidthColumn,
 } from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
+import {getColumns} from "@/client-side/utils";
 
 type Props = {
   items: CampaignContentItem[];
@@ -28,6 +28,7 @@ type Props = {
   totalPrice: number;
   proposalsFlag?: boolean;
   group: TableGroup;
+  title: string;
 };
 type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
 const makeRowKey = (n: CampaignAddedAccount, index: number) =>
@@ -44,8 +45,8 @@ export function TableStrategy({
   totalPrice,
   proposalsFlag,
   group,
+  title,
 }: Props) {
-  const { status } = useFetchCampaign();
 
   const [networksState, setNetworksState] =
     React.useState<CampaignAddedAccount[]>(networks);
@@ -86,27 +87,36 @@ export function TableStrategy({
       return true;
     });
   }, [sortedNetworks]);
+  const columns = React.useMemo(
+      () => getColumns(false, group, false),
+      [ group],
+  );
+
+  const widths = React.useMemo(
+      () =>
+          getTableColumnWidths({
+            group,
+            changeView: false,
+            canEdit: false,
+          }),
+      [group],
+  );
   return (
     <div className="tableBase-wrap">
+      <h1>{title}</h1>
       <table className="tableBase">
         <colgroup>
-          {columnsStrategy.map((key) => (
-            <col
-              key={key}
-              style={
-                getWidthColumn(proposalsFlag ?? false, false)[key as ColumnKey]
-                  ? {
-                      width: `${getWidthColumn(proposalsFlag ?? false, false)[key as ColumnKey]}px`,
-                    }
-                  : undefined
-              }
-            />
+          {columns.map((key) => (
+              <col
+                  key={key}
+                  style={widths[key] ? { width: `${widths[key]}px` } : undefined}
+              />
           ))}
         </colgroup>
 
         <thead>
           <tr>
-            {columnsStrategy.map((key) => (
+            {columns.map((key) => (
               <th key={key} className="tableBase__th">
                 <div className="header-content">
                   <span className="th-title">{getTitle(group, key)}</span>
@@ -143,6 +153,7 @@ export function TableStrategy({
             const rowKey = makeRowKey(network, index);
             return (
               <TableCard
+                  group={group}
                 key={rowKey}
                 rowKey={rowKey}
                 data={network}
@@ -152,6 +163,7 @@ export function TableStrategy({
                 onToggleDropdown={toggleDropdown}
                 onCloseDropdown={closeDropdown}
                 canEdit={false}
+                columns={columns}
               />
             );
           })}
@@ -168,16 +180,21 @@ export function TableStrategy({
               </td>
             </tr>
           )} */}
-          <tr>
-            {columnsStrategy.map((_, index) => (
+          {columns.map((col) => {
+            const isPrice = col === "network";
+            const isFollowers = col === "followers";
+
+            return (
               <td
-                key={index}
-                className={`td--footer ${index === 0 || index === 1 ? "is-left" : ""}`}>
-                {index === 0 && <p>Price: {totalPrice}€</p>}
-                {index === 1 && <p>{totalFollowers}</p>}
+                key={col}
+                className={`tableBase__td td--footer ${isPrice ? "td--footer-strategy" : ""} ${isFollowers ? "td--footer-strategy" : ""}`}>
+                {isPrice && <p className="td__price">Price: {totalPrice}€</p>}
+                {isFollowers && (
+                  <p className="td__followers">{totalFollowers}</p>
+                )}
               </td>
-            ))}
-          </tr>
+            );
+          })}
         </tfoot>
       </table>
     </div>

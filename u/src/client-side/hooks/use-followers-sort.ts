@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import type { CampaignAddedAccount } from "@/types/store/index.types";
+import type {ConnectedAccount} from "@/client-side/types/offers.ts";
 
 type SortDir = "asc" | "desc" | null;
-export function useFollowersSort(networks: CampaignAddedAccount[]) {
+export function useFollowersSort(networks: ConnectedAccount[]) {
   const [followersSort, setFollowersSort] = React.useState<SortDir>(null);
 
   const toggleFollowersSort = (dir: Exclude<SortDir, null>) => {

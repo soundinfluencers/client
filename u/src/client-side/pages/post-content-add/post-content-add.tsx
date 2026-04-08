@@ -119,42 +119,88 @@ export const PostContentAdd: React.FC = () => {
     groupAdditionalByGroup,
     getAdditionalIndex,
     getFormPrefix,
+    removeAdditionalForm,
   } = useAdditionalForms(postContentDraft ?? undefined);
 
+  // const handleSubmit = React.useCallback(
+  //   (formData: Record<string, string>) => {
+  //     (missingGroups as GroupKey[]).forEach((group) => {
+  //       const platforms = grouped[group] as string[] | undefined;
+  //       if (!platforms?.length) return;
+  //
+  //       platforms.forEach((platform) => {
+  //         actions.addPostContent(group, formData, platform);
+  //       });
+  //     });
+  //
+  //     actions.setPostContentDraft(formData);
+  //     actions.buildCampaignContentFromForm(
+  //       formData,
+  //       selectedPlatforms,
+  //       grouped,
+  //     );
+  //
+  //     const { campaignContent, promoCard } =
+  //       useSelectCampaignProposal.getState();
+  //
+  //     useProposalAccountsStore
+  //       .getState()
+  //       .mergeContent(optionIndex, campaignContent);
+  //
+  //     useProposalAccountsStore.getState().addAccounts(optionIndex, promoCard);
+  //
+  //     actions.clearPromoCards();
+  //
+  //     navigate("/client/campaign");
+  //   },
+  //   [actions, grouped, navigate, selectedPlatforms, missingGroups, optionIndex],
+  // );
   const handleSubmit = React.useCallback(
-    (formData: Record<string, string>) => {
-      (missingGroups as GroupKey[]).forEach((group) => {
-        const platforms = grouped[group] as string[] | undefined;
-        if (!platforms?.length) return;
+      (formData: Record<string, string>) => {
+        console.log("SUBMIT formData", formData);
+        console.log("SUBMIT missingGroups", missingGroups);
+        console.log("SUBMIT selectedPlatforms", selectedPlatforms);
+        console.log("SUBMIT grouped", grouped);
+        console.log("SUBMIT promoCard BEFORE", useSelectCampaignProposal.getState().promoCard);
 
-        platforms.forEach((platform) => {
-          actions.addPostContent(group, formData, platform);
+        (missingGroups as GroupKey[]).forEach((group) => {
+          const platforms = grouped[group] as string[] | undefined;
+          if (!platforms?.length) return;
+
+          platforms.forEach((platform) => {
+            actions.addPostContent(group, formData, platform);
+          });
         });
-      });
 
-      actions.setPostContentDraft(formData);
-      actions.buildCampaignContentFromForm(
-        formData,
-        selectedPlatforms,
-        grouped,
-      );
+        actions.setPostContentDraft(formData);
+        actions.buildCampaignContentFromForm(
+            formData,
+            selectedPlatforms,
+            grouped,
+        );
 
-      const { campaignContent, promoCard } =
-        useSelectCampaignProposal.getState();
+        const proposalState = useSelectCampaignProposal.getState();
+        console.log("SUBMIT campaignContent AFTER build", proposalState.campaignContent);
+        console.log("SUBMIT promoCard AFTER build", proposalState.promoCard);
 
-      useProposalAccountsStore
-        .getState()
-        .mergeContent(optionIndex, campaignContent);
+        useProposalAccountsStore
+            .getState()
+            .mergeContent(optionIndex, proposalState.campaignContent);
 
-      useProposalAccountsStore.getState().addAccounts(optionIndex, promoCard);
+        useProposalAccountsStore
+            .getState()
+            .addAccounts(optionIndex, proposalState.promoCard);
 
-      actions.clearPromoCards();
+        const proposalStoreAfter = useProposalAccountsStore.getState();
+        console.log("PROPOSAL STORE contentByOption", proposalStoreAfter.contentByOption?.[optionIndex]);
+        console.log("PROPOSAL STORE accountsByOption", proposalStoreAfter.accountsByOption?.[optionIndex]);
 
-      navigate("/client/campaign");
-    },
-    [actions, grouped, navigate, selectedPlatforms, missingGroups, optionIndex],
+        actions.clearPromoCards();
+
+        navigate("/client/campaign");
+      },
+      [actions, grouped, navigate, selectedPlatforms, missingGroups, optionIndex],
   );
-
   const renderGroup = (group: GroupKey) => {
     if (!missingGroups.includes(group)) return null;
 
@@ -175,7 +221,7 @@ export const PostContentAdd: React.FC = () => {
 
         {additional.map((f) => {
           const n = getAdditionalIndex(f.id);
-
+          const prefix = getFormPrefix(f);
           return (
             <AdditionalPlatformForm
               selectedEntity={selectedEntity}
@@ -188,6 +234,7 @@ export const PostContentAdd: React.FC = () => {
               }}
               index={n - 1}
               formPrefix={getFormPrefix(f)}
+              onRemove={() => removeAdditionalForm(f.id, prefix)}
             />
           );
         })}
@@ -198,18 +245,7 @@ export const PostContentAdd: React.FC = () => {
           onClick={() => toggleAdditionalSelection(group)}
         />
 
-        <div className="people-chose">
-          <ButtonSecondary
-            className={`for-class ${selectedEntity === 0 ? "active" : ""}`}
-            text="For creators"
-            onClick={() => setSelectedEntity(0)}
-          />
-          <ButtonSecondary
-            className={`for-class ${selectedEntity === 1 ? "active" : ""}`}
-            text="For communities"
-            onClick={() => setSelectedEntity(1)}
-          />
-        </div>
+
 
         {additionalSelection === group && (
           <div className="additional-selection">

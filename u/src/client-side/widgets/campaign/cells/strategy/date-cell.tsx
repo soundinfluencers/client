@@ -17,66 +17,66 @@ type Props = {
 };
 
 export const DateCell = React.memo(function DateCell({
-  isOpen,
-  onToggle,
-  onClose,
-  selectedDate,
-  setSelectedDate,
-  customDate,
-  setCustomDate,
-  canEdit,
-}: Props) {
+                                                       isOpen,
+                                                       onToggle,
+                                                       onClose,
+                                                       selectedDate,
+                                                       setSelectedDate,
+                                                       customDate,
+                                                       setCustomDate,
+                                                       canEdit,
+                                                     }: Props) {
   const value = String(selectedDate ?? "");
   const isDate = selectedDate === "BEFORE" || selectedDate === "AFTER";
   if (!canEdit) {
     return (
-      <td className="tableBase__td ">
-        <div className={`no-edit ${isDate ? "isDate" : undefined}`}>
-          {" "}
-          <p className="hidden-text">{value}</p>
-          {isDate && <p>{customDate}</p>}
-        </div>
-      </td>
+        <td className="tableBase__td ">
+          <div className={`no-edit ${isDate ? "isDate" : undefined}`}>
+            {" "}
+            <p className="hidden-text">{value}</p>
+            {isDate && <p>{customDate}</p>}
+          </div>
+        </td>
     );
   }
 
   return (
-    <td className="tableBase__td">
-      <Dropdown
-        isOpen={isOpen}
-        onToggle={onToggle}
-        selected={
-          <div className={isDate ? "isDate" : undefined}>
-            <p className="hidden-text" title={selectedDate}>
-              {selectedDate}
-            </p>
+      <td className="tableBase__td">
+        <Dropdown
+            isOpen={isOpen}
+            onToggle={onToggle}
+            selected={
+              <div className={isDate ? "isDate" : undefined}>
+                <p className="hidden-text" title={selectedDate}>
+                  {selectedDate}
+                </p>
 
-            {isDate && (
-              <DateInput
-                value={customDate}
-                onChange={(value) => {
-                  setCustomDate(value);
+                {isDate && (
+                    <DateInput
+                        value={customDate}
+                        onChange={(value) => {
+                          setCustomDate(value);
 
-                  setSelectedDate(`${selectedDate}:${value}`);
-                }}
-              />
-            )}
-          </div>
-        }>
-        <ul className="dropdown-list">
-          {getDropdownOptions("date").map((item: string) => (
-            <li
-              key={item}
-              onClick={() => {
-                setSelectedDate(item);
+                          setSelectedDate(`${selectedDate}:${value}`);
+                        }}
+                    />
+                )}
+              </div>
+            }>
+          <ul className="dropdown-list">
+            {getDropdownOptions("date").map((item: string) => (
+                <li
+                    key={item}
+                    onClick={() => {
+                      setSelectedDate(item);
 
-                onClose();
-              }}>
-              {item}
-            </li>
-          ))}
-        </ul>
-      </Dropdown>
-    </td>
+                      onClose();
+                    }}>
+                  {item}
+                </li>
+            ))}
+          </ul>
+        </Dropdown>
+      </td>
   );
 });

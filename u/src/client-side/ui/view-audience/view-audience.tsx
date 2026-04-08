@@ -1,5 +1,5 @@
 import React from "react";
-import repeat from "@/assets/bar-campaign-strategy/repeat.svg";
+import repeat from "@/assets/icons/Vector (14).svg";
 import "../styles/table-components.scss";
 
 interface Props {
@@ -14,11 +14,7 @@ export const ViewAudience: React.FC<Props> = ({ onChange, flag }) => {
         onClick={onChange}
         className={`ViewAudience__btn ${flag ? "active" : ""}`}>
         <img src={repeat} alt="" />
-        {flag ? (
-          <p>See campaign stratagy</p>
-        ) : (
-          <p>See audience geolocation & music genres</p>
-        )}
+        <p>Advanced Insights</p>
       </div>
     </div>
   );

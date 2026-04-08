@@ -1,5 +1,5 @@
 .tableBase-wrap {
-  margin-top: 16px;
+  padding: 16px 0px;
   width: 100%;
   h1 {
     margin: 8px 0px;
@@ -88,7 +88,10 @@
     align-items: center;
     justify-content: start;
     gap: 4px;
-    .eye {
+    p{
+      font-size: 12px;
+    }
+    .eye {cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -137,8 +140,9 @@
   .th-title {
     font-weight: 400;
     font-size: 15px;
+    text-align: center;
     line-height: 1;
-    white-space: nowrap;
+    letter-spacing: -0.3px;
   }
 
   .switch {
@@ -172,10 +176,14 @@
   .down {
     transform: rotate(180deg);
   }
-
+  .td--footer-strategy {
+    border-top: 1px solid rgba(191, 212, 255, 0.4) !important;
+    border-right: 1px solid rgba(191, 212, 255, 0.4) !important;
+  }
   .td--footer {
     background: rgba(185, 208, 255, 0.15);
-
+    border-right: 0px;
+    border-top: 1px solid rgba(191, 212, 255, 0.4);
     p {
       font-weight: 400;
       font-size: 15px;
@@ -183,7 +191,11 @@
     }
 
     &.is-left {
+      padding: 0px;
       text-align: left;
+    }
+    &.followers {
+      border-right: 1px solid rgba(185, 208, 255, 1);
     }
   }
 
@@ -365,7 +377,7 @@
     }
     .check {
       position: absolute;
-      right: 5px;
+      right: 2px;
     }
     .content-cell {
       padding: 4px;
@@ -379,7 +391,7 @@
       gap: 6px;
 
       font-weight: 400;
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.1;
 
       width: 100%;
@@ -401,7 +413,7 @@
         gap: 8px;
         background-color: white;
       }
-      .eye {
+      .eye {cursor: pointer;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -419,7 +431,7 @@
       }
       .trash {
         position: absolute;
-        right: 5px;
+        right: 2px;
       }
       span {
         display: flex;
@@ -450,7 +462,7 @@
     margin-top: 8px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     &__icon {
       display: flex;
       justify-content: center;
@@ -467,10 +479,9 @@
     p {
       font-weight: 400;
       font-style: Regular;
-      font-size: 12px;
+      font-size: 10px;
       leading-trim: NONE;
       line-height: 100%;
-      letter-spacing: 0%;
       vertical-align: bottom;
     }
   }
@@ -488,6 +499,7 @@
       height: 18px;
       border-radius: 4px;
       border: 1px solid rgb(231, 232, 241);
+
       img {
         width: 14px;
         height: 14px;
@@ -496,20 +508,32 @@
     p {
       font-weight: 400;
       font-style: Regular;
-      font-size: 12px;
+      font-size: 10px;
+      letter-spacing: -0.3px;
+      line-height: 100%;
+      vertical-align: bottom;
+    }
+  }
+  .add-influencer {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(
+      107.52deg,
+      #bce8ff 3.56%,
+      rgba(218, 244, 255, 0.94) 50.39%,
+      rgba(191, 216, 255, 0.895) 79.14%,
+      rgba(164, 188, 255, 0.85) 100%
+    );
+    p {
+      font-weight: 500;
+      font-style: Medium;
+      font-size: 14px;
       leading-trim: NONE;
       line-height: 100%;
       letter-spacing: 0%;
       vertical-align: bottom;
-    }
-  }
-  .add-influencer-main {
-    background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
-
-    .add-influencer {
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
   }
 }
@@ -519,7 +543,6 @@
   overflow: visible;
 }
 .no-edit {
-  cursor: pointer;
   position: relative;
   display: flex;
   align-items: center;
@@ -551,14 +574,14 @@
   padding: 6px 10px;
   font-size: 13px;
   border-radius: 4px;
-  white-space: nowrap;
+
   top: calc(100%);
   left: 30px;
   z-index: 50;
   max-width: 250px;
 }
 .hidden-text {
-  font-size: 14px;
+  font-size: 13px;
   max-width: 120px;
   white-space: nowrap;
   overflow: hidden;
@@ -571,6 +594,7 @@
   }
 }
 .username {
+  position: relative;
   text-align: left;
   max-width: 100% !important;
   flex: 1 1 auto;

@@ -39,7 +39,7 @@ export const ContentCell = React.memo(function ContentCell({
     index: 1,
     link: "",
   });
-  console.log(media0, "w");
+  console.log(platformItems, "platformItems");
   const onClickSelect = React.useCallback(
     (optionIndex: number) => {
       setSelectedContent(optionIndex);
@@ -82,18 +82,39 @@ export const ContentCell = React.memo(function ContentCell({
     const link = platformItems?.[selectedContent]?.mainLink ?? "";
     onClickVideo(selectedContent, link);
   };
-  if (!canEdit) {
+  if (platformItems.length <= 1) {
     return (
-      <td className="tableBase__td">
-        <div className="content-cell-static no-edit ">
-          <span onClick={onClickHeaderEye} className="eye">
-            <img src={eye} alt="" />
-          </span>
-          <p title={selectedLink}>
-            {selectedLink ? `${groupTitle(group)} ${selectedContent + 1}` : "—"}
-          </p>
-        </div>
-      </td>
+      <>
+        <td className="tableBase__td">
+          <div className="content-cell-static no-edit">
+            <span onClick={onClickHeaderEye} className="eye">
+              <img src={eye} alt="" />
+            </span>
+            <p title={selectedLink}>
+              {selectedLink
+                ? `${groupTitle(group)} ${selectedContent + 1}`
+                : "—"}
+            </p>
+          </div>
+        </td>
+
+        {popUp && (
+          <Modal onClose={closeModal}>
+            <div className="modal-card">
+              <h2>Video {selectedVideo.index}</h2>
+              {media0 ? (
+                <VideoPreview
+                  className="modal-card-video"
+                  videoUrl={videoUrl}
+                  pathLower={pathLower}
+                />
+              ) : (
+                <input type="text" value={selectedLink} readOnly />
+              )}
+            </div>
+          </Modal>
+        )}
+      </>
     );
   }
   return (
@@ -102,6 +123,7 @@ export const ContentCell = React.memo(function ContentCell({
         <Dropdown
           isOpen={isOpen}
           onToggle={onToggle}
+          content
           selected={
             <div className="content-cell-static">
               <span onClick={onClickHeaderEye} className="eye">

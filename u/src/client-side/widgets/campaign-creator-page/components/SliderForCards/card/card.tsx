@@ -1,12 +1,13 @@
 import React from "react";
 import "./_card.scss";
 
-import type { IApiOffer } from "@/types/client/creator-campaign/creator-campaign.types";
+
 import { ButtonMain } from "@/components/ui/buttons/button/Button";
 import { useCampaignStore } from "@/client-side/store";
+import type {Offer} from "@/client-side/types/offers.ts";
 
 interface Props {
-  dataCard: IApiOffer;
+  dataCard: Offer;
 }
 
 export const Card: React.FC<Props> = ({ dataCard }) => {
@@ -16,37 +17,42 @@ export const Card: React.FC<Props> = ({ dataCard }) => {
   const onChoose = React.useCallback(() => {
     setOffer(dataCard);
   }, [setOffer, dataCard]);
+
   return (
-    <div
-      className={`campaign-card ${
-        activeOfferId === dataCard._id ? "active" : ""
-      }`}>
-      <div className="campaign-card__header">
-        <div className="campaign-card__title-section">
-          <h2>{dataCard.title}</h2>
-          <p>€{dataCard.price}</p>
+      <div
+          className={`campaign-card ${
+              activeOfferId === dataCard._id ? "active" : ""
+          }`}
+      >
+        <div className="campaign-card__header">
+          <div className="campaign-card__title-section">
+            <h2>{dataCard.title}</h2>
+            <p>€{dataCard.price}</p>
+          </div>
+
+          <ul>
+            <li>{dataCard.storyAndPostDetails}</li>
+            <li>{dataCard.networksAmount} networks with</li>
+            <li>{dataCard.combinedFollowers} Followers Combined</li>
+          </ul>
+
+          <ButtonMain
+              text="Choose"
+              onClick={onChoose}
+              className="button"
+          />
         </div>
-        <ul>
-          <li>{dataCard.storyAndPostDetails}</li>
-          <li>{dataCard.networksAmount} networks with</li>
-          <li>{dataCard?.combinedFollowers} Followers Combined</li>
-        </ul>
-        <ButtonMain
-          text={"Choose"}
-          onClick={() => onChoose()}
-          className="button"
-        />
+
+        <div className="campaign-card__accounts">
+          <ul>
+            {dataCard.connectedAccounts.map((account) => (
+                <li key={account.accountId}>
+                  <img src={account.logoUrl} alt="" />
+                  {account.username}
+                </li>
+            ))}
+          </ul>
+        </div>
       </div>
-      <div className="campaign-card__accounts">
-        <ul>
-          {dataCard.connectedAccounts.map((acc, i) => (
-            <li key={i}>
-              <img src={acc.logoUrl} alt="" />
-              {acc.username}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
   );
 };

@@ -3,7 +3,7 @@ import { useUser } from "@/store/get-user";
 
 export const RootRedirect = () => {
   const { user } = useUser();
-
+console.log(user,'user')
   if (user?.role === "client") {
     return <Navigate to="/client" replace />;
   }

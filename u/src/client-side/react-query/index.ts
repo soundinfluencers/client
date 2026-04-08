@@ -3,7 +3,7 @@ export { useUpdateProfileMutation } from "./use-update-profile-mutation";
 export { useCopyShareLinkMutation } from "./use-copy-share-link-mutation";
 export { usePublishedOffersQuery } from "./use-offers-query";
 export { useShareCampaignQuery } from "./useShareCampaignQuery";
-export { useGetCampaignsQuery } from "./useGetCampaigns";
+export { useGetCampaignsInfiniteQuery } from "./useGetCampaigns";
 export { useInvoceDetailsQuery } from "./use-invoice-details-query";
 export { useUpdateInvoiceMutation } from "./use-update-invoice-mutation";
 export { usePromoAccountsFilters } from "./usePromoAccountQuery";

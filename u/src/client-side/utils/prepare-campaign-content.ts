@@ -74,7 +74,7 @@ const FIELDS = {
   press: {
     mainLink: "link to music, events, news",
     description: "artwork",
-    taggedLink: "link to press realese",
+    taggedLink: "Link to press release",
     additionalBrief: "additional brief",
   },
 } as const;
@@ -130,26 +130,27 @@ function buildItemFromPrefix(
 
     const k = normKey(rawKey);
 
-    if ("mainLink" in dict && k.includes(dict.mainLink)) {
+    if ("mainLink" in dict && k.includes(normKey(dict.mainLink))) {
       item.mainLink = value;
       continue;
     }
 
-    if ("description" in dict && k.includes(dict.description)) {
+    if ("description" in dict && k.includes(normKey(dict.description))) {
       item.descriptions.push({ _id: oid(), description: value });
       continue;
     }
 
-    if ("taggedUser" in dict && k.includes(dict.taggedUser)) {
+    if ("taggedUser" in dict && k.includes(normKey(dict.taggedUser))) {
       item.taggedUser = value;
       continue;
     }
-    if ("taggedLink" in dict && k.includes(dict.taggedLink)) {
+
+    if ("taggedLink" in dict && k.includes(normKey(dict.taggedLink))) {
       item.taggedLink = value;
       continue;
     }
 
-    if ("additionalBrief" in dict && k.includes(dict.additionalBrief)) {
+    if ("additionalBrief" in dict && k.includes(normKey(dict.additionalBrief))) {
       item.additionalBrief = value;
       continue;
     }

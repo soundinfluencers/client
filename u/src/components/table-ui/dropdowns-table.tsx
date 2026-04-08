@@ -9,6 +9,7 @@ interface DropdownProps {
   onToggle: () => void;
   selected: React.ReactNode;
   children: React.ReactNode;
+  content?: boolean
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
@@ -16,6 +17,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   onToggle,
   selected,
   children,
+    content
 }) => {
   return (
     <div data-open={isOpen} className="table-dropdown">
@@ -27,7 +29,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
       </div>
 
       {isOpen && (
-        <div className="table-dropdown__select">
+        <div className={`table-dropdown__select ${content ? "pad-select" : ""}`}>
           <div className="table-dropdown__select-contetn">{children}</div>
         </div>
       )}

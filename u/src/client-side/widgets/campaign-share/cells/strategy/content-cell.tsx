@@ -15,18 +15,20 @@ type Props = {
 
   setSelectedPd: (v: number) => void;
   socialMedia?: string;
+  group: string;
 };
 
 export const ContentCell = React.memo(function ContentCell({
-  isOpen,
-  onToggle,
-  onClose,
-  platformItems,
-  selectedContent,
-  setSelectedContent,
-  setSelectedPd,
-  socialMedia,
-}: Props) {
+                                                             isOpen,
+                                                             onToggle,
+                                                             onClose,
+                                                             platformItems,
+                                                             selectedContent,
+                                                             setSelectedContent,
+                                                             setSelectedPd,
+                                                             socialMedia,
+                                                             group,
+                                                           }: Props) {
   const [popUp, setPopUp] = React.useState(false);
   const [selectedVideo, setSelectedVideo] = React.useState({
     index: 1,
@@ -34,72 +36,111 @@ export const ContentCell = React.memo(function ContentCell({
   });
 
   const onClickSelect = React.useCallback(
-    (optionIndex: number) => {
-      setSelectedContent(optionIndex);
-      setSelectedPd(0);
-      onClose();
-    },
-    [setSelectedContent, setSelectedPd, onClose],
+      (optionIndex: number) => {
+        setSelectedContent(optionIndex);
+        setSelectedPd(0);
+        onClose();
+      },
+      [setSelectedContent, setSelectedPd, onClose],
   );
 
   const onClickVideo = React.useCallback(
-    (optionIndex: number, link: string) => {
-      setSelectedVideo({ index: optionIndex + 1, link });
-      setPopUp(true);
-    },
-    [],
+      (optionIndex: number, link: string) => {
+        setSelectedVideo({ index: optionIndex + 1, link });
+        setPopUp(true);
+      },
+      [],
   );
 
   const closeModal = React.useCallback(() => {
     setPopUp(false);
   }, []);
 
+  const groupTitle = (group: string) => {
+    switch (group) {
+      case "main":
+        return "Video";
+      case "music":
+        return "Song";
+      case "press":
+        return "Press";
+      default:
+        return "";
+    }
+  };
+
+  const onClickHeaderEye = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const link = platformItems?.[selectedContent]?.mainLink ?? "";
+    onClickVideo(selectedContent, link);
+  };
+
   const selectedLink = platformItems?.[selectedContent]?.mainLink;
 
   return (
-    <>
-      <td className="tableBase__td">
-        <Dropdown
-          isOpen={isOpen}
-          onToggle={onToggle}
-          selected={
-            <p title={selectedLink}>
-              {selectedLink ? `Video ${selectedContent + 1}` : "—"}
-            </p>
-          }>
-          <ul className="dropdown-list">
-            {platformItems.map((item: any, optionIndex: number) => (
-              <li
-                key={`${item?._id ?? optionIndex}-${socialMedia}`}
-                onClick={() => onClickSelect(optionIndex)}>
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClickVideo(optionIndex, item.mainLink);
-                  }}
-                  className="eye">
+      <>
+        <td className="tableBase__td">
+          {platformItems.length <= 1 ? (
+              <div className="content-cell-static no-edit">
+            <span onClick={onClickHeaderEye} className="eye">
+              <img src={eye} alt="" />
+            </span>
+                <p title={selectedLink}>
+                  {selectedLink ? `${groupTitle(group)} ${selectedContent + 1}` : "—"}
+                </p>
+              </div>
+          ) : (
+              <Dropdown
+                  isOpen={isOpen}
+                  onToggle={onToggle}
+                  content
+                  selected={
+                    <div className="content-cell-static">
+                <span onClick={onClickHeaderEye} className="eye">
                   <img src={eye} alt="" />
                 </span>
+                      <p title={selectedLink}>
+                        {selectedLink ? `${groupTitle(group)} ${selectedContent + 1}` : "—"}
+                      </p>
+                    </div>
+                  }
+              >
+                <ul className="dropdown-list">
+                  {platformItems.map((item: any, optionIndex: number) => (
+                      <li
+                          key={`${item?._id ?? optionIndex}-${socialMedia}`}
+                          onClick={() => onClickSelect(optionIndex)}
+                      >
+                  <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClickVideo(optionIndex, item.mainLink ?? "");
+                      }}
+                      className="eye"
+                  >
+                    <img src={eye} alt="" />
+                  </span>
 
-                {item.mainLink ? `Video ${optionIndex + 1}` : "—"}
+                        {item.mainLink ? `${groupTitle(group)} ${optionIndex + 1}` : "—"}
 
-                {selectedContent === optionIndex && (
-                  <img className="check" src={check} alt="" />
-                )}
-              </li>
-            ))}
-          </ul>
-        </Dropdown>
-      </td>
+                        {selectedContent === optionIndex && (
+                            <img className="check" src={check} alt="" />
+                        )}
+                      </li>
+                  ))}
+                </ul>
+              </Dropdown>
+          )}
+        </td>
 
-      {popUp && (
-        <Modal onClose={closeModal}>
-          <div className="modal-card">
-            <h2>Video {selectedVideo.index}</h2>
-            <input type="text" value={selectedLink} />
-          </div>
-        </Modal>
-      )}
-    </>
+        {popUp && (
+            <Modal onClose={closeModal}>
+              <div className="modal-card">
+                <h2>{groupTitle(group)} {selectedVideo.index}</h2>
+                <input type="text" value={selectedVideo.link} readOnly />
+              </div>
+            </Modal>
+        )}
+      </>
   );
 });

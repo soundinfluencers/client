@@ -23,9 +23,10 @@ export const TableCard = React.memo(function TableCard({
   toggleOpen,
   closeAny,
   isOpen,
+  columns,
 }: any) {
   const { actions } = useCampaignStore();
-
+  console.log(items,'item')
   const [selectedDate, setSelectedDate] = React.useState<string>(ReqData[0]);
   const [customDate, setCustomDate] = React.useState<string>("");
 
@@ -123,10 +124,10 @@ export const TableCard = React.memo(function TableCard({
   return (
     <tr>
       <UsernameCell data={data} />
-      <FollowersCell data={data} />
+      {columns.includes("followers") && <FollowersCell data={data} />}
 
-      {changeView && <GenresCell data={data} />}
-      {changeView && <CountriesCell data={data} />}
+
+
 
       {!changeView && (
         <DateCell
@@ -140,19 +141,21 @@ export const TableCard = React.memo(function TableCard({
         />
       )}
 
-      <ContentCell
-        isOpen={isContentOpen}
-        onToggle={onToggleContent}
-        onClose={closeAny}
-        platformItems={platformItems}
-        selectedContent={selectedContent}
-        setSelectedContent={setSelectedContent}
-        setSelectedPd={setSelectedPd}
-        socialMedia={data.socialMedia}
-      />
+      {group !== 'press' && <ContentCell
+          isOpen={isContentOpen}
+          onToggle={onToggleContent}
+          onClose={closeAny}
+          platformItems={platformItems}
+          selectedContent={selectedContent}
+          setSelectedContent={setSelectedContent}
+          setSelectedPd={setSelectedPd}
+          socialMedia={data.socialMedia}
+          group={group}
+      />}
 
       <DescriptionCell
         isOpen={isPostDescriptionOpen}
+        group={group}
         onToggle={onTogglePD}
         onClose={closeAny}
         platformItems={platformItems}
@@ -167,6 +170,10 @@ export const TableCard = React.memo(function TableCard({
         platformItems={platformItems}
         selectedContent={selectedContent}
       />
+      {changeView && columns.includes("countries") && (
+          <CountriesCell data={data} />
+      )}
+      {changeView && columns.includes("genres") && <GenresCell data={data} />}
     </tr>
   );
 });

@@ -14,16 +14,19 @@ export const TableFooter: React.FC<Props> = ({
   return (
     <tfoot>
       <tr>
-        {columns.map((_, index) => (
-          <td
-            key={index}
-            className={`tableBase__td  td--footer ${
-              index === 0 || index === 1 ? "is-left" : ""
-            }`}>
-            {index === 0 && <p>Price: {totalPrice}€</p>}
-            {index === 1 && <p>{totalFollowers}</p>}
-          </td>
-        ))}
+        {columns.map((col) => {
+          const isPrice = col === "network";
+          const isFollowers = col === "followers";
+
+          return (
+            <td
+              key={col}
+              className={`tableBase__td td--footer ${isPrice ? "td--footer-strategy" : ""} ${isFollowers ? "td--footer-strategy" : ""}`}>
+              {isPrice && <p className="td__price">Price: {totalPrice}€</p>}
+              {isFollowers && <p className="td__followers">{totalFollowers}</p>}
+            </td>
+          );
+        })}
       </tr>
     </tfoot>
   );

@@ -15,6 +15,7 @@ type Props = {
 
   setSelectedPd: (v: number) => void;
   socialMedia?: string;
+  group: string;
 };
 
 export const ContentCell = React.memo(function ContentCell({
@@ -26,6 +27,7 @@ export const ContentCell = React.memo(function ContentCell({
   setSelectedContent,
   setSelectedPd,
   socialMedia,
+  group,
 }: Props) {
   const [popUp, setPopUp] = React.useState(false);
   const [selectedVideo, setSelectedVideo] = React.useState({
@@ -53,21 +55,45 @@ export const ContentCell = React.memo(function ContentCell({
   const closeModal = React.useCallback(() => setPopUp(false), []);
 
   const selectedLink = platformItems?.[selectedContent]?.mainLink;
-
+  const groupTitle = (group: string) => {
+    switch (group) {
+      case "main":
+        return "Video";
+      case "music":
+        return "Song";
+      case "press":
+        return "Press";
+      default:
+        return "";
+    }
+  };
+  const onClickHeaderEye = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const link = platformItems?.[selectedContent]?.mainLink ?? "";
+    onClickVideo(selectedContent, link);
+  };
   return (
     <>
       <td className="tableBase__td">
         <Dropdown
           isOpen={isOpen}
           onToggle={onToggle}
+          content
           selected={
-            <p title={selectedLink}>
-              {selectedLink ? `Video ${selectedContent + 1}` : "—"}
-            </p>
+            <div className="content-cell-static">
+              <span onClick={onClickHeaderEye} className="eye">
+                <img src={eye} alt="" />
+              </span>
+              <p title={selectedLink}>
+                {selectedLink
+                  ? `${groupTitle(group)} ${selectedContent + 1}`
+                  : "—"}
+              </p>
+            </div>
           }>
           <ul className="dropdown-list">
             {platformItems.map((item: any, optionIndex: number) => (
-              <li
+              <li className={`content-cell ${selectedContent === optionIndex ? "active-content" : ""}`}
                 key={`${item?._id ?? optionIndex}-${socialMedia}`}
                 onClick={() => onClickSelect(optionIndex)}>
                 <span
@@ -81,9 +107,9 @@ export const ContentCell = React.memo(function ContentCell({
 
                 {item.mainLink ? `Video ${optionIndex + 1}` : "—"}
 
-                {selectedContent === optionIndex && (
-                  <img className="check" src={check} alt="" />
-                )}
+                {/*{selectedContent === optionIndex && (*/}
+                {/*  <img className="check" src={check} alt="" />*/}
+                {/*)}*/}
               </li>
             ))}
           </ul>
@@ -93,7 +119,7 @@ export const ContentCell = React.memo(function ContentCell({
       {popUp && (
         <Modal onClose={closeModal}>
           <div className="modal-card">
-            <h2>Video {selectedVideo.index}</h2>
+            <h2>{groupTitle(group)} {selectedVideo.index}</h2>
             <input type="text" value={selectedLink} />
           </div>
         </Modal>

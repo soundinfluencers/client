@@ -6,36 +6,54 @@ import { useUser } from "@/store/get-user";
 
 const HIDDEN_SEGMENTS = ["client", "influencer"];
 
+const formatLabel = (segment: string) => {
+    const decoded = decodeURIComponent(segment).replace(/-/g, " ");
+    return decoded.charAt(0).toUpperCase() + decoded.slice(1);
+};
+
 export const Breadcrumbs: React.FC = () => {
-  const { user } = useUser();
-  const location = useLocation();
+    const { user } = useUser();
+    const location = useLocation();
 
-  const dashboardLink = user?.role === "client" ? "/client" : "/influencer";
+    const dashboardLink = user?.role === "client" ? "/client" : "/influencer";
 
-  const pathnames = location.pathname
-    .split("/")
-    .filter(Boolean)
-    .filter((segment) => !HIDDEN_SEGMENTS.includes(segment));
+    const visibleSegments = location.pathname
+        .split("/")
+        .filter(Boolean)
+        .filter((segment) => !HIDDEN_SEGMENTS.includes(segment));
 
-  return (
-    <nav className="breadcrumbs">
-      <span>
+    return (
+        <nav className="breadcrumbs" aria-label="Breadcrumb">
+      <span className="breadcrumbs__item">
         <Link to={dashboardLink}>Dashboard</Link>
-        {pathnames.length > 0 && <img src={chevron} alt="" />}
+          {visibleSegments.length > 0 && <img src={chevron} alt="" />}
       </span>
 
-      {pathnames.map((name, index) => {
-        const isLast = index === pathnames.length - 1;
-        const label = decodeURIComponent(name.replace(/-/g, " "));
+            {visibleSegments.map((segment, index) => {
+                const isLast = index === visibleSegments.length - 1;
 
-        return isLast ? (
-          <span key={name}> {label} </span>
-        ) : (
-          <span key={name}>
-            {label} <img src={chevron} alt="" />
+                const href =
+                    "/" +
+                    [
+                        user?.role === "client" ? "client" : "influencer",
+                        ...visibleSegments.slice(0, index + 1),
+                    ].join("/");
+
+                const label = formatLabel(segment);
+
+                return (
+                    <span key={`${segment}-${index}`} className="breadcrumbs__item">
+            {isLast ? (
+                <span className="breadcrumbs__current">{label}</span>
+            ) : (
+                <>
+                    <Link to={href}>{label}</Link>
+                    <img src={chevron} alt="" />
+                </>
+            )}
           </span>
-        );
-      })}
-    </nav>
-  );
+                );
+            })}
+        </nav>
+    );
 };

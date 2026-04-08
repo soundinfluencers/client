@@ -19,12 +19,13 @@ export const PlattformsDataForm: IPlattformsDataForm = {
         id: "Storytag",
         name: "Story tag",
         placeholder: "@tagged user",
-        required: true,
+        required: false,
       },
       {
+
         id: "Storylink",
         name: "Story link",
-        required: true,
+        required: false,
 
         placeholder: "https://",
       },
@@ -70,6 +71,11 @@ export const PlattformsDataForm: IPlattformsDataForm = {
       {
         id: "artworkLinks",
         name: "Link to artwork & press shots",
+        placeholder: "https://",
+      },
+      {
+        id: "linkPress",
+        name: "Link to press release",
         placeholder: "https://",
       },
     ],

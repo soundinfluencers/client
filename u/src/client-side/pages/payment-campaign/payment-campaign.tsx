@@ -32,6 +32,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { deleteDraft } from "@/api/client/campaign/draft.api";
 import { useInvoceDetailsQuery } from "@/client-side/react-query";
 import { Modal } from "@/shared/ui/modal-fix/Modal";
+import {FormPayment} from "@components/form/form-payment.tsx";
 
 export type PaymentMethodId =
   | "bank_card"
@@ -240,6 +241,7 @@ export const PaymentCampaign = () => {
     }),
     [invoiceDetails],
   );
+  console.log(invoiceDetails,'invoiceDetails')
   return (
     <Container className="payment-campaign">
       <div className="navmenu">
@@ -271,7 +273,7 @@ export const PaymentCampaign = () => {
             <h3>Invoice details</h3>
           </div>
 
-          <Form<PaymentCampaignFormValues>
+          <FormPayment<PaymentCampaignFormValues>
             schema={paymentCampaignSchema}
             onSubmit={onSent}
             defaultValues={defaultValues}
@@ -303,7 +305,7 @@ export const PaymentCampaign = () => {
                 </div>
               )} */}
             </div>
-          </Form>
+          </FormPayment>
         </div>
       </div>
       {modalCompleted && (

@@ -19,7 +19,7 @@ interface FormSection<T extends FieldValues> {
   schema?: ZodSchema<T>;
   validateMode?: "onChange" | "onBlur" | "onSubmit" | "onTouched" |"all";
   onSubmit?: (data: T) => Promise<void> | void;
-
+  onValuesChange?: (data: T) => void;
   expose?: (methods: UseFormReturn<T>) => void;
 }
 
@@ -32,7 +32,7 @@ export const Form = <T extends FieldValues>({
   defaultValues,
   schema,
   validateMode = "onChange",
-
+onValuesChange,
   expose,
 }: FormSection<T>) => {
   const methods = useForm<T>({
@@ -50,7 +50,15 @@ export const Form = <T extends FieldValues>({
   React.useEffect(() => {
     expose?.(methods);
   }, [expose, methods]);
+  React.useEffect(() => {
+    if (!onValuesChange) return;
 
+    const subscription = methods.watch((values) => {
+      onValuesChange(values as T);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [methods, onValuesChange]);
   // React.useEffect(() => {
   //   if (!defaultValues) return;
   //   methods.reset(defaultValues, {
@@ -75,24 +83,24 @@ export const Form = <T extends FieldValues>({
   //   });
   // }, [defaultValues, methods]);
 
-  const prevDefaultsRef = React.useRef<string>("");
+  // const prevDefaultsRef = React.useRef<string>("");
 
-  React.useEffect(() => {
-    if (!defaultValues) return;
-
-    const next = JSON.stringify(defaultValues);
-    if (next === prevDefaultsRef.current) return;
-
-    prevDefaultsRef.current = next;
-
-    methods.reset(defaultValues, {
-      keepDirtyValues: true,
-      keepTouched: true,
-      keepErrors: true,
-      keepIsSubmitted: true,
-      keepSubmitCount: true,
-    });
-  }, [defaultValues, methods]);
+  // React.useEffect(() => {
+  //   if (!defaultValues) return;
+  //
+  //   const next = JSON.stringify(defaultValues);
+  //   if (next === prevDefaultsRef.current) return;
+  //
+  //   prevDefaultsRef.current = next;
+  //
+  //   methods.reset(defaultValues, {
+  //     keepDirtyValues: true,
+  //     keepTouched: true,
+  //     keepErrors: true,
+  //     keepIsSubmitted: true,
+  //     keepSubmitCount: true,
+  //   });
+  // }, [defaultValues, methods]);
 
   const handleFormSubmit = async (formData: T) => {
     console.log("Form submitted with data:", formData);
@@ -108,7 +116,7 @@ export const Form = <T extends FieldValues>({
       >
         {children}
         {submitButton && (
-          <div className={`form__btn-section ${classNameBtnSection ?? ""}`}>
+          <div className={`btn-section-form ${classNameBtnSection ?? ""}`}>
             {submitButton}
           </div>
         )}

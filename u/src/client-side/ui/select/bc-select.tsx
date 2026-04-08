@@ -74,7 +74,7 @@ export const SortSelect: React.FC<SelectSortProps> = ({
       isOpen={open}
       setOpen={setOpen}>
       <ul className="my-sort-list">
-        {filtersArr.map((item, i) => (
+        {filtersArr.map((item) => (
           <li
             onClick={() => {
               setOpen(false);

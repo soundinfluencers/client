@@ -7,6 +7,7 @@ import { Bar } from "@/client-side/ui";
 
 import { useDraftCampaignStore, useUpdateCampaign } from "@/client-side/store";
 import { TableDraft } from "../tables/table-draft";
+import { calcGroupPrices } from "@/client-side/utils";
 
 interface Props {
   campaign: any;
@@ -62,65 +63,85 @@ export const CampaignTablePageDraft: React.FC<Props> = ({
     }),
     [content],
   );
-
+  const { groupPrices } = React.useMemo(
+    () => calcGroupPrices(accounts),
+    [accounts],
+  );
   return (
     <div className="table-page">
       {/* <Bar campaign={campaign} /> */}
 
-      {view === 0 ? (
-        <div className="live-view-wrapper">
-          {byGroup.main.map((item: any) => (
-            <LiveViewCard key={item._id} item={item} networks={mainPromos} />
-          ))}
-          {byGroup.music.map((item: any) => (
-            <LiveViewCard key={item._id} item={item} networks={musicPromos} />
-          ))}
-          {byGroup.press.map((item: any) => (
-            <LiveViewCard key={item._id} item={item} networks={otherPromos} />
-          ))}
-        </div>
-      ) : (
-        <div className="table-wrapper">
-          {byGroup.main.length >= 1 && (
-            <TableDraft
-              campaignId={campaign.draftId}
-              totalPrice={draftPrice}
-              items={byGroup.main}
-              networks={mainPromos}
-              group="main"
-              canEdit={true}
-              title="Video Content Section"
-              changeView={changeView}
-            />
-          )}
+      <div className="table-scroll">
+        {view === 0 ? (
+          <div className="live-view-wrapper">
+            {byGroup.main.map((item: any) => (
+              <LiveViewCard
+                canEdit={true}
+                key={item._id}
+                item={item}
+                networks={mainPromos}
+              />
+            ))}
+            {byGroup.music.map((item: any) => (
+              <LiveViewCard
+                canEdit={true}
+                key={item._id}
+                item={item}
+                networks={musicPromos}
+              />
+            ))}
+            {byGroup.press.map((item: any) => (
+              <LiveViewCard
+                canEdit={true}
+                key={item._id}
+                item={item}
+                networks={otherPromos}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="table-wrapper">
+            {byGroup.main.length >= 1 && (
+              <TableDraft
+                campaignId={campaign.draftId}
+                totalPrice={groupPrices.main}
+                items={byGroup.main}
+                networks={mainPromos}
+                group="main"
+                canEdit={true}
+                title="Video Distribution"
+                changeView={changeView}
+              />
+            )}
 
-          {byGroup.music.length >= 1 && (
-            <TableDraft
-              campaignId={campaign.draftId}
-              totalPrice={draftPrice}
-              items={byGroup.music}
-              networks={musicPromos}
-              group="music"
-              canEdit={true}
-              title="Music Section"
-              changeView={changeView}
-            />
-          )}
+            {byGroup.music.length >= 1 && (
+              <TableDraft
+                campaignId={campaign.draftId}
+                totalPrice={groupPrices.music}
+                items={byGroup.music}
+                networks={musicPromos}
+                group="music"
+                canEdit={true}
+                title="Music Placements"
+                changeView={changeView}
+              />
+            )}
 
-          {byGroup.press.length >= 1 && (
-            <TableDraft
-              campaignId={campaign.draftId}
-              totalPrice={draftPrice}
-              items={byGroup.press}
-              networks={otherPromos}
-              group="press"
-              canEdit={true}
-              title="Press Section"
-              changeView={changeView}
-            />
-          )}
-        </div>
-      )}
+            {byGroup.press.length >= 1 && (
+              <TableDraft
+                campaignId={campaign.draftId}
+                totalPrice={groupPrices.press}
+                items={byGroup.press}
+                networks={otherPromos}
+                group="press"
+                canEdit={true}
+                title="Press Coverage"
+                changeView={changeView}
+              />
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

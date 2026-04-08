@@ -177,6 +177,7 @@ export const ContentCellEditStrategy = React.memo(
           <Dropdown
             isOpen={isOpen}
             onToggle={onToggle}
+            content
             selected={
               <div className="content-cell-static">
                 <span onClick={onClickHeaderEye} className="eye">
@@ -192,7 +193,7 @@ export const ContentCellEditStrategy = React.memo(
             <div className="post-description-block">
               <ul className="dropdown-list">
                 {platformItems.map((item: any, idx: number) => (
-                  <li key={item?._id ?? idx} onClick={() => selectContent(idx)}>
+                  <li className={`content-cell ${selectedContent === idx ? "active-content" : ""}`} key={item?._id ?? idx} onClick={() => selectContent(idx)}>
                     <span
                       onClick={(e) => {
                         e.stopPropagation();

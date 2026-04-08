@@ -53,11 +53,20 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
 
   const serverDescs: Desc[] = baseItem?.descriptions ?? [];
   const editingDescs: Desc[] = (patch?.descriptions ?? serverDescs) as Desc[];
-
+    const pressValue = editingDescs?.[0]?.description ?? "";
   const safeSelectedText = editingDescs?.[selectedPd]?.description ?? "—";
 
   const [isAdding, setIsAdding] = React.useState(false);
   const [newText, setNewText] = React.useState("");
+
+  React.useEffect(() => {
+    setIsAdding(false);
+    setNewText("");
+  }, [contentId]);
+
+  React.useEffect(() => {
+    setDeleteIdx(null);
+  }, [contentId]);
   const ensurePatchDescs = React.useCallback(() => {
     if (!contentId) return;
     if (patch?.descriptions) return;
@@ -69,20 +78,14 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
       })),
     );
   }, [contentId, patch?.descriptions, serverDescs, setDescriptions]);
-  React.useEffect(() => {
-    setIsAdding(false);
-    setNewText("");
-  }, [contentId]);
 
-  React.useEffect(() => {
-    setDeleteIdx(null);
-  }, [contentId]);
+
   const selectPd = React.useCallback(
-    (idx: number) => {
-      setSelectedPd(idx);
-      onClose();
-    },
-    [setSelectedPd, onClose],
+      (idx: number) => {
+        setSelectedPd(idx);
+        onClose();
+      },
+      [setSelectedPd, onClose],
   );
 
   const startAdd = React.useCallback(() => {
@@ -96,10 +99,112 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
     setNewText("");
   }, []);
 
-  const onOpenModal = (idx: number) => {
-    setModal(true);
-    setSelectedId(idx);
+
+  const commitAdd = React.useCallback(
+      (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        const trimmed = newText.trim();
+        if (!contentId) return;
+
+        if (!trimmed) {
+          setIsAdding(false);
+          setNewText("");
+          return;
+        }
+
+        ensurePatchDescs();
+        addDescription(contentId, trimmed);
+
+        setSelectedPd(editingDescs.length);
+
+        setIsAdding(false);
+        setNewText("");
+      },
+      [
+        contentId,
+        newText,
+        ensurePatchDescs,
+        addDescription,
+        setSelectedPd,
+        editingDescs.length,
+      ],
+  );
+  const confirmDelete = React.useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (deleteIdx === null || !contentId) return;
+
+        ensurePatchDescs();
+        removeDescription(contentId, deleteIdx);
+
+        if (selectedPd === deleteIdx) setSelectedPd(Math.max(0, deleteIdx - 1));
+        else if (selectedPd > deleteIdx) setSelectedPd(selectedPd - 1);
+
+        if (editIdx === deleteIdx) {
+          setEditIdx(null);
+          setEditText("");
+        }
+
+        setDeleteIdx(null);
+      },
+      [
+        deleteIdx,
+        contentId,
+        ensurePatchDescs,
+        removeDescription,
+        selectedPd,
+        setSelectedPd,
+        editIdx,
+      ],
+  );
+
+  const cancelDelete = React.useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteIdx(null);
+  }, []);  React.useEffect(() => {
+    setEditIdx(null);
+    setEditText("");
+  }, [contentId]);
+  if (!contentId) {
+    return (
+        <td className="tableBase__td">
+          <p className="hidden-text desc">—</p>
+        </td>
+    );
+  }
+    const handlePressChange = React.useCallback(
+        (value: string) => {
+            if (!contentId) return;
+
+            const next = editingDescs.length
+                ? editingDescs.map((item, idx) =>
+                    idx === 0 ? { ...item, description: value } : item,
+                )
+                : [{ _id: "", description: value }];
+
+            setDescriptions(contentId, next);
+        },
+        [contentId, editingDescs, setDescriptions],
+    );
+  const groupTitle = (group: string) => {
+    switch (group) {
+      case "main":
+        return "post description";
+      case "music":
+        return "track title";
+      case "press":
+        return "artwork link";
+      default:
+        return "";
+    }
   };
+
+
+
+  // const onOpenModal = (idx: number) => {
+  //   setModal(true);
+  //   setSelectedId(idx);
+  // };
   // const deleteDescription = () => {
   //   setModal(false);
   //   if (!contentId) return;
@@ -115,207 +220,140 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
   //     setEditText("");
   //   }
   // };
-  const commitAdd = React.useCallback(
-    (e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      const trimmed = newText.trim();
-      if (!contentId) return;
 
-      if (!trimmed) {
-        setIsAdding(false);
-        setNewText("");
-        return;
-      }
-
-      ensurePatchDescs();
-      addDescription(contentId, trimmed);
-
-      setSelectedPd(editingDescs.length);
-
-      setIsAdding(false);
-      setNewText("");
-    },
-    [
-      contentId,
-      newText,
-      ensurePatchDescs,
-      addDescription,
-      setSelectedPd,
-      editingDescs.length,
-    ],
-  );
-  const confirmDelete = React.useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (deleteIdx === null || !contentId) return;
-
-      ensurePatchDescs();
-      removeDescription(contentId, deleteIdx);
-
-      if (selectedPd === deleteIdx) setSelectedPd(Math.max(0, deleteIdx - 1));
-      else if (selectedPd > deleteIdx) setSelectedPd(selectedPd - 1);
-
-      if (editIdx === deleteIdx) {
-        setEditIdx(null);
-        setEditText("");
-      }
-
-      setDeleteIdx(null);
-    },
-    [
-      deleteIdx,
-      contentId,
-      ensurePatchDescs,
-      removeDescription,
-      selectedPd,
-      setSelectedPd,
-      editIdx,
-    ],
-  );
-
-  const cancelDelete = React.useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setDeleteIdx(null);
-  }, []);
-  if (!contentId) {
-    return (
-      <td className="tableBase__td">
-        <p className="hidden-text desc">—</p>
-      </td>
-    );
-  }
-  React.useEffect(() => {
-    setEditIdx(null);
-    setEditText("");
-  }, [contentId]);
-  const groupTitle = (group: string) => {
-    switch (group) {
-      case "main":
-        return "post description";
-      case "music":
-        return "track title";
-      case "press":
-        return "artwork link";
-      default:
-        return "";
-    }
-  };
   return (
     <>
       <td className="tableBase__td">
-        <Dropdown
-          isOpen={isOpen}
-          onToggle={onToggle}
-          selected={<p className="hidden-text desc">{safeSelectedText}</p>}>
-          <div className="post-description-block">
-            <ul className="dropdown-list">
-              {editingDescs.map((desc, idx) => (
-                <li
-                  className="desc-li"
-                  key={desc?._id ?? idx}
-                  onClick={() => selectPd(idx)}>
+          {group !== 'press' ?
+              <Dropdown
+                  isOpen={isOpen}
+                  onToggle={onToggle}
+                  selected={<p className="hidden-text desc">{safeSelectedText}</p>}>
+                  <div className="post-description-block">
+                      <ul className="dropdown-list">
+                          {editingDescs.map((desc, idx) => (
+                              <li
+                                  className="desc-li"
+                                  key={desc?._id ?? idx}
+                                  onClick={() => selectPd(idx)}>
                   <span className={selectedPd === idx ? "active" : ""}>
                     {idx + 1}
                   </span>{" "}
-                  {editIdx === idx ? (
-                    <input
-                      className="hidden-text desc-li"
-                      autoFocus
-                      value={editText}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => setEditText(e.target.value)}
-                      onBlur={() => {
-                        if (!contentId) return;
-                        ensurePatchDescs();
-                        updateDescription(contentId, idx, editText);
-                        setEditIdx(null);
-                        setEditText("");
-                      }}
-                    />
-                  ) : (
-                    <p
-                      className="hidden-text desc-li"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        ensurePatchDescs();
-                        setEditIdx(idx);
-                        setEditText(desc.description ?? "");
-                      }}
-                      title={desc?.description}>
-                      {desc?.description}
-                    </p>
-                  )}
-                  {deleteIdx === idx ? (
-                    <div className="confirm-delete">
-                      <img
-                        src={check}
-                        alt=""
-                        onClick={confirmDelete}
-                        style={{ cursor: "pointer" }}
-                      />
-                      <img
-                        src={x}
-                        alt=""
-                        onClick={cancelDelete}
-                        style={{ cursor: "pointer" }}
-                      />
-                    </div>
-                  ) : (
-                    <img
-                      className="trash"
-                      src={trash}
-                      alt=""
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteIdx(idx);
-                      }}
-                    />
-                  )}
-                </li>
-              ))}
+                                  {editIdx === idx ? (
+                                      <input
+                                          className="hidden-text desc-li"
+                                          autoFocus
+                                          value={editText}
+                                          onClick={(e) => e.stopPropagation()}
+                                          onChange={(e) => setEditText(e.target.value)}
+                                          onBlur={() => {
+                                              if (!contentId) return;
+                                              ensurePatchDescs();
+                                              updateDescription(contentId, idx, editText);
+                                              setEditIdx(null);
+                                              setEditText("");
+                                          }}
+                                      />
+                                  ) : (
+                                      <p
+                                          className="hidden-text desc-li"
+                                          onClick={(e) => {
+                                              e.stopPropagation();
+                                              ensurePatchDescs();
+                                              setEditIdx(idx);
+                                              setEditText(desc.description ?? "");
+                                          }}
+                                          title={desc?.description}>
+                                          {desc?.description}
+                                      </p>
+                                  )}
+                                  {deleteIdx === idx ? (
+                                      <div className="confirm-delete">
+                                          <img
+                                              src={check}
+                                              alt=""
+                                              onClick={confirmDelete}
+                                              style={{ cursor: "pointer" }}
+                                          />
+                                          <img
+                                              src={x}
+                                              alt=""
+                                              onClick={cancelDelete}
+                                              style={{ cursor: "pointer" }}
+                                          />
+                                      </div>
+                                  ) : (
+                                      <img
+                                          className="trash"
+                                          src={trash}
+                                          alt=""
+                                          onClick={(e) => {
+                                              e.stopPropagation();
+                                              setDeleteIdx(idx);
+                                          }}
+                                      />
+                                  )}
+                              </li>
+                          ))}
 
-              {isAdding && (
-                <li
-                  key="__new__"
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ cursor: "default" }}>
-                  <span>{editingDescs.length + 1}</span>
+                          {isAdding && (
+                              <li
+                                  key="__new__"
+                                  onClick={(e) => e.stopPropagation()}
+                                  style={{ cursor: "default" }}>
+                                  <span>{editingDescs.length + 1}</span>
 
-                  <input
-                    autoFocus
-                    value={newText}
-                    placeholder={`New ${groupTitle(group)}...`}
-                    onChange={(e) => setNewText(e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <div className="confirm-delete">
-                    <img
-                      src={check}
-                      alt=""
-                      onClick={commitAdd}
-                      style={{ cursor: "pointer" }}
-                    />
-                    <img
-                      src={x}
-                      alt=""
-                      onClick={cancelAdd}
-                      style={{ cursor: "pointer" }}
-                    />
+                                  <input
+                                      autoFocus
+                                      value={newText}
+                                      placeholder={`New ${groupTitle(group)}...`}
+                                      onChange={(e) => setNewText(e.target.value)}
+                                      onClick={(e) => e.stopPropagation()}
+                                  />
+                                  <div className="confirm-delete">
+                                      <img
+                                          src={check}
+                                          alt=""
+                                          onClick={commitAdd}
+                                          style={{ cursor: "pointer" }}
+                                      />
+                                      <img
+                                          src={x}
+                                          alt=""
+                                          onClick={cancelAdd}
+                                          style={{ cursor: "pointer" }}
+                                      />
+                                  </div>
+                              </li>
+                          )}
+                      </ul>
+
+                      {!isAdding && (
+                          <div onClick={startAdd} className="add-desc">
+                              <div className="add-desc__icon">
+                                  <img src={plus} alt="" />
+                              </div>
+                              <p>Add new {groupTitle(group)}</p>
+                          </div>
+                      )}
                   </div>
-                </li>
-              )}
-            </ul>
+              </Dropdown> :<input
+                  className="hidden-text desc"
+                  value={editingDescs?.[0]?.description ?? ""}
+                  onChange={(e) => {
+                      if (!contentId) return;
 
-            {!isAdding && (
-              <div onClick={startAdd} className="add-desc">
-                <div className="add-desc__icon">
-                  <img src={plus} alt="" />
-                </div>
-                <p>Add new {groupTitle(group)}</p>
-              </div>
-            )}
-          </div>
-        </Dropdown>
+                      const value = e.target.value;
+                      const next = editingDescs.length
+                          ? editingDescs.map((item, idx) =>
+                              idx === 0 ? { ...item, description: value } : item,
+                          )
+                          : [{ _id: "", description: value }];
+
+                      setDescriptions(contentId, next);
+                  }}
+                  placeholder="Artwork link"
+              />}
       </td>
     </>
   );

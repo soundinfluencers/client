@@ -5,19 +5,27 @@ import type { CampaignAddedAccount } from "@/types/store/index.types";
 
 type Props = { data: CampaignAddedAccount };
 
-export const NetworkCell = React.memo(function NetworkCell({ data }: Props) {
+export const NetworkCell = React.memo(({ data }: { data: any }) => {
+  const [show, setShow] = React.useState(false);
   const icon = React.useMemo(
     () => getSocialMediaIcon(data.socialMedia as SocialMediaType),
     [data.socialMedia],
   );
 
   return (
-    <td className="tableBase__td">
+    <td className="tableBase__tdpage__td col-network">
       <div className="username_row">
         <img src={icon} alt="" />
-        <p className="hidden-text" title={data.username}>
-          {data.username ?? ""}
-        </p>
+        <span
+          className="tooltip-wrap"
+          onMouseEnter={() => setShow(true)}
+          onMouseLeave={() => setShow(false)}>
+          <p className="hidden-text username" title={data.username}>
+            {data.username}
+          </p>
+
+          {show && <div className="tooltip-box">{data.username}</div>}
+        </span>
       </div>
     </td>
   );

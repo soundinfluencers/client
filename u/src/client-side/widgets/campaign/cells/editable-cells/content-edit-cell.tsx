@@ -165,18 +165,29 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
         return "";
     }
   };
+  const onClickHeaderEye = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const link = platformItems?.[selectedContent]?.mainLink ?? "";
+    onClickVideo(selectedContent, link);
+  };
   return (
     <>
       <td className="tableBase__td">
         <Dropdown
           isOpen={isOpen}
           onToggle={onToggle}
+          content
           selected={
-            <p title={selectedLink}>
-              {selectedLink
-                ? `${groupTitle(group)} ${selectedContent + 1}`
-                : "—"}
-            </p>
+            <div className="content-cell-static">
+              <span onClick={onClickHeaderEye} className="eye">
+                <img src={eye} alt="" />
+              </span>
+              <p title={selectedLink}>
+                {selectedLink
+                  ? `${groupTitle(group)} ${selectedContent + 1}`
+                  : "—"}
+              </p>
+            </div>
           }>
           <div className="post-description-block">
             <ul className="dropdown-list">

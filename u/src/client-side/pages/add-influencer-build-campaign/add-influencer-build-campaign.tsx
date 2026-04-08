@@ -29,6 +29,7 @@ import {
 } from "@/client-side/store";
 import { usePromoCardsAndSearch } from "@/client-side/hooks";
 import { useClickOutside } from "@/shared/lib/hooks/useClickOutside";
+import type {ConnectedAccount} from "@/client-side/types/offers.ts";
 
 export const AddInfluencerBuildCampaign: React.FC = () => {
   const [sp] = useSearchParams();
@@ -53,7 +54,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
     setFilter,
     setCurrency,
     setBudget,
-    FilterMethod,
+    filterMethod,
   } = useBuildCampaignFilters();
 
   const {
@@ -63,7 +64,6 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
     promoLoading,
     promoFetching,
     promoError,
-    promoRefetch,
 
     searchResults,
     searchLoading,
@@ -76,7 +76,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
     currency: selectedCurrency.currency,
     sortBy: selectedFilter.key,
     query: search,
-    FilterMethod,
+    filterMethod,
     limit,
   });
 
@@ -85,7 +85,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
   const setPromoCards = useCreateCampaign((s) => s.setPromoCards);
   const canLoadMore =
     !isSearchMode &&
-    (promoCards as IPromoCard[]).length >= limit &&
+    (promoCards as ConnectedAccount[]).length >= limit &&
     !promoFetching;
   React.useEffect(() => {
     if (search.trim().length === 0) {
@@ -97,9 +97,9 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
     setPending("promoCards", promoLoading || promoFetching);
   }, [promoLoading, promoFetching, setPending]);
 
-  const displayCards: IPromoCard[] = React.useMemo(() => {
-    if (search.trim().length === 0) return promoCards as IPromoCard[];
-    return pickedFromSearch ? [pickedFromSearch] : (promoCards as IPromoCard[]);
+  const displayCards: ConnectedAccount[] = React.useMemo(() => {
+    if (search.trim().length === 0) return promoCards as ConnectedAccount[];
+    return pickedFromSearch ? [pickedFromSearch] : (promoCards as ConnectedAccount[]);
   }, [search, promoCards, pickedFromSearch]);
   React.useEffect(() => {
     if (!canLoadMore) return;
@@ -159,7 +159,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
     setPickedFromSearch(item as IPromoCard);
     setIsDropdownOpen(false);
   }, []);
-  const hasCards = (promoCards as IPromoCard[]).length > 0;
+  const hasCards = (promoCards as ConnectedAccount[]).length > 0;
 
   const isInitialLoading = !hasCards && (promoLoading || promoFetching);
   const isFetchingMore = hasCards && promoFetching && isLoadingMore;
@@ -198,9 +198,9 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
                       <button onClick={() => searchRefetch()}>Retry</button>
                     </div>
                   ) : searchResults.length > 0 ? (
-                    searchResults.map((acc: IPromoCard) => (
+                    searchResults.map((acc: ConnectedAccount) => (
                       <div
-                        key={acc._id}
+                        key={acc.accountId}
                         className="search-dropdown__item"
                         onClick={() => onPickSearchItem(acc)}>
                         <div className="title">
@@ -300,7 +300,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
           )}
         </div>
       </div>
-      {!isSearchMode && (promoCards as IPromoCard[]).length >= limit && (
+      {!isSearchMode && (promoCards as ConnectedAccount[]).length >= limit && (
         <div
           ref={loadMoreRef}
           style={{

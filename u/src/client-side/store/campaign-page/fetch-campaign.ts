@@ -2,7 +2,6 @@ import { create } from "zustand";
 import {
   getCampaign,
   getProposalCampaign,
-  patchAddProposalOption,
   postAddProposalOption,
 } from "@/api/client/campaign/campaign.api";
 import { getCampaignDraft } from "@/api/client/campaign/draft.api";
@@ -19,9 +18,9 @@ export const useFetchCampaign = create<any>((set, get) => ({
   setDraft: async (draftId) => {
     set({ data: null });
     try {
-      const { data: res } = await getCampaignDraft(draftId);
-
-      const payload = (res as any).data ?? res;
+      const data = await getCampaignDraft(draftId);
+      console.log("resdatra", data);
+      const payload = data;
       set({ data: toCampaignPageModelFromDraft(payload) });
     } catch (error) {
       console.log(error);

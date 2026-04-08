@@ -6,3 +6,4 @@ export { usePromoCardsAndSearch } from "./use-promo-accounts-or-search";
 export { useHorizontalScroll } from "./use-scroll-horizontal";
 export { useAdditionalForms } from "./useAdditionalForms";
 export { useSelectedPlatforms } from "./useSelectedPlatforms";
+export {useDraftSaveModal} from "./use-draft-save-modal.ts";

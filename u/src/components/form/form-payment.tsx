@@ -1,0 +1,102 @@
+import React from "react";
+import {
+    FormProvider,
+    useForm,
+    type FieldValues,
+    type DefaultValues,
+    type UseFormReturn,
+} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { ZodSchema } from "zod";
+import "./_form.scss";
+
+interface FormSection<T extends FieldValues> {
+    children: React.ReactNode;
+    submitButton?: React.ReactNode;
+    className?: string;
+    classNameBtnSection?: string;
+    defaultValues?: DefaultValues<T>;
+    schema?: ZodSchema<T>;
+    validateMode?: "onChange" | "onBlur" | "onSubmit" | "onTouched" | "all";
+    onSubmit?: (data: T) => Promise<void> | void;
+    onValuesChange?: (data: T) => void;
+    expose?: (methods: UseFormReturn<T>) => void;
+}
+
+export const FormPayment = <T extends FieldValues>({
+                                                children,
+                                                submitButton,
+                                                className,
+                                                classNameBtnSection,
+                                                onSubmit,
+                                                defaultValues,
+                                                schema,
+                                                validateMode = "onChange",
+                                                onValuesChange,
+                                                expose,
+                                            }: FormSection<T>) => {
+    const methods = useForm<T>({
+        defaultValues,
+        resolver: schema ? (zodResolver(schema as any) as any) : undefined,
+        mode: validateMode,
+        reValidateMode: "onChange",
+        criteriaMode: "all",
+        shouldUnregister: false,
+    });
+
+    const prevDefaultsRef = React.useRef<string>("");
+
+    React.useEffect(() => {
+        expose?.(methods);
+    }, [expose, methods]);
+
+    React.useEffect(() => {
+        if (!onValuesChange) return;
+
+        const subscription = methods.watch((values) => {
+            onValuesChange(values as T);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [methods, onValuesChange]);
+
+    React.useEffect(() => {
+        if (!defaultValues) return;
+
+        const nextDefaults = JSON.stringify(defaultValues);
+        if (prevDefaultsRef.current === nextDefaults) return;
+
+        prevDefaultsRef.current = nextDefaults;
+
+        methods.reset(defaultValues as DefaultValues<T>, {
+            keepErrors: false,
+            keepTouched: false,
+            keepDirty: false,
+            keepDirtyValues: false,
+            keepIsSubmitted: false,
+            keepSubmitCount: false,
+        });
+    }, [defaultValues, methods]);
+
+    const handleFormSubmit = async (formData: T) => {
+        console.log("Form submitted with data:", formData);
+        if (onSubmit) await onSubmit(formData);
+    };
+
+    return (
+        <FormProvider {...methods}>
+            <form
+                className={`form ${className ?? ""}`}
+                onSubmit={methods.handleSubmit(handleFormSubmit)}
+                noValidate
+            >
+                {children}
+                {submitButton && (
+                    <div className={`btn-section-form ${classNameBtnSection ?? ""}`}>
+                        {submitButton}
+                    </div>
+                )}
+            </form>
+        </FormProvider>
+    );
+};

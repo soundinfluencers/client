@@ -8,7 +8,9 @@ import "../styles/table-components.scss";
 
 import { formatCampaignDate } from "@/utils/functions/formatDate";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
-import { useCampaignStore } from "@/client-side/store";
+import { useCampaignStore, useDraftCampaignStore } from "@/client-side/store";
+import {getCampaignSelectedAccounts} from "@/client-side/pages/campaign-strategy/model/campaign-strategy.helpers.ts";
+import {calcGroupPrices} from "@/client-side/utils";
 
 type AnyCampaign = any;
 
@@ -21,7 +23,7 @@ function pickAccountsFromCampaign(c: AnyCampaign): any[] | undefined {
   if (!c) return undefined;
 
   if (c.kind === "proposal") return c.selectedOption?.addedAccounts;
-  if (c.kind === "draft") return c.addedAccountsDraft;
+  if (c.kind === "draft") return c.addedAccounts;
 
   return c.addedAccounts;
 }
@@ -30,21 +32,30 @@ function pickContentFromCampaign(c: AnyCampaign): any[] | undefined {
   if (!c) return undefined;
 
   if (c.kind === "proposal") return c.selectedOption?.campaignContent;
-  if (c.kind === "draft") return c.campaignContentDraft;
+  if (c.kind === "draft") return c.campaignContent;
 
   return c.campaignContent;
 }
 
 export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
   const store = useCampaignStore();
-
+  const useDraftCampaignPrice = (campaignId: string) =>
+    useDraftCampaignStore((s) => s.getCampaignPrice(campaignId));
+  const draftPrice = useDraftCampaignPrice(campaign?.draftId);
+  // const accounts = React.useMemo(() => {
+  //   const fromCampaign = pickAccountsFromCampaign(campaign);
+  //   if (isNonEmpty(fromCampaign)) return fromCampaign as any[];
+  //
+  //   return (store.promoCard ?? []) as any[];
+  // }, [campaign, store.promoCard]);
   const accounts = React.useMemo(() => {
-    const fromCampaign = pickAccountsFromCampaign(campaign);
-    if (isNonEmpty(fromCampaign)) return fromCampaign as any[];
+    return getCampaignSelectedAccounts(store);
+  }, [campaign, store.offer, store.promoCard]);
 
-    return (store.promoCard ?? []) as any[];
-  }, [campaign, store.promoCard]);
-
+  const { totalPublicPrice } = React.useMemo(
+      () => calcGroupPrices(accounts),
+      [accounts],
+  );
   const content = React.useMemo(() => {
     const fromCampaign = pickContentFromCampaign(campaign);
     if (isNonEmpty(fromCampaign)) return fromCampaign as any[];
@@ -68,7 +79,7 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
 
   const barUIs = [
     { name: `Submitted: ${submitted}`, img: calendar, row: true },
-    { name: `Budget: ${budget}€`, img: creditcard, row: true },
+    { name: `Budget: ${totalPublicPrice || budget || draftPrice}€`, img: creditcard, row: true },
     {
       name: `Reach: ${formatFollowers(reachFollowers)} followers`,
       img: usercheck,
@@ -77,7 +88,7 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
     { name: `Posts: ${postsCount}`, img: edit, row: true },
     { name: `Video: ${content.length}`, img: video, row: false },
   ];
-
+  console.log(campaign);
   return (
     <div className="bar-strategy-proposals">
       {barUIs.map((item, i) => (

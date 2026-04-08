@@ -11,38 +11,35 @@ export const useHorizontalScroll = () => {
     if (!el) return;
 
     const check = () => {
-      const hasOverflow = el.scrollWidth > el.clientWidth;
+      const hasOverflow = el.scrollWidth > el.clientWidth + 1;
 
       setShowRightArrow(
-        hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+          hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
       );
-
       setShowLeftArrow(hasOverflow && el.scrollLeft > 0);
     };
 
     check();
 
-    el.addEventListener("scroll", check);
+    const resizeObserver = new ResizeObserver(check);
+    resizeObserver.observe(el);
+
+    el.addEventListener("scroll", check, { passive: true });
     window.addEventListener("resize", check);
 
     return () => {
+      resizeObserver.disconnect();
       el.removeEventListener("scroll", check);
       window.removeEventListener("resize", check);
     };
   }, []);
 
   const scrollRight = (offset = 150) => {
-    const el = ref.current;
-    if (!el) return;
-
-    el.scrollBy({ left: offset, behavior: "smooth" });
+    ref.current?.scrollBy({ left: offset, behavior: "smooth" });
   };
 
   const scrollLeft = (offset = 150) => {
-    const el = ref.current;
-    if (!el) return;
-
-    el.scrollBy({ left: -offset, behavior: "smooth" });
+    ref.current?.scrollBy({ left: -offset, behavior: "smooth" });
   };
 
   return {

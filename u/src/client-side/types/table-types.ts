@@ -1,4 +1,4 @@
-import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
+
 
 export type DropdownKey = "date" | "content" | "postDescription";
 
@@ -30,6 +30,7 @@ export type TableRowProps = {
   ) => void;
   onCloseDropdown: () => void;
   optionIndex?: number;
+  columns: any;
 };
 
 type ActiveDropdownProposal = {
@@ -45,6 +46,7 @@ export type TableRowProposalProps = {
   group: TableGroup;
   canEdit: boolean;
   activeDropdown: ActiveDropdownProposal;
+  columns: any;
   onToggleDropdown: (
     rowKey: string,
     key: "date" | "content" | "postDescription",
@@ -53,3 +55,8 @@ export type TableRowProposalProps = {
   optionIndex?: number;
 };
 export type DropKey = "date" | "content" | "postDescription";
+
+
+export type TableMode = "default" | "changeView";
+export type TableVariant = "readonly" | "editable";
+export type ColumnWidths = Partial<Record<string, number>>

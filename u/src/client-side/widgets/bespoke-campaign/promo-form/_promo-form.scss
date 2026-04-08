@@ -4,12 +4,51 @@
     padding-bottom: 8px;
     h2 {
       font-weight: 400;
-      font-style: Regular;
       font-size: 20px;
       leading-trim: NONE;
       line-height: 100%;
       letter-spacing: 0%;
     }
     margin-bottom: 16px;
+  }
+}
+.bespoke-modal{
+  padding: 32px;
+  h2{
+    color: #202934;
+    text-align: center;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  margin-bottom: 24px;
+  }
+  h3{
+    color: #202934;
+    text-align: center;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  p{
+    margin-top: 8px;
+    text-align: center;
+    color: rgba(81, 82, 89, 0.9);
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  .btn-bespoke{
+    max-width: 250px;
+    margin: 40px auto 0px;
+    height: 46px;
+    padding: 12px 8px;
+    p{
+      font-size: 16px;
+      margin: 0;
+      color: white;
+    }
   }
 }

@@ -18,7 +18,6 @@ import { ReqData } from "@/client-side/data/table-campaign.data";
 
 import { getAccountKey } from "@/client-side/utils";
 import { useStrategyCampaignStore } from "@/client-side/store";
-import { ContentCellEdit } from "../cells/editable-cells/content-edit-cell";
 import { ContentCellEditStrategy } from "../cells/editable-cells/content-edit-cell-strategy";
 import { DateCell } from "../cells/strategy/date-cell";
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
@@ -43,6 +42,7 @@ export const TableCard = React.memo(function TableCard({
   canEdit,
   onCloseDropdown,
   campaignId,
+  columns,
 }: TableRowProps) {
   console.log(data, "qwe");
   console.log(items, "itemswww");
@@ -89,7 +89,7 @@ export const TableCard = React.memo(function TableCard({
   //     .toLowerCase();
   //   return itemsByPlatform[key] ?? [];
   console.log(selectedContent, "selectedContent");
-  const media0 = items[selectedContent]?.mediaCache?.items?.[0];
+  const media0 = platformItems?.[selectedContent]?.mediaCache?.items?.[0];
   // }, [itemsByPlatform, data.socialMedia]);
 
   const selectedItem = platformItems?.[selectedContent];
@@ -107,11 +107,21 @@ export const TableCard = React.memo(function TableCard({
     () => onToggleDropdown(rowKey, "postDescription"),
     [onToggleDropdown, rowKey],
   );
-
+  console.log("strategy row", {
+    socialMedia: data.socialMedia,
+    selectedContent,
+    platformItemsLength: platformItems.length,
+    platformItems: platformItems.map((x) => ({
+      id: x?._id,
+      socialMedia: x?.socialMedia,
+      mainLink: x?.mainLink,
+    })),
+    selectedItemId: selectedItem?._id,
+  });
   return (
     <tr className="table-campaign-page__tr">
       <NetworkCell data={data} />
-      <FollowersCell data={data} />
+      {columns.includes("followers") && <FollowersCell data={data} />}
       {changeView ? (
         <>
           <GenresCell data={data} />
@@ -128,29 +138,29 @@ export const TableCard = React.memo(function TableCard({
             socialMedia={data.socialMedia}
             group={group}
           />
-          {canEdit ? (
-            <DescriptionCellEdit
-              isOpen={isPostDescriptionOpen}
-              onToggle={togglePD}
-              onClose={onCloseDropdown}
-              platformItems={platformItems}
-              selectedContent={selectedContent}
-              selectedPd={selectedPd}
-              setSelectedPd={setSelectedPd}
-              group={group}
-            />
+          {group !== 'press' ?  canEdit ? (
+              <DescriptionCellEdit
+                  isOpen={isPostDescriptionOpen}
+                  onToggle={togglePD}
+                  onClose={onCloseDropdown}
+                  platformItems={platformItems}
+                  selectedContent={selectedContent}
+                  selectedPd={selectedPd}
+                  setSelectedPd={setSelectedPd}
+                  group={group}
+              />
           ) : (
-            <DescriptionCell
-              isOpen={isPostDescriptionOpen}
-              onToggle={togglePD}
-              onClose={onCloseDropdown}
-              platformItems={platformItems}
-              selectedContent={selectedContent}
-              selectedPd={selectedPd}
-              setSelectedPd={setSelectedPd}
-              group={group}
-            />
-          )}
+              <DescriptionCell
+                  isOpen={isPostDescriptionOpen}
+                  onToggle={togglePD}
+                  onClose={onCloseDropdown}
+                  platformItems={platformItems}
+                  selectedContent={selectedContent}
+                  selectedPd={selectedPd}
+                  setSelectedPd={setSelectedPd}
+                  group={group}
+              />
+          ) : null}
         </>
       ) : (
         <>
@@ -189,35 +199,38 @@ export const TableCard = React.memo(function TableCard({
             setSelectedPd={setSelectedPd}
             socialMedia={data.socialMedia}
           /> */}
-          {canEdit ? (
-            <ContentCellEditStrategy
-              media0={media0}
-              campaignId={campaignId ?? ""}
-              selectedItem={selectedItem}
-              isOpen={isContentOpen}
-              onToggle={toggleContent}
-              onClose={onCloseDropdown}
-              platformItems={platformItems}
-              selectedContent={selectedContent}
-              setSelectedContent={setSelectedContent}
-              setSelectedPd={setSelectedPd}
-              socialMedia={data.socialMedia}
-              group={group}
-            />
-          ) : (
-            <ContentCell
-              media0={media0}
-              isOpen={isContentOpen}
-              onToggle={toggleContent}
-              onClose={onCloseDropdown}
-              platformItems={platformItems}
-              selectedContent={selectedContent}
-              setSelectedContent={setSelectedContent}
-              setSelectedPd={setSelectedPd}
-              socialMedia={data.socialMedia}
-              group={group}
-            />
-          )}
+          {group !== "press" ? (
+              canEdit ? (
+                  <ContentCellEditStrategy
+                      media0={media0}
+                      campaignId={campaignId ?? ""}
+                      selectedItem={selectedItem}
+                      isOpen={isContentOpen}
+                      onToggle={toggleContent}
+                      onClose={onCloseDropdown}
+                      platformItems={platformItems}
+                      selectedContent={selectedContent}
+                      setSelectedContent={setSelectedContent}
+                      setSelectedPd={setSelectedPd}
+                      socialMedia={data.socialMedia}
+                      group={group}
+                  />
+              ) : (
+                  <ContentCell
+                      media0={media0}
+                      isOpen={isContentOpen}
+                      onToggle={toggleContent}
+                      onClose={onCloseDropdown}
+                      platformItems={platformItems}
+                      selectedContent={selectedContent}
+                      setSelectedContent={setSelectedContent}
+                      setSelectedPd={setSelectedPd}
+                      socialMedia={data.socialMedia}
+                      group={group}
+                  />
+              )
+          ) : null}
+
           {canEdit ? (
             <DescriptionCellEdit
               isOpen={isPostDescriptionOpen}

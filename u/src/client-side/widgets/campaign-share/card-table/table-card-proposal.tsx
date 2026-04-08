@@ -41,6 +41,7 @@ export const TableCard = React.memo(function TableCard({
   canEdit,
   onCloseDropdown,
   optionIndex,
+  columns,
 }: TableRowProposalProps) {
   const [selectedContent, setSelectedContent] = React.useState<number>(0);
   const [selectedPd, setSelectedPd] = React.useState<number>(0);
@@ -100,40 +101,48 @@ export const TableCard = React.memo(function TableCard({
   return (
     <tr className={`table-campaign-page__tr ${isMarked ? "row--hl" : ""}`}>
       <NetworkCell data={data} />
-      <FollowersCell data={data} />
+      {columns.includes("followers") && <FollowersCell data={data} />}
 
       {changeView ? (
         <>
-          <GenresCell data={data} />
-          <CountriesCell data={data} />{" "}
-          <ContentCell
-            isOpen={isContentOpen}
-            onToggle={toggleContent}
-            onClose={onCloseDropdown}
-            platformItems={platformItems}
-            selectedContent={selectedContent}
-            setSelectedContent={setSelectedContent}
-            setSelectedPd={setSelectedPd}
-            socialMedia={data.socialMedia}
-          />
-          <DescriptionCell
-            isOpen={isPostDescriptionOpen}
-            onToggle={togglePD}
-            onClose={onCloseDropdown}
-            platformItems={platformItems}
-            selectedContent={selectedContent}
-            selectedPd={selectedPd}
-            setSelectedPd={setSelectedPd}
-          />
+
+          {group !== 'press' && <ContentCell
+              isOpen={isContentOpen}
+              onToggle={toggleContent}
+              onClose={onCloseDropdown}
+              platformItems={platformItems}
+              selectedContent={selectedContent}
+              setSelectedContent={setSelectedContent}
+              setSelectedPd={setSelectedPd}
+              socialMedia={data.socialMedia}
+              group={group}
+          />}
+          {group !== 'press' && <DescriptionCell
+              group={group}
+              isOpen={isPostDescriptionOpen}
+              onToggle={togglePD}
+              onClose={onCloseDropdown}
+              platformItems={platformItems}
+              selectedContent={selectedContent}
+              selectedPd={selectedPd}
+              setSelectedPd={setSelectedPd}
+          />}
+          {group == 'press' &&  <ExtraFieldsCells
+              changeView={changeView}
+              group={group}
+              platformItems={platformItems}
+              selectedContent={selectedContent}
+          />}
         </>
       ) : (
         <>
           <DateCell
+            canEdit={false}
             isOpen={isDateOpen}
             onToggle={toggleDate}
             onClose={onCloseDropdown}
-            selectedDate={mode} // показываем режим
-            customDate={dateVal} // показываем дату
+            selectedDate={mode}
+            customDate={dateVal}
             setSelectedDate={(nextMode) => {
               if (nextMode === "BEFORE" || nextMode === "AFTER") {
                 const next = dateVal ? `${nextMode}:${dateVal}` : nextMode;
@@ -152,18 +161,19 @@ export const TableCard = React.memo(function TableCard({
             }}
           />
 
-          <ContentCell
-            isOpen={isContentOpen}
-            onToggle={toggleContent}
-            onClose={onCloseDropdown}
-            platformItems={platformItems}
-            selectedContent={selectedContent}
-            setSelectedContent={setSelectedContent}
-            setSelectedPd={setSelectedPd}
-            socialMedia={data.socialMedia}
-          />
+          {group !== 'press' &&  <ContentCell
+              isOpen={isContentOpen}
+              onToggle={toggleContent}
+              onClose={onCloseDropdown}
+              platformItems={platformItems}
+              selectedContent={selectedContent}
+              setSelectedContent={setSelectedContent}
+              setSelectedPd={setSelectedPd}
+              socialMedia={data.socialMedia}
+              group={group}
+          />}
 
-          <DescriptionCell
+          <DescriptionCell group={group}
             isOpen={isPostDescriptionOpen}
             onToggle={togglePD}
             onClose={onCloseDropdown}
@@ -174,12 +184,15 @@ export const TableCard = React.memo(function TableCard({
           />
 
           <ExtraFieldsCells
+              changeView={changeView}
             group={group}
             platformItems={platformItems}
             selectedContent={selectedContent}
           />
         </>
       )}
+      {columns.includes("genres") && <GenresCell data={data} />}
+      {columns.includes("countries") && <CountriesCell data={data} />}
     </tr>
   );
 });

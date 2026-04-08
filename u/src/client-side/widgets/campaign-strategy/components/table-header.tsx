@@ -1,18 +1,21 @@
 import React from "react";
 import chevron from "@/assets/icons/chevron-up.svg";
 import type { SortDir } from "@/client-side/types/table-types";
-import { titles } from "@/client-side/data/table-campaign.data";
+import { getTitle, titles } from "@/client-side/data/table-campaign.data";
+import type { TableView } from "@/client-side/utils/getColumns";
 
 type Props = {
   columns: string[];
   followersSort: SortDir;
   onToggleFollowersSort: (dir: Exclude<SortDir, null>) => void;
+  group: TableView;
 };
 
 export const TableHeader: React.FC<Props> = ({
   columns,
   followersSort,
   onToggleFollowersSort,
+  group,
 }) => {
   return (
     <thead>
@@ -20,7 +23,7 @@ export const TableHeader: React.FC<Props> = ({
         {columns.map((key) => (
           <th key={key} className="table-strategy__th">
             <div className="header-content">
-              <span className="th-title">{titles[key]}</span>
+              <span className="th-title">{getTitle(group, key)}</span>
 
               {key === "followers" && (
                 <div className="switch" aria-label="Sort by followers">

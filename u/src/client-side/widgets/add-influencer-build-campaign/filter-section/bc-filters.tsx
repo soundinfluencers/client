@@ -34,23 +34,35 @@ export const Filters: React.FC<Props> = ({ onToggle, isSmall }) => {
     })();
   }, []);
 
+  // React.useEffect(() => {
+  //   const socialBlock = filter.find((f) => f.id === "social-platforms-1");
+  //   const socialItems = socialBlock?.filters ?? [];
+  //   if (!socialItems.length) return;
+
+  //   setSelected((prev) => {
+  //     const already = new Set(
+  //       prev.filter((x) => x.group === "socialMedia").map((x) => x.id),
+  //     );
+
+  //     const toAdd = socialItems.filter((x) => !already.has(x.id));
+  //     if (!toAdd.length) return prev;
+
+  //     return [...prev, ...toAdd];
+  //   });
+  // }, [filter, setSelected]);
   React.useEffect(() => {
     const socialBlock = filter.find((f) => f.id === "social-platforms-1");
     const socialItems = socialBlock?.filters ?? [];
     if (!socialItems.length) return;
 
+    const defaults = new Set(["instagram", "tiktok"]);
+    const toSelect = socialItems.filter((x) => defaults.has(x.id));
+
     setSelected((prev) => {
-      const already = new Set(
-        prev.filter((x) => x.group === "socialMedia").map((x) => x.id),
-      );
-
-      const toAdd = socialItems.filter((x) => !already.has(x.id));
-      if (!toAdd.length) return prev;
-
-      return [...prev, ...toAdd];
+      const withoutSocial = prev.filter((x) => x.group !== "socialMedia");
+      return [...withoutSocial, ...toSelect];
     });
   }, [filter, setSelected]);
-
   return (
     <div className={`sticky-filter ${isSmall ? "bc_filterForTable" : ""}`}>
       <div className={`bc_filter `}>

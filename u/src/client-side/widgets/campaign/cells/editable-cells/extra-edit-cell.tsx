@@ -7,12 +7,13 @@ type Props = {
   group: TableGroup;
   contentId?: string;
   baseItem?: any;
+  changeView?: boolean
 };
 
 export const ExtraFieldsCellsEdit = React.memo(function ExtraFieldsCellsEdit({
   group,
   contentId,
-  baseItem,
+  baseItem,changeView
 }: Props) {
   const patch = useUpdateCampaign((s) =>
     contentId ? s.patches[contentId] : undefined,
@@ -20,13 +21,16 @@ export const ExtraFieldsCellsEdit = React.memo(function ExtraFieldsCellsEdit({
   const setField = useUpdateCampaign((s) => s.setField);
 
   const keys = React.useMemo(() => {
+    if (changeView) {
+      return group === "press" ? (["additionalBrief"] as const) : ([] as const);
+    }
     switch (group) {
       case "music":
         return ["additionalBrief"] as const;
       case "main":
         return ["taggedUser", "taggedLink", "additionalBrief"] as const;
       case "press":
-        return ["additionalBrief"] as const;
+        return ['mainLink','taggedLink',"additionalBrief"] as const;
       default:
         return [] as const;
     }

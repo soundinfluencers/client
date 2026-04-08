@@ -6,6 +6,13 @@
       margin: 16px 0px;
     }
   }
+  .postNav{
+    display: flex;
+    @media screen and (max-width: 600px) {
+     flex-direction: column;
+      gap: 12px;
+    }
+  }
   @media screen and (max-width: 900px) {
     margin-bottom: 16px;
   }
@@ -104,6 +111,7 @@
             justify-content: center;
             gap: 16px;
             li {
+              cursor: pointer;
               display: flex;
               align-items: center;
               justify-content: center;

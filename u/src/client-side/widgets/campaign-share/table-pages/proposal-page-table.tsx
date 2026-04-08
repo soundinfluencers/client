@@ -72,9 +72,9 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
   );
   const approveOption = (index: number) => {
     setApprovedOptions((prev) => ({ ...prev, [index]: true }));
-    toast.success("Approved!");
 
-    proceedProposalToPayment();
+
+    proceedProposalToPayment(); toast.success("Approved!");
   };
   const requestCampaign = async (campaignId: string, text: string) => {
     try {
@@ -111,9 +111,18 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
       .getState()
       .setProposalPayload(campaignId, optionIndex, base);
 
-    navigate(
-      `/client/campaign/payment?proposal=${campaignId}&option=${optionIndex}`,
+    const paymentPath = `/client/campaign/payment?proposal=${campaignId}&option=${optionIndex}`;
+
+    sessionStorage.setItem(
+        "postAuthRedirect",
+        JSON.stringify({
+          path: paymentPath,
+          campaignId,
+          optionIndex,
+        }),
     );
+
+    navigate(paymentPath);
   };
 
   // const canEditUI = React.useMemo(() => {
@@ -150,6 +159,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
               items={byGroup.main}
               networks={mainPromos}
               group="main"
+              title="Video Distribution"
               canEdit={false}
               changeView={changeView}
             />
@@ -164,6 +174,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
               networks={musicPromos}
               group="music"
               changeView={changeView}
+              title="Music Placements"
             />
           )}
 
@@ -175,6 +186,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
               items={byGroup.press}
               networks={otherPromos}
               group="press"
+              title="Press Coverage"
               changeView={changeView}
             />
           )}
@@ -182,17 +194,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
       )}
       {!isApproved && (
         <div className="table-page__options">
-          <ButtonSecondary
-            className="btn"
-            text={
-              isRequestSentOption
-                ? "Sent"
-                : isRequesting
-                  ? "Sending..."
-                  : "Request edit"
-            }
-            onClick={() => setRequestModal(true)}
-          />{" "}
+
           <ButtonMain
             className="btn"
             text="Approve"

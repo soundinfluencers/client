@@ -28,11 +28,11 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
     e.stopPropagation();
     removeAccount(optionIndex, accountKey);
   };
-  const onConfirmDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    removeAccount(optionIndex, accountKey);
-    setIsConfirming(false);
-  };
+  // const onConfirmDelete = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
+  //   removeAccount(optionIndex, accountKey);
+  //   setIsConfirming(false);
+  // };
   const onDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
