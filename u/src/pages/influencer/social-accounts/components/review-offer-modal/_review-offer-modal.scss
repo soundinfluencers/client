@@ -1,0 +1,184 @@
+@use "@/styles/variables/variables" as vars;
+@use "@/styles/mixins/title" as title;
+
+.review-offer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 40px;
+
+  &__title-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    @media screen and (max-width: 500px) {
+      gap: 4px;
+    }
+  }
+  &__title {
+    @include title.title();
+  }
+  &__subtitle {
+    @include title.subtitle($font-color: vars.$gray);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    &-title {
+      font-size: 24px;
+      font-weight: 400;
+      @media screen and (max-width: 900px) {
+        font-size: 20px;
+      }
+      @media screen and (max-width: 500px) {
+        font-size: 16px;
+      }
+    }
+  }
+
+  &__account {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px;
+    border-radius: 32px;
+    border: 1px solid vars.$white-gray-2;
+    background: vars.$bg-white;
+
+    &-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      @media screen and (max-width: 500px) {
+        font-size: 4px;
+      }
+
+      >img {
+        width: 37px;
+        height: 37px;
+
+        @media screen and (max-width: 500px) {
+          width: 32px;
+          height: 32px;
+        }
+      }
+      >p {
+        @media screen and (max-width: 900px) {
+          font-size: 15xp;
+        }
+        @media screen and (max-width: 500px) {
+          font-size: 14px;
+        }
+      }
+    }
+    &-benefits {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 284px;
+      height: 38px;
+      width: 100%;
+      text-align: center;
+      color: vars.$gray-dark;
+      //padding: 8px 24px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #EBECFF 0%, #DFF0FF 100%);
+
+      @media screen and (max-width: 900px) {
+        font-size: 15px;
+        width: 235px;
+        height: 36px;
+      }
+      @media screen and (max-width: 500px) {
+        font-size: 12px;
+        width: 170px;
+        height: 32px;
+      }
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 100%;
+  }
+  &__earnings {
+    font-size: 24px;
+    font-weight: 400;
+    @media screen and (max-width: 900px) {
+      font-size: 20px;
+    }
+    @media screen and (max-width: 500px) {
+      font-size: 16px;
+    }
+  }
+
+  &__conformation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+
+    @media screen and (max-width: 900px) {
+      gap: 16px;
+      margin-bottom: 16px;
+      width: 100%;
+    }
+
+    &-title {
+      font-size: 18px;
+      font-weight: 400;
+
+      @media screen and (max-width: 500px) {
+        font-size: 15px;
+      }
+    }
+    &-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 16px;
+    }
+  }
+
+  &__negotiation {
+    text-decoration: underline !important;
+    text-decoration-thickness: from-font;
+    text-underline-offset: 2px;
+
+    -webkit-text-decoration-skip: none;
+    text-decoration-skip-ink: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &:link,
+    &:visited,
+    &:hover,
+    &:active,
+    &:focus,
+    &:focus-visible {
+      color: vars.$gray-dark;
+      text-decoration: underline !important;
+    }
+  }
+
+  &__terms {
+    text-align: start;
+    font-size: 15px;
+
+    @media screen and (max-width: 900px) {
+      font-size: 13px;
+    }
+  }
+}

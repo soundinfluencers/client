@@ -1,6 +1,7 @@
 import type { TSocialAccounts } from "@/types/user/influencer.types";
 
-export const normalizePriceLabel = (platform: TSocialAccounts) => {
+export const normalizePriceLabel = (platform?: TSocialAccounts) => {
+  //Price, include your currency
   switch (platform) {
     case "instagram":
       return "Price for 1 Instagram post & story, include your currency";
@@ -17,6 +18,6 @@ export const normalizePriceLabel = (platform: TSocialAccounts) => {
     case "press":
       return "Price for 1 Article, include your currency";
     default:
-      return "Price, include your currency";
+      return "";
   }
 };

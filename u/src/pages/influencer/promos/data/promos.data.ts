@@ -456,8 +456,7 @@ export const getPromoFields = (
   status: TPromoStatus,
 ): TDetailsField[] => {
   if (status === "completed") return COMPLETED_FIELDS[promo.accountSocialMedia];
-  if (status === "distributing")
-    return DISTRIBUTING_FIELDS[promo.accountSocialMedia];
+  if (status === "distributing") return DISTRIBUTING_FIELDS[promo.accountSocialMedia];
 
   return NEW_PROMOS_FIELDS[promo.accountSocialMedia];
 };

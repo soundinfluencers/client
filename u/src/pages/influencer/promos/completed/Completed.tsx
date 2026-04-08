@@ -46,7 +46,7 @@ export const Completed: React.FC = () => {
     return <Loader/>;
   }
   if (error) {
-    return <Error />;
+    return <Error/>;
   }
   if (promos.length === 0) {
     return (
@@ -57,6 +57,8 @@ export const Completed: React.FC = () => {
     );
   }
 
+  // TODO: add changing check staus fro data loading error empty
+
   return (
     <Container className="completed-page">
       <Breadcrumbs/>
@@ -66,13 +68,11 @@ export const Completed: React.FC = () => {
           status="completed"
         />
 
-        {!campaignId && !addedAccountsId && (
-          <ButtonMain
-            label={isFetchingNextPage ? 'Loading...' : 'View more'}
-            onClick={() => fetchNextPage()}
-            isDisabled={!hasNextPage}
-          />
-        )}
+        <ButtonMain
+          label={isFetchingNextPage ? 'Loading...' : 'View more'}
+          onClick={() => fetchNextPage()}
+          isDisabled={!hasNextPage}
+        />
       </div>
     </Container>
   );

@@ -1,0 +1,68 @@
+@use "@/styles/variables/variables" as vars;
+
+.text-area {
+  display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+  &__label {
+    font-size: 16px;
+    color: vars.$gray-dark;
+    transition: color 0.2s ease-in-out;
+
+    &--error {
+      color: vars.$error;
+    }
+  }
+
+  &__field {
+    height: 250px;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid vars.$white-gray-2;
+    background: vars.$bg-white;
+    transition: border-color ease-in-out .15s;
+
+    &::placeholder {
+      font-size: 16px;
+      color: vars.$gray;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: vars.$blue;
+    }
+
+    &--error {
+      border-color: vars.$error;
+
+      &:focus {
+        outline: none;
+        border-color: vars.$error;
+      }
+    }
+  }
+
+  &__error {
+    min-height: 0;
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity .15s ease, height .15s ease;
+    margin-top: -4px;
+    color: vars.$error;
+    font-size: 12px;
+
+    &--show {
+      height: auto;
+      min-height: 16px;
+      opacity: 1;
+    }
+
+    @media screen and (max-width: 900px) {
+      margin-top: -2px;
+    }
+  }
+
+
+}

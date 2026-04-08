@@ -19,7 +19,7 @@ import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 export const PromosList = () => {
   const { viewMode, activePromosFilter, limit } = useDashboardLayoutStore();
 
-  console.log(activePromosFilter);
+  // console.log(activePromosFilter);
 
   const { data, isError, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isPending } =
     useInfiniteQuery({
@@ -41,12 +41,13 @@ export const PromosList = () => {
       placeholderData: (prev) => prev,
     });
 
-  console.log("Promos query status:", { isError, isFetching, isFetchingNextPage, hasNextPage, isPending });
+  // console.log("Promos query status:", { isError, isFetching, isFetchingNextPage, hasNextPage, isPending });
 
-  console.log("Promos data:", data);
+  // console.log("Promos data:", data);
 
   const activePromos = data?.pages.flat() ?? [];
   // console.log('Filtered promos', filteredPromos);
+  console.log("Promos data:", activePromos);
 
   const isInitialLoading = isPending && !data;
   const isLoadingMore = isFetchingNextPage;

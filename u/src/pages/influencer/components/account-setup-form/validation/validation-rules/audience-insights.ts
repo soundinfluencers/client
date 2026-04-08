@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const TOP_COUNTRIES = 5;
+// const TOP_COUNTRIES = 5;
 
 const countryItemSchema = z.object({
   country: z.string().nullable(),
@@ -12,7 +12,7 @@ const hasPercent = (p: unknown) => typeof p === "number" && Number.isFinite(p);
 
 export const audienceInsightsSchema = z
 .array(countryItemSchema)
-.length(TOP_COUNTRIES, `Audience insights must contain exactly ${TOP_COUNTRIES} slots`)
+// .length(TOP_COUNTRIES, `Audience insights must contain exactly ${TOP_COUNTRIES} slots`)
 .superRefine((items, ctx) => {
   // console.log("Validating audience insights:", items);
   const arr = Array.isArray(items) ? items : [];

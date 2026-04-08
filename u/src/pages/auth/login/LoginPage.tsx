@@ -57,7 +57,7 @@ export const LoginPage: FC = () => {
         try {
           const parsed = JSON.parse(rawRedirect);
           const redirectPath =
-              typeof parsed?.path === "string" ? parsed.path : null;
+            typeof parsed?.path === "string" ? parsed.path : null;
 
           sessionStorage.removeItem("postAuthRedirect");
 
@@ -79,53 +79,54 @@ export const LoginPage: FC = () => {
       setIsLoading(false);
     }
   };
+
   return (
-      <div className="login-page">
-        <h1 className="login-page__title">
-          Log in to your {role === "client" ? "Client" : "Influencer"} Dashboard
-        </h1>
+    <div className="login-page">
+      <h1 className="login-page__title">
+        Log in to your {role === "client" ? "Client" : "Influencer"} Dashboard
+      </h1>
 
-        <Form<LoginFormData>
-            className={"login-page__form"}
-            submitButton={
-              <ButtonMain
-                  type={"submit"}
-                  className={"login-page__submit-btn"}
-                  label={isLoading ? "Logging in..." : "Log in"}
-              />
-            }
-            onSubmit={handleLogin}
-            schema={loginSchema}
-            validateMode={"onSubmit"}>
-          <BaseInput
-              name={"email"}
-              label={"Email"}
-              placeholder={"Enter email"}
-              type={"email"}
+      <Form<LoginFormData>
+        className={"login-page__form"}
+        submitButton={<ButtonMain type={'submit'} className={"login-page__submit-btn"} label={isLoading ? "Logging in..." : "Log in"} />}
+        onSubmit={handleLogin}
+        schema={loginSchema}
+        validateMode={'onSubmit'}
+      >
+        <BaseInput
+          name={"email"}
+          label={"Email"}
+          placeholder={"Enter email"}
+          type={"email"}
+        />
+        <div className="login-page__password-block">
+          <BaseMaskedPasswordInput
+            name={"password"}
+            label={"Password"}
+            placeholder={"Enter password"}
           />
-          <div className="login-page__password-block">
-            <BaseMaskedPasswordInput
-                name={"password"}
-                label={"Password"}
-                placeholder={"Enter password"}
-            />
-            <Link className="login-page__forgot" to={"/forgot-password"}>
-              Forgot password?
-            </Link>
-          </div>
-        </Form>
-
-        <div className="login-page__footer">
-          <p className="login-page__footer--text">
-            Don’t have an account?{" "}
-            <Link
-                className="login-page__footer--link"
-                to={role === "client" ? "/client-signup" : "/influencer-signup"}>
-              Sign up here
-            </Link>
-          </p>
+          <Link
+            className="login-page__forgot"
+            to={"/forgot-password"}
+          >
+            Forgot password?
+          </Link>
         </div>
+      </Form>
+
+
+      <div className="login-page__footer">
+        <p className="login-page__footer--text">
+          Don’t have an account?{" "}
+          <Link
+            className="login-page__footer--link"
+            to={role === "client" ? "/client-signup" : "/influencer-signup"}
+          >
+            Sign up here
+          </Link>
+        </p>
       </div>
+    </div>
   );
 };
 

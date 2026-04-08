@@ -9,8 +9,8 @@ import "flag-icons/css/flag-icons.min.css";
 
 import {
   type PhoneCountry,
-  UN_COUNTRY,
-  ALL_PHONE_COUNTRIES, getTailDigitsByDialCode, sanitizePhone, pickCountryByPhone,
+  ALL_PHONE_COUNTRIES, getTailDigitsByDialCode, sanitizePhone, pickCountryByPhone, getDialCodeFromValue, DEFAULT_CODE,
+  isValidFullPhone,
 } from "@components/ui/phone-input-v2/data/phoneCountries.ts";
 import { hasFlag } from "@components/ui/phone-input-v2/utils/hasFlag.ts";
 
@@ -32,7 +32,7 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
   const dropdownRef = useRef<HTMLDivElement>(null);
   const listParentRef = useRef<HTMLDivElement>(null);
 
-  const [selectedCountry, setSelectedCountry] = useState<PhoneCountry>(UN_COUNTRY);
+  const [selectedCountry, setSelectedCountry] = useState<PhoneCountry>(DEFAULT_CODE);
   const [search, setSearch] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -51,7 +51,7 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
   const rowVirtualizer = useVirtualizer({
     count: isMenuOpen ? filtered.length : 0,
     getScrollElement: () => listParentRef.current,
-    estimateSize: () => 48,
+    estimateSize: () => 50,
     overscan: 8,
   });
 
@@ -70,10 +70,24 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
 
     const next = pickCountryByPhone(value, selectedCountry);
     setSelectedCountry((prev) => (prev.iso2 === next.iso2 ? prev : next));
-  }, [value, isMenuOpen, selectedCountry]);
+  }, [value, isMenuOpen]);
 
   const handleSelectCountry = useCallback((c: PhoneCountry) => {
-    const tail = getTailDigitsByDialCode(value, selectedCountry.dialCode);
+
+    if (c.iso2 === selectedCountry.iso2) {
+      setIsMenuOpen(false);
+      setSearch("");
+      searchInputRef.current?.blur();
+      phoneInputRef.current?.focus();
+      return;
+    }
+
+    const cleaned = sanitizePhone(value);
+
+    const tail = isValidFullPhone(cleaned)
+      ? ""
+      : getTailDigitsByDialCode(cleaned, getDialCodeFromValue(cleaned));
+
     const nextValue = c.dialCode ? `${c.dialCode}${tail}` : "";
 
     setSelectedCountry(c);
@@ -90,7 +104,7 @@ export const PhoneInputV2: React.FC<PhoneInputProps> = ({ name, label, placehold
 
     searchInputRef.current?.blur();
     setTimeout(() => phoneInputRef.current?.focus(), 0);
-  }, [value, selectedCountry.dialCode, setValue, name, clearErrors]);
+  }, [value, setValue, name, clearErrors]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleaned = sanitizePhone(e.target.value);

@@ -10,7 +10,7 @@ import { ButtonMain } from '@/components/ui/buttons-fix/ButtonFix';
 import { Modal } from '@/components/ui/modal-fix/Modal';
 import { useNavigate } from 'react-router-dom';
 import { requestDtoMapper } from './utils/invoice-form.mapper';
-import { AmountInput } from "@/pages/influencer/create-invoice/components/amount-input/AmountInput.tsx";
+// import { AmountInput } from "@/pages/influencer/create-invoice/components/amount-input/AmountInput.tsx";
 import { useInfluencerInvoice } from "@/pages/influencer/shared/hooks/useInfluencerInvoice.ts";
 import { useFormContext } from "react-hook-form";
 import type {
@@ -23,6 +23,7 @@ import type {
 import type {
   InvoicePayload
 } from "@/pages/influencer/create-invoice/components/invoice-form-content/validation/schema.ts";
+import { useUser } from "@/store/get-user";
 
 interface Props {
   tab: TInvoicePaymentMethod;
@@ -72,7 +73,9 @@ export const InvoiceFormContent: React.FC<Props> = ({ tab, setTab }) => {
             <h3 className="invoice-form-content__title">{getInvoicePaymentMethodLabel(tab)}</h3>
             <div style={{ display: "flex", gap: 16, flexDirection: "column" }}>
               <FormFields inputs={PAYMENT_METHOD_INPUTS_DATA[tab].inputs}/>
-              <AmountInput/>
+
+              <BadgeAmount />
+              {/*<AmountInput/>*/}
             </div>
           </div>
         </div>
@@ -99,11 +102,11 @@ export const InvoiceFormContent: React.FC<Props> = ({ tab, setTab }) => {
               <div className="invoice-form-content__modal-header-description-block">
                 <p className="invoice-form-content__modal-header-description">
                   Thank you for your submission. Our usual payment processing time is <strong>1–7 business days</strong>.
-                  <br/>
-                  <br/>
+                </p>
+                <p className="invoice-form-content__modal-header-description">
                   You’ll be notified once the payment is completed or if there’s any issue with your payment details.
-                  <br/>
-                  <br/>
+                </p>
+                <p className="invoice-form-content__modal-header-description">
                   We appreciate your collaboration and look forward to working together on upcoming campaigns.
                 </p>
               </div>
@@ -130,6 +133,26 @@ export const InvoiceFormContent: React.FC<Props> = ({ tab, setTab }) => {
           </div>
         </Modal>
       )}
+    </div>
+  );
+};
+
+export const BadgeAmount = () => {
+  const { user } = useUser();
+
+  return (
+    <div className="amount">
+      <p className={'amount__label'}>Amount</p>
+
+      <div className={'amount__badge'}>
+        <span>Total Balance</span>
+        <span>{`${user?.balance}\u20AC`}</span>
+      </div>
+
+      <p className={'amount__description'}>
+        Please note that required numbers for receiving money through bank transfers can vary depending on your country.
+        If you are uncertain about the specific requirements, we recommend contacting your bank directly for information regarding international payments.
+      </p>
     </div>
   );
 };

@@ -29,7 +29,7 @@ export const SocialAccountsList: React.FC<Props> = ({ getAccounts }) => {
                 className="social-accounts-list__item-create"
                 onClick={() => onCreateAccount(id)}
               >
-                <img  src={plus} alt="Plus" />
+                <img src={plus} alt="Plus" />
                 Add
               </button>
             </div>

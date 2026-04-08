@@ -1,6 +1,6 @@
 import type { TSocialAccounts } from "@/types/user/influencer.types.ts";
 
-export const getArticle = (socialMedia: TSocialAccounts) => {
+export const getArticle = (socialMedia: TSocialAccounts | null) => {
   switch (socialMedia) {
     case "instagram":
       return 'each post + story';

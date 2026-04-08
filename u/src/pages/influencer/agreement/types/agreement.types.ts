@@ -5,6 +5,7 @@ export type TAgreementStats = "accept" | "decline" | "wait";
 export type TAgreementType = "profileCreate" | "accountAdd";
 
 export type TAgreementAccount = {
+  // accountId: string;
   username: string;
   price: number;
 };
@@ -18,6 +19,7 @@ export type TAgreementResponse = {
 } & TAgreementAccountsMap;
 
 export interface IAgreement {
+  // accountId: string;
   socialMedia: TSocialAccounts;
   username: string;
   price: number;
