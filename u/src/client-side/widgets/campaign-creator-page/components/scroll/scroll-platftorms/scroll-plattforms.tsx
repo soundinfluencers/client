@@ -9,51 +9,57 @@ import { PLATFORMS } from "@/client-side/data/genres-platforms";
 import { useHorizontalScroll } from "@/client-side/hooks";
 
 interface ScrollPlatformsProps {
-  selectedPlatform: SocialMediaType;
-  onPlatformSelect: (platform: SocialMediaType) => void;
+    selectedPlatform: SocialMediaType;
+    onPlatformSelect: (platform: SocialMediaType) => void;
 }
 
 export const ScrollPlatforms: React.FC<ScrollPlatformsProps> = React.memo(
-  ({ selectedPlatform, onPlatformSelect }) => {
-    const { ref, showRightArrow, showLeftArrow, scrollRight, scrollLeft } =
-      useHorizontalScroll();
+    ({ onPlatformSelect }) => {
+        const [activeKey, setActiveKey] = React.useState<string>("instagram");
 
-    return (
-      <div className="platforms-scroll">
-        <div className="platforms-scroll__header">
-          <h3>Choose your platforms</h3>
+        const { ref, showRightArrow, showLeftArrow, scrollRight, scrollLeft } =
+            useHorizontalScroll();
 
-          <div className="arrows">
-            {showLeftArrow && (
-              <img
-                onClick={() => scrollLeft()}
-                src={chevron}
-                alt="Left"
-                style={{ transform: "rotate(180deg)" }}
-              />
-            )}
+        return (
+            <div className="platforms-scroll">
+                <div className="platforms-scroll__header">
+                    <h3>Choose your platforms</h3>
 
-            {showRightArrow && (
-              <img onClick={() => scrollRight()} src={chevron} alt="Right" />
-            )}
-          </div>
-        </div>
+                    <div className="arrows">
+                        {showLeftArrow && (
+                            <img
+                                onClick={() => scrollLeft()}
+                                src={chevron}
+                                alt="Left"
+                                style={{ transform: "rotate(180deg)" }}
+                            />
+                        )}
 
-        <ul ref={ref} className="platforms-scroll__list">
-          {PLATFORMS.map((item) => (
-            <li
-              key={item.id}
-              className={item.id === selectedPlatform ? "active" : ""}
-              onClick={() => onPlatformSelect(item.id)}>
-              <img
-                src={getSocialMediaIconPlattform(item.icon)}
-                alt={item.label}
-              />
-              {item.label}
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  },
+                        {showRightArrow && (
+                            <img onClick={() => scrollRight()} src={chevron} alt="Right" />
+                        )}
+                    </div>
+                </div>
+
+                <ul ref={ref} className="platforms-scroll__list">
+                    {PLATFORMS.map((item) => (
+                        <li
+                            key={item.key}
+                            className={item.key === activeKey ? "active" : ""}
+                            onClick={() => {
+                                setActiveKey(item.key);
+                                onPlatformSelect(item.id as SocialMediaType);
+                            }}
+                        >
+                            <img
+                                src={getSocialMediaIconPlattform(item.icon)}
+                                alt={item.label}
+                            />
+                            {item.label}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        );
+    },
 );

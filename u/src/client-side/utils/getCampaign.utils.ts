@@ -65,9 +65,9 @@ export function toCampaignPageModelFromDraft(
     socialMedia: api.socialMedia,
 
     status: "draft",
-
-    addedAccountsDraft: api.addedAccounts,
-    campaignContentDraft: api.campaignContent,
+    step: api.step,
+    addedAccounts: api.addedAccounts,
+    campaignContent: api.campaignContent,
 
     price: 0,
 

@@ -1,59 +1,96 @@
 import { z } from "zod";
 
-const httpRegex = /^https?:\/\/\S+$/i;
+export type CampaignPostContentFormValues = Record<string, string>;
 
-const isHttpField = (key: string) => {
-  const k = key.toLowerCase();
+const normalizeString = z.preprocess((value) => {
+  if (value === undefined || value === null) return "";
+  return String(value);
+}, z.string());
+
+
+const isValidLink = (value: string) => {
+  const v = value.trim();
+
+  if (!v) return false;
+  if (/\s/.test(v)) return false;
+
   return (
-    k.includes("content link") ||
-    k.includes("story link") ||
-    k.includes("track link") ||
-    k.includes("link to music") ||
-    k.includes("artwork") ||
-    k.includes("links")
+      v.startsWith("http://") ||
+      v.startsWith("https://") ||
+      v.startsWith("www.") ||
+      v.includes(".")
   );
 };
 
-const isStoryTagField = (key: string) =>
-  key.toLowerCase().includes("story tag");
-const isPostDescriptionField = (key: string) =>
-  key.toLowerCase().includes("postdescription");
+export const campaignPostContentSchema: z.ZodType<CampaignPostContentFormValues> =
+    z.record(z.string(), normalizeString).superRefine((data, ctx) => {
+      for (const [key, rawValue] of Object.entries(data)) {
+        const value = String(rawValue ?? "").trim();
+        const k = key.toLowerCase();
 
-const getPostDescriptionIndex = (key: string) => {
-  const m = key.match(/postdescription-(\d+)/i);
-  return m ? Number(m[1]) : null;
-};
-export const campaignPostContentSchema: z.ZodType<Record<string, string>> = z
-  .record(z.string(), z.string())
-  .superRefine((data, ctx) => {
-    for (const [key, value] of Object.entries(data)) {
-      const v = String(value ?? "").trim();
-      const pdIndex = getPostDescriptionIndex(key);
-      if (pdIndex && pdIndex > 1 && !v) continue;
-      if (!v) {
-        ctx.addIssue({
-          code: "custom",
-          path: [key],
-          message: "This field is required",
-        });
-        continue;
-      }
+        if (k === "campaignname" && !value) {
+          ctx.addIssue({
+            code: "custom",
+            path: [key],
+            message: "Campaign name is required",
+          });
+          continue;
+        }
 
-      if (isStoryTagField(key) && !v.startsWith("@")) {
-        ctx.addIssue({
-          code: "custom",
-          path: [key],
-          message: "Story tag must start with '@'",
-        });
-        continue;
-      }
 
-      if (isHttpField(key) && !httpRegex.test(v)) {
-        ctx.addIssue({
-          code: "custom",
-          path: [key],
-          message: "Must start with http:// or https://",
-        });
+        if (k.includes("postdescription") && !value) {
+          ctx.addIssue({
+            code: "custom",
+            path: [key],
+            message: "Description is required",
+          });
+          continue;
+        }
+
+
+        if (
+            (k.includes("content link") ||
+                k.includes("track link") ||
+                k.includes("link to music, events, news")) &&
+            !value
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            path: [key],
+            message: "This link is required",
+          });
+          continue;
+        }
+
+
+        if (k.includes("track title") && !value) {
+          ctx.addIssue({
+            code: "custom",
+            path: [key],
+            message: "Track title is required",
+          });
+          continue;
+        }
+
+
+        if (k.includes("link to artwork & press shots") && !value) {
+          ctx.addIssue({
+            code: "custom",
+            path: [key],
+            message: "Artwork link is required",
+          });
+          continue;
+        }
+
+        // валидность ссылок
+        if (value && (k.includes("link") || k.includes("url") || k.includes("drive"))) {
+          if (!isValidLink(value)) {
+            ctx.addIssue({
+              code: "custom",
+              path: [key],
+              message: "Please enter a valid link",
+            });
+          }
+        }
       }
-    }
-  });
+    });

@@ -1,11 +1,14 @@
 import { useState, type FC } from "react";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { useUser } from "@/store/get-user/index.ts";
-import { loginApi } from "@/api/auth/auth.api.ts";
+import { getMe, loginApi } from "@/api/auth/auth.api.ts";
 import { handleApiError } from "@/api/error.api.ts";
 import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix.tsx";
-import { type LoginFormData, loginSchema } from "@/pages/auth/login/validation/login.schema.ts";
+import {
+  type LoginFormData,
+  loginSchema,
+} from "@/pages/auth/login/validation/login.schema.ts";
 import { BaseInput, Form } from "@/components";
 import { BaseMaskedPasswordInput } from "@components/ui/base-masked-password-input/BaseMaskedPasswordInput.tsx";
 
@@ -15,72 +18,114 @@ export const LoginPage: FC = () => {
   const { setAccessToken } = useAuth();
   const { role, setUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
-
+  const navigate = useNavigate()
+  // const handleLogin = async (formData: LoginFormData) => {
+  //   const { email, password } = formData;
+  //
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await loginApi({ email, password, role });
+  //
+  //     if (response) {
+  //       setAccessToken(response.accessToken);
+  //       const userData = await getMe();
+  //       setUser(userData);
+  //     }
+  //   } catch (error) {
+  //     handleApiError(error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
   const handleLogin = async (formData: LoginFormData) => {
     const { email, password } = formData;
 
     setIsLoading(true);
     try {
       const response = await loginApi({ email, password, role });
+      if (!response) return;
 
-      if (response) {
-        setUser(response);
-        setAccessToken(response.accessToken);
+      setAccessToken(response.accessToken);
+
+      const userData = await getMe();
+      console.log(userData);
+      setUser(userData);
+
+      const rawRedirect = sessionStorage.getItem("postAuthRedirect");
+
+      if (rawRedirect) {
+        try {
+          const parsed = JSON.parse(rawRedirect);
+          const redirectPath =
+              typeof parsed?.path === "string" ? parsed.path : null;
+
+          sessionStorage.removeItem("postAuthRedirect");
+
+          if (redirectPath && redirectPath.startsWith("/")) {
+            navigate(redirectPath, { replace: true });
+            return;
+          }
+        } catch {
+          sessionStorage.removeItem("postAuthRedirect");
+        }
       }
+
+      navigate(role === "client" ? "/client" : "/influencer", {
+        replace: true,
+      });
     } catch (error) {
       handleApiError(error);
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
-    <div className="login-page">
-      <h1 className="login-page__title">
-        Log in to your {role === "client" ? "Client" : "Influencer"} Dashboard
-      </h1>
+      <div className="login-page">
+        <h1 className="login-page__title">
+          Log in to your {role === "client" ? "Client" : "Influencer"} Dashboard
+        </h1>
 
-      <Form<LoginFormData>
-        className={"login-page__form"}
-        submitButton={<ButtonMain type={'submit'} className={"login-page__submit-btn"} label={isLoading ? "Logging in..." : "Log in"} />}
-        onSubmit={handleLogin}
-        schema={loginSchema}
-        validateMode={'onSubmit'}
-      >
-        <BaseInput
-          name={"email"}
-          label={"Email"}
-          placeholder={"Enter email"}
-          type={"email"}
-        />
-        <div className="login-page__password-block">
-          <BaseMaskedPasswordInput
-            name={"password"}
-            label={"Password"}
-            placeholder={"Enter password"}
+        <Form<LoginFormData>
+            className={"login-page__form"}
+            submitButton={
+              <ButtonMain
+                  type={"submit"}
+                  className={"login-page__submit-btn"}
+                  label={isLoading ? "Logging in..." : "Log in"}
+              />
+            }
+            onSubmit={handleLogin}
+            schema={loginSchema}
+            validateMode={"onSubmit"}>
+          <BaseInput
+              name={"email"}
+              label={"Email"}
+              placeholder={"Enter email"}
+              type={"email"}
           />
-          <Link
-            className="login-page__forgot"
-            to={"/forgot-password"}
-          >
-            Forgot password?
-          </Link>
+          <div className="login-page__password-block">
+            <BaseMaskedPasswordInput
+                name={"password"}
+                label={"Password"}
+                placeholder={"Enter password"}
+            />
+            <Link className="login-page__forgot" to={"/forgot-password"}>
+              Forgot password?
+            </Link>
+          </div>
+        </Form>
+
+        <div className="login-page__footer">
+          <p className="login-page__footer--text">
+            Don’t have an account?{" "}
+            <Link
+                className="login-page__footer--link"
+                to={role === "client" ? "/client-signup" : "/influencer-signup"}>
+              Sign up here
+            </Link>
+          </p>
         </div>
-      </Form>
-
-
-      <div className="login-page__footer">
-        <p className="login-page__footer--text">
-          Don’t have an account?{" "}
-          <Link
-            className="login-page__footer--link"
-            to={role === "client" ? "/client-signup" : "/influencer-signup"}
-          >
-            Sign up here
-          </Link>
-        </p>
       </div>
-    </div>
   );
 };
 

@@ -16,5 +16,12 @@
     &.active {
       border: 1px solid rgba(185, 208, 255, 1);
     }
+
+  }
+}
+.budget-input{
+  &.error{
+    display: block;
+    padding: 0;
   }
 }

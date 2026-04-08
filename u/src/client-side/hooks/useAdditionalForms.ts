@@ -32,7 +32,10 @@ const stableSortForms = (forms: AdditionalForm[]) => {
   });
 };
 
-export function useAdditionalForms(draft?: Record<string, string>) {
+export function useAdditionalForms(
+  draft?: Record<string, string>,
+  setDraft?: (next: Record<string, string>) => void,
+) {
   const [additionalSelection, setAdditionalSelection] =
     React.useState<GroupKey | null>(null);
 
@@ -46,8 +49,11 @@ export function useAdditionalForms(draft?: Record<string, string>) {
   React.useEffect(() => {
     console.log("=== CURRENT ADDITIONAL FORMS ===", additionalForms);
   }, [additionalForms]);
-
+  const didInitRef = React.useRef(false);
   React.useEffect(() => {
+    if (didInitRef.current) return;
+    didInitRef.current = true;
+
     const fromDraft = parseAdditionalFormsFromDraft(draft);
     setAdditionalForms(stableSortForms(fromDraft));
   }, [draft]);
@@ -88,7 +94,20 @@ export function useAdditionalForms(draft?: Record<string, string>) {
     const n = getAdditionalIndex(f.id);
     return `${f.group}-${f.socialMedia}-additional-${n}`;
   }, []);
+  const removeAdditionalForm = React.useCallback(
+    (id: string, prefix: string) => {
+      setAdditionalForms((prev) => prev.filter((f) => f.id !== id));
 
+      if (!draft || !setDraft) return;
+
+      const next = { ...draft };
+      for (const k of Object.keys(next)) {
+        if (k.startsWith(prefix + "-")) delete next[k];
+      }
+      setDraft(next);
+    },
+    [draft, setDraft],
+  );
   const groupAdditionalByGroup = React.useMemo(() => {
     const map: Record<GroupKey, AdditionalForm[]> = {
       main: [],
@@ -103,7 +122,7 @@ export function useAdditionalForms(draft?: Record<string, string>) {
     additionalSelection,
     toggleAdditionalSelection,
     addAdditionalForm,
-
+    removeAdditionalForm,
     additionalForms,
     groupAdditionalByGroup,
 

@@ -1,17 +1,17 @@
 import React from "react";
 import { getSocialMediaIcon } from "@/constants/social-medias";
-import type { SocialMediaType } from "@/types/utils/constants.types";
 import "./_table_row_card.scss";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
-import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 import { Checkbox } from "@/components";
 import { getPriceByCurrency } from "@/client-side/utils";
 
 import { TagsDropdown } from "./tags-dropdown";
 import { useBuildCampaignFilters, useCampaignStore } from "@/client-side/store";
+import type {ConnectedAccount} from "@/client-side/types/offers.ts";
+import type {SocialMedia} from "@/client-side/types/common.ts";
 
 interface Props {
-  data: IPromoCard;
+  data: ConnectedAccount;
   setIsSmall: React.Dispatch<React.SetStateAction<boolean>>;
   isSmall: boolean;
   isInclude: boolean;
@@ -74,10 +74,14 @@ export const TableRowCard: React.FC<Props> = ({
 
       <div className="followers">
         <img
-          src={getSocialMediaIcon(data.socialMedia as SocialMediaType)}
+          src={getSocialMediaIcon(data.socialMedia as SocialMedia) || ''}
           alt=""
         />
-        <span>{formatFollowers(data.followers)}</span>
+        {data.socialMedia !== "press" ? (
+          <span>{formatFollowers(data.followers)}</span>
+        ) : (
+          <span>-</span>
+        )}
       </div>
 
       <div className="genres">

@@ -7,12 +7,11 @@ import type {
   CampaignAddedAccount,
   CampaignContentItem,
 } from "@/types/store/index.types";
-import plus from "@/assets/icons/plus-square.svg";
 
 import { TableCard } from "../card-table/table-card-draft";
-import { useFetchCampaign } from "@/store/client/campaign-page";
+
 import {
-  columnsStrategy,
+  getTableColumnWidths,
   getTitle,
   getWidthColumn,
 } from "@/client-side/data/table-campaign.data";
@@ -75,17 +74,34 @@ export function TableDraft({
   const closeDropdown = React.useCallback(() => setActive(null), []);
   const uniqueNetworks = React.useMemo(() => {
     const seen = new Set<string>();
-    return sortedNetworks.filter((n) => {
-      const key = String((n as any).addedAccountsId ?? (n as any)._id);
+    return sortedNetworks.filter((n, index) => {
+      const key = String(
+          (n as any).addedAccountsId ??
+          (n as any).socialAccountId ??
+          (n as any).accountId ??
+          (n as any)._id ??
+          `${(n as any).influencerId}-${index}`
+      );
+
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
-  }, [sortedNetworks]);
+  }, [sortedNetworks])
 
   const columns = React.useMemo(
     () => getColumns(changeView ?? false, group, false),
     [group, canEdit, changeView],
+  );
+  console.log(uniqueNetworks);
+  const widths = React.useMemo(
+      () =>
+          getTableColumnWidths({
+            group,
+            changeView: false,
+            canEdit: false,
+          }),
+      [group, changeView, canEdit],
   );
   return (
     <div className="tableBase-wrap">
@@ -93,16 +109,10 @@ export function TableDraft({
       <table className="tableBase">
         <colgroup>
           {columns.map((key) => (
-            <col
-              key={key}
-              style={
-                getWidthColumn(changeView ?? false, false)[key as ColumnKey]
-                  ? {
-                      width: `${getWidthColumn(changeView ?? false, false)[key as ColumnKey]}px`,
-                    }
-                  : undefined
-              }
-            />
+              <col
+                  key={key}
+                  style={widths[key] ? { width: `${widths[key]}px` } : undefined}
+              />
           ))}
         </colgroup>
 
@@ -145,6 +155,7 @@ export function TableDraft({
             const rowKey = makeRowKey(network, index);
             return (
               <TableCard
+                columns={columns}
                 campaignId={campaignId}
                 key={rowKey}
                 rowKey={rowKey}
@@ -154,7 +165,7 @@ export function TableDraft({
                 activeDropdown={active}
                 onToggleDropdown={toggleDropdown}
                 onCloseDropdown={closeDropdown}
-                canEdit={canEdit}
+                canEdit={true}
                 changeView={changeView}
               />
             );
@@ -173,14 +184,21 @@ export function TableDraft({
               </tr>
             )} */}
           <tr>
-            {columns.map((_, index) => (
-              <td
-                key={index}
-                className={`td--footer ${index === 0 || index === 1 ? "is-left" : ""}`}>
-                {index === 0 && <p>Price: {totalPrice}€</p>}
-                {index === 1 && <p>{totalFollowers}</p>}
-              </td>
-            ))}
+            {columns.map((col) => {
+              const isPrice = col === "network";
+              const isFollowers = col === "followers";
+
+              return (
+                <td
+                  key={col}
+                  className={`tableBase__td td--footer ${isPrice ? "td--footer-strategy" : ""} ${isFollowers ? "td--footer-strategy" : ""}`}>
+                  {isPrice && <p className="td__price">Price: {totalPrice}€</p>}
+                  {isFollowers && (
+                    <p className="td__followers">{totalFollowers}</p>
+                  )}
+                </td>
+              );
+            })}
           </tr>
         </tfoot>
       </table>

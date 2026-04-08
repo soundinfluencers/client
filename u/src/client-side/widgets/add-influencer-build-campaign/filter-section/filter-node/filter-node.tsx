@@ -10,8 +10,17 @@ interface Props {
 export const FilterNode: React.FC<Props> = ({ item, selected, onToggle }) => {
   const isChecked = (filter: FilterItem) =>
     selected.some(
-      (f) => f.id === filter.id || f.children?.some((c) => c.id === item.id)
+      (f) => f.id === filter.id || f.children?.some((c) => c.id === filter.id),
     );
+
+  const selectedSocialCount = selected.filter(
+    (f) => f.group === "socialMedia",
+  ).length;
+
+  const checked = isChecked(item);
+
+  const isLastSocial =
+    item.group === "socialMedia" && checked && selectedSocialCount <= 1;
 
   return (
     <div className="choose">
@@ -20,7 +29,8 @@ export const FilterNode: React.FC<Props> = ({ item, selected, onToggle }) => {
           <input
             id={item.id}
             type="checkbox"
-            checked={isChecked(item)}
+            checked={checked}
+            disabled={isLastSocial}
             onChange={(e) => onToggle(item, e.target.checked)}
           />
           <label htmlFor={item.id}>{item.filterName}</label>

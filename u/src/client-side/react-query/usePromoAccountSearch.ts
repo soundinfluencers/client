@@ -1,15 +1,16 @@
 import { searchSocialAccounts } from "@/api/client/search-accounts/post-search-promos";
-import type { SocialMediaType } from "@/types/utils/constants.types";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type {SocialMedia} from "@/client-side/types/common.ts";
 
 export const useSearchSocialAccountsQuery = ({
-  query,
-  socialMedias,
-  page,
-  limit,
-}: {
+                                               query,
+                                               socialMedias,
+                                               page,
+                                               limit,
+                                             }: {
   query: string;
-  socialMedias: SocialMediaType[];
+  socialMedias: SocialMedia[];
   page: number;
   limit: number;
 }) => {
@@ -24,7 +25,7 @@ export const useSearchSocialAccountsQuery = ({
   return useQuery({
     queryKey: ["socialAccountSearch", key],
     queryFn: () =>
-      searchSocialAccounts({ query: q, socialMedias, page, limit }),
+        searchSocialAccounts({ query: q, socialMedias, page, limit }),
     enabled: q.length >= 2 && socialMedias.length > 0,
     placeholderData: keepPreviousData,
     staleTime: 15_000,

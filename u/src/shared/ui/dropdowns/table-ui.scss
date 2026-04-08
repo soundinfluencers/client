@@ -34,7 +34,7 @@
     p {
       font-weight: 400;
       font-style: Regular;
-      font-size: 14px;
+      font-size: 12px;
       leading-trim: NONE;
       line-height: 100%;
       letter-spacing: 0%;
@@ -64,9 +64,11 @@
     right: 0;
     margin-top: -8px;
     background: rgba(255, 255, 255, 1);
-    padding: 8px 8px;
+    padding: 8px;
     z-index: 5;
-
+    &.pad-select{
+      padding: 8px 4px;
+    }
     border: 1px solid rgba(185, 208, 255, 1);
     border-right: 1px solid rgba(185, 208, 255, 1);
     border-bottom: 1px solid rgba(185, 208, 255, 1);

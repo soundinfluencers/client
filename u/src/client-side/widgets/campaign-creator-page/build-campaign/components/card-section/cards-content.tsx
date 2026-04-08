@@ -1,21 +1,20 @@
 import React from "react";
-import {
-  useCreateCampaign,
-  useCampaignStore,
-} from "@/store/client/create-campaign";
+
 import "./_cards_content.scss";
 
-import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 import { TableRowCard } from "./components/table-row-card";
 import { Card } from "./components/card-grid";
 import { TableCardSkeleton } from "@/components/ui/skeletons/table-card-skeleton";
 import { CardSkeleton } from "@/components/ui/skeletons/card-skeleton";
+import { useCampaignStore } from "@/client-side/store";
+import type {ConnectedAccount} from "@/client-side/types/offers.ts";
+import type {CampaignListViewMode} from "@/client-side/types/common.ts";
 
 interface Props {
-  view: number;
+  view: CampaignListViewMode;
   setIsSmall: React.Dispatch<React.SetStateAction<boolean>>;
   isSmall: boolean;
-  promosCards: IPromoCard[];
+  promosCards: ConnectedAccount[];
   isInitialLoading: boolean;
   isFetchingMore: boolean;
   isRefetching: boolean;
@@ -31,12 +30,22 @@ export const CardsContainer: React.FC<Props> = ({
   isRefetching,
 }) => {
   const dimStyle = isRefetching ? { opacity: 0.6 } : undefined;
+  const offer = useCampaignStore((s) => s.offer);
+  const includedKeys = React.useMemo(() => {
+    return new Set(
+      (offer?.connectedAccounts ?? []).map(
+        (a) => `${a.socialMedia}:${a.accountId}`,
+      ),
+    );
+  }, [offer?.connectedAccounts]);
 
+  const isIncluded = (card: ConnectedAccount) =>
+    includedKeys.has(`${card.socialMedia}:${card.accountId}`);
   return (
     <div className="card-container-block">
       <div className="cards-main" style={dimStyle}>
-        <div className={`cards-container ${view === 0 ? "viewed" : ""}`}>
-          {view === 0 ? (
+        <div className={`cards-container ${view === 'table' ? "viewed" : ""}`}>
+          {view === 'table' ? (
             <div className="promos-grid">
               <div
                 className={`promos-grid__header ${isSmall ? "adaptive" : ""}`}>
@@ -55,7 +64,7 @@ export const CardsContainer: React.FC<Props> = ({
                     <TableRowCard
                       key={card.accountId}
                       data={card}
-                      isInclude={false}
+                      isInclude={isIncluded(card)}
                       isSmall={isSmall}
                       setIsSmall={setIsSmall}
                     />
@@ -65,7 +74,11 @@ export const CardsContainer: React.FC<Props> = ({
             Array.from({ length: 24 }).map((_, i) => <CardSkeleton key={i} />)
           ) : (
             promosCards.map((card) => (
-              <Card key={card.accountId} data={card} isInclude={false} />
+              <Card
+                key={card.accountId}
+                data={card}
+                isInclude={isIncluded(card)}
+              />
             ))
           )}
         </div>
@@ -77,7 +90,7 @@ export const CardsContainer: React.FC<Props> = ({
 
       {isFetchingMore && !isInitialLoading && (
         <div style={{ marginTop: "8px" }} className="cards-container">
-          {view === 0
+          {view === 'table'
             ? Array.from({ length: 6 }).map((_, i) => (
                 <TableCardSkeleton key={`more-${i}`} />
               ))

@@ -93,6 +93,7 @@ export const CampaignTablePageShare: React.FC<Props> = ({
                   totalPrice={campaign.price}
                   items={main}
                   networks={mainPromos}
+                  title="Video Distribution"
                   group={"main"}
                 />
               )}
@@ -102,6 +103,7 @@ export const CampaignTablePageShare: React.FC<Props> = ({
                   totalPrice={campaign.price}
                   items={music}
                   networks={musicPromos}
+                  title="Music Placements"
                   group={"music"}
                 />
               )}
@@ -112,6 +114,7 @@ export const CampaignTablePageShare: React.FC<Props> = ({
                   items={press}
                   networks={otherPromos}
                   group={"press"}
+                  title="Press Coverage"
                 />
               )}
             </>

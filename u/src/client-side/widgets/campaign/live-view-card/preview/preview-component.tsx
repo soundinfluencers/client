@@ -1,5 +1,5 @@
 import React from "react";
-import previewFallback from "@/assets/icons/video (1).png";
+import previewFallback from "@/assets/icons/video (2).png";
 import { getFilePreview } from "@/api/client/preview/preview.api";
 import { LoaderPreview } from "@/components/ui/loader-preview/loader";
 import play from "@/assets/icons/play.svg";

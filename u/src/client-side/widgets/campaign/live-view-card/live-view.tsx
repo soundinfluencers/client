@@ -37,9 +37,11 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
 }) => {
   const contentId = item?._id as string | undefined;
   const { merged } = useContentMerged(contentId, item);
-  const showStoryFields =
-    merged.socialMediaGroup !== "music" && merged.socialMediaGroup !== "press";
+  const isMusic = merged.socialMediaGroup === "music";
+  const isPress = merged.socialMediaGroup === "press";
 
+  const showStoryTag = !isMusic && !isPress;
+  const showStoryLink = !isMusic;
   const [isVideoOpen, setIsVideoOpen] = React.useState(false);
 
   const media0 = item?.mediaCache?.items?.[0];
@@ -118,10 +120,11 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
           }}
         />
         <ExtraFieldsCard
-          canEdit={canEdit ?? false}
-          contentId={contentId}
-          mergedItem={merged}
-          showStoryFields={showStoryFields}
+            canEdit={canEdit ?? false}
+            contentId={contentId}
+            mergedItem={merged}
+            showStoryTag={showStoryTag}
+            showStoryLink={showStoryLink}
         />
 
         <div className="live-view-card__fill-data">

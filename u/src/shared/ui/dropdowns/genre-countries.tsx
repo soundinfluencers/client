@@ -3,9 +3,9 @@ import "./genresICountries.scss";
 
 import type {
   Country,
-  IPromoCard,
 } from "@/types/client/creator-campaign/creator-campaign.types";
-import { useClickOutside } from "@/shared/lib/hooks/useClickOutside";
+
+import type {ConnectedAccount} from "@/client-side/types/offers.ts";
 type musicStyles = {
   musicGenres: string[];
   countries: Country[];
@@ -13,7 +13,7 @@ type musicStyles = {
 interface Props {
   data: musicStyles;
   flag?: boolean;
-  activePromo?: IPromoCard | undefined;
+  activePromo?: ConnectedAccount | undefined;
   isInclude?: boolean;
   open?: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;

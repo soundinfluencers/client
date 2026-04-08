@@ -119,7 +119,7 @@ export const ProposalCampaignPage: React.FC<Props> = ({
               group="main"
               canEdit={canEditUI}
               changeView={changeView}
-              title="Video Content Section"
+              title="Video Distribution"
             />
           )}
 
@@ -131,7 +131,7 @@ export const ProposalCampaignPage: React.FC<Props> = ({
               items={byGroup.music}
               networks={musicPromos}
               group="music"
-              title="Music Section"
+              title="Music Placements"
               changeView={changeView}
             />
           )}
@@ -144,7 +144,7 @@ export const ProposalCampaignPage: React.FC<Props> = ({
               items={byGroup.press}
               networks={otherPromos}
               group="press"
-              title="Press Section"
+              title="Press Coverage"
               changeView={changeView}
             />
           )}

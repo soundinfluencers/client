@@ -24,7 +24,7 @@ export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
       case "main":
         return ["taggedUser", "taggedLink", "additionalBrief"] as const;
       case "press":
-        return ["additionalBrief"] as const;
+        return ['mainLink','taggedLink',"additionalBrief"] as const;
       default:
         return [] as const;
     }
@@ -41,18 +41,19 @@ export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
 
         return (
           <td key={key} className="tableBase__td">
-            {key === "taggedLink" && value ? (
-              <Link
-                className="hidden-text tagged-link"
-                to={normalizeLink(value)}
-                target="_blank"
-                title={value}>
-                {value}
-              </Link>
+            {(key === "taggedLink" || key === "mainLink") && value ? (
+                <Link
+                    className={`hidden-text ${value ? "tagged-link" : ''}`}
+                    to={normalizeLink(value)}
+                    target="_blank"
+                    title={value}
+                >
+                  {value}
+                </Link>
             ) : (
-              <p className="hidden-text" title={value}>
-                {value || "—"}
-              </p>
+                <p className="hidden-text" title={value}>
+                  {value || "—"}
+                </p>
             )}
           </td>
         );

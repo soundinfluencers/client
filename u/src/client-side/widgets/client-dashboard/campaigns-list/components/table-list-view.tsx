@@ -4,9 +4,10 @@ import type {
   CampaignForList,
   CampaignStatusType,
 } from "@/types/client/dashboard/campaign.types";
-import { deleteDraft } from "@/api/client/campaign/draft.api";
 import { TableCardSkeleton } from "@/components/ui/skeletons/table-card-skeleton";
 import { NoData } from "@/components/ui/no-array/no-data";
+
+import {useDeleteDraftAction} from "@/client-side/pages/client-dashboard/hooks/useDeleteDraftAction.ts";
 
 interface TableListViewProps {
   thead: string[];
@@ -21,6 +22,7 @@ export const TableListView: React.FC<TableListViewProps> = ({
   onOpen,
   isLoading,
 }) => {
+  const { deleteDraft } = useDeleteDraftAction();
   if (isLoading) {
     return (
       <div className="table-list">
@@ -39,14 +41,7 @@ export const TableListView: React.FC<TableListViewProps> = ({
       </NoData>
     );
   }
-  const handleDeleteDraft = async (e: React.MouseEvent, draftId: string) => {
-    e.stopPropagation();
-    try {
-      await deleteDraft(draftId);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
 
   return (
     <div className="table-list">
@@ -80,7 +75,7 @@ export const TableListView: React.FC<TableListViewProps> = ({
               {tb.status === "draft" && (
                 <button
                   type="button"
-                  onClick={(e) => handleDeleteDraft(e, tb._id)}
+                  onClick={(e) => deleteDraft(e, tb._id)}
                   aria-label="Delete draft"
                   className="icon-button">
                   <img src={trash} alt="" />

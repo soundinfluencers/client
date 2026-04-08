@@ -1,12 +1,8 @@
-import type { CreateCampaignPlatformProps } from "@/types/store/index.types";
-import type { SocialMediaType } from "@/types/utils/constants.types";
 import { create } from "zustand";
+import type { CreateCampaignPlatformState } from "./types";
 
-export const useCreateCampaignPlatform = create<CreateCampaignPlatformProps>(
-  (set) => ({
-    selectedPlatform: "instagram",
-    setPlatform: (platform: SocialMediaType) => {
-      set({ selectedPlatform: platform });
-    },
-  }),
-);
+export const useCreateCampaignPlatform =
+    create<CreateCampaignPlatformState>((set) => ({
+        selectedPlatform: "instagram",
+        setPlatform: (platform) => set({ selectedPlatform: platform }),
+    }));

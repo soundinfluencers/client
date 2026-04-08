@@ -7,6 +7,16 @@ import soundcloudIcon from "@/assets/social-medias/soundcloud.svg";
 import pressIcon from "@/assets/social-medias/press.svg";
 import multipromoIcon from "@/assets/social-medias/multipromo.svg";
 
+import instagramIconPost from "@/assets/social-medias/instagram1.svg";
+import tiktokIconPost from "@/assets/social-medias/tiktok1.svg";
+import facebookIconPost from "@/assets/social-medias/facebook.1.svg";
+import youtubeIconPost from "@/assets/social-medias/youtube1.svg";
+import spotifyIconPost from "@/assets/social-medias/spotify.1.svg";
+import soundcloudIconPost from "@/assets/social-medias/sound cloud1.svg";
+import pressPost from "@/assets/social-medias/press1.svg";
+
+
+
 import plattform_multi from "../assets/plattform-social_medias/plattform_multi.svg";
 import plattform_instagram from "../assets/plattform-social_medias/plattform_instagram.svg";
 import plattform_tiktok from "../assets/plattform-social_medias/plattform_tiktok.svg";
@@ -33,6 +43,31 @@ export const getSocialMediaIcon = (socialMedia: SocialMediaType) => {
       return soundcloudIcon;
     case "press":
       return pressIcon;
+    case "multipromo":
+      return multipromoIcon;
+    default:
+      return null;
+  }
+};
+
+
+
+export const getSocialMediaIconPostContent = (socialMedia: SocialMediaType) => {
+  switch (socialMedia) {
+    case "instagram":
+      return instagramIconPost;
+    case "tiktok":
+      return tiktokIconPost;
+    case "facebook":
+      return facebookIconPost;
+    case "youtube":
+      return youtubeIconPost;
+    case "spotify":
+      return spotifyIconPost;
+    case "soundcloud":
+      return soundcloudIconPost;
+    case "press":
+      return pressPost;
     case "multipromo":
       return multipromoIcon;
     default:

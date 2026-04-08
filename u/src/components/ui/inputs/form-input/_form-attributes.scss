@@ -52,6 +52,8 @@ label {
   flex-direction: column;
   gap: 8px;
   &.error {
+    display: block;
+    padding: 0;
     label {
       color: rgba(225, 25, 32, 1);
     }

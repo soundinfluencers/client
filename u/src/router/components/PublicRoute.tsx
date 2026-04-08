@@ -17,8 +17,6 @@ export const PublicRoute = ({ children }: Props) => {
   const isAllowedPublicRoute = PUBLIC_ALLOWED_WHEN_AUTH.some((p) =>
     location.pathname.startsWith(p),
   );
-  const isShareRoute = location.pathname.startsWith("/promo-share");
-
   if (!isAuthReady) {
     // return <Loader />;
   }

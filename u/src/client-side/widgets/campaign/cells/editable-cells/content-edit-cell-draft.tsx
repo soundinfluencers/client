@@ -84,6 +84,7 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
 
   const createVideo = React.useCallback(() => {
     const link = newLink.trim();
+    console.log(link,'link');
     if (!link) return;
 
     const sm = String(socialMedia ?? "").toLowerCase();
@@ -163,12 +164,13 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
         <Dropdown
           isOpen={isOpen}
           onToggle={onToggle}
+          content
           selected={
             <div className="content-cell-static">
               <span onClick={onClickHeaderEye} className="eye">
                 <img src={eye} alt="" />
               </span>
-              <p title={selectedLink}>
+              <p title={selectedVideo.link}>
                 {selectedLink
                   ? `${groupTitle(group)} ${selectedContent + 1}`
                   : "—"}
@@ -178,7 +180,7 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
           <div className="post-description-block">
             <ul className="dropdown-list">
               {platformItems.map((item: any, idx: number) => (
-                <li key={item?._id ?? idx} onClick={() => selectContent(idx)}>
+                <li className={`content-cell ${selectedContent === idx ? "active-content" : ""}`} key={item?._id ?? idx} onClick={() => selectContent(idx)}>
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
@@ -211,7 +213,7 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
               <div className="add-desc__icon">
                 <img src={plus} alt="" />
               </div>
-              <p>Add new video</p>
+              <p>Add new {groupTitle(group)}</p>
             </div>
           </div>
         </Dropdown>

@@ -5,8 +5,15 @@ import { ObjectId } from "bson";
 import { getGroupBySocial } from "@/client-side/widgets/add-influencer-build-campaign/add-to-proposal/bc-prooced";
 import { buildProposalPatchBody, pickPrice } from "@/client-side/utils";
 
-export const getDraftAccountKey = (n: CampaignAddedAccount) =>
-  String((n as any).addedAccountsId ?? (n as any).accountId ?? (n as any)._id);
+export const getDraftAccountKey = (n: CampaignAddedAccount | any) =>
+    String(
+        n?.addedAccountsId ??
+        n?.socialAccountId ??
+        n?.accountId ??
+        n?._id ??
+        n?.id ??
+        "",
+    );
 const oid = () => new ObjectId().toHexString();
 type CampaignContentItem = {
   _id: string;
@@ -119,8 +126,6 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
       const state = get();
       const accounts = state.accountsByCampaignId[campaignId] ?? [];
 
-      // если хочешь "валюта кампании" как приоритетная:
-      // EUR если хоть у кого-то есть, иначе USD, иначе GBP, иначе UNKNOWN
       const hasEUR = accounts.some((a: any) => Number(a?.prices?.EUR ?? 0) > 0);
       const hasUSD = accounts.some((a: any) => Number(a?.prices?.USD ?? 0) > 0);
       const hasGBP = accounts.some((a: any) => Number(a?.prices?.GBP ?? 0) > 0);
@@ -151,10 +156,33 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
 
       const accounts = st.accountsByCampaignId[id] ?? [];
       const content = st.contentByCampaignId[id] ?? [];
+      const preparedAccounts = accounts.map((a: any) => {
+        const sm = String(a.socialMedia ?? "").toLowerCase();
 
+        const item =
+            content.find((c: any) => String(c.socialMedia ?? "").toLowerCase() === sm) ??
+            content.find(
+                (c: any) =>
+                    String(c.socialMediaGroup ?? "") === getGroupBySocial(sm),
+            ) ??
+            content.find((c: any) => String(c.socialMediaGroup ?? "") === "main") ??
+            content[0];
+
+        return {
+          ...a,
+          selectedContent:
+              item?._id && item?.descriptions?.[0]?._id
+                  ? {
+                    campaignContentItemId: String(item._id),
+                    descriptionId: String(item.descriptions[0]._id),
+                  }
+                  : null,
+          dateRequest: a.dateRequest ?? "ASAP",
+        };
+      });
       const body = buildProposalPatchBody({
         campaignName,
-        accounts,
+        accounts: preparedAccounts,
         content,
         patches,
       });
@@ -230,7 +258,7 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
         );
 
         if (next === prev) return state;
-
+        console.log("UPDATED IN STORE", next);
         return {
           accountsByCampaignId: {
             ...state.accountsByCampaignId,
@@ -272,7 +300,7 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
           taggedLink: base?.taggedLink ?? "",
           additionalBrief: base?.additionalBrief ?? "",
           descriptions: (base?.descriptions ?? []).map((d) => ({
-            _id: oid(), // ✅ уникальный id для каждой desc
+            _id: oid(),
             description: d?.description ?? "",
           })),
         };

@@ -6,7 +6,8 @@ import type {
 } from "@/types/client/dashboard/campaign.types";
 
 import { CardSkeleton } from "@/components/ui/skeletons/card-skeleton";
-import { useDeleteDraftMutation } from "@/client-side/react-query";
+
+import {useDeleteDraftAction} from "@/client-side/pages/client-dashboard/hooks/useDeleteDraftAction.ts";
 
 interface GridListViewProps {
   list: CampaignForList[];
@@ -19,13 +20,8 @@ export const GridListView: React.FC<GridListViewProps> = ({
   onOpen,
   isLoading,
 }) => {
-  const { mutate: deleteDraftMutate } = useDeleteDraftMutation();
-
-  const handleDeleteDraft = (e: React.MouseEvent, draftId: string) => {
-    e.stopPropagation();
-    deleteDraftMutate(draftId);
-  };
-
+  const { deleteDraft } = useDeleteDraftAction();
+  console.log(list,'list')
   if (isLoading) {
     return (
       <div className="home-campaigns-grid">
@@ -46,7 +42,7 @@ export const GridListView: React.FC<GridListViewProps> = ({
           <div className="home-campaigns-grid__item-header">
             <div className="home-campaigns-grid__item-info">
               <div className="home-campaigns-grid__item-meta">
-                <img src={getSocialMediaIcon(item.socialMedia)} alt="" />
+                <img src={getSocialMediaIcon(item.socialMedia) || ''} alt="" />
                 <p>{item.status ?? ""}</p>
               </div>
 
@@ -66,7 +62,7 @@ export const GridListView: React.FC<GridListViewProps> = ({
             </div>
 
             {item.status === "draft" && (
-              <button onClick={(e) => handleDeleteDraft(e, item._id)}>
+              <button onClick={(e) => deleteDraft(e, item._id)}>
                 <img src={trash} alt="" />
               </button>
             )}

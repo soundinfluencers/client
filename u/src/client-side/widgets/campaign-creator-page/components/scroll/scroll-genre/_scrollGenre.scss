@@ -1,5 +1,6 @@
-.scroll_Plattforms {
-  &__title {
+.genres-scroll {
+
+  &__header {
     width: 100%;
     display: flex;
     align-items: center;
@@ -11,15 +12,17 @@
       line-height: 100%;
       letter-spacing: 0%;
     }
+    img {
+      cursor: pointer;
+    }
   }
-
   ul {
     margin-top: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     list-style: none;
-
+    gap: 22px;
     overflow-x: auto;
     overflow-y: hidden;
     flex-wrap: nowrap;
@@ -29,21 +32,38 @@
     }
 
     li {
+      cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 11px 24px;
+      padding: 8px 24px;
 
-      font-weight: 400;
-      font-style: Regular;
-      font-size: 14px;
-      line-height: 100%;
-      letter-spacing: 0%;
       background-color: rgba(255, 255, 255, 0.5);
       border: 1px solid rgba(231, 232, 241, 1);
       border-radius: 32px;
+      height: 41px;
       flex-shrink: 0;
-
+      max-width: 125px;
+    .genre-label{
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      &__main{
+        color: #202934;
+        text-align: center;
+        font-size: 15px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+      }
+      &__sub{
+        color:  #202934;
+        font-size: 10px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+      }
+    }
       &:first-child {
         img {
           max-width: 32px;

@@ -27,6 +27,7 @@
   display: flex;
   justify-content: end;
   height: 36px;
+
   &__btn {
     cursor: pointer;
     display: flex;
@@ -38,64 +39,101 @@
     border: 1px solid rgba(185, 208, 255, 1);
     background-color: rgba(255, 255, 255, 0.5);
     font-size: 13px;
+    p {
+      user-select: none;
+    }
     &.active {
       background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
     }
   }
 }
+// .changeView-table {
+//   width: 100%;
+//   display: flex;
+//   justify-content: flex-end;
+
+//   &__segmented {
+//     display: flex;
+//     align-items: center;
+//     width: 100%;
+//     max-width: 266px;
+//     height: 38px;
+
+//     border-radius: 12px;
+//     background: #fff;
+//   }
+
+//   &__item {
+//     flex: 1;
+//     height: 100%;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+
+//     cursor: pointer;
+//     user-select: none;
+
+//     border: 1px solid rgba(231, 232, 241, 1);
+//     background: transparent;
+//     color: rgba(28, 28, 36, 0.45);
+
+//     &:not(:first-child) {
+//       margin-left: -1px;
+//     }
+
+//     &:first-child {
+//       border-radius: 12px 0 0 12px;
+//     }
+
+//     &:last-child {
+//       border-radius: 0 12px 12px 0;
+//     }
+
+//     &:not(:first-child):not(:last-child):not(.active) {
+//       border-left: 0;
+//       border-right: 0;
+//     }
+
+//     &.active {
+//       background: rgba(185, 208, 255, 0.18);
+//       border-color: rgba(185, 208, 255, 1);
+//       color: rgba(28, 28, 36, 1);
+//       position: relative;
+//       z-index: 2; // активная поверх соседей
+//     }
+//   }
+// }
 .changeView-table {
   width: 100%;
   display: flex;
   justify-content: flex-end;
 
+  cursor: pointer;
   &__segmented {
+    padding: 2px;
     display: flex;
     align-items: center;
     width: 100%;
-    max-width: 266px;
+    max-width: 148px;
     height: 38px;
 
     border-radius: 12px;
-    background: #fff;
+    background: rgba(185, 208, 255, 0.15);
   }
-
   &__item {
+    cursor: pointer;
     flex: 1;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    cursor: pointer;
-    user-select: none;
-
-    border: 1px solid rgba(231, 232, 241, 1);
-    background: transparent;
-    color: rgba(28, 28, 36, 0.45);
-
-    &:not(:first-child) {
-      margin-left: -1px;
-    }
-
-    &:first-child {
-      border-radius: 12px 0 0 12px;
-    }
-
-    &:last-child {
-      border-radius: 0 12px 12px 0;
-    }
-
-    &:not(:first-child):not(:last-child):not(.active) {
-      border-left: 0;
-      border-right: 0;
-    }
-
+    width: 48px;
+    height: 32px;
+    opacity: 0.5;
     &.active {
-      background: rgba(185, 208, 255, 0.18);
-      border-color: rgba(185, 208, 255, 1);
-      color: rgba(28, 28, 36, 1);
-      position: relative;
-      z-index: 2; // активная поверх соседей
+      opacity: 1;
+      border-radius: 8px;
+      border: 1px solid rgb(185, 208, 255);
+      background-color: white;
     }
   }
 }

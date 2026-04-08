@@ -23,14 +23,14 @@ interface LiveViewCardProps {
 
 export const LiveViewCardInsight: React.FC<LiveViewCardProps> = ({
   item,
-  campaign,
 }) => {
+    console.log("LiveViewCardInsight", item);
   const [isVideoOpen, setIsVideoOpen] = React.useState(false);
   console.log(item);
   const media0 = item?.mediaCache?.items?.[0];
   const pathLower = media0?.pathLower;
   const videoUrl = media0?.url ?? null;
-
+    console.log("LiveViewCardInsight", item);
   const hasVideo = Boolean(pathLower);
   return (
     <div className="live-view-cardInsight">
@@ -66,37 +66,37 @@ export const LiveViewCardInsight: React.FC<LiveViewCardProps> = ({
         />{" "}
         <div className="fill-input">
           <img src={link} alt="" />
-          <p>{item.taggedLink ?? "no post link"}</p>
+          <p>{item.postLink ?? "no post link"}</p>
         </div>
       </div>
       <div className="live-view-cardInsight__fill-data">
         <div className="fill-input">
           <img src={comment} alt="" />
-          <p>{campaign.totalComments ?? 0}</p>
+          <p>{item.comments ?? 0}</p>
         </div>
       </div>{" "}
       <div className="live-view-cardInsight__fill-data">
         <div className="fill-input">
           <img src={heart} alt="" />
-          <p>{campaign.totalLikes ?? 0}</p>
+          <p>{item.like ?? 0}</p>
         </div>
       </div>
       <div className="live-view-cardInsight__fill-data">
         <div className="fill-input">
           <img src={bookmark} alt="" />
-          <p>{campaign.totalSaves ?? 0}</p>
+          <p>{item.saves ?? 0}</p>
         </div>
       </div>
       <div className="live-view-cardInsight__fill-data">
         <div className="fill-input">
           <img src={share} alt="" />
-          <p>{campaign.totalSaves ?? 0}</p>
+          <p>{item.shares ?? 0}</p>
         </div>
       </div>
       <div className="live-view-cardInsight__fill-data">
         <div className="fill-input">
           <img src={chat} alt="" />
-          <p>{campaign.totalImpressions ?? 0}</p>
+          <p>{item.impressions ?? 0}</p>
         </div>
       </div>
       {isVideoOpen && (

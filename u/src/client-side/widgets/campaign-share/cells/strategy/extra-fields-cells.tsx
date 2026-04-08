@@ -5,22 +5,25 @@ type TableGroup = "main" | "music" | "press";
 type Props = {
   group: TableGroup;
   platformItems: any[];
-  selectedContent: number;
+  selectedContent: number;changeView?: boolean;
 };
 
 export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
   group,
   platformItems,
-  selectedContent,
+  selectedContent,changeView
 }: Props) {
   const keys = React.useMemo(() => {
+    if (changeView) {
+      return group === "press" ? (["additionalBrief"] as const) : ([] as const);
+    }
     switch (group) {
       case "music":
         return ["additionalBrief"] as const;
       case "main":
         return ["taggedUser", "taggedLink", "additionalBrief"] as const;
       case "press":
-        return ["additionalBrief"] as const;
+        return ['mainLink','taggedLink',"additionalBrief"] as const;
       default:
         return [] as const;
     }
@@ -37,9 +40,9 @@ export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
 
         return (
           <td key={key} className="tableBase__td">
-            {key === "taggedLink" && value ? (
+            {key === "taggedLink" || key === 'mainLink' && value ? (
               <Link
-                className="hidden-text tagged-link"
+                  className={`hidden-text ${value ? "tagged-link" : ''}`}
                 to={normalizeLink(value)}
                 target="_blank"
                 title={value}>

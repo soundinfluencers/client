@@ -1,6 +1,7 @@
 import React from "react";
 import { Dropdown } from "@/components/table-ui/dropdowns-table";
 import check from "@/assets/icons/check.svg";
+import {Link} from "react-router-dom";
 
 type Props = {
   isOpen: boolean;
@@ -26,6 +27,9 @@ export const DescriptionCell = React.memo(function DescriptionCell({
   group,
 }: Props) {
   const descriptions = platformItems?.[selectedContent]?.descriptions ?? [];
+  const normalizeLink = React.useCallback((value: string) => {
+    return value.startsWith("http") ? value : `https://${value}`;
+  }, []);
   const [show, setShow] = React.useState(false);
   const selectPd = React.useCallback(
     (idx: number) => {
@@ -40,57 +44,46 @@ export const DescriptionCell = React.memo(function DescriptionCell({
 
     return (
       <td className="tableBase__td">
-        <div className="no-edit">
-          <span
-            onMouseEnter={() => setShow(true)}
-            onMouseLeave={() => setShow(false)}>
-            <p className="hidden-text desc">{shown}</p>
+        {group !== 'press' ? <div className="no-edit">
+          <p className="hidden-text desc">
+            {descriptions?.[selectedPd]?.description}
+          </p>
+        </div> : <Link  to={normalizeLink(descriptions?.[selectedPd]?.description)}
+                                      target="_blank"><p className="hidden-text tagged-link">{descriptions?.[selectedPd]?.description}</p></Link>}
 
-            {show && (
-              <div className="tooltip-box">
-                {descriptions?.[selectedPd]?.description}
-              </div>
-            )}
-          </span>
-        </div>
       </td>
     );
   }
   return (
     <td className="tableBase__td">
-      <Dropdown
-        isOpen={isOpen}
-        onToggle={onToggle}
-        selected={
-          <p
-            onMouseEnter={() => setShow(true)}
-            onMouseLeave={() => setShow(false)}
-            className="hidden-text desc">
-            {descriptions?.[selectedPd]?.description}{" "}
-            {show && (
-              <div className="tooltip-box">
-                {descriptions?.[selectedPd]?.description}
-              </div>
-            )}
-          </p>
-        }>
-        <ul className="dropdown-list">
-          {descriptions.map((desc: any, optionIndex: number) => (
-            <li
-              title={desc?.description}
-              key={desc?._id ?? optionIndex}
-              onClick={() => selectPd(optionIndex)}>
+      {
+        group !== 'press' ?
+            <Dropdown
+                isOpen={isOpen}
+                onToggle={onToggle}
+                selected={
+                  <p className="hidden-text desc">
+                    {descriptions?.[selectedPd]?.description}
+                  </p>
+                }>
+              <ul className="dropdown-list">
+                {descriptions.map((desc: any, optionIndex: number) => (
+                    <li
+                        title={desc?.description}
+                        key={desc?._id ?? optionIndex}
+                        onClick={() => selectPd(optionIndex)}>
               <span className={selectedPd === optionIndex ? "active" : ""}>
                 {optionIndex + 1}
               </span>{" "}
-              <p className="hidden-text desc">{desc.description || "-"}</p>
-              {selectedPd === optionIndex && (
-                <img className="check" src={check} alt="" />
-              )}
-            </li>
-          ))}
-        </ul>
-      </Dropdown>
+                      <p className="hidden-text desc">{desc.description || "-"}</p>
+                      {selectedPd === optionIndex && (
+                          <img className="check" src={check} alt="" />
+                      )}
+                    </li>
+                ))}
+              </ul>
+            </Dropdown> : <p>{descriptions?.[selectedPd]?.description}</p>
+      }
     </td>
   );
 });

@@ -1,21 +1,18 @@
 import React from "react";
-import {
-  useCreateCampaign,
-  useCampaignStore,
-} from "@/store/client/create-campaign";
+
 import "./_cards_content.scss";
 
-import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 import { TableRowCard } from "./components/table-row-card";
 import { Card } from "./components/card-grid";
 import { TableCardSkeleton } from "@/components/ui/skeletons/table-card-skeleton";
 import { CardSkeleton } from "@/components/ui/skeletons/card-skeleton";
+import type {ConnectedAccount} from "@/client-side/types/offers.ts";
 
 interface Props {
   view: number;
   setIsSmall: React.Dispatch<React.SetStateAction<boolean>>;
   isSmall: boolean;
-  promosCards: IPromoCard[];
+  promosCards: ConnectedAccount[];
   loading: boolean;
   isInitialLoading: boolean;
   isFetchingMore: boolean;
@@ -27,7 +24,6 @@ export const CardsContainer: React.FC<Props> = ({
   setIsSmall,
   isSmall,
   promosCards,
-  loading,
   isInitialLoading,
   isFetchingMore,
   isRefetching,

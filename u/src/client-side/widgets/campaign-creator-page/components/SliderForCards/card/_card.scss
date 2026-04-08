@@ -3,6 +3,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-direction: column;
   transition:
     transform 0.25s ease,
@@ -79,12 +80,16 @@
     border-radius: 16px;
     h2 {
       font-weight: 500;
-      font-style: Medium;
       font-size: 24px;
-      leading-trim: NONE;
       line-height: 100%;
       letter-spacing: 0%;
       color: rgba(42, 42, 42, 1);
+
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
     }
     p {
       font-weight: 400;

@@ -17,8 +17,8 @@ export const ScrollGenres: React.FC<Props> = React.memo(
       useHorizontalScroll();
 
     return (
-      <div className="platforms-scroll">
-        <div className="platforms-scroll__header">
+      <div className="genres-scroll">
+        <div className="genres-scroll__header">
           <h3>Select your music genre</h3>
           <div className="arrows">
             {showLeftArrow && (
@@ -36,15 +36,21 @@ export const ScrollGenres: React.FC<Props> = React.memo(
           </div>
         </div>
 
-        <ul ref={ref} className="platforms-scroll__list">
-          {GENRES.map((name) => (
-            <li
-              key={name}
-              className={name === selectedGenre ? "active" : ""}
-              onClick={() => onGenreSelect(name)}>
-              {name}
-            </li>
-          ))}
+        <ul ref={ref} >
+            {GENRES.map((genre) => (
+                <li
+                    key={genre.id}
+                    className={genre.id === selectedGenre ? "active" : ""}
+                    onClick={() => onGenreSelect(genre.id)}
+                >
+                    <span className="genre-label">
+                      <span className="genre-label__main">{genre.text}</span>
+                        {genre.subText && (
+                            <span className="genre-label__sub">{genre.subText}</span>
+                        )}
+                    </span>
+                </li>
+            ))}
         </ul>
       </div>
     );

@@ -43,10 +43,10 @@ export const TableCard = React.memo(function TableCard({
   canEdit,
   onCloseDropdown,
   optionIndex,
+  columns,
 }: TableRowProposalProps) {
   const [selectedContent, setSelectedContent] = React.useState<number>(0);
   const [selectedPd, setSelectedPd] = React.useState<number>(0);
-
   const isDateOpen =
     activeDropdown?.rowKey === rowKey && activeDropdown.key === "date";
   const isContentOpen =
@@ -105,46 +105,63 @@ export const TableCard = React.memo(function TableCard({
   return (
     <tr className={`table-campaign-page__tr ${isMarked ? "row--hl" : ""}`}>
       <NetworkCell data={data} />
-      <FollowersCell data={data} />
+
+      {columns.includes("followers") && <FollowersCell data={data} />}
 
       {changeView ? (
         <>
-          <GenresCell data={data} />
-          <CountriesCell data={data} />{" "}
-          <ContentCell
-            group={group}
-            isOpen={isContentOpen}
-            onToggle={toggleContent}
-            onClose={onCloseDropdown}
-            platformItems={platformItems}
-            selectedContent={selectedContent}
-            setSelectedContent={setSelectedContent}
-            setSelectedPd={setSelectedPd}
-            socialMedia={data.socialMedia}
-          />
           {canEdit ? (
-            <DescriptionCellEdit
-              group={group}
-              isOpen={isPostDescriptionOpen}
-              onToggle={togglePD}
-              onClose={onCloseDropdown}
-              platformItems={platformItems}
-              selectedContent={selectedContent}
-              selectedPd={selectedPd}
-              setSelectedPd={setSelectedPd}
-            />
+              <ExtraFieldsCellsEdit
+                  changeView={changeView}
+                  contentId={contentId}
+                  baseItem={selectedItem}
+                  group={group}
+              />
           ) : (
-            <DescriptionCell
-              group={group}
-              isOpen={isPostDescriptionOpen}
-              onToggle={togglePD}
-              onClose={onCloseDropdown}
-              platformItems={platformItems}
-              selectedContent={selectedContent}
-              selectedPd={selectedPd}
-              setSelectedPd={setSelectedPd}
-            />
+              <ExtraFieldsCells
+                  changeView={changeView}
+                  group={group}
+                  platformItems={platformItems}
+                  selectedContent={selectedContent}
+              />
           )}
+          {group !== 'press' &&
+              <ContentCell
+                  group={group}
+                  isOpen={isContentOpen}
+                  onToggle={toggleContent}
+                  onClose={onCloseDropdown}
+                  platformItems={platformItems}
+                  selectedContent={selectedContent}
+                  setSelectedContent={setSelectedContent}
+                  setSelectedPd={setSelectedPd}
+                  socialMedia={data.socialMedia}
+              />
+          }
+
+          {group !== 'press' ?  canEdit ? (
+              <DescriptionCellEdit
+                  group={group}
+                  isOpen={isPostDescriptionOpen}
+                  onToggle={togglePD}
+                  onClose={onCloseDropdown}
+                  platformItems={platformItems}
+                  selectedContent={selectedContent}
+                  selectedPd={selectedPd}
+                  setSelectedPd={setSelectedPd}
+              />
+          ) : (
+              <DescriptionCell
+                  group={group}
+                  isOpen={isPostDescriptionOpen}
+                  onToggle={togglePD}
+                  onClose={onCloseDropdown}
+                  platformItems={platformItems}
+                  selectedContent={selectedContent}
+                  selectedPd={selectedPd}
+                  setSelectedPd={setSelectedPd}
+              />
+          ) : null}
         </>
       ) : (
         <>
@@ -173,35 +190,37 @@ export const TableCard = React.memo(function TableCard({
             }}
           />
 
-          {canEdit ? (
-            <ContentCellEdit
-              group={group}
-              media0={media0}
-              isOpen={isContentOpen}
-              onToggle={toggleContent}
-              onClose={onCloseDropdown}
-              platformItems={platformItems}
-              selectedContent={selectedContent}
-              setSelectedContent={setSelectedContent}
-              setSelectedPd={setSelectedPd}
-              socialMedia={data.socialMedia}
-              optionIndex={optionIndex ?? 0}
-              accountKey={accountKey}
-            />
-          ) : (
-            <ContentCell
-              group={group}
-              media0={media0}
-              isOpen={isContentOpen}
-              onToggle={toggleContent}
-              onClose={onCloseDropdown}
-              platformItems={platformItems}
-              selectedContent={selectedContent}
-              setSelectedContent={setSelectedContent}
-              setSelectedPd={setSelectedPd}
-              socialMedia={data.socialMedia}
-            />
-          )}
+          {group !== "press" ? (
+              canEdit ? (
+                  <ContentCellEdit
+                      group={group}
+                      media0={media0}
+                      isOpen={isContentOpen}
+                      onToggle={toggleContent}
+                      onClose={onCloseDropdown}
+                      platformItems={platformItems}
+                      selectedContent={selectedContent}
+                      setSelectedContent={setSelectedContent}
+                      setSelectedPd={setSelectedPd}
+                      socialMedia={data.socialMedia}
+                      optionIndex={optionIndex ?? 0}
+                      accountKey={accountKey}
+                  />
+              ) : (
+                  <ContentCell
+                      group={group}
+                      media0={media0}
+                      isOpen={isContentOpen}
+                      onToggle={toggleContent}
+                      onClose={onCloseDropdown}
+                      platformItems={platformItems}
+                      selectedContent={selectedContent}
+                      setSelectedContent={setSelectedContent}
+                      setSelectedPd={setSelectedPd}
+                      socialMedia={data.socialMedia}
+                  />
+              )
+          ) : null}
 
           {canEdit ? (
             <DescriptionCellEdit
@@ -242,7 +261,8 @@ export const TableCard = React.memo(function TableCard({
           )}
         </>
       )}
-
+      {columns.includes("genres") && <GenresCell data={data} />}
+      {columns.includes("countries") && <CountriesCell data={data} />}
       {canEdit && !changeView && (
         <ActionCell optionIndex={optionIndex ?? 0} data={data} />
       )}

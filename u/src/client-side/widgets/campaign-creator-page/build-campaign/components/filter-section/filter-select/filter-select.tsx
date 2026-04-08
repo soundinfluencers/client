@@ -39,7 +39,7 @@ export const FilterSelect: React.FC<Props> = ({ data }) => {
 
     if (selected.some((f) => f.id === platformFilter.id)) return;
     setSelected([...selected, platformFilter]);
-  }, [selectedPlatform]);
+  }, [selectedPlatform, selected, filters, setSelected]);
   return (
     <DropdownFilter
       AndOr={AndOrFlag}
@@ -47,14 +47,13 @@ export const FilterSelect: React.FC<Props> = ({ data }) => {
       title={title}
       onToggle={() => setOpen((p) => !p)}>
       {filters.map((item) => (
-        <div className="chooseContainer">
-          <FilterNode
-            key={item.id}
-            item={item}
-            selected={selected}
-            onToggle={toggle}
-          />
-        </div>
+          <div key={item.id} className="chooseContainer">
+            <FilterNode
+                item={item}
+                selected={selected}
+                onToggle={toggle}
+            />
+          </div>
       ))}
     </DropdownFilter>
   );

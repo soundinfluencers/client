@@ -54,14 +54,19 @@
   }
 }
 .offer-card {
-  max-width: 288px;
-  width: 100%;
-  height: 629px;
-  padding: 16px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #ebecff 0%, #dff0ff 50%, #ebecff 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.3s ease-in-out infinite;
+display: flex;
+  justify-content: center;
+  .offer-card-content{
+    max-width: 288px;
+    width: 100%;
+    height: 629px;
+    padding: 16px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #ebecff 0%, #dff0ff 50%, #ebecff 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.3s ease-in-out infinite;
+  }
+
 }
 /* =========================
    Skeleton layout

@@ -10,7 +10,8 @@
   z-index: 100;
   border-bottom-right-radius: 8px;
   border-bottom-left-radius: 8px;
-
+  top: 100px;
+  backdrop-filter: blur(3px);
   &__content {
     max-height: 280px;
     overflow-y: auto;

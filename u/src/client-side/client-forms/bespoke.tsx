@@ -1,19 +1,19 @@
-import React from "react";
-import type { IBespokeCampaignTabData } from "@/types/client/form-clients/bespoke-campaign-tabs-data";
+
 import { FormInput, FormTextArea } from "@/components";
 import { BudgetField } from "@/components/ui/inputs/budget-input/budget-input";
+import {CampaignTextArea, CampaignTextInput} from "@components/form/input-post-content.tsx";
 
 export function BespokeArtistForm() {
   return (
     <div className="inputs">
-      <FormInput
+      <CampaignTextInput
         required
         name={"Campaign objective" as any}
         label={"Campaign objective"}
         placeholder={"Enter tour, gig, branding push, announcement"}
       />
 
-      <FormInput
+      <CampaignTextInput
         required
         name={"Content available" as any}
         label={"Content available"}
@@ -26,13 +26,13 @@ export function BespokeArtistForm() {
         placeholder={"Enter your budget"}
       />
 
-      <FormInput
+      <CampaignTextInput
         name={"Target territories" as any}
         label={"Target territories"}
         placeholder={"Leave it empty for worldwide campaign"}
       />
 
-      <FormTextArea
+      <CampaignTextInput
         name={"Any Extra Briefs" as any}
         label={"Any Extra Briefs"}
         placeholder={
@@ -46,32 +46,33 @@ export function BespokeArtistForm() {
 export function BespokeMusicForm() {
   return (
     <div className="inputs">
-      <FormInput
+      <CampaignTextInput
+          required
         name={"Campaign objective" as any}
         label={"Campaign objective"}
         placeholder={"Enter tour, gig, branding push, announcement"}
       />
 
-      <FormInput
+      <CampaignTextInput
         required
         name={"Content available" as any}
         label={"Content available"}
         placeholder={"Enter links to your videos, press photos, artwork"}
       />
 
-      <FormInput
+      <CampaignTextInput
         name={"Download or private link to the track" as any}
         label={"Download or private link to the track"}
         placeholder={"Download or private link to the track"}
       />
 
-      <FormInput
+      <CampaignTextInput
         name={"Release date" as any}
         label={"Release date"}
         placeholder={"Enter release date"}
       />
 
-      <FormInput
+      <CampaignTextInput
         name={"Enter linkfire / smartlink" as any}
         label={"Linkfire / smartlink"}
         placeholder={"Enter linkfire / smartlink"}
@@ -83,7 +84,7 @@ export function BespokeMusicForm() {
         placeholder={"Enter your budget"}
       />
 
-      <FormInput
+      <CampaignTextInput
         name={"Target territories" as any}
         label={"Target territories"}
         placeholder={
@@ -91,13 +92,14 @@ export function BespokeMusicForm() {
         }
       />
 
-      <FormTextArea
+      <CampaignTextArea
         name={
           "Any extra notes (messaging, influencer type, content ideas)" as any
         }
         label={"Any extra notes (messaging, influencer type, content ideas)"}
         placeholder={"Enter messaging, influencer type, content ideas"}
-        isBespoke
+        isbespoke
+
       />
     </div>
   );
@@ -105,20 +107,21 @@ export function BespokeMusicForm() {
 export function BespokeEventForm() {
   return (
     <div className="inputs">
-      <FormInput
+      <CampaignTextInput
+          required
         name={"What you’re promoting (Campaign Goal)" as any}
         label={"What you’re promoting (Campaign Goal)"}
         placeholder={"Enter tour, gig, branding push, announcement"}
       />
 
-      <FormInput
+      <CampaignTextInput
         required
         name={"Content available" as any}
         label={"Content available"}
         placeholder={"Enter links to your videos, press photos, artwork"}
       />
 
-      <FormInput
+      <CampaignTextInput
         name={"Ticket link" as any}
         label={"Ticket link"}
         placeholder={"Enter ticket link"}
@@ -130,7 +133,7 @@ export function BespokeEventForm() {
         placeholder={"Enter your budget"}
       />
 
-      <FormInput
+      <CampaignTextInput
         name={"Target territories" as any}
         label={"Target territories"}
         placeholder={
@@ -138,13 +141,13 @@ export function BespokeEventForm() {
         }
       />
 
-      <FormTextArea
+      <CampaignTextArea
         name={
           "Any extra notes (messaging, influencer type, content ideas)" as any
         }
         label={"Any extra notes (messaging, influencer type, content ideas)"}
         placeholder={"Enter messaging, influencer type, content ideas"}
-        isBespoke
+        isbespoke
       />
     </div>
   );
@@ -152,11 +155,11 @@ export function BespokeEventForm() {
 export function BespokeOtherForm() {
   return (
     <div className="inputs">
-      <FormTextArea
+      <CampaignTextArea
         name={"Brief" as any}
         label={"Brief"}
         placeholder={"Enter brief here"}
-        isBespoke
+        isbespoke
       />
     </div>
   );

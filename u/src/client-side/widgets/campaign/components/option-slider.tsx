@@ -2,8 +2,7 @@ import React from "react";
 import "./option-slider.scss";
 import chevron from "@/assets/icons/chevron-right.svg";
 import x from "@/assets/icons/x (1).svg";
-import { deleteProposalOption } from "@/api/client/campaign/campaign.api";
-import { toast } from "react-toastify";
+
 import { Modal } from "@/components/ui/modal-fix/Modal";
 import { ButtonMain, ButtonSecondary } from "@/shared/ui";
 type Props = {
@@ -27,6 +26,7 @@ export function OptionsSlider({
   const [atEnd, setAtEnd] = React.useState(false);
   const [modal, setModal] = React.useState<boolean>(false);
   const [activeChooseOption, setActiveOption] = React.useState(activeOption);
+  const canDelete = optionIndexes.length > 1;
   const update = React.useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -83,15 +83,17 @@ export function OptionsSlider({
             className={activeOption === idx ? "active-option" : ""}
             onClick={() => onClickOption(idx)}>
             Option {idx + 1}
-            <img
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveOption(idx);
-                setModal(true);
-              }}
-              src={x}
-              alt=""
-            />
+            {canDelete && (
+                <img
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveOption(idx);
+                      setModal(true);
+                    }}
+                    src={x}
+                    alt=""
+                />
+            )}
           </li>
         ))}
       </ul>

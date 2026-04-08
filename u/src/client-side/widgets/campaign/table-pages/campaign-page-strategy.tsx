@@ -121,7 +121,7 @@ export const CampaignTablePage: React.FC<Props> = ({
                   networks={mainPromos}
                   group="main"
                   canEdit={campaign.canEdit}
-                  title="Video Content Section"
+                  title="Video Distribution"
                 />
               )}
 
@@ -133,7 +133,7 @@ export const CampaignTablePage: React.FC<Props> = ({
                   items={byGroup.music}
                   networks={musicPromos}
                   group="music"
-                  title="Music Section"
+                  title="Music Placements"
                 />
               )}
 
@@ -145,7 +145,7 @@ export const CampaignTablePage: React.FC<Props> = ({
                   items={byGroup.press}
                   networks={otherPromos}
                   group="press"
-                  title="Press Section"
+                  title="Press Coverage"
                 />
               )}
             </>

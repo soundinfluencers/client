@@ -1,7 +1,5 @@
-import type {
-  IApiOffer,
-  IPromoCard,
-} from "../../types/client/creator-campaign/creator-campaign.types";
+
+import type {ConnectedAccount, Offer} from "@/client-side/types/offers.ts";
 
 const getEurPrice = (prices: unknown): number => {
   if (prices && typeof prices === "object") {
@@ -11,7 +9,7 @@ const getEurPrice = (prices: unknown): number => {
   return Number(prices) || 0;
 };
 
-const getOfferAccountIds = (offer: IApiOffer | null): Set<string> => {
+const getOfferAccountIds = (offer: Offer | null): Set<string> => {
   const ids = new Set<string>();
   const accounts = (offer as any)?.connectedAccounts ?? [];
   for (const a of accounts) {
@@ -21,7 +19,7 @@ const getOfferAccountIds = (offer: IApiOffer | null): Set<string> => {
   return ids;
 };
 
-export const calcTotal = (offer: IApiOffer | null, cards: IPromoCard[]) => {
+export const calcTotal = (offer: Offer | null, cards: ConnectedAccount[]) => {
   const offerPrice = Number(offer?.price) || 0;
 
   const offerIds = getOfferAccountIds(offer);

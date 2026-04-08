@@ -1,11 +1,10 @@
-import React from "react";
+
 import { useNavigate } from "react-router-dom";
 import plus from "@/assets/icons/plus.svg";
 import "./_footer.scss";
 import { useCampaignStore } from "@/client-side/store";
-interface Props {}
 
-export const Footer: React.FC<Props> = () => {
+export const Footer= () => {
   const { offer, totalPrice, promoCardUI } = useCampaignStore();
   const navigate = useNavigate();
   console.log(promoCardUI, "ui");

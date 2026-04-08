@@ -2,7 +2,7 @@ import React from "react";
 import "./_card-bc_card.scss";
 import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 import { getSocialMediaIcon } from "@/constants/social-medias";
-import chevronDown from "@/assets/icons/chevron-down.svg";
+import chevronDown from "@/assets/icons/Vector (17).svg";
 import type { SocialMediaType } from "@/types/utils/constants.types";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 
@@ -24,8 +24,15 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
     (card) => card.accountId === data.accountId,
   );
   const [flag, setFlag] = React.useState<boolean>(false);
-  const hasGenres = data.musicGenres && data.musicGenres.length > 0;
-  const hasCountries = data.countries && data.countries.length > 0;
+  const hasGenres = (data.musicGenres?.length ?? 0) > 0;
+  const hasCountries = (data.countries?.length ?? 0) > 0;
+  const hasMeta = hasGenres || hasCountries;
+  const headTitle =
+    hasGenres && hasCountries
+      ? "Genres, Countries"
+      : hasGenres
+        ? "Genres"
+        : "Countries";
   return (
     <div
       onClick={() => {
@@ -53,31 +60,31 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
       </div>
       <div className="information">
         <div className="overflow">
-          {" "}
           <p>{data.username}</p>
         </div>
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          className="genresIcountries">
-          {hasGenres && hasCountries && (
+
+        <div onClick={(e) => e.stopPropagation()} className="genresIcountries">
+          {hasMeta && (
             <div
               onClick={() => setFlag((prev) => !prev)}
-              className="genresIcountries__head">
-              <p>Genres, Countries</p>
-              <img className={flag ? "active" : ""} src={chevronDown} alt="" />
+              className={`information__head ${flag ? "active" : ""}`}>
+              <img src={chevronDown} alt="" />
             </div>
           )}
         </div>
-        {flag && hasGenres && hasCountries && (
+
+        {flag && hasMeta && (
           <GenresCountries
             setOpen={setFlag}
-            isInclude={isInclude}
+            open={flag}
+            data={{
+              musicGenres: data.musicGenres ?? [],
+              countries: data.countries ?? [],
+            }}
             activePromo={activePromo}
-            data={data}
+            isInclude={isInclude}
           />
-        )}{" "}
+        )}
       </div>
       {isInclude && (
         <div className="included-text">
