@@ -73,7 +73,14 @@ type DraftCampaignStore = {
     campaignId: string,
     contentToAdd: CampaignContentItem[],
   ) => void;
-
+  setAccountSelectedContent: (
+      campaignId: string,
+      accountKey: string,
+      selected: {
+        campaignContentItemId: string;
+        descriptionId: string;
+      },
+  ) => void;
   clearCampaign: (campaignId: string) => void;
 };
 
@@ -100,6 +107,31 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
           contentByCampaignId: {
             ...state.contentByCampaignId,
             [key]: serverContent ?? [],
+          },
+        };
+      });
+    },
+    setAccountSelectedContent: (campaignId, accountKey, selected) => {
+      set((state) => {
+        const key = String(campaignId ?? "");
+        if (!key) return state;
+
+        const prev = state.accountsByCampaignId[key] ?? [];
+
+        const next = prev.map((account: any) =>
+            getDraftAccountKey(account) === String(accountKey)
+                ? {
+                  ...account,
+                  selectedContent: selected,
+                  selectedCampaignContentItem: selected,
+                }
+                : account,
+        );
+
+        return {
+          accountsByCampaignId: {
+            ...state.accountsByCampaignId,
+            [key]: next,
           },
         };
       });

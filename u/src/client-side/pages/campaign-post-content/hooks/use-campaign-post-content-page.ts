@@ -49,24 +49,15 @@ export const useCampaignPostContentPage = () => {
         postContentDraft ?? undefined,
         actions.setPostContentDraft,
     );
-
     const handleSubmit = React.useCallback(
         (formData: Record<string, string>) => {
             if (formData.campaignName) {
                 actions.setCampaignName(formData.campaignName);
             }
 
-            (["main", "music", "press"] as const).forEach((group) => {
-                const platforms = grouped[group];
-                if (!platforms?.length) return;
-
-                platforms.forEach((platform) => {
-                    actions.addPostContent(group, formData, platform);
-                });
-            });
-
             actions.setPostContentDraft(formData);
-            actions.buildCampaignContentFromForm(
+
+            actions.buildCampaignContentAndSyncAccounts(
                 formData,
                 selectedPlatforms,
                 grouped,
@@ -76,6 +67,32 @@ export const useCampaignPostContentPage = () => {
         },
         [actions, grouped, navigate, selectedPlatforms],
     );
+    // const handleSubmit = React.useCallback(
+    //     (formData: Record<string, string>) => {
+    //         if (formData.campaignName) {
+    //             actions.setCampaignName(formData.campaignName);
+    //         }
+    //
+    //         (["main", "music", "press"] as const).forEach((group) => {
+    //             const platforms = grouped[group];
+    //             if (!platforms?.length) return;
+    //
+    //             platforms.forEach((platform) => {
+    //                 actions.addPostContent(group, formData, platform);
+    //             });
+    //         });
+    //         console.log(formData,'[][][');
+    //         actions.setPostContentDraft(formData);
+    //         actions.buildCampaignContentFromForm(
+    //             formData,
+    //             selectedPlatforms,
+    //             grouped,
+    //         );
+    //
+    //         navigate("/client/create-campaign/content/strategy");
+    //     },
+    //     [actions, grouped, navigate, selectedPlatforms],
+    // );
 
     return {
         store,

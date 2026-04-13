@@ -146,7 +146,7 @@ export const TableDistributingInsight: React.FC<Props> = ({ campaign }) => {
         <tbody>
           {sortedAccounts.map((row, index) => (
             <TableCard
-              key={row.accountId ?? row._id ?? `${row.influencerId}-${index}`}
+              key={row.addedAccountsId ?? row._id ?? `${row.influencerId}-${index}`}
               data={row}
             />
           ))}
@@ -157,7 +157,7 @@ export const TableDistributingInsight: React.FC<Props> = ({ campaign }) => {
             {columns.map((_, index) => (
               <td
                 key={index}
-                className={`td--footer ${index === 0 || index === 1 ? "is-left" : ""}`}>
+                className={`td--footer ${index === 0 || index === 1 ? "is-left-another" : ""}`}>
                 {index === 0 && <p>price: {campaign.price}€</p>}
                 {index === 1 && <p>{campaign.totalFollowers}</p>}
 

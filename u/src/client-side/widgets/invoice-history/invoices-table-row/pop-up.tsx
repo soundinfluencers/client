@@ -9,6 +9,7 @@ import paypal from './assets//image 20 (2).png'
 import { getInvoiceById, patchInvoiceById } from "@/api/client/invoice/invoice.api";
 import { toast } from "react-toastify";
 import './_table-row.scss'
+import {formatFollowers} from "@/utils/functions/formatFollowers.ts";
 type InvoiceDetails = {
     invoiceId: string;
     creationDate: string;
@@ -19,6 +20,7 @@ type InvoiceDetails = {
     campaignName: string;
     company: string;
     poNumber: string;
+    campaignFollowers: number
 };
 type Props = {
     invoiceId: string;
@@ -31,6 +33,7 @@ type InvoiceForm = {
     company: string;
     address: string;
     country: string;
+    vatNumber: string
 };
 
 export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
@@ -42,6 +45,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
         company: "",
         address: "",
         country: "",
+        vatNumber: ""
     });
 
     const [form, setForm] = React.useState<InvoiceForm>({
@@ -49,12 +53,14 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
         company: "",
         address: "",
         country: "",
+        vatNumber: ""
     });
     const isChanged =
         form.poNumber !== initialForm.poNumber ||
         form.company !== initialForm.company ||
         form.address !== initialForm.address ||
-        form.country !== initialForm.country;
+        form.country !== initialForm.country ||
+        form.vatNumber !== initialForm.vatNumber;
     React.useEffect(() => {
         let mounted = true;
 
@@ -62,7 +68,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
             try {
                 setIsLoading(true);
                 const data = await getInvoiceById(invoiceId);
-
+                console.log(data,'datadatadata');
                 if (!mounted) return;
 
                 setInvoice(data);
@@ -72,6 +78,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                     company: data?.company ?? "",
                     address: data?.address ?? "",
                     country: data?.country ?? "",
+                    vatNumber: data?.vatNumber ?? "",
                 };
 
                 setForm(nextForm);
@@ -113,6 +120,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                 company: form.company,
                 address: form.address,
                 country: form.country,
+                vatNumber: form.vatNumber
             });
 
             toast.success("Invoice updated successfully");
@@ -127,7 +135,6 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
     };
     const header = [
         "Item Description",
-        "Brand",
         "Project",
         "PO",
         "Reach",
@@ -188,7 +195,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                 brand: form.company || invoice.company || "—",
                 project: invoice.campaignName || "—",
                 poNumber: form.poNumber || "—",
-                reach: "—",
+                reach: invoice.campaignFollowers || "—",
                 total: invoice.amount ? `${invoice.amount}€` : "—",
             },
         ];
@@ -224,7 +231,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                </div>
                <div className='edit-invoicePopUp__header'>
                    <h2>INVOICE</h2>
-                   <p><p>{invoice?.creationDate ?? "—"}</p></p>
+                   <p>{invoice?.creationDate ?? "—"}</p>
                </div>
                <div className='edit-invoicePopUp__first'>
                    <div className='edit-invoicePopUp__from'>
@@ -238,11 +245,21 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                           <p>Company No: 10458319</p>
                           <div className='edit-invoicePopUp__from-iconWrapper'>
                               <img src={mail} alt=""/>
-                              <p>Email: <span>admin@soundinfluencers.com</span></p>
+                              <p>
+                                  Email:{" "}
+                                  <a href="mailto:admin@soundinfluencers.com">
+                                      admin@soundinfluencers.com
+                                  </a>
+                              </p>
                           </div>
                           <div className='edit-invoicePopUp__from-iconWrapper'>
                               <img src={phone} alt=""/>
-                              <p>Phone: <span>+44 7537 129190</span></p>
+                              <p>
+                                  Phone:{" "}
+                                  <a href="tel:+447537129190">
+                                      +44 7537 129190
+                                  </a>
+                              </p>
                           </div>
                       </div>
                    </div>
@@ -263,6 +280,11 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                                value={form.country}
                                onChange={(e) => setField("country", e.target.value)}
                                placeholder="Country"
+                           />
+                           <input
+                               value={form.vatNumber}
+                               onChange={(e) => setField("vatNumber", e.target.value)}
+                               placeholder="vatNumber"
                            />
                        </div>
                    </div>
@@ -290,17 +312,14 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                         {items.map((item) => (
                             <div key={item.id} className="edit-invoicePopUp__grid ">
                                 <div><p>{item.description}</p></div>
-                                <div><p>{item.brand}</p></div>
                                 <div><p>{item.project}</p></div>
                                 <div className="po">
                                     <input
-                                        type='number'
                                         value={form.poNumber}
                                         onChange={(e) => setField("poNumber", e.target.value)}
-                                        placeholder="PO Number"
                                     />
                                 </div>
-                                <div><p>{item.reach}</p></div>
+                                <div><p>{formatFollowers(item.reach)}</p></div>
                                 <div><p>{item.total}</p></div>
                             </div>
                         ))}

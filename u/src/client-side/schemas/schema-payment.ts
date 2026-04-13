@@ -11,7 +11,6 @@ export const paymentCampaignSchema = z.object({
     .string()
     .optional()
     .transform((v) => (v ?? "").trim())
-    .refine((val) => !val || /^\d+$/.test(val), "VAT number must be numeric"),
 });
 
 export type PaymentCampaignFormValues = z.infer<typeof paymentCampaignSchema>;

@@ -1,4 +1,4 @@
-import React, { type FC } from "react";
+import  { type FC } from "react";
 import "./_campaigns_list.scss";
 
 import { TableListView } from "./components/table-list-view";

@@ -33,7 +33,10 @@ export const mapDraftAddedAccounts = (
 ) => {
     const map = new Map<string, any>();
 
-    const addAccount = (item: any, source: "selected" | "offer" | "promo" | "promoUI") => {
+    const addAccount = (
+        item: any,
+        source: "selected" | "offer" | "promo" | "promoUI",
+    ) => {
         const socialAccountId =
             item?.accountId ||
             item?.socialAccountId ||
@@ -49,7 +52,21 @@ export const mapDraftAddedAccounts = (
 
         const username = String(item?.username ?? "");
 
+        const incomingSelected =
+            item?.selectedCampaignContentItem ??
+            item?.selectedContent ??
+            null;
+
+        const incomingCampaignContentItemId = String(
+            incomingSelected?.campaignContentItemId ?? "",
+        );
+
+        const incomingDescriptionId = String(
+            incomingSelected?.descriptionId ?? "",
+        );
+
         const existing = map.get(socialAccountId);
+
         map.set(socialAccountId, {
             influencerId: existing?.influencerId || influencerId,
             socialAccountId,
@@ -57,9 +74,13 @@ export const mapDraftAddedAccounts = (
             username: existing?.username || username,
             selectedContent: {
                 campaignContentItemId:
-                uid(),
+                    existing?.selectedContent?.campaignContentItemId ||
+                    incomingCampaignContentItemId ||
+                    "",
                 descriptionId:
-                    uid(),
+                    existing?.selectedContent?.descriptionId ||
+                    incomingDescriptionId ||
+                    "",
             },
             __source: source,
         });

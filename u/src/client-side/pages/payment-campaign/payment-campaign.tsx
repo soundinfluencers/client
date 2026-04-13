@@ -59,6 +59,7 @@ const toBackendSelectedMethod = (
 export const PaymentCampaign = () => {
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get("draft");
+  const campaignDraftId = useCampaignStore((s) => s.draftId);
   const proposalId = searchParams.get("proposal");
   const optionIndex = Number(searchParams.get("option") ?? 0);
   const { data: invoiceDetails, isLoading: invoiceLoading } =
@@ -70,7 +71,7 @@ export const PaymentCampaign = () => {
   const [modalCompleted, setModalCompleted] = React.useState(false);
   const [selectedIdPayment, setSelectedIdPayment] =
     React.useState<PaymentMethodId>("bank_card");
-
+  const effectiveDraftId = draftId || campaignDraftId || null;
   const [currency, setCurrency] = React.useState<
     | "bank_transfer_uk"
     | "bank_transfer_eu"
@@ -167,36 +168,36 @@ export const PaymentCampaign = () => {
     try {
       let base: any;
 
-      if (draftId) {
+      if (effectiveDraftId) {
         const patches = useUpdateCampaign.getState().patches ?? {};
         base = draftStore.getCampaignPayload(
-          draftId,
-          campaignName ?? "",
-          selectedIdPayment,
-          patches,
+            effectiveDraftId,
+            campaignName ?? "",
+            selectedIdPayment,
+            patches,
         );
       } else if (proposalId) {
         const cached = useProposalCampaignStore
-          .getState()
-          .getProposalPayload(proposalId, optionIndex);
+            .getState()
+            .getProposalPayload(proposalId, optionIndex);
 
         const patches = useUpdateCampaign.getState().patches ?? {};
         base =
-          cached ??
-          useProposalCampaignStore
-            .getState()
-            .getCampaignPayload(
-              proposalId,
-              optionIndex,
-              campaignName ?? "",
-              patches,
-            );
+            cached ??
+            useProposalCampaignStore
+                .getState()
+                .getCampaignPayload(
+                    proposalId,
+                    optionIndex,
+                    campaignName ?? "",
+                    patches,
+                );
       } else {
         base = actions.getCampaignPayload(selectedIdPayment);
       }
 
       const finalCampaignName = String(
-        base?.campaignName ?? campaignName ?? "",
+          base?.campaignName ?? campaignName ?? "",
       );
 
       const paymentDetails = {
@@ -219,9 +220,9 @@ export const PaymentCampaign = () => {
       console.log(payload, "payload");
       await postCampaign(payload);
 
-      if (draftId) {
-        await deleteDraft(draftId);
-        draftStore.clearCampaign(draftId);
+      if (effectiveDraftId) {
+        await deleteDraft(effectiveDraftId);
+        draftStore.clearCampaign(effectiveDraftId);
       }
       setModalCompleted(true);
       toast.success("Campaign saved successfully!");

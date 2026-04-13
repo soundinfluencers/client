@@ -37,11 +37,14 @@ type ProposalAccountsStore = {
     opts?: { force?: boolean },
   ) => void;
   addContentForSocial: (
-    optionIndex: number,
-    socialMedia: string,
-    payload: { mainLink: string },
-    inheritFromContentId?: string,
-  ) => string;
+      optionIndex: number,
+      socialMedia: string,
+      payload: { mainLink: string },
+      inheritFromContentId?: string,
+  ) => {
+    contentId: string;
+    firstDescriptionId: string;
+  };
   addAccounts: (optionIndex: number, accounts: CampaignAddedAccount[]) => void;
   removeContentItem: (optionIndex: number, contentId: string) => void;
   mergeContent: (optionIndex: number, contentToAdd: any[]) => void;
@@ -49,6 +52,14 @@ type ProposalAccountsStore = {
     optionIndex: number,
     accountKey: string,
     dateRequest: string,
+  ) => void;
+  setAccountSelectedContent: (
+      optionIndex: number,
+      accountKey: string,
+      selected: {
+        campaignContentItemId: string;
+        descriptionId: string;
+      },
   ) => void;
   removeAccount: (optionIndex: number, accountKey: string) => void;
   setAccounts: (optionIndex: number, accounts: CampaignAddedAccount[]) => void;
@@ -60,7 +71,28 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     accountsByOption: {},
     contentByOption: {},
     recentlyAddedKeysByOption: {},
+    setAccountSelectedContent: (optionIndex, accountKey, selected) => {
+      set((state) => {
+        const prev = state.accountsByOption[optionIndex] ?? [];
 
+        const next = prev.map((account) =>
+            getAccountKey(account) === String(accountKey)
+                ? {
+                  ...account,
+                  selectedContent: selected,
+                  selectedCampaignContentItem: selected,
+                }
+                : account,
+        );
+
+        return {
+          accountsByOption: {
+            ...state.accountsByOption,
+            [optionIndex]: next,
+          },
+        };
+      });
+    },
     initOption: (optionIndex, serverAccounts, serverContent, opts) => {
       set((state) => {
         const exists = state.contentByOption[optionIndex];
@@ -93,38 +125,42 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       });
     },
     addContentForSocial: (
-      optionIndex,
-      socialMedia,
-      payload,
-      inheritFromContentId,
+        optionIndex,
+        socialMedia,
+        payload,
+        inheritFromContentId,
     ) => {
       const sm = String(socialMedia ?? "").toLowerCase();
       const group = getGroupBySocial(sm);
       const newId = oid();
+
+      let firstDescriptionId = "";
+
       set((state) => {
         const prev = state.contentByOption[optionIndex] ?? [];
 
         const base =
-          (inheritFromContentId
-            ? prev.find((c) => c._id === inheritFromContentId)
-            : prev.find(
-                (c) => String(c.socialMedia ?? "").toLowerCase() === sm,
-              )) ?? prev.find((c) => c.socialMediaGroup === group);
+            (inheritFromContentId
+                ? prev.find((c) => c._id === inheritFromContentId)
+                : prev.find((c) => String(c.socialMedia ?? "").toLowerCase() === sm)) ??
+            prev.find((c) => c.socialMediaGroup === group);
+
+        const descriptions = (base?.descriptions ?? []).map((d: any) => ({
+          _id: oid(),
+          description: d.description ?? "",
+        }));
+
+        firstDescriptionId = String(descriptions?.[0]?._id ?? "");
 
         const nextItem: CampaignContentItem = {
-          _id: oid(),
+          _id: newId,
           socialMedia: sm,
           socialMediaGroup: group,
           mainLink: payload.mainLink,
-
-          // ✅ наследуем
           taggedUser: base?.taggedUser ?? "",
           taggedLink: base?.taggedLink ?? "",
           additionalBrief: base?.additionalBrief ?? "",
-          descriptions: (base?.descriptions ?? []).map((d) => ({
-            _id: oid(),
-            description: d.description ?? "",
-          })),
+          descriptions,
         };
 
         return {
@@ -135,7 +171,10 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         };
       });
 
-      return newId;
+      return {
+        contentId: newId,
+        firstDescriptionId,
+      };
     },
     removeContentItem: (optionIndex, contentId) => {
       set((state) => {

@@ -31,6 +31,7 @@ export type TableRowProps = {
   onCloseDropdown: () => void;
   optionIndex?: number;
   columns: any;
+  status: string
 };
 
 type ActiveDropdownProposal = {

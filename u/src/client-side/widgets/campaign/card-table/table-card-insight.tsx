@@ -11,6 +11,7 @@ import { MetricCell } from "../cells/insight/metric-cell";
 type Props = { data: CampaignAddedAccount };
 
 export const TableCard = React.memo(function TableCard({ data }: Props) {
+    console.log("data", data);
   return (
     <tr className="table-campaign-page__tr">
       <NetworkCell data={data} />

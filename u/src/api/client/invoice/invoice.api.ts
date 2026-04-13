@@ -24,10 +24,12 @@ export const getInvoiceHistory = async (limit: number, page: number) => {
   return res.data.data.invoices;
 };
 export const getPdffileInvoiceHistory = async (invoiceId: string) => {
-  const res = await $api.get(`/invoice/download`, {
-    params: { invoiceId },
+  console.log(`INVOICE ID: ${invoiceId}`);
+
+  const res = await $api.get(`/invoice/download/${invoiceId}`, {
     responseType: "blob",
   });
+
   return res.data as Blob;
 };
 
@@ -49,6 +51,7 @@ export const patchInvoiceById = async (
       company: string;
       address: string;
       country: string;
+      vatNumber: string;
     },
 ) => {
   try {

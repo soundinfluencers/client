@@ -4,7 +4,7 @@ export type CampaignViewMode = -1 | 0 | 1 | 2;
 
 export type LastCampaignSession = {
     id: string;
-    status: "draft" | "proposal" | "regular" | string;
+    status: "draft" | "proposal" | "regular" | "pending";
     optionIndex?: number;
 };
 

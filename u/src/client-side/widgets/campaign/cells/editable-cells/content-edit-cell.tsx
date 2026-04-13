@@ -69,7 +69,6 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
   const selectContent = React.useCallback(
     (idx: number) => {
       setSelectedContent(idx);
-      setSelectedPd(0);
       onClose();
     },
     [setSelectedContent, setSelectedPd, onClose],
@@ -102,7 +101,6 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
     addContentForSocial(optionIndex, sm, { mainLink: link }, selectedItem?._id);
 
     setSelectedContent(platformItems.length);
-    setSelectedPd(0);
 
     closeAddModal();
     onClose();
@@ -141,7 +139,7 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
       if (prev > deleteIdx) return prev - 1;
       return prev;
     });
-    setSelectedPd(0);
+    // setSelectedPd(0);
   }, [
     platformItems,
     deleteIdx,

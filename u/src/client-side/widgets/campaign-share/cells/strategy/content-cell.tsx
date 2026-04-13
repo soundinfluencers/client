@@ -38,7 +38,6 @@ export const ContentCell = React.memo(function ContentCell({
   const onClickSelect = React.useCallback(
       (optionIndex: number) => {
         setSelectedContent(optionIndex);
-        setSelectedPd(0);
         onClose();
       },
       [setSelectedContent, setSelectedPd, onClose],
@@ -80,57 +79,14 @@ export const ContentCell = React.memo(function ContentCell({
   return (
       <>
         <td className="tableBase__td">
-          {platformItems.length <= 1 ? (
-              <div className="content-cell-static no-edit">
+            <div className="content-cell-static no-edit">
             <span onClick={onClickHeaderEye} className="eye">
               <img src={eye} alt="" />
             </span>
                 <p title={selectedLink}>
-                  {selectedLink ? `${groupTitle(group)} ${selectedContent + 1}` : "—"}
+                    {selectedLink ? `${groupTitle(group)} ${selectedContent + 1}` : "—"}
                 </p>
-              </div>
-          ) : (
-              <Dropdown
-                  isOpen={isOpen}
-                  onToggle={onToggle}
-                  content
-                  selected={
-                    <div className="content-cell-static">
-                <span onClick={onClickHeaderEye} className="eye">
-                  <img src={eye} alt="" />
-                </span>
-                      <p title={selectedLink}>
-                        {selectedLink ? `${groupTitle(group)} ${selectedContent + 1}` : "—"}
-                      </p>
-                    </div>
-                  }
-              >
-                <ul className="dropdown-list">
-                  {platformItems.map((item: any, optionIndex: number) => (
-                      <li
-                          key={`${item?._id ?? optionIndex}-${socialMedia}`}
-                          onClick={() => onClickSelect(optionIndex)}
-                      >
-                  <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onClickVideo(optionIndex, item.mainLink ?? "");
-                      }}
-                      className="eye"
-                  >
-                    <img src={eye} alt="" />
-                  </span>
-
-                        {item.mainLink ? `${groupTitle(group)} ${optionIndex + 1}` : "—"}
-
-                        {selectedContent === optionIndex && (
-                            <img className="check" src={check} alt="" />
-                        )}
-                      </li>
-                  ))}
-                </ul>
-              </Dropdown>
-          )}
+            </div>
         </td>
 
         {popUp && (

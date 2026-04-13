@@ -201,67 +201,71 @@ export const PostContentAdd: React.FC = () => {
       },
       [actions, grouped, navigate, selectedPlatforms, missingGroups, optionIndex],
   );
-  const renderGroup = (group: GroupKey) => {
-    if (!missingGroups.includes(group)) return null;
+    const renderGroup = (group: GroupKey) => {
+        if (!missingGroups.includes(group)) return null;
 
-    const platforms = (grouped[group] ?? []) as SocialMediaType[];
-    if (!platforms.length) return null;
+        const platforms = (grouped[group] ?? []) as SocialMediaType[];
+        if (!platforms.length) return null;
 
-    const baseForm = platformFormsMap[group];
-    const additional = groupAdditionalByGroup[group];
+        const baseForm = platformFormsMap[group];
+        const additional = groupAdditionalByGroup[group];
+        const canAddAdditional = group !== "press";
 
-    return (
-      <div key={group} className="platform-group">
-        <PlatformForm
-          selectedEntity={selectedEntity}
-          data={baseForm}
-          selectedPlatforms={platforms}
-          formPrefix={`${group}-0`}
-        />
+        return (
+            <div key={group} className="platform-group">
+                <PlatformForm
+                    selectedEntity={selectedEntity}
+                    data={baseForm}
+                    selectedPlatforms={platforms}
+                    formPrefix={`${group}-0`}
+                />
 
-        {additional.map((f) => {
-          const n = getAdditionalIndex(f.id);
-          const prefix = getFormPrefix(f);
-          return (
-            <AdditionalPlatformForm
-              selectedEntity={selectedEntity}
-              key={f.id}
-              data={{
-                ...baseForm,
-                _id: f.id,
-                platform: group,
-                socialMedia: f.socialMedia,
-              }}
-              index={n - 1}
-              formPrefix={getFormPrefix(f)}
-              onRemove={() => removeAdditionalForm(f.id, prefix)}
-            />
-          );
-        })}
+                {additional.map((f) => {
+                    const n = getAdditionalIndex(f.id);
+                    const prefix = getFormPrefix(f);
 
-        <ButtonSecondary
-          className="additional-button"
-          text={`Add additional ${baseForm.contentTitle}`}
-          onClick={() => toggleAdditionalSelection(group)}
-        />
+                    return (
+                        <AdditionalPlatformForm
+                            selectedEntity={selectedEntity}
+                            key={f.id}
+                            data={{
+                                ...baseForm,
+                                _id: f.id,
+                                platform: group,
+                                socialMedia: f.socialMedia,
+                            }}
+                            index={n - 1}
+                            formPrefix={prefix}
+                            onRemove={() => removeAdditionalForm(f.id, prefix)}
+                        />
+                    );
+                })}
 
+                {canAddAdditional && (
+                    <>
+                        <ButtonSecondary
+                            className="additional-button"
+                            text={`Add additional ${baseForm.contentTitle}`}
+                            onClick={() => toggleAdditionalSelection(group)}
+                        />
 
-
-        {additionalSelection === group && (
-          <div className="additional-selection">
-            <p>Choose the platform for additional post brief</p>
-            <ul>
-              {platforms.map((p) => (
-                <li key={p} onClick={() => addAdditionalForm(group, p)}>
-                  <img src={getSocialMediaIcon(p)} alt={p} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    );
-  };
+                        {additionalSelection === group && (
+                            <div className="additional-selection">
+                                <p>Choose the platform for additional post brief</p>
+                                <ul>
+                                    {platforms.map((p) => (
+                                        <li key={p} onClick={() => addAdditionalForm(group, p)}>
+                                            <img src={getSocialMediaIcon(p)} alt={p} />
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+        );
+    };
 
   React.useEffect(() => {
     if (missingGroups.length === 0) {

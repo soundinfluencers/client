@@ -38,9 +38,6 @@ export const CampaignContentView: React.FC<Props> = ({
         view,
         flag,
     });
-    console.log("VIEW byGroup.music", byGroup.music);
-    console.log("VIEW musicPromos", musicPromos);
-    console.log("groupPrices", groupPrices);
     const renderLiveCards = () => (
         <div className="live-view-wrapper">
             {byGroup.main.map((item) => (
@@ -126,6 +123,7 @@ export const CampaignContentView: React.FC<Props> = ({
                     group="main"
                     canEdit={config.canEdit}
                     title="Video Distribution"
+                    status={campaign.status}
                 />
             )}
 
@@ -138,6 +136,7 @@ export const CampaignContentView: React.FC<Props> = ({
                     group="music"
                     canEdit={config.canEdit}
                     title="Music Placements"
+                    status={campaign.status}
                 />
             )}
 
@@ -150,6 +149,7 @@ export const CampaignContentView: React.FC<Props> = ({
                     group="press"
                     canEdit={config.canEdit}
                     title="Press Coverage"
+                    status={campaign.status}
                 />
             )}
         </div>

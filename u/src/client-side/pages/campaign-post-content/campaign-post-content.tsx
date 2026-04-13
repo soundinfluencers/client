@@ -73,6 +73,7 @@ export const CampaignPostContent: React.FC = () => {
         const baseForm = platformFormsMap[group];
         const additional = groupAdditionalByGroup[group];
         const basePrefix = `${group}-0`;
+        const canAddAdditional = group !== "press";
 
         return (
             <div key={group} className="platform-group">
@@ -103,29 +104,33 @@ export const CampaignPostContent: React.FC = () => {
                     );
                 })}
 
-                <ButtonSecondary
-                    className="additional-button"
-                    text={`Add additional ${baseForm.contentTitle}`}
-                    onClick={() => toggleAdditionalSelection(group)}
-                />
+                {canAddAdditional && (
+                    <>
+                        <ButtonSecondary
+                            className="additional-button"
+                            text={`Add additional ${baseForm.contentTitle}`}
+                            onClick={() => toggleAdditionalSelection(group)}
+                        />
 
-                {additionalSelection === group && (
-                    <div className="additional-selection">
-                        <p>Choose the platform for additional post brief</p>
-                        <ul>
-                            {platforms.map((platform) => (
-                                <li
-                                    key={platform}
-                                    onClick={() => addAdditionalForm(group, platform)}
-                                >
-                                    <img
-                                        src={getSocialMediaIcon(platform) || ""}
-                                        alt={platform}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                        {additionalSelection === group && (
+                            <div className="additional-selection">
+                                <p>Choose the platform for additional post brief</p>
+                                <ul>
+                                    {platforms.map((platform) => (
+                                        <li
+                                            key={platform}
+                                            onClick={() => addAdditionalForm(group, platform)}
+                                        >
+                                            <img
+                                                src={getSocialMediaIcon(platform) || ""}
+                                                alt={platform}
+                                            />
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         );

@@ -90,7 +90,7 @@ export const Selection: React.FC<Props> = ({
 
                           <div className={Styles.followers}>
                             <p>
-                              {formatFollowers(card.followers)} followers{" "}
+                                {card.followers > 0 && `${formatFollowers(card.followers)} followers`}
                               <span>
                           {getPriceByCurrency(card.prices, selectedCurrency)}€
                         </span>

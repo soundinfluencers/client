@@ -24,8 +24,6 @@ export const TableCard = React.memo(function TableCard({
                                                            columns,
                                                        }: TableRowProps) {
     const [selectedDate, setSelectedDate] = React.useState<string>(ReqData[0]);
-    const [selectedContent, setSelectedContent] = React.useState<number>(0);
-    const [selectedPd, setSelectedPd] = React.useState<number>(0);
     const [customDate, setCustomDate] = React.useState<string>("");
 
     const isDateOpen =
@@ -40,10 +38,7 @@ export const TableCard = React.memo(function TableCard({
         const map: Record<string, CampaignContentItem[]> = {};
 
         for (const it of items ?? []) {
-            const key = String(it.socialMedia ?? "")
-                .trim()
-                .toLowerCase();
-
+            const key = String(it.socialMedia ?? "").trim().toLowerCase();
             (map[key] ||= []).push(it);
         }
 
@@ -51,12 +46,76 @@ export const TableCard = React.memo(function TableCard({
     }, [items]);
 
     const platformItems = React.useMemo(() => {
-        const key = String(data.socialMedia ?? "")
-            .trim()
-            .toLowerCase();
-
+        const key = String(data.socialMedia ?? "").trim().toLowerCase();
         return itemsByPlatform[key] ?? [];
     }, [itemsByPlatform, data.socialMedia]);
+
+    const selectedMeta =
+        (data as any)?.selectedContent ??
+        (data as any)?.selectedCampaignContentItem ??
+        null;
+
+    const selectedContentId = String(
+        selectedMeta?.campaignContentItemId ?? "",
+    );
+
+    const selectedDescriptionId = String(
+        selectedMeta?.descriptionId ?? "",
+    );
+
+    const resolvedSelectedContent = React.useMemo(() => {
+        if (!selectedContentId) return 0;
+
+        const index = platformItems.findIndex(
+            (item: any) =>
+                String(item?._id ?? item?.id ?? "") === selectedContentId,
+        );
+
+        return index >= 0 ? index : 0;
+    }, [platformItems, selectedContentId]);
+
+    const resolvedSelectedPd = React.useMemo(() => {
+        const descriptions =
+            platformItems?.[resolvedSelectedContent]?.descriptions ?? [];
+
+        if (!selectedDescriptionId) return 0;
+
+        const index = descriptions.findIndex(
+            (desc: any) => String(desc?._id ?? "") === selectedDescriptionId,
+        );
+
+        return index >= 0 ? index : 0;
+    }, [platformItems, resolvedSelectedContent, selectedDescriptionId]);
+
+    const [selectedContent, setSelectedContent] = React.useState<number>(
+        resolvedSelectedContent,
+    );
+    const [selectedPd, setSelectedPd] = React.useState<number>(
+        resolvedSelectedPd,
+    );
+
+    React.useEffect(() => {
+        setSelectedContent(resolvedSelectedContent);
+    }, [resolvedSelectedContent]);
+
+    React.useEffect(() => {
+        setSelectedPd(resolvedSelectedPd);
+    }, [resolvedSelectedPd]);
+
+    const safeSelectedContent =
+        selectedContent >= 0 && selectedContent < platformItems.length
+            ? selectedContent
+            : 0;
+
+    const safeSelectedPd = React.useMemo(() => {
+        const descriptions =
+            platformItems?.[safeSelectedContent]?.descriptions ?? [];
+
+        if (!descriptions.length) return 0;
+        if (selectedPd < 0 || selectedPd >= descriptions.length) return 0;
+
+        return selectedPd;
+    }, [platformItems, safeSelectedContent, selectedPd]);
 
     const toggleDate = React.useCallback(
         () => onToggleDropdown(rowKey, "date"),
@@ -87,7 +146,7 @@ export const TableCard = React.memo(function TableCard({
                             onToggle={toggleContent}
                             onClose={onCloseDropdown}
                             platformItems={platformItems}
-                            selectedContent={selectedContent}
+                            selectedContent={safeSelectedContent}
                             setSelectedContent={setSelectedContent}
                             setSelectedPd={setSelectedPd}
                             socialMedia={data.socialMedia}
@@ -102,8 +161,8 @@ export const TableCard = React.memo(function TableCard({
                             onToggle={togglePD}
                             onClose={onCloseDropdown}
                             platformItems={platformItems}
-                            selectedContent={selectedContent}
-                            selectedPd={selectedPd}
+                            selectedContent={safeSelectedContent}
+                            selectedPd={safeSelectedPd}
                             setSelectedPd={setSelectedPd}
                         />
                     )}
@@ -113,7 +172,7 @@ export const TableCard = React.memo(function TableCard({
                             changeView={changeView}
                             group={group}
                             platformItems={platformItems}
-                            selectedContent={selectedContent}
+                            selectedContent={safeSelectedContent}
                         />
                     )}
                 </>
@@ -136,7 +195,7 @@ export const TableCard = React.memo(function TableCard({
                             onToggle={toggleContent}
                             onClose={onCloseDropdown}
                             platformItems={platformItems}
-                            selectedContent={selectedContent}
+                            selectedContent={safeSelectedContent}
                             setSelectedContent={setSelectedContent}
                             setSelectedPd={setSelectedPd}
                             socialMedia={data.socialMedia}
@@ -145,13 +204,13 @@ export const TableCard = React.memo(function TableCard({
                     )}
 
                     <DescriptionCell
-                        group={group}
                         isOpen={isPostDescriptionOpen}
+                        group={group}
                         onToggle={togglePD}
                         onClose={onCloseDropdown}
                         platformItems={platformItems}
-                        selectedContent={selectedContent}
-                        selectedPd={selectedPd}
+                        selectedContent={safeSelectedContent}
+                        selectedPd={safeSelectedPd}
                         setSelectedPd={setSelectedPd}
                     />
 
@@ -159,7 +218,7 @@ export const TableCard = React.memo(function TableCard({
                         changeView={changeView}
                         group={group}
                         platformItems={platformItems}
-                        selectedContent={selectedContent}
+                        selectedContent={safeSelectedContent}
                     />
                 </>
             )}

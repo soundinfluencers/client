@@ -18,7 +18,7 @@ type Props = {
 
   platformItems: any[];
   selectedContent: number;
-
+    onSelectDescriptionId?: (descriptionId: string) => void;
   selectedPd: number;
   setSelectedPd: (v: number) => void;
   group: string;
@@ -32,7 +32,7 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
   selectedContent,
   selectedPd,
   setSelectedPd,
-  group,
+  group,onSelectDescriptionId
 }: Props) {
   const baseItem = platformItems?.[selectedContent];
   const contentId: string | undefined = baseItem?._id;
@@ -80,13 +80,15 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
   }, [contentId, patch?.descriptions, serverDescs, setDescriptions]);
 
 
-  const selectPd = React.useCallback(
-      (idx: number) => {
-        setSelectedPd(idx);
-        onClose();
-      },
-      [setSelectedPd, onClose],
-  );
+    const selectPd = React.useCallback(
+        (idx: number) => {
+            const nextId = String(editingDescs?.[idx]?._id ?? "");
+            setSelectedPd(idx);
+            onSelectDescriptionId?.(nextId);
+            onClose();
+        },
+        [editingDescs, setSelectedPd, onSelectDescriptionId, onClose],
+    );
 
   const startAdd = React.useCallback(() => {
     setIsAdding(true);
@@ -100,63 +102,86 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
   }, []);
 
 
-  const commitAdd = React.useCallback(
-      (e?: React.MouseEvent) => {
-        e?.stopPropagation();
-        const trimmed = newText.trim();
-        if (!contentId) return;
+    const commitAdd = React.useCallback(
+        (e?: React.MouseEvent) => {
+            e?.stopPropagation();
+            const trimmed = newText.trim();
+            if (!contentId) return;
 
-        if (!trimmed) {
-          setIsAdding(false);
-          setNewText("");
-          return;
-        }
+            if (!trimmed) {
+                setIsAdding(false);
+                setNewText("");
+                return;
+            }
 
-        ensurePatchDescs();
-        addDescription(contentId, trimmed);
+            ensurePatchDescs();
 
-        setSelectedPd(editingDescs.length);
+            const created = {
+                _id: crypto.randomUUID
+                    ? crypto.randomUUID().replace(/-/g, "").slice(0, 24)
+                    : Math.random().toString(16).slice(2).padEnd(24, "0").slice(0, 24),
+                description: trimmed,
+            };
 
-        setIsAdding(false);
-        setNewText("");
-      },
-      [
-        contentId,
-        newText,
-        ensurePatchDescs,
-        addDescription,
-        setSelectedPd,
-        editingDescs.length,
-      ],
-  );
-  const confirmDelete = React.useCallback(
-      (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (deleteIdx === null || !contentId) return;
+            const nextDescs = [...editingDescs, created];
+            setDescriptions(contentId, nextDescs);
 
-        ensurePatchDescs();
-        removeDescription(contentId, deleteIdx);
+            setSelectedPd(nextDescs.length - 1);
+            onSelectDescriptionId?.(created._id);
 
-        if (selectedPd === deleteIdx) setSelectedPd(Math.max(0, deleteIdx - 1));
-        else if (selectedPd > deleteIdx) setSelectedPd(selectedPd - 1);
+            setIsAdding(false);
+            setNewText("");
+        },
+        [
+            contentId,
+            newText,
+            ensurePatchDescs,
+            editingDescs,
+            setDescriptions,
+            setSelectedPd,
+            onSelectDescriptionId,
+        ],
+    );
+    const confirmDelete = React.useCallback(
+        (e: React.MouseEvent) => {
+            e.stopPropagation();
+            if (deleteIdx === null || !contentId) return;
 
-        if (editIdx === deleteIdx) {
-          setEditIdx(null);
-          setEditText("");
-        }
+            ensurePatchDescs();
 
-        setDeleteIdx(null);
-      },
-      [
-        deleteIdx,
-        contentId,
-        ensurePatchDescs,
-        removeDescription,
-        selectedPd,
-        setSelectedPd,
-        editIdx,
-      ],
-  );
+            const nextDescs = editingDescs.filter((_, idx) => idx !== deleteIdx);
+            setDescriptions(contentId, nextDescs);
+
+            let nextSelectedIdx = selectedPd;
+
+            if (selectedPd === deleteIdx) {
+                nextSelectedIdx = Math.max(0, deleteIdx - 1);
+            } else if (selectedPd > deleteIdx) {
+                nextSelectedIdx = selectedPd - 1;
+            }
+
+            setSelectedPd(nextSelectedIdx);
+            onSelectDescriptionId?.(String(nextDescs?.[nextSelectedIdx]?._id ?? ""));
+
+            if (editIdx === deleteIdx) {
+                setEditIdx(null);
+                setEditText("");
+            }
+
+            setDeleteIdx(null);
+        },
+        [
+            deleteIdx,
+            contentId,
+            ensurePatchDescs,
+            editingDescs,
+            setDescriptions,
+            selectedPd,
+            setSelectedPd,
+            onSelectDescriptionId,
+            editIdx,
+        ],
+    );
 
   const cancelDelete = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();

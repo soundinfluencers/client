@@ -22,261 +22,348 @@ const MUSIC_NETWORKS = ["spotify", "soundcloud"];
 export const getGroupBySocial = (
     social: string,
 ): "main" | "music" | "press" => {
-  const s = social.toLowerCase();
+    const s = social.toLowerCase();
 
-  if (MAIN_NETWORKS.includes(s)) return "main";
-  if (MUSIC_NETWORKS.includes(s)) return "music";
-  return "press";
+    if (MAIN_NETWORKS.includes(s)) return "main";
+    if (MUSIC_NETWORKS.includes(s)) return "music";
+    return "press";
 };
 
 export const TableCard = React.memo(function TableCard({
-                                                         data,
-                                                         rowKey,
-                                                         changeView,
-                                                         group,
-                                                         items,
-                                                         activeDropdown,
-                                                         onToggleDropdown,
-                                                         canEdit,
-                                                         onCloseDropdown,
-                                                         campaignId,
-                                                         columns,
+                                                           data,
+                                                           rowKey,
+                                                           changeView,
+                                                           group,
+                                                           items,
+                                                           activeDropdown,
+                                                           onToggleDropdown,
+                                                           canEdit,
+                                                           onCloseDropdown,
+                                                           campaignId,
+                                                           columns,
                                                        }: TableRowProps) {
-  const [selectedContent, setSelectedContent] = React.useState<number>(0);
-  const [selectedPd, setSelectedPd] = React.useState<number>(0);
+    const accountKey = getAccountKey(data);
 
-  const isDateOpen =
-      activeDropdown?.rowKey === rowKey && activeDropdown.key === "date";
-  const isContentOpen =
-      activeDropdown?.rowKey === rowKey && activeDropdown.key === "content";
-  const isPostDescriptionOpen =
-      activeDropdown?.rowKey === rowKey &&
-      activeDropdown.key === "postDescription";
+    const draftAccount = useDraftCampaignStore((s) => {
+        const list = s.accountsByCampaignId[campaignId ?? ""] ?? [];
 
-  const platformItems = React.useMemo(() => {
-    const social = String(data.socialMedia ?? "").toLowerCase();
+        return list.find(
+            (item: any) =>
+                String(
+                    item?.addedAccountsId ??
+                    item?.socialAccountId ??
+                    item?.accountId ??
+                    item?._id ??
+                    "",
+                ) === accountKey,
+        );
+    });
 
-    const socialItems = (items ?? []).filter(
-        (it) => String(it.socialMedia ?? "").toLowerCase() === social,
+    const setAccountDateRequest = useDraftCampaignStore(
+        (s) => s.setAccountDateRequest,
     );
 
-    if (socialItems.length) return socialItems;
+    const isDateOpen =
+        activeDropdown?.rowKey === rowKey && activeDropdown.key === "date";
+    const isContentOpen =
+        activeDropdown?.rowKey === rowKey && activeDropdown.key === "content";
+    const isPostDescriptionOpen =
+        activeDropdown?.rowKey === rowKey &&
+        activeDropdown.key === "postDescription";
 
-    const group = getGroupBySocial(social);
-    const groupItems = (items ?? []).filter(
-        (it) => it.socialMediaGroup === group,
+    const platformItems = React.useMemo(() => {
+        const social = String(data.socialMedia ?? "").toLowerCase();
+
+        const socialItems = (items ?? []).filter(
+            (it) => String(it.socialMedia ?? "").toLowerCase() === social,
+        );
+
+        if (socialItems.length) return socialItems;
+
+        const socialGroup = getGroupBySocial(social);
+        const groupItems = (items ?? []).filter(
+            (it) => it.socialMediaGroup === socialGroup,
+        );
+
+        if (social === "instagram") return groupItems;
+        if (socialGroup === "main") return groupItems.slice(0, 1);
+
+        return groupItems;
+    }, [items, data.socialMedia]);
+
+    const selectedMeta =
+        draftAccount?.selectedCampaignContentItem ??
+        draftAccount?.selectedContent ??
+        data?.selectedContent ??
+        data?.selectedCampaignContentItem ??
+        null;
+
+    const selectedContentId = String(
+        selectedMeta?.campaignContentItemId ?? "",
     );
 
-    if (social === "instagram") return groupItems;
-    if (group === "main") return groupItems.slice(0, 1);
-
-    return groupItems;
-  }, [items, data.socialMedia]);
-
-  const accountKey = getAccountKey(data);
-  const draftAccount = useDraftCampaignStore((s) => {
-    const list = s.accountsByCampaignId[campaignId ?? ""] ?? [];
-    return list.find(
-        (item: any) =>
-            String(
-                item?.addedAccountsId ??
-                item?.socialAccountId ??
-                item?.accountId ??
-                item?._id ??
-                "",
-            ) === accountKey,
+    const selectedDescriptionId = String(
+        selectedMeta?.descriptionId ?? "",
     );
-  });
-  const setAccountDateRequest = useDraftCampaignStore(
-      (s) => s.setAccountDateRequest,
-  );
 
-  const dateRequestRaw = String(draftAccount?.dateRequest ?? data?.dateRequest ?? "ASAP");
-  const [mode, dateVal = ""] = dateRequestRaw.split(":");
+    const resolvedSelectedContent = React.useMemo(() => {
+        if (!selectedContentId) return 0;
 
-  const selectedItem = platformItems?.[selectedContent];
-  const contentId = selectedItem?._id;
-  const media0 = items?.[selectedContent]?.mediaCache?.items?.[0];
+        const index = platformItems.findIndex(
+            (item: any) => String(item?._id ?? item?.id ?? "") === selectedContentId,
+        );
 
-  const toggleDate = React.useCallback(
-      () => onToggleDropdown(rowKey, "date"),
-      [onToggleDropdown, rowKey],
-  );
+        return index >= 0 ? index : 0;
+    }, [platformItems, selectedContentId]);
 
-  const toggleContent = React.useCallback(
-      () => onToggleDropdown(rowKey, "content"),
-      [onToggleDropdown, rowKey],
-  );
+    const resolvedSelectedPd = React.useMemo(() => {
+        const descriptions =
+            platformItems?.[resolvedSelectedContent]?.descriptions ?? [];
 
-  const togglePD = React.useCallback(
-      () => onToggleDropdown(rowKey, "postDescription"),
-      [onToggleDropdown, rowKey],
-  );
+        if (!selectedDescriptionId) return 0;
 
-  return (
-      <tr className="table-campaign-page__tr">
-        <NetworkCell data={data} />
+        const index = descriptions.findIndex(
+            (desc: any) => String(desc?._id ?? "") === selectedDescriptionId,
+        );
 
-        {columns.includes("followers") && <FollowersCell data={data} />}
+        return index >= 0 ? index : 0;
+    }, [platformItems, resolvedSelectedContent, selectedDescriptionId]);
 
-        {changeView ? (
-            <>
-              {canEdit ? (
-                  <ExtraFieldsCellsEdit
-                      changeView={changeView}
-                      contentId={contentId}
-                      baseItem={selectedItem}
-                      group={group}
-                  />
-              ) : (
-                  <ExtraFieldsCells
-                      changeView={changeView}
-                      group={group}
-                      platformItems={platformItems}
-                      selectedContent={selectedContent}
-                  />
-              )}
+    const [selectedContent, setSelectedContent] = React.useState<number>(
+        resolvedSelectedContent,
+    );
+    const [selectedPd, setSelectedPd] = React.useState<number>(
+        resolvedSelectedPd,
+    );
 
-              {group !== "press" && (
-                  <ContentCell
-                      isOpen={isContentOpen}
-                      onToggle={toggleContent}
-                      onClose={onCloseDropdown}
-                      platformItems={platformItems}
-                      selectedContent={selectedContent}
-                      setSelectedContent={setSelectedContent}
-                      setSelectedPd={setSelectedPd}
-                      socialMedia={data.socialMedia}
-                      group={group}
-                  />
-              )}
+    React.useEffect(() => {
+        setSelectedContent(resolvedSelectedContent);
+    }, [resolvedSelectedContent]);
 
-              {group !== "press" ? (
-                  canEdit ? (
-                      <DescriptionCellEdit
-                          isOpen={isPostDescriptionOpen}
-                          onToggle={togglePD}
-                          onClose={onCloseDropdown}
-                          platformItems={platformItems}
-                          selectedContent={selectedContent}
-                          selectedPd={selectedPd}
-                          setSelectedPd={setSelectedPd}
-                          group={group}
-                      />
-                  ) : (
-                      <DescriptionCell
-                          isOpen={isPostDescriptionOpen}
-                          onToggle={togglePD}
-                          onClose={onCloseDropdown}
-                          platformItems={platformItems}
-                          selectedContent={selectedContent}
-                          selectedPd={selectedPd}
-                          setSelectedPd={setSelectedPd}
-                          group={group}
-                      />
-                  )
-              ) : null}
-            </>
-        ) : (
-            <>
-              <DateCell
-                  isOpen={isDateOpen}
-                  onToggle={toggleDate}
-                  onClose={onCloseDropdown}
-                  canEdit={canEdit}
-                  selectedDate={mode}
-                  customDate={dateVal}
-                  setSelectedDate={(nextMode) => {
-                    if (nextMode === "BEFORE" || nextMode === "AFTER") {
-                      const next = dateVal ? `${nextMode}:${dateVal}` : nextMode;
-                      setAccountDateRequest(campaignId ?? "", accountKey, next);
-                    } else {
-                      setAccountDateRequest(campaignId ?? "", accountKey, nextMode);
-                    }
-                  }}
-                  setCustomDate={(nextDate) => {
-                    const m = mode === "BEFORE" || mode === "AFTER" ? mode : "BEFORE";
-                    setAccountDateRequest(
-                        campaignId ?? "",
-                        accountKey,
-                        `${m}:${nextDate}`,
-                    );
-                  }}
-              />
+    React.useEffect(() => {
+        setSelectedPd(resolvedSelectedPd);
+    }, [resolvedSelectedPd]);
 
-              {group !== "press" ? (
-                  canEdit ? (
-                      <ContentCellEditDraft
-                          campaignId={campaignId ?? ""}
-                          selectedItem={selectedItem}
-                          isOpen={isContentOpen}
-                          onToggle={toggleContent}
-                          onClose={onCloseDropdown}
-                          platformItems={platformItems}
-                          selectedContent={selectedContent}
-                          setSelectedContent={setSelectedContent}
-                          setSelectedPd={setSelectedPd}
-                          socialMedia={data.socialMedia}
-                          group={group}
-                      />
-                  ) : (
-                      <ContentCell
-                          media0={media0}
-                          isOpen={isContentOpen}
-                          onToggle={toggleContent}
-                          onClose={onCloseDropdown}
-                          platformItems={platformItems}
-                          selectedContent={selectedContent}
-                          setSelectedContent={setSelectedContent}
-                          setSelectedPd={setSelectedPd}
-                          socialMedia={data.socialMedia}
-                          group={group}
-                      />
-                  )
-              ) : null}
+    const safeSelectedContent =
+        selectedContent >= 0 && selectedContent < platformItems.length
+            ? selectedContent
+            : 0;
 
-              {canEdit ? (
-                  <DescriptionCellEdit
-                      isOpen={isPostDescriptionOpen}
-                      onToggle={togglePD}
-                      onClose={onCloseDropdown}
-                      platformItems={platformItems}
-                      selectedContent={selectedContent}
-                      selectedPd={selectedPd}
-                      setSelectedPd={setSelectedPd}
-                      group={group}
-                  />
-              ) : (
-                  <DescriptionCell
-                      isOpen={isPostDescriptionOpen}
-                      onToggle={togglePD}
-                      onClose={onCloseDropdown}
-                      platformItems={platformItems}
-                      selectedContent={selectedContent}
-                      selectedPd={selectedPd}
-                      setSelectedPd={setSelectedPd}
-                      group={group}
-                  />
-              )}
+    const safeSelectedPd = React.useMemo(() => {
+        const descriptions =
+            platformItems?.[safeSelectedContent]?.descriptions ?? [];
 
-              {canEdit ? (
-                  <ExtraFieldsCellsEdit
-                      contentId={contentId}
-                      baseItem={selectedItem}
-                      group={group}
-                  />
-              ) : (
-                  <ExtraFieldsCells
-                      group={group}
-                      platformItems={platformItems}
-                      selectedContent={selectedContent}
-                  />
-              )}
-            </>
-        )}
+        if (!descriptions.length) return 0;
+        if (selectedPd < 0 || selectedPd >= descriptions.length) return 0;
 
-        {columns.includes("genres") && <GenresCell data={data} />}
-        {columns.includes("countries") && <CountriesCell data={data} />}
-      </tr>
-  );
+        return selectedPd;
+    }, [platformItems, safeSelectedContent, selectedPd]);
+
+    const selectedItem = platformItems?.[safeSelectedContent];
+    const contentId = selectedItem?._id;
+    const media0 = selectedItem?.mediaCache?.items?.[0];
+
+    const dateRequestRaw = String(
+        draftAccount?.dateRequest ?? data?.dateRequest ?? "ASAP",
+    );
+    const [mode, dateVal = ""] = dateRequestRaw.split(":");
+    const setAccountSelectedContent = useDraftCampaignStore(
+        (s) => s.setAccountSelectedContent,
+    );
+
+    const handleSelectDescriptionId = React.useCallback(
+        (descriptionId: string) => {
+            if (!setAccountSelectedContent) return;
+
+            setAccountSelectedContent(campaignId ?? "", accountKey, {
+                campaignContentItemId: String(selectedItem?._id ?? ""),
+                descriptionId: String(descriptionId ?? ""),
+            });
+        },
+        [setAccountSelectedContent, campaignId, accountKey, selectedItem],
+    );
+    const toggleDate = React.useCallback(
+        () => onToggleDropdown(rowKey, "date"),
+        [onToggleDropdown, rowKey],
+    );
+
+    const toggleContent = React.useCallback(
+        () => onToggleDropdown(rowKey, "content"),
+        [onToggleDropdown, rowKey],
+    );
+
+    const togglePD = React.useCallback(
+        () => onToggleDropdown(rowKey, "postDescription"),
+        [onToggleDropdown, rowKey],
+    );
+
+    return (
+        <tr className="table-campaign-page__tr">
+            <NetworkCell data={data} />
+
+            {columns.includes("followers") && <FollowersCell data={data} />}
+
+            {changeView ? (
+                <>
+                    {canEdit ? (
+                        <ExtraFieldsCellsEdit
+                            changeView={changeView}
+                            contentId={contentId}
+                            baseItem={selectedItem}
+                            group={group}
+                        />
+                    ) : (
+                        <ExtraFieldsCells
+                            changeView={changeView}
+                            group={group}
+                            platformItems={platformItems}
+                            selectedContent={safeSelectedContent}
+                        />
+                    )}
+
+                    {group !== "press" && (
+                        <ContentCell
+                            isOpen={isContentOpen}
+                            onToggle={toggleContent}
+                            onClose={onCloseDropdown}
+                            platformItems={platformItems}
+                            selectedContent={safeSelectedContent}
+                            setSelectedContent={setSelectedContent}
+                            setSelectedPd={setSelectedPd}
+                            socialMedia={data.socialMedia}
+                            group={group}
+                        />
+                    )}
+
+                    {group !== "press" ? (
+                        canEdit ? (
+                            <DescriptionCellEdit
+                                onSelectDescriptionId={handleSelectDescriptionId}
+                                isOpen={isPostDescriptionOpen}
+                                onToggle={togglePD}
+                                onClose={onCloseDropdown}
+                                platformItems={platformItems}
+                                selectedContent={safeSelectedContent}
+                                selectedPd={safeSelectedPd}
+                                setSelectedPd={setSelectedPd}
+                                group={group}
+                            />
+                        ) : (
+                            <DescriptionCell
+
+                                isOpen={isPostDescriptionOpen}
+                                onToggle={togglePD}
+                                onClose={onCloseDropdown}
+                                platformItems={platformItems}
+                                selectedContent={safeSelectedContent}
+                                selectedPd={safeSelectedPd}
+                                setSelectedPd={setSelectedPd}
+                                group={group}
+                            />
+                        )
+                    ) : null}
+                </>
+            ) : (
+                <>
+                    <DateCell
+                        isOpen={isDateOpen}
+                        onToggle={toggleDate}
+                        onClose={onCloseDropdown}
+                        canEdit={canEdit}
+                        selectedDate={mode}
+                        customDate={dateVal}
+                        setSelectedDate={(nextMode) => {
+                            if (nextMode === "BEFORE" || nextMode === "AFTER") {
+                                const next = dateVal ? `${nextMode}:${dateVal}` : nextMode;
+                                setAccountDateRequest(campaignId ?? "", accountKey, next);
+                            } else {
+                                setAccountDateRequest(campaignId ?? "", accountKey, nextMode);
+                            }
+                        }}
+                        setCustomDate={(nextDate) => {
+                            const m = mode === "BEFORE" || mode === "AFTER" ? mode : "BEFORE";
+                            setAccountDateRequest(
+                                campaignId ?? "",
+                                accountKey,
+                                `${m}:${nextDate}`,
+                            );
+                        }}
+                    />
+
+                    {group !== "press" ? (
+                        canEdit ? (
+                            <ContentCellEditDraft
+                                campaignId={campaignId ?? ""}
+                                selectedItem={selectedItem}
+                                isOpen={isContentOpen}
+                                onToggle={toggleContent}
+                                onClose={onCloseDropdown}
+                                platformItems={platformItems}
+                                selectedContent={safeSelectedContent}
+                                setSelectedContent={setSelectedContent}
+                                setSelectedPd={setSelectedPd}
+                                socialMedia={data.socialMedia}
+                                group={group}
+                            />
+                        ) : (
+                            <ContentCell
+                                media0={media0}
+                                isOpen={isContentOpen}
+                                onToggle={toggleContent}
+                                onClose={onCloseDropdown}
+                                platformItems={platformItems}
+                                selectedContent={safeSelectedContent}
+                                setSelectedContent={setSelectedContent}
+                                setSelectedPd={setSelectedPd}
+                                socialMedia={data.socialMedia}
+                                group={group}
+                            />
+                        )
+                    ) : null}
+
+                    {canEdit ? (
+                        <DescriptionCellEdit
+                            onSelectDescriptionId={handleSelectDescriptionId}
+                            isOpen={isPostDescriptionOpen}
+                            onToggle={togglePD}
+                            onClose={onCloseDropdown}
+                            platformItems={platformItems}
+                            selectedContent={safeSelectedContent}
+                            selectedPd={safeSelectedPd}
+                            setSelectedPd={setSelectedPd}
+                            group={group}
+                        />
+                    ) : (
+                        <DescriptionCell
+                            isOpen={isPostDescriptionOpen}
+                            onToggle={togglePD}
+                            onClose={onCloseDropdown}
+                            platformItems={platformItems}
+                            selectedContent={safeSelectedContent}
+                            selectedPd={safeSelectedPd}
+                            setSelectedPd={setSelectedPd}
+                            group={group}
+                        />
+                    )}
+
+                    {canEdit ? (
+                        <ExtraFieldsCellsEdit
+                            contentId={contentId}
+                            baseItem={selectedItem}
+                            group={group}
+                        />
+                    ) : (
+                        <ExtraFieldsCells
+                            group={group}
+                            platformItems={platformItems}
+                            selectedContent={safeSelectedContent}
+                        />
+                    )}
+                </>
+            )}
+
+            {columns.includes("genres") && <GenresCell data={data} />}
+            {columns.includes("countries") && <CountriesCell data={data} />}
+        </tr>
+    );
 });

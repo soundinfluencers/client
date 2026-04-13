@@ -28,6 +28,7 @@ type Props = {
   campaignId: string;
   changeView?: boolean;
   title: string;
+  status: string
 };
 type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
 const makeRowKey = (n: CampaignAddedAccount, index: number) =>
@@ -47,6 +48,7 @@ export function TableStrategy({
   canEdit,
   changeView,
   title,
+    status,
 }: Props) {
   console.log(items, "items");
 
@@ -159,6 +161,7 @@ export function TableStrategy({
                 onCloseDropdown={closeDropdown}
                 canEdit={canEdit}
                 changeView={changeView}
+                status={status}
               />
             );
           })}
