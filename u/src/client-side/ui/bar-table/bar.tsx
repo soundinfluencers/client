@@ -88,7 +88,7 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
     { name: `Posts: ${postsCount}`, img: edit, row: true },
     { name: `Video: ${content.length}`, img: video, row: false },
   ];
-  console.log(campaign);
+
   return (
     <div className="bar-strategy-proposals">
       {barUIs.map((item, i) => (

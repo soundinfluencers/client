@@ -18,7 +18,7 @@ export const DropdownFilter: React.FC<Props> = ({
   onToggle,
   AndOr,
 }) => {
-  const { setFiltersMethod, FilterMethod } = useBuildCampaignFilters();
+  const { setFilterMethod, filterMethod } = useBuildCampaignFilters();
   return (
     <div className="dropdown_filter">
       <div onClick={onToggle} className="dropdown_filter__head">
@@ -33,8 +33,8 @@ export const DropdownFilter: React.FC<Props> = ({
             return (
               <li
                 key={i}
-                className={FilterMethod === methodLower ? "active" : ""}
-                onClick={() => setFiltersMethod(methodLower)}>
+                className={filterMethod === methodLower ? "active" : ""}
+                onClick={() => setFilterMethod(methodLower)}>
                 {ar.method}
               </li>
             );
