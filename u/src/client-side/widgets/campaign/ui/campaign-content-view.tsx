@@ -38,6 +38,9 @@ export const CampaignContentView: React.FC<Props> = ({
         view,
         flag,
     });
+    console.log("mainPromos", mainPromos);
+    console.log("bugroup", byGroup);
+    console.log("campaign", campaign);
     const renderLiveCards = () => (
         <div className="live-view-wrapper">
             {byGroup.main.map((item) => (

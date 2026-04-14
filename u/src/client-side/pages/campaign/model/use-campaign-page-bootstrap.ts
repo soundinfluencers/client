@@ -29,7 +29,7 @@ export const useCampaignPageBootstrap = (data: any) => {
         const currentId = getCurrentDataId(data);
 
         if (!data || currentId !== session.id) {
-            if (session.status === "draft" || session.status === "pending")  {
+            if (session.status === "draft")  {
                 useFetchCampaign.getState().setDraft(session.id);
                 return;
             }

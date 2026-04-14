@@ -1,5 +1,4 @@
 import React from "react";
-import previewFallback from "@/assets/icons/video (2).png";
 
 import { LoaderPreview } from "@/components/ui/loader-preview/loader";
 import { getVideoBlobUrl } from "@/api/client/preview/preview.api";

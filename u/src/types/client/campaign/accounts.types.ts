@@ -5,8 +5,7 @@ import type {
   ClosePromo,
   DateRequest,
 } from "./enums.types";
-import type { SelectedContentRef } from "@/pages/client/types";
-import type { SelectedCampaignContentItemSnapshot } from "@/types/store/index.types";
+import type {SelectedCampaignContentItemSnapshot, SelectedContentRef} from "@/types/store/index.types";
 
 export interface CampaignAddedAccount {
   _id: ObjectId;
