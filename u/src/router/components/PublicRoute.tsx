@@ -18,7 +18,7 @@ export const PublicRoute = ({ children }: Props) => {
     location.pathname.startsWith(p),
   );
   if (!isAuthReady) {
-    // return <Loader />;
+    return <Loader />;
   }
 
   if (accessToken && !isAllowedPublicRoute) {
