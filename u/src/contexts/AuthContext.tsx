@@ -60,23 +60,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [setAccessToken, setUser]);
 
   useEffect(() => {
-    console.log("Checking authentication status...");
-    const refresh = async () => {
+    const bootstrapAuth = async () => {
       try {
         await refreshAccessToken(setAccessToken);
-        console.log("Access token refreshed successfully");
-        // const userData = await getMe();
-        // setUser(userData);
+        const userData = await getMe();
+        setUser(userData);
       } catch {
         setAccessToken(null);
+        setUser(null);
       } finally {
         setIsAuthReady(true);
       }
     };
 
-    console.log("Attempting to refresh access token...");
-    refresh();
-  }, [setAccessToken]);
+    bootstrapAuth();
+  }, [setAccessToken, setUser]);
 
   const value = useMemo(
     () => ({ accessToken, setAccessToken, logout, isAuthReady }),
