@@ -388,7 +388,7 @@ export const TableCard = React.memo(function TableCard({
         ) : (
             <>
               <DateCell
-                  canEdit={false}
+                  canEdit={canEdit}
                   isOpen={isDateOpen}
                   onToggle={toggleDate}
                   onClose={onCloseDropdown}

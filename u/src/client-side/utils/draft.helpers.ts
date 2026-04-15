@@ -72,16 +72,7 @@ export const mapDraftAddedAccounts = (
             socialAccountId,
             socialMedia: existing?.socialMedia || socialMedia,
             username: existing?.username || username,
-            selectedContent: {
-                campaignContentItemId:
-                    existing?.selectedContent?.campaignContentItemId ||
-                    incomingCampaignContentItemId ||
-                    "",
-                descriptionId:
-                    existing?.selectedContent?.descriptionId ||
-                    incomingDescriptionId ||
-                    "",
-            },
+
             __source: source,
         });
     };
