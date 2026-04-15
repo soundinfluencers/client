@@ -29,7 +29,7 @@ export const BarSection: React.FC<Props> = ({ campaign }) => {
               <span>{formatCampaignDate(campaign.creationDate)}</span>
             </p>{" "}
             <p>
-              Budget: <span>{campaign.price}€</span>
+              Budget: {campaign.isPriceHidden ? null : <span>{campaign.price}€</span>}
             </p>{" "}
             <p>
               Posts: <span>{campaign.addedAccounts.length}</span>
@@ -83,7 +83,7 @@ export const BarSection: React.FC<Props> = ({ campaign }) => {
         <div className="BarSection-info__content">
           <div className="BarSection-info__left-section">
             <p>
-              CPM: <span>{cpm}</span>
+              CPM: {campaign.isCpmAndResultHidden ? null : <span>{cpm}</span>}
             </p>{" "}
             <p>
               Average Instagram CPM: <span>5€ to 12€</span>

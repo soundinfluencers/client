@@ -16,7 +16,7 @@ import { CampaignPageModals } from "./ui/campaign-page-modals";
 import { useCampaignPageBootstrap } from "./model/use-campaign-page-bootstrap";
 import { useCampaignPageView } from "./model/use-campaign-page-view";
 import { useCampaignPageActions } from "./model/use-campaign-page-actions";
-import { getBarComponentKind } from "./model/campaign-page.utils";
+import {buildShareUrl, getBarComponentKind} from "./model/campaign-page.utils";
 import {CampaignPageContent} from "@/client-side/widgets/campaign/campaign-page-content.tsx";
 
 export const CampaignPage = () => {
@@ -146,7 +146,7 @@ export const CampaignPage = () => {
 
     return null;
   })();
-
+  console.log(data,'data')
   return (
       <>
         <Container className="campaignBase">
@@ -174,8 +174,8 @@ export const CampaignPage = () => {
                 onOpenOptionModal={() => setOptionModal(true)}
                 onCopyShareLink={() => {
                   if (data.status === "completed" || data.kind === "regular") {
-                    copyShareLink(actions.campaignIdForActions);
-                    toast.success("Shared link created succesfully!");
+
+                    actions.copyShareLink()
                     return;
                   }
 

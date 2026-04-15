@@ -279,7 +279,10 @@ export const TableCard = React.memo(function TableCard({
       () => onToggleDropdown(rowKey, "content"),
       [onToggleDropdown, rowKey],
   );
-
+    const isPendingDelete = useProposalAccountsStore(
+        (s: any) =>
+            !!s.pendingDeleteKeysByOption?.[optionIndex ?? 0]?.[String(accountKey)],
+    );
   const togglePD = React.useCallback(
       () => onToggleDropdown(rowKey, "postDescription"),
       [onToggleDropdown, rowKey],
@@ -291,7 +294,9 @@ export const TableCard = React.memo(function TableCard({
   );
 
   return (
-      <tr className={`table-campaign-page__tr ${isMarked ? "row--hl" : ""}`}>
+      <tr
+          className={`table-campaign-page__tr ${isMarked ? "row--hl" : ""} ${isPendingDelete ? "row--delete" : ""}`}
+      >
         <NetworkCell data={data} />
         {columns.includes("followers") && <FollowersCell data={data} />}
 
