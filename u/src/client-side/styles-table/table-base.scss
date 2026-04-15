@@ -29,6 +29,9 @@
 
   .trash-action {
     width: 100%;
+    &__confirm-block{
+      text-align: center;
+    }
     &.td-wide {
       padding: 6px;
     }
@@ -939,4 +942,7 @@
 }
 .table-campaign-page__tr.row--hl {
   background: rgba(185, 208, 255, 0.15);
+}
+.table-campaign-page__tr.row--delete {
+  background: #EBF5FE;
 }

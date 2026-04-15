@@ -22,7 +22,7 @@ import {
     downloadBlob,
 } from "@/client-side/utils";
 import {
-    buildPromoShareUrl,
+    buildPromoShareUrl, buildShareUrl,
     getCampaignActionId,
     getOptionIndexes,
 } from "./campaign-page.utils";
@@ -39,6 +39,7 @@ type Params = {
     setIsRequesting: React.Dispatch<React.SetStateAction<boolean>>;
     setIsRequestSent: React.Dispatch<React.SetStateAction<boolean>>;
     setIsRequestingPDF: React.Dispatch<React.SetStateAction<boolean>>;
+
 };
 
 export const useCampaignPageActions = ({
@@ -306,10 +307,21 @@ export const useCampaignPageActions = ({
     const copyPromoShareLink = React.useCallback(async () => {
         const url = buildPromoShareUrl(campaignIdForActions);
         await navigator.clipboard.writeText(url);
-        toast.success("Shared link created succesfully!");
+        toast.success("Shared link created successfully!");
     }, [campaignIdForActions]);
 
+    const copyShareLink = React.useCallback(async () => {
+        if (!data?.socialMedia) {
+            toast.error("Social media is missing");
+            return;
+        }
+
+        const url = buildShareUrl(campaignIdForActions, data.socialMedia);
+        await navigator.clipboard.writeText(url);
+        toast.success("Shared link created successfully!");
+    }, [campaignIdForActions, data?.socialMedia]);
     return {
+
         campaignIdForActions,
         optionIndexes,
         onClickOption,
@@ -321,6 +333,7 @@ export const useCampaignPageActions = ({
         updateProposalOption,
         updateStrategyCampaign,
         proceedDraftToPayment,
-        copyPromoShareLink,
+        copyShareLink,
+        copyPromoShareLink
     };
 };

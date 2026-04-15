@@ -47,12 +47,39 @@ export function TableProposal({
                                   optionIndex,
                                   title,
                               }: Props) {
-    const localItems = useProposalAccountsStore(
+    const getGroupBySocial = (social?: string): TableGroup => {
+        const s = String(social ?? "").toLowerCase();
+
+        if (["facebook", "instagram", "youtube", "tiktok"].includes(s)) {
+            return "main";
+        }
+
+        if (["spotify", "soundcloud"].includes(s)) {
+            return "music";
+        }
+
+        return "press";
+    };
+    const optionItems = useProposalAccountsStore(
         (s) => s.contentByOption[optionIndex] ?? items ?? [],
     );
 
-    const localNetworks = useProposalAccountsStore(
+    const optionNetworks = useProposalAccountsStore(
         (s) => s.accountsByOption[optionIndex] ?? networks ?? [],
+    );
+
+    const localItems = React.useMemo(
+        () =>
+            (optionItems ?? []).filter((item) => item.socialMediaGroup === group),
+        [optionItems, group],
+    );
+
+    const localNetworks = React.useMemo(
+        () =>
+            (optionNetworks ?? []).filter(
+                (network) => getGroupBySocial((network as any).socialMedia) === group,
+            ),
+        [optionNetworks, group],
     );
 
     const totalFollowers = React.useMemo(

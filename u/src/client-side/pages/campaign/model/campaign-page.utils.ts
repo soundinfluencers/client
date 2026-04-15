@@ -49,8 +49,19 @@ export const parseLastCampaignSession = (): LastCampaignSession | null => {
 export const buildPromoShareUrl = (campaignId: string) => {
     const origin = "https://test.soundinfluencers.com";
     const id = encodeURIComponent(campaignId);
+
     return `${origin}/promo-share/${id}/proposal`;
 };
 
+export const buildShareUrl = (
+    campaignId: string,
+    socialMedia: string,
+) => {
+    const origin = "https://test.soundinfluencers.com";
+    const id = encodeURIComponent(campaignId);
+    const media = encodeURIComponent(socialMedia);
+
+    return `${origin}/promo-share/${id}/${media}`;
+};
 export const isLockedStatus = (status?: string) =>
     status === "distributing" || status === "completed";

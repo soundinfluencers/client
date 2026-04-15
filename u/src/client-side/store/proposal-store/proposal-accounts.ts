@@ -30,6 +30,9 @@ type ProposalAccountsStore = {
   recentlyAddedKeysByOption: Record<number, Record<string, true>>;
   markRecentlyAdded: (optionIndex: number, keys: string[]) => void;
   clearRecentlyAdded: (optionIndex: number, keys?: string[]) => void;
+  pendingDeleteKeysByOption: Record<number, Record<string, true>>;
+  markPendingDelete: (optionIndex: number, key: string) => void;
+  clearPendingDelete: (optionIndex: number, key?: string) => void;
   initOption: (
     optionIndex: number,
     serverAccounts: CampaignAddedAccount[],
@@ -71,6 +74,43 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     accountsByOption: {},
     contentByOption: {},
     recentlyAddedKeysByOption: {},
+    pendingDeleteKeysByOption: {},
+    markPendingDelete: (optionIndex, key) => {
+      set((state) => {
+        const prev = state.pendingDeleteKeysByOption?.[optionIndex] ?? {};
+
+        return {
+          pendingDeleteKeysByOption: {
+            ...(state.pendingDeleteKeysByOption ?? {}),
+            [optionIndex]: {
+              ...prev,
+              [String(key)]: true,
+            },
+          },
+        };
+      });
+    },
+
+    clearPendingDelete: (optionIndex, key) => {
+      set((state) => {
+        const all = { ...(state.pendingDeleteKeysByOption ?? {}) };
+
+        if (!key) {
+          delete all[optionIndex];
+          return { pendingDeleteKeysByOption: all };
+        }
+
+        const prev = all[optionIndex] ?? {};
+        const next = { ...prev };
+        delete next[String(key)];
+
+        all[optionIndex] = next;
+
+        return {
+          pendingDeleteKeysByOption: all,
+        };
+      });
+    },
     setAccountSelectedContent: (optionIndex, accountKey, selected) => {
       set((state) => {
         const prev = state.accountsByOption[optionIndex] ?? [];

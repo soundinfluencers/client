@@ -23,9 +23,11 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
   const isRecentlyAdded = useProposalAccountsStore(
     (s) => !!s.recentlyAddedKeysByOption?.[optionIndex]?.[String(accountKey)],
   );
-
+  const markPendingDelete = useProposalAccountsStore((s) => s.markPendingDelete);
+  const clearPendingDelete = useProposalAccountsStore((s) => s.clearPendingDelete);
   const onDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
+    clearPendingDelete(optionIndex, String(accountKey));
     removeAccount(optionIndex, accountKey);
   };
   // const onConfirmDelete = (e: React.MouseEvent) => {
@@ -41,10 +43,12 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
       return;
     }
 
+    markPendingDelete(optionIndex, String(accountKey));
     setIsConfirming(true);
   };
   const onCancelDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
+    clearPendingDelete(optionIndex, String(accountKey));
     setIsConfirming(false);
   };
   const onConfirmAdded = (e: React.MouseEvent) => {
