@@ -2,7 +2,7 @@ import type {
   RequestLoginUserModel,
   ResponseLoginUserModel,
 } from "@/types/auth/auth.types.ts";
-import $api from "../api.ts";
+import $api, { $auth } from "../api.ts";
 import type { ISignupInfluencerDraft } from "@/types/user/influencer.types.ts";
 import type { UserRoleType } from "@/types/user/user.types.ts";
 
@@ -11,7 +11,7 @@ export const loginApi = async ({
   password,
   role,
 }: RequestLoginUserModel): Promise<ResponseLoginUserModel> => {
-  const { data } = await $api.post("/auth/login", {
+  const { data } = await $auth.post("/auth/login", {
     email,
     password,
     role,
@@ -21,7 +21,7 @@ export const loginApi = async ({
 };
 
 export const logoutApi = async () => {
-  await $api.post("/auth/logout");
+  await $auth.post("/auth/logout");
 };
 
 export type TResetPasswordRequest = {
