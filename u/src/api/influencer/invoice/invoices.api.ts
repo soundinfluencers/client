@@ -7,7 +7,6 @@ export const getInfluencerInvoices = async (
 ): Promise<IInvoiceResponseModel[]> => {
   try {
     const response = await $api.get(`/invoice?limit=${limit}&page=${page}`);
-    console.log(response);
     // throw new Error("Not implemented");
     return response.data.data.invoices;
   } catch (error) {

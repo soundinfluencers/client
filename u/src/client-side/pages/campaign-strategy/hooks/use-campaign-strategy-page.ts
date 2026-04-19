@@ -20,7 +20,7 @@ export const useCampaignStrategyPage = () => {
     const campaignName = useCampaignStore((state) => state.campaignName);
     const promoCard = useCampaignStore((state) => state.promoCard);
     const resetCampaign = useCampaignStore((state) => state.actions.resetCampaign);
-console.log(campaignContent,'campaignContent');
+
     const groupedContent = React.useMemo(
         () => groupCampaignContent(campaignContent),
         [campaignContent],
@@ -46,6 +46,7 @@ console.log(campaignContent,'campaignContent');
     }, [navigate]);
 
     return {
+        navigate,
         checked,
         setChecked,
         changeView,

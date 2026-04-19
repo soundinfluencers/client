@@ -1,6 +1,6 @@
 import React from "react";
 import { ButtonMain, Container, Loader } from "@/components";
-import { toast } from "react-toastify";
+import save from  '@/assets/icons/check-circle.svg'
 
 import "@/client-side/styles-table/campaignBase.scss";
 import "@/client-side/styles-table/table-base.scss";
@@ -16,7 +16,7 @@ import { CampaignPageModals } from "./ui/campaign-page-modals";
 import { useCampaignPageBootstrap } from "./model/use-campaign-page-bootstrap";
 import { useCampaignPageView } from "./model/use-campaign-page-view";
 import { useCampaignPageActions } from "./model/use-campaign-page-actions";
-import {buildShareUrl, getBarComponentKind} from "./model/campaign-page.utils";
+import { getBarComponentKind} from "./model/campaign-page.utils";
 import {CampaignPageContent} from "@/client-side/widgets/campaign/campaign-page-content.tsx";
 
 export const CampaignPage = () => {
@@ -97,10 +97,11 @@ export const CampaignPage = () => {
       if (data?.selectedOption?.canEdit) {
         return (
             <button
-                className="campaignBase__title-request"
+                className="campaignBase__title-request save"
                 disabled={isRequesting}
                 onClick={actions.updateProposalOption}
             >
+              <img src={save} alt=""/>
               {isRequestSent ? "Save" : isRequesting ? "Saving..." : "Save"}
             </button>
         );
@@ -123,10 +124,11 @@ export const CampaignPage = () => {
 
     if (data.canEdit) {
       return (
-          <button  className="campaignBase__title-request"
+          <button  className="campaignBase__title-request save"
               disabled={!isDirty || isRequesting}
               onClick={actions.updateStrategyCampaign}
           >
+            <img src={save} alt=""/>
             {isRequestSent ? "Saved" : isRequesting ? "Saving..." : "Save"}
           </button>
       );

@@ -16,7 +16,7 @@ const oid = () => new ObjectId().toHexString();
 // };
 type CampaignContentItem = {
   _id: string;
-  socialMedia?: string; // ✅ у тебя в API есть socialMedia
+  socialMedia?: string;
   socialMediaGroup: "main" | "music" | "press";
   mainLink?: string;
   taggedUser?: string;
@@ -64,6 +64,9 @@ type ProposalAccountsStore = {
         descriptionId: string;
       },
   ) => void;
+  currentCampaignId: string | null;
+  setCurrentCampaignId: (id: string | null) => void;
+  clearAll: () => void;
   removeAccount: (optionIndex: number, accountKey: string) => void;
   setAccounts: (optionIndex: number, accounts: CampaignAddedAccount[]) => void;
   clearOption: (optionIndex: number) => void;
@@ -75,6 +78,8 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     contentByOption: {},
     recentlyAddedKeysByOption: {},
     pendingDeleteKeysByOption: {},
+    currentCampaignId: null,
+    setCurrentCampaignId: (id) => set({ currentCampaignId: id }),
     markPendingDelete: (optionIndex, key) => {
       set((state) => {
         const prev = state.pendingDeleteKeysByOption?.[optionIndex] ?? {};
@@ -90,7 +95,14 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         };
       });
     },
-
+    clearAll: () =>
+        set({
+          currentCampaignId: null,
+          accountsByOption: {},
+          contentByOption: {},
+          recentlyAddedKeysByOption: {},
+          pendingDeleteKeysByOption: {},
+        }),
     clearPendingDelete: (optionIndex, key) => {
       set((state) => {
         const all = { ...(state.pendingDeleteKeysByOption ?? {}) };

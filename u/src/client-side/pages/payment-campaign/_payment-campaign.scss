@@ -14,13 +14,26 @@
     line-height: 100%;
     letter-spacing: 0%;
   }
+  &__form-flex{
+    display: flex;
+    gap: 24px;
+    @media screen and (max-width: 900px) {
+      flex-direction: column;
+    }
+  }
+  &__form-flex-width{
+    width: 100%;
+    flex: 0 0 auto;
+    max-width: 808px;
+    @media screen and (max-width: 1100px) {
+      flex: 1 1 auto;
+    }
+  }
   &__content {
     margin-top: 13px;
     display: flex;
     gap: 24px;
-    @media screen and (max-width: 900px) {
-      justify-content: space-between;
-    }
+
   }
   .navmenu {
     margin: 32px 0px;
@@ -29,7 +42,7 @@
     }
   }
   &__width {
-    max-width: 930px;
+    max-width: 100%;
   }
 
   &__confirmation {
@@ -60,7 +73,6 @@
   &__form {
     margin-top: 8px;
     width: 100%;
-    max-width: 930px;
 
     .margin {
       margin-top: 16px;
@@ -75,21 +87,26 @@
       li {
         cursor: pointer;
         text-align: center;
-        max-width: 288px;
+        max-width: 264px;
         width: 100%;
-        padding: 24px;
-        height: 80px;
+        padding: 16px 24px;
+        height: 54px;
 
         border-radius: 8px;
-        background: rgba(255, 255, 255, 1);
+        border: 1px solid #FFF;
+        background: rgba(185, 208, 255, 0.15);
 
-        font-weight: 400;
-        font-size: 24px;
-        line-height: 100%;
-        letter-spacing: 0%;
+        color: #202934;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
 
         &.active {
-          background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+          border-radius: 8px;
+          border: 1px solid #B9D0FF;
+          background: #FFF;
+          box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
         }
       }
     }
@@ -112,77 +129,7 @@
     }
   }
 
-  @media screen and (max-width: 900px) {
-    &__content {
-      margin-top: 24px;
-      gap: 16px;
-    }
 
-    &__width {
-      max-width: 100%;
-    }
-
-    &__confirmation {
-      margin-top: 40px;
-
-      .PO {
-        margin-top: 40px;
-      }
-    }
-
-    &__form {
-      max-width: 358px;
-
-      .ul-BankTransfer {
-        gap: 16px;
-
-        li {
-          padding: 16px;
-          max-width: 110px;
-          height: 50px;
-          font-size: 14px;
-        }
-      }
-    }
-
-    &__invoice {
-      margin-bottom: 24px;
-
-      .btn-margin {
-        margin-top: 32px;
-      }
-    }
-  }
-
-  @media screen and (max-width: 600px) {
-    &__content {
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    &__confirmation {
-      margin-top: 32px;
-
-      .PO {
-        margin-top: 32px;
-      }
-    }
-
-    &__form {
-      max-width: 100%;
-      .ul-BankTransfer {
-        flex-direction: column;
-        gap: 12px;
-
-        li {
-          max-width: 100%;
-          height: 60px;
-          padding: 14px;
-          font-size: 18px;
-        }
-      }
-    }
-  }
 }
 .modal-payment {
   width: 671px;

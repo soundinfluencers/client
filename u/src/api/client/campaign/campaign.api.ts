@@ -20,7 +20,6 @@ export const getCampaigns = async (
 export const getCampaign = async (campaignId: string) => {
   try {
     const res = await $api.get(`/campaigns/${campaignId}`);
-    console.log(res, "rereerer!");
     return res.data;
   } catch (error) {
     console.log(error);
@@ -42,7 +41,7 @@ export const postCampaign = async (payload: any) => {
   try {
     await $api.post("/campaigns", payload);
   } catch (error) {
-    console.log(error, "[POST]: error with post data campaign");
+
     throw error;
   }
 };
@@ -56,7 +55,7 @@ export const postCampaignRequest = async (
       message: textaretValue,
     });
   } catch (error) {
-    console.log(error, "[POST]: error with post postCampaignRequest");
+
     throw error;
   }
 };
@@ -103,7 +102,7 @@ export const postCampaignProposal = async (payload: any) => {
     const response = await $api.post("/proposal-system", payload);
     return response;
   } catch (error) {
-    console.log(error, "[POST-PROPOSAL]: error with post data campaign");
+
     throw error;
   }
 };

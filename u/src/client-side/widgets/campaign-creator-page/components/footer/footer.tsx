@@ -7,7 +7,6 @@ import { useCampaignStore } from "@/client-side/store";
 export const Footer= () => {
   const { offer, totalPrice, promoCardUI } = useCampaignStore();
   const navigate = useNavigate();
-  console.log(promoCardUI, "ui");
   const canProceed = offer?._id || promoCardUI.length >= 1;
 
   return (

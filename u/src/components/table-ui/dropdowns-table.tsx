@@ -1,38 +1,50 @@
 import React from "react";
+import * as Popover from "@radix-ui/react-popover";
 import chevronDown from "@/assets/icons/chevron-down.svg";
 
 import "./table-ui.scss";
-import { useClickOutside } from "@/shared/lib/hooks/useClickOutside";
 
 interface DropdownProps {
   isOpen: boolean;
   onToggle: () => void;
   selected: React.ReactNode;
   children: React.ReactNode;
-  content?: boolean
+  content?: boolean;
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
-  isOpen,
-  onToggle,
-  selected,
-  children,
-    content
-}) => {
+                                                    isOpen,
+                                                    onToggle,
+                                                    selected,
+                                                    children,
+                                                    content,
+                                                  }) => {
   return (
-    <div data-open={isOpen} className="table-dropdown">
-      <div
-        className={`table-dropdown__title ${isOpen ? "active" : ""}`}
-        onClick={onToggle}>
-        {selected}
-        <img src={chevronDown} className="img" alt="" />
-      </div>
+      <Popover.Root open={isOpen} onOpenChange={() => onToggle()}>
+        <div data-open={isOpen} className="table-dropdown">
+          <Popover.Trigger asChild>
+            <button
+                type="button"
+                className={`table-dropdown__title ${isOpen ? "active" : ""}`}
+            >
+              {selected}
+              <img src={chevronDown} className="img" alt="" />
+            </button>
+          </Popover.Trigger>
 
-      {isOpen && (
-        <div className={`table-dropdown__select ${content ? "pad-select" : ""}`}>
-          <div className="table-dropdown__select-contetn">{children}</div>
+          <Popover.Portal>
+            <Popover.Content
+                side="bottom"
+                align="start"
+                sideOffset={-6}
+                avoidCollisions
+                className={`table-dropdown__select ${content ? "pad-select" : ""}`}
+                onOpenAutoFocus={(e) => e.preventDefault()}
+            >
+              <div className="table-dropdown__select-contetn">{children}</div>
+            </Popover.Content>
+          </Popover.Portal>
         </div>
-      )}
-    </div>
+      </Popover.Root>
   );
 };

@@ -76,6 +76,8 @@ export const CampaignContentView: React.FC<Props> = ({
         <div className="table-wrapper">
             {byGroup.main.length >= 1 && (
                 <TableProposal
+
+                    campaignId={campaignId}
                     optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
                     totalPrice={groupPrices.main}
                     items={byGroup.main}
@@ -89,6 +91,8 @@ export const CampaignContentView: React.FC<Props> = ({
 
             {byGroup.music.length >= 1 && (
                 <TableProposal
+
+                    campaignId={campaignId}
                     optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
                     totalPrice={groupPrices.music}
                     items={byGroup.music}

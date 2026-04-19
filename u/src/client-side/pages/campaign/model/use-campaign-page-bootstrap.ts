@@ -18,6 +18,14 @@ export const useCampaignPageBootstrap = (data: any) => {
     const initCampaign = useStrategyCampaignStore((s) => s.initCampaign);
     const initDraft = useDraftCampaignStore((s) => s.initCampaign);
 
+    const currentProposalCampaignId = useProposalAccountsStore(
+        (s) => s.currentCampaignId,
+    );
+    const setCurrentProposalCampaignId = useProposalAccountsStore(
+        (s) => s.setCurrentCampaignId,
+    );
+    const clearProposalStore = useProposalAccountsStore((s) => s.clearAll);
+
     React.useEffect(() => {
         const session = parseLastCampaignSession();
 
@@ -29,7 +37,7 @@ export const useCampaignPageBootstrap = (data: any) => {
         const currentId = getCurrentDataId(data);
 
         if (!data || currentId !== session.id) {
-            if (session.status === "draft")  {
+            if (session.status === "draft") {
                 useFetchCampaign.getState().setDraft(session.id);
                 return;
             }
@@ -44,6 +52,30 @@ export const useCampaignPageBootstrap = (data: any) => {
             useFetchCampaign.getState().setCampaign(session.id);
         }
     }, [data, navigate]);
+
+    React.useEffect(() => {
+        if (data?.kind !== "proposal") return;
+
+        const nextCampaignId = String(data.campaignId ?? "");
+        if (!nextCampaignId) return;
+
+        if (
+            currentProposalCampaignId &&
+            currentProposalCampaignId !== nextCampaignId
+        ) {
+            clearProposalStore();
+        }
+
+        if (currentProposalCampaignId !== nextCampaignId) {
+            setCurrentProposalCampaignId(nextCampaignId);
+        }
+    }, [
+        data?.kind,
+        data?.campaignId,
+        currentProposalCampaignId,
+        clearProposalStore,
+        setCurrentProposalCampaignId,
+    ]);
 
     React.useEffect(() => {
         if (data?.kind !== "proposal") return;

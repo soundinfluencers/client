@@ -12,6 +12,31 @@
   border-bottom-left-radius: 8px;
   top: 100px;
   backdrop-filter: blur(3px);
+  &__rowContent{
+    display: flex;
+    justify-content: space-between;
+    p{
+      max-width: 116px;
+      width: 100%;
+      color: #18181C;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+
+      span{
+        font-weight: 500;
+      }
+      border-bottom: 1px solid rgb(185, 208, 255);
+      padding-bottom: 2px;
+    }
+  }
+  &__infoContent{
+    margin-top: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
   &__content {
     max-height: 280px;
     overflow-y: auto;
@@ -44,6 +69,7 @@
     h3 {
       font-weight: normal;
       border-bottom: 1px solid rgba(185, 208, 255, 1);
+      padding-bottom: 2px;
     }
     ul {
       margin-top: 14px;

@@ -69,7 +69,7 @@ export const usePromoAccountsFilters = (
     sortBy,
     limit,
   });
-
+  console.log('currency',currency)
   return useQuery({
     queryKey: ["promoAccounts", key],
     queryFn: async () => {
@@ -83,7 +83,7 @@ export const usePromoAccountsFilters = (
           musicGenresFilterMethod: filterMethod,
           musicGenres: genres,
           budget,
-          currency,
+          budgetCurrency: currency,
         },
         sortBy,
         limit,

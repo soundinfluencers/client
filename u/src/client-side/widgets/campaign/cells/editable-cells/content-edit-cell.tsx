@@ -174,6 +174,7 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
         <Dropdown
           isOpen={isOpen}
           onToggle={onToggle}
+          onClose={onClose}
           content
           selected={
             <div className="content-cell-static">

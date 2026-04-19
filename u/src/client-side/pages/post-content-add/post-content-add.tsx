@@ -246,16 +246,29 @@ export const PostContentAdd: React.FC = () => {
                         <ButtonSecondary
                             className="additional-button"
                             text={`Add additional ${baseForm.contentTitle}`}
-                            onClick={() => toggleAdditionalSelection(group)}
+                            onClick={() => {
+                                if (platforms.length === 1) {
+                                    addAdditionalForm(group, platforms[0] as SocialMediaType);
+                                    return;
+                                }
+
+                                toggleAdditionalSelection(group);
+                            }}
                         />
 
-                        {additionalSelection === group && (
+                        {additionalSelection === group && platforms.length > 1 && (
                             <div className="additional-selection">
                                 <p>Choose the platform for additional post brief</p>
                                 <ul>
-                                    {platforms.map((p) => (
-                                        <li key={p} onClick={() => addAdditionalForm(group, p)}>
-                                            <img src={getSocialMediaIcon(p)} alt={p} />
+                                    {platforms.map((platform) => (
+                                        <li
+                                            key={platform}
+                                            onClick={() => addAdditionalForm(group, platform as SocialMediaType)}
+                                        >
+                                            <img
+                                                src={getSocialMediaIcon(platform) || ""}
+                                                alt={platform}
+                                            />
                                         </li>
                                     ))}
                                 </ul>

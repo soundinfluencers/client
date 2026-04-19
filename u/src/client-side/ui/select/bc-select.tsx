@@ -54,8 +54,8 @@ export const SelectBudget: React.FC<SelectBudgetProps> = ({
         <input
           type="number"
           id="price"
-          value={budgetSelected}
-          onChange={(e) => setBudget(Number(e.target.value) || 0)}
+          value={budgetSelected || ""}
+          onChange={(e) => setBudget(Number(e.target.value))}
         />
       </div>
     </DropdownSelect>

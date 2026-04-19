@@ -87,6 +87,7 @@
     margin-top: 40px;
 
     @media screen and (max-width: 900px) {
+      align-items: start;
       flex-direction: column-reverse;
       gap: 16px;
     }
@@ -106,21 +107,20 @@
     }
   }
   &__title-content {
-    width: 100%;
-    max-width: 150px;
+    width: fit-content;
   }
   &__title-request {
-    max-width: 150px;
-    width: 100%;
-    border-radius: 24px;
-    height: 38px;
-    background: linear-gradient(
-      107.52deg,
-      #bce8ff 3.56%,
-      rgba(218, 244, 255, 0.94) 50.39%,
-      rgba(191, 216, 255, 0.895) 79.14%,
-      rgba(164, 188, 255, 0.85) 100%
-    );
+    min-width: 150px;
+    border-radius: 8px;
+    height: 36px;
+    background: rgba(185, 208, 255, 0.15);
+    &.save{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 100px;
+    }
   }
   .share-link-row {
     flex: 0 0 auto;

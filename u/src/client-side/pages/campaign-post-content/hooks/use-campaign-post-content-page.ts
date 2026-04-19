@@ -24,7 +24,6 @@ export const useCampaignPostContentPage = () => {
 
     const saveDraftFormValues = React.useCallback(
         (values: Partial<Record<string, string>>) => {
-            console.log("ON_VALUES_CHANGE", values);
 
             actions.setPostContentDraft(values as Record<string, string>);
 

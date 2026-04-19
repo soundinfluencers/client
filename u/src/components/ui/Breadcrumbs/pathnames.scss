@@ -6,6 +6,7 @@
     max-width: 420px;
     overflow: auto;
     @include sb.scrollbar-thin-horizontal;
+
   }
   span {
     width: fit-content;
@@ -14,6 +15,7 @@
   }
   a,
   span {
+    flex: 0 0 auto;
     z-index: 1000;
 
     font-weight: 400;

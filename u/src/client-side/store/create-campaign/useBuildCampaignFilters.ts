@@ -17,5 +17,12 @@ export const useBuildCampaignFilters = create<BuildCampaignFiltersState>(
         setFilter: (filter) => set({ selectedFilter: filter }),
         setCurrency: (currency) => set({ selectedCurrency: currency }),
         setBudget: (budget) => set({ selectedBudget: budget }),
+        reset: () =>
+            set({
+                filterMethod: DEFAULT_FILTER_METHOD,
+                selectedFilter: DEFAULT_FILTER,
+                selectedCurrency: DEFAULT_CURRENCY,
+                selectedBudget: DEFAULT_BUDGET,
+            })
     }),
 );

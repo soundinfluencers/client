@@ -180,26 +180,15 @@ export const BuildCampaign: React.FC = () => {
                     multi-platform promotion tailored to your needs.
                   </p>
                 </NoData>
-            ) : displayCards.length > 0 ? (
-                <CardsContainer
-                    promosCards={displayCards}
-                    isSmall={isSmall}
-                    setIsSmall={setIsSmall}
-                    view={view}
-                    isInitialLoading={isInitialLoading}
-                    isFetchingMore={isFetchingMore}
-                    isRefetching={isRefetching}
-                />
-            ) : (
-                <NoData>
-                  <h2>No SocialAccounts for this filter right now</h2>
-                  <p>
-                    You can still choose another option,currency,filter to create a
-                    <br />
-                    multi-platform promotion tailored to your needs.
-                  </p>
-                </NoData>
-            )}
+            ) : <CardsContainer
+                promosCards={displayCards}
+                isSmall={isSmall}
+                setIsSmall={setIsSmall}
+                view={view}
+                isInitialLoading={isInitialLoading}
+                isFetchingMore={isFetchingMore}
+                isRefetching={isRefetching}
+            />}
           </div>
         </div>
 

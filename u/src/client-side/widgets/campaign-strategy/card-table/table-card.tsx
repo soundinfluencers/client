@@ -208,11 +208,11 @@ export const TableCard = React.memo(function TableCard({
             selectedContent={selectedContent}
         />
 
+          {changeView && columns.includes("genres") && <GenresCell data={data} />}
         {changeView && columns.includes("countries") && (
             <CountriesCell data={data} />
         )}
 
-        {changeView && columns.includes("genres") && <GenresCell data={data} />}
       </tr>
   );
 });

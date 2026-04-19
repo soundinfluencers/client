@@ -72,7 +72,7 @@ export const ExtraFieldsCard: React.FC<Props> = ({
               placeholder="Additional brief"
             />
           ) : (
-            <p>{mergedItem.additionalBrief}</p>
+            <p>{mergedItem.additionalBrief || "—"}</p>
           )}
         </div>
       </div>

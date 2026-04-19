@@ -85,4 +85,9 @@ export const useFilter = create<FilterCampaignState>((set) => ({
                     : filter,
             ),
       })),
+    reset: () =>
+      set({
+        selected: [],
+      }),
+
 }));
