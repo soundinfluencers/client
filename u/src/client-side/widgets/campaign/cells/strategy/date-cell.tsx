@@ -27,6 +27,7 @@ export const DateCell = React.memo(function DateCell({
                                                        canEdit,
                                                      }: Props) {
   const value = String(selectedDate ?? "");
+    const [label, date] = value.split(" ");
   const isDate = selectedDate === "BEFORE" || selectedDate === "AFTER";
   if (!canEdit) {
     return (
@@ -47,9 +48,10 @@ export const DateCell = React.memo(function DateCell({
             onToggle={onToggle}
             selected={
               <div className={isDate ? "isDate" : undefined}>
-                <p className="hidden-text" title={selectedDate}>
-                  {selectedDate}
-                </p>
+                  <div className="isDate">
+                      <p className="hidden-text" title={value}>{label}</p>
+                      <p>{date}</p>
+                  </div>
 
                 {isDate && (
                     <DateInput
