@@ -18,6 +18,7 @@ import { useProposalShare } from "./hooks/use-proposal-share";
 import {DraftButton} from "@/client-side/ui/draft-button/draft-button.tsx";
 
 export const CampaignStrategy: React.FC = () => {
+
   const {
     checked,
     setChecked,
@@ -38,6 +39,7 @@ export const CampaignStrategy: React.FC = () => {
     setProposalModalOpen,
     saveProposal,
     resetCampaign,
+    navigate
   } = useCampaignStrategyPage();
 
   const {
@@ -45,7 +47,6 @@ export const CampaignStrategy: React.FC = () => {
     copyShareLink,
     openProposal,
   } = useProposalShare(campaignProposalId);
-  console.log(groupedContent);
   return (
       <>
         <Container className="campaignBase">
@@ -158,6 +159,7 @@ export const CampaignStrategy: React.FC = () => {
             <Modal
                 onClose={() => {
                   setProposalModalOpen(false);
+                  navigate('/client')
                   resetCampaign();
                 }}
             >

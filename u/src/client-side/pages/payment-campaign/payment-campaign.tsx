@@ -2,9 +2,9 @@ import React from "react";
 import {
   Breadcrumbs,
   ButtonMain,
-  ButtonSecondary,
+
   Container,
-  Form,
+
   SubmitButton,
 } from "@/components";
 
@@ -33,6 +33,7 @@ import { deleteDraft } from "@/api/client/campaign/draft.api";
 import { useInvoceDetailsQuery } from "@/client-side/react-query";
 import { Modal } from "@/shared/ui/modal-fix/Modal";
 import {FormPayment} from "@components/form/form-payment.tsx";
+import { generatePaymentReferenceNumber } from "@/client-side/utils/payment-reference";
 
 export type PaymentMethodId =
   | "bank_card"
@@ -43,26 +44,17 @@ export type PaymentMethodId =
 
 export type PaymentTabId = "bank_card" | "paypal" | "bank_transfer";
 
-export type PaymentTab = {
-  id: PaymentTabId;
-  label: string;
-  icon: string;
-  component: React.FC<any>;
-};
-const toBackendSelectedMethod = (
-  id: PaymentMethodId,
-): "ukBankTransfer" | "internationalBankTransfer" | "paypal" => {
-  if (id === "paypal") return "paypal";
-  if (id === "bank_transfer_uk") return "ukBankTransfer";
-  return "internationalBankTransfer"; // eu + international
-};
+
 export const PaymentCampaign = () => {
   const [searchParams] = useSearchParams();
+  const [referenceNumber, setReferenceNumber] = React.useState(() =>
+      generatePaymentReferenceNumber("bank_card"),
+  );
   const draftId = searchParams.get("draft");
   const campaignDraftId = useCampaignStore((s) => s.draftId);
   const proposalId = searchParams.get("proposal");
   const optionIndex = Number(searchParams.get("option") ?? 0);
-  const { data: invoiceDetails, isLoading: invoiceLoading } =
+  const { data: invoiceDetails } =
     useInvoceDetailsQuery();
   const draftStore = useDraftCampaignStore();
   const { actions, campaignName } = useCampaignStore();
@@ -99,71 +91,23 @@ export const PaymentCampaign = () => {
       const def = "bank_transfer_uk" as const;
       setCurrency(def);
       setSelectedIdPayment(def);
+      setReferenceNumber(generatePaymentReferenceNumber(def));
       return;
     }
 
     setCurrency(null);
     setSelectedIdPayment(nextTab);
+    setReferenceNumber(generatePaymentReferenceNumber(nextTab));
   };
 
   const selectTransferCurrency = (
-    id: "bank_transfer_uk" | "bank_transfer_eu" | "bank_transfer_international",
+      id: "bank_transfer_uk" | "bank_transfer_eu" | "bank_transfer_international",
   ) => {
     setCurrency(id);
     setSelectedIdPayment(id);
+    setReferenceNumber(generatePaymentReferenceNumber(id));
   };
-  // const onSent = async (values: PaymentCampaignFormValues) => {
-  //   try {
-  //     let base: any;
 
-  //     if (draftId) {
-  //       const patches = useUpdateCampaign.getState().patches ?? {};
-
-  //       base = draftStore.getCampaignPayload(
-  //         draftId,
-  //         campaignName ?? "",
-  //         selectedIdPayment,
-  //         patches,
-  //       );
-  //     } else {
-  //       base = actions.getCampaignPayload(selectedIdPayment);
-  //     }
-
-  //     const finalCampaignName = String(
-  //       base?.campaignName ?? campaignName ?? "",
-  //     );
-
-  //     const paymentDetails = {
-  //       firstName: values.firstName,
-  //       lastName: values.lastName,
-  //       address: values.address,
-  //       country: values.country,
-  //       company: values.company ?? "",
-  //       vatNumber: values.vatNumber ?? "",
-  //       amount: Number(base?.campaignPrice ?? 0),
-  //       selectedPaymentMethod: selectedIdPayment,
-  //     };
-
-  //     const payload = {
-  //       ...base,
-  //       campaignName: finalCampaignName,
-  //       paymentDetails,
-  //     };
-
-  //     console.log(payload, "payload");
-  //     await postCampaign(payload);
-
-  //     if (draftId) {
-  //       await deleteDraft(draftId);
-  //       draftStore.clearCampaign(draftId);
-  //     }
-  //     setModalCompleted(true);
-  //     toast.success("Campaign saved successfully!");
-  //   } catch (e) {
-  //     console.error(e);
-  //     toast.error("Failed to save campaign");
-  //   }
-  // };
   const onSent = async (values: PaymentCampaignFormValues) => {
     try {
       let base: any;
@@ -209,6 +153,7 @@ export const PaymentCampaign = () => {
         vatNumber: values.vatNumber ?? "",
         amount: Number(base?.campaignPrice ?? 0),
         selectedPaymentMethod: selectedIdPayment,
+        referenceNumber
       };
 
       const payload = {
@@ -250,29 +195,12 @@ export const PaymentCampaign = () => {
       </div>
       <h1>Payment method</h1>
       <div className="payment-campaign__content">
-        <PaymentBar
-          data={PAYMENT_CAMPAIGN_TABS}
-          tab={tab}
-          onChange={handleTabChange}
-        />
+
 
         <div className="payment-campaign__form">
-          {tab === "bank_transfer" && (
-            <ul className="ul-BankTransfer">
-              {transferOptions.map((cr) => (
-                <li
-                  key={cr.id}
-                  className={currency === cr.id ? "active" : ""}
-                  onClick={() => selectTransferCurrency(cr.id)}>
-                  {cr.name}
-                </li>
-              ))}
-            </ul>
-          )}
 
-          <div className="payment-campaign__invoice">
-            <h3>Invoice details</h3>
-          </div>
+
+
 
           <FormPayment<PaymentCampaignFormValues>
             schema={paymentCampaignSchema}
@@ -286,11 +214,38 @@ export const PaymentCampaign = () => {
               />
             }
             className="payment-campaign__width">
-            <PaymentForm data={PAYMENT_CAMPAIGN_TABS_INPUTS} />
+            <div className="payment-campaign__form-flex">
+              <PaymentBar
+                  data={PAYMENT_CAMPAIGN_TABS}
+                  tab={tab}
+                  onChange={handleTabChange}
+              />
+              <div className="payment-campaign__form-flex-width">
+                <div className="payment-campaign__invoice">
+                  <h3>Invoice details</h3>
+                </div>
+                {tab === "bank_transfer" && (
+                    <ul className="ul-BankTransfer">
+                      {transferOptions.map((cr) => (
+                          <li
+                              key={cr.id}
+                              className={currency === cr.id ? "active" : ""}
+                              onClick={() => selectTransferCurrency(cr.id)}>
+                            {cr.name}
+                          </li>
+                      ))}
+                    </ul>
+                )}
+                <PaymentForm data={PAYMENT_CAMPAIGN_TABS_INPUTS} />
+              </div>
 
+            </div>
             <div className="payment-campaign__confirmation">
               {CurrentConfirmation && (
-                <CurrentConfirmation currency={currency ? [currency] : []} />
+                  <CurrentConfirmation
+                      currency={currency ? [currency] : []}
+                      referenceNumber={referenceNumber}
+                  />
               )}
 
               {/* {tab === "bank_transfer" && (
@@ -306,9 +261,11 @@ export const PaymentCampaign = () => {
                 </div>
               )} */}
             </div>
+
           </FormPayment>
         </div>
       </div>
+
       {modalCompleted && (
         <Modal
           onClose={() => {

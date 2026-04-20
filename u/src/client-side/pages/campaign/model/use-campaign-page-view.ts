@@ -21,7 +21,7 @@ export const useCampaignPageView = (data: any) => {
             return;
         }
 
-        setView(0);
+        setView(1);
     }, [data]);
 
     return {

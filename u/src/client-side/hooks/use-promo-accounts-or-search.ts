@@ -46,7 +46,7 @@ export const usePromoCardsAndSearch = ({
     page: 1,
     limit: 20,
   });
-
+  console.log(promo.data ,'promo data');
   return {
     q,
     isSearchMode,

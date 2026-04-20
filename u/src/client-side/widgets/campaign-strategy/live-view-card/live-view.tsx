@@ -57,7 +57,7 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
                   {" "}
                   <img src={editIcon} alt="" />
                   <p className="hidden-text desc">
-                    {item?.descriptions[selected].description}
+                    {item?.descriptions?.[selected].description}
                   </p>
                 </div>
               }>
@@ -90,7 +90,8 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
                   <h3>Story Tag</h3>
                   <div className="fill-input">
                     <img src={bookmark} alt="" />
-                    <p>{item.taggedUser}</p>
+                    {item.taggedUser ?   <p>{item.taggedUser}</p> : <p>—</p>}
+
                   </div>
                 </div>
             )}
@@ -103,7 +104,7 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
               <Link target="_blank" to={item.taggedLink}>
                 <div className="fill-input">
                   <img src={link} alt="" />
-                  <p className="tagged-link">{item.taggedLink}</p>
+                  {item.taggedLink ? <p className="tagged-link">{item.taggedLink}</p> :  <p>—</p>}
                 </div>
               </Link>
             </div>

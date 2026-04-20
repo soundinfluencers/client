@@ -1,21 +1,24 @@
-@use "@/styles/scrollbars/_scrollbars.scss" as sb;
 .table-dropdown {
   min-width: 81px;
   position: relative;
+  width: 100%;
+
   @media screen and (max-width: 500px) {
     max-width: 100%;
   }
-  width: 100%;
+
   .column {
     display: flex;
     flex-direction: column;
     align-items: start;
+
     &__row {
       display: flex;
       width: 100%;
       justify-content: space-between;
     }
   }
+
   &__title {
     cursor: pointer;
     position: relative;
@@ -28,19 +31,21 @@
     border: 1px solid rgba(231, 232, 241, 1);
     background-color: rgba(255, 255, 255, 1);
     border-radius: 8px;
-
     min-height: 36px;
+
+    appearance: none;
+    outline: none;
 
     p {
       font-weight: 400;
-      font-style: Regular;
       font-size: 12px;
-      leading-trim: NONE;
       letter-spacing: 0%;
       vertical-align: bottom;
     }
+
     @media screen and (max-width: 500px) {
       padding: 12px 8px;
+
       p {
         font-size: 14px;
       }
@@ -50,36 +55,40 @@
       border: 1px solid rgba(185, 208, 255, 1);
     }
   }
+
   &__select-contetn {
     max-height: 180px;
     overflow: auto;
+
     &::-webkit-scrollbar {
       width: 0px;
     }
   }
+
   &__select {
-    position: absolute;
-    left: 0;
-    right: 0;
-    margin-top: -8px;
+
+    width: var(--radix-popover-trigger-width);
     background: rgba(255, 255, 255, 1);
     padding: 8px;
-    z-index: 5;
-    &.pad-select{
-      padding: 8px 4px;
-    }
+    z-index: 1000;
+
     border: 1px solid rgba(185, 208, 255, 1);
-    border-right: 1px solid rgba(185, 208, 255, 1);
-    border-bottom: 1px solid rgba(185, 208, 255, 1);
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 16px;
+    box-sizing: border-box;
+
+    &.pad-select {
+      padding: 8px 4px;
+    }
   }
 }
+
 .table-dropdown .img {
   width: 16px;
   height: 16px;
   transition: 0.3s ease;
 }
+
 .table-dropdown[data-open="true"] .img {
   transform: rotate(180deg);
   transition: 0.3s ease;

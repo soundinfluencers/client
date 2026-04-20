@@ -45,6 +45,7 @@ export interface BuildCampaignFiltersState {
     setFilter: (filter: SortFilterOption) => void;
     setCurrency: (currency: CurrencyOption) => void;
     setBudget: (budget: number) => void;
+    reset: () => void;
 }
 
 export interface CreateCampaignPlatformState {
@@ -75,6 +76,7 @@ export interface FilterCampaignState {
         filters: FilterItem[],
     ) => void;
     removeItem: (id: string) => void;
+    reset: () => void;
 }
 
 export interface CampaignStoreState {

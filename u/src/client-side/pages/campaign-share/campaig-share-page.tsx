@@ -31,7 +31,7 @@ export const CampaignSharePage: React.FC<Props> = () => {
     [],
   );
   const [changeView, setChangeView] = React.useState(false);
-  const [view, setView] = React.useState<number>(0);
+  const [view, setView] = React.useState<number>(1);
   const [flag, setFlag] = React.useState<boolean>(true);
   const { data, setProposalOption } = useFetchCampaign();
 

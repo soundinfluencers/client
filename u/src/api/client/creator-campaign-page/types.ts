@@ -2,7 +2,7 @@ export interface MultiPromoAccountsBody {
   socialMedias: string[];
   countries?: string[];
   budget?: string;
-  currency?: string;
+  budgetCurrency?: string;
   additionalTopics?: string[];
   profileTypes?: string[];
   musicCategories?: string[];

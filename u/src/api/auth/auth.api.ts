@@ -16,7 +16,7 @@ export const loginApi = async ({
     password,
     role,
   });
-  console.log(data, "login");
+
   return data.data;
 };
 

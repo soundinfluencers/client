@@ -2,7 +2,7 @@ import React from "react";
 import Styles from "./selection.module.scss";
 import { useNavigate } from "react-router-dom";
 
-import {getSocialMediaIcon, getSocialMediaIconPostContent} from "@/constants/social-medias";
+import { getSocialMediaIconPostContent} from "@/constants/social-medias";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { getPriceByCurrency } from "@/client-side/utils";
 import { useBuildCampaignFilters } from "@/client-side/store";

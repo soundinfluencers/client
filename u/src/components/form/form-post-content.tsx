@@ -52,7 +52,6 @@ export function CampaignPostContentForm<T extends FieldValues>({
 
     const submit = methods.handleSubmit(
         async (data) => {
-            console.log("VALID SUBMIT", data);
             await onSubmit?.(data);
         },
         (errors) => {

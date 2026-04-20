@@ -9,7 +9,7 @@ import { useCampaignStore } from "@/client-side/store";
 export const BcProceed = () => {
     const { offer, totalPrice, promoCardUI } = useCampaignStore();
     const navigate = useNavigate();
-    console.log(promoCardUI, "ui");
+
     const canProceed = offer?._id || promoCardUI.length >= 1;
   return (
     <div className="bc_proceed">

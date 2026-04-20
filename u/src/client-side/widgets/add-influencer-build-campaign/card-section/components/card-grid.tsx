@@ -18,6 +18,8 @@ interface Props {
 }
 
 export const Card: React.FC<Props> = ({ data, isInclude }) => {
+
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
   const { actions, promoCard } = useSelectCampaignProposal();
   const { selectedCurrency } = useBuildCampaignFilters();
   const activePromo = promoCard.find(
@@ -27,14 +29,9 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
   const hasGenres = (data.musicGenres?.length ?? 0) > 0;
   const hasCountries = (data.countries?.length ?? 0) > 0;
   const hasMeta = hasGenres || hasCountries;
-  const headTitle =
-    hasGenres && hasCountries
-      ? "Genres, Countries"
-      : hasGenres
-        ? "Genres"
-        : "Countries";
   return (
     <div
+         ref={dropdownRef}
       onClick={() => {
         if (isInclude) return null;
         else actions.setPromoCards(data);
@@ -46,7 +43,7 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
         <div className="cost">
           <img src={data.logoUrl} alt="" />
           <p>
-            {getPriceByCurrency(data.prices, selectedCurrency)}
+            {getPriceByCurrency(data?.prices, selectedCurrency)}
             {selectedCurrency.key}
           </p>
         </div>
@@ -75,6 +72,7 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
 
         {flag && hasMeta && (
           <GenresCountries
+              ref={dropdownRef}
             setOpen={setFlag}
             open={flag}
             data={{

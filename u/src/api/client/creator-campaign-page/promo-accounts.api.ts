@@ -19,6 +19,5 @@ export const getMultiPromoAccounts = async ({
       page,
     },
   });
-  console.log(response, "promo");
   return response.data;
 };

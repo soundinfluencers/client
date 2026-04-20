@@ -15,6 +15,7 @@ interface Props {
 }
 
 export const Card: React.FC<Props> = ({ data, isInclude }) => {
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
   const { actions, promoCard } = useCampaignStore();
   const { selectedCurrency } = useBuildCampaignFilters();
   const activePromo = promoCard.find(
@@ -25,13 +26,12 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
   const hasCountries = (data.countries?.length ?? 0) > 0;
   const hasMeta = hasGenres || hasCountries;
 
-  console.log(data);
   return (
     <div
+        ref={dropdownRef}
       onClick={() => {
         if (isInclude) return null;
         else {
-            console.log(data,'card-schose')
           actions.setPromoCards(data);
           actions.setPromoCardsUI(data);
         }
@@ -74,6 +74,7 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
 
         {flag && hasMeta && (
           <GenresCountries
+              ref={dropdownRef}
             setOpen={setFlag}
             open={flag}
             data={{

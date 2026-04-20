@@ -311,7 +311,9 @@
       overflow: auto;
       @include sb.scrollbar-thin-horizontal;
       .audience {
-        math-depth: 4px;
+        p{
+          text-transform: capitalize;
+        }
         display: flex;
         align-items: center;
         gap: 4px;

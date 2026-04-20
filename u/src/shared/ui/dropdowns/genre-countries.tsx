@@ -6,6 +6,7 @@ import type {
 } from "@/types/client/creator-campaign/creator-campaign.types";
 
 import type {ConnectedAccount} from "@/client-side/types/offers.ts";
+import {useClickOutside} from "@/hooks/global/useClickOutside.ts";
 type musicStyles = {
   musicGenres: string[];
   countries: Country[];
@@ -17,6 +18,7 @@ interface Props {
   isInclude?: boolean;
   open?: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  ref: React.RefObject<HTMLDivElement | null>;
 }
 
 export const GenresCountries: React.FC<Props> = ({
@@ -26,9 +28,9 @@ export const GenresCountries: React.FC<Props> = ({
   isInclude,
   open = false,
   setOpen,
+    ref
 }) => {
-  // const dropdownRef = React.useRef<HTMLDivElement>(null);
-  // useClickOutside(dropdownRef, () => setOpen(false));
+  useClickOutside(ref, () => setOpen(false));
   return (
     <div
       data-open={open}
@@ -36,32 +38,38 @@ export const GenresCountries: React.FC<Props> = ({
         activePromo ? "selected" : ""
       } ${isInclude ? "isInclude" : ""}`}>
       <div className="information_popUp__content">
-        {data.musicGenres.length > 0 && (
-          <div className="genres">
-            <h3>Genres</h3>
-            <ul>
-              {data.musicGenres.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-              {data.musicGenres.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className='information_popUp__rowContent'>
+          <p>ER: <span>5.68%</span></p>
+          <p>AV: <span>4800</span></p>
+        </div>
+        <div className='information_popUp__infoContent'>
+          {data.musicGenres.length > 0 && (
+              <div className="genres">
+                <h3>Genres</h3>
+                <ul>
+                  {data.musicGenres.map((item, i) => (
+                      <li key={i}>{item}</li>
+                  ))}
+                  {data.musicGenres.map((item, i) => (
+                      <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+          )}
 
-        {data.countries.length > 0 && (
-          <div className="countries">
-            <h3>Countries</h3>
-            <ul>
-              {data.countries.map((cr, i) => (
-                <li key={i}>
-                  {cr.country} {cr.percentage}%
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+          {data.countries.length > 0 && (
+              <div className="countries">
+                <h3>Countries</h3>
+                <ul>
+                  {data.countries.map((cr, i) => (
+                      <li key={i}>
+                        {cr.country} {cr.percentage}%
+                      </li>
+                  ))}
+                </ul>
+              </div>
+          )}
+        </div>
       </div>
     </div>
   );

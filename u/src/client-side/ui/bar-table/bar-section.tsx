@@ -12,9 +12,7 @@ interface Props {
   campaign: CampaignResponse;
 }
 export const BarSection: React.FC<Props> = ({ campaign }) => {
-  const cpm = getCPM(campaign.cpm);
   const resultCPM = getResultCPM(campaign.cpm);
-  console.log(campaign,'campaign-work');
   return (
     <div className="BarSection">
       <div className="BarSection-info block">
@@ -83,8 +81,11 @@ export const BarSection: React.FC<Props> = ({ campaign }) => {
         <div className="BarSection-info__content">
           <div className="BarSection-info__left-section">
             <p>
-              CPM: {campaign.isCpmAndResultHidden ? null : <span>{cpm}</span>}
-            </p>{" "}
+              CPM:{" "}
+              {campaign.isCpmAndResultHidden ? null : (
+                  <span>{Number(campaign.cpm).toFixed(2)}</span>
+              )}
+            </p>
             <p>
               Average Instagram CPM: <span>5€ to 12€</span>
             </p>{" "}

@@ -277,8 +277,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
                 multi-platform promotion tailored to your needs.
               </p>
             </NoData>
-          ) : displayCards.length > 0 ? (
-            <CardsContainer
+          ) :  <CardsContainer
               promosCards={displayCards}
               isSmall={isSmall}
               setIsSmall={setIsSmall}
@@ -287,17 +286,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
               isFetchingMore={isFetchingMore}
               isRefetching={isRefetching}
               loading={false}
-            />
-          ) : (
-            <NoData>
-              <h2>No SocialAccounts for this filter right now</h2>
-              <p>
-                You can still choose another option,currency,filter to create a{" "}
-                <br></br>
-                multi-platform promotion tailored to your needs.
-              </p>
-            </NoData>
-          )}
+          />}
         </div>
       </div>
       {!isSearchMode && (promoCards as ConnectedAccount[]).length >= limit && (
