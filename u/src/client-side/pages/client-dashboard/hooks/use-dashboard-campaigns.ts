@@ -12,7 +12,7 @@ export const useDashboardCampaigns = () => {
         React.useState<CampaignFilterStatus>("all");
 
     const query = useGetCampaignsInfiniteQuery({ status: filterStatus });
-
+    console.log("query", query);
     const campaigns = React.useMemo(() => {
         return query.data?.pages.flat() ?? [];
     }, [query.data]);
