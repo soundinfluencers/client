@@ -5,8 +5,6 @@ import {
     Breadcrumbs,
     ButtonSecondary,
     Container,
-    Form,
-    FormInput,
     SubmitButton,
 } from "@/components";
 
@@ -28,8 +26,9 @@ import { campaignPostContentSchema } from "@/client-side/schemas";
 
 import { useCampaignPostContentPage } from "./hooks/use-campaign-post-content-page";
 import { useCampaignPostContentDraft } from "./hooks/use-campaign-post-content-draft";
-import {CampaignPostContentForm} from "@components/form/form-post-content.tsx";
-import {CampaignTextInput} from "@components/form/input-post-content.tsx";
+import { CampaignPostContentForm } from "@components/form/form-post-content.tsx";
+import { CampaignTextInput } from "@components/form/input-post-content.tsx";
+import type { UseFormReturn } from "react-hook-form";
 
 type GroupKey = "main" | "music" | "press";
 
@@ -50,8 +49,10 @@ export const CampaignPostContent: React.FC = () => {
         getAdditionalIndex,
         getFormPrefix,
         removeAdditionalForm,
-        pageTitle
+        pageTitle,
     } = useCampaignPostContentPage();
+
+    const [formMethods, setFormMethods] = React.useState<UseFormReturn<Record<string, string>> | null>(null);
 
     const {
         draftModal,
@@ -65,6 +66,23 @@ export const CampaignPostContent: React.FC = () => {
         grouped,
         selectedPlatforms,
     });
+
+    const unregisterFormPrefix = React.useCallback(
+        (prefix: string) => {
+            if (!formMethods) return;
+
+            const values = formMethods.getValues();
+            const keys = Object.keys(values).filter((key) =>
+                key.startsWith(`${prefix}-`),
+            );
+
+            keys.forEach((key) => {
+                formMethods.unregister(key);
+                formMethods.clearErrors(key);
+            });
+        },
+        [formMethods],
+    );
 
     const renderGroup = (group: GroupKey) => {
         const platforms = grouped[group] as SocialMediaType[];
@@ -98,7 +116,10 @@ export const CampaignPostContent: React.FC = () => {
                                 }}
                                 index={index}
                                 formPrefix={prefix}
-                                onRemove={() => removeAdditionalForm(form.id, prefix)}
+                                onRemove={() => {
+                                    unregisterFormPrefix(prefix);
+                                    removeAdditionalForm(form.id, prefix);
+                                }}
                             />
                         </React.Fragment>
                     );
@@ -126,7 +147,9 @@ export const CampaignPostContent: React.FC = () => {
                                     {platforms.map((platform) => (
                                         <li
                                             key={platform}
-                                            onClick={() => addAdditionalForm(group, platform as SocialMediaType)}
+                                            onClick={() =>
+                                                addAdditionalForm(group, platform as SocialMediaType)
+                                            }
                                         >
                                             <img
                                                 src={getSocialMediaIcon(platform) || ""}
@@ -164,16 +187,14 @@ export const CampaignPostContent: React.FC = () => {
                             onValuesChange={saveDraftFormValues}
                             defaultValues={postContentDraft ?? {}}
                             expose={(methods) => {
-                                console.log("errors", methods.formState.errors);
+                                setFormMethods(methods);
                             }}
-                            renderSubmit={(methods) => (
+                            renderSubmit={() => (
                                 <SubmitButton
                                     className="submit"
-                                    data={'Continue'}
-                                    type={'submit'}
+                                    data="Continue"
+                                    type="submit"
                                 />
-
-
                             )}
                         >
                             <CampaignTextInput

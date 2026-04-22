@@ -32,13 +32,13 @@ export function BespokeArtistForm() {
         placeholder={"Leave it empty for worldwide campaign"}
       />
 
-      <CampaignTextInput
+        <CampaignTextArea
+             className='agency-text-area'
         name={"Any Extra Briefs" as any}
         label={"Any Extra Briefs"}
         placeholder={
           "Enter here any details or ideas you'd like us to consider while designing your campaign"
         }
-        isBespoke
       />
     </div>
   );
@@ -93,12 +93,12 @@ export function BespokeMusicForm() {
       />
 
       <CampaignTextArea
+          className='agency-text-area'
         name={
           "Any extra notes (messaging, influencer type, content ideas)" as any
         }
-        label={"Any extra notes (messaging, influencer type, content ideas)"}
+        label={"Any Extra Briefs"}
         placeholder={"Enter messaging, influencer type, content ideas"}
-        isbespoke
 
       />
     </div>
@@ -145,9 +145,9 @@ export function BespokeEventForm() {
         name={
           "Any extra notes (messaging, influencer type, content ideas)" as any
         }
-        label={"Any extra notes (messaging, influencer type, content ideas)"}
+        label={"Any Extra Briefs"}
         placeholder={"Enter messaging, influencer type, content ideas"}
-        isbespoke
+        className='agency-text-area'
       />
     </div>
   );
@@ -159,7 +159,7 @@ export function BespokeOtherForm() {
         name={"Brief" as any}
         label={"Brief"}
         placeholder={"Enter brief here"}
-        isbespoke
+        isbespoke={true}
       />
     </div>
   );

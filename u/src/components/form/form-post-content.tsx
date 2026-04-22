@@ -35,7 +35,7 @@ export function CampaignPostContentForm<T extends FieldValues>({
         resolver: schema ? zodResolver(schema as any) : undefined,
         mode: "onSubmit",
         reValidateMode: "onChange",
-        shouldUnregister: false,
+        shouldUnregister: true,
     });
 
     React.useEffect(() => {
@@ -44,9 +44,11 @@ export function CampaignPostContentForm<T extends FieldValues>({
 
     React.useEffect(() => {
         if (!onValuesChange) return;
+
         const subscription = methods.watch((values) => {
             onValuesChange(values as T);
         });
+
         return () => subscription.unsubscribe();
     }, [methods, onValuesChange]);
 

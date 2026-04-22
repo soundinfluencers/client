@@ -72,7 +72,7 @@ export const PostContentAdd: React.FC = () => {
   const actions = useSelectCampaignProposal((s) => s.actions);
   const postContentDraft = useSelectCampaignProposal((s) => s.postContentDraft);
 
-  const EMPTY: any[] = []; // лучше типизируй под CampaignContentItem[]
+  const EMPTY: any[] = [];
 
   const proposalContent = useProposalAccountsStore(
     React.useCallback(

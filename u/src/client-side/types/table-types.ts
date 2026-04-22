@@ -40,6 +40,7 @@ type ActiveDropdownProposal = {
 } | null;
 
 export type TableRowProposalProps = {
+  campaignId: string;
   rowKey: string;
   data: any;
   items: any[];

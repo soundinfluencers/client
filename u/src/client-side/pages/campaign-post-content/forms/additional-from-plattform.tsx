@@ -1,11 +1,11 @@
 import React from "react";
-import { FormInput, FormTextArea, ButtonSecondary } from "@/components/ui";
+import { ButtonSecondary } from "@/components";
 import plus from "@/assets/icons/plus.svg";
 import x from "@/assets/icons/x.svg";
-import {getSocialMediaIcon, getSocialMediaIconPostContent} from "@/constants/social-medias";
+import { getSocialMediaIconPostContent } from "@/constants/social-medias";
 import type { SocialMediaType } from "@/types/utils/constants.types";
-import type {PlatformFormConfig} from "@/client-side/pages/campaign-post-content/model/platform.types.ts";
-
+import type { PlatformFormConfig } from "@/client-side/pages/campaign-post-content/model/platform.types.ts";
+import { CampaignTextArea, CampaignTextInput } from "@components/form/input-post-content.tsx";
 
 type AdditionalPlatformFormData = PlatformFormConfig & {
     _id: string;
@@ -64,21 +64,21 @@ export const AdditionalPlatformForm: React.FC<AdditionalPlatformFormProps> = ({
             )}
 
             <div className="inputs">
-                {data.inputs?.map((input, index) => (
+                {data.inputs?.map((input, inputIndex) => (
                     <React.Fragment key={input.id}>
-                        <FormInput
+                        <CampaignTextInput
                             required={!!input.required}
-                            id={`${formPrefix}-${input.id}-${index}`}
-                            name={`${formPrefix}-${input.name}-${index}`}
-                            placeholder={input.placeholder}
+                            id={`${formPrefix}-${input.id}-${inputIndex}`}
+                            name={`${formPrefix}-${input.name}-${inputIndex}`}
                             label={input.name}
+                            placeholder={input.placeholder}
                         />
 
                         {input.id === "Contentlink" && (
                             <>
                                 {descriptions.map((descIndex, i) => (
                                     <div key={descIndex} style={{ position: "relative" }}>
-                                        <FormTextArea
+                                        <CampaignTextArea
                                             required
                                             id={`${formPrefix}-Postdescription-${i + 1}`}
                                             name={`${formPrefix}-Postdescription-${i + 1}`}
@@ -120,14 +120,14 @@ export const AdditionalPlatformForm: React.FC<AdditionalPlatformFormProps> = ({
                     </React.Fragment>
                 ))}
 
-                {data.textAreas?.map((textarea, index) => (
-                    <FormTextArea
+                {data.textAreas?.map((textarea, textareaIndex) => (
+                    <CampaignTextArea
                         key={textarea.id}
                         required={!!textarea.required}
-                        id={`${formPrefix}-${textarea.id}-${index}`}
-                        name={`${formPrefix}-${textarea.name}-${index}`}
-                        placeholder={textarea.placeholder}
+                        id={`${formPrefix}-${textarea.id}-${textareaIndex}`}
+                        name={`${formPrefix}-${textarea.name}-${textareaIndex}`}
                         label={textarea.name}
+                        placeholder={textarea.placeholder}
                     />
                 ))}
             </div>

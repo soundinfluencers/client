@@ -2,8 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useCampaignStore } from "@/client-side/store";
 import { useSelectedPlatforms } from "@/client-side/hooks";
-import { useAdditionalForms } from "@/client-side/hooks"
-import {groupPlatforms} from "@/client-side/utils";
+import { useAdditionalForms } from "@/client-side/hooks";
+import { groupPlatforms } from "@/client-side/utils";
 
 export const useCampaignPostContentPage = () => {
     const navigate = useNavigate();
@@ -24,7 +24,6 @@ export const useCampaignPostContentPage = () => {
 
     const saveDraftFormValues = React.useCallback(
         (values: Partial<Record<string, string>>) => {
-
             actions.setPostContentDraft(values as Record<string, string>);
 
             if (values.campaignName !== undefined) {
@@ -33,6 +32,7 @@ export const useCampaignPostContentPage = () => {
         },
         [actions],
     );
+
     const pageTitle = React.useMemo(() => {
         const hasMain = grouped.main.length > 0;
         const hasMusic = grouped.music.length > 0;
@@ -44,10 +44,12 @@ export const useCampaignPostContentPage = () => {
 
         return "Review your campaign content";
     }, [grouped]);
+
     const additionalForms = useAdditionalForms(
         postContentDraft ?? undefined,
-        actions.setPostContentDraft,
+        (nextDraft) => actions.setPostContentDraft(nextDraft),
     );
+
     const handleSubmit = React.useCallback(
         (formData: Record<string, string>) => {
             if (formData.campaignName) {
@@ -66,32 +68,6 @@ export const useCampaignPostContentPage = () => {
         },
         [actions, grouped, navigate, selectedPlatforms],
     );
-    // const handleSubmit = React.useCallback(
-    //     (formData: Record<string, string>) => {
-    //         if (formData.campaignName) {
-    //             actions.setCampaignName(formData.campaignName);
-    //         }
-    //
-    //         (["main", "music", "press"] as const).forEach((group) => {
-    //             const platforms = grouped[group];
-    //             if (!platforms?.length) return;
-    //
-    //             platforms.forEach((platform) => {
-    //                 actions.addPostContent(group, formData, platform);
-    //             });
-    //         });
-    //         console.log(formData,'[][][');
-    //         actions.setPostContentDraft(formData);
-    //         actions.buildCampaignContentFromForm(
-    //             formData,
-    //             selectedPlatforms,
-    //             grouped,
-    //         );
-    //
-    //         navigate("/client/create-campaign/content/strategy");
-    //     },
-    //     [actions, grouped, navigate, selectedPlatforms],
-    // );
 
     return {
         store,

@@ -41,54 +41,61 @@ export const getBespokeTabData = (
 ) => {
     return tabs.find((item) => item.promoType === activeTabId) ?? null;
 };
+const removeEmptyFields = <T extends Record<string, unknown>>(obj: T) => {
+    return Object.fromEntries(
+        Object.entries(obj).filter(([, value]) => {
+            if (value === null || value === undefined) return false;
+            if (typeof value === "string" && value.trim() === "") return false;
+            return true;
+        }),
+    ) as Partial<T>;
+};
 
 export const buildBespokePayload = (
     category: BespokeCampaignCategory,
     values: BespokeFormValues,
 ) => {
     if (category === "other") {
-        return {
-            brief: values["Brief"] ?? "",
-        };
+        return removeEmptyFields({
+            brief: values["Brief"],
+        });
     }
 
-    const budget = parseAmount(values["Your budget"]);
-    const currency = mapCurrencySymbolToCode(
-        values["Your budget currency"] ?? "€",
-    );
+    const budgetRaw = values["Your budget"];
+    const currencyRaw = values["Your budget currency"];
 
-    const common = {
-        contentLink: values["Content available"] ?? "",
-        budget,
-        currency,
-        targetTerritories: values["Target territories"] || ".",
-    };
+    const common = removeEmptyFields({
+        contentLink: values["Content available"],
+        budget: budgetRaw ? parseAmount(budgetRaw) : undefined,
+        currency: currencyRaw ? mapCurrencySymbolToCode(currencyRaw) : undefined,
+        targetTerritories: values["Target territories"],
+    });
 
     if (category === "artist") {
-        return {
+        return removeEmptyFields({
             ...common,
-            campaignGoal: values["Campaign objective"] ?? "",
-            extraBriefs: values["Any Extra Briefs"] ?? "",
-        };
+            campaignGoal: values["Campaign objective"],
+            extraBriefs: values["Any Extra Briefs"],
+        });
     }
 
     if (category === "music") {
-        return {
+        return removeEmptyFields({
             ...common,
-            campaignGoal: values["Campaign objective"] ?? "",
-            trackLink: values["Download or private link to the track"] ?? "",
-            releaseDate: values["Release date"] ?? "",
-            smartLink: values["Enter linkfire / smartlink"] ?? "",
+            campaignGoal: values["Campaign objective"],
+            trackLink: values["Download or private link to the track"],
+            releaseDate: values["Release date"],
+            smartLink: values["Enter linkfire / smartlink"],
             extraBriefs:
-                values["Any extra notes (messaging, influencer type, content ideas)"] ?? "",
-        };
+                values["Any extra notes (messaging, influencer type, content ideas)"],
+        });
     }
 
-    return {
+    return removeEmptyFields({
         ...common,
-        campaignGoal: values["What you’re promoting (Campaign Goal)"] ?? "",
-        ticketLink: values["Ticket link"] ?? "",
+        campaignGoal: values["What you’re promoting (Campaign Goal)"],
+        ticketLink: values["Ticket link"],
         extraBriefs:
-            values["Any extra notes (messaging, influencer type, content ideas)"] ?? "",
-    };
+            values["Any extra notes (messaging, influencer type, content ideas)"],
+    });
 };
