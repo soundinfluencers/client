@@ -195,9 +195,10 @@ export const PostContentAdd: React.FC = () => {
         console.log("PROPOSAL STORE contentByOption", proposalStoreAfter.contentByOption?.[optionIndex]);
         console.log("PROPOSAL STORE accountsByOption", proposalStoreAfter.accountsByOption?.[optionIndex]);
 
-        actions.clearPromoCards();
+
 
         navigate("/client/campaign");
+          actions.clearPromoCards();
       },
       [actions, grouped, navigate, selectedPlatforms, missingGroups, optionIndex],
   );

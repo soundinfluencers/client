@@ -10,6 +10,8 @@ import {useClickOutside} from "@/hooks/global/useClickOutside.ts";
 type musicStyles = {
   musicGenres: string[];
   countries: Country[];
+  averageViews: number;
+  engagementRate: number
 };
 interface Props {
   data: musicStyles;
@@ -39,8 +41,8 @@ export const GenresCountries: React.FC<Props> = ({
       } ${isInclude ? "isInclude" : ""}`}>
       <div className="information_popUp__content">
         <div className='information_popUp__rowContent'>
-          <p>ER: <span>5.68%</span></p>
-          <p>AV: <span>4800</span></p>
+          <p>ER: <span>{Number(data.engagementRate).toFixed((1)) ?? 0}%</span></p>
+          <p>AV: <span>{data.averageViews ?? 0}</span></p>
         </div>
         <div className='information_popUp__infoContent'>
           {data.musicGenres.length > 0 && (

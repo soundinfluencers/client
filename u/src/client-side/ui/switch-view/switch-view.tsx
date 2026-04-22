@@ -31,7 +31,7 @@ import React from "react";
 import menu from "@/assets/icons/menu.svg";
 import grid from "@/assets/icons/grid.svg";
 import "./switch-view.scss";
-import type {CampaignListViewMode} from "@/client-side/pages/client-dashboard/model/dashboard.types.ts";
+import type {CampaignListViewMode} from "@/client-side/types/common.ts";
 
 
 interface Props {

@@ -78,6 +78,8 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
             setOpen={setFlag}
             open={flag}
             data={{
+                engagementRate: data.engagementRate,
+                averageViews: data.averageViews,
               musicGenres: data.musicGenres ?? [],
               countries: data.countries ?? [],
             }}

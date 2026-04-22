@@ -42,7 +42,9 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
     (s) => s.addContentForSocial,
   );
   const removeContentItem = useDraftCampaignStore((s) => s.removeContentItem);
-
+  const updateContentMainLink = useDraftCampaignStore(
+      (s) => s.updateContentMainLink,
+  );const [editableLink, setEditableLink] = React.useState("");
   const [popUp, setPopUp] = React.useState(false);
   const [selectedVideo, setSelectedVideo] = React.useState({
     index: 1,
@@ -68,6 +70,7 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
 
   const onClickVideo = React.useCallback((idx: number, link: string) => {
     setSelectedVideo({ index: idx + 1, link });
+    setEditableLink(link ?? "");
     setPopUp(true);
   }, []);
 
@@ -76,7 +79,23 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
     setNewLink("");
     setAddModal(true);
   }, []);
+  const saveEditedLink = React.useCallback(() => {
+    const item = platformItems?.[selectedContent];
+    const contentId = item?._id;
+    const link = editableLink.trim();
 
+    if (!contentId || !link) return;
+
+    updateContentMainLink(campaignId, String(contentId), link);
+    setSelectedVideo((prev) => ({ ...prev, link }));
+    setPopUp(false);
+  }, [
+    platformItems,
+    selectedContent,
+    editableLink,
+    updateContentMainLink,
+    campaignId,
+  ]);
   const closeAddModal = React.useCallback(() => {
     setAddModal(false);
     setNewLink("");
@@ -232,38 +251,47 @@ export const ContentCellEditDraft = React.memo(function ContentCellEditDraft({
               placeholder="Paste video link..."
             />
             <div className="modal-card-btn">
-              <ButtonSecondary text="Cancel" onClick={closeAddModal} />
-              <ButtonMain text="Create" onClick={createVideo} />
+              <ButtonSecondary className="btn" text="Cancel" onClick={closeAddModal} />
+              <ButtonMain className="btn" text="Create" onClick={createVideo} />
             </div>
           </div>
         </Modal>
       )}
 
       {deleteModal && (
-        <Modal onClose={() => setDeleteModal(false)}>
+        <Modal addStyles={'content-width'} onClose={() => setDeleteModal(false)}>
           <div className="onDeleteModal">
             <h2>
               Are you sure you want to <br /> delete this video?
             </h2>
             <p>You won’t be able to restore this!</p>
             <div className="onDeleteModal-btn">
-              <ButtonSecondary
+              <ButtonSecondary className="btn"
                 text="Cancel"
                 onClick={() => setDeleteModal(false)}
               />
-              <ButtonMain text="Delete" onClick={confirmDelete} />
+              <ButtonMain className="btn" text="Delete" onClick={confirmDelete} />
             </div>
           </div>
         </Modal>
       )}
 
       {popUp && (
-        <Modal onClose={closePreview}>
-          <div className="modal-card">
-            <h2>Video {selectedVideo.index}</h2>
-            <input type="text" value={selectedLink} />
-          </div>
-        </Modal>
+          <Modal onClose={closePreview}>
+            <div className="modal-card">
+              <h2>Video {selectedVideo.index}</h2>
+              <input
+                  type="text"
+                  value={editableLink}
+                  onChange={(e) => setEditableLink(e.target.value)}
+                  placeholder="Paste video link..."
+              />
+              <div className="modal-card-btn">
+                <ButtonSecondary className="btn" text="Cancel" onClick={closePreview} />
+                <ButtonMain className="btn" text="Save" onClick={saveEditedLink} />
+              </div>
+            </div>
+          </Modal>
       )}
     </>
   );

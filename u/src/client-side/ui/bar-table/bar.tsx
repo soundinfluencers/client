@@ -78,6 +78,8 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
   const postsCount = accounts.length;
 
   const barUIs = [
+
+    { name: `Status: ${campaign?.status || ''}`, img: calendar, row: true },
     { name: `Submitted: ${submitted}`, img: calendar, row: true },
     { name: `Budget: ${totalPublicPrice || budget || draftPrice}€`, img: creditcard, row: true },
     {

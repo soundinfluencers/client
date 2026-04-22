@@ -44,7 +44,8 @@
     border: 1px solid rgba(231, 232, 241, 1);
     transition: 0.2s ease;
     border-radius: 24px;
-
+    z-index: 10;
+    background-color: white;
     ul {
       display: flex;
       flex-direction: column;
@@ -114,6 +115,7 @@
     border-bottom-right-radius: 26px;
     transition: 0.2s ease;
     overflow: hidden;
+    background-color: white;
     ul {
       display: flex;
       flex-direction: column;

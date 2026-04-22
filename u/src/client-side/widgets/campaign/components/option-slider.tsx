@@ -124,7 +124,10 @@ export function OptionsSlider({
               <ButtonMain
                 className="btn"
                 text="Delete"
-                onClick={() => onDeleteOption(activeChooseOption)}
+                onClick={() => {{
+                  onDeleteOption(activeChooseOption);
+                  setModal(false);
+                }}}
               />
             </div>
           </div>

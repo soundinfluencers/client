@@ -70,6 +70,11 @@ type ProposalAccountsStore = {
   removeAccount: (optionIndex: number, accountKey: string) => void;
   setAccounts: (optionIndex: number, accounts: CampaignAddedAccount[]) => void;
   clearOption: (optionIndex: number) => void;
+  updateContentMainLink: (
+      optionIndex: number,
+      contentId: string,
+      mainLink: string,
+  ) => void;
 };
 
 export const useProposalAccountsStore = create<ProposalAccountsStore>()(
@@ -91,6 +96,24 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
               ...prev,
               [String(key)]: true,
             },
+          },
+        };
+      });
+    },
+    updateContentMainLink: (optionIndex, contentId, mainLink) => {
+      set((state) => {
+        const prev = state.contentByOption[optionIndex] ?? [];
+
+        const next = prev.map((item) =>
+            String(item._id) === String(contentId)
+                ? { ...item, mainLink }
+                : item,
+        );
+
+        return {
+          contentByOption: {
+            ...state.contentByOption,
+            [optionIndex]: next,
           },
         };
       });

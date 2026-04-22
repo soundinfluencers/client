@@ -431,6 +431,7 @@ export const useCampaignStore = create<CampaignStoreState>()(
             storage: createJSONStorage(() => localStorage),
 
             partialize: (state) => ({
+                offer: state.offer,
                 promoCard: state.promoCard,
                 promoCardUI: state.promoCardUI,
                 selectedAccounts: state.selectedAccounts,
@@ -441,6 +442,7 @@ export const useCampaignStore = create<CampaignStoreState>()(
                 activeOfferId: state.activeOfferId,
                 draftId: state.draftId,
                 draftStep: state.draftStep,
+                totalPrice: state.totalPrice,
             }),
 
             version: 1,

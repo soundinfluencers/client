@@ -131,9 +131,14 @@
 
 
 }
+.content-width{
+  max-width: 100% !important;
+  width: fit-content !important;
+}
 .modal-payment {
-  width: 671px;
-  padding: 32px 24px 40px;
+  max-width: 512px;
+  width: 100%;
+  padding: 32px 48px;
   text-align: center;
   h2 {
     font-weight: 400;

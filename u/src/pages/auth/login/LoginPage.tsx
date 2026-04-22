@@ -48,18 +48,17 @@ export const LoginPage: FC = () => {
       setAccessToken(response.accessToken);
 
       const userData = await getMe();
-      console.log(userData);
       setUser(userData);
-
+      console.log(userData,'qwertyuiop')
       const rawRedirect = sessionStorage.getItem("postAuthRedirect");
-
+      console.log(rawRedirect,'rawRedirect')
       if (rawRedirect) {
         try {
           const parsed = JSON.parse(rawRedirect);
           const redirectPath =
             typeof parsed?.path === "string" ? parsed.path : null;
 
-          sessionStorage.removeItem("postAuthRedirect");
+
 
           if (redirectPath && redirectPath.startsWith("/")) {
             navigate(redirectPath, { replace: true });

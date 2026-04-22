@@ -56,7 +56,11 @@ type StrategyCampaignStore = {
       campaignId: string,
       contentToAdd: CampaignContentItem[],
   ) => void;
-
+  updateContentMainLink: (
+      campaignId: string,
+      contentId: string,
+      mainLink: string,
+  ) => void;
   clearCampaign: (campaignId: string) => void;
 };
 
@@ -82,6 +86,27 @@ export const useStrategyCampaignStore = create<StrategyCampaignStore>()(
           contentByCampaignId: {
             ...state.contentByCampaignId,
             [key]: serverContent ?? [],
+          },
+        };
+      });
+    },
+    updateContentMainLink: (campaignId, contentId, mainLink) => {
+      const key = String(campaignId ?? "");
+      if (!key) return;
+
+      set((state) => {
+        const prev = state.contentByCampaignId[key] ?? [];
+
+        const next = prev.map((item) =>
+            String(item._id) === String(contentId)
+                ? { ...item, mainLink }
+                : item,
+        );
+
+        return {
+          contentByCampaignId: {
+            ...state.contentByCampaignId,
+            [key]: next,
           },
         };
       });

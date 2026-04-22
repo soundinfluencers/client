@@ -14,7 +14,7 @@ interface Props {
 export const BankCard: React.FC<Props> = ({referenceNumber}) => {
   const { totalPrice } = useCampaignStore();
   const referenceId = "P935872";
-
+  console.log(totalPrice);
   const handleCopy = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);

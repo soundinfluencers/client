@@ -13,9 +13,8 @@ export const Footer= () => {
     <div className="footer-campaign-creator-page">
       <div className="footer-campaign-creator-page__content">
         <p>
-          Offer: <span className="count">{offer?._id ? 1 : 0}</span>
+          Offer: <span className="count">{offer?._id ? 1 : 0}  </span>
         </p>
-        <img src={plus} alt="" />
         <p>
           Networks:
           <span className="count">

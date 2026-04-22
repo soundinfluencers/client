@@ -87,7 +87,7 @@ export const BuildCampaign: React.FC = () => {
                             <button onClick={() => searchRefetch()}>Retry</button>
                           </div>
                       ) : searchResults.length > 0 ? (
-                          searchResults.map((account) => (
+                          searchResults.slice(0,7).map((account) => (
                               <div
                                   key={account.accountId}
                                   className="search-dropdown__item"
@@ -180,15 +180,22 @@ export const BuildCampaign: React.FC = () => {
                     multi-platform promotion tailored to your needs.
                   </p>
                 </NoData>
-            ) : <CardsContainer
-                promosCards={displayCards}
-                isSmall={isSmall}
-                setIsSmall={setIsSmall}
-                view={view}
-                isInitialLoading={isInitialLoading}
-                isFetchingMore={isFetchingMore}
-                isRefetching={isRefetching}
-            />}
+            ) : displayCards.length === 0 ? (
+                <NoData>
+                  <h2>No Accounts</h2>
+                  <p>Try changing filters or come back later.</p>
+                </NoData>
+            ) : (
+                <CardsContainer
+                    promosCards={displayCards}
+                    isSmall={isSmall}
+                    setIsSmall={setIsSmall}
+                    view={view}
+                    isInitialLoading={isInitialLoading}
+                    isFetchingMore={isFetchingMore}
+                    isRefetching={isRefetching}
+                />
+            )}
           </div>
         </div>
 

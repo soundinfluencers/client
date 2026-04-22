@@ -1,6 +1,5 @@
 import React from "react";
 import "./_card-bc_card.scss";
-import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 import { getSocialMediaIcon } from "@/constants/social-medias";
 import chevronDown from "@/assets/icons/Vector (17).svg";
 import type { SocialMediaType } from "@/types/utils/constants.types";
@@ -12,8 +11,9 @@ import {
   useSelectCampaignProposal,
 } from "@/client-side/store";
 import { GenresCountries } from "@/shared/ui";
+import type {ConnectedAccount} from "@/client-side/types/offers.ts";
 interface Props {
-  data: IPromoCard;
+  data: ConnectedAccount;
   isInclude: boolean;
 }
 
@@ -76,6 +76,8 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
             setOpen={setFlag}
             open={flag}
             data={{
+                engagementRate: data.engagementRate,
+                averageViews: data.averageViews,
               musicGenres: data.musicGenres ?? [],
               countries: data.countries ?? [],
             }}

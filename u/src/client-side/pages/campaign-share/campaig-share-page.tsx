@@ -33,6 +33,7 @@ export const CampaignSharePage: React.FC<Props> = () => {
   const [changeView, setChangeView] = React.useState(false);
   const [view, setView] = React.useState<number>(1);
   const [flag, setFlag] = React.useState<boolean>(true);
+  const loadingProposal = useFetchCampaign((state) => state.isLoading)
   const { data, setProposalOption } = useFetchCampaign();
 
   const {
@@ -60,9 +61,7 @@ export const CampaignSharePage: React.FC<Props> = () => {
     setProposalOption(id, idx);
     setActiveOption(idx);
   }, [id, isProposal, data?.selectedOption?.optionIndex]);
-  if (isLoading) {
-    return <Loader />;
-  }
+
 
   const isBarSection =
     campaign && ["distributing", "completed"].includes(campaign?.status);
@@ -95,6 +94,9 @@ export const CampaignSharePage: React.FC<Props> = () => {
     campaign?.status ?? "",
   );
   console.log(campaign, "cam");
+  if (isLoading || loadingProposal) {
+    return <Loader />;
+  }
   return (
     <Container className="campaignBase">
       <div className="campaignBase__title">
