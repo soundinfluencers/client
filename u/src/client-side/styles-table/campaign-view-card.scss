@@ -13,6 +13,7 @@
   padding: 12px 16px;
   border-radius: 8px;
   min-width: 0;
+  background-color: white;
   border: 1px solid rgba(185, 208, 255, 0.5);
   &__content {
     width: 100%;
@@ -364,13 +365,12 @@
   justify-content: space-between;
   flex-direction: column;
   gap: 16px;
-  background-color: red;
   max-width: 357px;
   min-height: 663px;
   width: 100%;
   padding: 12px 16px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.5);
+ background-color: white;
   border: 1px solid rgb(231, 232, 241);
   min-width: 0;
   &__video {
