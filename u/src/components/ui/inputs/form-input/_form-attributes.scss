@@ -2,6 +2,18 @@ input,
 textarea {
   width: 100%;
   resize: none;
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: #000;
+    -webkit-box-shadow: 0 0 0 1000px #fff inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+  &::placeholder {
+    font-size: 16px;
+  }
+
+
 }
 label {
   font-weight: 400;
@@ -10,6 +22,7 @@ label {
   leading-trim: NONE;
   line-height: 100%;
   letter-spacing: 0%;
+  margin-bottom: 8px;
 }
 .form-field {
   textarea {
@@ -18,8 +31,11 @@ label {
     margin-top: 4px;
     width: 100%;
     background: rgba(255, 255, 255, 1);
-    border: 1px solid rgba(231, 232, 241, 1);
     border-radius: 8px;
+    outline: none;
+    &:focus{
+      border: 1px solid #B9D0FF;
+    }
     &.bespoke {
       height: 260px;
     }
@@ -27,6 +43,7 @@ label {
 }
 .form-input {
   &__error {
+    margin-top: 4px;
     color: red;
   }
   input {
@@ -37,13 +54,10 @@ label {
     border: 1px solid rgba(231, 232, 241, 1);
     border-radius: 8px;
     z-index: 0;
-    &:-webkit-autofill,
-    &:-webkit-autofill:hover,
-    &:-webkit-autofill:focus {
-      -webkit-text-fill-color: #000;
-      -webkit-box-shadow: 0 0 0 1000px #fff inset;
-      transition: background-color 5000s ease-in-out 0s;
+    &:focus{
+      border: 1px solid #B9D0FF;
     }
+
   }
 }
 .form-field,

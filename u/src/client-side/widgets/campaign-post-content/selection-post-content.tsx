@@ -1,7 +1,7 @@
 import React from "react";
 import Styles from "./selection.module.scss";
 import { useNavigate } from "react-router-dom";
-
+import offerIcon from "@/assets/icons/Multi platforms.svg"
 import { getSocialMediaIconPostContent} from "@/constants/social-medias";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { getPriceByCurrency } from "@/client-side/utils";
@@ -46,9 +46,17 @@ export const Selection: React.FC<Props> = ({
             {offer && (
                 <div className={Styles.offer}>
                   <div className={Styles.offer__header}>
-                    <div className={Styles.queue}>1</div>
-                    <h3>{offer.title}</h3>
-                    <p>{offer.price}€</p>
+
+                    <div className={Styles.offer__header__info}>
+                        <div className={Styles.queue_social}>
+                            <img
+                                src={offerIcon}
+                                alt=""
+                            />
+                        </div>
+                        <h3>{offer.title}</h3>
+                        <p>{offer.price}€</p>
+                    </div>
                   </div>
 
                   <div className={Styles.offer__content}>

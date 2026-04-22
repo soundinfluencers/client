@@ -12,7 +12,7 @@ interface Props {
 
 export const PayPal: React.FC<Props> = ({referenceNumber}) => {
   const { totalPrice } = useCampaignStore();
-
+  console.log(totalPrice);
   const referenceId = "P935872";
   const email = "technotvchannel@gmail.com";
 

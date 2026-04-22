@@ -267,7 +267,7 @@ export const PaymentCampaign = () => {
       </div>
 
       {modalCompleted && (
-        <Modal
+        <Modal addStyles='content-width'
           onClose={() => {
             setModalCompleted(false);
             navigate("/client");

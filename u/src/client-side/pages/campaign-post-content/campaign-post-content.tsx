@@ -108,7 +108,7 @@ export const CampaignPostContent: React.FC = () => {
                     <>
                         <ButtonSecondary
                             className="additional-button"
-                            text={`Add additional ${baseForm.contentTitle}`}
+                            text={`Add another ${baseForm.contentTitle}`}
                             onClick={() => {
                                 if (platforms.length === 1) {
                                     addAdditionalForm(group, platforms[0] as SocialMediaType);
@@ -178,7 +178,7 @@ export const CampaignPostContent: React.FC = () => {
                         >
                             <CampaignTextInput
                                 id="campaignName"
-                                label="Campaign Name"
+                                label="Campaign name"
                                 name="campaignName"
                                 placeholder="Enter campaign name"
                                 required

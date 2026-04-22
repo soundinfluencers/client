@@ -330,6 +330,7 @@ export const DescriptionCellEdit = React.memo(function DescriptionCellEdit({
 
                                   <input
                                       autoFocus
+                                      className="hidden-text"
                                       value={newText}
                                       placeholder={`New ${groupTitle(group)}...`}
                                       onChange={(e) => setNewText(e.target.value)}

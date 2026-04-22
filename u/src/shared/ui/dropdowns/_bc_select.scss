@@ -1,15 +1,15 @@
 .BudgetPopUp {
   position: relative;
-  max-width: 288px;
+  max-width: 224px;
   @media screen and (max-width: 500px) {
     max-width: 100%;
   }
   width: 100%;
   &.less {
     width: 100%;
-    max-width: 184px;
+    max-width: 159px;
     @media screen and (max-width: 500px) {
-      max-width: 164px;
+      max-width: 134px;
     }
   }
   &__title {
@@ -19,7 +19,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 12px 24px;
+    padding: 12px;
     gap: 26px;
     border: 1px solid rgba(231, 232, 241, 1);
     background-color: rgba(255, 255, 255, 1);
@@ -35,7 +35,7 @@
     }
     img {
       position: absolute;
-      right: 8px;
+      right: 4px;
       &.active {
         transform: rotate(180deg);
       }
@@ -50,20 +50,18 @@
     right: 0;
     margin-top: -8px;
     background: rgba(255, 255, 255, 1);
-    padding: 24px;
+    padding: 24px 12px;
     z-index: 5;
 
     border-left: 1px solid rgba(231, 232, 241, 1);
     border-right: 1px solid rgba(231, 232, 241, 1);
     border-bottom: 1px solid rgba(231, 232, 241, 1);
-    border-bottom-left-radius: 26px;
-    border-bottom-right-radius: 26px;
+    border-radius: 0 0 8px 8px;
     &.active {
       border-left: 1px solid rgba(185, 208, 255, 1);
       border-right: 1px solid rgba(185, 208, 255, 1);
       border-bottom: 1px solid rgba(185, 208, 255, 1);
-      border-bottom-left-radius: 26px;
-      border-bottom-right-radius: 26px;
+      border-radius: 0 0 8px 8px;
     }
     @media screen and (max-width: 500px) {
       padding: 16px 12px;
@@ -71,12 +69,15 @@
     .currency {
       ul {
         display: flex;
-        justify-content: space-evenly;
+        justify-content: space-between;
+        padding: 0px 8px;
         li {
+          cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: 400;
+
+          font-weight: 300;
           font-style: Regular;
           font-size: 20px;
           leading-trim: NONE;
@@ -86,11 +87,10 @@
           border-radius: 50%;
           width: 40px;
           height: 40px;
-          border: 1px solid rgba(185, 208, 255, 1);
 
           &.active {
-            border: 1px solid rgba(185, 208, 255, 1);
-            background-color: rgba(235, 245, 254, 1);
+            border: 1px solid #B9D0FF;
+            background: #F6FAFF;
           }
         }
       }
@@ -130,7 +130,8 @@
       }
       img {
         position: absolute;
-        right: 16px;
+        margin-top: -4px;
+        right: 2px;
       }
     }
   }

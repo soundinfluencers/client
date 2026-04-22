@@ -1,6 +1,5 @@
 .base-confirmations {
   width: 100%;
-
   h2 {
     font-weight: 400;
     font-style: Regular;
@@ -12,6 +11,7 @@
 
   &__content_paypal,
   &__content_bankcard {
+
     flex: 1 0 auto;
     display: flex;
     flex-direction: column;
@@ -28,6 +28,9 @@
     flex-direction: column;
     flex: 0 0 auto;
     gap: 24px;
+
+
+
     &__flex {
       display: flex;
       align-items: center;
@@ -48,6 +51,8 @@
 
     &--paypal,
     &--bankcard {
+
+      background-color: white;
       display: flex;
       gap: 16px;
       padding: 24px;
@@ -73,6 +78,7 @@
       border: 1px solid rgba(185, 208, 255, 1);
       border-radius: 16px;
 
+      background-color: white;
       @media screen and (max-width: 900px) {
         flex-direction: column;
       }
@@ -239,4 +245,11 @@
       font-size: 13px;
     }
   }
+}
+.strong-row-field{
+  color: #030922;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }

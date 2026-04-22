@@ -35,7 +35,7 @@
     width: fit-content;
     background-color: rgba(255, 255, 255, 1);
     border-radius: 8px;
-    border: 1px solid rgba(185, 208, 255, 1);
+    border: 1px solid #EBECFF;
 
     @media screen and (max-width: 901px) {
       width: 100%;
@@ -78,7 +78,7 @@
   gap: 8px;
   height: 40px;
   padding: 8px 16px;
-  border-right: 1px solid rgba(185, 208, 255, 1);
+  border-right: 1px solid #EBECFF;
   opacity: 0.5;
   p {
     font-size: 15px;
@@ -91,7 +91,7 @@
     width: fit-content;
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 1);
-    border: 1px solid rgba(185, 208, 255, 1);
+    border: 1px solid #EBECFF;
     padding: 8px;
     font-size: 15px;
   }

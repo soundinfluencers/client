@@ -239,18 +239,30 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
 
         <div className="build-compaign__viewAfilters">
           <ul>
-            {selected.map((item) => (
-              <li key={item.id}>
-                {item.filterName}{" "}
-                {item.children?.map((child, idx) => (
-                  <span key={child.id ?? idx}>
-                    {child.filterName}
-                    {idx < (item.children?.length ?? 0) - 1 ? ", " : ""}
-                  </span>
-                ))}
-                <img onClick={() => removeItem(item.id)} src={x} alt="" />
-              </li>
-            ))}
+            {selected.map((item) => {
+              const selectedSocialCount = selected.filter(
+                  (filter) => filter.group === "socialMedia",
+              ).length;
+
+              const hideRemoveButton =
+                  item.group === "socialMedia" && selectedSocialCount <= 1;
+
+              return (
+                  <li key={item.id}>
+                    {item.filterName}{" "}
+                    {item.children?.map((child, idx) => (
+                        <span key={child.id}>
+                            {child.filterName}
+                          {idx < (item.children?.length ?? 0) - 1 ? ", " : ""}
+                          </span>
+                    ))}
+
+                    {!hideRemoveButton && (
+                        <img onClick={() => removeItem(item.id)} src={x} alt="" />
+                    )}
+                  </li>
+              );
+            })}
           </ul>
 
           <SwitchView
@@ -270,23 +282,29 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
           )}
 
           {promoError ? (
-            <NoData>
-              <h2>No SocialAccounts for this filter right now</h2>
-              <p>
-                You can still choose another filter to create a <br></br>
-                multi-platform promotion tailored to your needs.
-              </p>
-            </NoData>
-          ) :  <CardsContainer
-              promosCards={displayCards}
-              isSmall={isSmall}
-              setIsSmall={setIsSmall}
-              view={view}
-              isInitialLoading={isInitialLoading}
-              isFetchingMore={isFetchingMore}
-              isRefetching={isRefetching}
-              loading={false}
-          />}
+              <NoData>
+                <h2>No SocialAccounts for this filter right now</h2>
+                <p>
+                  You can still move forward by using Offers to create a <br />
+                  multi-platform promotion tailored to your needs.
+                </p>
+              </NoData>
+          ) : displayCards.length === 0 ? (
+              <NoData>
+                <h2>No Accounts</h2>
+                <p>Try changing filters or come back later.</p>
+              </NoData>
+          ) : (
+              <CardsContainer
+                  promosCards={displayCards}
+                  isSmall={isSmall}
+                  setIsSmall={setIsSmall}
+                  view={view}
+                  isInitialLoading={isInitialLoading}
+                  isFetchingMore={isFetchingMore}
+                  isRefetching={isRefetching} />
+          )}
+
         </div>
       </div>
       {!isSearchMode && (promoCards as ConnectedAccount[]).length >= limit && (

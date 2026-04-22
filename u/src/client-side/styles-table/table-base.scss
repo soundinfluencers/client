@@ -121,7 +121,10 @@
       border-right: 0px;
     }
     input {
-      font-size: 15px;
+      font-size: 14px;
+    }
+    .followers{
+      font-size: 14px;
     }
   }
 
@@ -189,7 +192,7 @@
     border-top: 1px solid rgba(191, 212, 255, 0.4);
     p {
       font-weight: 400;
-      font-size: 15px;
+      font-size: 14px;
       line-height: 1;
     }
 
@@ -198,6 +201,7 @@
       text-align: left;
     }
     &.followers {
+
       border-right: 1px solid rgba(185, 208, 255, 1);
     }
   }
@@ -219,7 +223,7 @@
   .followers {
     overflow: hidden;
     font-weight: 400;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.1;
   }
 
@@ -586,7 +590,7 @@
   max-width: 250px;
 }
 .hidden-text {
-  font-size: 13px;
+  font-size: 14px;
   max-width: 120px;
   white-space: nowrap;
   overflow: hidden;
@@ -619,7 +623,10 @@
     color: rgb(76, 76, 76);
   }
 }
-
+.content-width{
+  max-width: 100% !important;
+  width: fit-content !important;
+}
 .modal-card,
 .onDeleteModal,
 .create-option {
@@ -630,7 +637,7 @@
   flex-direction: column;
   align-items: center;
   gap: 24px;
-  padding: 32px 48px 40px;
+  padding: 32px 48px;
   box-sizing: border-box;
 
   h2 {

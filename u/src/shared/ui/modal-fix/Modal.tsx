@@ -9,9 +9,10 @@ import React from "react";
 interface Props extends PropsWithChildren {
   onClose: () => void;
   className?: string;
+  addStyles?:string
 }
 
-export const Modal = ({ onClose, children }: Props) => {
+export const Modal = ({ onClose, children,addStyles }: Props) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -26,7 +27,7 @@ export const Modal = ({ onClose, children }: Props) => {
 
   return createPortal(
     <div className="modal">
-      <div className="modal__content" ref={modalRef}>
+      <div className={`modal__content ${addStyles}`} ref={modalRef}>
         <img
           className="modal__close-button"
           onClick={onClose}

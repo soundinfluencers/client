@@ -9,12 +9,12 @@ import { DescriptionCellEdit } from "../cells/editable-cells/descritpion-edit-ce
 import { ExtraFieldsCellsEdit } from "../cells/editable-cells/extra-edit-cell";
 import { CountriesCell } from "../cells/strategy/countries-cell";
 import { GenresCell } from "../cells/strategy/genres-cell";
+import { DateCell } from "../cells/strategy/date-cell";
+import { ContentCellEditDraft } from "../cells/editable-cells/content-edit-cell-draft";
 
 import type { TableRowProps } from "@/client-side/types/table-types";
-import { DateCell } from "../cells/strategy/date-cell";
 import { getAccountKey } from "@/client-side/utils";
-import { useDraftCampaignStore } from "@/client-side/store";
-import { ContentCellEditDraft } from "../cells/editable-cells/content-edit-cell-draft";
+import { useDraftCampaignStore, useUpdateCampaign } from "@/client-side/store";
 
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
 const MUSIC_NETWORKS = ["spotify", "soundcloud"];
@@ -62,6 +62,12 @@ export const TableCard = React.memo(function TableCard({
     const setAccountDateRequest = useDraftCampaignStore(
         (s) => s.setAccountDateRequest,
     );
+
+    const setAccountSelectedContent = useDraftCampaignStore(
+        (s) => s.setAccountSelectedContent,
+    );
+
+    const patches = useUpdateCampaign((s) => s.patches);
 
     const isDateOpen =
         activeDropdown?.rowKey === rowKey && activeDropdown.key === "date";
@@ -116,18 +122,22 @@ export const TableCard = React.memo(function TableCard({
         return index >= 0 ? index : 0;
     }, [platformItems, selectedContentId]);
 
-    const resolvedSelectedPd = React.useMemo(() => {
-        const descriptions =
-            platformItems?.[resolvedSelectedContent]?.descriptions ?? [];
+    const resolvedSelectedItem = platformItems?.[resolvedSelectedContent];
+    const resolvedSelectedItemId = String(resolvedSelectedItem?._id ?? "");
+    const resolvedDescriptions =
+        patches?.[resolvedSelectedItemId]?.descriptions ??
+        resolvedSelectedItem?.descriptions ??
+        [];
 
+    const resolvedSelectedPd = React.useMemo(() => {
         if (!selectedDescriptionId) return 0;
 
-        const index = descriptions.findIndex(
+        const index = resolvedDescriptions.findIndex(
             (desc: any) => String(desc?._id ?? "") === selectedDescriptionId,
         );
 
         return index >= 0 ? index : 0;
-    }, [platformItems, resolvedSelectedContent, selectedDescriptionId]);
+    }, [resolvedDescriptions, selectedDescriptionId]);
 
     const [selectedContent, setSelectedContent] = React.useState<number>(
         resolvedSelectedContent,
@@ -149,32 +159,28 @@ export const TableCard = React.memo(function TableCard({
             ? selectedContent
             : 0;
 
-    const safeSelectedPd = React.useMemo(() => {
-        const descriptions =
-            platformItems?.[safeSelectedContent]?.descriptions ?? [];
+    const selectedItem = platformItems?.[safeSelectedContent];
+    const contentId = String(selectedItem?._id ?? "");
+    const patchedSelectedItem = patches?.[contentId];
+    const selectedDescriptions =
+        patchedSelectedItem?.descriptions ?? selectedItem?.descriptions ?? [];
 
-        if (!descriptions.length) return 0;
-        if (selectedPd < 0 || selectedPd >= descriptions.length) return 0;
+    const safeSelectedPd = React.useMemo(() => {
+        if (!selectedDescriptions.length) return 0;
+        if (selectedPd < 0 || selectedPd >= selectedDescriptions.length) return 0;
 
         return selectedPd;
-    }, [platformItems, safeSelectedContent, selectedPd]);
+    }, [selectedDescriptions, selectedPd]);
 
-    const selectedItem = platformItems?.[safeSelectedContent];
-    const contentId = selectedItem?._id;
     const media0 = selectedItem?.mediaCache?.items?.[0];
 
     const dateRequestRaw = String(
         draftAccount?.dateRequest ?? data?.dateRequest ?? "ASAP",
     );
     const [mode, dateVal = ""] = dateRequestRaw.split(":");
-    const setAccountSelectedContent = useDraftCampaignStore(
-        (s) => s.setAccountSelectedContent,
-    );
 
     const handleSelectDescriptionId = React.useCallback(
         (descriptionId: string) => {
-            if (!setAccountSelectedContent) return;
-
             setAccountSelectedContent(campaignId ?? "", accountKey, {
                 campaignContentItemId: String(selectedItem?._id ?? ""),
                 descriptionId: String(descriptionId ?? ""),
@@ -182,6 +188,7 @@ export const TableCard = React.memo(function TableCard({
         },
         [setAccountSelectedContent, campaignId, accountKey, selectedItem],
     );
+
     const toggleDate = React.useCallback(
         () => onToggleDropdown(rowKey, "date"),
         [onToggleDropdown, rowKey],
@@ -250,7 +257,6 @@ export const TableCard = React.memo(function TableCard({
                             />
                         ) : (
                             <DescriptionCell
-
                                 isOpen={isPostDescriptionOpen}
                                 onToggle={togglePD}
                                 onClose={onCloseDropdown}

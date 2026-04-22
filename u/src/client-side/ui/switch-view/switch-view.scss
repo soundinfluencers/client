@@ -7,7 +7,7 @@
     margin-top: 0px;
     .changeView__content {
       background-color: white;
-      height: 40px;
+
     }
   }
   &__content {
@@ -16,8 +16,7 @@
     width: 100%;
     max-width: 108px !important;
     border-radius: 8px;
-    border: 1px solid rgba(231, 232, 241, 1);
-    height: 36px;
+    border: 1px solid #EBECFF;
     overflow: hidden;
     .changeView-check {
       display: flex;
@@ -28,6 +27,9 @@
       width: 48px !important;
       padding: 8px;
       opacity: 0.5;
+      &:not(:last-child){
+        border-right: 1px solid #EBECFF;
+      }
       .check {
         position: absolute;
         width: 16px;

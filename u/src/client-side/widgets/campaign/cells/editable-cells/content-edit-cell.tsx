@@ -57,7 +57,7 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
   const [selectedVideo, setSelectedVideo] = React.useState({
     index: 1,
     link: "",
-  });
+  });const [editableLink, setEditableLink] = React.useState("");
   const [addModal, setAddModal] = React.useState(false);
   const [newLink, setNewLink] = React.useState("");
 
@@ -73,13 +73,34 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
     },
     [setSelectedContent, setSelectedPd, onClose],
   );
-  const onClickVideo = React.useCallback(
-    (optionIndex: number, link: string) => {
-      setSelectedVideo({ index: optionIndex + 1, link });
-      setPopUp(true);
-    },
-    [],
+  const updateContentMainLink = useProposalAccountsStore(
+      (s) => s.updateContentMainLink,
   );
+  const onClickVideo = React.useCallback(
+      (optionIndex: number, link: string) => {
+        setSelectedVideo({ index: optionIndex + 1, link });
+        setEditableLink(link ?? "");
+        setPopUp(true);
+      },
+      [],
+  );
+  const saveEditedLink = React.useCallback(() => {
+    const item = platformItems?.[selectedContent];
+    const contentId = item?._id;
+    const link = editableLink.trim();
+
+    if (!contentId || !link) return;
+
+    updateContentMainLink(optionIndex, String(contentId), link);
+    setSelectedVideo((prev) => ({ ...prev, link }));
+    setPopUp(false);
+  }, [
+    platformItems,
+    selectedContent,
+    editableLink,
+    updateContentMainLink,
+    optionIndex,
+  ]);
   const openAddModal = React.useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
     setNewLink("");
@@ -244,14 +265,14 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
               placeholder="Paste video link..."
             />
             <div className="modal-card-btn">
-              <ButtonSecondary text="Cancel" onClick={closeAddModal} />
-              <ButtonMain text="Create" onClick={createVideo} />
+              <ButtonSecondary className="btn" text="Cancel" onClick={closeAddModal} />
+              <ButtonMain className="btn" text="Create" onClick={createVideo} />
             </div>
           </div>
         </Modal>
       )}
       {deleteModal && (
-        <Modal onClose={() => setDeleteModal(false)}>
+        <Modal addStyles={'content-width'} onClose={() => setDeleteModal(false)}>
           <div className="onDeleteModal">
             <h2>
               Are you sure you want to <br /> delete this video?
@@ -259,27 +280,50 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
             <p>You won’t be able to restore this!</p>
             <div className="onDeleteModal-btn">
               <ButtonSecondary
+                  className="btn"
                 text="Cancel"
                 onClick={() => setDeleteModal(false)}
               />
-              <ButtonMain text="Delete" onClick={confirmDelete} />
+              <ButtonMain className="btn" text="Delete" onClick={confirmDelete} />
             </div>
           </div>
         </Modal>
       )}{" "}
       {popUp && (
-        <Modal onClose={closeModalVideo}>
-          <div className="modal-card">
-            <h2>Video {selectedVideo.index}</h2>
-            {media0 && (
-              <VideoPreview
-                className="modal-card-video"
-                videoUrl={videoUrl}
-                pathLower={pathLower}
-              />
-            )}
-          </div>
-        </Modal>
+          <Modal onClose={closeModalVideo}>
+            <div className="modal-card">
+              <h2>Video {selectedVideo.index}</h2>
+
+              {media0 ? (
+                  <VideoPreview
+                      className="modal-card-video"
+                      videoUrl={videoUrl}
+                      pathLower={pathLower}
+                  />
+              ) : (
+                  <>
+                    <input
+                        type="text"
+                        value={editableLink}
+                        onChange={(e) => setEditableLink(e.target.value)}
+                        placeholder="Paste video link..."
+                    />
+                    <div className="modal-card-btn">
+                      <ButtonSecondary
+                          className="btn"
+                          text="Cancel"
+                          onClick={closeModalVideo}
+                      />
+                      <ButtonMain
+                          className="btn"
+                          text="Save"
+                          onClick={saveEditedLink}
+                      />
+                    </div>
+                  </>
+              )}
+            </div>
+          </Modal>
       )}
     </>
   );

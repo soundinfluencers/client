@@ -133,45 +133,56 @@ export const useCampaignPageActions = ({
     const onDeleteOption = React.useCallback(async (idx: number) => {
         if (data?.kind !== "proposal") return;
 
-        const prevLocal = localExtraOptions;
-        setLocalExtraOptions((prev) => prev.filter((x) => x !== idx));
-
-        const nextOptionIndexes = optionIndexes.filter((x) => x !== idx);
-
-        const nextActive =
-            activeOption === idx
-                ? nextOptionIndexes.length
-                    ? nextOptionIndexes[0]
-                    : 0
-                : activeOption;
-
-        if (nextActive !== activeOption) {
-            setActiveOption(nextActive);
-            useFetchCampaign.getState().setProposalOption(data.campaignId, nextActive);
-        }
-
         try {
             setIsRequesting(true);
 
             await deleteProposalOption(data.campaignId, idx);
-            await useFetchCampaign.getState().setProposalOption(data.campaignId, nextActive);
 
+            const freshMeta = await useFetchCampaign.getState().setProposalOption(
+                data.campaignId,
+                activeOption === idx ? 0 : activeOption,
+            );
+
+            if (freshMeta?.kind !== "proposal") return;
+
+            const freshOptionIndexes = freshMeta.existingOptions ?? [];
+            const nextActive =
+                activeOption === idx
+                    ? freshOptionIndexes.length
+                        ? freshOptionIndexes[0]
+                        : 0
+                    : activeOption;
+
+            setLocalExtraOptions([]);
+            setActiveOption(nextActive);
+
+            const refreshed = await useFetchCampaign
+                .getState()
+                .setProposalOption(data.campaignId, nextActive);
+
+            if (refreshed?.kind === "proposal") {
+                useProposalAccountsStore.getState().initOption(
+                    nextActive,
+                    refreshed.selectedOption.addedAccounts,
+                    refreshed.selectedOption.campaignContent,
+                    { force: true },
+                );
+            }
+            setOptionModal(false)
             toast.success("Proposal option deleted successfully!");
         } catch (e) {
             console.error(e);
             toast.error("Failed to delete option");
-            setLocalExtraOptions(prevLocal);
         } finally {
             setIsRequesting(false);
         }
     }, [
         data,
-        localExtraOptions,
-        optionIndexes,
         activeOption,
         setActiveOption,
         setLocalExtraOptions,
         setIsRequesting,
+        setOptionModal
     ]);
 
     const requestCampaign = React.useCallback(async () => {
