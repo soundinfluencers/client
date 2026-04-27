@@ -51,7 +51,7 @@ export const BuildCampaign: React.FC = () => {
     isRefetching,
     onPickSearchItem,
   } = useBuildCampaignView();
-
+  console.log(displayCards)
   return (
       <div className="build-compaign">
         <div className="build-compaign__title">

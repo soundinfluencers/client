@@ -70,6 +70,7 @@ export const CampaignPageControls: React.FC<Props> = ({
                     />
                 </div>
 
+
                 <div className="controls-second">
                     {view !== 2 && (
                         <ViewAudience
@@ -133,19 +134,21 @@ export const CampaignPageControls: React.FC<Props> = ({
                 )}
             </div>
 
-            <div className="controls-second">
+
                 {data?.kind !== "proposal" &&
                     data?.kind !== "regular" &&
                     data?.kind !== "draft" &&
                     view === 1 && (
+                        <div className="controls-second">
                         <div className="ViewAudience-block">
                             <ViewAudience
                                 flag={changeView}
                                 onChange={() => setChangeView((prev) => !prev)}
                             />
                         </div>
+                    </div>
                     )}
-            </div>
+
         </>
     );
 };

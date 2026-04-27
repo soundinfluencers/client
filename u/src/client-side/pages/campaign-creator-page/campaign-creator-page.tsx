@@ -86,7 +86,17 @@ export const CampaignCreatorPage: React.FC = () => {
                 />
             </div>
 
-            {isError ? (
+            {isLoading || isFetching ? (
+                <SliderForCard isLoading={true} offers={[]} />
+            ) : isError ? (
+                <NoData>
+                    <h2>No offers available for this genre right now</h2>
+                    <p>
+                        You can still move forward by using Build Your Custom Campaign to
+                        create a multi <br />-platform promotion tailored to your needs.
+                    </p>
+                </NoData>
+            ) : offers.length === 0 ? (
                 <NoData>
                     <h2>No offers available for this genre right now</h2>
                     <p>
@@ -95,7 +105,7 @@ export const CampaignCreatorPage: React.FC = () => {
                     </p>
                 </NoData>
             ) : (
-                <SliderForCard isLoading={isFetching || isLoading} offers={offers} />
+                <SliderForCard isLoading={false} offers={offers} />
             )}
 
             <BuildCampaign />

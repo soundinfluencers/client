@@ -66,23 +66,20 @@ export const useCampaignStore = create<CampaignStoreState>()(
                     set((state) => {
                         const incomingId = String((offer as any)?._id ?? "");
                         const currentId = String((state.offer as any)?._id ?? "");
-
                         const isSame = incomingId && incomingId === currentId;
 
                         if (isSame) {
                             return {
                                 offer: null,
                                 activeOfferId: null,
-                                promoCard: [],
-                                totalPrice: calcTotal(null, []),
+                                totalPrice: calcTotal(null, state.promoCard),
                             };
                         }
 
                         return {
                             offer,
                             activeOfferId: incomingId || null,
-                            promoCard: [],
-                            totalPrice: calcTotal(offer, []),
+                            totalPrice: calcTotal(offer, state.promoCard),
                         };
                     }),
 

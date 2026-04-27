@@ -1,132 +1,166 @@
 import React from "react";
 import type { SocialMediaType } from "@/types/utils/constants.types";
-import {
-  buildAdditionalId,
-  getAdditionalIndex,
-  parseAdditionalFormsFromDraft,
-} from "../utils";
 
-export type GroupKey = "main" | "music" | "press";
+type GroupKey = "main" | "music" | "press";
 
-export type AdditionalForm = {
+type AdditionalFormItem = {
   id: string;
   group: GroupKey;
-  socialMedia: SocialMediaType;
+  socialMedia: string;
 };
 
-const GROUP_ORDER: Record<GroupKey, number> = { main: 0, music: 1, press: 2 };
+type AdditionalSelection = GroupKey | null;
 
-const stableSortForms = (forms: AdditionalForm[]) => {
+const buildAdditionalId = (
+    group: GroupKey,
+    socialMedia: string,
+    index: number,
+) => `${group}-${String(socialMedia).toLowerCase()}-additional-${index}`;
+
+const parseAdditionalFormId = (id: string) => {
+  const match = id.match(/^(main|music|press)-([a-z0-9_]+)-additional-(\d+)$/i);
+  if (!match) return null;
+
+  return {
+    group: match[1] as GroupKey,
+    socialMedia: match[2].toLowerCase(),
+    index: Number(match[3]),
+  };
+};
+
+const stableSortForms = (forms: AdditionalFormItem[]) => {
   return [...forms].sort((a, b) => {
-    const g = GROUP_ORDER[a.group] - GROUP_ORDER[b.group];
-    if (g !== 0) return g;
+    const pa = parseAdditionalFormId(a.id);
+    const pb = parseAdditionalFormId(b.id);
 
-    const ai = getAdditionalIndex(a.id);
-    const bi = getAdditionalIndex(b.id);
-    if (ai !== bi) return ai - bi;
+    if (!pa || !pb) return 0;
+    if (pa.group !== pb.group) return pa.group.localeCompare(pb.group);
+    if (pa.socialMedia !== pb.socialMedia) {
+      return pa.socialMedia.localeCompare(pb.socialMedia);
+    }
 
-    const sm = String(a.socialMedia).localeCompare(String(b.socialMedia));
-    if (sm !== 0) return sm;
-
-    return a.id.localeCompare(b.id);
+    return pa.index - pb.index;
   });
 };
 
-export function useAdditionalForms(
-  draft?: Record<string, string>,
-  setDraft?: (next: Record<string, string>) => void,
-) {
-  const [additionalSelection, setAdditionalSelection] =
-    React.useState<GroupKey | null>(null);
+const collectAdditionalFormsFromDraft = (
+    draft?: Record<string, string>,
+): AdditionalFormItem[] => {
+  if (!draft) return [];
 
-  const [additionalForms, setAdditionalForms] = React.useState<
-    AdditionalForm[]
-  >(() => {
-    const fromDraft = parseAdditionalFormsFromDraft(draft);
-    return stableSortForms(fromDraft);
+  const map = new Map<string, AdditionalFormItem>();
+
+  Object.keys(draft).forEach((key) => {
+    const normalized = key.replace(/-\d+$/i, "");
+    const match = normalized.match(
+        /^(main|music|press)-([a-z0-9_]+)-additional-(\d+)/i,
+    );
+
+    if (!match) return;
+
+    const id = `${match[1]}-${match[2].toLowerCase()}-additional-${match[3]}`;
+
+    if (!map.has(id)) {
+      map.set(id, {
+        id,
+        group: match[1] as GroupKey,
+        socialMedia: match[2].toLowerCase(),
+      });
+    }
   });
 
-  React.useEffect(() => {
-    console.log("=== CURRENT ADDITIONAL FORMS ===", additionalForms);
-  }, [additionalForms]);
-  const didInitRef = React.useRef(false);
-  React.useEffect(() => {
-    if (didInitRef.current) return;
-    didInitRef.current = true;
+  return stableSortForms(Array.from(map.values()));
+};
 
-    const fromDraft = parseAdditionalFormsFromDraft(draft);
-    setAdditionalForms(stableSortForms(fromDraft));
-  }, [draft]);
+export const useAdditionalForms = (
+    draftValues: Record<string, string> | undefined,
+    setDraftValues: (next: Record<string, string>) => void,
+) => {
+  const [additionalSelection, setAdditionalSelection] =
+      React.useState<AdditionalSelection>(null);
+
+  const [additionalForms, setAdditionalForms] = React.useState<AdditionalFormItem[]>(
+      () => collectAdditionalFormsFromDraft(draftValues),
+  );
 
   const toggleAdditionalSelection = React.useCallback((group: GroupKey) => {
     setAdditionalSelection((prev) => (prev === group ? null : group));
   }, []);
 
+  const getAdditionalIndex = React.useCallback((id: string) => {
+    const parsed = parseAdditionalFormId(id);
+    return parsed?.index ?? 1;
+  }, []);
+
+  const getFormPrefix = React.useCallback((form: AdditionalFormItem) => {
+    return form.id;
+  }, []);
+
   const addAdditionalForm = React.useCallback(
-    (group: GroupKey, socialMedia: SocialMediaType) => {
-      setAdditionalForms((prev) => {
-        const used = prev
-          .filter((x) => x.group === group)
-          .map((x) => getAdditionalIndex(x.id))
-          .filter((n) => Number.isFinite(n));
+      (group: GroupKey, socialMedia: SocialMediaType) => {
+        setAdditionalForms((prev) => {
+          const normalizedSocial = String(socialMedia).toLowerCase();
 
-        const nextIndex = used.length ? Math.max(...used) + 1 : 1;
-        const id = buildAdditionalId(group, socialMedia, nextIndex);
+          const usedIndexes = prev
+              .filter(
+                  (item) =>
+                      item.group === group && item.socialMedia === normalizedSocial,
+              )
+              .map((item) => parseAdditionalFormId(item.id)?.index ?? 0);
 
-        if (prev.some((x) => x.id === id)) return prev;
+          const nextIndex = usedIndexes.length ? Math.max(...usedIndexes) + 1 : 1;
+          const id = buildAdditionalId(group, normalizedSocial, nextIndex);
 
-        console.log("=== ADD ADDITIONAL FORM ===", {
-          group,
-          socialMedia,
-          nextIndex,
-          id,
+          if (prev.some((item) => item.id === id)) return prev;
+
+          return stableSortForms([
+            ...prev,
+            {
+              id,
+              group,
+              socialMedia: normalizedSocial,
+            },
+          ]);
         });
 
-        return stableSortForms([...prev, { id, group, socialMedia }]);
-      });
-
-      setAdditionalSelection(null);
-    },
-    [],
+        setAdditionalSelection(null);
+      },
+      [],
   );
 
-  const getFormPrefix = React.useCallback((f: AdditionalForm) => {
-    const n = getAdditionalIndex(f.id);
-    return `${f.group}-${f.socialMedia}-additional-${n}`;
-  }, []);
   const removeAdditionalForm = React.useCallback(
-    (id: string, prefix: string) => {
-      setAdditionalForms((prev) => prev.filter((f) => f.id !== id));
+      (formId: string, prefix: string) => {
+        setAdditionalForms((prev) => prev.filter((form) => form.id !== formId));
 
-      if (!draft || !setDraft) return;
+        const nextDraft = { ...(draftValues ?? {}) };
 
-      const next = { ...draft };
-      for (const k of Object.keys(next)) {
-        if (k.startsWith(prefix + "-")) delete next[k];
-      }
-      setDraft(next);
-    },
-    [draft, setDraft],
+        Object.keys(nextDraft).forEach((key) => {
+          if (key.startsWith(`${prefix}-`)) {
+            delete nextDraft[key];
+          }
+        });
+
+        setDraftValues(nextDraft);
+        setAdditionalSelection(null);
+      },
+      [draftValues, setDraftValues],
   );
+
   const groupAdditionalByGroup = React.useMemo(() => {
-    const map: Record<GroupKey, AdditionalForm[]> = {
-      main: [],
-      music: [],
-      press: [],
+    return {
+      main: additionalForms.filter((item) => item.group === "main"),
+      music: additionalForms.filter((item) => item.group === "music"),
+      press: additionalForms.filter((item) => item.group === "press"),
     };
-    for (const f of additionalForms) map[f.group].push(f);
-    return map;
   }, [additionalForms]);
 
   return {
     additionalSelection,
     toggleAdditionalSelection,
     addAdditionalForm,
-    removeAdditionalForm,
-    additionalForms,
     groupAdditionalByGroup,
-
     getAdditionalIndex,
     getFormPrefix,
+    removeAdditionalForm,
   };
-}
+};
