@@ -8,7 +8,8 @@ import { Checkbox } from "@/components";
 import { getPriceByCurrency } from "@/client-side/utils";
 
 import { TagsDropdown } from "./tags-dropdown";
-import { useBuildCampaignFilters, useCampaignStore } from "@/client-side/store";
+import {useBuildCampaignFilters, useCampaignStore, useProposalAccountsStore} from "@/client-side/store";
+import {useSearchParams} from "react-router-dom";
 
 interface Props {
   data: IPromoCard;
@@ -23,10 +24,18 @@ export const TableRowCard: React.FC<Props> = ({
   isSmall,
   isInclude,
 }) => {
+  // const [searchParams] = useSearchParams();
+  // const optionIndex = Number(searchParams.get("option") ?? 0);
   const { selectedCurrency } = useBuildCampaignFilters();
   const { actions } = useCampaignStore();
   const [checked, setChecked] = React.useState(false);
 
+  // const existingAccounts = useProposalAccountsStore(
+  //     (s) => s.accountsByOption[optionIndex] ?? [],
+  // );
+  // const isAlreadyInProposal = existingAccounts.some(
+  //     (account) => String(account.socialAccountId) === String(data.accountId),
+  // );
   const addPromo = (checked: boolean) => {
     setChecked(checked);
     if (isInclude) return;
@@ -58,7 +67,7 @@ export const TableRowCard: React.FC<Props> = ({
       <div className="name">
         <Checkbox
           onChange={addPromo}
-          isChecked={isInclude || checked}
+          isChecked={isInclude || checked }
           name={data.username}
         />
       </div>
