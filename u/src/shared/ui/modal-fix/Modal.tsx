@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { type PropsWithChildren } from "react";
 import { useRef } from "react";
 import { useClickOutside } from "../../../hooks/global/useClickOutside";
-import x from "@/assets/icons/x.svg";
+// import x from "@/assets/icons/x.svg";
 import React from "react";
 
 interface Props extends PropsWithChildren {
@@ -28,12 +28,12 @@ export const Modal = ({ onClose, children,addStyles }: Props) => {
   return createPortal(
     <div className="modal">
       <div className={`modal__content ${addStyles}`} ref={modalRef}>
-        <img
-          className="modal__close-button"
-          onClick={onClose}
-          src={x}
-          alt="Close modal"
-        />
+        {/*<img*/}
+        {/*  className="modal__close-button"*/}
+        {/*  onClick={onClose}*/}
+        {/*  src={x}*/}
+        {/*  alt="Close modal"*/}
+        {/*/>*/}
         {children}
       </div>
     </div>,

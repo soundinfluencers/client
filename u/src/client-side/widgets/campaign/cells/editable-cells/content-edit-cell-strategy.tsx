@@ -193,6 +193,7 @@ export const ContentCellEditStrategy = React.memo(
           return "";
       }
     };
+    const canDelete = platformItems.length > 1;
     return (
       <>
         <td className="tableBase__td">
@@ -232,15 +233,17 @@ export const ContentCellEditStrategy = React.memo(
                       {item?.mainLink ? `Video ${idx + 1}` : "—"}
                     </p>
 
-                    <img
-                      className="trash"
-                      src={trash}
-                      alt=""
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openDelete(idx);
-                      }}
-                    />
+                    {canDelete && (
+                        <img
+                            className="trash"
+                            src={trash}
+                            alt=""
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDelete(idx);
+                            }}
+                        />
+                    )}
                   </li>
                 ))}
               </ul>

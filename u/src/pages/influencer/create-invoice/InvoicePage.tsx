@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import type {
   InvoiceFormValues,
 } from "@/pages/influencer/create-invoice/components/invoice-form-content/types/invoice-form-inputs.types.ts";
-import { useInfluencerInvoice } from "@/pages/influencer/shared/hooks/useInfluencerInvoice.ts";
 import type {
   TInvoicePaymentMethod,
 } from "@/pages/influencer/create-invoice/components/payment-bar/types/payment-method.types.ts";
@@ -14,6 +13,8 @@ import { useUser } from "@/store/get-user";
 import {
   getCreateInvoiceDefaultValues
 } from "@/pages/influencer/create-invoice/utils/getCreateInvoiceDefaultValues.ts";
+import { useQuery } from "@tanstack/react-query";
+import { getInvoiceDraft } from "@/api/influencer/create-invoice/create-invoice.api.ts";
 
 export const InvoicePage = () => {
   const { user } = useUser();
@@ -21,46 +22,43 @@ export const InvoicePage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const {
-    invoiceDetails,
-    paymentDetails,
-    isLoadingInvoiceDetails,
-    isLoadingPaymentDetails,
-    isErrorInvoiceDetails,
-    isErrorPaymentDetails,
-  } = useInfluencerInvoice();
-
   const [createInvoiceTab, setCreateInvoiceTab] = useState<TInvoicePaymentMethod>('ukBankTransfer');
 
-  if (isLoadingInvoiceDetails || isLoadingPaymentDetails) {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["invoice-draft"],
+    queryFn: getInvoiceDraft,
+  });
+
+  console.log("Invoice draft:", data);
+
+  if (isPending) {
     return (<Loader />);
   }
 
-  if (isErrorInvoiceDetails || isErrorPaymentDetails) {
+  if (isError) {
     return (<div>Error loading data. Please try again later.</div>);
   }
 
   const defaultValues = getCreateInvoiceDefaultValues(
-    invoiceDetails,
-    paymentDetails,
-    createInvoiceTab,
-    user?.balance);
+      data,
+      createInvoiceTab,
+      user?.balance);
 
   console.log('Default form values:', defaultValues);
 
   return (
-    <Container className="invoice-page">
-      <Breadcrumbs/>
+      <Container className="invoice-page">
+        <Breadcrumbs/>
 
-      <h2 className="invoice-page__title">Payment method</h2>
+        <h2 className="invoice-page__title">Payment method</h2>
 
-      <Form<InvoiceFormValues>
-        className="invoice-page__form"
-        schema={invoicePayloadSchema}
-        defaultValues={defaultValues}
-      >
-        <InvoiceFormContent tab={createInvoiceTab} setTab={setCreateInvoiceTab}/>
-      </Form>
-    </Container>
+        <Form<InvoiceFormValues>
+            className="invoice-page__form"
+            schema={invoicePayloadSchema}
+            defaultValues={defaultValues}
+        >
+          <InvoiceFormContent tab={createInvoiceTab} setTab={setCreateInvoiceTab}/>
+        </Form>
+      </Container>
   );
 };

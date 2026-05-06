@@ -1,0 +1,19 @@
+.root{
+  max-width: 159px;
+  width: 100%;
+}
+.list{
+  display: flex;
+  flex-direction: column ;
+  gap: 8px;
+  .item{
+    position: relative;
+    font-size: 14px;
+    font-weight: 300;
+    img{
+      position: absolute;
+      right: -2px;
+      margin-top: -3px;
+    }
+  }
+}

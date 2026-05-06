@@ -19,6 +19,8 @@ interface Props {
     isInclude: boolean;
 }
 
+const EMPTY_ACCOUNTS: any[] = [];
+
 export const Card: React.FC<Props> = ({ data, isInclude }) => {
     const dropdownRef = React.useRef<HTMLDivElement>(null);
     const { actions, promoCard } = useSelectCampaignProposal();
@@ -28,10 +30,10 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
     const optionIndex = Number(searchParams.get("option") ?? 0);
 
     const existingAccounts = useProposalAccountsStore(
-        (s) => s.accountsByOption[optionIndex] ?? [],
+        (s) => s.accountsByOption[optionIndex] ?? EMPTY_ACCOUNTS,
     );
 
-    const [flag, setFlag] = React.useState<boolean>(false);
+    const [flag, setFlag] = React.useState(false);
 
     const hasGenres = (data.musicGenres?.length ?? 0) > 0;
     const hasCountries = (data.countries?.length ?? 0) > 0;
@@ -48,6 +50,8 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
     const isDisabled = isInclude || isAlreadyInProposal;
     const isActive = isSelectedNow || isAlreadyInProposal;
 
+    const socialIcon = getSocialMediaIcon(data.socialMedia as SocialMediaType);
+
     return (
         <div
             ref={dropdownRef}
@@ -61,7 +65,7 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
         >
             <div className="bc_card__head">
                 <div className="cost">
-                    <img src={data.logoUrl} alt="" />
+                    {data.logoUrl ? <img src={data.logoUrl} alt="" /> : null}
                     <p>
                         {getPriceByCurrency(data?.prices, selectedCurrency)}
                         {selectedCurrency.key}
@@ -69,10 +73,7 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
                 </div>
 
                 <div className="social">
-                    <img
-                        src={getSocialMediaIcon(data.socialMedia as SocialMediaType)}
-                        alt=""
-                    />
+                    {socialIcon ? <img src={socialIcon} alt="" /> : null}
                     <p>{formatFollowers(data.followers)}</p>
                 </div>
             </div>
@@ -104,8 +105,9 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
                             musicGenres: data.musicGenres ?? [],
                             countries: data.countries ?? [],
                         }}
+
                         activePromo={isActive ? data : undefined}
-                        isInclude={isInclude}
+                        isInclude={isInclude || isAlreadyInProposal}
                     />
                 )}
             </div>

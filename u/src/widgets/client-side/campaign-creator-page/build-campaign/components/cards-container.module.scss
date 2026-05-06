@@ -1,0 +1,84 @@
+.block {
+  position: relative;
+  width: 100%;
+}
+
+.main {
+  width: 100%;
+}
+
+.cardsContainer {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  justify-items: start;
+  align-items: start;
+  align-self: start;
+  gap: 16px;
+}
+
+.viewed .promosGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  height: fit-content;
+}
+
+.promosGridHeader {
+  display: grid;
+  grid-template-columns: minmax(140px, 2.1fr) minmax(88px, 0.9fr) minmax(88px, 0.9fr) minmax(110px, 1fr) minmax(110px, 1fr);
+  padding: 8px 0;
+  color: #202934;
+  font-weight: 400;
+  column-gap: 12px;
+
+  div {
+    white-space: nowrap;
+    min-width: 0;
+    font-size: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media screen and (max-width: 1100px) {
+    grid-template-columns: minmax(130px, 2fr) minmax(78px, 0.85fr) minmax(78px, 0.85fr) minmax(96px, 1fr) minmax(96px, 1fr);
+    column-gap: 10px;
+
+    div {
+      font-size: 15px;
+    }
+  }
+
+  @media screen and (max-width: 900px) {
+    grid-template-columns: minmax(120px, 1.8fr) minmax(72px, 0.8fr) minmax(72px, 0.8fr) minmax(88px, 1fr) minmax(88px, 1fr);
+    column-gap: 8px;
+
+    div {
+      font-size: 13px;
+    }
+  }
+}
+
+.center {
+  text-align: center;
+}
+
+.adaptive {
+  @media screen and (max-width: 600px) {
+    grid-template-columns: minmax(92px, 1.5fr) minmax(64px, 0.8fr) minmax(56px, 0.7fr) minmax(64px, 1fr) minmax(64px, 1fr);
+    column-gap: 6px;
+
+    div {
+      font-size: 11px;
+    }
+  }
+
+  @media screen and (max-width: 420px) {
+    grid-template-columns: minmax(82px, 1.35fr) minmax(58px, 0.75fr) minmax(52px, 0.65fr) minmax(56px, 0.9fr) minmax(56px, 0.9fr);
+    column-gap: 4px;
+
+    div {
+      font-size: 10px;
+    }
+  }
+}

@@ -7,8 +7,10 @@ import hash from "@/assets/payments-icons/clarity_hashtag-solid.svg";
 
 import type { CurrencyType } from "@/types/client/form-clients/payment-campaign-inputs";
 import "./styles/_base-confirmations.scss";
-import { useCampaignStore } from "@/client-side/store";
 import { toast } from "react-toastify";
+import {
+  useCampaignBuilderStore
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
 
 interface Props {
   currency: CurrencyType[];
@@ -16,7 +18,7 @@ interface Props {
 }
 
 export const BankTransfer: React.FC<Props> = ({ currency,referenceNumber }) => {
-  const { totalPrice } = useCampaignStore();
+  const { totalPrice } = useCampaignBuilderStore();
   console.log(totalPrice);
   const currentCurrency = currency[0];
   const accountNumber = "17299128";
@@ -40,12 +42,17 @@ export const BankTransfer: React.FC<Props> = ({ currency,referenceNumber }) => {
 
   return (
       <div className="base-confirmations">
-        <h2>
-          {isUk && "Payment confirmation by Bank Transfer UK"}
-          {isEu && "Payment confirmation by Bank Transfer EU"}
-          {isInternational && "Payment confirmation by Bank Transfer International"}
-        </h2>
 
+        <div className='base-confirmations__header'>
+          <h2>
+            {isUk && "Payment confirmation by Bank Transfer UK"}
+            {isEu && "Payment confirmation by Bank Transfer EU"}
+            {isInternational && "Payment confirmation by Bank Transfer International"}
+          </h2>
+          <button type={'submit'} className='base-confirmations__button' onClick={() => {}}>
+            Confirm payment sent
+          </button>
+        </div>
         <div className="base-confirmations__content--banktransfer">
           {isUk && <div className="base-confirmations__content_banktransfer">
             <div className="base-confirmations__content_banktransfer__flex">

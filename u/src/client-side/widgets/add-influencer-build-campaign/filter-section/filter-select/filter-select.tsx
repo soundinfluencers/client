@@ -32,14 +32,22 @@ export const FilterSelect: React.FC<Props> = ({ data }) => {
   React.useEffect(() => {
     if (!selectedPlatform) return;
     if (didInitPlatform.current) return;
-    didInitPlatform.current = true;
+
+    const hasSelectedSocial = selected.some((item) => item.group === "socialMedia");
+    if (hasSelectedSocial) {
+      didInitPlatform.current = true;
+      return;
+    }
 
     const platformFilter = findPlatformFilter(filters, selectedPlatform);
     if (!platformFilter) return;
 
-    if (selected.some((f) => f.id === platformFilter.id)) return;
-    setSelected([...selected, platformFilter]);
-  }, [selectedPlatform]);
+    didInitPlatform.current = true;
+    setSelected((prev) => {
+      if (prev.some((item) => item.id === platformFilter.id)) return prev;
+      return [...prev, platformFilter];
+    });
+  }, [selectedPlatform, filters, selected, setSelected]);
   return (
     <DropdownFilter
       AndOr={AndOrFlag}

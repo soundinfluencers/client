@@ -1,0 +1,19 @@
+.draftButton{
+  max-width: 132px;
+  width: 100%;
+  height: 34px;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #B9D0FF;
+  @media (max-width: 600px) {
+    max-width: 108px;
+    padding: 4px 8px;
+    gap:4px;
+    height: 28px;
+    font-size: 14px;
+  }
+}

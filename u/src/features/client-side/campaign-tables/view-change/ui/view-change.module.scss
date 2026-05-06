@@ -1,0 +1,31 @@
+.changeViewTable {
+
+  display: flex;
+  cursor: pointer;
+}
+
+.segmented {
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(185, 208, 255, 0.15);
+}
+
+.item {
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 32px;
+  opacity: 0.5;
+}
+
+.active {
+  opacity: 1;
+  border-radius: 8px;
+  background-color: white;
+}

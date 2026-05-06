@@ -31,34 +31,34 @@ const objectId = () => {
     for (let i = 0; i < 12; i++) bytes[i] = Math.floor(Math.random() * 256);
   }
   return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 };
 
 export const useUpdateCampaign = create<UpdateState>((set, get) => ({
   patches: {},
 
   setField: (contentId, field, value) =>
-    set((s) => ({
-      patches: {
-        ...s.patches,
-        [contentId]: {
-          ...(s.patches[contentId] ?? {}),
-          [field]: value,
+      set((s) => ({
+        patches: {
+          ...s.patches,
+          [contentId]: {
+            ...(s.patches[contentId] ?? {}),
+            [field]: value,
+          },
         },
-      },
-    })),
+      })),
 
   setDescriptions: (contentId, next) =>
-    set((s) => ({
-      patches: {
-        ...s.patches,
-        [contentId]: {
-          ...(s.patches[contentId] ?? {}),
-          descriptions: next,
+      set((s) => ({
+        patches: {
+          ...s.patches,
+          [contentId]: {
+            ...(s.patches[contentId] ?? {}),
+            descriptions: next,
+          },
         },
-      },
-    })),
+      })),
 
   addDescription: (contentId, text = "") => {
     const curr = get().patches[contentId]?.descriptions ?? [];
@@ -69,7 +69,7 @@ export const useUpdateCampaign = create<UpdateState>((set, get) => ({
   updateDescription: (contentId, index, text) => {
     const curr = get().patches[contentId]?.descriptions ?? [];
     const next = curr.map((d, i) =>
-      i === index ? { ...d, description: text } : d,
+        i === index ? { ...d, description: text } : d,
     );
     get().setDescriptions(contentId, next);
   },

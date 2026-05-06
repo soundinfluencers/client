@@ -3,8 +3,10 @@ import { toast } from "react-toastify";
 import euro from "@/assets/payments-icons/Vector (10).svg";
 import copy from "@/assets/icons/akar-icons_copy.svg";
 import method from "@/assets/payments-icons/mdi_recurring-payment.svg";
-import {useCampaignStore} from "@/client-side/store";
 import React from "react";
+import {
+  useCampaignBuilderStore
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
 
 interface Props {
   referenceNumber: string;
@@ -12,7 +14,7 @@ interface Props {
 
 
 export const BankCard: React.FC<Props> = ({referenceNumber}) => {
-  const { totalPrice } = useCampaignStore();
+  const { totalPrice } = useCampaignBuilderStore();
   const referenceId = "P935872";
   console.log(totalPrice);
   const handleCopy = async (text: string, label: string) => {
@@ -27,7 +29,12 @@ export const BankCard: React.FC<Props> = ({referenceNumber}) => {
 
   return (
       <div className="base-confirmations">
-        <h2>Payment confirmation by Bank Card</h2>
+        <div className='base-confirmations__header'>
+          <h2>Payment confirmation by Bank Card</h2>
+          <button type={'submit'} className='base-confirmations__button' onClick={() => {}}>
+            Confirm payment sent
+          </button>
+        </div>
 
         <div className="base-confirmations__content--bankcard">
           <div className="base-confirmations__content_bankcard">

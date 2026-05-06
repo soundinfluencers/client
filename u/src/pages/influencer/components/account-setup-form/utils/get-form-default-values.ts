@@ -21,7 +21,7 @@ export const getDefaultValues = (
     musicGenres: [],
     categories: [],
     creatorCategories: [],
-    initialPrice: null,
+    price: null,
     currency: "EUR",
     countries: makeEmptyCountries(), // 5 empty slots
   };

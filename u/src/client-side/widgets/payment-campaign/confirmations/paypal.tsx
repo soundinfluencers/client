@@ -3,15 +3,17 @@ import "./styles/_base-confirmations.scss";
 import euro from "@/assets/payments-icons/Vector (10).svg";
 import method from "@/assets/payments-icons/mdi_recurring-payment.svg";
 import copy from "@/assets/icons/akar-icons_copy.svg";
-import { useCampaignStore } from "@/client-side/store";
 import { toast } from "react-toastify";
+import {
+  useCampaignBuilderStore
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
 
 interface Props {
   referenceNumber: string;
 }
 
 export const PayPal: React.FC<Props> = ({referenceNumber}) => {
-  const { totalPrice } = useCampaignStore();
+  const { totalPrice } = useCampaignBuilderStore();
   console.log(totalPrice);
   const referenceId = "P935872";
   const email = "technotvchannel@gmail.com";
@@ -28,7 +30,13 @@ export const PayPal: React.FC<Props> = ({referenceNumber}) => {
 
   return (
       <div className="base-confirmations">
-        <h2>Payment confirmation by PayPal</h2>
+
+        <div className='base-confirmations__header'>
+          <h2>Payment confirmation by PayPal</h2>
+          <button type={'submit'} className='base-confirmations__button' onClick={() => {}}>
+            Confirm payment sent
+          </button>
+        </div>
 
         <div className="base-confirmations__content--paypal">
           <div className="base-confirmations__content_paypal">

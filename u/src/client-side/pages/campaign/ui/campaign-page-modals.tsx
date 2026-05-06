@@ -28,7 +28,7 @@ export const CampaignPageModals: React.FC<Props> = ({
     return (
         <>
             {optionModal && (
-                <Modal onClose={onCloseOptionModal}>
+                <Modal onClose={onCloseOptionModal} isShowCloseButton={false}>
                     <div className="create-option">
                         <h2>Proposal option</h2>
                         <p>
@@ -52,7 +52,7 @@ export const CampaignPageModals: React.FC<Props> = ({
             )}
 
             {requestModal && (
-                <Modal onClose={onCloseRequestModal}>
+                <Modal isShowCloseButton={false} onClose={onCloseRequestModal}>
                     <div className="request-edit">
                         <h2>Request edit</h2>
                         <textarea

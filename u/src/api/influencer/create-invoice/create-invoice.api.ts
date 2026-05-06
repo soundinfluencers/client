@@ -14,3 +14,13 @@ export const createInvoice = async (
     throw error;
   }
 };
+
+export const getInvoiceDraft = async (): Promise<InvoiceCreateRequestDto> => {
+  console.log("Fetching invoice draft...");
+
+  const { data } = await $api.get('/invoice/draft');
+
+  console.log("Invoice draft fetched:", data.data);
+
+  return data.data as InvoiceCreateRequestDto;
+}

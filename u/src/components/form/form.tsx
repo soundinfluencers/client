@@ -59,17 +59,17 @@ onValuesChange,
 
     return () => subscription.unsubscribe();
   }, [methods, onValuesChange]);
-  // React.useEffect(() => {
-  //   if (!defaultValues) return;
-  //   methods.reset(defaultValues, {
-  //     keepDirtyValues: true,
-  //     keepTouched: true,
-  //     keepErrors: true,
-  //     keepIsSubmitted: true,
-  //     keepSubmitCount: true,
-  //   });
-  //   // methods.trigger();
-  // }, [defaultValues, methods]);
+  React.useEffect(() => {
+    if (!defaultValues) return;
+    methods.reset(defaultValues, {
+      keepDirtyValues: true,
+      keepTouched: true,
+      keepErrors: true,
+      keepIsSubmitted: true,
+      keepSubmitCount: true,
+    });
+
+  }, [defaultValues, methods]);
 
   // React.useEffect(() => {
   //   if (!defaultValues) return;
