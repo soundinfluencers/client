@@ -12,6 +12,7 @@ type ContentPatch = Partial<{
 
 type UpdateState = {
   patches: Record<string, ContentPatch>;
+  hasStructuralChanges: boolean;
 
   setField: (contentId: string, field: keyof ContentPatch, value: any) => void;
 
@@ -20,16 +21,21 @@ type UpdateState = {
   updateDescription: (contentId: string, index: number, text: string) => void;
   removeDescription: (contentId: string, index: number) => void;
 
+  markDirty: () => void;
+  clearStructuralChanges: () => void;
+
   reset: () => void;
 };
 
 const objectId = () => {
   const bytes = new Uint8Array(12);
+
   if (typeof crypto !== "undefined" && crypto.getRandomValues) {
     crypto.getRandomValues(bytes);
   } else {
     for (let i = 0; i < 12; i++) bytes[i] = Math.floor(Math.random() * 256);
   }
+
   return Array.from(bytes)
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
@@ -37,6 +43,7 @@ const objectId = () => {
 
 export const useUpdateCampaign = create<UpdateState>((set, get) => ({
   patches: {},
+  hasStructuralChanges: false,
 
   setField: (contentId, field, value) =>
       set((s) => ({
@@ -80,5 +87,13 @@ export const useUpdateCampaign = create<UpdateState>((set, get) => ({
     get().setDescriptions(contentId, next);
   },
 
-  reset: () => set({ patches: {} }),
+  markDirty: () => set({ hasStructuralChanges: true }),
+
+  clearStructuralChanges: () => set({ hasStructuralChanges: false }),
+
+  reset: () =>
+      set({
+        patches: {},
+        hasStructuralChanges: false,
+      }),
 }));

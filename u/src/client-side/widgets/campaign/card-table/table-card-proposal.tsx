@@ -295,7 +295,7 @@ export const TableCard = React.memo(function TableCard({
 
   return (
       <tr
-          className={`table-campaign-page__tr ${isMarked ? "row--hl" : ""} ${isPendingDelete ? "row--delete" : ""}`}
+          className={`table-campaign-page__tr  ${isPendingDelete ? "row--delete" : ""}`}
       >
         <NetworkCell data={data} />
         {columns.includes("followers") && <FollowersCell data={data} />}

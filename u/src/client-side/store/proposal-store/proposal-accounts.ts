@@ -3,6 +3,7 @@ import { devtools } from "zustand/middleware";
 import type { CampaignAddedAccount } from "@/types/store/index.types";
 import { getGroupBySocial } from "@/client-side/widgets/add-influencer-build-campaign/add-to-proposal/bc-prooced";
 import { ObjectId } from "bson";
+import {useUpdateCampaign} from "@/client-side/store";
 
 export const getAccountKey = (n: CampaignAddedAccount) =>
   String((n as any).addedAccountsId ?? (n as any).accountId);
@@ -101,6 +102,8 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       });
     },
     updateContentMainLink: (optionIndex, contentId, mainLink) => {
+      useUpdateCampaign.getState().markDirty();
+
       set((state) => {
         const prev = state.contentByOption[optionIndex] ?? [];
 
@@ -147,6 +150,8 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       });
     },
     setAccountSelectedContent: (optionIndex, accountKey, selected) => {
+      useUpdateCampaign.getState().markDirty();
+
       set((state) => {
         const prev = state.accountsByOption[optionIndex] ?? [];
 
@@ -186,11 +191,14 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       });
     },
     setAccountDateRequest: (optionIndex, accountKey, dateRequest) => {
+      useUpdateCampaign.getState().markDirty();
+
       set((state) => {
         const prev = state.accountsByOption[optionIndex] ?? [];
         const next = prev.map((a) =>
-          getAccountKey(a) === accountKey ? { ...a, dateRequest } : a,
+            getAccountKey(a) === accountKey ? { ...a, dateRequest } : a,
         );
+
         return {
           accountsByOption: {
             ...state.accountsByOption,
@@ -205,6 +213,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         payload,
         inheritFromContentId,
     ) => {
+      useUpdateCampaign.getState().markDirty();
       const sm = String(socialMedia ?? "").toLowerCase();
       const group = getGroupBySocial(sm);
       const newId = oid();
@@ -252,6 +261,8 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       };
     },
     removeContentItem: (optionIndex, contentId) => {
+      useUpdateCampaign.getState().markDirty();
+
       set((state) => {
         const prev = state.contentByOption[optionIndex] ?? [];
         const next = prev.filter((c) => String(c._id) !== String(contentId));
@@ -266,6 +277,8 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       });
     },
     mergeContent: (optionIndex, contentToAdd) => {
+      useUpdateCampaign.getState().markDirty();
+
       set((state) => {
         const prev = state.contentByOption[optionIndex] ?? [];
         const incoming = contentToAdd ?? [];
@@ -273,9 +286,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         const map = new Map<string, any>();
         [...prev, ...incoming].forEach((it) => {
           if (!it) return;
-          const key = String(
-            it._id ?? `${it.socialMedia}-${it.mainLink ?? ""}`,
-          );
+          const key = String(it._id ?? `${it.socialMedia}-${it.mainLink ?? ""}`);
           map.set(key, it);
         });
 
@@ -372,6 +383,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     },
     addAccounts: (optionIndex, accounts) => {
       set((state: any) => {
+        useUpdateCampaign.getState().markDirty();
         const prev = state.accountsByOption[optionIndex] ?? [];
         const prevKeys = new Set(prev.map(getAccountKey));
 
@@ -449,6 +461,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     //   });
     // },
     removeAccount: (optionIndex, accountKey) => {
+      useUpdateCampaign.getState().markDirty();
       set((state) => {
         const prevAcc = state.accountsByOption[optionIndex] ?? [];
         const removed = prevAcc.find((a) => getAccountKey(a) === accountKey);
