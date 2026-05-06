@@ -19,7 +19,22 @@ export const buildPromoShareUrl = (
     const id = encodeURIComponent(campaignId);
     return `${origin}/promo-share/${id}/proposal`;
 };
-export const getCampaignSelectedAccounts = (state: any) => {
+export const getCampaignSelectedAccounts = (
+    campaign: any,
+    state: any,
+) => {
+    if (campaign?.kind === "proposal") {
+        return campaign?.selectedOption?.addedAccounts ?? [];
+    }
+
+    if (campaign?.kind === "draft") {
+        return campaign?.addedAccounts ?? [];
+    }
+
+    if (campaign?.addedAccounts?.length) {
+        return campaign.addedAccounts;
+    }
+
     const map = new Map<string, any>();
 
     const offerAccounts = state.offer?.connectedAccounts ?? [];

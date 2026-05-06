@@ -22,11 +22,13 @@
   table-layout: fixed;
   min-width: 1224px;
   height: calc(100% + 100px);
-  border: 1px solid rgba(185, 208, 255, 1);
   border-radius: 8px;
   border-collapse: separate;
   border-spacing: 0px;
+  &.border-table{
+    border: 1px solid rgba(185, 208, 255, 1);
 
+  }
   .trash-action {
     width: 100%;
     &__confirm-block{
@@ -501,6 +503,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 0px 4px;
   &__icon {
     display: flex;
     justify-content: center;

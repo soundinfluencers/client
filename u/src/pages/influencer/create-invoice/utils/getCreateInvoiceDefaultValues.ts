@@ -1,10 +1,8 @@
-import type { TInvoiceDetailsApi } from "@/pages/influencer/invoice-details/types/invoice-details.types.ts";
-import type { TPaymentDetailsResponseDto } from "@/pages/influencer/payment-details/types/payment-details.types.ts";
 import type {
   TInvoicePaymentMethod,
 } from "@/pages/influencer/create-invoice/components/payment-bar/types/payment-method.types.ts";
 import type {
-  InternationalForm,
+  InternationalForm, InvoiceCreateRequestDto,
   PaypalForm, UkForm,
 } from "@/pages/influencer/create-invoice/components/invoice-form-content/types/invoice-form-inputs.types.ts";
 
@@ -15,18 +13,17 @@ type DefaultsByTab = {
 };
 
 export function getCreateInvoiceDefaultValues<TTab extends TInvoicePaymentMethod>(
-  invoiceDetails: TInvoiceDetailsApi | undefined,
-  paymentDetails: TPaymentDetailsResponseDto | undefined,
-  tab: TTab,
-  balance: number | undefined,
+    data: InvoiceCreateRequestDto,
+    tab: TTab,
+    balance: number | undefined,
 ): DefaultsByTab[TTab] {
   const base = {
-    firstName: invoiceDetails?.firstName ?? "",
-    lastName: invoiceDetails?.lastName ?? "",
-    address: invoiceDetails?.address ?? "",
-    country: invoiceDetails?.country ?? "",
-    company: invoiceDetails?.company || undefined,
-    vatNumber: invoiceDetails?.vatNumber || undefined,
+    firstName: data?.firstName ?? "",
+    lastName: data?.lastName ?? "",
+    address: data?.address ?? "",
+    country: data?.country ?? "",
+    company: data?.company || undefined,
+    vatNumber: data?.vatNumber || undefined,
     amountType: "balance" as const,
     amount: balance ?? null,
   };
@@ -36,30 +33,30 @@ export function getCreateInvoiceDefaultValues<TTab extends TInvoicePaymentMethod
       return {
         ...base,
         selectedPaymentMethod: "ukBankTransfer",
-        beneficiary: paymentDetails?.ukBankTransfer?.beneficiary ?? "",
-        beneficiaryAddress: paymentDetails?.ukBankTransfer?.beneficiaryAddress ?? "",
-        sortCode: paymentDetails?.ukBankTransfer?.sortCode ?? "",
-        accountNumber: paymentDetails?.ukBankTransfer?.accountNumber ?? "",
+        beneficiary: data?.ukBankTransfer?.beneficiary ?? "",
+        beneficiaryAddress: data?.ukBankTransfer?.beneficiaryAddress ?? "",
+        sortCode: data?.ukBankTransfer?.sortCode ?? "",
+        accountNumber: data?.ukBankTransfer?.accountNumber ?? "",
       } as DefaultsByTab[TTab];
 
     case "internationalBankTransfer":
       return {
         ...base,
         selectedPaymentMethod: "internationalBankTransfer",
-        beneficiary: paymentDetails?.internationalBankTransfer?.beneficiary ?? "",
-        beneficiaryAddress: paymentDetails?.internationalBankTransfer?.beneficiaryAddress ?? "",
-        iban: paymentDetails?.internationalBankTransfer?.iban ?? "",
-        bankName: paymentDetails?.internationalBankTransfer?.bankName ?? "",
-        bankCountry: paymentDetails?.internationalBankTransfer?.bankCountry ?? "",
-        bankAccountCurrency: paymentDetails?.internationalBankTransfer?.bankAccountCurrency ?? "",
-        swiftBicCode: paymentDetails?.internationalBankTransfer?.swiftBicCode ?? "",
+        beneficiary: data?.internationalBankTransfer?.beneficiary ?? "",
+        beneficiaryAddress: data?.internationalBankTransfer?.beneficiaryAddress ?? "",
+        iban: data?.internationalBankTransfer?.iban ?? "",
+        bankName: data?.internationalBankTransfer?.bankName ?? "",
+        bankCountry: data?.internationalBankTransfer?.bankCountry ?? "",
+        bankAccountCurrency: data?.internationalBankTransfer?.bankAccountCurrency ?? "",
+        swiftBicCode: data?.internationalBankTransfer?.swiftBicCode ?? "",
       } as DefaultsByTab[TTab];
 
     case "paypal":
       return {
         ...base,
         selectedPaymentMethod: "paypal",
-        paypalEmail: paymentDetails?.paypal?.paypalEmail ?? "",
+        paypalEmail: data?.paypal?.paypalEmail ?? "",
       } as DefaultsByTab[TTab];
   }
 }

@@ -48,7 +48,9 @@ export const TableRowCard: React.FC<Props> = ({
 
     const observer = new ResizeObserver((entries) => {
       const width = entries[0].contentRect.width;
-      setIsSmall(width <= 896);
+      const nextIsSmall = width <= 896;
+
+      setIsSmall((prev) => (prev === nextIsSmall ? prev : nextIsSmall));
     });
 
     observer.observe(el);

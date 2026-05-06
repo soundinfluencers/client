@@ -1,13 +1,69 @@
 .base-confirmations {
   width: 100%;
-  h2 {
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 20px;
-    leading-trim: NONE;
-    line-height: 100%;
-    letter-spacing: 0%;
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+
+    h2 {
+      font-weight: 400;
+      font-size: 20px;
+      line-height: 100%;
+      margin: 0;
+    }
+
+    @media screen and (max-width: 600px) {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 12px;
+
+      h2 {
+        font-size: 18px;
+        line-height: 120%;
+      }
+    }
+
+    @media screen and (max-width: 380px) {
+      h2 {
+        font-size: 16px;
+      }
+    }
   }
+
+  &__button {
+    display: inline-flex;
+    padding: 12px 24px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+
+    max-width: 185px;
+    min-width: 145px;
+    width: auto;
+    height: 43px;
+
+    border-radius: 24px;
+    background: #202934;
+    color: white;
+
+    font-size: 13px;
+    line-height: 100%;
+    white-space: nowrap;
+
+    @media screen and (max-width: 600px) {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    @media screen and (max-width: 380px) {
+      height: 40px;
+      padding: 10px 16px;
+      font-size: 12px;
+    }
+  }
+
+
 
   &__content_paypal,
   &__content_bankcard {

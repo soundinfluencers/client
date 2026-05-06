@@ -1,0 +1,252 @@
+.root {
+  margin-top: 16px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.left,
+.right {
+  flex: 0 0 50%;
+}
+
+.greeting {
+  background: rgba(185, 208, 255, 0.15);
+  padding: 0 0 24px 24px;
+  height: 183px;
+  border: 1px solid #fff;
+  border-right: none;
+  border-radius: 16px 0 0 16px;
+  display: flex;
+  align-items: flex-end;
+
+  p {
+    color: #1d2433;
+    font-size: 32px;
+    font-weight: 400;
+  }
+}
+
+.subtitle {
+  font-size: 20px;
+  padding: 16px 0 8px;
+}
+
+.actionsRow {
+  display: flex;
+  gap: 14px;
+  padding-right: 24px;
+}
+
+.actionCard {
+  position: relative;
+  width: 100%;
+  max-width: 288px;
+  height: 65px;
+  border: 1px solid #dff0ff;
+  border-radius: 16px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 16px;
+  cursor: pointer;
+
+  &:hover .tooltip {
+    opacity: 1;
+    transform: translateY(-8px);
+    pointer-events: auto;
+  }
+
+  &:hover .actionIcon {
+    background: linear-gradient(
+                    107.52deg,
+                    #bce8ff 3.56%,
+                    rgba(218, 244, 255, 0.94) 50.39%,
+                    rgba(191, 216, 255, 0.895) 79.14%,
+                    rgba(164, 188, 255, 0.85) 100%
+    );
+  }
+
+  span:first-child {
+    color: #4c566a;
+    font-size: clamp(14px, 1.2vw, 20px);
+  }
+}
+
+.actionIcon {
+  min-width: 45px;
+  min-height: 45px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.tooltip {
+  position: absolute;
+  top: 90%;
+  right: -150px;
+  width: 260px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f7f7f7;
+  color: #18181c;
+  font-size: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transform: translateY(0);
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+}
+
+.rightTop {
+  height: calc(100% - 99px);
+  border: 1px solid #fff;
+  border-left: none;
+  border-bottom: none;
+  background: rgba(185, 208, 255, 0.15);
+  border-radius: 0 16px 0 0;
+}
+
+.rightBottom {
+  height: 117px;
+  border: 1px solid #fff;
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  background: rgba(185, 208, 255, 0.15);
+}
+
+.balanceBlock {
+  width: 100%;
+  height: 100%;
+  padding: 0 24px 24px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.balanceTitle {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  font-size: 16px;
+  color: #4c566a;
+}
+
+.balanceValue {
+  text-align: right;
+  font-size: 64px;
+  font-weight: 300;
+  color: #4c566a;
+  line-height: 1;
+}
+
+.mobile {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobileCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
+  height: 131px;
+  border-radius: 8px;
+  border: 1px solid #fff;
+  background: rgba(185, 208, 255, 0.15);
+}
+
+.mobileGreeting {
+  color: #1d2433;
+  font-size: 20px;
+}
+
+.mobileActions {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .root {
+    margin-top: 24px;
+  }
+
+  .greeting {
+    height: 124px;
+    padding: 0 0 16px 16px;
+
+    p {
+      font-size: 24px;
+    }
+  }
+
+  .actionsRow {
+    gap: 8px;
+    padding-right: 16px;
+  }
+
+  .actionCard {
+    height: 51px;
+    padding: 8px;
+  }
+
+  .actionIcon {
+    min-width: 32px;
+    min-height: 32px;
+
+    img {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .rightTop {
+    height: calc(100% - 67px);
+  }
+
+  .rightBottom {
+    height: 168px;
+  }
+
+  .balanceBlock {
+    padding: 0 16px 16px 0;
+  }
+
+  .balanceTitle {
+    font-size: 14px;
+  }
+
+  .balanceValue {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 500px) {
+  .balanceValue {
+    font-size: 24px;
+  }
+
+  .mobileActions {
+    flex-direction: column;
+  }
+
+  .actionCard {
+    max-width: 100%;
+    height: 43px;
+  }
+}

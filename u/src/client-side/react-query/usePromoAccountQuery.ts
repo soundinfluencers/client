@@ -4,7 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 type Params = {
   selected: FilterItem[];
-  budget: string;
+  budget?: number | null;
   currency: string;
   sortBy: string;
   filterMethod: string;
@@ -56,6 +56,25 @@ export const usePromoAccountsFilters = (
       .filter((item) => item.group === "musicCategories")
       .map((item) => item.id);
 
+  const normalizedBudget =
+      typeof budget === "number" && budget > 0 ? budget : undefined;
+
+  const body = {
+    socialMedias,
+    countries,
+    additionalTopics,
+    profileTypes: profileType,
+    musicCategories,
+    musicGenresFilterMethod: filterMethod,
+    musicGenres: genres,
+    ...(normalizedBudget
+        ? {
+          budget: normalizedBudget,
+          budgetCurrency: currency,
+        }
+        : {}),
+  };
+
   const key = JSON.stringify({
     socialMedias: [...socialMedias].sort(),
     countries: [...countries].sort(),
@@ -64,27 +83,17 @@ export const usePromoAccountsFilters = (
     additionalTopics: [...additionalTopics].sort(),
     musicCategories: [...musicCategories].sort(),
     musicGenresFilterMethod: filterMethod,
-    budget,
-    currency,
+    budget: normalizedBudget ?? null,
+    currency: normalizedBudget ? currency : null,
     sortBy,
     limit,
   });
-  console.log('currency',currency)
+
   return useQuery({
     queryKey: ["promoAccounts", key],
     queryFn: async () => {
       const { data } = await getMultiPromoAccounts({
-        body: {
-          socialMedias,
-          countries,
-          additionalTopics,
-          profileTypes: profileType,
-          musicCategories,
-          musicGenresFilterMethod: filterMethod,
-          musicGenres: genres,
-          budget,
-          budgetCurrency: currency,
-        },
+        body,
         sortBy,
         limit,
         page: 1,

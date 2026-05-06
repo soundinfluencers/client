@@ -2,8 +2,8 @@ import type React from 'react';
 import './_view-mode.scss';
 
 // import check from '../../../../../assets/icons/check.svg';
-import gridViewIcon from '../../../../../assets/icons/grid.svg';
-import listViewIcon from '../../../../../assets/icons/menu.svg';
+import gridViewIcon from '@/assets/icons/Vector (16).svg';
+import listViewIcon from '@/assets/icons/Vector (15).svg';
 import { useDashboardLayoutStore } from '../../store/useDashboardLayoutStore';
 
 export const ViewModeTabs:React.FC = () => {

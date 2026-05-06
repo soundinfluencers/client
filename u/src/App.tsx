@@ -44,6 +44,7 @@ import {
   NewPassword
 } from "@/pages/auth/new-password/NewPassword.tsx";
 import { Negotiation } from "@/pages/influencer/negotiation/Negotiation.tsx";
+import {DashboardPage} from "@/pages/client-side/dashboard";
 
 
 function App() {
@@ -94,7 +95,7 @@ function App() {
           path="/client"
           element={
             <PrivateRoute>
-              <HomePage />
+              <DashboardPage/>
             </PrivateRoute>
           }
         />

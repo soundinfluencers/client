@@ -8,13 +8,16 @@ import "react-toastify/dist/ReactToastify.css";
 
 import App from "./App";
 import "./styles/_base.scss";
+import { NuqsAdapter } from "nuqs/adapters/react-router/v6";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
-          <App/>
+            <NuqsAdapter>
+                <App/>
+            </NuqsAdapter>
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>

@@ -10,14 +10,13 @@ import type {ConnectedAccount} from "@/client-side/types/offers.ts";
 
 type Params = {
   selected: FilterItem[];
-  budget: string;
+  budget?: number | null;
   currency: string;
   sortBy: string;
   query: string;
   filterMethod: string;
   limit: number;
 };
-
 export const usePromoCardsAndSearch = ({
                                          selected,
                                          budget,
@@ -46,7 +45,7 @@ export const usePromoCardsAndSearch = ({
     page: 1,
     limit: 20,
   });
-  console.log(promo.data ,'promo data');
+
   return {
     q,
     isSearchMode,
@@ -57,7 +56,7 @@ export const usePromoCardsAndSearch = ({
     promoError: promo.isError,
     promoRefetch: promo.refetch,
 
-    searchResults: (searchRes.data?.data?.accounts ?? []) as unknown as ConnectedAccount[],
+    searchResults: (searchRes.data?.data?.accounts ?? []) as ConnectedAccount[],
     searchLoading: searchRes.isLoading,
     searchFetching: searchRes.isFetching,
     searchError: searchRes.isError,

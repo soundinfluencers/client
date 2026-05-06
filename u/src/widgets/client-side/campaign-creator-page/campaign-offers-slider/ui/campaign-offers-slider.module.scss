@@ -1,0 +1,202 @@
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
+.wrapper {
+  position: relative;
+}
+
+.slider {
+  margin-top: 27px;
+
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  cursor: pointer;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prev {
+  left: -18px;
+
+  img {
+    transform: rotate(180deg);
+  }
+}
+
+.next {
+  right: -18px;
+}
+
+.card {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease;
+  &.cardActive{
+
+  }
+
+}
+
+.cardActive {
+  .cardHeader {
+    border: 1px solid rgba(14, 116, 220, 1);
+  }
+
+  .cardTitleSection {
+    background: linear-gradient(
+                    107.52deg,
+                    #bce8ff 3.56%,
+                    rgba(218, 244, 255, 0.94) 50.39%,
+                    rgba(191, 216, 255, 0.895) 79.14%,
+                    rgba(164, 188, 255, 0.85) 100%
+    );
+  }
+
+  .cardAccounts {
+
+
+    border-left: 1px solid rgba(14, 116, 220, 1);
+    border-right: 1px solid rgba(14, 116, 220, 1);
+    border-bottom: 1px solid rgba(14, 116, 220, 1);
+  }
+  .cardButton{
+    background: #0E74DC;
+  }
+}
+
+.cardHeader {
+  max-width: 288px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid rgba(231, 232, 241, 1);
+  transition: 0.2s ease;
+  border-radius: 24px;
+  background: white;
+  z-index: 10;
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 0 16px;
+
+    li {
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1;
+      color: rgba(24, 24, 28, 1);
+    }
+  }
+}
+
+.cardButton {
+  margin-top: 24px;
+  max-width: 272px;
+  margin-bottom: 8px;
+}
+
+.cardTitleSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-width: 272px;
+  width: 100%;
+  height: 156px;
+  background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+  padding: 16px;
+  border-radius: 16px;
+
+  h2 {
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1;
+    color: rgba(42, 42, 42, 1);
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  p {
+    font-weight: 300;
+    font-size: 36px;
+    line-height: 1;
+    color: rgba(42, 42, 42, 1);
+  }
+}
+
+.cardAccounts {
+  margin-top: -19px;
+  max-width: 288px;
+  width: 100%;
+  padding: 43px 16px 26px;
+  border-left: 1px solid rgba(231, 232, 241, 1);
+  border-right: 1px solid rgba(231, 232, 241, 1);
+  border-bottom: 1px solid rgba(231, 232, 241, 1);
+  border-bottom-left-radius: 26px;
+  border-bottom-right-radius: 26px;
+  transition: 0.2s ease;
+  overflow: hidden;
+  background: white;
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    height: 252px;
+    @include sb.scrollbar-dotted-vertical;
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+
+      img {
+        width: 32px;
+        height: 32px;
+        filter: grayscale(100%);
+        border-radius: 50%;
+      }
+    }
+  }
+}
+
+.card:hover {
+  .cardHeader {
+    border: 1px solid rgba(14, 116, 220, 1);
+  }
+
+  .cardTitleSection {
+    background: linear-gradient(
+                    107.52deg,
+                    #bce8ff 3.56%,
+                    rgba(218, 244, 255, 0.94) 50.39%,
+                    rgba(191, 216, 255, 0.895) 79.14%,
+                    rgba(164, 188, 255, 0.85) 100%
+    );
+  }
+
+  .cardAccounts {
+
+
+    border-left: 1px solid rgba(14, 116, 220, 1);
+    border-right: 1px solid rgba(14, 116, 220, 1);
+    border-bottom: 1px solid rgba(14, 116, 220, 1);
+  }
+  .cardButton{
+    background: #0E74DC;
+  }
+}

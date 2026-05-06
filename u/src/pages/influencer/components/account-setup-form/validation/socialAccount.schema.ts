@@ -31,7 +31,7 @@ const socialAccountDraftBase = z.object({
   logoUrl: requiredLogoUrl,
 
   profileCategory: profileCategoryEnum,
-  initialPrice: requiredPrice,
+  price: requiredPrice,
   currency: profileCurrencyEnum,
 
   musicGenres: z.array(musicGenresSchema).default([]),

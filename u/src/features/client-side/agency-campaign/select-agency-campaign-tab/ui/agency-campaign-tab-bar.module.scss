@@ -1,0 +1,43 @@
+.root {
+  margin-top: 24px;
+}
+
+.label {
+  margin-bottom: 8px;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 32px;
+  border-radius: 32px;
+  border: 1px solid #e7e8f1;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.active {
+  background: linear-gradient(
+                  107.52deg,
+                  #bce8ff 3.56%,
+                  rgba(218, 244, 255, 0.94) 50.39%,
+                  rgba(191, 216, 255, 0.895) 79.14%,
+                  rgba(164, 188, 255, 0.85) 100%
+  );
+}
+
+@media (max-width: 600px) {
+  .tab {
+    padding: 8px 16px;
+  }
+}

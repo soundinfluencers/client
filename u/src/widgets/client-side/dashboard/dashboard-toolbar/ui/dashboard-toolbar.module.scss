@@ -1,0 +1,123 @@
+
+.root {
+  margin-top: 40px;
+  margin-bottom: 34px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.titleRow {
+  p {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #EBECFF;
+}
+
+.filterButton {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 8px 16px;
+  border: 0;
+  border-right: 1px solid #EBECFF;
+  background: transparent;
+  opacity: 0.5;
+
+  &:last-child {
+    border-right: 0;
+  }
+
+  span {
+    font-size: 15px;
+  }
+}
+
+.active {
+  opacity: 1;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(185, 208, 255, 1);
+}
+
+.dotHidden {
+  visibility: hidden;
+}
+
+@media (max-width: 1100px) {
+  .root {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .content {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0;
+  }
+}
+
+@media (max-width: 901px) {
+  .titleRow {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .filters {
+    width: 100%;
+    gap: 4px;
+    flex-wrap: wrap;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .filterButton {
+    width: fit-content;
+    border-radius: 8px;
+    border: 1px solid rgba(185, 208, 255, 1);
+    background: #fff;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .filters {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 420px) {
+  .filterButton {
+    gap: 2px;
+
+    span {
+      font-size: 12px;
+    }
+  }
+}

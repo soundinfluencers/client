@@ -1,0 +1,84 @@
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
+.popup {
+  position: absolute;
+  background: #fff;
+  width: calc(100% + 2px);
+  border: 1px solid rgb(185, 208, 255);
+  padding: 24px 12px;
+  left: -1px;
+  right: 0;
+  margin-top: 16px;
+  z-index: 100;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+  top: 85px;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  &.selected{
+    background-color: rgb(235, 245, 254);
+  }
+  &.include{
+    background: linear-gradient(107.52deg, #bce8ff 3.56%, rgba(218, 244, 255, 0.94) 50.39%, rgba(191, 216, 255, 0.895) 79.14%, rgba(164, 188, 255, 0.85) 100%);
+  }
+}
+
+.content {
+  padding: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+  @include sb.scrollbar-dotted-vertical;
+
+}
+
+.rowContent {
+  display: flex;
+  justify-content: space-between;
+  p{
+    max-width: 116px;
+    width: 100%;
+    color: #18181c;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border-bottom: 1px solid rgb(185, 208, 255);
+    padding-bottom: 2px;
+  }
+
+}
+
+.infoContent {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.genres,
+.countries {
+  h3 {
+    font-weight: 300;
+    border-bottom: 1px solid rgb(185, 208, 255);
+    padding-bottom: 2px;
+  }
+
+  ul {
+    margin-top: 14px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  li {
+    padding: 4px 8px;
+    background: #fff;
+    border: 1px solid rgb(231, 232, 241);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 300;
+  }
+}
+
+.selected {}
+.include {}

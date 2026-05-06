@@ -29,7 +29,7 @@ export type SocialAccountDraft = {
   logoUrl: string | null;
 
   profileCategory: ProfileCategory;
-  initialPrice: number | null;
+  price: number | null;
   currency: ProfileCurrency;
 
   musicGenres: MusicGenreItem[];

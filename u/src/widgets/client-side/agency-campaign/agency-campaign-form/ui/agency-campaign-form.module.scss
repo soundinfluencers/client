@@ -1,0 +1,62 @@
+.root {
+}
+
+.content {
+  margin-top: 32px;
+}
+
+.formTitle {
+  border-bottom: 1px solid rgba(185, 208, 255, 1);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+
+  h2 {
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1;
+  }
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.submitButton {
+  margin-top: 48px;
+}
+
+.successModal {
+  padding: 32px;
+
+  h2 {
+    color: #202934;
+    text-align: center;
+    font-size: 36px;
+    font-weight: 400;
+    margin-bottom: 24px;
+  }
+
+  h3 {
+    color: #202934;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 400;
+  }
+
+  p {
+    margin-top: 8px;
+    text-align: center;
+    color: rgba(81, 82, 89, 0.9);
+    font-size: 20px;
+    font-weight: 400;
+  }
+}
+
+.successButton {
+  max-width: 250px;
+  margin: 40px auto 0;
+  height: 46px;
+  padding: 12px 8px;
+}

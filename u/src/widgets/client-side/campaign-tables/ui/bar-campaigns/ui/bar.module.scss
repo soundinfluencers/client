@@ -1,0 +1,22 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  @media screen and (max-width: 1000px) {
+    justify-content: start;
+    gap: 4px;
+  }
+  &Button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+  }
+  &Row {
+    background-color: rgba(185, 208, 255, 1);
+    width: 2px;
+    height: 22px;
+  }
+}

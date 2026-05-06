@@ -189,6 +189,7 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
     const link = platformItems?.[selectedContent]?.mainLink ?? "";
     onClickVideo(selectedContent, link);
   };
+  const canDelete = platformItems.length > 1;
   return (
     <>
       <td className="tableBase__td">
@@ -231,15 +232,17 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
                     {item?.mainLink ? `${groupTitle(group)} ${idx + 1}` : "—"}
                   </p>
 
-                  <img
-                    className="trash"
-                    src={trash}
-                    alt=""
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openDelete(idx);
-                    }}
-                  />
+                  {canDelete && (
+                      <img
+                          className="trash"
+                          src={trash}
+                          alt=""
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDelete(idx);
+                          }}
+                      />
+                  )}
                 </li>
               ))}
             </ul>

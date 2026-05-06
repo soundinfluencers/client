@@ -97,12 +97,12 @@ export const CampaignPage = () => {
       if (data?.selectedOption?.canEdit) {
         return (
             <button
-                className="campaignBase__title-request save"
-                disabled={isRequesting}
+                className={`campaignBase__title-request save ${isDirty ? "saveActive" : "saveDisabled"}`}
+                disabled={!isDirty || isRequesting}
                 onClick={actions.updateProposalOption}
             >
-              <img src={save} alt=""/>
-              {isRequestSent ? "Save" : isRequesting ? "Saving..." : "Save"}
+              <img src={save} alt="" />
+              {isRequestSent ? "Saved" : isRequesting ? "Saving..." : "Save"}
             </button>
         );
       }
@@ -124,11 +124,12 @@ export const CampaignPage = () => {
 
     if (data.canEdit) {
       return (
-          <button  className="campaignBase__title-request save"
+          <button
+              className={`campaignBase__title-request save ${isDirty ? "saveActive" : "saveDisabled"}`}
               disabled={!isDirty || isRequesting}
               onClick={actions.updateStrategyCampaign}
           >
-            <img src={save} alt=""/>
+            <img src={save} alt="" />
             {isRequestSent ? "Saved" : isRequesting ? "Saving..." : "Save"}
           </button>
       );

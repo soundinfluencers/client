@@ -10,20 +10,20 @@ import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
 import {
   AccountSetting,
   AddInfluencerBuildCampaign,
-  BespokeCampaign,
-  CampaignCreatorPage,
+
   CampaignPage,
-  CampaignPostContent,
   CampaignSharePage,
-  CampaignStrategy,
-  HomePage,
   InvoiceDetails,
   InvoicesHistory,
   PaymentCampaign,
   PostContentAdd,
 } from "@/client-side/index.ts";
 import { ContactSupport } from "@/pages/influencer/contact-support/ContactSupport.tsx";
-
+import { AgencyCampaignPage } from "@/pages/client-side/agency-campaign/index.ts";
+import {CampaignCreatorPage} from "@/pages/client-side/campaign-creator-page";
+import {CampaignPostContentRoute} from "@/pages/client-side/campaign-post-content/ui/campaign-post-content-route.tsx";
+import {CampaignStrategyPage} from "@/pages/client-side/campaign-strategy-page/ui/campaign-strategy-page.tsx";
+import {DashboardPage} from "@/pages/client-side/dashboard";
 // import { CampaignAddInfluencer } from "@/pages/client/campaign-add-infuencer/campaign-add-infuencer.tsx";
 
 export const routes: IRoute[] = [
@@ -72,7 +72,7 @@ export const routes: IRoute[] = [
   {
     name: "Home",
     path: "/client",
-    component: HomePage,
+    component: DashboardPage,
     isProtected: true,
   },
   {
@@ -84,13 +84,13 @@ export const routes: IRoute[] = [
   {
     name: "Content",
     path: "/client/create-campaign/content",
-    component: CampaignPostContent,
+    component: CampaignPostContentRoute,
     isProtected: true,
   },
   {
     name: "Strategy",
     path: "/client/create-campaign/content/strategy",
-    component: CampaignStrategy,
+    component: CampaignStrategyPage,
     isProtected: true,
   },
   {
@@ -108,7 +108,7 @@ export const routes: IRoute[] = [
   {
     name: "BespokeCampaign",
     path: "/client/agency-campaign",
-    component: BespokeCampaign,
+    component: AgencyCampaignPage,
     isProtected: true,
   },
   {

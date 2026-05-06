@@ -1,0 +1,42 @@
+.sortHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.sortHeaderActive {
+  font-weight: 500;
+}
+
+.sortTitle {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sortIcons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.sortImage {
+  width: 10px;
+  height: 10px;
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+}
+
+.sortImageActive {
+  opacity: 1;
+}

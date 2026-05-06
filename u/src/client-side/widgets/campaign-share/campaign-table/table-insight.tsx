@@ -91,7 +91,7 @@ export const TableDistributingInsight: React.FC<Props> = ({ campaign }) => {
 
   return (
     <div className="tableBase-wrap">
-      <table className="tableBase tableBase--campaign table-campaign-page">
+      <table className="tableBase border-table tableBase--campaign table-campaign-page">
         <colgroup>
           {columns.map((key) => (
             <col

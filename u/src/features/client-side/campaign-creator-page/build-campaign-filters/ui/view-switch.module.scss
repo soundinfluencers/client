@@ -1,0 +1,31 @@
+.root {
+  width: fit-content;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 108px;
+  border-radius: 8px;
+  border: 1px solid rgba(231, 232, 241, 1);
+  background: white;
+  height: 40px;
+  overflow: hidden;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  padding: 8px;
+  cursor: pointer;
+  opacity: 0.5;
+  border: 0;
+  background: transparent;
+}
+
+.active {
+  opacity: 1;
+}

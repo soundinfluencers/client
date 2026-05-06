@@ -104,7 +104,7 @@ export function TableProposal({
   return (
     <div className="tableBase-wrap">
       <h1>{title}</h1>
-      <table className="tableBase">
+      <table className="tableBase border-table">
         <colgroup>
           {columns.map((key) => (
               <col

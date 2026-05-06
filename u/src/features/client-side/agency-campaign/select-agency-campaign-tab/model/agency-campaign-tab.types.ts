@@ -1,0 +1,1 @@
+export type AgencyCampaignTabParam = "artist" | "music" | "event" | "other";

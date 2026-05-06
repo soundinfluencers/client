@@ -1,0 +1,1 @@
+export type CampaignViewMode = "table" | "grid";

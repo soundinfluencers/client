@@ -49,9 +49,9 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
   //   return (store.promoCard ?? []) as any[];
   // }, [campaign, store.promoCard]);
   const accounts = React.useMemo(() => {
-    return getCampaignSelectedAccounts(store);
+    return getCampaignSelectedAccounts(campaign, store);
   }, [campaign, store.offer, store.promoCard]);
-
+  console.log(campaign,'aqwe')
   const { totalPublicPrice } = React.useMemo(
       () => calcGroupPrices(accounts),
       [accounts],
@@ -70,24 +70,24 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
     String(campaign?.submittedAt ?? campaign?.createdAt ?? new Date()),
   );
 
-  const reachFollowers = React.useMemo(
-    () => sumFollowers(accounts),
-    [accounts],
-  );
 
+  console.log(accounts, 'awdjawnlwnadjnwajawdnawdjjawjwad');
   const postsCount = accounts.length;
+  const totalFollowers =
+      Number(campaign?.totalFollowers ?? 0) > 0
+          ? Number(campaign.totalFollowers)
+          : sumFollowers(accounts);
 
   const barUIs = [
-
-    { name: `Status: ${campaign?.status || ''}`, img: calendar, row: true },
+    { name: `Status: ${campaign?.status || ""}`, img: calendar, row: true },
     { name: `Submitted: ${submitted}`, img: calendar, row: true },
     { name: `Budget: ${totalPublicPrice || budget || draftPrice}€`, img: creditcard, row: true },
     {
-      name: `Reach: ${formatFollowers(reachFollowers)} followers`,
+      name: `Reach: ${formatFollowers(totalFollowers)} followers`,
       img: usercheck,
       row: true,
     },
-    { name: `Posts: ${postsCount}`, img: edit, row: true },
+    { name: `Posts: ${postsCount || content.length}`, img: edit, row: true },
     { name: `Video: ${content.length}`, img: video, row: false },
   ];
 

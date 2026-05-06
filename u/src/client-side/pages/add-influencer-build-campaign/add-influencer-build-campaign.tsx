@@ -59,12 +59,10 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
 
   const {
     isSearchMode,
-
     promoCards,
     promoLoading,
     promoFetching,
     promoError,
-
     searchResults,
     searchLoading,
     searchFetching,
@@ -72,7 +70,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
     searchRefetch,
   } = usePromoCardsAndSearch({
     selected,
-    budget: String(selectedBudget),
+    budget: selectedBudget,
     currency: selectedCurrency.currency,
     sortBy: selectedFilter.key,
     query: search,

@@ -108,7 +108,7 @@ export function OptionsSlider({
         </button>
       )}{" "}
       {modal && (
-        <Modal onClose={() => setModal(false)}>
+        <Modal isShowCloseButton={false} onClose={() => setModal(false)}>
           <div className="create-option">
             <h2>
               Are you sure you want to <br></br> delete this Option{" "}
