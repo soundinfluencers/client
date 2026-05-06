@@ -22,7 +22,6 @@ import {CampaignPageContent} from "@/client-side/widgets/campaign/campaign-page-
 export const CampaignPage = () => {
   const { data, isLoading } = useFetchCampaign();
   const { mutate: copyShareLink, isPending } = useCopyShareLinkMutation();
-  const patches = useUpdateCampaign((s) => s.patches);
 
   useCampaignPageBootstrap(data);
 
@@ -67,9 +66,13 @@ export const CampaignPage = () => {
     setIsRequestingPDF,
   });
 
+  const patches = useUpdateCampaign((s) => s.patches);
+  const hasStructuralChanges = useUpdateCampaign((s) => s.hasStructuralChanges);
+
   const isDirty = React.useMemo(
-      () => Object.keys(patches ?? {}).length > 0,
-      [patches],
+      () =>
+          Object.keys(patches ?? {}).length > 0 || hasStructuralChanges,
+      [patches, hasStructuralChanges],
   );
 
   React.useEffect(() => {
