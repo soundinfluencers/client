@@ -24,6 +24,8 @@ type Props = {
     setFilterMethod: (value: CampaignFilterMethod) => void;
 };
 
+const DEFAULT_OPEN_IDS = ["social-platforms-1", "profile-type"];
+
 export const FilterPanel = ({
                                 onToggle,
                                 isSmall,
@@ -35,6 +37,20 @@ export const FilterPanel = ({
                                 setFilterMethod,
                             }: Props) => {
     const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
+
+    const [openSectionIds, setOpenSectionIds] = React.useState<string[]>(
+        DEFAULT_OPEN_IDS,
+    );
+
+    const toggleSection = React.useCallback((sectionId: string) => {
+        setOpenSectionIds((prev) => {
+            if (prev.includes(sectionId)) {
+                return prev.filter((id) => id !== sectionId);
+            }
+
+            return [...prev, sectionId];
+        });
+    }, []);
 
     return (
         <div className={`${styles.sticky} ${isSmall ? styles.tableFilter : ""}`}>
@@ -58,6 +74,8 @@ export const FilterPanel = ({
                                 filterMethod={filterMethod}
                                 setFilterMethod={setFilterMethod}
                                 scrollContainerRef={scrollContainerRef}
+                                open={openSectionIds.includes(section.id)}
+                                onToggleSection={() => toggleSection(section.id)}
                             />
                         ))}
                 </div>

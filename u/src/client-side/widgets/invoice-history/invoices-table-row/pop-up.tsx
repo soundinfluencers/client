@@ -224,7 +224,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
         return value;
     };
     return (
-        <Modal onClose={onSubmit} >
+        <Modal isShowCloseButton={false} onClose={onSubmit} >
            <div className='edit-invoicePopUp'>
                <div className='edit-invoicePopUp__logo'>
                    <img src={logo} alt=""/>

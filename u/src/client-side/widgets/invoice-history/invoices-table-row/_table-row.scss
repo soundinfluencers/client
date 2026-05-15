@@ -67,7 +67,9 @@
 
 
 .edit-invoicePopUp {
+  max-height: 750px;
   padding: 40px;
+  overflow: auto;
 
   &__logo {
     display: flex;

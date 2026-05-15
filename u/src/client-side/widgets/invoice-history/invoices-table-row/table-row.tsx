@@ -5,6 +5,7 @@ import edit from "@/assets/icons/edit.svg";
 import { toast } from "react-toastify";
 import React from "react";
 import { EditInvoiceModal } from "./pop-up.tsx";
+import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
 
 interface Props {
   item: any;
@@ -27,9 +28,13 @@ export const TableRow = ({ item, onReload }: Props) => {
   };
 
   const getPdf = async (id: string) => {
+    if (isRequestingPDF) return;
+
     try {
       setisRequestingPDF(true);
+
       const blob = await getPdffileInvoiceHistory(id);
+
       downloadBlob(blob, `invoice-${id}.pdf`);
       toast.success("PDF created successfully!");
     } catch (error) {
@@ -47,28 +52,39 @@ export const TableRow = ({ item, onReload }: Props) => {
 
           <td className="custom-table-row__cell">{item?.creationDate}</td>
 
-          <td className="custom-table-row__cell">{item?.amount} {item?.amount ? '€' : ''}</td>
+          <td className="custom-table-row__cell">
+            {item?.amount} {item?.amount ? "€" : ""}
+          </td>
 
           <td className="custom-table-row__cell custom-table-row__cell--campaign">
             <p title={item?.campaignName}>{item?.campaignName}</p>
 
-            {item?.shortInvoiceId && <div className="custom-table-row__row-actions">
-              <div
-                  className="custom-table-row__action"
-                  onClick={() => setIsEditOpen(true)}
-              >
-                <img src={edit} alt="" />
-                <p>Edit</p>
-              </div>
+            {item?.shortInvoiceId && (
+                <div className="custom-table-row__row-actions">
+                  <div
+                      className="custom-table-row__action"
+                      onClick={() => setIsEditOpen(true)}
+                  >
+                    <img src={edit} alt="" />
+                    <p>Edit</p>
+                  </div>
 
-              <div
-                  onClick={() => getPdf(item.invoiceId)}
-                  className="custom-table-row__action"
-              >
-                <img src={pdf} alt="" />
-                <p>{isRequestingPDF ? "creating..." : "PDF File"}</p>
-              </div>
-            </div> }
+                  <div
+                      onClick={() => getPdf(item.invoiceId)}
+                      className={`custom-table-row__action ${
+                          isRequestingPDF ? "custom-table-row__action--loading" : ""
+                      }`}
+                  >
+                    {isRequestingPDF ? (
+                        <CircleLoader />
+                    ) : (
+                        <img src={pdf} alt="" />
+                    )}
+
+                    <p>{isRequestingPDF ? "Creating..." : "PDF File"}</p>
+                  </div>
+                </div>
+            )}
           </td>
         </tr>
 
