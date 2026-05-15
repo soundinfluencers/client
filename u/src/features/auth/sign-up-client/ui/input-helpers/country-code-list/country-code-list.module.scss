@@ -1,0 +1,136 @@
+.countryCodeList {
+  padding: 8px;
+  border: 1px solid #b9d0ff;
+  border-radius: 0 0 8px 8px;
+  background: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  position: absolute;
+  will-change: transform, opacity;
+  width: 100%;
+  top: calc(100% - 8px);
+  left: 0;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transform: translateY(-4px);
+
+  transition:
+          opacity 150ms ease,
+          transform 150ms ease;
+}
+
+.listOpen {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.searchWrapper {
+  width: 100%;
+  padding-inline: 8px;
+}
+
+.searchInput {
+  max-height: 43px;
+  padding: 12px 8px 12px 38px;
+
+  border: none;
+  border-radius: 0;
+  outline: none;
+  border-bottom: 1px solid #e7e8f1;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-bottom: 1px solid #e7e8f1;
+}
+
+.searchIcon {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 12px;
+  left: 8px;
+}
+
+.listViewport {
+  width: 100%;
+  max-height: 193px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.listViewport::-webkit-scrollbar {
+  width: 4px;
+}
+
+.listViewport::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  width: 2px;
+  background: #b9d0ff;
+}
+
+.listViewport::-webkit-scrollbar-track {
+  background: #e7e8f1;
+  border-radius: 4px;
+}
+
+.list {
+  width: 100%;
+  display: block;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  height: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 8px;
+  border-radius: 8px;
+  color: #2a2a2a;
+  cursor: pointer;
+
+  transition: background-color 220ms ease;
+}
+
+.item:hover {
+  background-color: rgba(185, 208, 255, 0.15);
+}
+
+.label {
+  font-size: 15px;
+  color: #2a2a2a;
+}
+
+.iconCheck {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  aspect-ratio: 1 / 1;
+}
+
+@media (max-width: 811px) {
+  .label {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 599px) {
+  .iconCheck {
+    width: 18px;
+    height: 18px;
+  }
+}

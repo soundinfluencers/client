@@ -1,4 +1,5 @@
-import { FLAG_ICONS_SUPPORTED } from "@components/ui/phone-input-v2/data/flag-icon.ts";
+import {FLAG_ICONS_SUPPORTED} from "@/features/auth/sign-up-client/ui/input-helpers/model/phone-countries.ts";
+
 
 export const hasFlag = (iso2?: string): boolean => {
   if (!iso2) return false;

@@ -18,15 +18,27 @@ import type {SocialMediaType} from "@/shared/types/utils/constants.types.ts";
 import {
     CardsContainer
 } from "@/widgets/client-side/campaign-creator-page/build-campaign/components/cards-container.tsx";
+import {useSearchParams} from "react-router-dom";
 
 export const BuildCampaign = () => {
+    const [searchParams] = useSearchParams();
+    const isAddInfluencerMode = searchParams.get("mode") === "add-influencer";
     const vm = useBuildCampaignView();
 
     return (
         <div className={styles.root}>
             <div className={styles.title}>
-                <h2>Build your custom campaign</h2>
-                <p>Handpick networks, genres, and budgets to tailor your campaign</p>
+                <h2>
+                    {isAddInfluencerMode
+                        ? "Add influencers to proposal"
+                        : "Build your custom campaign"}
+                </h2>
+
+                <p>
+                    {isAddInfluencerMode
+                        ? "Select new networks to add to this proposal option"
+                        : "Handpick networks, genres, and budgets to tailor your campaign"}
+                </p>
             </div>
 
             <div className={styles.content}>

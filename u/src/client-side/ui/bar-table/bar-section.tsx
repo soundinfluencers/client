@@ -4,97 +4,134 @@ import insight from "@/assets/icons/bar-chart-2.svg";
 import activity from "@/assets/icons/activity.svg";
 import type { CampaignResponse } from "@/types/store/index.types";
 import { formatCampaignDate } from "@/utils/functions/formatDate";
-
 import { formatFollowers } from "@/utils/functions/formatFollowers";
-import { getCPM, getResultCPM } from "@/client-side/utils";
+import { getResultCPM } from "@/client-side/utils";
 
 interface Props {
   campaign: CampaignResponse;
 }
+
+const currencySymbols: Record<string, string> = {
+  EUR: "€",
+  USD: "$",
+  GBP: "£",
+};
+
+const formatCurrency = (
+    value: number | string | null | undefined,
+    currency: string | null | undefined,
+) => {
+  const symbol = currencySymbols[currency || "EUR"] || currency || "€";
+  return `${value ?? 0}${symbol}`;
+};
+
 export const BarSection: React.FC<Props> = ({ campaign }) => {
   const resultCPM = getResultCPM(campaign.cpm);
+  const currency = campaign.displayCurrency ?? "EUR";
+
   return (
-    <div className="BarSection">
-      <div className="BarSection-info block">
-        <div className="BarSection-info__title">
-          <img src={edit} alt="" />
-          <h2>Brief</h2>
-        </div>
-        <div className="BarSection-info__content">
-          <div className="BarSection-info__left-section">
-            <p>
-              Submitted:{" "}
-              <span>{formatCampaignDate(campaign.creationDate)}</span>
-            </p>{" "}
-            <p>
-              Budget: {campaign.isPriceHidden ? null : <span>{campaign.price}€</span>}
-            </p>{" "}
-            <p>
-              Posts: <span>{campaign.addedAccounts.length}</span>
-            </p>
+      <div className="BarSection">
+        <div className="BarSection-info block">
+          <div className="BarSection-info__title">
+            <img src={edit} alt="" />
+            <h2>Brief</h2>
           </div>
-          <div className="BarSection-info__right-section">
-            {" "}
-            <p>
-              Reach:{" "}
-              <span>{formatFollowers(campaign.totalFollowers)} followers</span>
-            </p>
-            <p>
-              Videos: <span>{campaign.campaignContent.length}</span>
-            </p>
+
+          <div className="BarSection-info__content">
+            <div className="BarSection-info__left-section">
+              <p>
+                Submitted:{" "}
+                <span>{formatCampaignDate(campaign.creationDate)}</span>
+              </p>
+
+              <p>
+                Budget:{" "}
+                {campaign.isPriceHidden ? null : (
+                    <span>{formatCurrency(campaign.price, currency)}</span>
+                )}
+              </p>
+
+              <p>
+                Posts: <span>{campaign.addedAccounts.length}</span>
+              </p>
+            </div>
+
+            <div className="BarSection-info__right-section">
+              <p>
+                Reach:{" "}
+                <span>{formatFollowers(campaign.totalFollowers)} followers</span>
+              </p>
+
+              <p>
+                Videos: <span>{campaign.campaignContent.length}</span>
+              </p>
+            </div>
           </div>
         </div>
-      </div>{" "}
-      <div className="BarSection-info block">
-        <div className="BarSection-info__title">
-          <img src={insight} alt="" />
-          <h2>Insights</h2>
-        </div>
-        <div className="BarSection-info__content">
-          <div className="BarSection-info__left-section">
-            <p>
-              Impressions: <span>{campaign.totalImpressions ?? 0}</span>
-            </p>{" "}
-            <p>
-              Likes: <span>{campaign.totalLikes ?? 0}</span>
-            </p>{" "}
-            <p>
-              Saves: <span>{campaign.totalSaves ?? 0}</span>
-            </p>
+
+        <div className="BarSection-info block">
+          <div className="BarSection-info__title">
+            <img src={insight} alt="" />
+            <h2>Insights</h2>
           </div>
-          <div className="BarSection-info__right-section">
-            {" "}
-            <p>
-              Comments: <span>{campaign.totalComments ?? 0}</span>
-            </p>
-            <p>
-              Shares: <span>{campaign.totalShares ?? 0}</span>
-            </p>
+
+          <div className="BarSection-info__content">
+            <div className="BarSection-info__left-section">
+              <p>
+                Impressions: <span>{campaign.totalImpressions ?? 0}</span>
+              </p>
+
+              <p>
+                Likes: <span>{campaign.totalLikes ?? 0}</span>
+              </p>
+
+              <p>
+                Saves: <span>{campaign.totalSaves ?? 0}</span>
+              </p>
+            </div>
+
+            <div className="BarSection-info__right-section">
+              <p>
+                Comments: <span>{campaign.totalComments ?? 0}</span>
+              </p>
+
+              <p>
+                Shares: <span>{campaign.totalShares ?? 0}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="BarSection-info block">
+          <div className="BarSection-info__title">
+            <img src={activity} alt="" />
+            <h2>Performance</h2>
+          </div>
+
+          <div className="BarSection-info__content">
+            <div className="BarSection-info__left-section">
+              <p>
+                CPM:{" "}
+                {campaign.isCpmAndResultHidden ? null : (
+                    <span>
+                  {formatCurrency(Number(campaign.cpm).toFixed(2), currency)}
+                </span>
+                )}
+              </p>
+
+              <p>
+                Average Instagram CPM:{" "}
+                <span>
+                {formatCurrency(5, currency)} to {formatCurrency(12, currency)}
+              </span>
+              </p>
+
+              <p>
+                Result: <span>{resultCPM}</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
-      <div className="BarSection-info block">
-        <div className="BarSection-info__title">
-          <img src={activity} alt="" />
-          <h2>Performance</h2>
-        </div>
-        <div className="BarSection-info__content">
-          <div className="BarSection-info__left-section">
-            <p>
-              CPM:{" "}
-              {campaign.isCpmAndResultHidden ? null : (
-                  <span>{Number(campaign.cpm).toFixed(2)}</span>
-              )}
-            </p>
-            <p>
-              Average Instagram CPM: <span>5€ to 12€</span>
-            </p>{" "}
-            <p>
-              Result: <span>{resultCPM}</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 };

@@ -58,6 +58,7 @@ export const TableRowCard: React.FC<Props> = ({
             countries: data.countries,
             genres: data.musicGenres,
             logoUrl: data.logoUrl,
+            source: "manual",
         });
     };
     React.useEffect(() => {

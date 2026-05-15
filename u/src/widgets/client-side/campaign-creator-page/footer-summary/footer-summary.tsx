@@ -10,7 +10,15 @@ import {
     calcBuilderTotal
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total.ts";
 
-export const FooterSummary = () => {
+type Props = {
+    mode?: "create" | "add-influencer";
+    optionIndex?: number | null;
+};
+
+export const FooterSummary = ({
+                                  mode = "create",
+                                  optionIndex = null,
+                              }: Props) => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
@@ -18,30 +26,64 @@ export const FooterSummary = () => {
     const selectedPromoCardIds = useCampaignBuilderStore((s) => s.selectedPromoCardIds);
     const selectedAccounts = useCampaignBuilderStore((s) => s.selectedAccounts);
     const setTotalPrice = useCampaignBuilderStore((s) => s.actions.setTotalPrice);
-    const offersQueries = queryClient.getQueriesData({ queryKey: ["publishedOffers"] });
+
+    const isAddInfluencerMode = mode === "add-influencer" && optionIndex !== null;
+
+    const offersQueries = queryClient.getQueriesData({
+        queryKey: ["publishedOffers"],
+    });
 
     const offers = offersQueries.flatMap(([, data]) =>
         Array.isArray(data) ? data : [],
     ) as BuildCampaignOffer[];
 
-
     const totalPrice = calcBuilderTotal({
-        selectedOfferId,
-        offers,
+        selectedOfferId: isAddInfluencerMode ? null : selectedOfferId,
+        offers: isAddInfluencerMode ? [] : offers,
         selectedAccounts,
     });
-    const canProceed = Boolean(selectedOfferId || selectedPromoCardIds.length >= 1);
+
+    const canProceed = isAddInfluencerMode
+        ? selectedPromoCardIds.length >= 1
+        : Boolean(selectedOfferId || selectedPromoCardIds.length >= 1);
+
+    const handleProceed = () => {
+        if (!canProceed) return;
+        console.log(isAddInfluencerMode,'isAddInfluencerMode')
+        setTotalPrice(totalPrice);
+
+        if (isAddInfluencerMode) {
+            navigate(
+                `/client/create-campaign/content?mode=add-influencer&option=${optionIndex}`,
+            );
+            return;
+        }
+
+        navigate("/client/create-campaign/content");
+    };
 
     return (
         <div className={styles.root}>
             <div className={styles.content}>
+                {!isAddInfluencerMode && (
+                    <>
+                        <p>
+                            Offer:{" "}
+                            <span className={styles.count}>
+                                {selectedOfferId ? 1 : 0}
+                            </span>
+                        </p>
+                        <img src={plus} alt="" />
+                    </>
+                )}
+
                 <p>
-                    Offer: <span className={styles.count}>{selectedOfferId ? 1 : 0}</span>
+                    Networks:{" "}
+                    <span className={styles.count}>
+                        {selectedPromoCardIds.length}
+                    </span>
                 </p>
-                <img src={plus} alt="" />
-                <p>
-                    Networks: <span className={styles.count}>{selectedPromoCardIds.length}</span>
-                </p>
+
                 <p>
                     Total: <span className={styles.count}>{totalPrice}€</span>
                 </p>
@@ -50,14 +92,9 @@ export const FooterSummary = () => {
             <button
                 className={canProceed ? styles.active : styles.disabled}
                 disabled={!canProceed}
-                onClick={() => {
-                    if (!canProceed) return;
-
-                    setTotalPrice(totalPrice);
-                    navigate("/client/create-campaign/content");
-                }}
+                onClick={handleProceed}
             >
-                Proceed
+                {isAddInfluencerMode ? "Add account" : "Proceed"}
             </button>
         </div>
     );

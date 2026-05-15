@@ -11,6 +11,7 @@ import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { useCampaignStore, useDraftCampaignStore } from "@/client-side/store";
 import {getCampaignSelectedAccounts} from "@/client-side/pages/campaign-strategy/model/campaign-strategy.helpers.ts";
 import {calcGroupPrices} from "@/client-side/utils";
+import {formatCurrency} from "@/shared/functions/formatCurrency.ts";
 
 type AnyCampaign = any;
 
@@ -78,10 +79,20 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
           ? Number(campaign.totalFollowers)
           : sumFollowers(accounts);
 
+  const currency = campaign?.displayCurrency ?? "EUR";
+
   const barUIs = [
     { name: `Status: ${campaign?.status || ""}`, img: calendar, row: true },
     { name: `Submitted: ${submitted}`, img: calendar, row: true },
-    { name: `Budget: ${totalPublicPrice || budget || draftPrice}€`, img: creditcard, row: true },
+    {
+      name: `Budget: ${
+          campaign.isPriceHidden
+              ? ""
+              : formatCurrency(totalPublicPrice || budget || draftPrice, currency)
+      }`,
+      img: creditcard,
+      row: true,
+    },
     {
       name: `Reach: ${formatFollowers(totalFollowers)} followers`,
       img: usercheck,

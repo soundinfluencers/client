@@ -82,5 +82,6 @@ export const likeField = makeNumberField("Likes is required", 0);
 export const commentsField = makeNumberField("Comments is required", 0);
 export const sharesField = makeNumberField("Shares is required", 0);
 export const ratingField = makeNumberField("Rating is required", 1);
-
+export const savesField = makeNumberField("Saves is required", 0);
+export const favoritesField = makeNumberField("Favorites is required", 0);
 

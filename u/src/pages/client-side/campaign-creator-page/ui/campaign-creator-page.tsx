@@ -21,8 +21,17 @@ import {
 } from "@/widgets/client-side/campaign-creator-page/campaign-offers-slider/ui/campaign-offers-slider.tsx";
 import {BuildCampaign} from "@/widgets/client-side/campaign-creator-page/build-campaign/ui/build-campaign.tsx";
 import {FooterSummary} from "@/widgets/client-side/campaign-creator-page/footer-summary/footer-summary.tsx";
+import {useSearchParams} from "react-router-dom";
 
 export const CampaignCreatorPage: React.FC = () => {
+    const [searchParams] = useSearchParams();
+
+    const isAddInfluencerMode =
+        searchParams.get("mode") === "add-influencer" &&
+        searchParams.has("option");
+
+    const optionIndex = Number(searchParams.get("option") ?? 0);
+
     const {
         selectedPlatformKey,
         setPlatform,
@@ -37,47 +46,60 @@ export const CampaignCreatorPage: React.FC = () => {
     const draft = useSaveCampaignCreatorDraft({
         postCampaignDraft,
     });
+
     const isEmpty = !isLoading && !isFetching && offers.length === 0;
+
     return (
         <Container className={styles.root}>
             <div className={styles.navmenu}>
                 <Breadcrumbs />
-                <DraftButton onClick={draft.open} />
+
+                {!isAddInfluencerMode && (
+                    <DraftButton onClick={draft.open} />
+                )}
             </div>
 
-            <h1>Ready-to-launch offers</h1>
+            {!isAddInfluencerMode && (
+                <>
+                    <h1>Ready-to-launch offers</h1>
 
-            <div className={styles.head}>
-                <PlatformScroll
-                    selectedPlatformKey={selectedPlatformKey}
-                    onPlatformSelect={setPlatform}
-                />
+                    <div className={styles.head}>
+                        <PlatformScroll
+                            selectedPlatformKey={selectedPlatformKey}
+                            onPlatformSelect={setPlatform}
+                        />
 
-                <GenreScroll
-                    selectedGenre={selectedGenre}
-                    onGenreSelect={setSelectedGenre}
-                />
-            </div>
+                        <GenreScroll
+                            selectedGenre={selectedGenre}
+                            onGenreSelect={setSelectedGenre}
+                        />
+                    </div>
 
-            {isError || isEmpty ? (
-                <NoData>
-                    <h2>No offers available for this genre right now</h2>
-                    <p>
-                        You can still move forward by using Build Your Custom Campaign to
-                        create a multi-platform promotion tailored to your needs.
-                    </p>
-                </NoData>
-            ) : (
-                <CampaignOffersSlider
-                    isLoading={isFetching || isLoading}
-                    offers={offers}
-                />
+                    {isError || isEmpty ? (
+                        <NoData>
+                            <h2>No offers available for this genre right now</h2>
+                            <p>
+                                You can still move forward by using Build Your Custom Campaign to
+                                create a multi-platform promotion tailored to your needs.
+                            </p>
+                        </NoData>
+                    ) : (
+                        <CampaignOffersSlider
+                            isLoading={isFetching || isLoading}
+                            offers={offers}
+                        />
+                    )}
+                </>
             )}
 
             <BuildCampaign />
-            <FooterSummary />
 
-            {draft.isOpen && (
+            <FooterSummary
+                mode={isAddInfluencerMode ? "add-influencer" : "create"}
+                optionIndex={isAddInfluencerMode ? optionIndex : null}
+            />
+
+            {!isAddInfluencerMode && draft.isOpen && (
                 <Modal onClose={draft.close}>
                     <div className={styles.createOption}>
                         <h2>Save draft</h2>
@@ -97,7 +119,6 @@ export const CampaignCreatorPage: React.FC = () => {
                             />
                             <ButtonMain
                                 className={styles.btn}
-
                                 text="Save"
                                 onClick={draft.save}
                             />

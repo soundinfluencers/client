@@ -45,6 +45,20 @@ export const PromoCardGrid: React.FC<Props> = ({
     const onSelect = () => {
         if (isInclude) return;
 
+        console.log("[TABLE CARD] selected data", data);
+        console.log("[TABLE CARD] account id fields", {
+            accountId: data.accountId,
+            socialAccountId: (data as any).socialAccountId,
+            _id: (data as any)._id,
+        });
+        console.log("[TABLE CARD] audience fields", {
+            followers: data.followers,
+            monthlyListeners: (data as any).monthlyListeners,
+            listeners: (data as any).listeners,
+            subscribers: (data as any).subscribers,
+            audience: (data as any).audience,
+        });
+
         togglePromoCard({
             accountId: data.accountId,
             influencerId: data.influencerId,
@@ -57,7 +71,10 @@ export const PromoCardGrid: React.FC<Props> = ({
             countries: data.countries,
             genres: data.musicGenres,
             logoUrl: data.logoUrl,
+            source: "manual",
         });
+
+        console.log("[BUILDER STORE] after toggle", useCampaignBuilderStore.getState());
     };
 
     return (

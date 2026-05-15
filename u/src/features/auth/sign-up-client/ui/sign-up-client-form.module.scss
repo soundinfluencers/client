@@ -1,0 +1,33 @@
+.signUpClientForm {
+  max-width: 600px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.submitBtn {
+  margin: 0 auto;
+}
+
+@media (max-width: 811px) {
+  .signUpClientForm {
+    gap: 48px;
+  }
+
+  .fields {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 599px) {
+  .signUpClientForm {
+    gap: 24px;
+  }
+}

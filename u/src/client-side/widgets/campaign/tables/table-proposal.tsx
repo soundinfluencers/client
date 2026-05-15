@@ -17,6 +17,9 @@ import {getTableColumnWidths, getTitle} from "@/client-side/data/table-campaign.
 import { useFollowersSort } from "@/client-side/hooks";
 import { getAccountKey, getColumns } from "@/client-side/utils";
 import {useProposalAccountsStore} from "@/client-side/store";
+import {
+    useCampaignBuilderStore
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
 
 type Props = {
   items: CampaignContentItem[];
@@ -47,6 +50,7 @@ export function TableProposal({
                                   optionIndex,
                                   title,
                               }: Props) {
+    const resetCampaign = useCampaignBuilderStore((s) => s.actions.reset);
     const getGroupBySocial = (social?: string): TableGroup => {
         const s = String(social ?? "").toLowerCase();
 
@@ -219,7 +223,7 @@ export function TableProposal({
                                 className={`td--footer ${isAddInfluencer ? "is-left" : ""} ${col.includes("followers") ? "followers" : ""}`}
                             >
                                 {isAddInfluencer && (
-                                    <Link to={`/client/campaign/add-influencer?option=${optionIndex}`}>
+                                    <Link onClick={() => resetCampaign()} to={`/client/create-campaign?mode=add-influencer&option=${optionIndex}`}>
                                         <div className="add-influencer">
                                             <img src={plus} alt="" />
                                             <p>Add Influencer</p>

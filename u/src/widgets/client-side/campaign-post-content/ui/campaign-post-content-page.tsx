@@ -22,7 +22,12 @@ import type {
 } from "../model/campaign-post-content.types";
 import { useCampaignPostContentPageDraft } from "@/pages/client-side/campaign-post-content/model/use-campaign-post-content-page-draft";
 
+type GroupKey = "main" | "music" | "press";
+
 type Props = {
+    mode?: "create" | "add-influencer";
+    allowedGroups?: GroupKey[];
+
     accounts: CampaignPostContentAccount[];
     offerAccounts: CampaignPostContentAccount[];
     manualAccounts: CampaignPostContentAccount[];
@@ -38,6 +43,8 @@ type Props = {
 };
 
 export const CampaignPostContentPage: React.FC<Props> = ({
+                                                             mode = "create",
+                                                             allowedGroups,
                                                              accounts,
                                                              offerAccounts,
                                                              manualAccounts,
@@ -47,16 +54,16 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                                                              onSubmitPayload,
                                                              offerPrice,
                                                              defaultBlocks,
-                                                             defaultCampaignContent
+                                                             defaultCampaignContent,
                                                          }) => {
     const navigate = useNavigate();
-
     const vm = useCampaignPostContent({
+        mode,
         accounts,
         campaignPrice: totalPrice,
-        campaignName: defaultCampaignName,
+        campaignName: mode === "add-influencer" ? "Add influencer" : defaultCampaignName,
         defaultBlocks,
-        defaultCampaignContent
+        defaultCampaignContent,
     });
 
     const {
@@ -72,10 +79,17 @@ export const CampaignPostContentPage: React.FC<Props> = ({
         buildPayload: vm.buildPayload,
     });
 
-    const mainBlocks = vm.blocks.filter((item) => item.group === "main");
-    const musicBlocks = vm.blocks.filter((item) => item.group === "music");
-    const pressBlocks = vm.blocks.filter((item) => item.group === "press");
+    const visibleBlocks = React.useMemo(() => {
+        if (!allowedGroups?.length) return vm.blocks;
 
+        return vm.blocks.filter((block) => {
+            return allowedGroups.includes(block.group as GroupKey);
+        });
+    }, [vm.blocks, allowedGroups]);
+
+    const mainBlocks = visibleBlocks.filter((item) => item.group === "main");
+    const musicBlocks = visibleBlocks.filter((item) => item.group === "music");
+    const pressBlocks = visibleBlocks.filter((item) => item.group === "press");
     const submit = vm.form.handleSubmit(async () => {
         const payload = vm.buildPayload();
         await onSubmitPayload(payload);
@@ -145,39 +159,43 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                         <div className={styles.formSticky}>
                             <div className={styles.header}>
                                 <h1>{pageTitle}</h1>
-                                <DraftButton onClick={openDraftModal} />
-                            </div>
 
-                            <div className={styles.formField}>
-                                <label
-                                    htmlFor="campaignName"
-                                    className={
-                                        vm.form.formState.errors.campaignName
-                                            ? styles.labelError
-                                            : ""
-                                    }
-                                >
-                                    Campaign Name
-                                </label>
-
-                                <input
-                                    id="campaignName"
-                                    {...vm.form.register("campaignName")}
-                                    className={
-                                        vm.form.formState.errors.campaignName
-                                            ? styles.inputError
-                                            : ""
-                                    }
-                                    placeholder="Enter campaign name"
-                                />
-
-                                {vm.form.formState.errors.campaignName && (
-                                    <p className={styles.errorText}>
-                                        {vm.form.formState.errors.campaignName
-                                            ?.message as string}
-                                    </p>
+                                {mode !== "add-influencer" && (
+                                    <DraftButton onClick={openDraftModal} />
                                 )}
                             </div>
+
+                            {mode !== "add-influencer" && (
+                                <div className={styles.formField}>
+                                    <label
+                                        htmlFor="campaignName"
+                                        className={
+                                            vm.form.formState.errors.campaignName
+                                                ? styles.labelError
+                                                : ""
+                                        }
+                                    >
+                                        Campaign Name
+                                    </label>
+
+                                    <input
+                                        id="campaignName"
+                                        {...vm.form.register("campaignName")}
+                                        className={
+                                            vm.form.formState.errors.campaignName
+                                                ? styles.inputError
+                                                : ""
+                                        }
+                                        placeholder="Enter campaign name"
+                                    />
+
+                                    {vm.form.formState.errors.campaignName && (
+                                        <p className={styles.errorText}>
+                                            {vm.form.formState.errors.campaignName?.message as string}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
 
                             {!!mainBlocks.length && (
                                 <section className={styles.groupSection}>
@@ -380,12 +398,19 @@ export const CampaignPostContentPage: React.FC<Props> = ({
 
                     <CampaignPostContentSelection
                         accounts={accounts}
-                        offerAccounts={offerAccounts}
+                        offerAccounts={mode === "add-influencer" ? [] : offerAccounts}
                         manualAccounts={manualAccounts}
-                        offerName={offerName}
+                        offerName={mode === "add-influencer" ? undefined : offerName}
                         totalPrice={totalPrice}
-                        offerPrice={offerPrice ?? 0}
-                        onEditSelection={() => navigate("/client/create-campaign")}
+                        offerPrice={mode === "add-influencer" ? 0 : offerPrice ?? 0}
+                        onEditSelection={() => {
+                            if (mode === "add-influencer") {
+                                navigate(`/client/create-campaign?mode=add-influencer&option=${new URLSearchParams(window.location.search).get("option") ?? 0}`);
+                                return;
+                            }
+
+                            navigate("/client/create-campaign");
+                        }}
                     />
                 </div>
             </form>

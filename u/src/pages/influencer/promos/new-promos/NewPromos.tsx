@@ -65,10 +65,11 @@ export const NewPromos = () => {
 
   if (promos.length === 0) {
     return (
-      <EmptyPromosList
-        title={'No new promotions right now'}
-        description={'You’re all caught up. New promotions will appear here as soon as they’re available.'}
-      />
+        <EmptyPromosList
+            title={'No new promotions right now'}
+            description={"You're all caught up. New promotions will appear here as soon as they're available."}
+            isNew={true}
+        />
     );
   }
 

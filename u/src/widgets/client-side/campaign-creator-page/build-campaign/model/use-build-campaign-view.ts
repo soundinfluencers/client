@@ -53,7 +53,9 @@ const collectFilterIds = (items: CampaignFilterItem[]) => {
 
     return ids;
 };
-
+const hasFilters = (section: CampaignFilterSection) => {
+    return Array.isArray(section.filters) && section.filters.length > 0;
+};
 const collectSectionFilterIds = (section: CampaignFilterSection) => {
     return collectFilterIds(section.filters);
 };
@@ -188,9 +190,13 @@ export const useBuildCampaignView = () => {
     ]);
 
     const visibleSections = React.useMemo(() => {
-        if (!isCommunitySelected) return sections;
+        const notEmptySections = sections.filter(hasFilters);
 
-        return sections.filter((section) => !isHiddenForCommunitySection(section));
+        if (!isCommunitySelected) return notEmptySections;
+
+        return notEmptySections.filter(
+            (section) => !isHiddenForCommunitySection(section),
+        );
     }, [sections, isCommunitySelected]);
 
     const selected = React.useMemo(() => {
