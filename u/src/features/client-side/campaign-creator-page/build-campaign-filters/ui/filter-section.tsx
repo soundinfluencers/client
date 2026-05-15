@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { FilterNode } from "./filter-node";
 import styles from "./filter-panel.module.scss";
@@ -7,8 +7,6 @@ import type {
     CampaignFilterMethod,
     CampaignFilterSection,
 } from "@/entities/client-side/campaign-creator-page/campaign-filter/model/campaign-filter.types.ts";
-
-const DEFAULT_OPEN_IDS = ["social-platforms-1", "profile-type"];
 
 type Props = {
     section: CampaignFilterSection;
@@ -21,6 +19,8 @@ type Props = {
     filterMethod: CampaignFilterMethod;
     setFilterMethod: (value: CampaignFilterMethod) => void;
     scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+    open: boolean;
+    onToggleSection: () => void;
 };
 
 export const FilterSectionView = ({
@@ -30,13 +30,11 @@ export const FilterSectionView = ({
                                       filterMethod,
                                       setFilterMethod,
                                       scrollContainerRef,
+                                      open,
+                                      onToggleSection,
                                   }: Props) => {
     const rootRef = useRef<HTMLDivElement | null>(null);
     const shouldScrollRef = useRef(false);
-
-    const [open, setOpen] = useState(() =>
-        DEFAULT_OPEN_IDS.includes(section.id),
-    );
 
     useEffect(() => {
         if (!open) return;
@@ -64,20 +62,14 @@ export const FilterSectionView = ({
         });
     }, [open, scrollContainerRef]);
 
-    const onToggleSection = () => {
-        setOpen((prev) => {
-            const next = !prev;
-            shouldScrollRef.current = next;
-            return next;
-        });
+    const handleToggleSection = () => {
+        shouldScrollRef.current = !open;
+        onToggleSection();
     };
 
     return (
         <div ref={rootRef} className={styles.dropdown}>
-            <div
-                className={styles.dropdownHead}
-                onClick={onToggleSection}
-            >
+            <div className={styles.dropdownHead} onClick={handleToggleSection}>
                 <p>{section.title}</p>
 
                 <span
