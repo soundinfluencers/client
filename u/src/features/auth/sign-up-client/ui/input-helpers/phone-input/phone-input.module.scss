@@ -1,0 +1,26 @@
+.root {
+  position: relative;
+  z-index: 1;
+}
+
+.focused {
+  z-index: 50;
+}
+
+.input {
+  position: relative;
+  padding: 16px 16px 16px 100px;
+  z-index: 2;
+}
+
+.root.focused {
+  .input {
+    border-color: #b9d0ff;
+  }
+}
+
+@media (max-width: 811px) {
+  .input {
+    padding: 16px 16px 16px 82px;
+  }
+}

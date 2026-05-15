@@ -6,7 +6,13 @@ import { ObjectId } from "bson";
 import {useUpdateCampaign} from "@/client-side/store";
 
 export const getAccountKey = (n: CampaignAddedAccount) =>
-  String((n as any).addedAccountsId ?? (n as any).accountId);
+    String(
+        (n as any).addedAccountsId ??
+        (n as any).accountId ??
+        (n as any).socialAccountId ??
+        (n as any)._id ??
+        "",
+    );
 const oid = () => new ObjectId().toHexString();
 
 // type CampaignContentItem = {
@@ -17,13 +23,16 @@ const oid = () => new ObjectId().toHexString();
 // };
 type CampaignContentItem = {
   _id: string;
-  socialMedia?: string;
+  socialMedia: string;
   socialMediaGroup: "main" | "music" | "press";
-  mainLink?: string;
-  taggedUser?: string;
-  taggedLink?: string;
-  additionalBrief?: string;
-  descriptions?: Array<{ _id: string }>;
+  mainLink: string;
+  taggedUser: string;
+  taggedLink: string;
+  additionalBrief: string;
+  descriptions: Array<{
+    _id: string;
+    description: string;
+  }>;
 };
 type ProposalAccountsStore = {
   accountsByOption: Record<number, CampaignAddedAccount[]>;
@@ -178,6 +187,22 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         const exists = state.contentByOption[optionIndex];
         if (exists && !opts?.force) return state;
 
+        const normalizedContent = (serverContent ?? []).map((item: any) => ({
+          _id: String(item?._id ?? oid()),
+          socialMedia: String(item?.socialMedia ?? "").toLowerCase(),
+          socialMediaGroup: item?.socialMediaGroup ?? getGroupBySocial(item?.socialMedia),
+          mainLink: String(item?.mainLink ?? ""),
+          taggedUser: String(item?.taggedUser ?? ""),
+          taggedLink: String(item?.taggedLink ?? ""),
+          additionalBrief: String(item?.additionalBrief ?? ""),
+          descriptions: Array.isArray(item?.descriptions)
+              ? item.descriptions.map((desc: any) => ({
+                _id: String(desc?._id ?? oid()),
+                description: String(desc?.description ?? ""),
+              }))
+              : [],
+        }));
+
         return {
           accountsByOption: {
             ...state.accountsByOption,
@@ -185,7 +210,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           },
           contentByOption: {
             ...state.contentByOption,
-            [optionIndex]: serverContent ?? [],
+            [optionIndex]: normalizedContent,
           },
         };
       });
@@ -195,8 +220,11 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
 
       set((state) => {
         const prev = state.accountsByOption[optionIndex] ?? [];
-        const next = prev.map((a) =>
-            getAccountKey(a) === accountKey ? { ...a, dateRequest } : a,
+
+        const next = prev.map((account) =>
+            String(getAccountKey(account)) === String(accountKey)
+                ? { ...account, dateRequest }
+                : account,
         );
 
         return {
@@ -281,9 +309,25 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
 
       set((state) => {
         const prev = state.contentByOption[optionIndex] ?? [];
-        const incoming = contentToAdd ?? [];
 
-        const map = new Map<string, any>();
+        const incoming = (contentToAdd ?? []).map((item: any) => ({
+          _id: String(item?._id ?? oid()),
+          socialMedia: String(item?.socialMedia ?? "").toLowerCase(),
+          socialMediaGroup: item?.socialMediaGroup ?? getGroupBySocial(item?.socialMedia),
+          mainLink: String(item?.mainLink ?? ""),
+          taggedUser: String(item?.taggedUser ?? ""),
+          taggedLink: String(item?.taggedLink ?? ""),
+          additionalBrief: String(item?.additionalBrief ?? ""),
+          descriptions: Array.isArray(item?.descriptions)
+              ? item.descriptions.map((desc: any) => ({
+                _id: String(desc?._id ?? oid()),
+                description: String(desc?.description ?? ""),
+              }))
+              : [],
+        }));
+
+        const map = new Map<string, CampaignContentItem>();
+
         [...prev, ...incoming].forEach((it) => {
           if (!it) return;
           const key = String(it._id ?? `${it.socialMedia}-${it.mainLink ?? ""}`);
@@ -384,50 +428,101 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     addAccounts: (optionIndex, accounts) => {
       set((state: any) => {
         useUpdateCampaign.getState().markDirty();
+
         const prev = state.accountsByOption[optionIndex] ?? [];
         const prevKeys = new Set(prev.map(getAccountKey));
 
         const content = state.contentByOption[optionIndex] ?? [];
-        const mainItem = content.find((c) => c.socialMediaGroup === "main");
 
-        const addedRaw = (accounts ?? []).filter(
-          (a) => !prevKeys.has(getAccountKey(a)),
-        );
+        const addedRaw = (accounts ?? []).filter((account) => {
+          const key = getAccountKey(account);
 
-        const next = addedRaw.map((a) => {
-          const sm = String(a.socialMedia || "").toLowerCase();
-          const isMain = [
-            "facebook",
-            "instagram",
-            "youtube",
-            "tiktok",
-          ].includes(sm);
-
-          if (isMain && mainItem) {
-            const def = {
-              campaignContentItemId: mainItem._id,
-              descriptionId: mainItem.descriptions?.[0]?._id ?? "",
-            };
-            return {
-              ...a,
-              selectedContent: def,
-              selectedCampaignContentItem: def,
-            };
+          if (!key) {
+            console.warn("[PROPOSAL addAccounts] account without key", account);
+            return false;
           }
 
+          return !prevKeys.has(key);
+        });
+
+        const next = addedRaw.map((account) => {
+          const accountId = String(
+              (account as any).accountId ??
+              (account as any).socialAccountId ??
+              "",
+          );
+
+          const socialAccountId = String(
+              (account as any).socialAccountId ??
+              (account as any).accountId ??
+              "",
+          );
+
+          const sm = String((account as any).socialMedia ?? "").toLowerCase();
+          const group = getGroupBySocial(sm);
+
+          const contentItem =
+              content.find(
+                  (item) => String(item.socialMedia ?? "").toLowerCase() === sm,
+              ) ??
+              content.find((item) => item.socialMediaGroup === group) ??
+              null;
+
+          const selected = contentItem
+              ? {
+                campaignContentItemId: contentItem._id,
+                descriptionId: contentItem.descriptions?.[0]?._id ?? "",
+              }
+              : null;
+
+          const selectedContent =
+              (account as any).selectedContent ??
+              (account as any).selectedCampaignContentItem ??
+              selected;
+
           return {
-            ...a,
-            selectedContent: null,
-            selectedCampaignContentItem: null,
+            ...account,
+
+            accountId,
+            socialAccountId,
+
+            socialMedia: sm,
+
+            price: Number((account as any).price ?? (account as any).publicPrice ?? 0),
+            publicPrice: Number((account as any).publicPrice ?? (account as any).price ?? 0),
+
+            followers: Number((account as any).followers ?? 0),
+
+            logoUrl: String((account as any).logoUrl ?? ""),
+            countries: Array.isArray((account as any).countries)
+                ? (account as any).countries
+                : [],
+            genres: Array.isArray((account as any).genres)
+                ? (account as any).genres
+                : [],
+
+            dateRequest: (account as any).dateRequest ?? "ASAP",
+
+            selectedContent,
+            selectedCampaignContentItem: selectedContent,
+
+            confirmation: (account as any).confirmation ?? "wait",
+            closePromo: (account as any).closePromo ?? "wait",
           };
         });
 
         if (!next.length) return state;
 
-        const addedKeys = next.map((a) => getAccountKey(a));
+        const addedKeys = next.map(getAccountKey).filter(Boolean);
+
         const prevMarked = state.recentlyAddedKeysByOption?.[optionIndex] ?? {};
         const marked = { ...prevMarked };
-        addedKeys.forEach((k) => (marked[String(k)] = true));
+
+        addedKeys.forEach((key) => {
+          marked[String(key)] = true;
+        });
+
+        console.log("[PROPOSAL addAccounts] next normalized", next);
 
         return {
           accountsByOption: {
@@ -462,29 +557,47 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     // },
     removeAccount: (optionIndex, accountKey) => {
       useUpdateCampaign.getState().markDirty();
+
       set((state) => {
         const prevAcc = state.accountsByOption[optionIndex] ?? [];
-        const removed = prevAcc.find((a) => getAccountKey(a) === accountKey);
-        if (!removed) return state;
 
-        const nextAcc = prevAcc.filter((a) => getAccountKey(a) !== accountKey);
-        if (nextAcc.length === prevAcc.length) return state;
-
-        // группа удаляемого аккаунта
-        const removedGroup = getGroupBySocial((removed as any).socialMedia);
-
-        // остались ли аккаунты в этой группе после удаления?
-        const stillHasGroup = nextAcc.some(
-          (a) => getGroupBySocial((a as any).socialMedia) === removedGroup,
+        const removed = prevAcc.find(
+            (account) => String(getAccountKey(account)) === String(accountKey),
         );
 
-        // если группа опустела — удаляем campaignContent этой группы
+        if (!removed) return state;
+
+        const nextAcc = prevAcc.filter(
+            (account) => String(getAccountKey(account)) !== String(accountKey),
+        );
+
+        if (nextAcc.length === prevAcc.length) return state;
+
+        const removedGroup = getGroupBySocial((removed as any).socialMedia);
+
+        const stillHasGroup = nextAcc.some(
+            (account) => getGroupBySocial((account as any).socialMedia) === removedGroup,
+        );
+
         let nextContent = state.contentByOption[optionIndex] ?? [];
+
         if (!stillHasGroup) {
           nextContent = nextContent.filter(
-            (c) => c.socialMediaGroup !== removedGroup,
+              (content) => content.socialMediaGroup !== removedGroup,
           );
         }
+
+        const pendingDelete = {
+          ...(state.pendingDeleteKeysByOption?.[optionIndex] ?? {}),
+        };
+
+        delete pendingDelete[String(accountKey)];
+
+        const recentlyAdded = {
+          ...(state.recentlyAddedKeysByOption?.[optionIndex] ?? {}),
+        };
+
+        delete recentlyAdded[String(accountKey)];
 
         return {
           accountsByOption: {
@@ -494,6 +607,14 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           contentByOption: {
             ...state.contentByOption,
             [optionIndex]: nextContent,
+          },
+          pendingDeleteKeysByOption: {
+            ...(state.pendingDeleteKeysByOption ?? {}),
+            [optionIndex]: pendingDelete,
+          },
+          recentlyAddedKeysByOption: {
+            ...(state.recentlyAddedKeysByOption ?? {}),
+            [optionIndex]: recentlyAdded,
           },
         };
       });

@@ -8,7 +8,7 @@ import type {
     CampaignFilterSection,
 } from "@/entities/client-side/campaign-creator-page/campaign-filter/model/campaign-filter.types.ts";
 
-const DEFAULT_OPEN_IDS = ["social-platforms-1", "profile-type", "music-genre"];
+const DEFAULT_OPEN_IDS = ["social-platforms-1", "profile-type"];
 
 type Props = {
     section: CampaignFilterSection;

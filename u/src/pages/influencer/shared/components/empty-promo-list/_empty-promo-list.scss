@@ -1,6 +1,7 @@
 @use "@/styles/variables/variables" as vars;
 
 .empty-promos-list {
+  max-width: 750px;
   display: flex;
   justify-content: center;
   align-items: center;

@@ -1,10 +1,10 @@
 import React, { Suspense } from "react";
 import { type FC } from "react";
-import { SignupClient } from "./components/layout/SignupClient.tsx";
 // import { SignupInfluencer } from "./components/layout/SignupInfluencer.tsx";
 
 import { useLocation } from "react-router-dom";
 import { Loader } from "@/shared/ui";
+import {SignupClientPage} from "@/pages/auth/signup-client-page";
 
 const SignupInfluencer = React.lazy(() => import("./components/layout/SignupInfluencer.tsx"));
 
@@ -13,7 +13,7 @@ export const SignupPage: FC = () => {
 
   return (
     <div className="signup-page">
-      {location.pathname === '/signup/client' && <SignupClient/>}
+      {location.pathname === '/signup/client' && <SignupClientPage/>}
       {location.pathname === '/signup/influencer' && (
         <Suspense fallback={
           <div

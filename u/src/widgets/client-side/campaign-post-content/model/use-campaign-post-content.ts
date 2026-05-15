@@ -4,7 +4,6 @@ import { useForm, useWatch } from "react-hook-form";
 
 import {
     campaignPostContentFormSchema,
-    type CampaignPostContentFormSchema,
 } from "./campaign-post-content.schema";
 import type {
     AdditionalMainTarget,
@@ -28,22 +27,31 @@ import {
     updateDescriptionInBlock,
 } from "./campaign-post-content.helpers";
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
+import {z} from "zod";
 
 type Params = {
+    mode?: "create" | "add-influencer";
     accounts: CampaignPostContentAccount[];
-    campaignName?: string;
     campaignPrice: number;
+    campaignName?: string;
     defaultBlocks?: CampaignPostContentBlock[];
     defaultCampaignContent?: BuiltCampaignPostContentPayload["campaignContent"];
 };
 
 export const useCampaignPostContent = ({
+                                            mode = "create",
                                            accounts,
                                            campaignName = "",
                                            campaignPrice,
                                            defaultBlocks,
                                            defaultCampaignContent
                                        }: Params) => {
+    const schema =
+        mode === "add-influencer"
+            ? campaignPostContentFormSchema.extend({
+                campaignName: z.string().optional().default(""),
+            })
+            : campaignPostContentFormSchema;
     const setCampaignName = useCampaignBuilderStore((s) => s.actions.setCampaignName);
     const setPostContentDraft = useCampaignBuilderStore(
         (s) => s.actions.setPostContentDraft,
@@ -72,8 +80,8 @@ export const useCampaignPostContent = ({
             blocks: baseBlocks,
         });
     }, [accounts, defaultBlocks, defaultCampaignContent]);
-    const form = useForm<CampaignPostContentFormSchema>({
-        resolver: zodResolver(campaignPostContentFormSchema),
+    const form = useForm({
+        resolver: zodResolver(schema),
         defaultValues: {
             campaignName,
             blocks: initialBlocks,
@@ -280,7 +288,7 @@ export const useCampaignPostContent = ({
         const data = form.getValues();
 
         const payload = buildCampaignPostContentPayload({
-            campaignName: data.campaignName,
+            campaignName: data.campaignName || '',
             campaignPrice,
             accounts,
             blocks: data.blocks,

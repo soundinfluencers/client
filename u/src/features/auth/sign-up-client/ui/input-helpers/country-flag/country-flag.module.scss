@@ -1,0 +1,26 @@
+.flag {
+  display: block !important;
+  width: 24px !important;
+  height: 18px !important;
+
+  font-size: 0 !important;
+  line-height: 0 !important;
+  vertical-align: top;
+  position: static !important;
+
+  border-radius: 3px;
+  overflow: hidden;
+  background-size: 100% 100%;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+@media (max-width: 599px) {
+  .flag {
+    width: 20px !important;
+    height: 15px !important;
+  }
+}

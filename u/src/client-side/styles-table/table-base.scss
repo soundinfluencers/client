@@ -31,6 +31,8 @@
   }
   .trash-action {
     width: 100%;
+    height: 100%;
+    align-items: center;
     &__confirm-block{
       text-align: center;
     }
@@ -276,7 +278,7 @@
   .isDate {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 
   .col-network {

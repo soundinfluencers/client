@@ -1,19 +1,19 @@
 import { z } from "zod";
 import {
   commentsField,
-  datePostField, impressionsField, likeField,
-  postLinkField, ratingField, screenshotUrlField, sharesField,
+  datePostField, favoritesField, impressionsField, likeField,
+  postLinkField, ratingField, savesField, screenshotUrlField, sharesField,
 } from "@/pages/influencer/promos/distributing/components/campaign-result-form/validation/rules/validation-rules.ts";
 
 export type Platform =
-  | "instagram"
-  | "youtube"
-  | "tiktok"
-  | "facebook"
-  | "soundcloud"
-  | "spotify"
-  | "press"
-  | "multipromo";
+    | "instagram"
+    | "youtube"
+    | "tiktok"
+    | "facebook"
+    | "soundcloud"
+    | "spotify"
+    | "press"
+    | "multipromo";
 
 const socialsDataSchema = z.object({
   postLink: postLinkField,
@@ -25,6 +25,14 @@ const socialsDataSchema = z.object({
   shares: sharesField,
 });
 
+const instagramDataSchema = socialsDataSchema.extend({
+  saves: savesField,
+});
+
+const tiktokDataSchema = socialsDataSchema.extend({
+  favorites: favoritesField,
+})
+
 const soundcloudDataSchema = z.object({
   screenshotUrl: screenshotUrlField,
 });
@@ -32,6 +40,7 @@ const soundcloudDataSchema = z.object({
 const spotifyDataSchema = z.object({
   rating: ratingField,
   screenshotUrl: screenshotUrlField,
+  saves: savesField,
 });
 
 const pressDataSchema = z.object({
@@ -48,8 +57,12 @@ const multipromoDataSchema = z.object({}).superRefine((_v, ctx) => {
 export const getCampaignResultDataSchema = (platform: Platform) => {
   switch (platform) {
     case "instagram":
-    case "youtube":
+      return instagramDataSchema;
+
     case "tiktok":
+      return tiktokDataSchema;
+
+    case "youtube":
     case "facebook":
       return socialsDataSchema;
 
@@ -71,5 +84,5 @@ export const getCampaignResultDataSchema = (platform: Platform) => {
 };
 
 export type CampaignResultDataValues = z.infer<
-  ReturnType<typeof getCampaignResultDataSchema>
+    ReturnType<typeof getCampaignResultDataSchema>
 >;

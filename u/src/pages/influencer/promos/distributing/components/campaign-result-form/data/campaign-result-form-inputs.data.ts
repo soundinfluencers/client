@@ -22,9 +22,7 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         placeholder: "Attach the screenshot",
         size: "large",
         description:
-          "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
-        //delete accept property
-        // accept: ["image/png", "image/jpg", "image/jpeg"],
+            "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
       },
       {
         type: "numeric",
@@ -50,6 +48,12 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         name: "shares",
         placeholder: "Enter the shares number here",
       },
+      {
+        type: 'numeric',
+        label: "Saves*",
+        name: 'saves',
+        placeholder: "Enter the saves number here",
+      },
     ],
   },
   youtube: {
@@ -73,7 +77,7 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         placeholder: "Attach the screenshot",
         size: "large",
         description:
-          "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
+            "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
         // accept: ["image/png", "image/jpg", "image/jpeg"],
       },
       {
@@ -123,7 +127,7 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         placeholder: "Attach the screenshot",
         size: "large",
         description:
-          "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
+            "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
         // accept: ["image/png", "image/jpg", "image/jpeg"],
       },
       {
@@ -150,6 +154,13 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         name: "shares",
         placeholder: "Enter the shares number here",
       },
+      {
+        type: 'numeric',
+        label: "Favorites*",
+        name: 'favorites',
+        placeholder: "Enter the favorites number here",
+      },
+
     ],
   },
   facebook: {
@@ -173,7 +184,7 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         placeholder: "Attach the screenshot",
         size: "large",
         description:
-          "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
+            "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
         // accept: ["image/png", "image/jpg", "image/jpeg"],
       },
       {
@@ -210,9 +221,9 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         name: "screenshotUrl",
         size: "large",
         placeholder:
-          "Attach here the screenshot of the SoundCloud account including the track",
+            "Attach here the screenshot of the SoundCloud account including the track",
         description:
-          "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
+            "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
         // accept: ["image/png", "image/jpg", "image/jpeg"],
       },
     ],
@@ -232,10 +243,16 @@ export const CAMPAIGN_RESULT_INPUTS_DATA: TCampaignResultInputData = {
         name: "screenshotUrl",
         size: "large",
         placeholder:
-          "Attach here the screenshot of the Spotify playlist including the track",
+            "Attach here the screenshot of the Spotify playlist including the track",
         description:
-          "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
+            "Please make sure to upload the screenshot at least 24 hours after posting, allowing sufficient time for the content to reach its full audience.",
         // accept: ["image/png", "image/jpg", "image/jpeg"],
+      },
+      {
+        type: 'numeric',
+        label: "Saves*",
+        name: 'saves',
+        placeholder: "Enter the saves number here",
       },
     ],
   },

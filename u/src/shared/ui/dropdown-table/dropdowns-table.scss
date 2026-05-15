@@ -37,10 +37,12 @@
     outline: none;
 
     p {
+      width: 100%;
       font-weight: 400;
       font-size: 12px;
       letter-spacing: 0%;
       vertical-align: bottom;
+      text-align: left;
     }
 
     @media screen and (max-width: 500px) {

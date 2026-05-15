@@ -1,3 +1,5 @@
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
+
 .selection {
   position: sticky;
   top: 10px;
@@ -58,6 +60,8 @@
   position: relative;
   max-height: 544px;
   overflow-y: auto;
+  @include sb.scrollbar-dotted-vertical;
+
 }
 .offerSection{
   .offerHeader{

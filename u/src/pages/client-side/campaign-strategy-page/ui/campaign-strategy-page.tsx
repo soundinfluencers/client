@@ -219,11 +219,11 @@ export const CampaignStrategyPage = () => {
                                 <CampaignStrategySection
                                     title={grouped.music.title}
                                     group="music"
-                                    mode={pageMode === "edit" ? "edit" : "readonly"}
+                                    mode={pageMode}
                                     accounts={grouped.music.accounts}
                                     items={grouped.music.items}
                                     totalPrice={totalPrice}
-                                    actions={pageMode === "edit" ? readonlyDateActions : undefined}
+                                    actions={pageMode !== "readonly" ? readonlyDateActions : undefined}
                                     insights={insights}
                                 />
                             )}
@@ -232,11 +232,11 @@ export const CampaignStrategyPage = () => {
                                 <CampaignStrategySection
                                     title={grouped.press.title}
                                     group="press"
-                                    mode={pageMode === "edit" ? "edit" : "readonly"}
+                                    mode={pageMode}
                                     accounts={grouped.press.accounts}
                                     items={grouped.press.items}
                                     totalPrice={totalPrice}
-                                    actions={pageMode === "edit" ? readonlyDateActions : undefined}
+                                    actions={pageMode !== "readonly" ? readonlyDateActions : undefined}
                                     insights={insights}
                                 />
                             )}

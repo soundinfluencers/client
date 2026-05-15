@@ -1,0 +1,138 @@
+.root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  color: #2a2a2a;
+  font-size: 16px;
+
+  transition: color 220ms ease;
+}
+
+.labelError {
+  color: #e11920;
+}
+
+.input {
+  margin: 0;
+  padding: 16px;
+
+  width: 100%;
+  height: 51px;
+
+  border-radius: 8px;
+  background-color: #ffffff;
+  border: 1px solid #e7e8f1;
+
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: none;
+
+  font: inherit;
+  color: #202934;
+  font-size: 16px;
+  line-height: inherit;
+  letter-spacing: inherit;
+
+  caret-color: #000000;
+
+  transition: border-color 220ms ease;
+}
+
+.input::placeholder {
+  color: #515259;
+  font-size: 16px;
+  opacity: 1;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #b9d0ff;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.input[type="search"] {
+  -webkit-appearance: none;
+}
+
+.input::-webkit-search-decoration,
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-results-button,
+.input::-webkit-search-results-decoration {
+  display: none;
+}
+
+.input:-webkit-autofill {
+  box-shadow: 0 0 0 1000px transparent inset;
+  -webkit-text-fill-color: inherit;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.inputError {
+  border: 1px solid #e11920;
+}
+
+.inputError:focus {
+  outline: none;
+  border-color: #e11920;
+}
+
+.error {
+  color: #e11920;
+  min-height: 16px;
+  font-size: 12px;
+  margin-top: -4px;
+}
+
+.errorTextHidden {
+  visibility: hidden;
+}
+
+.control {
+  position: relative;
+}
+
+@media (max-width: 811px) {
+  .root {
+    gap: 4px;
+  }
+
+  .label,
+  .input,
+  .input::placeholder {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 599px) {
+  .label,
+  .input,
+  .input::placeholder {
+    font-size: 14px;
+  }
+
+  .input {
+    height: 48px;
+  }
+
+  .error {
+    margin-top: -2px;
+  }
+}

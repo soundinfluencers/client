@@ -61,6 +61,8 @@ export interface ICampaignResultFormData {
   comments?: number;
   shares?: number;
   rating?: number;
+  saves?: number;
+  favorites?: number;
 }
 
 export type TCampaignInfo = {

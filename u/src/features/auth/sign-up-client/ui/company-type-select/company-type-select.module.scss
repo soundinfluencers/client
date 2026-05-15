@@ -1,0 +1,151 @@
+.root {
+  position: relative;
+  z-index: 1;
+}
+
+.focused {
+  z-index: 50;
+}
+
+.input {
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.root.focused {
+  .input {
+    border-color: #b9d0ff;
+  }
+}
+
+.listWrapper {
+  padding: 16px 16px 8px 16px;
+  border: 1px solid #b9d0ff;
+  border-radius: 0 0 8px 8px;
+  background: #ffffff;
+
+  position: absolute;
+  width: 100%;
+  top: calc(100% - 8px);
+  left: 0;
+  opacity: 0;
+  z-index: 1;
+  transform: translateY(-4px);
+
+  transition:
+          opacity 120ms ease,
+          transform 120ms ease;
+
+  pointer-events: none;
+}
+
+.listWrapperVisible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: 225px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.list::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: #b9d0ff;
+}
+
+.list::-webkit-scrollbar-track {
+  background: #e7e8f1;
+  border-radius: 4px;
+}
+
+.item {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #2a2a2a;
+}
+
+.item:hover {
+  background: rgba(185, 208, 255, 0.15);
+}
+
+.button {
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 16px;
+  z-index: 2;
+
+  width: 24px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #202934;
+  transition: opacity 220ms ease;
+}
+
+.button:hover {
+  opacity: 0.7;
+}
+
+.chevronIcon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: #202934;
+  transform: rotate(90deg);
+  transition: transform 150ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(270deg);
+}
+
+.checkIcon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: #202934;
+}
+
+@media (max-width: 811px) {
+  .item {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 599px) {
+  .chevronIcon,
+  .checkIcon {
+    width: 18px;
+    height: 18px;
+  }
+}

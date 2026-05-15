@@ -1,3 +1,4 @@
+@use "@/styles/scrollbars/_scrollbars.scss" as sb;
 .card {
   display: flex;
   flex-direction: column;
@@ -118,6 +119,7 @@
   gap: 8px;
   max-height: 168px;
   overflow-y: auto;
+  @include sb.scrollbar-dotted-vertical;
   padding: 8px;
   border-radius: 8px;
   border: 1px solid rgb(231, 232, 241);
