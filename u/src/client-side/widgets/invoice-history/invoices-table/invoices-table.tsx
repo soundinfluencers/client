@@ -38,7 +38,13 @@ export const InvoicesTable: React.FC<Props> = ({ invoices }) => {
           <TableSpacerRow colSpan={5} />
         </tbody>
 
-        <tfoot className="custom-table__footer" />
+        <tfoot className="custom-table__footer" >
+        <tr>
+
+          <td colSpan={5}></td>
+
+        </tr>
+        </tfoot>
       </table>
     </div>
   );

@@ -315,7 +315,7 @@ export const CampaignStrategyPage = () => {
                             type="text"
                             value={shareUrl}
                             readOnly
-                            placeholder="https://test.soundinfluencers.com/promo-share/..."
+                            placeholder="https://go.soundinfluencers.com//promo-share/..."
                         />
 
                         <div className={styles.proposalModalButtons}>

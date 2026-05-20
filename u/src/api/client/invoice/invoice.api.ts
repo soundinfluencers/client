@@ -35,6 +35,7 @@ export const getPdffileInvoiceHistory = async (invoiceId: string) => {
 export const getInvoiceById = async (invoiceId: string) => {
   try {
     const res = await $api.get(`/invoice/${invoiceId}`);
+    console.log(res.data,'invoice');
     return res.data.data;
   } catch (error) {
     console.log(error, "get invoice by id error");

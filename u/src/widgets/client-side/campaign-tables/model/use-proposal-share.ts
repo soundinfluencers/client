@@ -2,7 +2,7 @@ import React from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
-const PROMO_SHARE_ORIGIN = "https://test.soundinfluencers.com";
+const PROMO_SHARE_ORIGIN = "https://go.soundinfluencers.com";
 const CLIENT_CAMPAIGN_ROUTE = "/client/campaign";
 
 export const buildPromoShareUrl = (
