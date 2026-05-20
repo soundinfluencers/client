@@ -12,6 +12,7 @@ import {
 } from "@/client-side/ui";
 import { OptionsSlider } from "@/client-side/widgets/campaign/components/option-slider";
 import { isLockedStatus } from "../model/campaign-page.utils";
+import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
 
 type Props = {
     data: any;
@@ -109,17 +110,17 @@ export const CampaignPageControls: React.FC<Props> = ({
                     <ul className="option-buttons">
                         <li onClick={onGetCSV}>
                             <img src={csv} alt="" />
-                            {isRequesting ? "creating..." : "CSV File"}
+                            {isRequesting ? <CircleLoader /> : "CSV File"}
                         </li>
 
                         <li onClick={onGetPDF}>
                             <img src={pdf} alt="" />
-                            {isRequestingPDF ? "creating..." : "PDF File"}
+                            {isRequestingPDF ? <CircleLoader /> : "PDF File"}
                         </li>
 
                         <li onClick={onCopyShareLink}>
                             <img src={share} alt="" />
-                            {isPending ? "Copying..." : "Share link"}
+                            {isPending ? <CircleLoader /> : "Share link"}
                         </li>
                     </ul>
                 ) : (

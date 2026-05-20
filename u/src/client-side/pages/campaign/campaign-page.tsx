@@ -22,7 +22,7 @@ import {CampaignPageContent} from "@/client-side/widgets/campaign/campaign-page-
 export const CampaignPage = () => {
   const { data, isLoading } = useFetchCampaign();
   const { mutate: copyShareLink, isPending } = useCopyShareLinkMutation();
-
+  const [isCopyingShare, setIsCopyingShare] = React.useState(false);
   useCampaignPageBootstrap(data);
 
   const viewState = useCampaignPageView(data);
@@ -30,8 +30,6 @@ export const CampaignPage = () => {
   const {
     optionModal,
     setOptionModal,
-    requestModal,
-    setRequestModal,
     activeOption,
     setActiveOption,
     changeView,
@@ -47,7 +45,7 @@ export const CampaignPage = () => {
     localExtraOptions,
     setLocalExtraOptions,
     textareaValue,
-    setTextareaValue,
+
     flag,
     setFlag,
   } = viewState;
@@ -59,7 +57,6 @@ export const CampaignPage = () => {
     localExtraOptions,
     setLocalExtraOptions,
     textareaValue,
-    setRequestModal,
     setOptionModal,
     setIsRequesting,
     setIsRequestSent,
@@ -110,18 +107,6 @@ export const CampaignPage = () => {
         );
       }
 
-      if (data.status === "under_review") {
-        return (
-            <button
-                className="campaignBase__title-request"
-                disabled={isRequesting}
-                onClick={() => setRequestModal(true)}
-            >
-              {isRequestSent ? "Sent" : isRequesting ? "Sending..." : "Request edit"}
-            </button>
-        );
-      }
-
       return null;
     }
 
@@ -138,17 +123,7 @@ export const CampaignPage = () => {
       );
     }
 
-    if (data.status === "under_review") {
-      return (
-          <button
-              className="campaignBase__title-request"
-              disabled={isRequesting}
-              onClick={() => setRequestModal(true)}
-          >
-            {isRequestSent ? "Sent" : isRequesting ? "Sending..." : "Request edit"}
-          </button>
-      );
-    }
+
 
     return null;
   })();
@@ -221,14 +196,14 @@ export const CampaignPage = () => {
 
         <CampaignPageModals
             optionModal={optionModal}
-            requestModal={requestModal}
+
             activeOption={activeOption}
-            textareaValue={textareaValue}
-            setTextareaValue={setTextareaValue}
+
+
             onCloseOptionModal={() => setOptionModal(false)}
-            onCloseRequestModal={() => setRequestModal(false)}
+
             onAddOptionYes={() => actions.onAddOption(true)}
-            onRequestSend={actions.requestCampaign}
+
         />
       </>
   );

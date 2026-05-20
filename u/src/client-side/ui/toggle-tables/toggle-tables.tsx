@@ -11,9 +11,9 @@ export const ToggleTables: React.FC<Props> = ({ onChange, flag }) => {
     <div className="toggleTables">
       <div
         onClick={onChange}
-        className={`toggleTables__btn ${flag ? "active" : ""}`}>
+        className={`toggleTables__btn ${!flag ? "active" : ""}`}>
         <img src={repeat} alt="" />
-        {flag ? <p>Campaign Strategy</p> : <p> Campaign Insights</p>}
+        {flag ? <p>Campaign Insights</p> : <p>Campaign Strategy</p>}
       </div>
     </div>
   );

@@ -3,7 +3,6 @@ import type { CampaignViewMode } from "./campaign-page.types";
 
 export const useCampaignPageView = (data: any) => {
     const [optionModal, setOptionModal] = React.useState(false);
-    const [requestModal, setRequestModal] = React.useState(false);
     const [activeOption, setActiveOption] = React.useState(0);
     const [changeView, setChangeView] = React.useState(false);
     const [view, setView] = React.useState<CampaignViewMode>(1);
@@ -27,8 +26,8 @@ export const useCampaignPageView = (data: any) => {
     return {
         optionModal,
         setOptionModal,
-        requestModal,
-        setRequestModal,
+
+
         activeOption,
         setActiveOption,
         changeView,

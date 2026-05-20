@@ -47,7 +47,7 @@ export const parseLastCampaignSession = (): LastCampaignSession | null => {
 };
 
 export const buildPromoShareUrl = (campaignId: string) => {
-    const origin = "https://test.soundinfluencers.com";
+    const origin = "https://go.soundinfluencers.com";
     const id = encodeURIComponent(campaignId);
 
     return `${origin}/promo-share/${id}/proposal`;
@@ -57,7 +57,7 @@ export const buildShareUrl = (
     campaignId: string,
     socialMedia: string,
 ) => {
-    const origin = "https://test.soundinfluencers.com";
+    const origin = "https://go.soundinfluencers.com";
     const id = encodeURIComponent(campaignId);
     const media = encodeURIComponent(socialMedia);
 

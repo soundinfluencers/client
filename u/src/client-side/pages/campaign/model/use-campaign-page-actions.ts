@@ -34,7 +34,6 @@ type Params = {
     localExtraOptions: number[];
     setLocalExtraOptions: React.Dispatch<React.SetStateAction<number[]>>;
     textareaValue: string;
-    setRequestModal: React.Dispatch<React.SetStateAction<boolean>>;
     setOptionModal: React.Dispatch<React.SetStateAction<boolean>>;
     setIsRequesting: React.Dispatch<React.SetStateAction<boolean>>;
     setIsRequestSent: React.Dispatch<React.SetStateAction<boolean>>;
@@ -49,7 +48,7 @@ export const useCampaignPageActions = ({
                                            localExtraOptions,
                                            setLocalExtraOptions,
                                            textareaValue,
-                                           setRequestModal,
+
                                            setOptionModal,
                                            setIsRequesting,
                                            setIsRequestSent,
@@ -183,26 +182,6 @@ export const useCampaignPageActions = ({
         setLocalExtraOptions,
         setIsRequesting,
         setOptionModal
-    ]);
-
-    const requestCampaign = React.useCallback(async () => {
-        try {
-            setIsRequesting(true);
-            await postCampaignRequest(campaignIdForActions, textareaValue);
-            toast.success("Request Campaign sent succesfully!");
-            setIsRequestSent(true);
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setRequestModal(false);
-            setIsRequesting(false);
-        }
-    }, [
-        campaignIdForActions,
-        textareaValue,
-        setIsRequesting,
-        setIsRequestSent,
-        setRequestModal,
     ]);
 
     const updateProposalOption = React.useCallback(async () => {
@@ -340,7 +319,6 @@ export const useCampaignPageActions = ({
         getPDF,
         onAddOption,
         onDeleteOption,
-        requestCampaign,
         updateProposalOption,
         updateStrategyCampaign,
         proceedDraftToPayment,
