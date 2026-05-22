@@ -5,7 +5,6 @@ import {
     deleteProposalOption,
     patchAddProposalOption,
     patchCampaign,
-    postCampaignRequest,
 } from "@/api/client/campaign/campaign.api";
 import { getPdfFile } from "@/api/client/file/get-pdf";
 import { getCsvFile } from "@/api/client/file/get-csv";
@@ -22,8 +21,10 @@ import {
     downloadBlob,
 } from "@/client-side/utils";
 import {
-    buildPromoShareUrl, buildShareUrl,
+    buildPromoShareUrl,
+    buildShareUrl,
     getCampaignActionId,
+    getNextActiveOptionAfterDelete,
     getOptionIndexes,
 } from "./campaign-page.utils";
 
@@ -38,7 +39,6 @@ type Params = {
     setIsRequesting: React.Dispatch<React.SetStateAction<boolean>>;
     setIsRequestSent: React.Dispatch<React.SetStateAction<boolean>>;
     setIsRequestingPDF: React.Dispatch<React.SetStateAction<boolean>>;
-
 };
 
 export const useCampaignPageActions = ({
@@ -48,7 +48,6 @@ export const useCampaignPageActions = ({
                                            localExtraOptions,
                                            setLocalExtraOptions,
                                            textareaValue,
-
                                            setOptionModal,
                                            setIsRequesting,
                                            setIsRequestSent,
@@ -62,138 +61,208 @@ export const useCampaignPageActions = ({
         [data, localExtraOptions],
     );
 
-    const onClickOption = React.useCallback(
-        (optionIndex: number) => {
-            setIsRequestSent(false);
-            setActiveOption(optionIndex);
-            useFetchCampaign.getState().setProposalOption(campaignIdForActions, optionIndex);
-        },
-        [campaignIdForActions, setActiveOption, setIsRequestSent],
-    );
-
-    const getCSV = React.useCallback(async (id: string) => {
-        try {
-            setIsRequesting(true);
-            const res = await getCsvFile(id);
-            downloadBlob(res.data as Blob, `campaign-${id}.csv`);
-            toast.success("CSV created succesfully!");
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsRequesting(false);
-        }
-    }, [setIsRequesting]);
-
-    const getPDF = React.useCallback(async (id: string) => {
-        try {
-            setIsRequestingPDF(true);
-            const res = await getPdfFile(id);
-            downloadBlob(res.data as Blob, `campaign-${id}.pdf`);
-            toast.success("PDF created succesfully!");
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsRequestingPDF(false);
-        }
-    }, [setIsRequestingPDF]);
-
-    const onAddOption = React.useCallback(async (inheritFromOption0: boolean) => {
-        if (data?.kind !== "proposal") return;
-
-        const base = data.existingOptions ?? [];
-        const all = [...base, ...localExtraOptions];
-        const newIndex = all.length ? Math.max(...all) + 1 : 0;
-
-        setLocalExtraOptions((prev) => [...prev, newIndex]);
-        setOptionModal(false);
-
-        try {
-            setIsRequesting(true);
-            await useFetchCampaign
-                .getState()
-                .addProposalOption(campaignIdForActions, inheritFromOption0);
-
-            toast.success("Proposal Option added succesfully!");
-        } catch (e) {
-            console.error(e);
-            setLocalExtraOptions((prev) => prev.filter((x) => x !== newIndex));
-        } finally {
-            setIsRequesting(false);
-        }
-    }, [
-        data,
-        localExtraOptions,
-        setLocalExtraOptions,
-        setOptionModal,
-        setIsRequesting,
-        campaignIdForActions,
-    ]);
-
-    const onDeleteOption = React.useCallback(async (idx: number) => {
-        if (data?.kind !== "proposal") return;
-
-        try {
-            setIsRequesting(true);
-
-            await deleteProposalOption(data.campaignId, idx);
-
-            const freshMeta = await useFetchCampaign.getState().setProposalOption(
-                data.campaignId,
-                activeOption === idx ? 0 : activeOption,
-            );
-
-            if (freshMeta?.kind !== "proposal") return;
-
-            const freshOptionIndexes = freshMeta.existingOptions ?? [];
-            const nextActive =
-                activeOption === idx
-                    ? freshOptionIndexes.length
-                        ? freshOptionIndexes[0]
-                        : 0
-                    : activeOption;
-
-            setLocalExtraOptions([]);
-            setActiveOption(nextActive);
+    const reloadProposalOption = React.useCallback(
+        async (optionIndex: number) => {
+            if (!data?.campaignId) return null;
 
             const refreshed = await useFetchCampaign
                 .getState()
-                .setProposalOption(data.campaignId, nextActive);
+                .setProposalOption(data.campaignId, optionIndex);
 
             if (refreshed?.kind === "proposal") {
                 useProposalAccountsStore.getState().initOption(
-                    nextActive,
-                    refreshed.selectedOption.addedAccounts,
-                    refreshed.selectedOption.campaignContent,
+                    optionIndex,
+                    refreshed.selectedOption?.addedAccounts ?? [],
+                    refreshed.selectedOption?.campaignContent ?? [],
                     { force: true },
                 );
             }
-            setOptionModal(false)
-            toast.success("Proposal option deleted successfully!");
-        } catch (e) {
-            console.error(e);
-            toast.error("Failed to delete option");
-        } finally {
-            setIsRequesting(false);
-        }
-    }, [
-        data,
-        activeOption,
-        setActiveOption,
-        setLocalExtraOptions,
-        setIsRequesting,
-        setOptionModal
-    ]);
+
+            return refreshed;
+        },
+        [data?.campaignId],
+    );
+
+    const onClickOption = React.useCallback(
+        async (optionIndex: number) => {
+            if (!campaignIdForActions) return;
+
+            try {
+                setIsRequestSent(false);
+                setIsRequesting(true);
+                setActiveOption(optionIndex);
+
+                const refreshed = await useFetchCampaign
+                    .getState()
+                    .setProposalOption(campaignIdForActions, optionIndex);
+
+                if (refreshed?.kind === "proposal") {
+                    useProposalAccountsStore.getState().initOption(
+                        optionIndex,
+                        refreshed.selectedOption?.addedAccounts ?? [],
+                        refreshed.selectedOption?.campaignContent ?? [],
+                        { force: true },
+                    );
+                }
+            } catch (e) {
+                console.error(e);
+                toast.error("Failed to load option");
+            } finally {
+                setIsRequesting(false);
+            }
+        },
+        [
+            campaignIdForActions,
+            setActiveOption,
+            setIsRequestSent,
+            setIsRequesting,
+        ],
+    );
+
+    const getCSV = React.useCallback(
+        async (id: string) => {
+            try {
+                setIsRequesting(true);
+
+                const res = await getCsvFile(id);
+                downloadBlob(res.data as Blob, `campaign-${id}.csv`);
+
+                toast.success("CSV created successfully!");
+            } catch (error) {
+                console.error(error);
+                toast.error("Failed to create CSV");
+            } finally {
+                setIsRequesting(false);
+            }
+        },
+        [setIsRequesting],
+    );
+
+    const getPDF = React.useCallback(
+        async (id: string) => {
+            try {
+                setIsRequestingPDF(true);
+
+                const res = await getPdfFile(id);
+                downloadBlob(res.data as Blob, `campaign-${id}.pdf`);
+
+                toast.success("PDF created successfully!");
+            } catch (error) {
+                console.error(error);
+                toast.error("Failed to create PDF");
+            } finally {
+                setIsRequestingPDF(false);
+            }
+        },
+        [setIsRequestingPDF],
+    );
+
+    const onAddOption = React.useCallback(
+        async (inheritFromCurrentOption: boolean) => {
+            if (data?.kind !== "proposal") return;
+
+            const currentOptions = getOptionIndexes(data, localExtraOptions);
+            const nextOptionIndex = currentOptions.length;
+
+            try {
+                setIsRequesting(true);
+                setOptionModal(false);
+
+                await useFetchCampaign
+                    .getState()
+                    .addProposalOption(campaignIdForActions, inheritFromCurrentOption);
+
+                useUpdateCampaign.getState().reset();
+
+                setLocalExtraOptions([]);
+                setActiveOption(nextOptionIndex);
+                setIsRequestSent(false);
+
+                await reloadProposalOption(nextOptionIndex);
+
+                toast.success("Proposal option added successfully!");
+            } catch (e) {
+                console.error(e);
+                toast.error("Failed to add proposal option");
+            } finally {
+                setIsRequesting(false);
+            }
+        },
+        [
+            data,
+            localExtraOptions,
+            campaignIdForActions,
+            setLocalExtraOptions,
+            setActiveOption,
+            setOptionModal,
+            setIsRequesting,
+            setIsRequestSent,
+            reloadProposalOption,
+        ],
+    );
+
+    const onDeleteOption = React.useCallback(
+        async (deletedOptionIndex: number) => {
+            if (data?.kind !== "proposal") return;
+
+            const currentOptions = getOptionIndexes(data, localExtraOptions);
+
+            if (currentOptions.length <= 1) {
+                toast.error("You cannot delete the last option");
+                return;
+            }
+
+            const nextActiveOption = getNextActiveOptionAfterDelete({
+                activeOption,
+                deletedOption: deletedOptionIndex,
+                optionsCount: currentOptions.length,
+            });
+
+            try {
+                setIsRequesting(true);
+
+                await deleteProposalOption(data.campaignId, deletedOptionIndex);
+
+                useUpdateCampaign.getState().reset();
+
+                setLocalExtraOptions([]);
+                setActiveOption(nextActiveOption);
+                setIsRequestSent(false);
+
+                await reloadProposalOption(nextActiveOption);
+
+                toast.success("Proposal option deleted successfully!");
+            } catch (e) {
+                console.error(e);
+                toast.error("Failed to delete option");
+            } finally {
+                setIsRequesting(false);
+            }
+        },
+        [
+            data,
+            activeOption,
+            localExtraOptions,
+            setActiveOption,
+            setLocalExtraOptions,
+            setIsRequesting,
+            setIsRequestSent,
+            reloadProposalOption,
+        ],
+    );
 
     const updateProposalOption = React.useCallback(async () => {
         if (!data?.campaignId) return;
 
-        setIsRequesting(true);
-
         try {
-            const st = useProposalAccountsStore.getState();
-            const accounts = st.accountsByOption[activeOption] ?? [];
-            const content = st.contentByOption[activeOption] ?? [];
+            setIsRequesting(true);
+
+            const proposalState = useProposalAccountsStore.getState();
+
+            const accounts = proposalState.accountsByOption[activeOption] ?? [];
+            const content = proposalState.contentByOption[activeOption] ?? [];
             const patches = useUpdateCampaign.getState().patches ?? {};
+
             const { totalPublicPrice } = calcGroupPrices(accounts);
 
             const body = buildProposalPatchBody({
@@ -207,28 +276,24 @@ export const useCampaignPageActions = ({
             await patchAddProposalOption(data.campaignId, activeOption, body);
 
             useUpdateCampaign.getState().reset();
-            await useFetchCampaign.getState().setProposalOption(data.campaignId, activeOption);
 
-            const fresh = useFetchCampaign.getState().data;
-            if (fresh?.kind === "proposal") {
-                useProposalAccountsStore
-                    .getState()
-                    .initOption(
-                        activeOption,
-                        fresh.selectedOption.addedAccounts,
-                        fresh.selectedOption.campaignContent,
-                        { force: true },
-                    );
-            }
+            await reloadProposalOption(activeOption);
 
-            toast.success("Proposal Campaign updated succesfully!");
+            toast.success("Proposal campaign updated successfully!");
             setIsRequestSent(true);
         } catch (e) {
             console.error(e);
+            toast.error("Failed to update proposal campaign");
         } finally {
             setIsRequesting(false);
         }
-    }, [data, activeOption, setIsRequesting, setIsRequestSent]);
+    }, [
+        data,
+        activeOption,
+        setIsRequesting,
+        setIsRequestSent,
+        reloadProposalOption,
+    ]);
 
     const updateStrategyCampaign = React.useCallback(async () => {
         if (!data?.campaignId) return;
@@ -237,8 +302,13 @@ export const useCampaignPageActions = ({
             setIsRequesting(true);
 
             const strategyState = useStrategyCampaignStore.getState();
-            const accounts = strategyState.accountsByCampaignId[data.campaignId] ?? [];
-            const content = strategyState.contentByCampaignId[data.campaignId] ?? [];
+
+            const accounts =
+                strategyState.accountsByCampaignId[data.campaignId] ?? [];
+
+            const content =
+                strategyState.contentByCampaignId[data.campaignId] ?? [];
+
             const patches = useUpdateCampaign.getState().patches ?? {};
 
             const body = buildProposalPatchBody({
@@ -251,24 +321,27 @@ export const useCampaignPageActions = ({
             await patchCampaign(data.campaignId, body);
 
             useUpdateCampaign.getState().reset();
-            await useFetchCampaign.getState().setCampaign(data.campaignId);
 
-            const fresh = useFetchCampaign.getState().data;
+            const refreshed = await useFetchCampaign
+                .getState()
+                .setCampaign(data.campaignId);
+
+            const fresh = refreshed ?? useFetchCampaign.getState().data;
+
             if (fresh?.kind === "regular") {
-                useStrategyCampaignStore
-                    .getState()
-                    .initCampaign(
-                        fresh.campaignId,
-                        fresh.addedAccounts,
-                        fresh.campaignContent,
-                        { force: true },
-                    );
+                useStrategyCampaignStore.getState().initCampaign(
+                    fresh.campaignId,
+                    fresh.addedAccounts ?? [],
+                    fresh.campaignContent ?? [],
+                    { force: true },
+                );
             }
 
-            toast.success("Strategy Campaign updated succesfully!");
+            toast.success("Strategy campaign updated successfully!");
             setIsRequestSent(true);
         } catch (e) {
             console.error(e);
+            toast.error("Failed to update strategy campaign");
         } finally {
             setIsRequesting(false);
         }
@@ -276,9 +349,11 @@ export const useCampaignPageActions = ({
 
     const proceedDraftToPayment = React.useCallback(async () => {
         const draftId = String(data?.draftId ?? "");
+
         if (!draftId) return;
 
         const draftState = useDraftCampaignStore.getState();
+
         const accounts = draftState.accountsByCampaignId[draftId] ?? [];
         const content = draftState.contentByCampaignId[draftId] ?? [];
         const patches = useUpdateCampaign.getState().patches ?? {};
@@ -291,13 +366,21 @@ export const useCampaignPageActions = ({
         });
 
         useDraftCampaignStore.getState().setDraftPayload(draftId, body);
+
         navigate(`/client/campaign/payment?draft=${draftId}`);
     }, [data, navigate]);
 
     const copyPromoShareLink = React.useCallback(async () => {
-        const url = buildPromoShareUrl(campaignIdForActions);
-        await navigator.clipboard.writeText(url);
-        toast.success("Shared link created successfully!");
+        try {
+            const url = buildPromoShareUrl(campaignIdForActions);
+
+            await navigator.clipboard.writeText(url);
+
+            toast.success("Shared link copied successfully!");
+        } catch (e) {
+            console.error(e);
+            toast.error("Failed to copy share link");
+        }
     }, [campaignIdForActions]);
 
     const copyShareLink = React.useCallback(async () => {
@@ -306,12 +389,19 @@ export const useCampaignPageActions = ({
             return;
         }
 
-        const url = buildShareUrl(campaignIdForActions, data.socialMedia);
-        await navigator.clipboard.writeText(url);
-        toast.success("Shared link created successfully!");
-    }, [campaignIdForActions, data?.socialMedia]);
-    return {
+        try {
+            const url = buildShareUrl(campaignIdForActions, data.socialMedia);
 
+            await navigator.clipboard.writeText(url);
+
+            toast.success("Shared link copied successfully!");
+        } catch (e) {
+            console.error(e);
+            toast.error("Failed to copy share link");
+        }
+    }, [campaignIdForActions, data?.socialMedia]);
+
+    return {
         campaignIdForActions,
         optionIndexes,
         onClickOption,
@@ -323,6 +413,6 @@ export const useCampaignPageActions = ({
         updateStrategyCampaign,
         proceedDraftToPayment,
         copyShareLink,
-        copyPromoShareLink
+        copyPromoShareLink,
     };
 };

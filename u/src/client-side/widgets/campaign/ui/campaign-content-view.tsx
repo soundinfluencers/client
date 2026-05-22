@@ -27,6 +27,8 @@ export const CampaignContentView: React.FC<Props> = ({
         kind,
         campaignId,
         byGroup,
+        visibleByGroup,
+        accountsByContentId,
         groupPrices,
         config,
         accounts,
@@ -38,34 +40,38 @@ export const CampaignContentView: React.FC<Props> = ({
         view,
         flag,
     });
-    console.log("mainPromos", mainPromos);
-    console.log("bugroup", byGroup);
-    console.log("campaign", campaign);
+    const getNetworksForItem = React.useCallback(
+        (item: any) => {
+            const contentId = String(item?._id ?? "");
+            return accountsByContentId?.[contentId] ?? [];
+        },
+        [accountsByContentId],
+    );
     const renderLiveCards = () => (
         <div className="live-view-wrapper">
-            {byGroup.main.map((item) => (
+            {visibleByGroup.main.map((item) => (
                 <LiveViewCard
                     key={item._id}
                     item={item}
-                    networks={mainPromos}
+                    networks={getNetworksForItem(item)}
                     canEdit={config.liveCanEdit}
                 />
             ))}
 
-            {byGroup.music.map((item) => (
+            {visibleByGroup.music.map((item) => (
                 <LiveViewCard
                     key={item._id}
                     item={item}
-                    networks={musicPromos}
+                    networks={getNetworksForItem(item)}
                     canEdit={config.liveCanEdit}
                 />
             ))}
 
-            {byGroup.press.map((item) => (
+            {visibleByGroup.press.map((item) => (
                 <LiveViewCard
                     key={item._id}
                     item={item}
-                    networks={otherPromos}
+                    networks={getNetworksForItem(item)}
                     canEdit={config.liveCanEdit}
                 />
             ))}

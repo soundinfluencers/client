@@ -9,7 +9,7 @@ import { useGroupPromos } from "@/client-side/hooks";
 import {
     applyPatches,
     ensureContentGroupsFromAccounts,
-    buildResolvedCampaignContent,
+    buildResolvedCampaignContent, getAccountsByContentId, filterContentWithAccounts,
 } from "./campaign-content.utils";
 import {calcGroupPrices} from "@/client-side/utils";
 
@@ -150,10 +150,33 @@ export const useCampaignContentData = ({
         () => calcGroupPrices(resolved.accounts),
         [resolved.accounts],
     );
+    const accountsByContentId = React.useMemo(
+        () => getAccountsByContentId(resolved.accounts),
+        [resolved.accounts],
+    );
 
+    const visibleByGroup = React.useMemo(
+        () => ({
+            main: filterContentWithAccounts({
+                content: resolved.byGroup.main,
+                accountsByContentId,
+            }),
+            music: filterContentWithAccounts({
+                content: resolved.byGroup.music,
+                accountsByContentId,
+            }),
+            press: filterContentWithAccounts({
+                content: resolved.byGroup.press,
+                accountsByContentId,
+            }),
+        }),
+        [resolved.byGroup, accountsByContentId],
+    );
     return {
         ...resolved,
         ...promos,
-        groupPrices
+        groupPrices,
+        accountsByContentId,
+        visibleByGroup,
     };
 };

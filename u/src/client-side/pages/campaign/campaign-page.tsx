@@ -76,7 +76,7 @@ export const CampaignPage = () => {
     if (isDirty) setIsRequestSent(false);
   }, [isDirty, setIsRequestSent]);
 
-  if (!data) {
+  if (!data || isLoading || isRequesting) {
     return <Loader />;
   }
 

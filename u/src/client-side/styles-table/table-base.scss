@@ -623,12 +623,24 @@
   text-align: left;
   max-width: 150px !important;
   flex: 1 1 auto;
-}
+}.edit-desc{
+   max-width: 140px !important;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+ }
 .desc {
   max-width: 250px !important;
 }
 .desc-li {
-  max-width: 210px !important;
+  max-width: 170px !important;
+}
+.desc-li-card{
+  max-width: 270px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: 0.2s ease;
 }
 .tagged-link {
   text-decoration: underline;
