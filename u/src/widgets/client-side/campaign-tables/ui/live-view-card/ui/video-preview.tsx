@@ -1,6 +1,8 @@
 import React from "react";
 import styles from "./live-view-card.module.scss";
-import {getVideoBlobUrl} from "@/entities/client-side/campaign-strategy-page/api/preview-file.ts";
+import { getVideoBlobUrl } from "@/entities/client-side/campaign-strategy-page/api/preview-file.ts";
+import {resolveVideoUrl} from "@/widgets/client-side/campaign-tables/model/media-url.helpers.ts";
+
 
 type Props = {
     videoUrl?: string | null;
@@ -13,24 +15,40 @@ export const VideoPreview: React.FC<Props> = ({
                                                   pathLower,
                                                   className,
                                               }) => {
-    const [url, setUrl] = React.useState<string | null>(videoUrl ?? null);
+    const [url, setUrl] = React.useState<string | null>(null);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(false);
 
     React.useEffect(() => {
-        if (videoUrl) return;
-        if (!pathLower) return;
-
         let objectUrl = "";
 
         const loadVideo = async () => {
             try {
+                setError(false);
                 setLoading(true);
-                objectUrl = await getVideoBlobUrl({
-                    provider: "dropbox",
+
+                const externalUrl = resolveVideoUrl({
+                    url: videoUrl,
                     pathLower,
                 });
-                setUrl(objectUrl);
+
+                if (externalUrl) {
+                    setUrl(externalUrl);
+                    return;
+                }
+
+                if (pathLower) {
+                    objectUrl = await getVideoBlobUrl({
+                        provider: "dropbox",
+                        pathLower,
+                    });
+
+                    setUrl(objectUrl);
+                    return;
+                }
+
+                setUrl(null);
+                setError(true);
             } catch {
                 setError(true);
             } finally {
@@ -50,7 +68,15 @@ export const VideoPreview: React.FC<Props> = ({
             {loading ? (
                 <div className={styles.loader}>Loading...</div>
             ) : url && !error ? (
-                <video src={url} controls preload="metadata" />
+                url.includes("drive.google.com") ? (
+                    <iframe
+                        src={url}
+                        allow="autoplay"
+                        allowFullScreen
+                    />
+                ) : (
+                    <video src={url} controls preload="metadata" />
+                )
             ) : (
                 <div className={styles.loader}>Video unavailable</div>
             )}

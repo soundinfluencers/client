@@ -28,47 +28,70 @@ export type AgencyCampaignFormConfig = {
     fields: AgencyFormField[];
 };
 
+export type AgencyCurrency = "EUR" | "USD" | "GBP";
+
+export type AgencyPayloadBase = {
+    campaignGoal: string;
+    contentLink: string;
+    budget: number;
+    currency: AgencyCurrency;
+    targetTerritories: string;
+    extraBriefs: string;
+    trackLink: string;
+    releaseDate: string;
+    smartLink: string;
+    ticketLink: string;
+    brief: string;
+};
+
 export type AgencyCampaignPayload =
     | {
     category: "artist";
-    payload: {
-        campaignGoal: string;
-        contentLink: string;
-        budget: number;
-        currency: "EUR" | "USD" | "GBP";
-        targetTerritories: string;
-        extraBriefs: string;
-    };
+    payload: Partial<
+        Pick<
+            AgencyPayloadBase,
+            | "campaignGoal"
+            | "contentLink"
+            | "budget"
+            | "currency"
+            | "targetTerritories"
+            | "extraBriefs"
+        >
+    >;
 }
     | {
     category: "music";
-    payload: {
-        campaignGoal: string;
-        contentLink: string;
-        trackLink: string;
-        releaseDate: string;
-        smartLink: string;
-        budget: number;
-        currency: "EUR" | "USD" | "GBP";
-        targetTerritories: string;
-        extraBriefs: string;
-    };
+    payload: Partial<
+        Pick<
+            AgencyPayloadBase,
+            | "campaignGoal"
+            | "contentLink"
+            | "trackLink"
+            | "releaseDate"
+            | "smartLink"
+            | "budget"
+            | "currency"
+            | "targetTerritories"
+            | "extraBriefs"
+        >
+    >;
 }
     | {
     category: "event";
-    payload: {
-        campaignGoal: string;
-        contentLink: string;
-        ticketLink: string;
-        budget: number;
-        currency: "EUR" | "USD" | "GBP";
-        targetTerritories: string;
-        extraBriefs: string;
-    };
+    payload: Partial<
+        Pick<
+            AgencyPayloadBase,
+            | "campaignGoal"
+            | "contentLink"
+            | "ticketLink"
+            | "budget"
+            | "currency"
+            | "targetTerritories"
+            | "extraBriefs"
+        >
+    >;
 }
     | {
     category: "other";
-    payload: {
-        brief: string;
-    };
+    payload: Partial<Pick<AgencyPayloadBase, "brief">>;
 };

@@ -17,6 +17,7 @@ import {
 import { useFollowersSort } from "@/client-side/hooks";
 import type { TableGroup } from "@/client-side/types/table-types";
 import { getColumns } from "@/client-side/utils";
+import {getCurrencySymbol} from "@/pages/influencer/negotiation/utils/getCurrencySymbol.ts";
 
 type Props = {
   items: CampaignContentItem[];
@@ -29,6 +30,7 @@ type Props = {
   changeView?: boolean;
   title: string;
   status: string
+  campaign: any;
 };
 type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
 const makeRowKey = (n: CampaignAddedAccount, index: number) =>
@@ -49,6 +51,7 @@ export function TableStrategy({
   changeView,
   title,
     status,
+                                campaign,
 }: Props) {
   console.log(items, "items");
 
@@ -187,7 +190,7 @@ export function TableStrategy({
                 <td
                   key={col}
                   className={`tableBase__td td--footer ${isPrice ? "td--footer-strategy" : ""} ${isFollowers ? "td--footer-strategy" : ""}`}>
-                  {isPrice && <p className="td__price">Price: {totalPrice}€</p>}
+                  {isPrice && <p className="td__price">Price: {totalPrice}{totalPrice > 0 && <span>{getCurrencySymbol(campaign.displayCurrency)}</span>}</p>}
                   {isFollowers && (
                     <p className="td__followers">{totalFollowers}</p>
                   )}

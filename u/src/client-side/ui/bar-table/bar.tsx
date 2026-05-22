@@ -65,7 +65,7 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
   }, [campaign, store.campaignContent]);
 
   const budget =
-    campaign?.price ?? campaign?.totalPrice ?? store.totalPrice ?? 0;
+    campaign?.price;
 
   const submitted = formatCampaignDate(
     String(campaign?.submittedAt ?? campaign?.createdAt ?? new Date()),
@@ -88,7 +88,7 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
       name: `Budget: ${
           campaign.isPriceHidden
               ? ""
-              : formatCurrency(totalPublicPrice || budget || draftPrice, currency)
+              : formatCurrency(budget || draftPrice, currency)
       }`,
       img: creditcard,
       row: true,

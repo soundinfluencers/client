@@ -51,7 +51,6 @@
       p {
         font-weight: 400;
         font-size: 12px;
-        line-height: 100%;
         vertical-align: bottom;
       }
     }
@@ -203,7 +202,6 @@
       font-style: Regular;
       font-size: 12px;
       leading-trim: NONE;
-      line-height: 100%;
       letter-spacing: -0.2px;
       vertical-align: bottom;
     }
@@ -292,7 +290,7 @@
       font-style: Medium;
       font-size: 14px;
       leading-trim: NONE;
-      line-height: 100%;
+
       letter-spacing: 0%;
     }
     .fill-input {
@@ -356,6 +354,7 @@
         display: flex;
         align-items: center;
         gap: 4px;
+        flex: 0 0 auto;
       }
     }
   }
@@ -468,7 +467,6 @@
   }
 }
 .hidden-text {
-  max-width: 120px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

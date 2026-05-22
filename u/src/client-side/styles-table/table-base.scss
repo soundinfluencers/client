@@ -6,7 +6,6 @@
     width: 100%;
     font-weight: 400;
     font-size: 20px;
-    line-height: 100%;
 
     @media screen and (max-width: 900px) {
       font-size: 32px;
@@ -16,11 +15,28 @@
     }
   }
 }
+.tableBase {
+  .insight-footer-row {
+    .insight-footer-cell {
+      border-top: 1px solid rgba(191, 212, 255, 0.4) !important;
+      border-right: 1px solid rgba(191, 212, 255, 0.4) !important;
+      background: rgba(185, 208, 255, 0.15);
+    }
 
+    .insight-footer-cell.is-empty {
+      border: 0 !important;
+
+    }
+
+    .insight-footer-cell.is-empty-border-right {
+      border-right: 1px solid rgba(191, 212, 255, 0.4) !important;
+    }
+  }
+}
 .tableBase {
   width: 100%;
   table-layout: fixed;
-  min-width: 1224px;
+
   height: calc(100% + 100px);
   border-radius: 8px;
   border-collapse: separate;
@@ -344,7 +360,6 @@
     p {
       font-weight: 400;
       font-size: 12px;
-      line-height: 100%;
       vertical-align: bottom;
     }
   }
@@ -495,7 +510,6 @@
     font-style: Regular;
     font-size: 10px;
     leading-trim: NONE;
-    line-height: 100%;
     vertical-align: bottom;
   }
 }
@@ -525,7 +539,6 @@
     font-style: Regular;
     font-size: 10px;
     letter-spacing: -0.3px;
-    line-height: 100%;
     vertical-align: bottom;
   }
 }
@@ -546,7 +559,6 @@
     font-style: Medium;
     font-size: 14px;
     leading-trim: NONE;
-    line-height: 100%;
     letter-spacing: 0%;
     vertical-align: bottom;
   }
@@ -575,7 +587,6 @@
     font-style: Regular;
     font-size: 14px;
     leading-trim: NONE;
-    line-height: 100%;
     letter-spacing: 0%;
     vertical-align: bottom;
   }
@@ -610,7 +621,7 @@
 .username {
   position: relative;
   text-align: left;
-  max-width: 100% !important;
+  max-width: 150px !important;
   flex: 1 1 auto;
 }
 .desc {

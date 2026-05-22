@@ -90,31 +90,34 @@ export const CampaignTablePageShare: React.FC<Props> = ({
               {main.length >= 1 && (
                 <TableStrategy
                   proposalsFlag={proposalsFlag}
-                  totalPrice={campaign.price}
+                  totalPrice={campaign.isPriceHidden ? null : campaign.price}
                   items={main}
                   networks={mainPromos}
                   title="Video Distribution"
                   group={"main"}
+                  campaign={campaign}
                 />
               )}
               {music.length >= 1 && (
                 <TableStrategy
                   proposalsFlag={proposalsFlag}
-                  totalPrice={campaign.price}
+                  totalPrice={campaign.isPriceHidden ? null : campaign.price}
                   items={music}
                   networks={musicPromos}
                   title="Music Placements"
                   group={"music"}
+                  campaign={campaign}
                 />
               )}
               {press.length >= 1 && (
                 <TableStrategy
                   proposalsFlag={proposalsFlag}
-                  totalPrice={campaign.price}
+                  totalPrice={campaign.isPriceHidden ? null : campaign.price}
                   items={press}
                   networks={otherPromos}
                   group={"press"}
                   title="Press Coverage"
+                  campaign={campaign}
                 />
               )}
             </>

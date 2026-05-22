@@ -68,8 +68,17 @@ export const LiveViewCard: React.FC<Props> = ({
     const [selectedDescIdx, setSelectedDescIdx] = React.useState(0);
 
     const media0 = merged?.mediaCache?.items?.[0];
+
     const pathLower = media0?.pathLower;
+
     const videoUrl = media0?.url ?? null;
+
+// new logic later:
+// const videoUrl =
+//     media0?.url ??
+//     merged?.mainLink ??
+//     null;
+
     const hasVideo = Boolean(pathLower || videoUrl);
 
     React.useEffect(() => {
@@ -116,6 +125,26 @@ export const LiveViewCard: React.FC<Props> = ({
                         />
                     </div>
                 </div>
+
+                {/* new video logic later:
+                    <div className={styles.videoWrap}>
+                        <div
+                            role={hasVideo ? "button" : undefined}
+                            className={styles.previewTrigger}
+                            onClick={() => {
+                                if (!hasVideo) return;
+                                setIsVideoOpen(true);
+                            }}
+                        >
+                            <PreviewPhoto
+                                previewUrl={media0?.previewUrl}
+                                pathLower={media0?.pathLower}
+                                fileId={media0?.fileId}
+                                urlInsight={videoUrl ?? undefined}
+                            />
+                        </div>
+                    </div>
+                    */}
 
                 <LiveDescriptionsEditorDropdown
                     title={title}

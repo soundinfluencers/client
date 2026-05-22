@@ -65,9 +65,12 @@ export const LiveViewCardInsight: React.FC<LiveViewCardProps> = ({
           src={getSocialMediaIcon(item.socialMedia as SocialMediaType)}
           alt=""
         />{" "}
-        <div className="fill-input">
+          <div
+              style={{ cursor: item?.postLink && "pointer" }}
+              className="fill-input"
+          >
           <img src={link} alt="" />
-          <p>{item.postLink ?? "no post link"}</p>
+          <p>{item.postLink ?? "-"}</p>
         </div>
       </div>
       <div className="live-view-cardInsight__fill-data">

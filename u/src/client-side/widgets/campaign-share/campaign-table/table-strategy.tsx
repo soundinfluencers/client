@@ -21,14 +21,16 @@ import {
 } from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
 import {getColumns} from "@/client-side/utils";
+import {getCurrencySymbol} from "@/pages/influencer/negotiation/utils/getCurrencySymbol.ts";
 
 type Props = {
   items: CampaignContentItem[];
   networks: CampaignAddedAccount[];
-  totalPrice: number;
+  totalPrice: number | null;
   proposalsFlag?: boolean;
   group: TableGroup;
   title: string;
+  campaign: any
 };
 type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
 const makeRowKey = (n: CampaignAddedAccount, index: number) =>
@@ -46,6 +48,7 @@ export function TableStrategy({
   proposalsFlag,
   group,
   title,
+                                campaign
 }: Props) {
 
   const [networksState, setNetworksState] =
@@ -80,9 +83,18 @@ export function TableStrategy({
   const closeDropdown = React.useCallback(() => setActive(null), []);
   const uniqueNetworks = React.useMemo(() => {
     const seen = new Set<string>();
-    return sortedNetworks.filter((n) => {
-      const key = String((n as any).accountId ?? (n as any)._id);
+
+    return sortedNetworks.filter((n, index) => {
+      const key = String(
+          (n as any).addedAccountsId ??
+          (n as any).socialAccountId ??
+          (n as any).accountId ??
+          (n as any)._id ??
+          `${(n as any).influencerId}-${index}`,
+      );
+
       if (seen.has(key)) return false;
+
       seen.add(key);
       return true;
     });
@@ -101,6 +113,7 @@ export function TableStrategy({
           }),
       [group],
   );
+  console.log(items,'items')
   return (
     <div className="tableBase-wrap">
       <h1>{title}</h1>
@@ -188,7 +201,7 @@ export function TableStrategy({
               <td
                 key={col}
                 className={`tableBase__td td--footer ${isPrice ? "td--footer-strategy" : ""} ${isFollowers ? "td--footer-strategy" : ""}`}>
-                {isPrice && <p className="td__price">Price: {totalPrice}€</p>}
+                {isPrice && <p className="td__price">Price: {campaign.isPriceHidden ? "" : `${totalPrice}${getCurrencySymbol(campaign.displayCurrency)}`}</p>}
                 {isFollowers && (
                   <p className="td__followers">{totalFollowers}</p>
                 )}

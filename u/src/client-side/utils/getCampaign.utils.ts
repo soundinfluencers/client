@@ -36,6 +36,7 @@ export function toCampaignPageModelFromRegular(
     isCpmAndResultHidden: api.isCpmAndResultHidden,
     isPriceHidden: api.isPriceHidden,
     hiddenColumns: api.hiddenColumns,
+    displayCurrency:api.displayCurrency
   };
 }
 type ProposalModel = Extract<CampaignPageModel, { kind: "proposal" }>;
@@ -70,7 +71,6 @@ export function toCampaignPageModelFromDraft(
     campaignContent: api.campaignContent,
 
     price: 0,
-
     creationDate: null,
     shareLink: null,
 

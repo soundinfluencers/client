@@ -79,7 +79,7 @@ export const CampaignContentView: React.FC<Props> = ({
 
                     campaignId={campaignId}
                     optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
-                    totalPrice={groupPrices.main}
+                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
                     items={byGroup.main}
                     networks={mainPromos}
                     group="main"
@@ -94,7 +94,7 @@ export const CampaignContentView: React.FC<Props> = ({
 
                     campaignId={campaignId}
                     optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
-                    totalPrice={groupPrices.music}
+                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
                     items={byGroup.music}
                     networks={musicPromos}
                     group="music"
@@ -107,7 +107,7 @@ export const CampaignContentView: React.FC<Props> = ({
             {byGroup.press.length >= 1 && (
                 <TableProposal
                     optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
-                    totalPrice={groupPrices.press}
+                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
                     items={byGroup.press}
                     networks={otherPromos}
                     group="press"
@@ -123,8 +123,9 @@ export const CampaignContentView: React.FC<Props> = ({
         <div className="table-wrapper">
             {byGroup.main.length >= 1 && (
                 <TableStrategy
+                    campaign={campaign}
                     campaignId={campaignId}
-                    totalPrice={groupPrices.main}
+                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
                     items={byGroup.main}
                     networks={mainPromos}
                     group="main"
@@ -136,8 +137,9 @@ export const CampaignContentView: React.FC<Props> = ({
 
             {byGroup.music.length >= 1 && (
                 <TableStrategy
+                    campaign={campaign}
                     campaignId={campaignId}
-                    totalPrice={groupPrices.music}
+                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
                     items={byGroup.music}
                     networks={musicPromos}
                     group="music"
@@ -149,8 +151,9 @@ export const CampaignContentView: React.FC<Props> = ({
 
             {byGroup.press.length >= 1 && (
                 <TableStrategy
+                    campaign={campaign}
                     campaignId={campaignId}
-                    totalPrice={groupPrices.press}
+                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
                     items={byGroup.press}
                     networks={otherPromos}
                     group="press"
@@ -167,7 +170,7 @@ export const CampaignContentView: React.FC<Props> = ({
             {byGroup.main.length >= 1 && (
                 <TableDraft
                     campaignId={campaignId}
-                    totalPrice={groupPrices.main}
+                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
                     items={byGroup.main}
                     networks={mainPromos}
                     group="main"
@@ -180,7 +183,7 @@ export const CampaignContentView: React.FC<Props> = ({
             {byGroup.music.length >= 1 && (
                 <TableDraft
                     campaignId={campaignId}
-                    totalPrice={groupPrices.music}
+                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
                     items={byGroup.music}
                     networks={musicPromos}
                     group="music"
@@ -193,7 +196,7 @@ export const CampaignContentView: React.FC<Props> = ({
             {byGroup.press.length >= 1 && (
                 <TableDraft
                     campaignId={campaignId}
-                    totalPrice={groupPrices.press}
+                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
                     items={byGroup.press}
                     networks={otherPromos}
                     group="press"

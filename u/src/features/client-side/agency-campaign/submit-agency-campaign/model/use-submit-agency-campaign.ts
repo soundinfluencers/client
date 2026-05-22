@@ -6,13 +6,14 @@ import type {
 } from "@/entities/client-side/agency-campaign/model/agency-campaign.types.ts";
 import {buildAgencyCampaignPayload} from "@/entities/client-side/agency-campaign/model/agency-campaign.helpers.ts";
 import {postAgencyCampaign} from "@/entities/client-side/agency-campaign/api/agency-campaign.api.ts";
+import {useNavigate} from "react-router-dom";
 
 
 
 export const useSubmitAgencyCampaign = () => {
     const [isSuccessOpen, setIsSuccessOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const navigate = useNavigate();
     const submit = async (
         category: AgencyCampaignCategory,
         values: AgencyFormValues,
@@ -38,6 +39,9 @@ export const useSubmitAgencyCampaign = () => {
         isSubmitting,
         isSuccessOpen,
         openSuccess: () => setIsSuccessOpen(true),
-        closeSuccess: () => setIsSuccessOpen(false),
+        closeSuccess: () => {
+            setIsSuccessOpen(false);
+            navigate("/");
+        },
     };
 };
