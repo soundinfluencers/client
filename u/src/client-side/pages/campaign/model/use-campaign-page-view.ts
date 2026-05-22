@@ -15,35 +15,58 @@ export const useCampaignPageView = (data: any) => {
 
     React.useEffect(() => {
         if (data?.kind === "proposal") {
-            setActiveOption(data.selectedOption?.optionIndex ?? 0);
-            setView(-1);
+            setActiveOption((prev) => {
+                const serverOption = data.selectedOption?.optionIndex;
+
+                if (typeof serverOption === "number") {
+                    return serverOption;
+                }
+
+                return prev;
+            });
+
+            setView((prev) => {
+                if (prev === -1 || prev === 0 || prev === 2) return prev;
+                return -1;
+            });
+
             return;
         }
 
-        setView(1);
-    }, [data]);
+        setView((prev) => {
+            if (prev === 0 || prev === 1) return prev;
+            return 1;
+        });
+    }, [data?.kind, data?.selectedOption?.optionIndex]);
 
     return {
         optionModal,
         setOptionModal,
 
-
         activeOption,
         setActiveOption,
+
         changeView,
         setChangeView,
+
         view,
         setView,
+
         isRequesting,
         setIsRequesting,
+
         isRequestSent,
         setIsRequestSent,
+
         isRequestingPDF,
         setIsRequestingPDF,
+
         localExtraOptions,
         setLocalExtraOptions,
+
         textareaValue,
         setTextareaValue,
+
         flag,
         setFlag,
     };

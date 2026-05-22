@@ -157,3 +157,41 @@ export const buildResolvedCampaignContent = ({
         config,
     };
 };
+
+export const getAccountSelectedContentId = (account: any) => {
+    return String(
+        account?.selectedContent?.campaignContentItemId ??
+        account?.selectedCampaignContentItem?.campaignContentItemId ??
+        account?.selectedContentItem?._id ??
+        "",
+    );
+};
+
+export const getAccountsByContentId = (accounts: any[]) => {
+    return (accounts ?? []).reduce<Record<string, any[]>>((acc, account) => {
+        const contentId = getAccountSelectedContentId(account);
+
+        if (!contentId) return acc;
+
+        if (!acc[contentId]) {
+            acc[contentId] = [];
+        }
+
+        acc[contentId].push(account);
+
+        return acc;
+    }, {});
+};
+
+export const filterContentWithAccounts = ({
+                                              content,
+                                              accountsByContentId,
+                                          }: {
+    content: any[];
+    accountsByContentId: Record<string, any[]>;
+}) => {
+    return (content ?? []).filter((item) => {
+        const contentId = String(item?._id ?? "");
+        return (accountsByContentId[contentId] ?? []).length > 0;
+    });
+};
