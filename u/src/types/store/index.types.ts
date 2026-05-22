@@ -288,6 +288,7 @@ export interface CampaignAddedAccount {
 // -------------------------
 
 export interface CampaignResponse {
+  displayCurrency: any;
   campaignId: ObjectId;
   campaignName: string;
   canEdit: boolean;

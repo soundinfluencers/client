@@ -114,16 +114,28 @@ export type CampaignBuilderActions = {
     ) => void;
     hydrateFromDraft: (payload: {
         draftId: string;
-        draftStep: CampaignDraftLatestStep;
-        totalPrice: number;
+        draftStep: "addAccounts" | "addContent" | "strategyTable";
         campaignName: string;
-        selectedOfferId?: string | null;
-        selectedOfferAccountIds?: string[];
+        totalPrice: number;
+        selectedOfferId: null;
+        selectedOfferAccountIds: any[];
         selectedPromoCardIds: string[];
-        selectedAccounts: SelectedCampaignAccount[];
-        campaignContent: CampaignContentItem[];
-        postContentDraft?: Record<string, unknown> | null;
-        blocksDraft?: CampaignPostContentBlock[] | null;
+        selectedAccounts: {
+            accountId: string;
+            influencerId: string;
+            username: string;
+            socialMedia: string;
+            followers: number;
+            profileType: "creator" | "community";
+            price: number;
+            logoUrl: string;
+            source: string;
+            selectedCampaignContentItem: { campaignContentItemId: string; descriptionId: string } | null;
+            dateRequest: string
+        }[];
+        campaignContent: any[];
+        postContentDraft: null;
+        blocksDraft: null
     }) => void;
 
     setTotalPrice: (value: number) => void;

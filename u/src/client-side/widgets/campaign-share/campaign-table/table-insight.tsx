@@ -6,6 +6,7 @@ import { TableCard } from "../card-table/table-card-insight";
 
 import chevron from "@/assets/icons/chevron-up.svg";
 import { columns, titles } from "@/client-side/data/table-campaign.data";
+import {getCurrencySymbol} from "@/pages/influencer/negotiation/utils/getCurrencySymbol.ts";
 
 interface Props {
   campaign: CampaignResponse;
@@ -146,29 +147,39 @@ export const TableDistributingInsight: React.FC<Props> = ({ campaign }) => {
         <tbody>
           {sortedAccounts.map((row, index) => (
             <TableCard
-              key={row.accountId ?? row._id ?? `${row.influencerId}-${index}`}
+              key={row._id ?? `${row.influencerId}-${index}`}
               data={row}
             />
           ))}
         </tbody>
 
         <tfoot>
-          <tr>
-            {columns.map((_, index) => (
+        <tr className="insight-footer-row">
+          {columns.map((row, index) => (
               <td
-                key={index}
-                className={`td--footer ${index === 0 || index === 1 ? "is-left" : ""}`}>
-                {index === 0 && <p>price: {campaign.price}€</p>}
+                  key={index}
+                  className={`td--footer insight-footer-cell ${
+                      index === 0 || index === 1 ? "is-left-another" : ""
+                  } ${index === 2 || index === 3 ? "is-empty" : ""}
+        ${index === 3 ? "is-empty-border-right" : ""}`}
+              >
+                {index === 0 && (
+                    <p>
+                      price:{" "}
+                      {campaign.isPriceHidden
+                          ? "—"
+                          : `${campaign.price}${getCurrencySymbol(campaign.displayCurrency)}`}
+                    </p>
+                )}
                 {index === 1 && <p>{campaign.totalFollowers}</p>}
-
                 {index === 4 && <p>{campaign.totalImpressions}</p>}
                 {index === 5 && <p>{campaign.totalLikes}</p>}
                 {index === 6 && <p>{campaign.totalComments}</p>}
                 {index === 7 && <p>{campaign.totalSaves}</p>}
                 {index === 8 && <p>{campaign.totalShares}</p>}
               </td>
-            ))}
-          </tr>
+          ))}
+        </tr>
         </tfoot>
       </table>
     </div>

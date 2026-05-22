@@ -6,7 +6,6 @@
     width: 100%;
     font-weight: 400;
     font-size: 20px;
-    line-height: 100%;
 
     @media screen and (max-width: 900px) {
       font-size: 32px;
@@ -341,7 +340,6 @@
     p {
       font-weight: 400;
       font-size: 12px;
-      line-height: 100%;
       vertical-align: bottom;
     }
   }
@@ -492,7 +490,6 @@
     font-style: Regular;
     font-size: 10px;
     leading-trim: NONE;
-    line-height: 100%;
     vertical-align: bottom;
   }
 }
@@ -521,7 +518,6 @@
     font-style: Regular;
     font-size: 10px;
     letter-spacing: -0.3px;
-    line-height: 100%;
     vertical-align: bottom;
   }
 }
@@ -542,7 +538,6 @@
     font-style: Medium;
     font-size: 14px;
     leading-trim: NONE;
-    line-height: 100%;
     letter-spacing: 0%;
     vertical-align: bottom;
   }
@@ -571,7 +566,6 @@
     font-style: Regular;
     font-size: 14px;
     leading-trim: NONE;
-    line-height: 100%;
     letter-spacing: 0%;
     vertical-align: bottom;
   }
@@ -592,7 +586,6 @@
 }
 .hidden-text {
   font-size: 14px;
-  max-width: 120px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

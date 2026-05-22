@@ -23,13 +23,7 @@ export const ModalVideo: React.FC<Props> = ({ onClose, children }) => {
     return (
         <div className={styles.modal}>
             <div ref={contentRef} className={styles.modalContent}>
-                <button
-                    type="button"
-                    className={styles.modalClose}
-                    onClick={onClose}
-                >
-                    ×
-                </button>
+
                 {children}
             </div>
         </div>

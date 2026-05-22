@@ -6,7 +6,7 @@ import type { CampaignDraftDto } from "@/entities/client-side/campaign-draft/api
 const draftStepRouteMap = {
     addAccounts: "/client/create-campaign",
     addContent: "/client/create-campaign/content",
-    strategyTable: "/client/campaign",
+    strategyTable: "/client/create-campaign/content/strategy",
 } as const;
 
 type Params = {
@@ -21,17 +21,6 @@ export const useOpenDraftAction = ({ getDraftDetails }: Params) => {
             const draft = await getDraftDetails(draftId);
 
             hydrateCampaignBuilderFromDraft(draft);
-
-            if (draft.step === "strategyTable") {
-                sessionStorage.setItem(
-                    "lastCampaign",
-                    JSON.stringify({
-                        id: String(draft._id ?? draftId),
-                        status: "draft",
-                        optionIndex: 0,
-                    }),
-                );
-            }
 
             navigate(draftStepRouteMap[draft.step]);
         },

@@ -4,15 +4,16 @@ import { getFilePreview } from "@/api/client/preview/preview.api";
 import { LoaderPreview } from "@/components/ui/loader-preview/loader";
 import play from "@/assets/icons/play.svg";
 interface PreviewVideoProps {
-  previewUrl?: string | null;
+  previewUrl?: string | null; // если уже есть url
   pathLower?: string;
   fileId?: string;
+  urlInsight?: string
 }
 
 export const PreviewPhoto: React.FC<PreviewVideoProps> = ({
   previewUrl,
   pathLower,
-  fileId,
+  fileId,urlInsight
 }) => {
   const [url, setUrl] = React.useState<string | null>(previewUrl ?? null);
   const [loading, setLoading] = React.useState(false);
@@ -53,19 +54,19 @@ export const PreviewPhoto: React.FC<PreviewVideoProps> = ({
 
   return (
     <div className="video">
-      {url && (
-        <div className="video-play">
-          <div className="video-play__play">
-            <img src={play} alt="" />
+      {!urlInsight && url && (
+          <div className="video-play">
+            <div className="video-play__play">
+              <img src={play} alt="" />
+            </div>
           </div>
-        </div>
       )}
       {loading ? (
         <LoaderPreview />
       ) : url && !error ? (
         <img src={url} alt="preview" />
       ) : (
-        <img src={previewFallback} alt="no preview" />
+        <img src={urlInsight || previewFallback} alt="no preview" />
       )}
     </div>
   );

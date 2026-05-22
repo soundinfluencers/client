@@ -127,7 +127,7 @@ export const BarSection: React.FC<Props> = ({ campaign }) => {
               </p>
 
               <p>
-                Result: <span>{resultCPM}</span>
+                Result: {campaign.isCpmAndResultHidden ? null : <span>{resultCPM}</span>}
               </p>
             </div>
           </div>

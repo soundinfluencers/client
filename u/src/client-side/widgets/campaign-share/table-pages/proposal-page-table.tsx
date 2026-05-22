@@ -58,10 +58,10 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
   const content = campaign.selectedOption.campaignContent;
   console.log(campaign?.campaignId, "campaign?.campaignId");
   console.log(content, "conent");
-  const { groupPrices } = React.useMemo(
-    () => calcGroupPrices(campaign?.selectedOption?.addedAccounts),
-    [campaign?.selectedOption?.addedAccounts],
-  );
+  // const { groupPrices } = React.useMemo(
+  //   () => calcGroupPrices(campaign?.selectedOption?.addedAccounts),
+  //   [campaign?.selectedOption?.addedAccounts],
+  // );
   const byGroup = React.useMemo(
     () => ({
       main: content.filter((x) => x.socialMediaGroup === "main"),
@@ -74,7 +74,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
     setApprovedOptions((prev) => ({ ...prev, [index]: true }));
 
 
-    proceedProposalToPayment(); toast.success("Approved!");
+    proceedProposalToPayment();
   };
   const requestCampaign = async (campaignId: string, text: string) => {
     try {
@@ -155,7 +155,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
           {byGroup.main.length >= 1 && (
             <TableProposal
               optionIndex={optionIndex}
-              totalPrice={groupPrices.main}
+              totalPrice={campaign.price}
               items={byGroup.main}
               networks={mainPromos}
               group="main"
@@ -169,7 +169,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
             <TableProposal
               optionIndex={optionIndex}
               canEdit={false}
-              totalPrice={groupPrices.music}
+              totalPrice={campaign.price}
               items={byGroup.music}
               networks={musicPromos}
               group="music"
@@ -182,7 +182,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
             <TableProposal
               optionIndex={optionIndex}
               canEdit={false}
-              totalPrice={groupPrices.press}
+              totalPrice={campaign.price}
               items={byGroup.press}
               networks={otherPromos}
               group="press"

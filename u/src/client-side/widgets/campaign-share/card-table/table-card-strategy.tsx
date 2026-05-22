@@ -12,6 +12,29 @@ import { ExtraFieldsCells } from "../cells/strategy/extra-fields-cells";
 import { CountriesCell } from "../cells/strategy/countries-cell";
 import { GenresCell } from "../cells/strategy/genres-cell";
 
+const parseDateRequest = (value?: string | null) => {
+    const raw = String(value ?? "").trim();
+
+    if (raw.startsWith("BEFORE:")) {
+        return {
+            selectedDate: "BEFORE",
+            customDate: raw.replace("BEFORE:", ""),
+        };
+    }
+
+    if (raw.startsWith("AFTER:")) {
+        return {
+            selectedDate: "AFTER",
+            customDate: raw.replace("AFTER:", ""),
+        };
+    }
+
+    return {
+        selectedDate: raw || ReqData[0],
+        customDate: "",
+    };
+};
+
 export const TableCard = React.memo(function TableCard({
                                                            data,
                                                            rowKey,
@@ -23,13 +46,30 @@ export const TableCard = React.memo(function TableCard({
                                                            onCloseDropdown,
                                                            columns,
                                                        }: TableRowProps) {
-    const [selectedDate, setSelectedDate] = React.useState<string>(ReqData[0]);
-    const [customDate, setCustomDate] = React.useState<string>("");
+    const initialDateRequest = React.useMemo(
+        () => parseDateRequest((data as any)?.dateRequest),
+        [data],
+    );
+
+    const [selectedDate, setSelectedDate] = React.useState<string>(
+        initialDateRequest.selectedDate,
+    );
+
+    const [customDate, setCustomDate] = React.useState<string>(
+        initialDateRequest.customDate,
+    );
+
+    React.useEffect(() => {
+        setSelectedDate(initialDateRequest.selectedDate);
+        setCustomDate(initialDateRequest.customDate);
+    }, [initialDateRequest.selectedDate, initialDateRequest.customDate]);
 
     const isDateOpen =
         activeDropdown?.rowKey === rowKey && activeDropdown.key === "date";
+
     const isContentOpen =
         activeDropdown?.rowKey === rowKey && activeDropdown.key === "content";
+
     const isPostDescriptionOpen =
         activeDropdown?.rowKey === rowKey &&
         activeDropdown.key === "postDescription";
@@ -37,23 +77,56 @@ export const TableCard = React.memo(function TableCard({
     const itemsByPlatform = React.useMemo(() => {
         const map: Record<string, CampaignContentItem[]> = {};
 
-        for (const it of items ?? []) {
-            const key = String(it.socialMedia ?? "").trim().toLowerCase();
-            (map[key] ||= []).push(it);
+        for (const item of items ?? []) {
+            const key = String(item.socialMedia ?? "").trim().toLowerCase();
+
+            if (!map[key]) {
+                map[key] = [];
+            }
+
+            map[key].push(item);
         }
 
         return map;
     }, [items]);
 
     const platformItems = React.useMemo(() => {
-        const key = String(data.socialMedia ?? "").trim().toLowerCase();
-        return itemsByPlatform[key] ?? [];
-    }, [itemsByPlatform, data.socialMedia]);
+        const key = String((data as any)?.socialMedia ?? "")
+            .trim()
+            .toLowerCase();
 
-    const selectedMeta =
-        (data as any)?.selectedContent ??
-        (data as any)?.selectedCampaignContentItem ??
-        null;
+        return itemsByPlatform[key] ?? [];
+    }, [itemsByPlatform, data]);
+
+    const selectedMeta = React.useMemo(() => {
+        const rawSelected =
+            (data as any)?.selectedContent ??
+            (data as any)?.selectedCampaignContentItem ??
+            null;
+
+        if (!rawSelected) return null;
+
+        /**
+         * Backend иногда присылает:
+         * selectedContent: {
+         *   campaignContentItemId,
+         *   descriptionId
+         * }
+         *
+         * А иногда:
+         * selectedCampaignContentItem: {
+         *   _id,
+         *   description
+         * }
+         *
+         * Поэтому нормализуем оба варианта.
+         */
+        return {
+            campaignContentItemId:
+                rawSelected.campaignContentItemId ?? rawSelected._id ?? "",
+            descriptionId: rawSelected.descriptionId ?? "",
+        };
+    }, [data]);
 
     const selectedContentId = String(
         selectedMeta?.campaignContentItemId ?? "",
@@ -64,6 +137,7 @@ export const TableCard = React.memo(function TableCard({
     );
 
     const resolvedSelectedContent = React.useMemo(() => {
+        if (!platformItems.length) return 0;
         if (!selectedContentId) return 0;
 
         const index = platformItems.findIndex(
@@ -78,6 +152,7 @@ export const TableCard = React.memo(function TableCard({
         const descriptions =
             platformItems?.[resolvedSelectedContent]?.descriptions ?? [];
 
+        if (!descriptions.length) return 0;
         if (!selectedDescriptionId) return 0;
 
         const index = descriptions.findIndex(
@@ -90,6 +165,7 @@ export const TableCard = React.memo(function TableCard({
     const [selectedContent, setSelectedContent] = React.useState<number>(
         resolvedSelectedContent,
     );
+
     const [selectedPd, setSelectedPd] = React.useState<number>(
         resolvedSelectedPd,
     );
@@ -102,35 +178,36 @@ export const TableCard = React.memo(function TableCard({
         setSelectedPd(resolvedSelectedPd);
     }, [resolvedSelectedPd]);
 
-    const safeSelectedContent =
-        selectedContent >= 0 && selectedContent < platformItems.length
+    const safeSelectedContent = React.useMemo(() => {
+        if (!platformItems.length) return 0;
+
+        return selectedContent >= 0 && selectedContent < platformItems.length
             ? selectedContent
             : 0;
+    }, [platformItems, selectedContent]);
 
     const safeSelectedPd = React.useMemo(() => {
         const descriptions =
             platformItems?.[safeSelectedContent]?.descriptions ?? [];
 
         if (!descriptions.length) return 0;
-        if (selectedPd < 0 || selectedPd >= descriptions.length) return 0;
 
-        return selectedPd;
+        return selectedPd >= 0 && selectedPd < descriptions.length
+            ? selectedPd
+            : 0;
     }, [platformItems, safeSelectedContent, selectedPd]);
 
-    const toggleDate = React.useCallback(
-        () => onToggleDropdown(rowKey, "date"),
-        [onToggleDropdown, rowKey],
-    );
+    const toggleDate = React.useCallback(() => {
+        onToggleDropdown(rowKey, "date");
+    }, [onToggleDropdown, rowKey]);
 
-    const toggleContent = React.useCallback(
-        () => onToggleDropdown(rowKey, "content"),
-        [onToggleDropdown, rowKey],
-    );
+    const toggleContent = React.useCallback(() => {
+        onToggleDropdown(rowKey, "content");
+    }, [onToggleDropdown, rowKey]);
 
-    const togglePD = React.useCallback(
-        () => onToggleDropdown(rowKey, "postDescription"),
-        [onToggleDropdown, rowKey],
-    );
+    const togglePD = React.useCallback(() => {
+        onToggleDropdown(rowKey, "postDescription");
+    }, [onToggleDropdown, rowKey]);
 
     return (
         <tr className="table-campaign-page__tr">
@@ -149,7 +226,7 @@ export const TableCard = React.memo(function TableCard({
                             selectedContent={safeSelectedContent}
                             setSelectedContent={setSelectedContent}
                             setSelectedPd={setSelectedPd}
-                            socialMedia={data.socialMedia}
+                            socialMedia={(data as any)?.socialMedia}
                             group={group}
                         />
                     )}
@@ -198,7 +275,7 @@ export const TableCard = React.memo(function TableCard({
                             selectedContent={safeSelectedContent}
                             setSelectedContent={setSelectedContent}
                             setSelectedPd={setSelectedPd}
-                            socialMedia={data.socialMedia}
+                            socialMedia={(data as any)?.socialMedia}
                             group={group}
                         />
                     )}

@@ -44,7 +44,7 @@ export const CampaignSharePage: React.FC<Props> = () => {
   } = useShareCampaignQuery(id, {
     enabled: !!id && !isProposal,
   });
-
+  console.log("campaign", campaign);
   React.useEffect(() => {
     if (!id || !isProposal) return;
 
@@ -143,6 +143,7 @@ export const CampaignSharePage: React.FC<Props> = () => {
               campaign={data}
               changeView={changeView}
               view={view}
+
             />
           )}
           {data && (

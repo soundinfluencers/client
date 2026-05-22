@@ -118,5 +118,6 @@ export const deleteProposalOption = async (
 
 export const getShareLink = async (campaignId: string): Promise<any> => {
   const res = await $api.get(`/campaigns/${campaignId}/share`);
+  console.log(res,'res')
   return res.data;
 };

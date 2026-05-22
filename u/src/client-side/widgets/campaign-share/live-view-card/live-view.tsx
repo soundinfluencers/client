@@ -39,7 +39,7 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
   const { merged } = useContentMerged(contentId, item);
   const showStoryFields =
     merged.socialMediaGroup !== "music" && merged.socialMediaGroup !== "press";
-
+  console.log(networks,'w');
   const [isVideoOpen, setIsVideoOpen] = React.useState(false);
 
   const media0 = item?.mediaCache?.items?.[0];

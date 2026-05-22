@@ -7,7 +7,6 @@
     width: 100%;
     font-weight: 400;
     font-size: 20px;
-    line-height: 100%;
 
     @media screen and (max-width: 900px) {
       font-size: 32px;
@@ -226,7 +225,7 @@
     border-top: 1px solid rgba(191, 212, 255, 0.4);
     p {
       font-weight: 400;
-      font-size: 15px;
+      font-size: 14px;
       line-height: 1;
     }
 
@@ -373,7 +372,6 @@
       p {
         font-weight: 400;
         font-size: 12px;
-        line-height: 100%;
         vertical-align: bottom;
       }
     }
@@ -524,7 +522,6 @@
       font-style: Regular;
       font-size: 10px;
       leading-trim: NONE;
-      line-height: 100%;
       vertical-align: bottom;
     }
   }
@@ -553,7 +550,6 @@
       font-style: Regular;
       font-size: 10px;
       letter-spacing: -0.3px;
-      line-height: 100%;
       vertical-align: bottom;
     }
   }
@@ -574,7 +570,6 @@
       font-style: Medium;
       font-size: 14px;
       leading-trim: NONE;
-      line-height: 100%;
       letter-spacing: 0%;
       vertical-align: bottom;
     }
@@ -604,7 +599,6 @@
     font-style: Regular;
     font-size: 14px;
     leading-trim: NONE;
-    line-height: 100%;
     letter-spacing: 0%;
     vertical-align: bottom;
   }
@@ -624,8 +618,7 @@
   max-width: 250px;
 }
 .hidden-text {
-  font-size: 13px;
-  max-width: 110px;
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -639,7 +632,6 @@
 .username {
   position: relative;
   text-align: left;
-  max-width: 100% !important;
   flex: 1 1 auto;
 }
 .desc {
@@ -679,7 +671,6 @@
   h2 {
     font-weight: 400;
     font-size: 36px;
-    line-height: 100%;
     text-align: center;
   }
 

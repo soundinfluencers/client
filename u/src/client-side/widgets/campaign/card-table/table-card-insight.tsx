@@ -20,8 +20,8 @@ export const TableCard = React.memo(function TableCard({ data }: Props) {
       <LinkCell url={(data as any).postLink} />
       <LinkCell leftIcon={imageIcon} url={(data as any).screenshot} />
 
-      <MetricCell value={(data as any).impressions} />
-      <MetricCell value={(data as any).like} />
+      <MetricCell value={(data as any).impressions ?? 0} />
+      <MetricCell value={(data as any).like ?? 0} />
       <MetricCell value={(data as any).comments ?? 0} />
       <MetricCell value={(data as any).saves ?? 0} />
       <MetricCell value={(data as any).shares ?? 0} />

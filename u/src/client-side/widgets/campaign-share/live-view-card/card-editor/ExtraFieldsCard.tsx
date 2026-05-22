@@ -20,7 +20,7 @@ export const ExtraFieldsCard: React.FC<Props> = ({
   const setField = useUpdateCampaign((s) => s.setField);
 
   if (!showStoryFields) return null;
-
+    console.log(mergedItem,'er')
   return (
     <>
       <div className="live-view-card__fill-data">
@@ -36,7 +36,7 @@ export const ExtraFieldsCard: React.FC<Props> = ({
               placeholder="Tagged user"
             />
           ) : (
-            <p>{mergedItem.taggedUser}</p>
+              <p>{mergedItem.taggedUser || "—"}</p>
           )}
         </div>
       </div>
@@ -54,27 +54,11 @@ export const ExtraFieldsCard: React.FC<Props> = ({
               placeholder="Tagged link"
             />
           ) : (
-            <p>{mergedItem.taggedLink}</p>
+            <p>{mergedItem.taggedLink || '—'}</p>
           )}
         </div>
       </div>
 
-      <div className="live-view-card__fill-data">
-        <h3>Additional brief</h3>
-        <div className="fill-input">
-          {canEdit && contentId ? (
-            <input
-              value={mergedItem.additionalBrief ?? ""}
-              onChange={(e) =>
-                setField(contentId, "additionalBrief", e.target.value)
-              }
-              placeholder="Additional brief"
-            />
-          ) : (
-            <p>{mergedItem.additionalBrief}</p>
-          )}
-        </div>
-      </div>
     </>
   );
 };
