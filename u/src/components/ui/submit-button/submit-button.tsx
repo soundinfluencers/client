@@ -1,5 +1,6 @@
 import React from "react";
 import { useFormContext, useFormState } from "react-hook-form";
+import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
 
 interface Props {
     type?: "submit";
@@ -23,7 +24,7 @@ export const SubmitButton: React.FC<Props> = ({
             className={`${className ?? ""} ready`}
             disabled={isSubmitting}
         >
-            {isSubmitting ? "Saving..." : data}
+            {isSubmitting ? <CircleLoader/> : data}
         </button>
     );
 };

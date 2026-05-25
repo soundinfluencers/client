@@ -11,13 +11,15 @@ import { toast } from "react-toastify";
 import {
   useCampaignBuilderStore
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
 
 interface Props {
   currency: CurrencyType[];
   referenceNumber: string;
+  isSubmitting?: boolean;
 }
 
-export const BankTransfer: React.FC<Props> = ({ currency,referenceNumber }) => {
+export const BankTransfer: React.FC<Props> = ({ currency,referenceNumber,isSubmitting }) => {
   const { totalPrice } = useCampaignBuilderStore();
   console.log(totalPrice);
   const currentCurrency = currency[0];
@@ -50,7 +52,11 @@ export const BankTransfer: React.FC<Props> = ({ currency,referenceNumber }) => {
             {isInternational && "Payment confirmation by Bank Transfer International"}
           </h2>
           <button type={'submit'} className='base-confirmations__button' onClick={() => {}}>
-            Confirm payment sent
+            {isSubmitting ? (
+                <CircleLoader/>
+            ) : (
+                "Confirm payment sent"
+            )}
           </button>
         </div>
         <div className="base-confirmations__content--banktransfer">

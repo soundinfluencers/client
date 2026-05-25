@@ -7,12 +7,14 @@ import { toast } from "react-toastify";
 import {
   useCampaignBuilderStore
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
 
 interface Props {
   referenceNumber: string;
+  isSubmitting?: boolean;
 }
 
-export const PayPal: React.FC<Props> = ({referenceNumber}) => {
+export const PayPal: React.FC<Props> = ({referenceNumber,isSubmitting}) => {
   const { totalPrice } = useCampaignBuilderStore();
   console.log(totalPrice);
   const referenceId = "P935872";
@@ -33,9 +35,11 @@ export const PayPal: React.FC<Props> = ({referenceNumber}) => {
 
         <div className='base-confirmations__header'>
           <h2>Payment confirmation by PayPal</h2>
-          <button type={'submit'} className='base-confirmations__button' onClick={() => {}}>
-            Confirm payment sent
-          </button>
+          {isSubmitting ? (
+              <CircleLoader/>
+          ) : (
+              "Confirm payment sent"
+          )}
         </div>
 
         <div className="base-confirmations__content--paypal">
