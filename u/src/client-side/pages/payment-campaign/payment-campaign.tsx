@@ -45,6 +45,7 @@ export type PaymentMethodId =
 export type PaymentTabId = "bank_card" | "paypal" | "bank_transfer";
 
 export const PaymentCampaign = () => {
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -53,6 +54,7 @@ export const PaymentCampaign = () => {
   );
   const [tab, setTab] = React.useState<PaymentTabId>("bank_card");
   const [modalCompleted, setModalCompleted] = React.useState(false);
+  const [isPaymentSubmitting, setIsPaymentSubmitting] = React.useState(false);
   const [selectedIdPayment, setSelectedIdPayment] =
       React.useState<PaymentMethodId>("bank_card");
   const [currency, setCurrency] = React.useState<
@@ -125,7 +127,11 @@ export const PaymentCampaign = () => {
   );
 
   const onSent = async (values: PaymentCampaignFormValues) => {
+    if (isPaymentSubmitting) return;
+
     try {
+      setIsPaymentSubmitting(true);
+
       let base: Record<string, any>;
 
       if (effectiveDraftId) {
@@ -195,8 +201,6 @@ export const PaymentCampaign = () => {
         paymentDetails,
       };
 
-      console.log("PAYMENT CAMPAIGN PAYLOAD", payload);
-
       await postCampaign(payload);
 
       if (effectiveDraftId) {
@@ -209,6 +213,8 @@ export const PaymentCampaign = () => {
     } catch (e) {
       console.error(e);
       toast.error("Failed to save campaign");
+    } finally {
+      setIsPaymentSubmitting(false);
     }
   };
 
@@ -274,6 +280,7 @@ export const PaymentCampaign = () => {
                         <CurrentConfirmation
                             currency={currency ? [currency] : []}
                             referenceNumber={referenceNumber}
+                            isSubmitting={isPaymentSubmitting}
                         />
                     )}
                   </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import edit from "@/assets/icons/edit.svg";
-import proview from "@/assets/icons/Vector (15).svg";
-import liveview from "@/assets/icons/Vector (16).svg";
+import liveview from "@/assets/icons/Vector (15).svg";
+import proview from "@/assets/icons/Vector (16).svg";
 import styles from "./view-change.module.scss";
 import type { StrategyViewMode } from "@/features/client-side/campaign-tables/model/use-campaign-strategy-view-params";
 

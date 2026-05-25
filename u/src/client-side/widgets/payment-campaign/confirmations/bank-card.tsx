@@ -7,13 +7,15 @@ import React from "react";
 import {
   useCampaignBuilderStore
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
 
 interface Props {
   referenceNumber: string;
+  isSubmitting?: boolean;
 }
 
 
-export const BankCard: React.FC<Props> = ({referenceNumber}) => {
+export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting}) => {
   const { totalPrice } = useCampaignBuilderStore();
   const referenceId = "P935872";
   console.log(totalPrice);
@@ -31,8 +33,16 @@ export const BankCard: React.FC<Props> = ({referenceNumber}) => {
       <div className="base-confirmations">
         <div className='base-confirmations__header'>
           <h2>Payment confirmation by Bank Card</h2>
-          <button type={'submit'} className='base-confirmations__button' onClick={() => {}}>
-            Confirm payment sent
+          <button
+              type="submit"
+              className="base-confirmations__button"
+              disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+                <CircleLoader/>
+            ) : (
+                "Confirm payment sent"
+            )}
           </button>
         </div>
 
