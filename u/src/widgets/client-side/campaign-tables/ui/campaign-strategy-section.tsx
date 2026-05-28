@@ -23,6 +23,7 @@ type Props = {
     totalPrice: number;
     actions?: StrategyTableActions;
     insights?: boolean;
+    currency?: string;
 };
 export const CampaignStrategySection: React.FC<Props> = ({
                                                              title,
@@ -33,6 +34,7 @@ export const CampaignStrategySection: React.FC<Props> = ({
                                                              totalPrice,
                                                              actions,
                                                              insights = false,
+                                                             currency
                                                          }) => {
     const rows = React.useMemo<StrategyRow[]>(
         () =>
@@ -76,6 +78,7 @@ export const CampaignStrategySection: React.FC<Props> = ({
                 isFetching={false}
                 emptyText="No influencers found"
                 optionIndex={0}
+                currency={currency}
                 highlightedRowKeys={mode === "edit" ? actions?.recentlyAddedAccountKeys ?? [] : []}
                 deletingRowKey={mode === "edit" ? actions?.deletingAccountKey ?? null : null}
                 getRowKey={(row) => row.accountKey}

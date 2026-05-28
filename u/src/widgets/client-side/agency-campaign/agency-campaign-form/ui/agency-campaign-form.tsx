@@ -48,7 +48,8 @@ const renderField = (field: AgencyFormField) => {
                 label={field.label}
                 placeholder={field.placeholder}
                 required={field.required}
-                isbespoke
+                className="agency-text-area"
+                isbespoke={field.isBespoke}
             />
         );
     }

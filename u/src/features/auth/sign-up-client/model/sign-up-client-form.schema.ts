@@ -13,11 +13,10 @@ export const signUpClientFormSchema = z.object({
       .min(1, 'First name is required')
       .max(50, "First name must be 50 characters or less"),
 
-  lastName: z
-      .string()
-      .trim()
-      .min(1, 'Last name is required')
-      .max(50, 'Last name must be 50 characters or less'),
+    lastName: z
+        .string()
+        .trim()
+        .max(50, 'Last name must be 50 characters or less'),
 
   companyType: z
       .string()

@@ -28,6 +28,7 @@ interface TableProps<TData> {
     highlightedRowKeys?: string[];
     deletingRowKey?: string | null;
     group: StrategyGroup;
+    currency?: string;
 }
 
 export function TableCampaign<TData>({
@@ -45,6 +46,7 @@ export function TableCampaign<TData>({
                                          deletingRowKey = null,
                                          canManageAccounts,
                                          group,
+                                         currency
                                      }: TableProps<TData>) {
     "use no memo";
     const [searchParams] = useSearchParams();
@@ -150,7 +152,7 @@ export function TableCampaign<TData>({
                                                 Add influencer
                                             </Link>
                                         ) : (
-                                            <span>Price: {totalPrice}€</span>
+                                            <span>Price: {totalPrice}{currency ?? "€"}</span>
                                         ))}
 
                                     {index === 1 && group !== 'press' ? <span>{totalFollowers}</span> : null}

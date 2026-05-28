@@ -1,15 +1,31 @@
 .base-confirmations {
   width: 100%;
+  min-width: 0;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  img {
+    flex-shrink: 0;
+  }
+
   &__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+    min-width: 0;
 
     h2 {
       font-weight: 400;
-      font-size: 20px;
-      line-height: 100%;
+      font-style: normal;
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 120%;
       margin: 0;
     }
 
@@ -17,17 +33,6 @@
       align-items: flex-start;
       flex-direction: column;
       gap: 12px;
-
-      h2 {
-        font-size: 18px;
-        line-height: 120%;
-      }
-    }
-
-    @media screen and (max-width: 380px) {
-      h2 {
-        font-size: 16px;
-      }
     }
   }
 
@@ -41,102 +46,90 @@
     max-width: 185px;
     min-width: 145px;
     width: auto;
-    height: 43px;
+    min-height: 43px;
+    height: auto;
 
     border-radius: 24px;
+    border: none;
     background: #202934;
     color: white;
 
-    font-size: 13px;
+    font-size: clamp(12px, 1.3vw, 13px);
     line-height: 100%;
     white-space: nowrap;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.75;
+    }
 
     @media screen and (max-width: 600px) {
       width: 100%;
       max-width: 100%;
-    }
-
-    @media screen and (max-width: 380px) {
-      height: 40px;
-      padding: 10px 16px;
-      font-size: 12px;
+      min-width: 0;
     }
   }
-
-
 
   &__content_paypal,
-  &__content_bankcard {
-
-    flex: 1 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-
-    &__flex {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-  }
+  &__content_bankcard,
   &__content_banktransfer {
+    flex: 0 0 300px;
+    max-width: 300px;
+    min-width: 220px;
+
     display: flex;
     flex-direction: column;
-    flex: 0 0 auto;
     gap: 24px;
-
-
 
     &__flex {
       display: flex;
       align-items: center;
       gap: 8px;
+      min-width: 0;
 
+      p {
+        min-width: 0;
+        color: #202934;
+        font-size: 15px;
+        line-height: 140%;
+        overflow-wrap: anywhere;
+      }
     }
-
   }
+
   &__content {
     display: flex;
     gap: 16px;
     padding: 24px;
     margin-top: 16px;
     width: 100%;
+    min-width: 0;
+
     border: 1px solid rgba(185, 208, 255, 1);
     border-radius: 16px;
-
+    background-color: white;
 
     &--paypal,
-    &--bankcard {
-
-      background-color: white;
-      display: flex;
-      gap: 16px;
-      padding: 24px;
-      margin-top: 16px;
-      width: 100%;
-      border: 1px solid rgba(185, 208, 255, 1);
-      border-radius: 16px;
-
-      @media screen and (max-width: 900px) {
-        flex-direction: column;
-      }
-    }
-
-    &--bankcard{
-      gap: 48px ;
-    }
+    &--bankcard,
     &--banktransfer {
       display: flex;
+      align-items: flex-start;
       gap: 48px;
-      padding: 24px;
+
+      padding: 16px;
       margin-top: 16px;
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
+
       border: 1px solid rgba(185, 208, 255, 1);
       border-radius: 16px;
-
       background-color: white;
+
       @media screen and (max-width: 900px) {
         flex-direction: column;
+        gap: 24px;
       }
     }
 
@@ -145,19 +138,60 @@
       flex-direction: column;
       gap: 24px;
       width: 100%;
+      min-width: 0;
 
       &__box {
         padding: 16px;
         width: 100%;
-        gap: 12px;
+        min-width: 0;
         background: rgba(185, 208, 255, 0.15);
         border-radius: 16px;
       }
     }
 
+    &__row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+
+      color: #202934;
+      font-size: 16px;
+      line-height: 140%;
+
+      .strong-row-field {
+        color: #030922;
+        font-size: inherit;
+        font-style: normal;
+        font-weight: 500;
+        line-height: inherit;
+        overflow-wrap: anywhere;
+      }
+
+      &__top {
+        margin-top: 16px;
+      }
+    }
+
+    &__border {
+      width: fit-content;
+      max-width: 100%;
+      padding: 8px 24px;
+
+      border: 1px solid rgba(185, 208, 255, 1);
+      border-radius: 8px;
+
+      overflow-wrap: anywhere;
+    }
+
+    /**
+     * Старые блоки оставлены, если где-то еще используются.
+     * Для BankCard лучше использовать __steps.
+     */
     &__information {
-      padding: 9px 0px;
+      padding: 9px 0;
       width: 100%;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 50.5px;
@@ -167,8 +201,8 @@
     &__information-bankcard {
       padding: 16px;
       display: flex;
-      height: 100%;
       width: 100%;
+      min-width: 0;
       gap: 12px;
       background: rgba(185, 208, 255, 0.15);
       border-radius: 16px;
@@ -183,6 +217,8 @@
 
     &__information-transfer {
       width: 100%;
+      min-width: 0;
+
       &__flex {
         margin-top: 8px;
         display: flex;
@@ -190,122 +226,345 @@
         gap: 63px;
       }
     }
-
-    &__row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      .strong-row-field{
-        color: #030922;
-        font-size: 16px;
-        font-style: normal;
-        font-weight: 500;
-        line-height: normal;
-      }
-      &__top {
-        margin-top: 16px;
-      }
-    }
-
-    &__border {
-      width: fit-content;
-      padding: 8px 24px;
-      border: 1px solid rgba(185, 208, 255, 1);
-      border-radius: 8px;
-    }
-  }
-
-  &__column-counts {
-    width: fit-content;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-
-  &__stick {
-    width: 2px;
-    height: 24px;
-    background-color: rgba(185, 208, 255, 1);
   }
 
   &__count {
     display: flex;
     align-items: center;
     justify-content: center;
+
     width: 40px;
     height: 40px;
+    flex: 0 0 40px;
+
     border-radius: 50%;
-    border: 1px solid rgba(185, 208, 255, 1);
+    border: none;
     background: rgba(185, 208, 255, 0.15);
+
+    color: #030922;
     font-weight: 400;
-    font-style: Regular;
+    font-style: normal;
     font-size: 20px;
-    leading-trim: NONE;
     line-height: 100%;
-    letter-spacing: 0%;
     text-align: center;
-    vertical-align: middle;
+
+    cursor: default;
 
     &.white {
-      background-color: rgba(255, 255, 255, 1);
+      background-color: white;
+      border: 1px solid rgba(185, 208, 255, 1);
     }
 
+    &:is(button) {
+      cursor: pointer;
+    }
 
+    img {
+      max-width: 20px;
+      max-height: 20px;
+      object-fit: contain;
+    }
+  }
+
+  /**
+   * Новый блок для BankCard.
+   * Общая ширина может быть 540px — элементы не съезжают.
+   */
+  &__steps {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 540px;
+    min-width: 0;
+
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(185, 208, 255, 0.15);
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__step {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: 12px;
+
+    position: relative;
+    min-height: 72px;
+
+    &:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: 0;
+      width: 2px;
+      background: rgba(185, 208, 255, 1);
+    }
+  }
+
+  &__step-number {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 50%;
+    border: 1px solid rgba(185, 208, 255, 1);
+    background: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #030922;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+
+    position: relative;
+    z-index: 1;
+  }
+
+  &__step-text {
+    padding-top: 7px;
+    min-width: 0;
+
+    color: #202934;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 140%;
+
+    overflow-wrap: anywhere;
+  }
+
+  /**
+   * Новый блок для PayPal / BankTransfer.
+   */
+  &__info-cards {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 540px;
+    min-width: 0;
+
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(185, 208, 255, 0.15);
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  &__info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+
+    border-radius: 50%;
+    border: 1px solid rgba(185, 208, 255, 1);
+    background: white;
+
+    img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+  }
+
+  &__info-text {
+    padding-top: 4px;
+    min-width: 0;
+
+    color: #202934;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 140%;
+
+    overflow-wrap: anywhere;
   }
 
   @media screen and (max-width: 900px) {
-    h2 {
-      font-size: 18px;
-    }
+    &__content_paypal,
+    &__content_bankcard,
+    &__content_banktransfer {
+      flex: none;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      gap: 18px;
 
-    &__count {
-      font-size: 18px;
-      width: 36px;
-      height: 36px;
-    }
-
-    &__column-counts {
-      font-size: 14px;
+      &__flex {
+        p {
+          font-size: 15px;
+        }
+      }
     }
 
     &__content {
-      font-size: 15px;
+      &--paypal,
+      &--bankcard,
+      &--banktransfer {
+        gap: 24px;
+      }
     }
 
-    &__border {
+    &__count {
+      width: 36px;
+      height: 36px;
+      flex-basis: 36px;
+      font-size: 18px;
+
+      img {
+        max-width: 18px;
+        max-height: 18px;
+      }
+    }
+
+    &__steps,
+    &__info-cards {
+      max-width: 100%;
+    }
+
+    &__step {
+      grid-template-columns: 36px minmax(0, 1fr);
+      column-gap: 10px;
+      min-height: 64px;
+
+      &:not(:last-child)::after {
+        left: 17px;
+        top: 36px;
+      }
+    }
+
+    &__step-number {
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+    }
+
+    &__step-text,
+    &__info-text {
       font-size: 14px;
+    }
+
+    &__info-icon {
+      width: 36px;
+      height: 36px;
+      flex-basis: 36px;
+
+      img {
+        width: 18px;
+        height: 18px;
+      }
     }
   }
 
   @media screen and (max-width: 500px) {
-    h2 {
-      font-size: 16px;
+    &__content {
+      &--paypal,
+      &--bankcard,
+      &--banktransfer {
+        padding: 12px;
+        border-radius: 12px;
+        gap: 18px;
+      }
+    }
+
+    &__content_paypal,
+    &__content_bankcard,
+    &__content_banktransfer {
+      gap: 14px;
+
+      &__flex {
+        p {
+          font-size: 13px;
+        }
+      }
     }
 
     &__count {
-      font-size: 16px;
       width: 32px;
       height: 32px;
+      flex-basis: 32px;
+      font-size: 16px;
+
+      img {
+        max-width: 16px;
+        max-height: 16px;
+      }
     }
 
-    &__column-counts {
-      font-size: 13px;
+    &__steps,
+    &__info-cards {
+      padding: 12px;
+      border-radius: 12px;
     }
 
-    &__content {
-      font-size: 14px;
+    &__step {
+      grid-template-columns: 32px minmax(0, 1fr);
+      column-gap: 8px;
+      min-height: 58px;
+
+      &:not(:last-child)::after {
+        left: 15px;
+        top: 32px;
+      }
     }
 
-    &__border {
-      font-size: 13px;
+    &__step-number {
+      width: 32px;
+      height: 32px;
+      font-size: 15px;
+    }
+
+    &__step-text {
+      padding-top: 4px;
+      font-size: 12px;
+      line-height: 135%;
+    }
+
+    &__info-cards {
+      gap: 12px;
+    }
+
+    &__info-card {
+      gap: 8px;
+    }
+
+    &__info-icon {
+      width: 32px;
+      height: 32px;
+      flex-basis: 32px;
+
+      img {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    &__info-text {
+      padding-top: 3px;
+      font-size: 12px;
+      line-height: 135%;
     }
   }
 }
-.strong-row-field{
+
+.strong-row-field {
   color: #030922;
-  font-size: 16px;
+  font-size: inherit;
   font-style: normal;
   font-weight: 500;
-  line-height: normal;
+  line-height: inherit;
+  overflow-wrap: anywhere;
 }

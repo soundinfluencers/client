@@ -225,6 +225,11 @@ background-color: #fff;
     }
 
     .BarSection-info {
+      &__eye-row{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
       p {
         font-weight: 400;
         font-size: 16px;

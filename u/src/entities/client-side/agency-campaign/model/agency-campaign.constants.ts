@@ -167,6 +167,7 @@ export const AGENCY_CAMPAIGN_FORM_CONFIGS: AgencyCampaignFormConfig[] = [
                 placeholder: "Enter brief here",
                 required: true,
                 type: "textarea",
+                isBespoke: true,
             },
         ],
     },

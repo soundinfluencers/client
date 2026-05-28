@@ -35,6 +35,7 @@ type Props = {
     totalPrice: number;
     offerPrice?: number;
     defaultCampaignName?: string;
+    currency?: string
     onSubmitPayload: (
         payload: BuiltCampaignPostContentPayload,
     ) => void | Promise<void>;
@@ -54,7 +55,7 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                                                              onSubmitPayload,
                                                              offerPrice,
                                                              defaultBlocks,
-                                                             defaultCampaignContent,
+                                                             defaultCampaignContent,currency
                                                          }) => {
     const navigate = useNavigate();
     const vm = useCampaignPostContent({
@@ -398,6 +399,7 @@ export const CampaignPostContentPage: React.FC<Props> = ({
 
                     <CampaignPostContentSelection
                         accounts={accounts}
+                        currency={currency}
                         offerAccounts={mode === "add-influencer" ? [] : offerAccounts}
                         manualAccounts={manualAccounts}
                         offerName={mode === "add-influencer" ? undefined : offerName}

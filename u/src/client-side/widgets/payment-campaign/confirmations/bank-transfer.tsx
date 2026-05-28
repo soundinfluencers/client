@@ -8,30 +8,38 @@ import hash from "@/assets/payments-icons/clarity_hashtag-solid.svg";
 import type { CurrencyType } from "@/types/client/form-clients/payment-campaign-inputs";
 import "./styles/_base-confirmations.scss";
 import { toast } from "react-toastify";
-import {
-  useCampaignBuilderStore
-} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
-import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
+import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import { CircleLoader } from "@/features/auth/sign-up-client/ui/circle-loader";
 
 interface Props {
   currency: CurrencyType[];
   referenceNumber: string;
   isSubmitting?: boolean;
+  currencySymbol?: string
+
 }
 
-export const BankTransfer: React.FC<Props> = ({ currency,referenceNumber,isSubmitting }) => {
+export const BankTransfer: React.FC<Props> = ({
+                                                currency,
+                                                referenceNumber,
+                                                isSubmitting,
+                                                currencySymbol,
+
+                                              }) => {
   const { totalPrice } = useCampaignBuilderStore();
-  console.log(totalPrice);
+
   const currentCurrency = currency[0];
+
   const accountNumber = "17299128";
-  const IBAN = 'GB91REVO00997094280983'
-  const BIC = 'REVOGB21'
+  const iban = "GB91REVO00997094280983";
+  const bic = "REVOGB21";
   const sortCode = "04-00-75";
-  const referenceId = "BT935872";
-  const BICCINT = 'CHASDEFX'
+  const intermediaryBic = "CHASDEFX";
+
   const isUk = currentCurrency === "bank_transfer_uk";
   const isEu = currentCurrency === "bank_transfer_eu";
   const isInternational = currentCurrency === "bank_transfer_international";
+
   const handleCopy = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -44,199 +52,236 @@ export const BankTransfer: React.FC<Props> = ({ currency,referenceNumber,isSubmi
 
   return (
       <div className="base-confirmations">
-
-        <div className='base-confirmations__header'>
+        <div className="base-confirmations__header">
           <h2>
             {isUk && "Payment confirmation by Bank Transfer UK"}
             {isEu && "Payment confirmation by Bank Transfer EU"}
-            {isInternational && "Payment confirmation by Bank Transfer International"}
+            {isInternational &&
+                "Payment confirmation by Bank Transfer International"}
           </h2>
-          <button type={'submit'} className='base-confirmations__button' onClick={() => {}}>
-            {isSubmitting ? (
-                <CircleLoader/>
-            ) : (
-                "Confirm payment sent"
-            )}
+
+          <button
+              type="submit"
+              className="base-confirmations__button"
+              disabled={isSubmitting}
+          >
+            {isSubmitting ? <CircleLoader /> : "Confirm payment sent"}
           </button>
         </div>
+
         <div className="base-confirmations__content--banktransfer">
-          {isUk && <div className="base-confirmations__content_banktransfer">
-            <div className="base-confirmations__content_banktransfer__flex">
-              <div className="base-confirmations__count">
-                <img src={euro} alt="Amount" />
-              </div>
-              <p>Total DUE: {totalPrice}€</p>
-            </div>
-
-            <div className="base-confirmations__content_banktransfer__flex">
-              <button
-                  type="button"
-                  className="base-confirmations__count"
-                  onClick={() => handleCopy(accountNumber, "Account Number")}
-              >
-                <img src={copy} alt="Copy account number" />
-              </button>
-              <p>Account Number: {accountNumber}</p>
-            </div>
-
-            <div className="base-confirmations__content_banktransfer__flex">
-              <button
-                  type="button"
-                  className="base-confirmations__count"
-                  onClick={() => handleCopy(sortCode, "Sort Code")}
-              >
-                <img src={copy} alt="Copy sort code" />
-              </button>
-              <p>Sort Code: {sortCode}</p>
-            </div>
-
-            <div className="base-confirmations__content_banktransfer__flex">
-              <button
-                  type="button"
-                  className="base-confirmations__count"
-                  onClick={() => handleCopy(referenceId, "Reference ID")}
-              >
-                <img src={copy} alt="Copy reference ID" />
-              </button>
-              <p>Reference ID: {referenceNumber}</p>
-            </div>
-          </div>}
-          {isEu && <div className="base-confirmations__content_banktransfer">
-            <div className="base-confirmations__content_banktransfer__flex">
-              <div className="base-confirmations__count">
-                <img src={euro} alt="Amount" />
-              </div>
-              <p>Total DUE: {totalPrice}€</p>
-            </div>
-            <div className="base-confirmations__content_banktransfer__flex">
-              <button
-                  type="button"
-                  className="base-confirmations__count"
-                  onClick={() => handleCopy(IBAN, "IBAN")}
-              >
-                <img src={copy} alt="Copy account number" />
-              </button>
-              IBAN
-              <p className='strong-row-field'>GB91REVO00997094280983</p>
-            </div>
-            <div className="base-confirmations__content_banktransfer__flex">
-              <button
-                  type="button"
-                  className="base-confirmations__count"
-                  onClick={() => handleCopy(BIC, "BIC")}
-              >
-                <img src={copy} alt="Copy account number" />
-              </button>
-              BIC:
-              <p className='strong-row-field'>{BIC}</p>
-            </div>
-
-            <div className="base-confirmations__content_banktransfer__flex">
-              <button
-                  type="button"
-                  className="base-confirmations__count"
-                  onClick={() => handleCopy(referenceId, "Reference ID")}
-              >
-                <img src={copy} alt="Copy reference ID" />
-              </button>
-              <p className='strong-row-field'>Reference ID: {referenceNumber}</p>
-            </div>
-          </div>}
-          {isInternational &&
+          {isUk && (
               <div className="base-confirmations__content_banktransfer">
                 <div className="base-confirmations__content_banktransfer__flex">
                   <div className="base-confirmations__count">
                     <img src={euro} alt="Amount" />
                   </div>
-                  <p>Total DUE: {totalPrice}€</p>
+                  <p>Total DUE: {totalPrice}{currencySymbol ?? "€"}</p>
                 </div>
+
                 <div className="base-confirmations__content_banktransfer__flex">
                   <button
                       type="button"
                       className="base-confirmations__count"
-                      onClick={() => handleCopy(IBAN, "IBAN")}
+                      onClick={() => handleCopy(accountNumber, "Account Number")}
                   >
                     <img src={copy} alt="Copy account number" />
                   </button>
-                  IBAN
-                  <p className='strong-row-field'>GB91REVO00997094280983</p>
-                </div>
-                <div className="base-confirmations__content_banktransfer__flex">
-                  <button
-                      type="button"
-                      className="base-confirmations__count"
-                      onClick={() => handleCopy(BIC, "BIC")}
-                  >
-                    <img src={copy} alt="Copy account number" />
-                  </button>
-                  BIC:
-                  <p className='strong-row-field'>{BIC}</p>
+                  <p>
+                    Account Number:{" "}
+                    <span className="strong-row-field">{accountNumber}</span>
+                  </p>
                 </div>
 
                 <div className="base-confirmations__content_banktransfer__flex">
                   <button
                       type="button"
                       className="base-confirmations__count"
-                      onClick={() => handleCopy(referenceId, "Reference ID")}
+                      onClick={() => handleCopy(sortCode, "Sort Code")}
                   >
-                    <img src={copy} alt="Copy reference ID" />
+                    <img src={copy} alt="Copy sort code" />
                   </button>
-                  <p className='strong-row-field'>Reference ID: {referenceNumber}</p>
+                  <p>
+                    Sort Code: <span className="strong-row-field">{sortCode}</span>
+                  </p>
                 </div>
+
                 <div className="base-confirmations__content_banktransfer__flex">
                   <button
                       type="button"
                       className="base-confirmations__count"
-                      onClick={() => handleCopy(BICCINT, "CHASDEFX")}
+                      onClick={() => handleCopy(referenceNumber, "Reference ID")}
                   >
                     <img src={copy} alt="Copy reference ID" />
                   </button>
-                  <p className='strong-row-field'>Intermediary BIC: {BICCINT}</p>
+                  <p>
+                    Reference ID:{" "}
+                    <span className="strong-row-field">{referenceNumber}</span>
+                  </p>
                 </div>
-              </div>}
-          <div className="base-confirmations__content__information-transfer">
-            <div className="base-confirmations__content__transfer_flex">
-              <div className="base-confirmations__content__transfer_flex__box">
-                <div className="base-confirmations__content__row">
-                  <div className="base-confirmations__count white">
-                    <img src={beneficiary} alt="" />
+              </div>
+          )}
+
+          {isEu && (
+              <div className="base-confirmations__content_banktransfer">
+                <div className="base-confirmations__content_banktransfer__flex">
+                  <div className="base-confirmations__count">
+                    <img src={euro} alt="Amount" />
                   </div>
-                  <p>Beneficiary: Techno TV LTD</p>
+                  <p>Total DUE: {totalPrice}{currencySymbol ?? "€"}</p>
                 </div>
-                <p className="base-confirmations__content__row__top">
-                  Beneficiary address: 124 City Road, EC1V 2NX, London, United Kingdom
-                </p>
+
+                <div className="base-confirmations__content_banktransfer__flex">
+                  <button
+                      type="button"
+                      className="base-confirmations__count"
+                      onClick={() => handleCopy(iban, "IBAN")}
+                  >
+                    <img src={copy} alt="Copy IBAN" />
+                  </button>
+                  <p>
+                    IBAN: <span className="strong-row-field">{iban}</span>
+                  </p>
+                </div>
+
+                <div className="base-confirmations__content_banktransfer__flex">
+                  <button
+                      type="button"
+                      className="base-confirmations__count"
+                      onClick={() => handleCopy(bic, "BIC")}
+                  >
+                    <img src={copy} alt="Copy BIC" />
+                  </button>
+                  <p>
+                    BIC: <span className="strong-row-field">{bic}</span>
+                  </p>
+                </div>
+
+                <div className="base-confirmations__content_banktransfer__flex">
+                  <button
+                      type="button"
+                      className="base-confirmations__count"
+                      onClick={() => handleCopy(referenceNumber, "Reference ID")}
+                  >
+                    <img src={copy} alt="Copy reference ID" />
+                  </button>
+                  <p>
+                    Reference ID:{" "}
+                    <span className="strong-row-field">{referenceNumber}</span>
+                  </p>
+                </div>
+              </div>
+          )}
+
+          {isInternational && (
+              <div className="base-confirmations__content_banktransfer">
+                <div className="base-confirmations__content_banktransfer__flex">
+                  <div className="base-confirmations__count">
+                    <img src={euro} alt="Amount" />
+                  </div>
+                  <p>Total DUE: {totalPrice}{currencySymbol ?? "€"}</p>
+                </div>
+
+                <div className="base-confirmations__content_banktransfer__flex">
+                  <button
+                      type="button"
+                      className="base-confirmations__count"
+                      onClick={() => handleCopy(iban, "IBAN")}
+                  >
+                    <img src={copy} alt="Copy IBAN" />
+                  </button>
+                  <p>
+                    IBAN: <span className="strong-row-field">{iban}</span>
+                  </p>
+                </div>
+
+                <div className="base-confirmations__content_banktransfer__flex">
+                  <button
+                      type="button"
+                      className="base-confirmations__count"
+                      onClick={() => handleCopy(bic, "BIC")}
+                  >
+                    <img src={copy} alt="Copy BIC" />
+                  </button>
+                  <p>
+                    BIC: <span className="strong-row-field">{bic}</span>
+                  </p>
+                </div>
+
+                <div className="base-confirmations__content_banktransfer__flex">
+                  <button
+                      type="button"
+                      className="base-confirmations__count"
+                      onClick={() => handleCopy(referenceNumber, "Reference ID")}
+                  >
+                    <img src={copy} alt="Copy reference ID" />
+                  </button>
+                  <p>
+                    Reference ID:{" "}
+                    <span className="strong-row-field">{referenceNumber}</span>
+                  </p>
+                </div>
+
+                <div className="base-confirmations__content_banktransfer__flex">
+                  <button
+                      type="button"
+                      className="base-confirmations__count"
+                      onClick={() => handleCopy(intermediaryBic, "Intermediary BIC")}
+                  >
+                    <img src={copy} alt="Copy intermediary BIC" />
+                  </button>
+                  <p>
+                    Intermediary BIC:{" "}
+                    <span className="strong-row-field">{intermediaryBic}</span>
+                  </p>
+                </div>
+              </div>
+          )}
+
+          <div className="base-confirmations__info-cards">
+            <div className="base-confirmations__info-card">
+              <div className="base-confirmations__info-icon">
+                <img src={beneficiary} alt="" />
               </div>
 
-              <div className="base-confirmations__content__transfer_flex__box">
-                <div className="base-confirmations__content__row">
-                  <div className="base-confirmations__count white">
-                    <img src={method} alt="" />
-                  </div>
-                  <p>Payment method: Revolut Ltd</p>
-                </div>
-                <p className="base-confirmations__content__row__top">
-                  Bank/Payment method address: <span className='strong-row-field'>7 Westferry Circus, E14 4HD, London, United Kingdom</span>
-                </p>
+              <div className="base-confirmations__info-text">
+                Beneficiary: <span className="strong-row-field">Techno TV LTD</span>
+                <br />
+                Beneficiary address: 124 City Road, EC1V 2NX, London, United
+                Kingdom
+              </div>
+            </div>
+
+            <div className="base-confirmations__info-card">
+              <div className="base-confirmations__info-icon">
+                <img src={method} alt="" />
               </div>
 
-              {isInternational ?
-                  <div className="base-confirmations__content__transfer_flex__box">
-                    <div className="base-confirmations__content__row">
-                      <div className="base-confirmations__count white">
-                        <img src={hash} alt="" />
-                      </div>
-                      <p>If possible, send the payment as "Friends & Family"</p>
-                    </div>
-                  </div> :
-                  <div className="base-confirmations__content__transfer_flex__box">
-                    <div className="base-confirmations__content__row">
-                      <div className="base-confirmations__count white">
-                        <img src={hash} alt="" />
-                      </div>
-                      <p>Add this payment reference number: {referenceNumber}</p>
-                    </div>
-                  </div>}
+              <div className="base-confirmations__info-text">
+                Payment method: <span className="strong-row-field">Revolut Ltd</span>
+                <br />
+                Bank/Payment method address:{" "}
+                <span className="strong-row-field">
+                7 Westferry Circus, E14 4HD, London, United Kingdom
+              </span>
+              </div>
+            </div>
+
+            <div className="base-confirmations__info-card">
+              <div className="base-confirmations__info-icon">
+                <img src={hash} alt="" />
+              </div>
+
+              <div className="base-confirmations__info-text">
+                {isInternational ? (
+                    <>If possible, send the payment as "Friends &amp; Family"</>
+                ) : (
+                    <>
+                      Add this payment reference number:{" "}
+                      <span className="strong-row-field">{referenceNumber}</span>
+                    </>
+                )}
+              </div>
             </div>
           </div>
         </div>

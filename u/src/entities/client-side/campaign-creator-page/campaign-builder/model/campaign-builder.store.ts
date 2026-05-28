@@ -22,6 +22,7 @@ const initialState = {
     blocksDraft: null,
     totalPrice: 0,
     selectedOfferPrice: 0,
+    selectedCurrency: "€",
 } satisfies Omit<CampaignBuilderStore, "actions">;
 
 export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
@@ -31,7 +32,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
 
             actions: {
                 setCampaignName: (value) => set({ campaignName: value }),
-
+                setSelectedCurrency: (value) => set({ selectedCurrency: value }),
                 setDraftMeta: ({ draftId, draftStep }) =>
                     set({
                         draftId,
@@ -222,6 +223,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                                        draftStep,
                                        campaignName,
                                        totalPrice = 0,
+                                       selectedCurrency = "€",
                                        selectedOfferId = null,
                                        selectedOfferAccountIds = [],
                                        selectedPromoCardIds,
@@ -232,6 +234,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                                    }) =>
                     set({
                         totalPrice,
+                        selectedCurrency,
                         draftId,
                         draftStep,
                         campaignName,
@@ -257,6 +260,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                 selectedOfferId: state.selectedOfferId,
                 selectedOfferName: state.selectedOfferName,
                 selectedOfferPrice: state.selectedOfferPrice,
+                selectedCurrency: state.selectedCurrency,
                 selectedOfferAccountIds: state.selectedOfferAccountIds,
                 selectedPromoCardIds: state.selectedPromoCardIds,
                 selectedAccounts: state.selectedAccounts,

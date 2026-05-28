@@ -18,7 +18,7 @@ export const getInitialPersonalDetails = (): TSignUpClientFormValues => {
 export const mapSignupClientToDto = (data: any): any => {
   return {
     firstName: data.firstName,
-    lastName: data.lastName,
+    lastName: data.lastName.trim() || undefined,
     company: data.company,
     companyType: data.companyType,
     instagramUsername: data.instagramUsername,
