@@ -66,6 +66,7 @@
 .offerSection{
   .offerHeader{
     display: flex;
+    align-items: center;
     justify-content: space-between;
     &__title{
       display: flex;
@@ -91,8 +92,15 @@
   }
   .offerBody{
     margin-top: 8px;
-
-    margin-left: 32px;
+    .groupSection{
+      .groupBody{
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 8px;
+        margin-left: 32px;
+      }
+    }
   }
 }
 .manualSections{
@@ -102,6 +110,9 @@
 
   .groupSection{
     .groupBody{
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
       margin-top: 8px;
       margin-left: 32px;
     }
@@ -195,6 +206,7 @@
   padding-top: 8px;
 
   h2 {
+    text-align: end;
     font-weight: 400;
     font-size: 20px;
     line-height: 100%;

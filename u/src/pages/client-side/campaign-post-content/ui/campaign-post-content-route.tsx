@@ -17,7 +17,6 @@ import {
     attachExistingContentToAccounts,
     buildProposalAccountsAfterSubmit
 } from "@/pages/client-side/campaign-post-content/model/build-proposal-accounts.ts";
-
 type GroupKey = "main" | "music" | "press";
 
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
@@ -63,7 +62,7 @@ export const CampaignPostContentRoute = () => {
     const campaignContent = useCampaignBuilderStore((s) => s.campaignContent);
     const totalPrice = useCampaignBuilderStore((s) => s.totalPrice);
     const offerPrice = useCampaignBuilderStore((s) => s.selectedOfferPrice);
-
+    const selectedCurrency = useCampaignBuilderStore((s) => s.selectedCurrency);
     const setCampaignContent = useCampaignBuilderStore((s) => s.actions.setCampaignContent);
     const syncSelectedAccountsContent = useCampaignBuilderStore(
         (s) => s.actions.syncSelectedAccountsContent,
@@ -191,6 +190,7 @@ export const CampaignPostContentRoute = () => {
                 offerPrice={isAddInfluencerMode ? 0 : offerPrice}
                 defaultCampaignName={campaignName}
                 defaultBlocks={blocksDraft ?? undefined}
+                currency={selectedCurrency}
                 onSubmitPayload={(payload) => {
                     if (isAddInfluencerMode) {
                         const mergedContent = [...proposalContent, ...payload.campaignContent];

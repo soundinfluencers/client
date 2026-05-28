@@ -6,7 +6,9 @@
   border-radius: 8px;
   border: 1px solid vars.$blue;
   overflow: hidden;
-
+  &.custom-client{
+    min-width: 1224px;
+  }
   @media screen and (max-width: 900px) {
     margin-bottom: 12px;
   }

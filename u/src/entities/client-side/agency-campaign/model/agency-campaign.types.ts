@@ -20,12 +20,14 @@ export type AgencyFormField = {
     placeholder: string;
     required?: boolean;
     type?: "text" | "textarea" | "budget";
+    isBespoke?: boolean;
 };
 
 export type AgencyCampaignFormConfig = {
     tabId: AgencyCampaignTabId;
     title: string;
     fields: AgencyFormField[];
+
 };
 
 export type AgencyCurrency = "EUR" | "USD" | "GBP";

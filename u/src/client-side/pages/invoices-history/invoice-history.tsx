@@ -55,7 +55,7 @@ export const InvoicesHistory = () => {
       </header>
 
       <div className="invoices-history__content">
-        <div className="invoices-history__scroll-container">
+        <div className="invoices-history__scroll-container custom-client">
           <InvoicesTable invoices={invoices} />
         </div>
       </div>

@@ -1,27 +1,37 @@
 import React from "react";
+import { useSearchParams } from "react-router-dom";
+
 import { Breadcrumbs, Container } from "@/components";
 import { ButtonMain, ButtonSecondary } from "@/shared/ui";
 import { Modal } from "@/shared/ui/modal-fix/Modal";
 import { NoData } from "@components/ui/no-array/no-data";
+import { DraftButton } from "@components/ui/draft-button/draft-button.tsx";
 
+import { postCampaignDraft } from "@/api/client/campaign/draft.api";
 
 import { useCampaignCreatorPage } from "../model/use-campaign-creator-page";
 import { useSaveCampaignCreatorDraft } from "../model/use-save-campaign-creator-draft";
 
-import { postCampaignDraft } from "@/api/client/campaign/draft.api";
-import {DraftButton} from "@components/ui/draft-button/draft-button.tsx";
-
-
-
 import styles from "./campaign-creator-page.module.scss";
-import {PlatformScroll} from "@/features/client-side/campaign-creator-page/select-platform/ui/platform-scroll.tsx";
-import {GenreScroll} from "@/features/client-side/campaign-creator-page/select-genre/ui/genre-scroll.tsx";
+
+import { PlatformScroll } from "@/features/client-side/campaign-creator-page/select-platform/ui/platform-scroll.tsx";
+import { GenreScroll } from "@/features/client-side/campaign-creator-page/select-genre/ui/genre-scroll.tsx";
+
 import {
-    CampaignOffersSlider
+    CampaignOffersSlider,
 } from "@/widgets/client-side/campaign-creator-page/campaign-offers-slider/ui/campaign-offers-slider.tsx";
-import {BuildCampaign} from "@/widgets/client-side/campaign-creator-page/build-campaign/ui/build-campaign.tsx";
-import {FooterSummary} from "@/widgets/client-side/campaign-creator-page/footer-summary/footer-summary.tsx";
-import {useSearchParams} from "react-router-dom";
+
+import {
+    BuildCampaign,
+} from "@/widgets/client-side/campaign-creator-page/build-campaign/ui/build-campaign.tsx";
+
+import {
+    FooterSummary,
+} from "@/widgets/client-side/campaign-creator-page/footer-summary/footer-summary.tsx";
+
+import {
+    useCampaignProceedSummary,
+} from "@/widgets/client-side/campaign-creator-page/build-campaign/model/use-campaign-proceed-summary.tsx";
 
 export const CampaignCreatorPage: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -31,6 +41,20 @@ export const CampaignCreatorPage: React.FC = () => {
         searchParams.has("option");
 
     const optionIndex = Number(searchParams.get("option") ?? 0);
+
+    const {
+        selectedCurrency,
+        selectedOfferId,
+        selectedPromoCardIds,
+        totalPrice,
+        canProceed,
+        handleProceed,
+    } = useCampaignProceedSummary({
+        mode: isAddInfluencerMode ? "add-influencer" : "create",
+        optionIndex: isAddInfluencerMode ? optionIndex : null,
+    });
+
+    const currencySymbol = selectedCurrency?.key ?? "€";
 
     const {
         selectedPlatformKey,
@@ -94,9 +118,34 @@ export const CampaignCreatorPage: React.FC = () => {
 
             <BuildCampaign />
 
+            <div className={styles.proceed}>
+                <div className={styles.proceedTotal}>
+
+                    <p>
+                        Total:{" "}
+                        <span>
+                            {totalPrice}
+                            {currencySymbol}
+                        </span>
+                    </p>
+                </div>
+
+                <ButtonMain
+                    className={styles.btn}
+                    text={isAddInfluencerMode ? "Add account" : "Proceed"}
+                    onClick={handleProceed}
+                    isDisabled={!canProceed}
+                />
+            </div>
+
             <FooterSummary
-                mode={isAddInfluencerMode ? "add-influencer" : "create"}
-                optionIndex={isAddInfluencerMode ? optionIndex : null}
+                isAddInfluencerMode={isAddInfluencerMode}
+                selectedCurrency={currencySymbol}
+                selectedOfferId={selectedOfferId}
+                selectedPromoCardIds={selectedPromoCardIds}
+                totalPrice={totalPrice}
+                canProceed={canProceed}
+                onProceed={handleProceed}
             />
 
             {!isAddInfluencerMode && draft.isOpen && (
@@ -117,6 +166,7 @@ export const CampaignCreatorPage: React.FC = () => {
                                 text="Cancel"
                                 onClick={draft.close}
                             />
+
                             <ButtonMain
                                 className={styles.btn}
                                 text="Save"

@@ -3,7 +3,7 @@ import { parsePhoneNumber } from "libphonenumber-js";
 
 export const personalDetailsSchema = z.object({
   firstName: z.string().trim().min(2, "Must be at least 2 characters").max(50),
-  lastName: z.string().trim().min(2, "Must be at least 2 characters").max(50),
+  lastName: z.string().trim().max(50, 'Last name must be 50 characters or less'),
   email: z.string().trim().email("Please enter a valid email"),
   phone: z.string().trim().superRefine((val, ctx) => {
     const v = val.trim();
