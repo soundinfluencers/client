@@ -68,6 +68,7 @@ export type CampaignBuilderState = {
     postContentDraft: Record<string, unknown> | null;
     blocksDraft: CampaignPostContentBlock[] | null;
     totalPrice: number;
+    selectedCurrency: string;
 };
 
 export type CampaignBuilderActions = {
@@ -112,6 +113,7 @@ export type CampaignBuilderActions = {
             profileType?: "creator" | "community";
         }>,
     ) => void;
+    setSelectedCurrency: (currency: string) => void;
     hydrateFromDraft: (payload: {
         draftId: string;
         draftStep: "addAccounts" | "addContent" | "strategyTable";

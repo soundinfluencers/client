@@ -14,11 +14,7 @@
     letter-spacing: 0%;
   }
   &__form-flex{
-    display: flex;
-    gap: 24px;
-    @media screen and (max-width: 900px) {
-      flex-direction: column;
-    }
+
   }
   &__form-flex-width{
     width: 100%;
@@ -67,6 +63,11 @@
   }
 
   &__form {
+    display: flex;
+    gap: 24px;
+    @media screen and (max-width: 900px) {
+      flex-direction: column;
+    }
     margin-top: 8px;
     width: 100%;
 

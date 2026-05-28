@@ -12,10 +12,11 @@ import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
 interface Props {
   referenceNumber: string;
   isSubmitting?: boolean;
+    currencySymbol?: string
 }
 
 
-export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting}) => {
+export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting,currencySymbol}) => {
   const { totalPrice } = useCampaignBuilderStore();
   const referenceId = "P935872";
   console.log(totalPrice);
@@ -52,7 +53,7 @@ export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting}) => {
               <div className="base-confirmations__count">
                 <img src={euro} alt="" />
               </div>
-              <p>Total DUE: {totalPrice}€</p>
+              <p>Total DUE: {totalPrice}{currencySymbol ?? "€"}</p>
             </div>
 
             <div className="base-confirmations__content_bankcard__flex">
@@ -74,50 +75,54 @@ export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting}) => {
             </div>
           </div>
 
-          <div className="base-confirmations__content__information-bankcard">
-            <div className="base-confirmations__column-counts">
-              <div className="base-confirmations__count white">1</div>
-              <div className="base-confirmations__stick"></div>
-              <div className="base-confirmations__count white">2</div>
-              <div className="base-confirmations__stick"></div>
-              <div className="base-confirmations__count white">3</div>
-              <div className="base-confirmations__stick"></div>
-              <div className="base-confirmations__count white">4</div>
-              <div className="base-confirmations__stick"></div>
-              <div className="base-confirmations__count white">5</div>
-              <div className="base-confirmations__stick"></div>
-              <div className="base-confirmations__count white">6</div>
-              <div className="base-confirmations__stick"></div>
-              <div className="base-confirmations__count white">7</div>
+          <div className="base-confirmations__steps">
+            <div className="base-confirmations__step">
+              <div className="base-confirmations__step-number">1</div>
+              <div className="base-confirmations__step-text">
+                Go On:{" "}
+                <span className="strong-row-field">
+        https://revolut.me/technotvltd
+      </span>
+              </div>
             </div>
 
-            <div className="base-confirmations__content__information">
-              <div className="base-confirmations__content__row">
-                Go On:
-               <p className='strong-row-field'>https://revolut.me/technotvltd</p>
+            <div className="base-confirmations__step">
+              <div className="base-confirmations__step-number">2</div>
+              <div className="base-confirmations__step-text">
+                Select the currency “EURO” and enter the amount due, showing here on top
               </div>
+            </div>
 
-              <div className="base-confirmations__content__row">
-                Select the currency “EURO” and enter the amount due, showing here
-                on top
+            <div className="base-confirmations__step">
+              <div className="base-confirmations__step-number">3</div>
+              <div className="base-confirmations__step-text">
+                In the "NOTE" section, enter the payment reference number:{" "}
+                <span className="strong-row-field">*C935872</span>
               </div>
+            </div>
 
-              <div className="base-confirmations__content__row">
-                In the "NOTE" section, enter the payment reference number:
-               <p className='strong-row-field'>*C935872</p>
-              </div>
+            <div className="base-confirmations__step">
+              <div className="base-confirmations__step-number">4</div>
+              <div className="base-confirmations__step-text">Click “Pay”</div>
+            </div>
 
-             <p>Click “Pay”</p>
-
-              <div className="base-confirmations__content__row">
+            <div className="base-confirmations__step">
+              <div className="base-confirmations__step-number">5</div>
+              <div className="base-confirmations__step-text">
                 Select payment by card and enter card details
               </div>
+            </div>
 
-              <p>Click “Pay”</p>
+            <div className="base-confirmations__step">
+              <div className="base-confirmations__step-number">6</div>
+              <div className="base-confirmations__step-text">Click “Pay”</div>
+            </div>
 
-              <div className="base-confirmations__content__row">
-                Add this payment reference number:
-                <p className='strong-row-field'>*C935872</p>
+            <div className="base-confirmations__step">
+              <div className="base-confirmations__step-number">7</div>
+              <div className="base-confirmations__step-text">
+                Add this payment reference number:{" "}
+                <span className="strong-row-field">*C935872</span>
               </div>
             </div>
           </div>

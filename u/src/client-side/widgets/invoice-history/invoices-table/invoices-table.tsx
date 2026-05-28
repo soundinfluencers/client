@@ -10,7 +10,7 @@ interface Props {
 export const InvoicesTable: React.FC<Props> = ({ invoices }) => {
   console.log(invoices, "w");
   return (
-    <div className="table-card-history">
+    <div className="table-card-history custom-client">
       <table className="custom-table">
         <colgroup>
           <col style={{ width: "139px" }} />

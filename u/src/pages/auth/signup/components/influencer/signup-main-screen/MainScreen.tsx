@@ -61,7 +61,11 @@ export const MainScreen = () => {
     setIsLoading(true);
     try {
       console.log("Submitting influencer signup with data: ", useInfluencerSignupStore.getState().user);
-      await influencerSignupApi(useInfluencerSignupStore.getState().user);
+      const payload = {
+        ...useInfluencerSignupStore.getState().user,
+        lastName: undefined,
+      };
+      await influencerSignupApi(payload);
       setIsSuccess(true);
       resetSignup();
     } catch (e: any) {

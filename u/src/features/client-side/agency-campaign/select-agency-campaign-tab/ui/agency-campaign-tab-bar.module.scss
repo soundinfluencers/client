@@ -12,6 +12,21 @@
   justify-content: space-between;
   gap: 8px;
   overflow-x: auto;
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: rgba(231, 232, 241, 1);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(185, 208, 255, 1);
+    border-radius: 3px;
+  }
+  @media (max-width: 525px) {
+    padding-bottom: 8px;
+  }
 }
 
 .tab {

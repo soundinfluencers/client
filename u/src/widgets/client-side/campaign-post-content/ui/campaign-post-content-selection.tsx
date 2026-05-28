@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./campaign-post-content-selection.module.scss";
 import type { CampaignPostContentAccount } from "../model/campaign-post-content.types";
 import { normalizeSocial } from "../model/campaign-post-content.helpers";
-import offerIcon from "@/assets/icons/Multi platforms.svg";
+import offerIcon from "@/assets/icons/multi.png";
 import { formatFollowers } from "@/utils/functions/formatFollowers.ts";
 import { getSocialMediaIconPostContent } from "@/constants/social-medias.ts";
 import type { SocialMediaType } from "@/shared/types/utils/constants.types.ts";
@@ -14,7 +14,8 @@ type Props = {
     offerName?: string;
     totalPrice: number;
     onEditSelection: () => void;
-    offerPrice: number
+    offerPrice: number;
+    currency?: string;
 };
 
 type SelectionGroup = {
@@ -34,7 +35,7 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
                                                                   manualAccounts,
                                                                   offerName,
                                                                   totalPrice,
-                                                                  onEditSelection,offerPrice
+                                                                  onEditSelection,offerPrice,currency
                                                               }) => {
     const offerGroups: SelectionGroup[] = [
         {
@@ -206,9 +207,7 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
         return (
             <div key={item.accountId} className={styles.accountRow}>
                 <div className={styles.accountMain}>
-                    <div className={styles.accountAvatar}>
-                        {item.logoUrl ? <img src={item.logoUrl} alt="" /> : null}
-                    </div>
+                    {item.logoUrl ? <img src={item.logoUrl} alt="" /> : null}
 
                     <div className={styles.accountInfo}>
                         <p>{item.username}</p>
@@ -286,7 +285,7 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
             </div>
 
             <div className={styles.selectionFooter}>
-                <h2>Total price: {totalPrice}€</h2>
+                <h2>Total price: {totalPrice}{currency}</h2>
             </div>
         </aside>
     );

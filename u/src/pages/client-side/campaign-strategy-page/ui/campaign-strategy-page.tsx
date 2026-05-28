@@ -29,6 +29,9 @@ import {Checkbox} from "@/widgets/client-side/campaign-tables/ui/check-box-row/u
 import {postCampaignDraft} from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
 import {toast} from "react-toastify";
 import {DraftButton} from "@components/ui/draft-button/draft-button.tsx";
+import {
+    useBuildCampaignParams
+} from "@/features/client-side/campaign-creator-page/build-campaign-filters/model/use-build-campaign-params.ts";
 
 
 export const CampaignStrategyPage = () => {
@@ -39,6 +42,8 @@ export const CampaignStrategyPage = () => {
     const content = useCampaignBuilderStore((s) => s.campaignContent);
     const totalPrice = useCampaignBuilderStore((s) => s.totalPrice);
     const draftId = useCampaignBuilderStore((s) => s.draftId);
+    const selectedCurrency = useCampaignBuilderStore((s) => s.selectedCurrency);
+
     const reset = useCampaignBuilderStore((s) => s.actions.reset);
     const [checked, setChecked] = React.useState(true);
 
@@ -140,6 +145,7 @@ export const CampaignStrategyPage = () => {
                 accounts,
                 content,
                 submittedAt: new Date(),
+                currency: selectedCurrency,
             }),
         [totalPrice, accounts, content],
     );
@@ -155,6 +161,7 @@ export const CampaignStrategyPage = () => {
                     <div className={styles.header}>
                         <h1>{campaignName || "Campaign strategy"}</h1>
                         <Bar
+
                             submittedLabel={barData.submittedLabel}
                             budgetLabel={barData.budgetLabel}
                             reachLabel={barData.reachLabel}
@@ -199,6 +206,7 @@ export const CampaignStrategyPage = () => {
                                     totalPrice={totalPrice}
                                     actions={pageMode !== "readonly" ? readonlyDateActions : undefined}
                                     insights={insights}
+                                    currency={selectedCurrency}
                                 />
                             )}
 
@@ -212,6 +220,8 @@ export const CampaignStrategyPage = () => {
                                     totalPrice={totalPrice}
                                     actions={pageMode !== "readonly" ? readonlyDateActions : undefined}
                                     insights={insights}
+                                    currency={selectedCurrency}
+
                                 />
                             )}
 
@@ -225,6 +235,8 @@ export const CampaignStrategyPage = () => {
                                     totalPrice={totalPrice}
                                     actions={pageMode !== "readonly" ? readonlyDateActions : undefined}
                                     insights={insights}
+                                    currency={selectedCurrency}
+
                                 />
                             )}
 
@@ -238,6 +250,9 @@ export const CampaignStrategyPage = () => {
                                     totalPrice={totalPrice}
                                     actions={pageMode !== "readonly" ? readonlyDateActions : undefined}
                                     insights={insights}
+                                    currency={selectedCurrency}
+
+
                                 />
                             )}
                         </div>

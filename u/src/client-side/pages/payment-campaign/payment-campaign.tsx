@@ -34,6 +34,9 @@ import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator
 import { buildStrategyCreateCampaignPayload } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
 
 import "./_payment-campaign.scss";
+import {
+  useBuildCampaignParams
+} from "@/features/client-side/campaign-creator-page/build-campaign-filters/model/use-build-campaign-params.ts";
 
 export type PaymentMethodId =
     | "bank_card"
@@ -101,6 +104,7 @@ export const PaymentCampaign = () => {
     { name: "International", id: "bank_transfer_international" },
   ];
 
+  const selectedCurrency = useCampaignBuilderStore((s) => s.selectedCurrency);
   const handleTabChange = React.useCallback((nextTab: PaymentTabId) => {
     setTab(nextTab);
 
@@ -240,6 +244,11 @@ export const PaymentCampaign = () => {
 
         <div className="payment-campaign__content">
           <div className="payment-campaign__form">
+            <PaymentBar
+                data={PAYMENT_CAMPAIGN_TABS}
+                tab={tab}
+                onChange={handleTabChange}
+            />
             <FormPayment<PaymentCampaignFormValues>
                 schema={paymentCampaignSchema}
                 onSubmit={onSent}
@@ -255,11 +264,7 @@ export const PaymentCampaign = () => {
             >
               <div className="payment-campaign__form-flex">
 
-                <PaymentBar
-                    data={PAYMENT_CAMPAIGN_TABS}
-                    tab={tab}
-                    onChange={handleTabChange}
-                />
+
 
                 <div className="payment-campaign__form-flex-width">
                   {tab === "bank_transfer" && (
@@ -278,6 +283,7 @@ export const PaymentCampaign = () => {
                   <div className="payment-campaign__confirmation">
                     {CurrentConfirmation && (
                         <CurrentConfirmation
+                            currencySymbol={selectedCurrency}
                             currency={currency ? [currency] : []}
                             referenceNumber={referenceNumber}
                             isSubmitting={isPaymentSubmitting}

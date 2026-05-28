@@ -6,9 +6,17 @@ import type { CampaignResponse } from "@/types/store/index.types";
 import { formatCampaignDate } from "@/utils/functions/formatDate";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { getResultCPM } from "@/client-side/utils";
+import {EyeHide} from "@/client-side/widgets/campaign/components/eye-hide/eye-hide.tsx";
+
+type VisibilityState = {
+  isCpmAndResultHidden: boolean;
+  isPriceHidden: boolean;
+};
 
 interface Props {
   campaign: CampaignResponse;
+  onVisibilityChange?: (nextVisibility: VisibilityState) => void;
+  canToggleVisibility?: boolean;
 }
 
 const currencySymbols: Record<string, string> = {
@@ -25,9 +33,42 @@ const formatCurrency = (
   return `${value ?? 0}${symbol}`;
 };
 
-export const BarSection: React.FC<Props> = ({ campaign }) => {
+export const BarSection: React.FC<Props> = ({
+                                              campaign,
+                                              onVisibilityChange,
+                                              canToggleVisibility = false,
+                                            }) => {
   const resultCPM = getResultCPM(campaign.cpm);
+
   const currency = campaign.displayCurrency ?? "EUR";
+
+  const isPriceHidden = Boolean(campaign.isPriceHidden);
+
+  const isCpmAndResultHidden = Boolean(campaign.isCpmAndResultHidden);
+
+  const togglePriceVisibility = () => {
+
+    onVisibilityChange?.({
+
+      isPriceHidden: !isPriceHidden,
+
+      isCpmAndResultHidden,
+
+    });
+
+  };
+
+  const toggleCpmVisibility = () => {
+
+    onVisibilityChange?.({
+
+      isPriceHidden,
+
+      isCpmAndResultHidden: !isCpmAndResultHidden,
+
+    });
+
+  };
 
   return (
       <div className="BarSection">
@@ -44,12 +85,23 @@ export const BarSection: React.FC<Props> = ({ campaign }) => {
                 <span>{formatCampaignDate(campaign.creationDate)}</span>
               </p>
 
-              <p>
-                Budget:{" "}
-                {campaign.isPriceHidden ? null : (
-                    <span>{formatCurrency(campaign.price, currency)}</span>
+              <div className="BarSection-info__eye-row">
+                <p>
+                  Budget:{" "}
+                  {isPriceHidden ? (
+                      <span>••••</span>
+                  ) : (
+                      <span>{formatCurrency(campaign.price, currency)}</span>
+                  )}
+                </p>
+
+                {canToggleVisibility && (
+                    <EyeHide
+                        isHidden={isPriceHidden}
+                        onToggle={togglePriceVisibility}
+                    />
                 )}
-              </p>
+              </div>
 
               <p>
                 Posts: <span>{campaign.addedAccounts.length}</span>
@@ -110,15 +162,25 @@ export const BarSection: React.FC<Props> = ({ campaign }) => {
 
           <div className="BarSection-info__content">
             <div className="BarSection-info__left-section">
-              <p>
-                CPM:{" "}
-                {campaign.isCpmAndResultHidden ? null : (
-                    <span>
-                  {formatCurrency(Number(campaign.cpm).toFixed(2), currency)}
-                </span>
-                )}
-              </p>
+              <div className="BarSection-info__eye-row">
+                <p>
+                  CPM:{" "}
+                  {isCpmAndResultHidden ? (
+                      <span>••••</span>
+                  ) : (
+                      <span>
+                        {formatCurrency(Number(campaign.cpm ?? 0).toFixed(2), currency)}
+                      </span>
+                  )}
+                </p>
 
+                {canToggleVisibility && (
+                    <EyeHide
+                        isHidden={isCpmAndResultHidden}
+                        onToggle={toggleCpmVisibility}
+                    />
+                )}
+              </div>
               <p>
                 Average Instagram CPM:{" "}
                 <span>
@@ -127,7 +189,12 @@ export const BarSection: React.FC<Props> = ({ campaign }) => {
               </p>
 
               <p>
-                Result: {campaign.isCpmAndResultHidden ? null : <span>{resultCPM}</span>}
+                Result:{" "}
+                {isCpmAndResultHidden ? (
+                    <span>••••</span>
+                ) : (
+                    <span>{resultCPM}</span>
+                )}
               </p>
             </div>
           </div>

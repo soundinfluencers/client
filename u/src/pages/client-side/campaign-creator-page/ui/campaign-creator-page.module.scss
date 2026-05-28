@@ -19,6 +19,38 @@
   flex-direction: column;
   gap: 25px;
 }
+.proceed {
+  max-width: 250px;
+  margin: 0 auto 130px;
+  &Total{
+    text-align: center;
+    padding-bottom: 16px;
+
+    p{
+      margin: 0 auto;
+      max-width: 118px;
+      color: #2A2A2A;
+
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      text-transform: capitalize;
+      border-bottom: 1px solid;
+      span{
+        color: #2A2A2A;
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+        text-transform: capitalize;
+      }
+    }
+  }
+  .btn{
+    height: 46px;
+  }
+}
 
 .createOption {
   display: flex;

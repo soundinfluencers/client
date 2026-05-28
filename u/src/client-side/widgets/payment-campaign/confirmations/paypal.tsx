@@ -3,21 +3,20 @@ import "./styles/_base-confirmations.scss";
 import euro from "@/assets/payments-icons/Vector (10).svg";
 import method from "@/assets/payments-icons/mdi_recurring-payment.svg";
 import copy from "@/assets/icons/akar-icons_copy.svg";
+import hash from "@/assets/payments-icons/clarity_hashtag-solid.svg";
 import { toast } from "react-toastify";
-import {
-  useCampaignBuilderStore
-} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
-import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
+import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import { CircleLoader } from "@/features/auth/sign-up-client/ui/circle-loader";
 
 interface Props {
   referenceNumber: string;
   isSubmitting?: boolean;
+  currencySymbol?: string
 }
 
-export const PayPal: React.FC<Props> = ({referenceNumber,isSubmitting}) => {
+export const PayPal: React.FC<Props> = ({ referenceNumber, isSubmitting,currencySymbol }) => {
   const { totalPrice } = useCampaignBuilderStore();
-  console.log(totalPrice);
-  const referenceId = "P935872";
+
   const email = "technotvchannel@gmail.com";
 
   const handleCopy = async (text: string, label: string) => {
@@ -32,14 +31,16 @@ export const PayPal: React.FC<Props> = ({referenceNumber,isSubmitting}) => {
 
   return (
       <div className="base-confirmations">
-
-        <div className='base-confirmations__header'>
+        <div className="base-confirmations__header">
           <h2>Payment confirmation by PayPal</h2>
-          {isSubmitting ? (
-              <CircleLoader/>
-          ) : (
-              "Confirm payment sent"
-          )}
+
+          <button
+              type="submit"
+              className="base-confirmations__button"
+              disabled={isSubmitting}
+          >
+            {isSubmitting ? <CircleLoader /> : "Confirm payment sent"}
+          </button>
         </div>
 
         <div className="base-confirmations__content--paypal">
@@ -48,18 +49,18 @@ export const PayPal: React.FC<Props> = ({referenceNumber,isSubmitting}) => {
               <div className="base-confirmations__count">
                 <img src={euro} alt="" />
               </div>
-              <p>Total DUE: {totalPrice}€</p>
+              <p>Total DUE: {totalPrice}{currencySymbol ?? "€"}</p>
             </div>
 
             <div className="base-confirmations__content_paypal__flex">
               <button
                   type="button"
                   className="base-confirmations__count"
-                  onClick={() => handleCopy(referenceId, "Reference ID")}
+                  onClick={() => handleCopy(referenceNumber, "Reference ID")}
               >
                 <img src={copy} alt="Copy reference ID" />
               </button>
-              <p>Reference ID: {referenceNumber}</p>
+              <p>Reference ID:  <span className="strong-row-field">{referenceNumber}</span> </p>
             </div>
 
             <div className="base-confirmations__content_paypal__flex">
@@ -70,7 +71,7 @@ export const PayPal: React.FC<Props> = ({referenceNumber,isSubmitting}) => {
               >
                 <img src={copy} alt="Copy email" />
               </button>
-              <p>Email: {email}</p>
+              <p>Email: <span className="strong-row-field">{email}</span> </p>
             </div>
 
             <div className="base-confirmations__content_paypal__flex">
@@ -81,24 +82,36 @@ export const PayPal: React.FC<Props> = ({referenceNumber,isSubmitting}) => {
             </div>
           </div>
 
-          <div className="base-confirmations__content__information-paypal">
-            <div className="base-confirmations__column-counts">
-              <div className="base-confirmations__count white">1</div>
-              <div className="base-confirmations__stick"></div>
-              <div className="base-confirmations__count white">2</div>
-              <div className="base-confirmations__stick"></div>
-              <div className="base-confirmations__count white">3</div>
+          <div className="base-confirmations__info-cards">
+            <div className="base-confirmations__info-card">
+              <div className="base-confirmations__info-icon">
+                <img src={method} alt="" />
+              </div>
+
+              <div className="base-confirmations__info-text">
+                Please send the funds to:{" "}
+                <span className="strong-row-field">{email}</span>
+              </div>
             </div>
 
-            <div className="base-confirmations__content__information-paypal__flex">
-              <div className="base-confirmations__content__row">
-                Please send the funds to: <p className='strong-row-field'>{email}</p>
+            <div className="base-confirmations__info-card">
+              <div className="base-confirmations__info-icon">
+                <img src={copy} alt="" />
               </div>
-              <div className="base-confirmations__content__row">
-                In the "NOTE" section, enter the payment reference number: <p className='strong-row-field'>PP935872</p>
+
+              <div className="base-confirmations__info-text">
+                In the "NOTE" section, enter the payment reference number:{" "}
+                <span className="strong-row-field">{referenceNumber}</span>
               </div>
-              <div className="base-confirmations__content__row">
-                If possible, send the payment as "Friends & Family"
+            </div>
+
+            <div className="base-confirmations__info-card">
+              <div className="base-confirmations__info-icon">
+                <img src={hash} alt="" />
+              </div>
+
+              <div className="base-confirmations__info-text">
+                If possible, send the payment as "Friends &amp; Family"
               </div>
             </div>
           </div>
