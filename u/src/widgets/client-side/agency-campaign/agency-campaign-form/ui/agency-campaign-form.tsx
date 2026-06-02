@@ -136,25 +136,23 @@ export const AgencyCampaignForm = ({ activeTab, onTabChange }: Props) => {
             </div>
 
             {isSuccessOpen && (
-                <Modal onClose={closeSuccess}>
-                    <div className={styles.successModal}>
-                        <h2>Campaign submitted successfully</h2>
-                        <h3>Thank you for submitting your campaign details.</h3>
-                        <p>
-                            Our team is now reviewing your request and preparing a tailored
-                            campaign plan for your approval.
-                        </p>
-                        <p>
-                            You can expect to hear from us within 12–48 hours — often sooner.
-                        </p>
-                        <p>We’re looking forward to working with you.</p>
+                <Modal addStyles={styles.successModal} onClose={closeSuccess}>
+                    <h2>Campaign submitted successfully</h2>
+                    <h3>Thank you for submitting your campaign details.</h3>
+                    <p>
+                        Our team is now reviewing your request and preparing a tailored
+                        campaign plan for your approval.
+                    </p>
+                    <p>
+                        You can expect to hear from us within 12–48 hours — often sooner.
+                    </p>
+                    <p>We’re looking forward to working with you.</p>
 
-                        <ButtonMain
-                            className={styles.successButton}
-                            text="Back to dashboard"
-                            onClick={() => navigate("/")}
-                        />
-                    </div>
+                    <ButtonMain
+                        className={styles.successButton}
+                        text="Back to dashboard"
+                        onClick={() => navigate("/")}
+                    />
                 </Modal>
             )}
         </div>

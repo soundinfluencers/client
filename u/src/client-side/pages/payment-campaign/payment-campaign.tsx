@@ -34,10 +34,6 @@ import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator
 import { buildStrategyCreateCampaignPayload } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
 
 import "./_payment-campaign.scss";
-import {
-  useBuildCampaignParams
-} from "@/features/client-side/campaign-creator-page/build-campaign-filters/model/use-build-campaign-params.ts";
-
 export type PaymentMethodId =
     | "bank_card"
     | "paypal"
@@ -129,7 +125,24 @@ export const PaymentCampaign = () => {
       },
       [],
   );
+  const proposalPaymentPayload = React.useMemo(() => {
+    if (!proposalId) return null;
 
+    try {
+      const raw = sessionStorage.getItem("proposalPaymentPayload");
+      if (!raw) return null;
+
+      const parsed = JSON.parse(raw);
+
+      const isSameProposal =
+          String(parsed?.campaignId ?? "") === String(proposalId) &&
+          Number(parsed?.optionIndex ?? 0) === Number(optionIndex);
+
+      return isSameProposal ? parsed?.payload ?? null : null;
+    } catch {
+      return null;
+    }
+  }, [proposalId, optionIndex]);
   const onSent = async (values: PaymentCampaignFormValues) => {
     if (isPaymentSubmitting) return;
 
@@ -147,14 +160,10 @@ export const PaymentCampaign = () => {
             patches,
         );
       } else if (proposalId) {
-        const cached = useProposalCampaignStore
-            .getState()
-            .getProposalPayload(proposalId, optionIndex);
-
         const patches = useUpdateCampaign.getState().patches ?? {};
 
         base =
-            cached ??
+            proposalPaymentPayload ??
             useProposalCampaignStore
                 .getState()
                 .getCampaignPayload(
@@ -204,9 +213,10 @@ export const PaymentCampaign = () => {
         campaignName: finalCampaignName,
         paymentDetails,
       };
-
       await postCampaign(payload);
-
+      if (proposalId) {
+        sessionStorage.removeItem("proposalPaymentPayload");
+      }
       if (effectiveDraftId) {
         await deleteDraft(effectiveDraftId);
         draftStore.clearCampaign(effectiveDraftId);
@@ -221,7 +231,17 @@ export const PaymentCampaign = () => {
       setIsPaymentSubmitting(false);
     }
   };
+  const paymentAmount = React.useMemo(() => {
+    if (proposalPaymentPayload) {
+      return Number(
+          proposalPaymentPayload?.campaignPrice ??
+          proposalPaymentPayload?.totalPrice ??
+          0,
+      );
+    }
 
+    return Number(builderTotalPrice ?? 0);
+  }, [proposalPaymentPayload, builderTotalPrice]);
   const defaultValues = React.useMemo<Partial<PaymentCampaignFormValues>>(
       () => ({
         firstName: invoiceDetails?.firstName ?? "",
@@ -287,6 +307,7 @@ export const PaymentCampaign = () => {
                             currency={currency ? [currency] : []}
                             referenceNumber={referenceNumber}
                             isSubmitting={isPaymentSubmitting}
+                            amount={paymentAmount}
                         />
                     )}
                   </div>

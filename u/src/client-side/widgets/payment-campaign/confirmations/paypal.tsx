@@ -11,12 +11,13 @@ import { CircleLoader } from "@/features/auth/sign-up-client/ui/circle-loader";
 interface Props {
   referenceNumber: string;
   isSubmitting?: boolean;
-  currencySymbol?: string
+  currencySymbol?: string;
+  amount?: number;
 }
 
-export const PayPal: React.FC<Props> = ({ referenceNumber, isSubmitting,currencySymbol }) => {
+export const PayPal: React.FC<Props> = ({ referenceNumber, isSubmitting,currencySymbol,amount }) => {
   const { totalPrice } = useCampaignBuilderStore();
-
+  const displayAmount = Number(amount ?? totalPrice ?? 0);
   const email = "technotvchannel@gmail.com";
 
   const handleCopy = async (text: string, label: string) => {
@@ -49,7 +50,7 @@ export const PayPal: React.FC<Props> = ({ referenceNumber, isSubmitting,currency
               <div className="base-confirmations__count">
                 <img src={euro} alt="" />
               </div>
-              <p>Total DUE: {totalPrice}{currencySymbol ?? "€"}</p>
+              <p>Total DUE: {displayAmount}{currencySymbol ?? "€"}</p>
             </div>
 
             <div className="base-confirmations__content_paypal__flex">

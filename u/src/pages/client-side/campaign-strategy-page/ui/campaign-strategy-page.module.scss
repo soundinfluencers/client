@@ -1,5 +1,6 @@
 .page {
   width: 100%;
+  min-width: 0;
 }
 
 .header {
@@ -10,10 +11,10 @@
 
   h1 {
     color: #202934;
-    font-size: 36px;
+    font-size: clamp(28px, 4vw, 36px);
     font-style: normal;
     font-weight: 300;
-    line-height: normal;
+    line-height: 1.1;
     margin: 0;
   }
 }
@@ -22,7 +23,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-
+  min-width: 0;
 }
 
 .pageContentCards {
@@ -31,6 +32,7 @@
   justify-content: space-between;
   gap: 16px;
   width: 100%;
+  min-width: 0;
 
   @media (max-width: 1100px) {
     grid-template-columns: repeat(2, minmax(0, 357px));
@@ -40,6 +42,10 @@
     grid-template-columns: minmax(0, 357px);
     justify-content: center;
   }
+
+  @media (max-width: 420px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .controls {
@@ -48,6 +54,7 @@
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .controlsContent {
@@ -55,6 +62,7 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .controlsProposal {
@@ -70,18 +78,29 @@
   color: #202934;
   cursor: pointer;
   transition: 0.2s ease;
+  box-sizing: border-box;
 
   &:hover {
     background: #f8faff;
   }
+
+  @media (max-width: 500px) {
+    width: 100%;
+    min-height: 34px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
 }
 
 .footerActions {
-  margin: 16px 0px 60px;
+  margin: 16px 0 60px;
   display: flex;
   flex-direction: column;
-
   gap: 16px;
+
+  @media (max-width: 500px) {
+    margin-bottom: 40px;
+  }
 }
 
 .proceedButton,
@@ -94,17 +113,26 @@
   align-items: center;
   gap: 8px;
   min-height: 46px;
+  box-sizing: border-box;
+
+  @media (max-width: 500px) {
+    min-height: 44px;
+    padding: 10px 18px;
+    font-size: 14px;
+  }
 }
-.proceedButton{
-  margin: 24px auto 0px;
 
-}
-.proceedButtonProposal{
-  margin: 24px 0px;
+.proceedButton {
+  margin: 24px auto 0;
 }
 
+.proceedButtonProposal {
+  margin: 24px 0;
 
-
+  @media (max-width: 500px) {
+    margin: 18px 0;
+  }
+}
 
 .navMenu {
   margin: 32px 0;
@@ -112,48 +140,77 @@
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+  min-width: 0;
+
+  @media (max-width: 700px) {
+    margin: 20px 0;
+  }
+
+  @media (max-width: 500px) {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    margin: 16px 0;
+  }
 }
 
 .proposalModal {
-
+  width: min(100%, 671px);
+  max-width: 671px !important;
   padding: 32px 48px 40px;
+  box-sizing: border-box;
+  border-radius: 24px;
+  background: #fff;
+  overflow: hidden;
+  margin: 0 auto;
 
   h2 {
     margin: 0;
+    color: #202934;
     font-weight: 400;
-    font-size: 36px;
-    line-height: 100%;
+    font-size: clamp(24px, 5vw, 36px);
+    line-height: 1.1;
     text-align: center;
+    word-break: break-word;
   }
 
   input {
     margin-top: 32px;
     width: 100%;
-    padding: 24px;
+    min-width: 0;
+    padding: 0 16px;
     border-radius: 8px;
     height: 52px;
     background: #fff;
     border: 1px solid rgba(191, 212, 255, 0.4);
     outline: none;
     box-sizing: border-box;
+    font-size: 16px;
   }
 }
 
 .proposalModalButtons {
-
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 16px;
+  width: 100%;
+
   button {
-    max-width: 250px;
     width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: 46px;
+    box-sizing: border-box;
   }
 }
 
 @media (max-width: 700px) {
   .proposalModal {
-    padding: 24px 24px 28px;
+    max-width: calc(100vw - 24px);
+    padding: 28px 24px;
+    border-radius: 20px;
 
     h2 {
       font-size: 28px;
@@ -161,41 +218,48 @@
 
     input {
       margin-top: 20px;
-      padding: 16px;
+      padding: 0 14px;
       height: 48px;
+      font-size: 14px;
     }
   }
 
   .proposalModalButtons {
-    margin-top: 24px;
-    gap: 16px;
+    gap: 12px;
 
     button {
-      max-width: 150px;
+      height: 44px;
+      font-size: 14px;
     }
   }
 }
 
 @media (max-width: 500px) {
   .proposalModal {
-    padding: 20px 16px 22px;
+    max-width: calc(100vw - 20px);
+    padding: 24px 16px;
+    border-radius: 18px;
 
     h2 {
-      font-size: 22px;
+      font-size: 24px;
+      line-height: 1.15;
     }
 
     input {
-      padding: 14px;
+      margin-top: 18px;
+      padding: 0 12px;
       height: 44px;
+      font-size: 14px;
     }
   }
 
   .proposalModalButtons {
-    flex-direction: column;
-    gap: 12px;
-
+    grid-template-columns: 1fr;
+    margin-top: 10px;
     button {
+      width: 100%;
       max-width: 100%;
+      margin: 0;
     }
   }
 
@@ -207,5 +271,31 @@
   .controlsContent {
     width: 100%;
     justify-content: space-between;
+  }
+}
+
+@media (max-width: 360px) {
+  .proposalModal {
+    max-width: calc(100vw - 16px);
+    padding: 20px 12px;
+    border-radius: 16px;
+
+    h2 {
+      font-size: 22px;
+    }
+
+    input {
+      height: 42px;
+      font-size: 13px;
+    }
+  }
+
+  .proposalModalButtons {
+    margin-top: 16px;
+
+    button {
+      height: 42px;
+      font-size: 13px;
+    }
   }
 }
