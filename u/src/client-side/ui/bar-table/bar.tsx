@@ -14,7 +14,12 @@ import {calcGroupPrices} from "@/client-side/utils";
 import {formatCurrency} from "@/shared/functions/formatCurrency.ts";
 
 type AnyCampaign = any;
-
+type VisibleStats = {
+  visibleAccounts: any[];
+  visibleContent: any[];
+  postsCount: number;
+  videosCount: number;
+};
 const sumFollowers = (arr: any[] = []) =>
   arr.reduce((sum, n) => sum + Number(n?.followers ?? 0), 0);
 
@@ -38,7 +43,7 @@ function pickContentFromCampaign(c: AnyCampaign): any[] | undefined {
   return c.campaignContent;
 }
 
-export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
+export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleStats:VisibleStats  }) => {
   const store = useCampaignStore();
   const useDraftCampaignPrice = (campaignId: string) =>
     useDraftCampaignStore((s) => s.getCampaignPrice(campaignId));
@@ -73,7 +78,7 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
 
 
   console.log(accounts, 'awdjawnlwnadjnwajawdnawdjjawjwad');
-  const postsCount = accounts.length;
+  const postsCount = visibleStats?.postsCount ?? accounts.length;
   const totalFollowers =
       Number(campaign?.totalFollowers ?? 0) > 0
           ? Number(campaign.totalFollowers)
@@ -99,7 +104,11 @@ export const Bar = ({ campaign }: { campaign: AnyCampaign }) => {
       row: true,
     },
     { name: `Posts: ${postsCount || content.length}`, img: edit, row: true },
-    { name: `Video: ${content.length}`, img: video, row: false },
+    {
+      name: `Video: ${visibleStats?.videosCount ?? content.length}`,
+      img: video,
+      row: false,
+    },
   ];
 
   return (

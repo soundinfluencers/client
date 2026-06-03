@@ -10,14 +10,16 @@ import {
 import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
 
 interface Props {
-  referenceNumber: string;
-  isSubmitting?: boolean;
-    currencySymbol?: string
+    referenceNumber: string;
+    isSubmitting?: boolean;
+    currencySymbol?: string;
+    amount?: number;
 }
 
 
-export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting,currencySymbol}) => {
+export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting,currencySymbol,amount}) => {
   const { totalPrice } = useCampaignBuilderStore();
+    const displayAmount = Number(amount ?? totalPrice ?? 0);
   const referenceId = "P935872";
   console.log(totalPrice);
   const handleCopy = async (text: string, label: string) => {
@@ -53,7 +55,7 @@ export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting,currency
               <div className="base-confirmations__count">
                 <img src={euro} alt="" />
               </div>
-              <p>Total DUE: {totalPrice}{currencySymbol ?? "€"}</p>
+                <p>Total DUE: {displayAmount}{currencySymbol ?? "€"}</p>
             </div>
 
             <div className="base-confirmations__content_bankcard__flex">

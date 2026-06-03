@@ -316,40 +316,38 @@ export const CampaignStrategyPage = () => {
             </Container>
 
             {isProposalModalOpen && (
-                <Modal isShowCloseButton={false}
+                <Modal className={styles.proposalModal} isShowCloseButton={false}
                     onClose={() => {
                         setProposalModalOpen(false);
                         navigate("/client");
                         reset();
                     }}
                 >
-                    <div className={styles.proposalModal}>
-                        <h2>Proposal saved</h2>
+                    <h2>Proposal saved</h2>
 
-                        <input
-                            type="text"
-                            value={shareUrl}
-                            readOnly
-                            placeholder="https://go.soundinfluencers.com//promo-share/..."
+                    <input
+                        type="text"
+                        value={shareUrl}
+                        readOnly
+                        placeholder="https://go.soundinfluencers.com//promo-share/..."
+                    />
+
+                    <div className={styles.proposalModalButtons}>
+                        <ButtonSecondary
+                            text='Copy share link'
+                            className={styles.proceedButtonProposal}
+                            onClick={copyShareLink}
                         />
 
-                        <div className={styles.proposalModalButtons}>
-                            <ButtonSecondary
-                                text='Copy share link'
-                                className={styles.proceedButtonProposal}
-                                onClick={copyShareLink}
-                            />
 
 
+                        <ButtonMain
+                            text='Edit proposal'
+                            className={styles.proceedButtonProposal}
+                            onClick={openProposal}
+                        />
 
-                            <ButtonMain
-                                text='Edit proposal'
-                                className={styles.proceedButtonProposal}
-                                onClick={openProposal}
-                            />
 
-
-                        </div>
                     </div>
                 </Modal>
             )}

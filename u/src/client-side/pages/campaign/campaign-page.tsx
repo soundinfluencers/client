@@ -218,11 +218,12 @@ export const CampaignPage = () => {
                         isCpmAndResultHidden: visibility.isCpmAndResultHidden,
                         isPriceHidden: visibility.isPriceHidden,
                       }}
+                      visibleStats={actions.visibleStats}
                       canToggleVisibility={true}
                       onVisibilityChange={updateVisibilityOnToggle}
                   />
               ) : (
-                  <BarComponent campaign={data} />
+                  <BarComponent visibleStats={actions.visibleStats} campaign={data} />
               )
           )}
 

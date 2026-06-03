@@ -12,8 +12,19 @@
 
   @media screen and (max-width: 900px) {
     position: relative;
-    padding: 8px;
+    padding: 16px;
     max-width: 100%;
+    border-radius: 20px;
+  }
+
+  @media screen and (max-width: 600px) {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  @media screen and (max-width: 420px) {
+    padding: 10px;
+    border-radius: 14px;
   }
 }
 
@@ -29,8 +40,12 @@
     font-weight: 400;
     line-height: normal;
 
-    @media (max-width: 500px) {
-      font-size: 24px;
+    @media (max-width: 600px) {
+      font-size: 20px;
+    }
+
+    @media (max-width: 420px) {
+      font-size: 18px;
     }
   }
 
@@ -38,17 +53,22 @@
     padding: 8px 24px;
     cursor: pointer;
     border-radius: 24px;
-    border: 1px solid #E7E8F1 ;
-    background: #FFF;
-    @media (max-width: 500px) {
-      font-size: 14px;
-      padding: 8px 16px;
+    border: 1px solid #e7e8f1;
+    background: #fff;
+
+    @media (max-width: 600px) {
+      font-size: 13px;
+      padding: 7px 14px;
+    }
+
+    @media (max-width: 420px) {
+      font-size: 12px;
+      padding: 6px 12px;
     }
   }
 
   @media (max-width: 600px) {
-    flex-direction: column;
-    align-items: flex-start;
+    gap: 8px;
   }
 }
 
@@ -62,62 +82,149 @@
   overflow-y: auto;
   @include sb.scrollbar-dotted-vertical;
 
+  @media (max-width: 900px) {
+    gap: 24px;
+    margin-top: 24px;
+    max-height: none;
+  }
+
+  @media (max-width: 600px) {
+    gap: 18px;
+    margin-top: 18px;
+  }
+
+  @media (max-width: 420px) {
+    gap: 14px;
+    margin-top: 14px;
+  }
 }
-.offerSection{
-  .offerHeader{
+
+.offerSection {
+  .offerHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    &__title{
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ebecff;
+
+    &__title {
       display: flex;
       align-items: center;
       gap: 4px;
-      h4{
+      min-width: 0;
+
+      h4 {
         color: #202934;
         font-size: 20px;
         font-style: normal;
         font-weight: 400;
         line-height: normal;
-        span{
+        margin: 0;
+
+        span {
           color: #202934;
           font-size: 16px;
           font-style: normal;
           font-weight: 300;
           line-height: normal;
         }
+
+        @media (max-width: 600px) {
+          font-size: 17px;
+
+          span {
+            font-size: 13px;
+          }
+        }
+
+        @media (max-width: 420px) {
+          font-size: 15px;
+
+          span {
+            font-size: 12px;
+          }
+        }
       }
     }
-    padding-bottom: 8px;
-    border-bottom: 1px solid #EBECFF;
+
+    @media (max-width: 600px) {
+      gap: 8px;
+    }
+
+    @media (max-width: 420px) {
+      padding-bottom: 6px;
+    }
   }
-  .offerBody{
+
+  .offerBody {
     margin-top: 8px;
-    .groupSection{
-      .groupBody{
+
+    .groupSection {
+      .groupBody {
         display: flex;
         flex-direction: column;
         gap: 8px;
         margin-top: 8px;
         margin-left: 32px;
+
+        @media (max-width: 900px) {
+          margin-left: 20px;
+        }
+
+        @media (max-width: 600px) {
+          gap: 6px;
+          margin-left: 12px;
+        }
+
+        @media (max-width: 420px) {
+          margin-left: 8px;
+        }
       }
     }
   }
 }
-.manualSections{
+
+.manualSections {
   display: flex;
   flex-direction: column;
   gap: 34px;
 
-  .groupSection{
-    .groupBody{
+  @media (max-width: 900px) {
+    gap: 24px;
+  }
+
+  @media (max-width: 600px) {
+    gap: 18px;
+  }
+
+  @media (max-width: 420px) {
+    gap: 14px;
+  }
+
+  .groupSection {
+    .groupBody {
       display: flex;
       flex-direction: column;
       gap: 8px;
       margin-top: 8px;
       margin-left: 32px;
+
+      @media (max-width: 900px) {
+        margin-left: 20px;
+      }
+
+      @media (max-width: 600px) {
+        gap: 6px;
+        margin-left: 12px;
+      }
+
+      @media (max-width: 420px) {
+        margin-left: 8px;
+      }
     }
   }
 }
+
 .selectionBody {
   overflow-y: auto;
   max-height: 550px;
@@ -132,6 +239,10 @@
 
   &:first-child {
     margin-top: 0;
+  }
+
+  @media (max-width: 600px) {
+    margin-top: 18px;
   }
 }
 
@@ -148,6 +259,19 @@
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+    margin: 0;
+
+    @media (max-width: 600px) {
+      font-size: 17px;
+    }
+
+    @media (max-width: 420px) {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    gap: 6px;
   }
 }
 
@@ -156,6 +280,10 @@
   flex-direction: column;
   gap: 8px;
   margin-top: 8px;
+
+  @media (max-width: 600px) {
+    gap: 6px;
+  }
 }
 
 .title {
@@ -163,10 +291,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  min-width: 0;
 
-  @media screen and (max-width: 500px) {
-    align-items: flex-start;
-    flex-direction: column;
+  @media screen and (max-width: 600px) {
+    gap: 8px;
   }
 }
 
@@ -174,11 +302,45 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 
   h3 {
     font-size: 15px;
     font-weight: 400;
     margin: 0;
+    min-width: 0;
+  }
+
+  img {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 600px) {
+    gap: 4px;
+
+    h3 {
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    img {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    h3 {
+      font-size: 11px;
+    }
+
+    img {
+      width: 16px;
+      height: 16px;
+    }
   }
 }
 
@@ -192,10 +354,17 @@
     gap: 8px;
     margin: 0;
 
-    @media screen and (max-width: 500px) {
+    @media screen and (max-width: 600px) {
+      min-width: 0;
       justify-content: flex-start;
-      font-size: 13px;
-      line-height: 12px;
+      font-size: 11px;
+      line-height: 1.2;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    @media screen and (max-width: 420px) {
+      font-size: 10px;
     }
   }
 }
@@ -212,17 +381,27 @@
     line-height: 100%;
     margin: 0;
 
-    @media (max-width: 500px) {
-      font-size: 16px;
+    @media (max-width: 600px) {
+      font-size: 15px;
+    }
+
+    @media (max-width: 420px) {
+      font-size: 14px;
     }
   }
+
+  @media (max-width: 600px) {
+    margin-top: 18px;
+  }
 }
+
 .accountRow {
   display: grid;
   grid-template-columns: minmax(0, 200px) minmax(0, 250px) minmax(0, 60px);
   align-items: center;
   column-gap: 12px;
   width: 100%;
+  min-width: 0;
 
   .accountMain {
     min-width: 0;
@@ -237,6 +416,12 @@
       filter: grayscale(100%);
       flex-shrink: 0;
     }
+
+    h3,
+    p,
+    span {
+      min-width: 0;
+    }
   }
 
   .accountMeta {
@@ -247,5 +432,100 @@
     min-width: 60px;
     text-align: right;
     justify-self: end;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(44px, auto);
+    column-gap: 8px;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(44px, auto);
+    column-gap: 6px;
+
+    .accountMain {
+      gap: 4px;
+
+      img {
+        width: 18px;
+        height: 18px;
+      }
+
+      h3,
+      p,
+      span {
+        font-size: 12px;
+        line-height: 1.2;
+      }
+    }
+
+    .accountMeta {
+      grid-column: auto;
+      min-width: 0;
+      font-size: 11px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      p,
+      span {
+        font-size: 11px;
+        line-height: 1.2;
+      }
+    }
+
+    .accountPrice {
+      min-width: 44px;
+      justify-self: end;
+      text-align: right;
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+
+      p,
+      span {
+        font-size: 12px;
+        line-height: 1.2;
+      }
+    }
+  }
+
+  @media (max-width: 420px) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.75fr) minmax(40px, auto);
+    column-gap: 4px;
+
+    .accountMain {
+      img {
+        width: 16px;
+        height: 16px;
+      }
+
+      h3,
+      p,
+      span {
+        font-size: 11px;
+      }
+    }
+
+    .accountMeta {
+      font-size: 10px;
+
+      p,
+      span {
+        font-size: 10px;
+      }
+    }
+
+    .accountPrice {
+      min-width: 40px;
+      font-size: 11px;
+
+      p,
+      span {
+        font-size: 11px;
+      }
+    }
   }
 }

@@ -194,6 +194,14 @@ const applyPatchesToContent = (
     };
   });
 };
+const getSelectedContentId = (account: AnyAccount) => {
+  return String(
+      account?.selectedCampaignContentItem?.campaignContentItemId ??
+      account?.selectedContent?.campaignContentItemId ??
+      account?.selectedContentItem?._id ??
+      "",
+  );
+};
 export function buildProposalPatchBody(args: {
   campaignName: string;
   accounts: AnyAccount[];
@@ -251,12 +259,26 @@ export function buildProposalPatchBody(args: {
 
   const normalizedNext = ensureMongoIdsForContent(contentNext);
 
+  const addedAccounts = (accounts ?? [])
+      .map((a) => mapAccountToApi(a, normalizedNext))
+      .filter((a) => a.socialAccountId && a.influencerId && a.socialMedia);
+
+  const usedContentIds = new Set(
+      addedAccounts
+          .map((account: any) =>
+              String(account?.selectedCampaignContentItem?.campaignContentItemId ?? ""),
+          )
+          .filter(Boolean),
+  );
+
+  const visibleCampaignContent = normalizedNext.filter((contentItem: any) =>
+      usedContentIds.has(String(contentItem?._id ?? "")),
+  );
+
   return {
     campaignName: String(campaignName ?? ""),
-    addedAccounts: (accounts ?? [])
-      .map((a) => mapAccountToApi(a, normalizedNext))
-      .filter((a) => a.socialAccountId && a.influencerId && a.socialMedia),
-    campaignContent: normalizedNext.map(mapContentToApi),
+    addedAccounts,
+    campaignContent: visibleCampaignContent.map(mapContentToApi),
     totalPrice: totalPublicPrice,
   };
 }

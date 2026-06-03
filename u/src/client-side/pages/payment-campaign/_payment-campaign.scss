@@ -1,45 +1,63 @@
 .payment-campaign {
   margin-bottom: 151px;
+
   @media screen and (max-width: 900px) {
     margin-bottom: 73px;
   }
+
   @media screen and (max-width: 600px) {
     margin-bottom: 31px;
   }
+
   h1 {
     font-weight: 400;
-    font-style: Regular;
-    font-size: 36px;
-    leading-trim: NONE;
-    letter-spacing: 0%;
+    font-style: normal;
+    font-size: clamp(28px, 4vw, 36px);
+    line-height: 1.1;
+    letter-spacing: 0;
+    margin: 0;
   }
-  &__form-flex{
 
+  &__form-flex {
   }
-  &__form-flex-width{
+
+  &__form-flex-width {
     width: 100%;
+
     @media screen and (max-width: 1100px) {
       flex: 1 1 auto;
     }
   }
+
   &__content {
     margin-top: 13px;
     display: flex;
     gap: 24px;
 
-  }
-  .navmenu {
-    margin: 32px 0px;
     @media screen and (max-width: 900px) {
-      margin: 16px 0px;
+      flex-direction: column;
+      gap: 16px;
     }
   }
+
+  .navmenu {
+    margin: 32px 0;
+
+    @media screen and (max-width: 900px) {
+      margin: 16px 0;
+    }
+  }
+
   &__width {
     max-width: 100%;
   }
 
   &__confirmation {
     margin-bottom: 48px;
+
+    @media screen and (max-width: 600px) {
+      margin-bottom: 32px;
+    }
 
     .PO {
       margin-top: 16px;
@@ -50,14 +68,21 @@
 
       .btn {
         max-width: 250px;
+        width: 100%;
         height: 46px;
       }
 
       p {
+        margin: 0;
         font-weight: 400;
         font-size: 16px;
-        letter-spacing: 0%;
+        line-height: 1.4;
+        letter-spacing: 0;
         text-align: center;
+
+        @media screen and (max-width: 600px) {
+          font-size: 14px;
+        }
       }
     }
   }
@@ -65,11 +90,13 @@
   &__form {
     display: flex;
     gap: 24px;
-    @media screen and (max-width: 900px) {
-      flex-direction: column;
-    }
     margin-top: 8px;
     width: 100%;
+
+    @media screen and (max-width: 900px) {
+      flex-direction: column;
+      gap: 16px;
+    }
 
     .margin {
       margin-top: 16px;
@@ -81,27 +108,37 @@
       justify-content: space-between;
       gap: 8px;
 
+      @media screen and (max-width: 600px) {
+        flex-direction: column;
+        margin-bottom: 18px;
+      }
+
       li {
         cursor: pointer;
         text-align: center;
         width: 100%;
         padding: 16px 24px;
         height: 54px;
-
         border-radius: 8px;
-        border: 1px solid #FFF;
+        border: 1px solid #fff;
         background: rgba(185, 208, 255, 0.15);
-
         color: #202934;
         font-size: 16px;
         font-style: normal;
         font-weight: 500;
         line-height: normal;
+        box-sizing: border-box;
+
+        @media screen and (max-width: 600px) {
+          height: 48px;
+          padding: 13px 16px;
+          font-size: 14px;
+        }
 
         &.active {
           border-radius: 8px;
-          border: 1px solid #B9D0FF;
-          background: #FFF;
+          border: 1px solid #b9d0ff;
+          background: #fff;
           box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
         }
       }
@@ -113,19 +150,26 @@
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(185, 208, 255, 1);
 
-
+    @media screen and (max-width: 600px) {
+      margin-bottom: 24px;
+    }
 
     h3 {
+      margin: 0;
       font-weight: 400;
       font-size: 20px;
-      letter-spacing: 0%;
+      line-height: 1.2;
+      letter-spacing: 0;
+
+      @media screen and (max-width: 600px) {
+        font-size: 18px;
+      }
     }
   }
-
-
 }
+
 .btn-margin {
-  margin: 48px auto 0px;
+  margin: 48px auto 0;
   display: flex;
   padding: 12px 24px;
   justify-content: center;
@@ -137,76 +181,150 @@
   border-radius: 24px;
   background: #202934;
   color: white;
+  box-sizing: border-box;
+
+  @media screen and (max-width: 600px) {
+    margin-top: 32px;
+    height: 44px;
+    padding: 10px 18px;
+    font-size: 14px;
+  }
 }
-.content-width{
+
+.content-width {
   max-width: 100% !important;
   width: fit-content !important;
+
+  @media screen and (max-width: 600px) {
+    width: 100% !important;
+  }
 }
+
 .modal-payment {
+  width: min(100%, 512px);
+  margin: 0 auto;
   max-width: 512px;
-  width: 100%;
   padding: 32px 48px;
   text-align: center;
+  box-sizing: border-box;
+  border-radius: 24px;
+  background: #fff;
+  overflow: hidden;
+
   h2 {
+    margin: 0;
+    color: #202934;
     font-weight: 400;
-    font-size: 36px;
+    font-size: clamp(24px, 5vw, 36px);
+    line-height: 1.1;
     text-align: center;
   }
+
   h3 {
-    margin: 24px 0px 8px;
+    margin: 24px 0 8px;
+    color: #202934;
     font-weight: 400;
-    font-style: Regular;
-    font-size: 20px;
-    leading-trim: NONE;
-    line-height: 100%;
-    letter-spacing: 0%;
+    font-style: normal;
+    font-size: clamp(18px, 3.5vw, 20px);
+    line-height: 1.2;
+    letter-spacing: 0;
     text-align: center;
   }
+
   p {
+    margin: 0;
+    color: #202934;
     font-weight: 400;
-    font-style: Regular;
+    font-style: normal;
     font-size: 14px;
-    leading-trim: NONE;
-    line-height: 100%;
-    letter-spacing: 0%;
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-align: center;
   }
+
   .btn {
     height: 46px;
     max-width: 250px;
     width: 100%;
-    margin: 39px auto 0px;
+    margin: 32px auto 0;
+  p{
+    color: #fff;
+  }
   }
 }
 
 @media (max-width: 700px) {
-  .modal-proposal {
-    width: min(671px, 92vw);
-    padding: 24px 24px 28px;
+  .modal-payment {
+    max-width: calc(100vw - 24px);
+    padding: 28px 24px;
+    border-radius: 20px;
 
     h2 {
       font-size: 28px;
     }
 
+    h3 {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    p {
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
     .btn {
-      max-width: 150px;
-      p {
-        font-size: 14px;
-      }
+      margin-top: 28px;
+      height: 44px;
     }
   }
 }
 
 @media (max-width: 500px) {
-  .modal-proposal {
-    width: 92vw;
-    padding: 20px 16px 22px;
+  .modal-payment {
+    max-width: calc(100vw - 20px);
+    padding: 24px 16px;
+    border-radius: 18px;
+
+    h2 {
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    h3 {
+      margin: 18px 0 8px;
+      font-size: 16px;
+    }
+
+    p {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .btn {
+      max-width: 100%;
+      height: 44px;
+      margin-top: 24px;
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .modal-payment {
+    max-width: calc(100vw - 16px);
+    padding: 20px 12px;
+    border-radius: 16px;
 
     h2 {
       font-size: 22px;
     }
 
-    .btn {
-      max-width: 100%;
+    h3 {
+      font-size: 15px;
+    }
+
+    p {
+      font-size: 12px;
     }
   }
 }

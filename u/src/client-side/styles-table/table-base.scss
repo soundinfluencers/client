@@ -797,6 +797,7 @@
   .modal-card,
   .onDeleteModal,
   .create-option {
+
     padding: 24px 20px 28px;
     gap: 16px;
     border-radius: 16px;
@@ -840,10 +841,11 @@
 
   .onDeleteModal {
     .onDeleteModal-btn {
-      margin-top: 20px;
-      gap: 12px;
+      margin-top: 10px !important;
+      gap: 12px !important;
 
       .btn {
+
         max-width: 180px;
         min-height: 40px;
       }
@@ -857,7 +859,7 @@
     }
 
     .create-option-btn {
-      gap: 12px;
+      gap: 12px !important;
 
       .btn {
         max-width: 180px;

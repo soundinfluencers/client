@@ -16,7 +16,7 @@ interface Props {
   referenceNumber: string;
   isSubmitting?: boolean;
   currencySymbol?: string
-
+  amount?: number;
 }
 
 export const BankTransfer: React.FC<Props> = ({
@@ -24,10 +24,10 @@ export const BankTransfer: React.FC<Props> = ({
                                                 referenceNumber,
                                                 isSubmitting,
                                                 currencySymbol,
-
+                                                amount
                                               }) => {
   const { totalPrice } = useCampaignBuilderStore();
-
+  const displayAmount = Number(amount ?? totalPrice ?? 0);
   const currentCurrency = currency[0];
 
   const accountNumber = "17299128";
@@ -76,7 +76,7 @@ export const BankTransfer: React.FC<Props> = ({
                   <div className="base-confirmations__count">
                     <img src={euro} alt="Amount" />
                   </div>
-                  <p>Total DUE: {totalPrice}{currencySymbol ?? "€"}</p>
+                  <p>Total DUE: {displayAmount}{currencySymbol ?? "€"}</p>
                 </div>
 
                 <div className="base-confirmations__content_banktransfer__flex">
@@ -128,7 +128,7 @@ export const BankTransfer: React.FC<Props> = ({
                   <div className="base-confirmations__count">
                     <img src={euro} alt="Amount" />
                   </div>
-                  <p>Total DUE: {totalPrice}{currencySymbol ?? "€"}</p>
+                  <p>Total DUE: {displayAmount}{currencySymbol ?? "€"}</p>
                 </div>
 
                 <div className="base-confirmations__content_banktransfer__flex">
@@ -179,7 +179,7 @@ export const BankTransfer: React.FC<Props> = ({
                   <div className="base-confirmations__count">
                     <img src={euro} alt="Amount" />
                   </div>
-                  <p>Total DUE: {totalPrice}{currencySymbol ?? "€"}</p>
+                  <p>Total DUE: {displayAmount}{currencySymbol ?? "€"}</p>
                 </div>
 
                 <div className="base-confirmations__content_banktransfer__flex">
