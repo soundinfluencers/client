@@ -149,6 +149,19 @@ export const CampaignStrategyPage = () => {
             }),
         [totalPrice, accounts, content],
     );
+    const getNetworksForContentItem = React.useCallback(
+        (
+            itemId: string,
+            networks: typeof accounts,
+        ) => {
+            return networks.filter((account) => {
+                const selectedId = account.selectedCampaignContentItem?.campaignContentItemId;
+
+                return String(selectedId) === String(itemId);
+            });
+        },
+        [],
+    );
     return (
         <>
             <Container>
@@ -259,44 +272,80 @@ export const CampaignStrategyPage = () => {
                     ) : (
                         <div className={styles.pageContentCards}>
                             {!!grouped.mainCreator.items.length &&
-                                grouped.mainCreator.items.map((item) => (
-                                    <LiveViewCard
-                                        key={item._id}
-                                        item={item}
-                                        networks={grouped.mainCreator.accounts}
-                                        canEdit={pageMode === "edit"}
-                                    />
-                                ))}
+                                grouped.mainCreator.items.map((item) => {
+                                    const networks = getNetworksForContentItem(
+                                        String(item._id),
+                                        grouped.mainCreator.accounts,
+                                    );
+
+                                    if (!networks.length) return null;
+
+                                    return (
+                                        <LiveViewCard
+                                            key={item._id}
+                                            item={item}
+                                            networks={networks}
+                                            canEdit={pageMode === "edit"}
+                                        />
+                                    );
+                                })}
 
                             {!!grouped.mainCommunity.items.length &&
-                                grouped.mainCommunity.items.map((item) => (
-                                    <LiveViewCard
-                                        key={item._id}
-                                        item={item}
-                                        networks={grouped.mainCommunity.accounts}
-                                        canEdit={pageMode === "edit"}
-                                    />
-                                ))}
+                                grouped.mainCommunity.items.map((item) => {
+                                    const networks = getNetworksForContentItem(
+                                        String(item._id),
+                                        grouped.mainCommunity.accounts,
+                                    );
+
+                                    if (!networks.length) return null;
+
+                                    return (
+                                        <LiveViewCard
+                                            key={item._id}
+                                            item={item}
+                                            networks={networks}
+                                            canEdit={pageMode === "edit"}
+                                        />
+                                    );
+                                })}
 
                             {!!grouped.music.items.length &&
-                                grouped.music.items.map((item) => (
-                                    <LiveViewCard
-                                        key={item._id}
-                                        item={item}
-                                        networks={grouped.music.accounts}
-                                        canEdit={pageMode === "edit"}
-                                    />
-                                ))}
+                                grouped.music.items.map((item) => {
+                                    const networks = getNetworksForContentItem(
+                                        String(item._id),
+                                        grouped.music.accounts,
+                                    );
+
+                                    if (!networks.length) return null;
+
+                                    return (
+                                        <LiveViewCard
+                                            key={item._id}
+                                            item={item}
+                                            networks={networks}
+                                            canEdit={pageMode === "edit"}
+                                        />
+                                    );
+                                })}
 
                             {!!grouped.press.items.length &&
-                                grouped.press.items.map((item) => (
-                                    <LiveViewCard
-                                        key={item._id}
-                                        item={item}
-                                        networks={grouped.press.accounts}
-                                        canEdit={pageMode === "edit"}
-                                    />
-                                ))}
+                                grouped.press.items.map((item) => {
+                                    const networks = getNetworksForContentItem(
+                                        String(item._id),
+                                        grouped.press.accounts,
+                                    );
+
+                                    if (!networks.length) return null;
+
+                                    return (
+                                        <LiveViewCard
+                                            key={item._id}
+                                            item={item}
+                                            networks={networks}
+                                            canEdit={pageMode === "edit"}
+                                        />
+                                    );
+                                })}
                         </div>
                     )}
 
