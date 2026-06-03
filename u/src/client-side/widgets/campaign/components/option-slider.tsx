@@ -118,7 +118,7 @@ export function OptionsSlider({
             <div className="create-option-btn">
               <ButtonSecondary
                 className="btn"
-                text="Cancle"
+                text="Cancel"
                 onClick={() => setModal(false)}
               />
               <ButtonMain

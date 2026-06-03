@@ -12,11 +12,17 @@ type VisibilityState = {
   isCpmAndResultHidden: boolean;
   isPriceHidden: boolean;
 };
-
+type VisibleStats = {
+  visibleAccounts: any[];
+  visibleContent: any[];
+  postsCount: number;
+  videosCount: number;
+};
 interface Props {
   campaign: CampaignResponse;
   onVisibilityChange?: (nextVisibility: VisibilityState) => void;
   canToggleVisibility?: boolean;
+  visibleStats?: VisibleStats;
 }
 
 const currencySymbols: Record<string, string> = {
@@ -37,6 +43,7 @@ export const BarSection: React.FC<Props> = ({
                                               campaign,
                                               onVisibilityChange,
                                               canToggleVisibility = false,
+                                              visibleStats
                                             }) => {
   const resultCPM = getResultCPM(campaign.cpm);
 
@@ -104,7 +111,7 @@ export const BarSection: React.FC<Props> = ({
               </div>
 
               <p>
-                Posts: <span>{campaign.addedAccounts.length}</span>
+                Posts: <span>{visibleStats?.postsCount ?? campaign.addedAccounts.length}</span>
               </p>
             </div>
 
@@ -115,7 +122,7 @@ export const BarSection: React.FC<Props> = ({
               </p>
 
               <p>
-                Videos: <span>{campaign.campaignContent.length}</span>
+                Videos: <span>{visibleStats?.videosCount ?? campaign.campaignContent.length}</span>
               </p>
             </div>
           </div>

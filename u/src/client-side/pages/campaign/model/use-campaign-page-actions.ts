@@ -27,6 +27,10 @@ import {
     getNextActiveOptionAfterDelete,
     getOptionIndexes,
 } from "./campaign-page.utils";
+import {
+    filterContentWithAccounts,
+    getAccountsByContentId
+} from "@/client-side/widgets/campaign/model/campaign-content.utils.ts";
 
 type Params = {
     data: any;
@@ -400,7 +404,46 @@ export const useCampaignPageActions = ({
             toast.error("Failed to copy share link");
         }
     }, [campaignIdForActions, data?.socialMedia]);
+    const visibleStats = React.useMemo(() => {
+        const campaignAccounts =
+            data?.kind === "proposal"
+                ? data?.selectedOption?.addedAccounts ?? []
+                : data?.addedAccounts ?? [];
 
+        const campaignContent =
+            data?.kind === "proposal"
+                ? data?.selectedOption?.campaignContent ?? []
+                : data?.campaignContent ?? [];
+
+        const accountsByContentId = getAccountsByContentId(campaignAccounts);
+
+        const visibleContent = filterContentWithAccounts({
+            content: campaignContent,
+            accountsByContentId,
+        });
+
+        const visibleContentIds = new Set(
+            visibleContent.map((item: any) => String(item?._id ?? "")),
+        );
+
+        const visibleAccounts = campaignAccounts.filter((account: any) => {
+            const contentId = String(
+                account?.selectedContent?.campaignContentItemId ??
+                account?.selectedCampaignContentItem?.campaignContentItemId ??
+                account?.selectedContentItem?._id ??
+                "",
+            );
+
+            return visibleContentIds.has(contentId);
+        });
+
+        return {
+            visibleAccounts,
+            visibleContent,
+            postsCount: visibleAccounts.length,
+            videosCount: visibleContent.length,
+        };
+    }, [data]);
     return {
         campaignIdForActions,
         optionIndexes,
@@ -414,5 +457,6 @@ export const useCampaignPageActions = ({
         proceedDraftToPayment,
         copyShareLink,
         copyPromoShareLink,
+        visibleStats
     };
 };

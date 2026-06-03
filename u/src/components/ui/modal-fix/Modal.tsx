@@ -14,7 +14,7 @@ interface Props extends PropsWithChildren {
   isCloseOnClickOutsideDisabled?: boolean;
 }
 
-export const Modal = ({ onClose, children, isShowCloseButton = true, isCloseOnClickOutsideDisabled = false }: Props) => {
+export const Modal = ({className, onClose, children, isShowCloseButton = true, isCloseOnClickOutsideDisabled = false }: Props) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -33,7 +33,7 @@ export const Modal = ({ onClose, children, isShowCloseButton = true, isCloseOnCl
 
   return createPortal(
     <div className="modal" aria-hidden={false}>
-      <div className="modal__content" ref={modalRef} role={'dialog'} aria-modal={true} tabIndex={-1}>
+      <div className={`modal__content ${className}`} ref={modalRef} role={'dialog'} aria-modal={true} tabIndex={-1}>
         {isShowCloseButton && (
           <img
             className="modal__close-button"

@@ -20,7 +20,7 @@ export const NetworkCell: React.FC<Props> = ({ row }) => {
                 }
                 alt={account.socialMedia}
             />
-            <p className="hidden-text username">{account.username || "—"}</p>
+            <p title={account.username} className="hidden-text username">{account.username || "—"}</p>
         </div>
     );
 };

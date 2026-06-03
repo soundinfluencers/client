@@ -21,6 +21,7 @@ import {
   ViewAudience,
   ViewChange,
 } from "@/client-side/ui";
+import {getVisibleCampaignStats} from "@/client-side/pages/campaign-share/model/campaign-campaign.helpers.ts";
 interface Props {}
 
 export const CampaignSharePage: React.FC<Props> = () => {
@@ -32,7 +33,7 @@ export const CampaignSharePage: React.FC<Props> = () => {
   );
   const [changeView, setChangeView] = React.useState(false);
   const [view, setView] = React.useState<number>(1);
-  const [flag, setFlag] = React.useState<boolean>(true);
+  const [flag, setFlag] = React.useState<boolean>(false);
   const loadingProposal = useFetchCampaign((state) => state.isLoading)
   const { data, setProposalOption } = useFetchCampaign();
 
@@ -93,6 +94,33 @@ export const CampaignSharePage: React.FC<Props> = () => {
   const statusFlag = ["distributing", "completed"].includes(
     campaign?.status ?? "",
   );
+  const barCampaign = campaign || data;
+
+  const visibleStats = React.useMemo(() => {
+    if (!barCampaign) {
+      return {
+        visibleAccounts: [],
+        visibleContent: [],
+        postsCount: 0,
+        videosCount: 0,
+      };
+    }
+
+    const accounts =
+        type === "proposal"
+            ? barCampaign?.selectedOption?.addedAccounts ?? []
+            : barCampaign?.addedAccounts ?? [];
+
+    const content =
+        type === "proposal"
+            ? barCampaign?.selectedOption?.campaignContent ?? []
+            : barCampaign?.campaignContent ?? [];
+
+    return getVisibleCampaignStats({
+      accounts,
+      content,
+    });
+  }, [barCampaign, type]);
   console.log(campaign, "cam");
   if (isLoading || loadingProposal) {
     return <Loader />;
@@ -105,7 +133,9 @@ export const CampaignSharePage: React.FC<Props> = () => {
           SoundInfluencers
         </h1>
       </div>{" "}
-      {BarComponent && <BarComponent campaign={campaign || data} />}
+      {BarComponent && barCampaign && (
+          <BarComponent campaign={barCampaign} visibleStats={visibleStats} />
+      )}
       {data && (
         <OptionsSlider
           optionIndexes={optionIndexes}
@@ -115,15 +145,17 @@ export const CampaignSharePage: React.FC<Props> = () => {
       )}{" "}
       <div className="controls-second">
         {" "}
-        {data && view !== 0 && (
-          <ViewAudience
-            flag={changeView}
-            onChange={() => setChangeView((prev) => !prev)}
-          />
-        )}{" "}
-        {campaign && campaign.status !== "under_review" && (
-          <ToggleTables onChange={() => setFlag((prev) => !prev)} flag={flag} />
-        )}
+        <div className='controls-second_share-row'>
+          {data && flag === true && view !== 0 && (
+              <ViewAudience
+                  flag={changeView}
+                  onChange={() => setChangeView((prev) => !prev)}
+              />
+          )}{" "}
+          {(campaign || data) && (
+              <ToggleTables onChange={() => setFlag((prev) => !prev)} flag={flag} />
+          )}
+        </div>
         <div className="controls-second__content">
           <ViewChange isProposal={false} setView={setView} view={view} />
         </div>
@@ -139,12 +171,12 @@ export const CampaignSharePage: React.FC<Props> = () => {
             />
           )}
           {data && (
-            <ProposalCampaignPageShare
-              campaign={data}
-              changeView={changeView}
-              view={view}
-
-            />
+              <ProposalCampaignPageShare
+                  campaign={data}
+                  changeView={changeView}
+                  view={view}
+                  flag={flag}
+              />
           )}
           {data && (
             <p className="option-chose">

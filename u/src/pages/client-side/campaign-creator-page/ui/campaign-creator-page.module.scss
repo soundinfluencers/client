@@ -1,15 +1,23 @@
 .root {
+  width: 100%;
+  min-width: 0;
+
   .navmenu {
     margin: 32px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
   }
 
   h1 {
+    margin: 0;
     font-weight: 300;
-    font-size: 36px;
-    line-height: 1;
+    font-size: clamp(26px, 4vw, 36px);
+    line-height: 1.1;
+    word-break: break-word;
   }
 }
 
@@ -18,28 +26,33 @@
   display: flex;
   flex-direction: column;
   gap: 25px;
+  width: 100%;
+  min-width: 0;
 }
+
 .proceed {
+  width: 100%;
   max-width: 250px;
   margin: 0 auto 130px;
-  &Total{
+
+  &Total {
     text-align: center;
     padding-bottom: 16px;
 
-    p{
+    p {
       margin: 0 auto;
-      max-width: 118px;
-      color: #2A2A2A;
-
-      font-size: 20px;
+      max-width: 160px;
+      color: #2a2a2a;
+      font-size: clamp(18px, 3vw, 20px);
       font-style: normal;
       font-weight: 400;
       line-height: normal;
       text-transform: capitalize;
       border-bottom: 1px solid;
-      span{
-        color: #2A2A2A;
-        font-size: 20px;
+
+      span {
+        color: #2a2a2a;
+        font-size: inherit;
         font-style: normal;
         font-weight: 500;
         line-height: normal;
@@ -47,7 +60,9 @@
       }
     }
   }
-  .btn{
+
+  .btn {
+    width: 100%;
     height: 46px;
   }
 }
@@ -56,62 +71,128 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8p;
+  gap: 8px;
+
+  width: min(100%, 560px);
+  max-width: calc(100vw - 32px);
+  min-width: 0;
+
   padding: 24px;
-  min-width: 360px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
 
   h2 {
-    margin-bottom: 16px;
+    margin: 0 0 16px;
     font-weight: 400;
-    font-size: 28px;
-    line-height: 1;
+    font-size: clamp(24px, 4vw, 28px);
+    line-height: 1.1;
+    text-align: center;
+    word-break: break-word;
   }
 }
 
 .createOptionInput {
-  max-width: 575px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 52px;
   padding: 0 12px;
   border-radius: 12px;
   border: 1px solid rgba(231, 232, 241, 1);
   outline: none;
+  box-sizing: border-box;
 }
 
 .createOptionButtons {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
-  justify-content: center;
   width: 100%;
+  min-width: 0;
   gap: 12px;
   margin-top: 20px;
-  .btn{
-    max-width: 250px;
+
+  .btn {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: 46px;
   }
 }
 
 @media (max-width: 900px) {
   .root {
     .navmenu {
-      margin: 16px 0;
+      margin: 20px 0;
     }
+  }
+
+  .head {
+    gap: 20px;
+  }
+
+  .proceed {
+    margin-bottom: 90px;
   }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
   .root {
-    h1 {
-      font-size: 30px;
+    .navmenu {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 12px;
     }
   }
 
   .createOption {
-    min-width: auto;
-    width: 100%;
+    max-width: calc(100vw - 24px);
+    padding: 20px 16px;
+  }
+
+  .proceed {
+    max-width: none;
+    margin-bottom: 70px;
+  }
+}
+
+@media (max-width: 500px) {
+  .createOption {
     padding: 16px;
   }
 
+  .createOptionInput {
+    height: 48px;
+  }
+
   .createOptionButtons {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .proceed {
+    margin-bottom: 48px;
+
+    .btn {
+      height: 44px;
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .root {
+    h1 {
+      font-size: 26px;
+    }
+  }
+
+  .createOption {
+    max-width: calc(100vw - 16px);
+    padding: 12px;
+  }
+
+  .createOptionButtons {
+    margin-top: 16px;
   }
 }
