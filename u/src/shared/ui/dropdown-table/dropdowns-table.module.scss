@@ -1,0 +1,96 @@
+.tableDropdown {
+  min-width: 81px;
+  position: relative;
+  width: 100%;
+
+  @media screen and (max-width: 500px) {
+    max-width: 100%;
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.columnRow {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.tableDropdownTitle {
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  padding: 0px 8px;
+  border: 1px solid rgba(231, 232, 241, 1);
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 8px;
+  min-height: 36px;
+
+  appearance: none;
+  outline: none;
+
+  p {
+    width: 100%;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0;
+    vertical-align: bottom;
+    text-align: left;
+  }
+
+  @media screen and (max-width: 500px) {
+    padding: 12px 8px;
+
+    p {
+      font-size: 14px;
+    }
+  }
+}
+
+.active {
+  border: 1px solid rgba(185, 208, 255, 1);
+}
+
+.tableDropdownSelectContent {
+  max-height: 180px;
+  overflow: auto;
+
+  &::-webkit-scrollbar {
+    width: 0;
+  }
+}
+
+.tableDropdownSelect {
+  width: var(--radix-popover-trigger-width);
+  background: rgba(255, 255, 255, 1);
+  padding: 8px;
+  z-index: 1000;
+
+  border: 1px solid rgba(185, 208, 255, 1);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  box-sizing: border-box;
+}
+
+.padSelect {
+  padding: 8px 4px;
+}
+
+.img {
+  width: 16px;
+  height: 16px;
+  transition: 0.3s ease;
+}
+
+.tableDropdown[data-open="true"] .img {
+  transform: rotate(180deg);
+  transition: 0.3s ease;
+}

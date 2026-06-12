@@ -24,6 +24,7 @@ import {CampaignCreatorPage} from "@/pages/client-side/campaign-creator-page";
 import {CampaignPostContentRoute} from "@/pages/client-side/campaign-post-content/ui/campaign-post-content-route.tsx";
 import {CampaignStrategyPage} from "@/pages/client-side/campaign-strategy-page/ui/campaign-strategy-page.tsx";
 import {DashboardPage} from "@/pages/client-side/dashboard";
+import {Campaign} from "@/pages/client-side/campaign";
 // import { CampaignAddInfluencer } from "@/pages/client/campaign-add-infuencer/campaign-add-infuencer.tsx";
 
 export const routes: IRoute[] = [

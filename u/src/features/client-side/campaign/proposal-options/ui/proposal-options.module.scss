@@ -1,0 +1,123 @@
+.additionalOption {
+  background-color: rgba(255, 255, 255, 0.5);
+  flex: 0 0 auto;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  height: 34px;
+  border: 1px solid rgba(185, 208, 255, 1);
+  width: fit-content;
+
+  p {
+    margin: 0;
+    color: var(--black-blue, #202934);
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+}
+
+.optionsSlider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 500px;
+
+  &__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid rgba(185, 208, 255, 1);
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    img {
+      width: 24px;
+      height: 24px;
+      transition:
+              transform 0.2s ease,
+              opacity 0.2s ease;
+    }
+
+    &:hover {
+      background: rgba(185, 208, 255, 0.15);
+      border-color: rgba(120, 160, 255, 1);
+    }
+
+    &:active {
+      background: rgba(185, 208, 255, 0.25);
+      transform: scale(0.96);
+    }
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.45;
+    }
+  }
+}
+
+.left {}
+
+.right {}
+
+.optionList {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 6px 4px;
+  margin: 0;
+  list-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > li {
+    flex: 0 0 auto;
+    height: 34px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(185, 208, 255, 1);
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--black-blue, #202934);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 400;
+
+    img {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+.activeOption {
+  background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%) !important;
+}

@@ -29,9 +29,6 @@ import {Checkbox} from "@/widgets/client-side/campaign-tables/ui/check-box-row/u
 import {postCampaignDraft} from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
 import {toast} from "react-toastify";
 import {DraftButton} from "@components/ui/draft-button/draft-button.tsx";
-import {
-    useBuildCampaignParams
-} from "@/features/client-side/campaign-creator-page/build-campaign-filters/model/use-build-campaign-params.ts";
 
 
 export const CampaignStrategyPage = () => {

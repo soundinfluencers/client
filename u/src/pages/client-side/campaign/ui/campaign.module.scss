@@ -1,0 +1,182 @@
+.container {
+  h1 {
+    color: var(--black-blue, #202934);
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  h2 {
+    margin: 8px 0 16px;
+    color: var(--black-blue, #202934);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+
+    strong {
+      color: var(--black-blue, #202934);
+      font-size: 15px;
+      font-style: normal;
+      font-weight: 300;
+      line-height: normal;
+    }
+  }
+
+  .headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+
+    h1 {
+      margin: 0;
+      min-width: 0;
+    }
+  }
+
+  .saveButton {
+    cursor: not-allowed;
+    flex: 0 0 auto;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    height: 44px;
+    padding: 0 18px;
+
+    border-radius: 10px;
+    border: 1px solid #d8e3ff;
+    background: #eef4ff;
+
+    color: #8f96a8;
+    font-size: 16px;
+    font-weight: 400;
+
+    opacity: 0.65;
+
+    img {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 auto;
+    }
+
+    &:disabled {
+      pointer-events: none;
+    }
+  }
+
+  .saveButtonActive {
+    cursor: pointer;
+    opacity: 1;
+
+    border-color: #b9d0ff;
+    background: linear-gradient(
+                    107.52deg,
+                    #bce8ff 3.56%,
+                    rgba(218, 244, 255, 0.94) 50.39%,
+                    rgba(191, 216, 255, 0.89) 79.14%,
+                    rgba(164, 188, 255, 0.85) 100%
+    );
+
+    color: var(--black-blue, #202934);
+
+    &:hover {
+      filter: brightness(0.98);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .controls {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .controlsLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .controlsRight {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex: 0 0 auto;
+    min-width: max-content;
+    white-space: nowrap;
+  }
+
+  .controlsUnderReview {
+    justify-content: flex-end;
+
+    .controlsLeft {
+      display: none;
+    }
+  }
+
+  .controlsDistributing,
+  .controlsCompleted,
+  .controlsProposal {
+    justify-content: space-between;
+  }
+
+  .proposalOptions {
+    margin-top: 34px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media screen and (max-width: 900px) {
+    .controls {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .controlsLeft,
+    .controlsRight {
+      width: 100%;
+    }
+
+    .controlsRight {
+      margin-left: 0;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      min-width: 0;
+      white-space: normal;
+    }
+  }
+
+  @media screen and (max-width: 700px) {
+    .headerRow {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .saveButton {
+      width: 100%;
+    }
+  }
+
+  @media screen and (max-width: 520px) {
+    .controlsRight {
+      justify-content: stretch;
+    }
+  }
+}
