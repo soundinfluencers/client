@@ -1,0 +1,35 @@
+.changeViewTable {
+  display: flex;
+  align-items: center;
+
+  &__segmented {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid #ebecff;
+  }
+
+  &__item {
+    width: 34px;
+    height: 28px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    img {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.active {
+  background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+}

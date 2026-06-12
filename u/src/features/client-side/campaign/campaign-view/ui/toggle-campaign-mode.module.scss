@@ -1,11 +1,11 @@
 .toggleTables {
   flex: 0 0 auto;
   cursor: pointer;
-  background-color: #fff;
   display: flex;
   justify-content: end;
   border-radius: 8px;
   height: 36px;
+
   &__btn {
     display: flex;
     align-items: center;
@@ -16,8 +16,19 @@
     border: 1px solid #EBECFF;
     background-color: rgba(255, 255, 255, 0.5);
     font-size: 13px;
-    &.active {
-      background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+    cursor: pointer;
+
+    p {
+      margin: 0;
+    }
+
+    img {
+      width: 16px;
+      height: 16px;
     }
   }
+}
+
+.active {
+  background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
 }

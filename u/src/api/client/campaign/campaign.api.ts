@@ -2,6 +2,29 @@ import $api from "../../api.ts";
 
 // CAMPAIGN
 
+export type ApproveProposalCampaignBody = {
+  firstName: string;
+  lastName: string;
+  address: string;
+  country: string;
+  referenceNumber: string;
+  amount: number;
+  company?: string;
+  vatNumber?: string;
+  poNumber?: string;
+  selectedPaymentMethod: string;
+};
+
+export const approveProposalCampaign = async (
+    campaignId: string,
+    optionIndex: number,
+    body: ApproveProposalCampaignBody,
+) => {
+  return $api.post(`/proposal-system/approve/${campaignId}`, body, {
+    params: { optionIndex },
+  });
+};
+
 export const getCampaigns = async (
     status: string,
     page: number = 1,
