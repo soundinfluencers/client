@@ -1,0 +1,22 @@
+.eye {
+  width: 40px;
+  height: 24px;
+  border-radius: 8px;
+  border: 1px solid #EBECFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    border-color: #C9CEFF;
+    box-shadow: 0 2px 8px rgba(18, 24, 40, 0.06);
+  }
+}

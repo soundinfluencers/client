@@ -1,0 +1,194 @@
+.strategyBar {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  p{
+    color: var(--black-blue, #202934);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  strong {
+    color: var(--black-blue, #202934);
+
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-transform: Capitalize;
+  }
+}
+
+.divider {
+  background-color: #b9d0ff;
+  width: 2px;
+  height: 22px;
+}
+
+.insightBar{
+  display: flex;
+  justify-content: space-between;
+  .card{
+    max-width: 386px;
+    width: 100%;
+    height: 168px;
+    padding: 16px;
+
+
+    border-radius: 16px;
+    border: 1px solid var(--blue, #B9D0FF);
+    background: var(--white, #FFF);
+
+    &Content{
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 32px;
+      .box{
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        .hide{
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        p{
+          color: var(--black-blue, #202934);
+
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 300;
+          line-height: normal;
+          strong{
+            color: var(--black-blue, #202934);
+
+
+            font-size: 15px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+          }
+        }
+      }
+    }
+
+    &Title{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      h3{
+        color: var(--black-blue, #202934);
+        font-family: "Satoshi Variable",sans-serif;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+      }
+    }
+  }
+}
+@media (max-width: 1200px) {
+  .insightBar {
+    gap: clamp(6px, 0.8vw, 10px);
+
+    .card {
+      max-width: none;
+      height: clamp(136px, 12.4vw, 148px);
+      padding: clamp(6px, 0.7vw, 8px);
+
+      &Title {
+        gap: clamp(4px, 0.5vw, 6px);
+
+        img {
+          width: clamp(14px, 1.3vw, 16px);
+          height: clamp(14px, 1.3vw, 16px);
+        }
+
+        h3 {
+          font-size: clamp(12px, 1.15vw, 14px);
+        }
+      }
+
+      &Content {
+        margin-top: clamp(8px, 1vw, 12px);
+        gap: clamp(8px, 1.5vw, 18px);
+
+        .box {
+          gap: clamp(8px, 1vw, 12px);
+
+          .hide {
+            gap: clamp(4px, 0.5vw, 6px);
+          }
+
+          p {
+            font-size: clamp(11px, 1.08vw, 13px);
+
+            strong {
+              font-size: clamp(11px, 1.08vw, 13px);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 812px) {
+  .insightBar {
+    flex-direction: column;
+    gap: 12px;
+
+    .card {
+      max-width: none;
+      width: 100%;
+      height: auto;
+      min-height: 140px;
+      padding: 14px;
+
+      &Title {
+        gap: 8px;
+
+        img {
+          width: 16px;
+          height: 16px;
+        }
+
+        h3 {
+          font-size: 15px;
+        }
+      }
+
+      &Content {
+        margin-top: 14px;
+        justify-content: space-between;
+        gap: 12px;
+
+        .box {
+          gap: 12px;
+
+          .hide {
+            gap: 8px;
+          }
+
+          p {
+            font-size: 14px;
+
+            strong {
+              font-size: 14px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

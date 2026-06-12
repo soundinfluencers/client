@@ -1,8 +1,8 @@
 import React from "react";
 import * as Popover from "@radix-ui/react-popover";
-import chevronDown from "./assets/chevron-down.svg";
 
-import "./dropdowns-table.scss";
+import chevronDown from "./assets/chevron-down.svg";
+import styles from "./dropdowns-table.module.scss";
 
 interface DropdownProps {
     isOpen: boolean;
@@ -21,14 +21,24 @@ export const Dropdown: React.FC<DropdownProps> = ({
                                                   }) => {
     return (
         <Popover.Root open={isOpen} onOpenChange={onOpenChange}>
-            <div data-open={isOpen} className="table-dropdown">
+            <div
+                data-open={isOpen ? "true" : "false"}
+                className={styles.tableDropdown}
+            >
                 <Popover.Trigger asChild>
                     <button
                         type="button"
-                        className={`table-dropdown__title ${isOpen ? "active" : ""}`}
+                        className={`${styles.tableDropdownTitle} ${
+                            isOpen ? styles.active : ""
+                        }`}
                     >
                         {selected}
-                        <img src={chevronDown} className="img" alt="" />
+
+                        <img
+                            src={chevronDown}
+                            className={styles.img}
+                            alt=""
+                        />
                     </button>
                 </Popover.Trigger>
 
@@ -37,9 +47,13 @@ export const Dropdown: React.FC<DropdownProps> = ({
                     align="start"
                     sideOffset={-5}
                     avoidCollisions={false}
-                    className={`table-dropdown__select ${content ? "pad-select" : ""}`}
+                    className={`${styles.tableDropdownSelect} ${
+                        content ? styles.padSelect : ""
+                    }`}
                 >
-                    <div className="table-dropdown__select-contetn">{children}</div>
+                    <div className={styles.tableDropdownSelectContent}>
+                        {children}
+                    </div>
                 </Popover.Content>
             </div>
         </Popover.Root>

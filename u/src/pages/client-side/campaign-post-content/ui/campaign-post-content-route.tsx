@@ -4,25 +4,23 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { CampaignPostContentPage } from "@/widgets/client-side/campaign-post-content/ui/campaign-post-content-page.tsx";
 import styles from "./campaign-post-content.module.scss";
 
-import {
-    useCampaignBuilderStore,
-} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
-
-import {
-    useProposalAccountsStore,
-} from "@/client-side/store";
+import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import { useCampaignStore } from "@/entities/client-side/campaign/store/campaign.store";
 
 import { Breadcrumbs, Container } from "@/components";
 import {
     attachExistingContentToAccounts,
-    buildProposalAccountsAfterSubmit
+    buildProposalAccountsAfterSubmit,
 } from "@/pages/client-side/campaign-post-content/model/build-proposal-accounts.ts";
+
 type GroupKey = "main" | "music" | "press";
 
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
 const MUSIC_NETWORKS = ["spotify", "soundcloud"];
+
 const EMPTY_ACCOUNTS: any[] = [];
 const EMPTY_CONTENT: any[] = [];
+
 const getGroupBySocial = (social?: string): GroupKey => {
     const s = String(social ?? "").toLowerCase();
 
@@ -52,8 +50,15 @@ export const CampaignPostContentRoute = () => {
 
     const mode = searchParams.get("mode");
     const optionIndex = Number(searchParams.get("option") ?? 0);
+    const returnTo = searchParams.get("returnTo")
+        ? decodeURIComponent(String(searchParams.get("returnTo")))
+        : "/client/campaign";
 
     const isAddInfluencerMode = mode === "add-influencer";
+
+    const editable = useCampaignStore((s) => s.editable);
+    const addCampaignAccounts = useCampaignStore((s) => s.addAccounts);
+    const mergeCampaignContent = useCampaignStore((s) => s.mergeCampaignContent);
 
     const selectedAccounts = useCampaignBuilderStore((s) => s.selectedAccounts);
     const campaignName = useCampaignBuilderStore((s) => s.campaignName);
@@ -63,35 +68,34 @@ export const CampaignPostContentRoute = () => {
     const totalPrice = useCampaignBuilderStore((s) => s.totalPrice);
     const offerPrice = useCampaignBuilderStore((s) => s.selectedOfferPrice);
     const selectedCurrency = useCampaignBuilderStore((s) => s.selectedCurrency);
-    const setCampaignContent = useCampaignBuilderStore((s) => s.actions.setCampaignContent);
+
+    const setCampaignContent = useCampaignBuilderStore(
+        (s) => s.actions.setCampaignContent,
+    );
     const syncSelectedAccountsContent = useCampaignBuilderStore(
         (s) => s.actions.syncSelectedAccountsContent,
     );
     const clearBuilder = useCampaignBuilderStore((s) => s.actions.reset);
 
-    const proposalAccounts = useProposalAccountsStore(
-        (s) => s.accountsByOption[optionIndex] ?? EMPTY_ACCOUNTS,
-    );
-
-    const proposalContent = useProposalAccountsStore(
-        (s) => s.contentByOption[optionIndex] ?? EMPTY_CONTENT,
-    );
-
-    const addProposalAccounts = useProposalAccountsStore((s) => s.addAccounts);
-    const mergeProposalContent = useProposalAccountsStore((s) => s.mergeContent);
+    const proposalAccounts = editable?.addedAccounts ?? EMPTY_ACCOUNTS;
+    const proposalContent = editable?.campaignContent ?? EMPTY_CONTENT;
 
     const mappedAccounts = React.useMemo(
         () =>
             selectedAccounts.map((item) => ({
                 accountId: item.accountId,
+                socialAccountId: item.accountId,
+
                 influencerId: item.influencerId,
                 socialMedia: item.socialMedia,
                 username: item.username,
                 profileType: item.profileType,
                 logoUrl: item.logoUrl,
-                followers: item.followers,
-                price: item.price,
-                publicPrice: item.price,
+
+                followers: Number(item.followers ?? 0),
+                price: Number(item.price ?? 0),
+                publicPrice: Number(item.price ?? 0),
+
                 dateRequest: item.dateRequest ?? "ASAP",
                 source: item.source,
                 countries: item.countries,
@@ -105,7 +109,10 @@ export const CampaignPostContentRoute = () => {
 
         return mappedAccounts.filter((selected) => {
             return !proposalAccounts.some((existing: any) => {
-                return String(existing.socialAccountId ?? existing.accountId) === String(selected.accountId);
+                return (
+                    String(existing.socialAccountId ?? existing.accountId) ===
+                    String(selected.socialAccountId ?? selected.accountId)
+                );
             });
         });
     }, [isAddInfluencerMode, mappedAccounts, proposalAccounts]);
@@ -135,8 +142,13 @@ export const CampaignPostContentRoute = () => {
     React.useEffect(() => {
         if (!isAddInfluencerMode) return;
 
+        if (!editable) {
+            navigate(returnTo);
+            return;
+        }
+
         if (!accountsForPage.length) {
-            navigate("/client/campaign");
+            navigate(returnTo);
             return;
         }
 
@@ -147,22 +159,21 @@ export const CampaignPostContentRoute = () => {
             proposalContent,
         );
 
-        console.log("[ADD INFLUENCER AUTO] preparedAccounts", preparedAccounts);
-
-        addProposalAccounts(optionIndex, preparedAccounts as any);
+        addCampaignAccounts(preparedAccounts as any);
 
         clearBuilder?.();
 
-        navigate("/client/campaign");
+        navigate(returnTo);
     }, [
         isAddInfluencerMode,
+        editable,
         accountsForPage,
         proposalContent,
         missingGroups.length,
-        addProposalAccounts,
-        optionIndex,
+        addCampaignAccounts,
         clearBuilder,
         navigate,
+        returnTo,
     ]);
 
     const offerAccounts = accountsForPage.filter((item) => item.source === "offer");
@@ -181,7 +192,9 @@ export const CampaignPostContentRoute = () => {
             <CampaignPostContentPage
                 mode={isAddInfluencerMode ? "add-influencer" : "create"}
                 allowedGroups={isAddInfluencerMode ? missingGroups : undefined}
-                defaultCampaignContent={isAddInfluencerMode ? proposalContent : campaignContent}
+                defaultCampaignContent={
+                    isAddInfluencerMode ? proposalContent : campaignContent
+                }
                 accounts={accountsForPage}
                 offerAccounts={isAddInfluencerMode ? [] : offerAccounts}
                 manualAccounts={manualAccounts}
@@ -193,7 +206,10 @@ export const CampaignPostContentRoute = () => {
                 currency={selectedCurrency}
                 onSubmitPayload={(payload) => {
                     if (isAddInfluencerMode) {
-                        const mergedContent = [...proposalContent, ...payload.campaignContent];
+                        const mergedContent = [
+                            ...proposalContent,
+                            ...payload.campaignContent,
+                        ];
 
                         const preparedAccounts = buildProposalAccountsAfterSubmit({
                             sourceAccounts: accountsForPage,
@@ -201,17 +217,12 @@ export const CampaignPostContentRoute = () => {
                             mergedContent,
                         });
 
-                        console.log("[ADD INFLUENCER] payload.addedAccounts", payload.addedAccounts);
-                        console.log("[ADD INFLUENCER] accountsForPage", accountsForPage);
-                        console.log("[ADD INFLUENCER] preparedAccounts", preparedAccounts);
-                        console.log("[ADD INFLUENCER] mergedContent", mergedContent);
-
-                        mergeProposalContent(optionIndex, payload.campaignContent);
-                        addProposalAccounts(optionIndex, preparedAccounts as any);
+                        mergeCampaignContent(payload.campaignContent as any);
+                        addCampaignAccounts(preparedAccounts as any);
 
                         clearBuilder?.();
 
-                        navigate("/client/campaign");
+                        navigate(returnTo);
                         return;
                     }
 

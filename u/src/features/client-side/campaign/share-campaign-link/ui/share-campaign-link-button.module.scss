@@ -1,0 +1,32 @@
+.shareLinkRowProposal {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.shareLinkProposal {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 8px;
+  height: 36px;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid #EBECFF;
+  background-color: #fff;
+  color: var(--black-blue, #202934);
+  font-size: 13px;
+  font-weight: 400;
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.65;
+  }
+}

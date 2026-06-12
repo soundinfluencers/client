@@ -1,0 +1,33 @@
+.sortHeader {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.icons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 auto;
+
+  img {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+.iconActive {
+  opacity: 1 !important;
+}
+
+.active {
+  color: var(--black-blue, #202934);
+}

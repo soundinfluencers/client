@@ -26,7 +26,7 @@ import { useInvoceDetailsQuery } from "@/client-side/react-query";
 
 import { FormPayment } from "@components/form/form-payment.tsx";
 import { Modal } from "@/shared/ui/modal-fix/Modal";
-import { postCampaign } from "@/api/client/campaign/campaign.api";
+import {approveProposalCampaign, postCampaign} from "@/api/client/campaign/campaign.api";
 import { deleteDraft } from "@/api/client/campaign/draft.api";
 import { generatePaymentReferenceNumber } from "@/client-side/utils/payment-reference";
 
@@ -153,6 +153,7 @@ export const PaymentCampaign = () => {
 
       if (effectiveDraftId) {
         const patches = useUpdateCampaign.getState().patches ?? {};
+
         base = draftStore.getCampaignPayload(
             effectiveDraftId,
             builderCampaignName || legacyCampaignName || "",
@@ -203,30 +204,49 @@ export const PaymentCampaign = () => {
         country: values.country,
         company: values.company ?? "",
         vatNumber: values.vatNumber ?? "",
-        amount: Number(base?.campaignPrice ?? builderTotalPrice ?? 0),
+        amount: Number(
+            base?.campaignPrice ??
+            base?.totalPrice ??
+            builderTotalPrice ??
+            0,
+        ),
         selectedPaymentMethod: selectedIdPayment,
         referenceNumber,
       };
 
-      const payload = {
-        ...base,
-        campaignName: finalCampaignName,
-        paymentDetails,
-      };
-      await postCampaign(payload);
+
+
       if (proposalId) {
+        await approveProposalCampaign(proposalId, optionIndex, paymentDetails);
         sessionStorage.removeItem("proposalPaymentPayload");
+      } else {
+        const payload = {
+          ...base,
+          campaignName: finalCampaignName,
+          paymentDetails,
+        };
+
+        await postCampaign(payload);
       }
+
       if (effectiveDraftId) {
         await deleteDraft(effectiveDraftId);
         draftStore.clearCampaign(effectiveDraftId);
       }
 
       setModalCompleted(true);
-      toast.success("Campaign saved successfully!");
+      toast.success(
+          proposalId
+              ? "Proposal approved successfully!"
+              : "Campaign saved successfully!",
+      );
     } catch (e) {
       console.error(e);
-      toast.error("Failed to save campaign");
+      toast.error(
+          proposalId
+              ? "Failed to approve proposal"
+              : "Failed to save campaign",
+      );
     } finally {
       setIsPaymentSubmitting(false);
     }

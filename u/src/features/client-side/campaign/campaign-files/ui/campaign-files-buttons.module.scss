@@ -1,0 +1,37 @@
+.filesButtons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.fileButton {
+  flex: 0 0 auto;
+
+  min-width: 112px;
+
+  width: auto;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgb(185, 208, 255);
+  gap: 4px;
+  border-radius: 8px;
+  padding: 4px 12px;
+  background-color: #fff;
+  font-weight: 400;
+  font-size: 12px;
+  height: 36px;
+}
+
+@media screen and (max-width: 520px) {
+  .filesButtons {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .fileButton {
+    flex: 1 1 140px;
+  }
+}
