@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 export const negotiationSchema = z
 .object({
-  initialPrice: z
+  price: z
   .number({ error: "Price is required" })
   .min(1, { message: "Price must be at least 1" }),
 
@@ -27,7 +27,7 @@ export const negotiationSchema = z
     ctx.addIssue({
       code: "custom",
       message: "Currency is required",
-      path: ["initialPrice"],
+      path: ["price"],
     });
   }
 });

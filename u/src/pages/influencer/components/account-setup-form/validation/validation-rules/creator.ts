@@ -1,22 +1,29 @@
 import { z } from "zod";
+import { CONTENT_FOCUS_OPTIONS } from "@/pages/influencer/components/account-setup-form/components/checkbox-button-list/data/creator-categories.data.ts";
+import { MUSIC_GENRES_CREATOR } from "@/pages/influencer/components/account-setup-form/components/checkbox-button-list/data/music-genres.data.ts";
 import {
-  ENTERTAINMENT_CATEGORIES_DATA, MUSIC_CATEGORIES_DATA,
-} from "@/pages/influencer/components/account-setup-form/components/checkbox-button-list/data/creator-categories.data.ts";
+  collectLeafValues,
+} from "@/pages/influencer/components/account-setup-form/components/checkbox-button-list/utils/tree-options.helpers.ts";
 
-const pickValues = (data: Array<{ value: string }>) => data.map((x) => x.value);
+const creatorMusicGenreLeafValues = collectLeafValues(MUSIC_GENRES_CREATOR);
+const creatorContentFocusLeafValues = collectLeafValues(CONTENT_FOCUS_OPTIONS);
 
-const ENTERTAINMENT_SET = new Set(pickValues(ENTERTAINMENT_CATEGORIES_DATA));
-const MUSIC_SET = new Set(pickValues(MUSIC_CATEGORIES_DATA));
-
-export const creatorCategoriesSchema = z
+export const requiredCreatorMusicGenres = z
 .array(z.string())
 .superRefine((values, ctx) => {
-  const arr = Array.isArray(values) ? values : [];
+  if (!values.some((value) => creatorMusicGenreLeafValues.has(value))) {
+    ctx.addIssue({
+      code: "custom",
+      path: [],
+      message: "Select at least one option",
+    });
+  }
+});
 
-  const hasEntertainment = arr.some((v) => ENTERTAINMENT_SET.has(v));
-  const hasMusic = arr.some((v) => MUSIC_SET.has(v));
-
-  if (!hasEntertainment || !hasMusic) {
+export const requiredCreatorContentFocus = z
+.array(z.string())
+.superRefine((values, ctx) => {
+  if (!values.some((value) => creatorContentFocusLeafValues.has(value))) {
     ctx.addIssue({
       code: "custom",
       path: [],

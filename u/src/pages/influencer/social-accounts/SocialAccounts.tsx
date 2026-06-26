@@ -90,7 +90,7 @@ export const SocialAccounts = () => {
               payload: cleanedData,
             });
             onResetAccountForm();
-            if (cleanedData.initialPrice && cleanedData.initialPrice !== account?.initialPrice) {
+            if (cleanedData.price && cleanedData.price !== account?.price) {
               // setIsPriceModalOpen(true);
             }
           } catch (error) {

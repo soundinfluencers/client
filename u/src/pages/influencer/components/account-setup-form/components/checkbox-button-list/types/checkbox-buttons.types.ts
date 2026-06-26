@@ -1,6 +1,10 @@
-export interface ICheckboxButton {
-  id: string;
+export type NestedOption = {
   label: string;
   value: string;
-  children?: ICheckboxButton[];
-}
+  children?: NestedOption[];
+};
+
+export type TreeNodeMeta = {
+  value: string;
+  parentValue: string | null;
+};

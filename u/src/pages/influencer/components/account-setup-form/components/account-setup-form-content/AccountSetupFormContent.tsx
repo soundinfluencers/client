@@ -11,9 +11,9 @@ import { Modal } from '@components/ui/modal-fix/Modal.tsx';
 
 import { PLATFORM_CONFIG } from '../../data/account-setup-form.data';
 import { ACCOUNT_INPUTS_DATA } from './data/user-inputs.data';
-import { MUSIC_GENRES_DATA } from '../checkbox-button-list/data/music-genres.data';
-import { THEME_TOPICS_DATA } from '../checkbox-button-list/data/categories.data';
-import { ENTERTAINMENT_CATEGORIES_DATA, MUSIC_CATEGORIES_DATA } from '../checkbox-button-list/data/creator-categories.data';
+import { MUSIC_GENRES_COMMUNITY, MUSIC_GENRES_CREATOR } from '../checkbox-button-list/data/music-genres.data';
+import { THEME_TOPICS } from '../checkbox-button-list/data/categories.data';
+import { CONTENT_FOCUS_OPTIONS } from '../checkbox-button-list/data/creator-categories.data';
 
 import { normalizeAccountForApi } from '@/pages/influencer/shared/utils/socialAccount.mapper';
 import type { TSocialAccounts } from '@/types/user/influencer.types';
@@ -76,21 +76,21 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
 
         {isCommunity && (
           <>
-            {platformConfig.musicGenres && (
+            {platformConfig.communityMusicGenres && (
               <CheckboxButtonList
-                data={MUSIC_GENRES_DATA}
+                data={MUSIC_GENRES_COMMUNITY}
                 title="Music genres"
                 subtitle="Select all the applicable"
-                name="musicGenres"
+                name="communityMusicGenres"
               />
             )}
 
             {platformConfig.themeTopics && (
               <CheckboxButtonList
-                data={THEME_TOPICS_DATA}
+                data={THEME_TOPICS}
                 title="Theme topics"
                 subtitle="Select this if the main core theme of the page (optional)"
-                name="categories"
+                name="communityThemeTopics"
               />
             )}
           </>
@@ -99,16 +99,16 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
         {isCreator && (
           <>
             <CheckboxButtonList
-              data={ENTERTAINMENT_CATEGORIES_DATA}
-              title="Entertainment categories"
+              data={MUSIC_GENRES_CREATOR}
+              title="Music genres"
               subtitle="Select all the applicable"
-              name="creatorCategories"
+              name="creatorMusicGenres"
             />
             <CheckboxButtonList
-              data={MUSIC_CATEGORIES_DATA}
-              title="Music categories"
+              data={CONTENT_FOCUS_OPTIONS}
+              title="Content focus"
               subtitle="Select all the applicable"
-              name="creatorCategories"
+              name="creatorContentFocus"
             />
           </>
         )}

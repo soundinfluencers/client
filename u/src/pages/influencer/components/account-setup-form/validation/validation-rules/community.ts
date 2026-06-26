@@ -1,12 +1,24 @@
 import { z } from "zod";
+import { MUSIC_GENRES_COMMUNITY } from "@/pages/influencer/components/account-setup-form/components/checkbox-button-list/data/music-genres.data.ts";
+import {
+  collectLeafValues,
+} from "@/pages/influencer/components/account-setup-form/components/checkbox-button-list/utils/tree-options.helpers.ts";
 
-export const musicGenresSchema = z.object({
-  genre: z.string().min(1),
-  subGenres: z.array(z.string()),
+const communityMusicGenreLeafValues = collectLeafValues(MUSIC_GENRES_COMMUNITY);
+
+export const requiredCommunityMusicGenres = z
+.array(z.string())
+.superRefine((values, ctx) => {
+  if (!values.some((value) => communityMusicGenreLeafValues.has(value))) {
+    ctx.addIssue({
+      code: "custom",
+      path: [],
+      message: "Select at least 1 music genre",
+    });
+  }
 });
 
-export const requiredMusicGenres = z
-.array(musicGenresSchema)
-.min(1, { message: "Select at least 1 music genre" });
-
-export const optionalThemeTopics = z.array(z.string()).optional().default([]);
+export const optionalCommunityThemeTopics = z
+.array(z.string())
+.optional()
+.default([]);

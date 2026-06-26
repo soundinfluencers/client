@@ -4,11 +4,10 @@ import {
   requiredAccountName, requiredFollowers, requiredPrice, requiredProfileLink, profileCategoryEnum,
 } from "@/pages/influencer/components/account-setup-form/validation/validation-rules/base-fields.ts";
 import {
-  musicGenresSchema,
-  optionalThemeTopics, requiredMusicGenres,
+  optionalCommunityThemeTopics, requiredCommunityMusicGenres,
 } from "@/pages/influencer/components/account-setup-form/validation/validation-rules/community.ts";
 import {
-  creatorCategoriesSchema
+  requiredCreatorContentFocus, requiredCreatorMusicGenres,
 } from "@/pages/influencer/components/account-setup-form/validation/validation-rules/creator.ts";
 import {
   audienceInsightsSchema
@@ -34,9 +33,10 @@ const socialAccountDraftBase = z.object({
   price: requiredPrice,
   currency: profileCurrencyEnum,
 
-  musicGenres: z.array(musicGenresSchema).default([]),
-  categories: optionalThemeTopics,
-  creatorCategories: z.array(z.string()).default([]),
+  communityMusicGenres: z.array(z.string()).default([]),
+  communityThemeTopics: optionalCommunityThemeTopics,
+  creatorMusicGenres: z.array(z.string()).default([]),
+  creatorContentFocus: z.array(z.string()).default([]),
 
   countries: audienceInsightsSchema.optional().default(emptyCountries),
 });
@@ -47,12 +47,13 @@ const instagramAndTiktokAndYoutubeBase = socialAccountDraftBase.extend({
 
 const communitySchema = instagramAndTiktokAndYoutubeBase.extend({
   profileCategory: z.literal("community"),
-  musicGenres: requiredMusicGenres,
+  communityMusicGenres: requiredCommunityMusicGenres,
 });
 
 const creatorSchema = instagramAndTiktokAndYoutubeBase.extend({
   profileCategory: z.literal("creator"),
-  creatorCategories: creatorCategoriesSchema,
+  creatorMusicGenres: requiredCreatorMusicGenres,
+  creatorContentFocus: requiredCreatorContentFocus,
 });
 
 const instagramAndTiktokAndYoutubeSchema = z.discriminatedUnion(
@@ -62,19 +63,19 @@ const instagramAndTiktokAndYoutubeSchema = z.discriminatedUnion(
 
 const spotifyAndSoundcloudSchema = socialAccountDraftBase.extend({
   profileCategory: z.literal("community"),
-  musicGenres: requiredMusicGenres,
+  communityMusicGenres: requiredCommunityMusicGenres,
 });
 
 const facebookSchema = socialAccountDraftBase.extend({
   profileCategory: z.literal("community"),
-  musicGenres: requiredMusicGenres,
+  communityMusicGenres: requiredCommunityMusicGenres,
   countries: audienceInsightsSchema,
 });
 
 const pressSchema = socialAccountDraftBase.extend({
   profileCategory: z.literal("community"),
   followers: z.preprocess(() => 0, z.literal(0)),
-  musicGenres: requiredMusicGenres,
+  communityMusicGenres: requiredCommunityMusicGenres,
 });
 
 export const getAccountSchemaByPlatform = (platform: TSocialAccounts) => {

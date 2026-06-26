@@ -18,7 +18,7 @@ export type TSettingMode =
 // Form configuration types (for different platforms)
 type TPlatformConfig = {
   switcher: boolean;
-  musicGenres: boolean;
+  communityMusicGenres: boolean;
   themeTopics: boolean;
   audienceInsights: boolean;
 };
