@@ -122,8 +122,9 @@
 
   &__child-item {
     display: flex;
-    align-items: center;
-    gap: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
 
     @media screen and (max-width: 500px) {
       gap: 8px;

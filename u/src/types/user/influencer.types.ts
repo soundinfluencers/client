@@ -29,13 +29,20 @@ export type SocialAccountDraft = {
   logoUrl: string | null;
 
   profileCategory: ProfileCategory;
-  initialPrice: number | null;
+  price: number | null;
   currency: ProfileCurrency;
 
-  musicGenres: MusicGenreItem[];
-  categories: string[];
+  communityMusicGenres?: string[];
+  communityThemeTopics?: string[];
+  creatorMusicGenres?: string[];
+  creatorContentFocus?: string[];
 
-  creatorCategories: string[];
+  /** @deprecated Legacy display compatibility only. Account setup submit strips this field. */
+  musicGenres?: MusicGenreItem[];
+  /** @deprecated Legacy display compatibility only. Account setup submit strips this field. */
+  categories?: string[];
+  /** @deprecated Legacy display compatibility only. Account setup submit strips this field. */
+  creatorCategories?: string[];
 
   countries: CountryItem[];
 };
@@ -84,10 +91,15 @@ export interface InfluencerProfileApi {
 }
 
 // Create social account DTO
-export type TCreateSocialAccountDTO = SocialAccountDraft & { socialMedia: TSocialAccounts };
+export type TCreateSocialAccountDTO = Omit<SocialAccountDraft, "musicGenres" | "categories" | "creatorCategories"> & {
+  socialMedia: TSocialAccounts;
+};
 
 // Update social account DTO
-export type TUpdateSocialAccountDTO = SocialAccountDraft & { accountId: string; socialMedia: TSocialAccounts };
+export type TUpdateSocialAccountDTO = Omit<SocialAccountDraft, "musicGenres" | "categories" | "creatorCategories"> & {
+  accountId: string;
+  socialMedia: TSocialAccounts;
+};
 
 // Delete social account DTO
 export interface TDeleteSocialAccountDTO {

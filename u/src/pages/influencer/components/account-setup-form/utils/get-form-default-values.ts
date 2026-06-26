@@ -18,10 +18,11 @@ export const getDefaultValues = (
     followers: null,
     logoUrl: "",
     profileCategory: "community",
-    musicGenres: [],
-    categories: [],
-    creatorCategories: [],
-    initialPrice: null,
+    communityMusicGenres: [],
+    communityThemeTopics: [],
+    creatorMusicGenres: [],
+    creatorContentFocus: [],
+    price: null,
     currency: "EUR",
     countries: makeEmptyCountries(), // 5 empty slots
   };
