@@ -49,6 +49,10 @@ export interface IPromoCard extends CampaignAddedAccount {
   prices: Prices;
   socialMedia: string;
   countries: Country[];
+  communityMusicGenres?: string[];
+  communityThemeTopics?: string[];
+  creatorMusicGenres?: string[];
+  creatorContentFocus?: string[];
   musicGenres: string[];
   creatorCategories: string[];
   categories: string[];

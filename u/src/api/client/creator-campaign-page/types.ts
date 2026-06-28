@@ -1,11 +1,11 @@
 export interface MultiPromoAccountsBody {
   socialMedias: string[];
   countries?: string[];
-  budget?: string;
+  budget?: number;
   budgetCurrency?: string;
-  additionalTopics?: string[];
   profileTypes?: string[];
-  musicCategories?: string[];
-  musicGenres: string[];
-  musicGenresFilterMethod?: string;
+  communityMusicGenres: string[];
+  communityThemeTopics: string[];
+  creatorMusicGenres: string[];
+  creatorContentFocus: string[];
 }

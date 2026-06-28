@@ -1,14 +1,25 @@
 export type CampaignFilterGroup =
     | "socialMedia"
     | "countries"
-    | "genres"
     | "profileType"
+    | "genres"
     | "addTopics"
-    | "musicCategories"
+    | "communityMusicGenres"
+    | "creatorMusicGenres"
+    | "communityThemeTopics"
+    | "creatorContentFocus"
     | "entertainmentCategories"
     | string;
 
 export type CampaignFilterId = string;
+
+export type CampaignApiTargetGroup =
+    | "communityMusicGenres"
+    | "communityThemeTopics"
+    | "creatorMusicGenres"
+    | "creatorContentFocus";
+
+export type CampaignApiTargets = Partial<Record<CampaignApiTargetGroup, string[]>>;
 
 export type CampaignFilterItem = {
     id: string;
@@ -17,6 +28,7 @@ export type CampaignFilterItem = {
     group: string;
     filterName: string;
     count: number;
+    apiTargets?: CampaignApiTargets;
     children?: CampaignFilterItem[];
 };
 
@@ -51,15 +63,14 @@ export type CampaignCardsViewMode = "grid" | "table";
 export type CampaignFiltersRequestBody = {
     socialMedias: string[];
     profileTypes: string[];
-    musicGenres: string[];
-    musicGenresFilterMethod: CampaignFilterMethod;
     countries: string[];
-    additionalTopics: string[];
-    musicCategories: string[];
-    entertainmentCategories: string[];
+    communityMusicGenres: string[];
+    communityThemeTopics: string[];
+    creatorMusicGenres: string[];
+    creatorContentFocus: string[];
 };
 
 export type PromoAccountsFiltersBody = CampaignFiltersRequestBody & {
     budget?: number;
-    budgetCurrency: string;
+    budgetCurrency?: string;
 };

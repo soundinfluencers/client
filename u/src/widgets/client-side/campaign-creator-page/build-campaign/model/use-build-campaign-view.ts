@@ -28,12 +28,15 @@ const isProfileTypeSection = (section: CampaignFilterSection) => {
     return section.id === "profile-type";
 };
 
-const isHiddenForCommunitySection = (section: CampaignFilterSection) => {
-    return ["music-categories", "additional-topics"].includes(section.id);
-};
+const COMMUNITY_SECTION_IDS = ["community-music-genres", "community-theme-topics"];
+const CREATOR_SECTION_IDS = ["creator-music-genres", "creator-content-focus"];
 
 const isCommunityFilterItem = (item: CampaignFilterItem) => {
     return item.id === "community" || normalize(item.filterName) === "community";
+};
+
+const isCreatorFilterItem = (item: CampaignFilterItem) => {
+    return item.id === "creator" || normalize(item.filterName) === "creator";
 };
 
 const collectFilterIds = (items: CampaignFilterItem[]) => {
@@ -149,9 +152,8 @@ export const useBuildCampaignView = () => {
         return buildCampaignFiltersRequestBody({
             sections: initialSections,
             selectedIds: effectiveSelectedFilterIds,
-            musicGenresFilterMethod: filterMethod,
         });
-    }, [initialSections, effectiveSelectedFilterIds, filterMethod]);
+    }, [initialSections, effectiveSelectedFilterIds]);
 
     const filtersQuery = useCampaignFiltersQuery(filtersBody);
     const sections = filtersQuery.data ?? bootstrapSections;
@@ -169,35 +171,53 @@ export const useBuildCampaignView = () => {
         });
     }, [sections, effectiveSelectedFilterIds]);
 
-    const hiddenForCommunityIds = React.useMemo(() => {
-        if (!isCommunitySelected) return [];
+    const isCreatorSelected = React.useMemo(() => {
+        const profileTypeSection = sections.find(isProfileTypeSection);
+
+        if (!profileTypeSection) return false;
+
+        return profileTypeSection.filters.some((item) => {
+            return (
+                effectiveSelectedFilterIds.includes(item.id) &&
+                isCreatorFilterItem(item)
+            );
+        });
+    }, [sections, effectiveSelectedFilterIds]);
+
+    const hiddenProfileSectionIds = React.useMemo(() => {
+        if (isCommunitySelected && !isCreatorSelected) return CREATOR_SECTION_IDS;
+        if (isCreatorSelected && !isCommunitySelected) return COMMUNITY_SECTION_IDS;
+        return [];
+    }, [isCommunitySelected, isCreatorSelected]);
+
+    const hiddenProfileFilterIds = React.useMemo(() => {
+        if (!hiddenProfileSectionIds.length) return [];
 
         return sections
-            .filter(isHiddenForCommunitySection)
+            .filter((section) => hiddenProfileSectionIds.includes(section.id))
             .flatMap(collectSectionFilterIds);
-    }, [sections, isCommunitySelected]);
+    }, [sections, hiddenProfileSectionIds]);
 
     const visibleSelectedFilterIds = React.useMemo(() => {
-        if (!isCommunitySelected) return effectiveSelectedFilterIds;
+        if (!hiddenProfileFilterIds.length) return effectiveSelectedFilterIds;
 
         return effectiveSelectedFilterIds.filter(
-            (id) => !hiddenForCommunityIds.includes(id),
+            (id) => !hiddenProfileFilterIds.includes(id),
         );
     }, [
         effectiveSelectedFilterIds,
-        hiddenForCommunityIds,
-        isCommunitySelected,
+        hiddenProfileFilterIds,
     ]);
 
     const visibleSections = React.useMemo(() => {
         const notEmptySections = sections.filter(hasFilters);
 
-        if (!isCommunitySelected) return notEmptySections;
+        if (!hiddenProfileSectionIds.length) return notEmptySections;
 
         return notEmptySections.filter(
-            (section) => !isHiddenForCommunitySection(section),
+            (section) => !hiddenProfileSectionIds.includes(section.id),
         );
-    }, [sections, isCommunitySelected]);
+    }, [sections, hiddenProfileSectionIds]);
 
     const selected = React.useMemo(() => {
         if (!visibleSections.length) return [];
@@ -212,14 +232,12 @@ export const useBuildCampaignView = () => {
         return buildPromoAccountsFiltersBody({
             sections: visibleSections,
             selectedIds: visibleSelectedFilterIds,
-            musicGenresFilterMethod: filterMethod,
             budget: selectedBudget,
             budgetCurrency: selectedCurrencyCode,
         });
     }, [
         visibleSections,
         visibleSelectedFilterIds,
-        filterMethod,
         selectedBudget,
         selectedCurrencyCode,
     ]);
@@ -391,9 +409,21 @@ export const useBuildCampaignView = () => {
                 })
                 : false;
 
-            if (nextIsCommunitySelected) {
+            const nextIsCreatorSelected = profileTypeSection
+                ? profileTypeSection.filters.some((filterItem) => {
+                    return (
+                        next.includes(filterItem.id) &&
+                        isCreatorFilterItem(filterItem)
+                    );
+                })
+                : false;
+
+            if (nextIsCommunitySelected !== nextIsCreatorSelected) {
+                const sectionIdsToHide = nextIsCommunitySelected
+                    ? CREATOR_SECTION_IDS
+                    : COMMUNITY_SECTION_IDS;
                 const idsToRemove = sections
-                    .filter(isHiddenForCommunitySection)
+                    .filter((section) => sectionIdsToHide.includes(section.id))
                     .flatMap(collectSectionFilterIds);
 
                 next = next.filter((id) => !idsToRemove.includes(id));

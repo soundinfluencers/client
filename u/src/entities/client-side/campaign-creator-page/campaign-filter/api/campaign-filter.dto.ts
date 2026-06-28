@@ -1,8 +1,11 @@
+import type { CampaignApiTargets } from "../model/campaign-filter.types";
+
 export type CampaignFilterItemDto = {
     id: string;
     group: string;
     filterName: string;
     count: number;
+    apiTargets?: CampaignApiTargets;
     children?: CampaignFilterItemDto[];
 };
 

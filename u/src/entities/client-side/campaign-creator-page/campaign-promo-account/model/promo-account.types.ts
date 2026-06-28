@@ -17,7 +17,9 @@ export type PromoAccount = {
     countries: PromoAccountCountry[];
     averageViews: number;
     engagementRate: number;
+    communityMusicGenres: string[];
+    communityThemeTopics: string[];
+    creatorMusicGenres: string[];
+    creatorContentFocus: string[];
     musicGenres: string[];
-    creatorCategories: string[];
-    categories: string[];
 };

@@ -17,9 +17,10 @@ export type PromoAccountDto = {
     averageViews: number;
     engagementRate: number;
     countries: PromoAccountCountryDto[];
-    musicGenres: string[];
-    creatorCategories: string[];
-    categories: string[];
+    communityMusicGenres: string[];
+    communityThemeTopics: string[];
+    creatorMusicGenres: string[];
+    creatorContentFocus: string[];
 };
 
 export type GetPromoAccountsResponseDto = {
@@ -46,12 +47,11 @@ export type SearchPromoAccountsResponseDto = {
 export type FilterPromoAccountsBodyDto = {
     socialMedias: string[];
     profileTypes: string[];
-    musicGenres: string[];
-    musicGenresFilterMethod: string;
     countries: string[];
-    additionalTopics: string[];
-    budget: number;
-    budgetCurrency: string;
-    musicCategories: string[];
-    entertainmentCategories: string[];
+    communityMusicGenres: string[];
+    communityThemeTopics: string[];
+    creatorMusicGenres: string[];
+    creatorContentFocus: string[];
+    budget?: number;
+    budgetCurrency?: string;
 };

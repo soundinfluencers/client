@@ -12,6 +12,10 @@ export type ConnectedAccount = {
     prices: Record<string, number>;
     socialMedia: SocialMedia;
     countries: Country[];
+    communityMusicGenres?: string[];
+    communityThemeTopics?: string[];
+    creatorMusicGenres?: string[];
+    creatorContentFocus?: string[];
     musicGenres: string[];
     creatorCategories: string[];
     categories: string[];

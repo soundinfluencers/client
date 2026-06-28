@@ -24,13 +24,12 @@ export type GetProfileFiltersResponse = ApiResponse<{
 export type SocialAccountFilterPayload = {
     socialMedias: SocialMedia[];
     profileTypes: string[];
-    musicGenres: string[];
-    musicGenresFilterMethod: "and" | "or" | string;
     countries: string[];
-    additionalTopics: string[];
+    communityMusicGenres: string[];
+    communityThemeTopics: string[];
+    creatorMusicGenres: string[];
+    creatorContentFocus: string[];
     budget: number;
-    musicCategories: string[];
-    entertainmentCategories: string[];
 };
 
 export type SocialAccountSearchPayload = {

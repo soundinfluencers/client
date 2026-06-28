@@ -11,10 +11,22 @@ export interface FilterItem {
     | "addTopics"
     | "genres"
     | "profileType"
-    | "musicCategories";
+    | "communityMusicGenres"
+    | "communityThemeTopics"
+    | "creatorMusicGenres"
+    | "creatorContentFocus";
   id: string;
   filterName: string;
   count: number;
+  apiTargets?: Partial<
+    Record<
+      | "communityMusicGenres"
+      | "communityThemeTopics"
+      | "creatorMusicGenres"
+      | "creatorContentFocus",
+      string[]
+    >
+  >;
   children?: FilterItem[];
 }
 

@@ -11,6 +11,45 @@ type Params = {
   limit: number;
 };
 
+type ApiTargetGroup =
+    | "communityMusicGenres"
+    | "communityThemeTopics"
+    | "creatorMusicGenres"
+    | "creatorContentFocus";
+
+const flattenSelectedItems = (items: FilterItem[]): FilterItem[] =>
+    items.flatMap((item) =>
+        item.children?.length ? item.children : [item],
+    );
+
+const unique = (values: string[]) => [...new Set(values.filter(Boolean))];
+
+const getTargetValues = (
+    selected: FilterItem[],
+    group: ApiTargetGroup,
+): string[] =>
+    unique(
+        flattenSelectedItems(selected).flatMap((item) => {
+          const targets = item.apiTargets?.[group];
+
+          if (targets?.length) return targets;
+          if (item.group === group) return [item.id];
+
+          return [];
+        }),
+    );
+
+const getAllowedProfileTargets = (profileTypes: string[]) => {
+  const normalized = profileTypes.map((item) => item.toLowerCase());
+  const hasCommunity = normalized.includes("community");
+  const hasCreator = normalized.includes("creator");
+
+  return {
+    includeCommunity: !(hasCreator && !hasCommunity),
+    includeCreator: !(hasCommunity && !hasCreator),
+  };
+};
+
 export const usePromoAccountsFilters = (
     {
       selected,
@@ -32,29 +71,25 @@ export const usePromoAccountsFilters = (
           item.children?.length ? item.children.map((child) => child.id) : item.id,
       );
 
-  const genres = selected
-      .filter((item) => item.group === "genres")
-      .flatMap((item) => {
-        const parent = item.id;
-
-        if (item.children?.length) {
-          return item.children.map((child) => `${parent} ${child.id}`.trim());
-        }
-
-        return [parent];
-      });
-
   const profileType = selected
       .filter((item) => item.group === "profileType")
       .map((item) => item.id);
 
-  const additionalTopics = selected
-      .filter((item) => item.group === "addTopics")
-      .map((item) => item.id);
+  const { includeCommunity, includeCreator } =
+      getAllowedProfileTargets(profileType);
 
-  const musicCategories = selected
-      .filter((item) => item.group === "musicCategories")
-      .map((item) => item.id);
+  const communityMusicGenres = includeCommunity
+      ? getTargetValues(selected, "communityMusicGenres")
+      : [];
+  const communityThemeTopics = includeCommunity
+      ? getTargetValues(selected, "communityThemeTopics")
+      : [];
+  const creatorMusicGenres = includeCreator
+      ? getTargetValues(selected, "creatorMusicGenres")
+      : [];
+  const creatorContentFocus = includeCreator
+      ? getTargetValues(selected, "creatorContentFocus")
+      : [];
 
   const normalizedBudget =
       typeof budget === "number" && budget > 0 ? budget : undefined;
@@ -62,11 +97,11 @@ export const usePromoAccountsFilters = (
   const body = {
     socialMedias,
     countries,
-    additionalTopics,
     profileTypes: profileType,
-    musicCategories,
-    musicGenresFilterMethod: filterMethod,
-    musicGenres: genres,
+    communityMusicGenres,
+    communityThemeTopics,
+    creatorMusicGenres,
+    creatorContentFocus,
     ...(normalizedBudget
         ? {
           budget: normalizedBudget,
@@ -78,11 +113,12 @@ export const usePromoAccountsFilters = (
   const key = JSON.stringify({
     socialMedias: [...socialMedias].sort(),
     countries: [...countries].sort(),
-    genres: [...genres].sort(),
+    communityMusicGenres: [...communityMusicGenres].sort(),
+    communityThemeTopics: [...communityThemeTopics].sort(),
+    creatorMusicGenres: [...creatorMusicGenres].sort(),
+    creatorContentFocus: [...creatorContentFocus].sort(),
     profileType: [...profileType].sort(),
-    additionalTopics: [...additionalTopics].sort(),
-    musicCategories: [...musicCategories].sort(),
-    musicGenresFilterMethod: filterMethod,
+    filterMethod,
     budget: normalizedBudget ?? null,
     currency: normalizedBudget ? currency : null,
     sortBy,

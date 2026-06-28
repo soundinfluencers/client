@@ -3,7 +3,7 @@ import type {
     CampaignFilterSection,
     CampaignFiltersRequestBody,
 } from "../model/campaign-filter.types";
-import { mapCampaignFilterSectionDto } from "../model/campaign-filter.mappers";
+import { mapCampaignFilterSectionsDto } from "../model/campaign-filter.mappers";
 import $api from "@/api/api.ts";
 
 
@@ -16,5 +16,5 @@ export const getCampaignFilters = async (
     );
 
     const items = response.data?.data?.filterArr ?? [];
-    return items.map(mapCampaignFilterSectionDto);
+    return mapCampaignFilterSectionsDto(items);
 };
