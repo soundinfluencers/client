@@ -1,50 +1,69 @@
-import type { ICheckboxButton } from "../types/checkbox-buttons.types";
+import type { NestedOption } from "../types/checkbox-buttons.types";
 
-export const MUSIC_GENRES_DATA: ICheckboxButton[] = [
+export const MUSIC_GENRES_COMMUNITY: NestedOption[] = [
   {
-    id: "techno",
+    value: "techno",
     label: "Techno",
-    value: "Techno",
     children: [
-      {
-        id: "techno-melodic",
-        label: "Melodic, Minimal",
-        value: "Melodic, Minimal",
-      },
-      {
-        id: "techno-hard",
-        label: "Hard, Peak",
-        value: "Hard, Peak",
-      },
+      { value: "techno_melodic_minimal", label: "Melodic, Minimal" },
+      { value: "techno_hard_peak", label: "Hard, Peak" },
     ],
   },
   {
-    id: "house",
+    value: "house",
     label: "House",
-    value: "House",
+    children: [
+      { value: "house_tech_house", label: "Tech House" },
+      { value: "house_melodic_afro", label: "Melodic, Afro" },
+    ],
+  },
+  { value: "edm", label: "EDM" },
+  { value: "drum_and_bass", label: "D&B" },
+  { value: "bass", label: "Bass" },
+  { value: "psy_trance", label: "Psy, Trance" },
+  { value: "dubstep", label: "Dubstep" },
+  { value: "hip_hop", label: "Hip-hop" },
+  { value: "pop", label: "Pop" },
+];
+
+export const MUSIC_GENRES_CREATOR: NestedOption[] = [
+  {
+    value: "electronic_music",
+    label: "Electronic Music",
     children: [
       {
-        id: "tech-house",
-        label: "Tech House",
-        value: "Tech House",
+        value: "techno",
+        label: "Techno",
+        children: [
+          { value: "electronic_techno_melodic_minimal", label: "Melodic, Minimal" },
+          { value: "electronic_techno_hard_peak", label: "Hard, Peak" },
+        ],
       },
-      { id: "melodic", label: "Melodic", value: "Melodic" },
-      { id: "afro-house", label: "Afro House", value: "Afro House" },
+      {
+        value: "house",
+        label: "House",
+        children: [
+          { value: "electronic_house_tech_house", label: "Tech House" },
+          { value: "electronic_house_melodic_afro", label: "Melodic, Afro" },
+        ],
+      },
+      { value: "electronic_edm", label: "EDM" },
+      { value: "electronic_drum_and_bass", label: "D&B" },
+      { value: "electronic_bass", label: "Bass" },
+      { value: "electronic_psy_trance", label: "Psy, Trance" },
+      { value: "electronic_dubstep", label: "Dubstep" },
     ],
   },
   {
-    id: "edm",
-    label: "EDM",
-    value: "EDM",
+    value: "mainstream_music",
+    label: "Mainstream Music",
+    children: [
+      { value: "mainstream_pop", label: "Pop" },
+      { value: "mainstream_hip_hop", label: "Hip-hop" },
+      { value: "mainstream_arabic", label: "Arabic" },
+      { value: "mainstream_k_pop", label: "K-Pop" },
+      { value: "mainstream_metal_rock", label: "Metal/Rock" },
+      { value: "mainstream_latin", label: "Latin" },
+    ],
   },
-  {
-    id: "d&b",
-    label: "D&B",
-    value: "D&B",
-  },
-  { id: "bass", label: "Bass", value: "Bass" },
-  { id: "psy-trance", label: "Psy, Trance", value: "Psy, Trance" },
-  { id: "dubstep", label: "Dubstep", value: "Dubstep" },
-  { id: "pop", label: "Pop", value: "Pop" },
-  { id: "hip-hop", label: "Hip-Hop", value: "Hip-hop" },
 ];

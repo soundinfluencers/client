@@ -6,7 +6,7 @@ export const NEGOTIATION_ACCOUNT_CARD_FIELDS: FieldsConfig = {
     { key: "profileLink", label: "Link:", type: "link" },
     { key: "followers", label: "Followers:", type: "text" },
     { key: "countries", label: "Audience countries:", type: "countries" },
-    { key: "initialPrice", label: "Price:", type: "price" },
+    { key: "price", label: "Price:", type: "price" },
     // creatorCategories only for creator
     { key: "creatorCategories", label: "Creator categories:", type: "stringChips", when: { category: "creator" } },
     // musicGenres and topics for community
@@ -19,7 +19,7 @@ export const NEGOTIATION_ACCOUNT_CARD_FIELDS: FieldsConfig = {
     { key: "profileLink", label: "Link:", type: "link" },
     { key: "followers", label: "Followers:", type: "text" },
     { key: "countries", label: "Audience countries:", type: "countries" },
-    { key: "initialPrice", label: "Price:", type: "price" },
+    { key: "price", label: "Price:", type: "price" },
     // creatorCategories only for creator
     { key: "creatorCategories", label: "Creator categories:", type: "stringChips", when: { category: "creator" } },
     // musicGenres and topics for community
@@ -32,7 +32,7 @@ export const NEGOTIATION_ACCOUNT_CARD_FIELDS: FieldsConfig = {
     { key: "profileLink", label: "Link:", type: "link" },
     { key: "followers", label: "Followers:", type: "text" },
     { key: "countries", label: "Audience countries:", type: "countries" },
-    { key: "initialPrice", label: "Price:", type: "price" },
+    { key: "price", label: "Price:", type: "price" },
     // creatorCategories only for creator
     { key: "creatorCategories", label: "Creator categories:", type: "stringChips", when: { category: "creator" } },
     // musicGenres and topics for community
@@ -46,7 +46,7 @@ export const NEGOTIATION_ACCOUNT_CARD_FIELDS: FieldsConfig = {
     { key: "profileLink", label: "Link:", type: "link" },
     { key: "followers", label: "Followers:", type: "text" },
     { key: "musicGenres", label: "Music genres:", type: "chips" },
-    { key: "initialPrice", label: "Price:", type: "price" },
+    { key: "price", label: "Price:", type: "price" },
   ],
 
   soundcloud: [
@@ -54,7 +54,7 @@ export const NEGOTIATION_ACCOUNT_CARD_FIELDS: FieldsConfig = {
     { key: "profileLink", label: "Link:", type: "link" },
     { key: "followers", label: "Followers:", type: "text" },
     { key: "musicGenres", label: "Music genres:", type: "chips" },
-    { key: "initialPrice", label: "Price:", type: "price" },
+    { key: "price", label: "Price:", type: "price" },
   ],
 
   facebook: [
@@ -65,13 +65,13 @@ export const NEGOTIATION_ACCOUNT_CARD_FIELDS: FieldsConfig = {
     { key: "musicGenres", label: "Music genres:", type: "chips" },
     { key: "categories", label: "Theme topics:", type: "chips", when: { category: "community" } },
     { key: "countries", label: "Audience countries:", type: "countries" },
-    { key: "initialPrice", label: "Price:", type: "price" },
+    { key: "price", label: "Price:", type: "price" },
   ],
 
   press: [
     { key: "username", label: "Account name:", type: "text" },
     { key: "profileLink", label: "Link:", type: "link" },
     { key: "musicGenres", label: "Music genres:", type: "chips" },
-    { key: "initialPrice", label: "Price:", type: "price" },
+    { key: "price", label: "Price:", type: "price" },
   ],
 };
