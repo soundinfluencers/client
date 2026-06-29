@@ -37,7 +37,7 @@ export const BuildCampaign = () => {
                 <p>
                     {isAddInfluencerMode
                         ? "Select new networks to add to this proposal option"
-                        : "Handpick networks, genres, and budgets to tailor your campaign"}
+                        : "Handpick networks, genres, and budgets to tailor your campaign "}
                 </p>
             </div>
 
