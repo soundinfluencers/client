@@ -19,6 +19,7 @@
     "axios": "^1.13.2",
     "bson": "^7.1.1",
     "crypto-js": "^4.2.0",
+    "dompurify": "^3.4.11",
     "flag-icons": "^7.5.0",
     "i18n-iso-countries": "^7.14.0",
     "libphonenumber-js": "^1.12.37",
@@ -37,6 +38,7 @@
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "@types/crypto-js": "^4.2.2",
+    "@types/dompurify": "^3.0.5",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",

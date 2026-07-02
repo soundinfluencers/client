@@ -25,6 +25,7 @@ import {CampaignPostContentRoute} from "@/pages/client-side/campaign-post-conten
 import {CampaignStrategyPage} from "@/pages/client-side/campaign-strategy-page/ui/campaign-strategy-page.tsx";
 import {DashboardPage} from "@/pages/client-side/dashboard";
 import {Campaign} from "@/pages/client-side/campaign";
+import {AiChat} from "@/widgets/ai-chat";
 // import { CampaignAddInfluencer } from "@/pages/client/campaign-add-infuencer/campaign-add-infuencer.tsx";
 
 export const routes: IRoute[] = [
@@ -141,6 +142,14 @@ export const routes: IRoute[] = [
     path: "/promo-share/:id/:type",
     component: CampaignSharePage,
     isProtected: false,
+  },
+  {
+    // Shared by client and influencer — the backend derives the role from the JWT,
+    // so this one route sits above the client/influencer split.
+    name: "AiChat",
+    path: "/ai-chat",
+    component: AiChat,
+    isProtected: true,
   },
   {
     name: "InvoiceHistory",
