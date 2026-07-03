@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Modal } from "@components/ui/modal-fix/Modal";
 
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
+import { useHydrateDraftFromUrl } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/use-hydrate-draft-from-url.ts";
 import { groupCampaignStrategyData } from "../model/campaign-strategy.helpers";
 import { CampaignStrategySection } from "@/widgets/client-side/campaign-tables/ui/campaign-strategy-section";
 
@@ -32,6 +33,8 @@ import {DraftButton} from "@components/ui/draft-button/draft-button.tsx";
 
 
 export const CampaignStrategyPage = () => {
+    useHydrateDraftFromUrl();
+
     const navigate = useNavigate();
 
     const campaignName = useCampaignBuilderStore((s) => s.campaignName);

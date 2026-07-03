@@ -33,7 +33,13 @@ import {
     useCampaignProceedSummary,
 } from "@/widgets/client-side/campaign-creator-page/build-campaign/model/use-campaign-proceed-summary.tsx";
 
+import {
+    useHydrateDraftFromUrl,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/use-hydrate-draft-from-url.ts";
+
 export const CampaignCreatorPage: React.FC = () => {
+    useHydrateDraftFromUrl();
+
     const [searchParams] = useSearchParams();
 
     const isAddInfluencerMode =

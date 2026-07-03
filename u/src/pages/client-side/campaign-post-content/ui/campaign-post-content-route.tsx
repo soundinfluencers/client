@@ -5,6 +5,7 @@ import { CampaignPostContentPage } from "@/widgets/client-side/campaign-post-con
 import styles from "./campaign-post-content.module.scss";
 
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import { useHydrateDraftFromUrl } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/use-hydrate-draft-from-url.ts";
 import { useCampaignStore } from "@/entities/client-side/campaign/store/campaign.store";
 
 import { Breadcrumbs, Container } from "@/components";
@@ -45,6 +46,8 @@ const getGroupsFromContent = (content: any[]) => {
 };
 
 export const CampaignPostContentRoute = () => {
+    useHydrateDraftFromUrl();
+
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
