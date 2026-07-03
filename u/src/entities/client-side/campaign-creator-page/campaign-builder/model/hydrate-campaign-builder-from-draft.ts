@@ -42,8 +42,13 @@ export const hydrateCampaignBuilderFromDraft = (
 
                 source: "manual" as const,
 
+                // The backend GET returns the assignment as `selectedContent`; older callers
+                // expected `selectedCampaignContentItem`. Accept both so the content-to-account
+                // assignment survives draft resume (it silently dropped before).
                 selectedCampaignContentItem:
-                    acc.selectedCampaignContentItem ?? null,
+                    acc.selectedCampaignContentItem ??
+                    (acc as any).selectedContent ??
+                    null,
 
                 dateRequest:
                     acc.dateRequest ?? "ASAP",

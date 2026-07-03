@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { sendAgentMessage, type AgentLink } from "@/api/agent/agent.api.ts";
+import { AiPaymentModal } from "./ai-payment-modal.tsx";
 
 interface Message {
   q: string;
@@ -26,6 +27,8 @@ export const AiChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   // Held across turns so the backend can load this conversation's memory.
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  // When set, the in-chat payment modal is open for this draft.
+  const [paymentDraftId, setPaymentDraftId] = useState<string | null>(null);
 
   const { mutate, isPending } = useMutation({
     mutationFn: (msg: string) => sendAgentMessage(msg, conversationId),
@@ -89,26 +92,43 @@ export const AiChat = () => {
 
             {msg.links.length > 0 && (
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "8px" }}>
-                {msg.links.map((link, k) => (
-                  <Link
-                    key={k}
-                    to={link.path}
-                    style={{
-                      fontSize: "13px",
-                      padding: "4px 10px",
-                      border: "1px solid #ccc",
-                      borderRadius: "999px",
-                      textDecoration: "none",
-                    }}
-                  >
-                    {link.label} →
-                  </Link>
-                ))}
+                {msg.links.map((link, k) => {
+                  const chipStyle = {
+                    fontSize: "13px",
+                    padding: "4px 10px",
+                    border: "1px solid #ccc",
+                    borderRadius: "999px",
+                    textDecoration: "none",
+                  } as const;
+
+                  // Payment links open the in-chat checkout modal instead of navigating away.
+                  if (link.kind === "payment" && link.draftId) {
+                    return (
+                      <button
+                        key={k}
+                        onClick={() => setPaymentDraftId(link.draftId!)}
+                        style={{ ...chipStyle, cursor: "pointer", background: "none" }}
+                      >
+                        {link.label} →
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <Link key={k} to={link.path} style={chipStyle}>
+                      {link.label} →
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </div>
         ))}
       </div>
+
+      {paymentDraftId && (
+        <AiPaymentModal draftId={paymentDraftId} onClose={() => setPaymentDraftId(null)} />
+      )}
     </div>
   );
 };

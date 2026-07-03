@@ -3,6 +3,9 @@ import $api from "../api.ts";
 export interface AgentLink {
   label: string;
   path: string;
+  // Typed hint from the backend tools: 'payment' opens the in-chat payment modal.
+  kind?: string;
+  draftId?: string;
 }
 
 export interface AgentChatResponse {
