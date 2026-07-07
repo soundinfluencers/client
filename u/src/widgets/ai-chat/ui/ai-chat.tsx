@@ -23,9 +23,9 @@ const sanitizeReply = (html: string) =>
   });
 
 const EXAMPLE_PROMPTS = [
-  "Знайди хаус-інфлюенсерів у Німеччині до 2000 €",
-  "Створи кампанію для мого нового треку",
-  "Де подивитись мої рахунки?",
+  "Find house influencers in Germany under 2000 €",
+  "Create a campaign for my new track",
+  "Where can I see my invoices?",
 ];
 
 // Shared chat block: identical for client and influencer.
