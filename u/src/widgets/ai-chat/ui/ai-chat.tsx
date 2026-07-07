@@ -39,6 +39,7 @@ export const AiChat = () => {
   const [paymentDraftId, setPaymentDraftId] = useState<string | null>(null);
 
   const messagesRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { mutate, isPending } = useMutation({
     mutationFn: (msg: string) => sendAgentMessage(msg, conversationId),
@@ -54,6 +55,16 @@ export const AiChat = () => {
     const el = messagesRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, isPending]);
+
+  // Auto-grow: the textarea expands upward with the text and only scrolls past max-height.
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    const next = Math.min(ta.scrollHeight, 120);
+    ta.style.height = `${next}px`;
+    ta.style.overflowY = ta.scrollHeight > 120 ? "auto" : "hidden";
+  }, [input]);
 
   const handleSend = () => {
     if (!input.trim() || isPending) return;
@@ -74,6 +85,7 @@ export const AiChat = () => {
 
   return (
     <Container className={styles.root}>
+      <div className={styles.shell}>
       <div className={styles.header}>
         <h1>AI Assistant</h1>
         <p>Describe your campaign in plain words — search, drafting and checkout happen right here.</p>
@@ -159,6 +171,7 @@ export const AiChat = () => {
 
         <div className={styles.inputArea}>
           <textarea
+            ref={textareaRef}
             className={styles.textarea}
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -177,6 +190,8 @@ export const AiChat = () => {
             New conversation
           </button>
         </div>
+      </div>
+
       </div>
 
       {paymentDraftId && (
