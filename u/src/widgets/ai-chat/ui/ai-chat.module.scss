@@ -1,0 +1,328 @@
+@use "../../../styles/variables/variables" as vars;
+
+.root {
+    padding: 32px 0 64px;
+}
+
+.header {
+    margin-bottom: 20px;
+
+    h1 {
+        color: vars.$black-blue;
+        font-size: 32px;
+        font-weight: 600;
+        margin: 0 0 4px;
+    }
+
+    p {
+        color: vars.$light-gray;
+        font-size: 15px;
+        margin: 0;
+    }
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    background: vars.$bg-white;
+    border: 1px solid vars.$border-secondary;
+    border-radius: 20px;
+    box-shadow: 0 6px 24px rgba(32, 41, 52, 0.06);
+    overflow: hidden;
+    max-width: 860px;
+    min-height: 60vh;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 28px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* --- empty state --- */
+
+.empty {
+    margin: auto;
+    text-align: center;
+    padding: 48px 24px;
+
+    h3 {
+        color: vars.$black-blue;
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0 0 8px;
+    }
+
+    p {
+        color: vars.$light-gray;
+        font-size: 14px;
+        margin: 0 0 20px;
+    }
+}
+
+.examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.exampleChip {
+    background: vars.$white-blue;
+    border: 1px solid vars.$border-secondary;
+    border-radius: 999px;
+    color: vars.$black-blue;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 8px 16px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+
+    &:hover {
+        background: vars.$deep-light-blue;
+        border-color: vars.$blue;
+    }
+}
+
+/* --- messages --- */
+
+.userRow {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.userBubble {
+    background: vars.$black-blue;
+    border-radius: 18px 18px 4px 18px;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 75%;
+    padding: 12px 16px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.agentRow {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.steps {
+    color: vars.$light-gray;
+    font-size: 12.5px;
+    font-style: italic;
+    padding-left: 4px;
+
+    div {
+        margin-bottom: 2px;
+    }
+}
+
+.agentBubble {
+    background: vars.$white-blue;
+    border: 1px solid vars.$border-secondary;
+    border-radius: 18px 18px 18px 4px;
+    color: vars.$black-blue;
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 85%;
+    padding: 14px 18px;
+    word-break: break-word;
+
+    p {
+        margin: 0 0 8px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    ul,
+    ol {
+        margin: 8px 0;
+        padding-left: 20px;
+    }
+
+    li {
+        margin-bottom: 4px;
+    }
+}
+
+.links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-left: 4px;
+}
+
+.linkChip {
+    background: vars.$bg-white;
+    border: 1px solid vars.$black-blue;
+    border-radius: 999px;
+    color: vars.$black-blue;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 16px;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+
+    &:hover {
+        background: vars.$black-blue;
+        color: #fff;
+    }
+}
+
+.payChip {
+    background: vars.$black-blue;
+    border: 1px solid vars.$black-blue;
+    border-radius: 999px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 18px;
+    transition: background 0.2s ease;
+
+    &:hover {
+        background: vars.$hover-button-1;
+    }
+}
+
+/* --- thinking indicator --- */
+
+.thinking {
+    align-items: center;
+    color: vars.$light-gray;
+    display: flex;
+    font-size: 13px;
+    gap: 8px;
+    padding-left: 4px;
+
+    span {
+        animation: aiChatPulse 1.2s ease-in-out infinite;
+        background: vars.$light-gray;
+        border-radius: 50%;
+        display: inline-block;
+        height: 6px;
+        width: 6px;
+
+        &:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        &:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+    }
+}
+
+@keyframes aiChatPulse {
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+}
+
+/* --- input area --- */
+
+.inputArea {
+    border-top: 1px solid vars.$border-secondary;
+    background: vars.$bg-white;
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    align-items: flex-end;
+}
+
+.textarea {
+    background: vars.$white-blue;
+    border: 1px solid vars.$border-secondary;
+    border-radius: 14px;
+    color: vars.$black-blue;
+    flex: 1;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    max-height: 120px;
+    min-height: 44px;
+    outline: none;
+    padding: 12px 16px;
+    resize: none;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+        border-color: vars.$blue;
+    }
+
+    &::placeholder {
+        color: vars.$light-gray;
+    }
+}
+
+.sendButton {
+    background: vars.$black-blue;
+    border: 1px solid vars.$black-blue;
+    border-radius: 999px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    height: 44px;
+    padding: 0 28px;
+    transition: background 0.25s ease;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+        background: vars.$hover-button-1;
+    }
+
+    &:disabled {
+        background: vars.$disabled-button-1;
+        border-color: vars.$disabled-button-1;
+        color: vars.$light-gray;
+        cursor: not-allowed;
+    }
+}
+
+.resetButton {
+    background: none;
+    border: none;
+    color: vars.$light-gray;
+    cursor: pointer;
+    font-size: 13px;
+    height: 44px;
+    padding: 0 8px;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+        color: vars.$black-blue;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+}
+
+@media (max-width: 640px) {
+    .userBubble,
+    .agentBubble {
+        max-width: 95%;
+    }
+
+    .inputArea {
+        flex-wrap: wrap;
+    }
+}

@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import DOMPurify from "dompurify";
+import { Container } from "@/components";
 import { sendAgentMessage, type AgentLink } from "@/api/agent/agent.api.ts";
 import { AiPaymentModal } from "./ai-payment-modal.tsx";
+import styles from "./ai-chat.module.scss";
 
 interface Message {
   q: string;
@@ -20,6 +22,12 @@ const sanitizeReply = (html: string) =>
     ALLOWED_ATTR: [],
   });
 
+const EXAMPLE_PROMPTS = [
+  "Знайди хаус-інфлюенсерів у Німеччині до 2000 €",
+  "Створи кампанію для мого нового треку",
+  "Де подивитись мої рахунки?",
+];
+
 // Shared chat block: identical for client and influencer.
 // Role is resolved server-side from the JWT, so this component is role-agnostic.
 export const AiChat = () => {
@@ -30,6 +38,8 @@ export const AiChat = () => {
   // When set, the in-chat payment modal is open for this draft.
   const [paymentDraftId, setPaymentDraftId] = useState<string | null>(null);
 
+  const messagesRef = useRef<HTMLDivElement>(null);
+
   const { mutate, isPending } = useMutation({
     mutationFn: (msg: string) => sendAgentMessage(msg, conversationId),
     onSuccess: ({ steps, reply, links, conversationId: cid }) => {
@@ -39,9 +49,22 @@ export const AiChat = () => {
     },
   });
 
+  // Keep the newest message in view.
+  useEffect(() => {
+    const el = messagesRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, isPending]);
+
   const handleSend = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isPending) return;
     mutate(input);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   const handleReset = () => {
@@ -50,85 +73,115 @@ export const AiChat = () => {
   };
 
   return (
-    <div style={{ padding: "24px", maxWidth: "800px" }}>
-      <h2>AI Agent</h2>
-
-      <div>
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          rows={4}
-          style={{ width: "100%", marginBottom: "8px" }}
-          placeholder="Type your message..."
-        />
-        <button onClick={handleSend} disabled={isPending || !input.trim()}>
-          {isPending ? "Thinking..." : "Send"}
-        </button>
-        <button onClick={handleReset} disabled={isPending} style={{ marginLeft: "8px" }}>
-          New conversation
-        </button>
+    <Container className={styles.root}>
+      <div className={styles.header}>
+        <h1>AI Assistant</h1>
+        <p>Describe your campaign in plain words — search, drafting and checkout happen right here.</p>
       </div>
 
-      <div style={{ marginTop: "24px" }}>
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            style={{ marginBottom: "16px", borderBottom: "1px solid #ccc", paddingBottom: "12px" }}
-          >
-            <p><strong>Q:</strong> {msg.q}</p>
-
-            {msg.steps.length > 0 && (
-              <div style={{ color: "#888", fontSize: "13px", margin: "8px 0" }}>
-                {msg.steps.map((s, j) => (
-                  <div key={j}>· {s}</div>
+      <div className={styles.card}>
+        <div className={styles.messages} ref={messagesRef}>
+          {messages.length === 0 && !isPending && (
+            <div className={styles.empty}>
+              <h3>How can I help?</h3>
+              <p>Ask me to find influencers, build a campaign or guide you around the platform.</p>
+              <div className={styles.examples}>
+                {EXAMPLE_PROMPTS.map((prompt) => (
+                  <button
+                    key={prompt}
+                    className={styles.exampleChip}
+                    onClick={() => setInput(prompt)}
+                  >
+                    {prompt}
+                  </button>
                 ))}
               </div>
-            )}
-
-            <div>
-              <strong>A:</strong>
-              <div dangerouslySetInnerHTML={{ __html: sanitizeReply(msg.a) }} />
             </div>
+          )}
 
-            {msg.links.length > 0 && (
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "8px" }}>
-                {msg.links.map((link, k) => {
-                  const chipStyle = {
-                    fontSize: "13px",
-                    padding: "4px 10px",
-                    border: "1px solid #ccc",
-                    borderRadius: "999px",
-                    textDecoration: "none",
-                  } as const;
-
-                  // Payment links open the in-chat checkout modal instead of navigating away.
-                  if (link.kind === "payment" && link.draftId) {
-                    return (
-                      <button
-                        key={k}
-                        onClick={() => setPaymentDraftId(link.draftId!)}
-                        style={{ ...chipStyle, cursor: "pointer", background: "none" }}
-                      >
-                        {link.label} →
-                      </button>
-                    );
-                  }
-
-                  return (
-                    <Link key={k} to={link.path} style={chipStyle}>
-                      {link.label} →
-                    </Link>
-                  );
-                })}
+          {messages.map((msg, i) => (
+            <div key={i}>
+              <div className={styles.userRow}>
+                <div className={styles.userBubble}>{msg.q}</div>
               </div>
-            )}
-          </div>
-        ))}
+
+              <div className={styles.agentRow} style={{ marginTop: "12px" }}>
+                {msg.steps.length > 0 && (
+                  <div className={styles.steps}>
+                    {msg.steps.map((s, j) => (
+                      <div key={j}>· {s}</div>
+                    ))}
+                  </div>
+                )}
+
+                <div
+                  className={styles.agentBubble}
+                  dangerouslySetInnerHTML={{ __html: sanitizeReply(msg.a) }}
+                />
+
+                {msg.links.length > 0 && (
+                  <div className={styles.links}>
+                    {msg.links.map((link, k) => {
+                      // Payment links open the in-chat checkout modal instead of navigating away.
+                      if (link.kind === "payment" && link.draftId) {
+                        return (
+                          <button
+                            key={k}
+                            className={styles.payChip}
+                            onClick={() => setPaymentDraftId(link.draftId!)}
+                          >
+                            {link.label} →
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <Link key={k} to={link.path} className={styles.linkChip}>
+                          {link.label} →
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {isPending && (
+            <div className={styles.thinking}>
+              Thinking
+              <span />
+              <span />
+              <span />
+            </div>
+          )}
+        </div>
+
+        <div className={styles.inputArea}>
+          <textarea
+            className={styles.textarea}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={1}
+            placeholder="Type your message…"
+          />
+          <button
+            className={styles.sendButton}
+            onClick={handleSend}
+            disabled={isPending || !input.trim()}
+          >
+            {isPending ? "Thinking…" : "Send"}
+          </button>
+          <button className={styles.resetButton} onClick={handleReset} disabled={isPending}>
+            New conversation
+          </button>
+        </div>
       </div>
 
       {paymentDraftId && (
         <AiPaymentModal draftId={paymentDraftId} onClose={() => setPaymentDraftId(null)} />
       )}
-    </div>
+    </Container>
   );
 };
