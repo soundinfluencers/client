@@ -93,8 +93,8 @@ export const CampaignPage = () => {
     if (!data) return false;
 
     return (
-        visibility.isCpmAndResultHidden !== Boolean(data.isCpmAndResultHidden) ||
-        visibility.isPriceHidden !== Boolean(data.isPriceHidden)
+      visibility.isCpmAndResultHidden !== Boolean(data.isCpmAndResultHidden) ||
+      visibility.isPriceHidden !== Boolean(data.isPriceHidden)
     );
   }, [
     data,
@@ -103,47 +103,47 @@ export const CampaignPage = () => {
   ]);
 
   const updateVisibilityOnToggle = React.useCallback(
-      async (nextVisibility: VisibilityState) => {
-        if (!data?.campaignId) return;
+    async (nextVisibility: VisibilityState) => {
+      if (!data?.campaignId) return;
 
-        const prevVisibility = visibility;
+      const prevVisibility = visibility;
 
-        setVisibility(nextVisibility);
-        setIsRequesting(true);
+      setVisibility(nextVisibility);
+      setIsRequesting(true);
 
-        try {
-          await patchCampaign(data.campaignId, {
-            isCpmAndResultHidden: nextVisibility.isCpmAndResultHidden,
-            isPriceHidden: nextVisibility.isPriceHidden,
+      try {
+        await patchCampaign(data.campaignId, {
+          isCpmAndResultHidden: nextVisibility.isCpmAndResultHidden,
+          isPriceHidden: nextVisibility.isPriceHidden,
+        });
+
+        const refreshed = await useFetchCampaign
+        .getState()
+        .setCampaign(data.campaignId);
+
+        const fresh = refreshed ?? useFetchCampaign.getState().data;
+
+        if (fresh) {
+          setVisibility({
+            isCpmAndResultHidden: Boolean(fresh.isCpmAndResultHidden),
+            isPriceHidden: Boolean(fresh.isPriceHidden),
           });
-
-          const refreshed = await useFetchCampaign
-              .getState()
-              .setCampaign(data.campaignId);
-
-          const fresh = refreshed ?? useFetchCampaign.getState().data;
-
-          if (fresh) {
-            setVisibility({
-              isCpmAndResultHidden: Boolean(fresh.isCpmAndResultHidden),
-              isPriceHidden: Boolean(fresh.isPriceHidden),
-            });
-          }
-
-          setIsRequestSent(true);
-        } catch (e) {
-          console.error(e);
-          setVisibility(prevVisibility);
-        } finally {
-          setIsRequesting(false);
         }
-      },
-      [
-        data?.campaignId,
-        visibility,
-        setIsRequesting,
-        setIsRequestSent,
-      ],
+
+        setIsRequestSent(true);
+      } catch (e) {
+        console.error(e);
+        setVisibility(prevVisibility);
+      } finally {
+        setIsRequesting(false);
+      }
+    },
+    [
+      data?.campaignId,
+      visibility,
+      setIsRequesting,
+      setIsRequestSent,
+    ],
   );
 
   React.useEffect(() => {
@@ -153,19 +153,19 @@ export const CampaignPage = () => {
   }, [isDirty, isVisibilityDirty, setIsRequestSent]);
 
   if (!data || isLoading) {
-    return <Loader />;
+    return <Loader/>;
   }
 
   const { isBarSection, showBar } = getBarComponentKind(data);
 
   const BarComponent =
-      data?.kind === "regular"
-          ? isBarSection
-              ? BarSection
-              : Bar
-          : data?.kind === "proposal" || data?.kind === "draft"
-              ? Bar
-              : null;
+    data?.kind === "regular"
+      ? isBarSection
+        ? BarSection
+        : Bar
+      : data?.kind === "proposal" || data?.kind === "draft"
+        ? Bar
+        : null;
 
   const isProposal = data?.status === "proposal";
 
@@ -179,16 +179,16 @@ export const CampaignPage = () => {
     if (data.kind === "proposal") {
       if (data?.selectedOption?.canEdit) {
         return (
-            <button
-                className={`campaignBase__title-request save ${
-                    isDirty ? "saveActive" : "saveDisabled"
-                }`}
-                disabled={!isDirty || isRequesting}
-                onClick={actions.updateProposalOption}
-            >
-              <img src={save} alt="" />
-              {isRequestSent ? "Saved" : isRequesting ? "Saving..." : "Save"}
-            </button>
+          <button
+            className={`campaignBase__title-request save ${
+              isDirty ? "saveActive" : "saveDisabled"
+            }`}
+            disabled={!isDirty || isRequesting}
+            onClick={actions.updateProposalOption}
+          >
+            <img src={save} alt=""/>
+            {isRequestSent ? "Saved" : isRequesting ? "Saving..." : "Save"}
+          </button>
         );
       }
 
@@ -203,91 +203,91 @@ export const CampaignPage = () => {
   })();
 
   return (
-      <>
-        <Container className="campaignBase">
-          <CampaignPageHeader
-              title={`${data.campaignName} - Campaign SoundInfluencers`}
-              rightSlot={headerAction}
+    <>
+      <Container className="campaignBase">
+        <CampaignPageHeader
+          title={`${data.campaignName} - Campaign SoundInfluencers`}
+          rightSlot={headerAction}
+        />
+
+        {showBar && BarComponent && (
+          isBarSection ? (
+            <BarSection
+              campaign={{
+                ...data,
+                isCpmAndResultHidden: visibility.isCpmAndResultHidden,
+                isPriceHidden: visibility.isPriceHidden,
+              }}
+              visibleStats={actions.visibleStats}
+              canToggleVisibility={true}
+              onVisibilityChange={updateVisibilityOnToggle}
+            />
+          ) : (
+            <BarComponent visibleStats={actions.visibleStats} campaign={data}/>
+          )
+        )}
+
+        <div className="campaignBase__content">
+          <CampaignPageControls
+            data={data}
+            isProposal={isProposal}
+            view={view}
+            setView={setView}
+            changeView={changeView}
+            setChangeView={setChangeView}
+            flag={flag}
+            setFlag={setFlag}
+            optionIndexes={actions.optionIndexes}
+            activeOption={activeOption}
+            onClickOption={actions.onClickOption}
+            onDeleteOption={actions.onDeleteOption}
+            onOpenOptionModal={() => setOptionModal(true)}
+            onCopyShareLink={() => {
+              if (data.status === "completed" || data.kind === "regular") {
+                actions.copyShareLink();
+                return;
+              }
+
+              actions.copyPromoShareLink();
+            }}
+            onGetCSV={() => actions.getCSV(data.campaignId)}
+            onGetPDF={() => actions.getPDF(data.campaignId)}
+            isPending={isPending}
+            isRequesting={isRequesting}
+            isRequestingPDF={isRequestingPDF}
           />
 
-          {showBar && BarComponent && (
-              isBarSection ? (
-                  <BarSection
-                      campaign={{
-                        ...data,
-                        isCpmAndResultHidden: visibility.isCpmAndResultHidden,
-                        isPriceHidden: visibility.isPriceHidden,
-                      }}
-                      visibleStats={actions.visibleStats}
-                      canToggleVisibility={true}
-                      onVisibilityChange={updateVisibilityOnToggle}
-                  />
-              ) : (
-                  <BarComponent visibleStats={actions.visibleStats} campaign={data} />
-              )
-          )}
+          <CampaignPageContent
+            data={data}
+            changeView={changeView}
+            view={view}
+            flag={flag}
+          />
+        </div>
 
-          <div className="campaignBase__content">
-            <CampaignPageControls
-                data={data}
-                isProposal={isProposal}
-                view={view}
-                setView={setView}
-                changeView={changeView}
-                setChangeView={setChangeView}
-                flag={flag}
-                setFlag={setFlag}
-                optionIndexes={actions.optionIndexes}
-                activeOption={activeOption}
-                onClickOption={actions.onClickOption}
-                onDeleteOption={actions.onDeleteOption}
-                onOpenOptionModal={() => setOptionModal(true)}
-                onCopyShareLink={() => {
-                  if (data.status === "completed" || data.kind === "regular") {
-                    actions.copyShareLink();
-                    return;
-                  }
+        {data.kind === "proposal" && (
+          <p className="option-chose">
+            Option {activeOption + 1} is already selected
+          </p>
+        )}
 
-                  actions.copyPromoShareLink();
-                }}
-                onGetCSV={() => actions.getCSV(data.campaignId)}
-                onGetPDF={() => actions.getPDF(data.campaignId)}
-                isPending={isPending}
-                isRequesting={isRequesting}
-                isRequestingPDF={isRequestingPDF}
-            />
-
-            <CampaignPageContent
-                data={data}
-                changeView={changeView}
-                view={view}
-                flag={flag}
+        {data.kind === "draft" && (
+          <div className="campaignBase__proceedTo">
+            <ButtonMain
+              className="proceedTo"
+              text="Proceed to payment"
+              onClick={actions.proceedDraftToPayment}
             />
           </div>
+        )}
+      </Container>
 
-          {data.kind === "proposal" && (
-              <p className="option-chose">
-                Option {activeOption + 1} is already selected
-              </p>
-          )}
-
-          {data.kind === "draft" && (
-              <div className="campaignBase__proceedTo">
-                <ButtonMain
-                    className="proceedTo"
-                    text="Proceed to payment"
-                    onClick={actions.proceedDraftToPayment}
-                />
-              </div>
-          )}
-        </Container>
-
-        <CampaignPageModals
-            optionModal={optionModal}
-            activeOption={activeOption}
-            onCloseOptionModal={() => setOptionModal(false)}
-            onAddOptionYes={() => actions.onAddOption(true)}
-        />
-      </>
+      <CampaignPageModals
+        optionModal={optionModal}
+        activeOption={activeOption}
+        onCloseOptionModal={() => setOptionModal(false)}
+        onAddOptionYes={() => actions.onAddOption(true)}
+      />
+    </>
   );
 };

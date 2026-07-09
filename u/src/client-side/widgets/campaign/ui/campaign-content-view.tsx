@@ -11,244 +11,244 @@ import { TableDistributingInsight } from "../tables/table-insight";
 import { useCampaignContentData } from "../model/use-campaign-content-data";
 
 type Props = {
-    campaign: any;
-    view: number;
-    changeView?: boolean;
-    flag?: boolean;
+  campaign: any;
+  view: number;
+  changeView?: boolean;
+  flag?: boolean;
 };
 
 export const CampaignContentView: React.FC<Props> = ({
-                                                         campaign,
-                                                         view,
-                                                         changeView = false,
-                                                         flag = true,
-                                                     }) => {
-    const {
-        kind,
-        campaignId,
-        byGroup,
-        visibleByGroup,
-        accountsByContentId,
-        groupPrices,
-        config,
-        accounts,
-        mainPromos,
-        musicPromos,
-        otherPromos,
-    } = useCampaignContentData({
-        campaign,
-        view,
-        flag,
-    });
-    const getNetworksForItem = React.useCallback(
-        (item: any) => {
-            const contentId = String(item?._id ?? "");
-            return accountsByContentId?.[contentId] ?? [];
-        },
-        [accountsByContentId],
-    );
-    const renderLiveCards = () => (
-        <div className="live-view-wrapper">
-            {visibleByGroup.main.map((item) => (
-                <LiveViewCard
-                    key={item._id}
-                    item={item}
-                    networks={getNetworksForItem(item)}
-                    canEdit={config.liveCanEdit}
-                />
-            ))}
+  campaign,
+  view,
+  changeView = false,
+  flag = true,
+}) => {
+  const {
+    kind,
+    campaignId,
+    byGroup,
+    visibleByGroup,
+    accountsByContentId,
+    groupPrices,
+    config,
+    accounts,
+    mainPromos,
+    musicPromos,
+    otherPromos,
+  } = useCampaignContentData({
+    campaign,
+    view,
+    flag,
+  });
+  const getNetworksForItem = React.useCallback(
+    (item: any) => {
+      const contentId = String(item?._id ?? "");
+      return accountsByContentId?.[contentId] ?? [];
+    },
+    [accountsByContentId],
+  );
+  const renderLiveCards = () => (
+    <div className="live-view-wrapper">
+      {visibleByGroup.main.map((item) => (
+        <LiveViewCard
+          key={item._id}
+          item={item}
+          networks={getNetworksForItem(item)}
+          canEdit={config.liveCanEdit}
+        />
+      ))}
 
-            {visibleByGroup.music.map((item) => (
-                <LiveViewCard
-                    key={item._id}
-                    item={item}
-                    networks={getNetworksForItem(item)}
-                    canEdit={config.liveCanEdit}
-                />
-            ))}
+      {visibleByGroup.music.map((item) => (
+        <LiveViewCard
+          key={item._id}
+          item={item}
+          networks={getNetworksForItem(item)}
+          canEdit={config.liveCanEdit}
+        />
+      ))}
 
-            {visibleByGroup.press.map((item) => (
-                <LiveViewCard
-                    key={item._id}
-                    item={item}
-                    networks={getNetworksForItem(item)}
-                    canEdit={config.liveCanEdit}
-                />
-            ))}
-        </div>
-    );
+      {visibleByGroup.press.map((item) => (
+        <LiveViewCard
+          key={item._id}
+          item={item}
+          networks={getNetworksForItem(item)}
+          canEdit={config.liveCanEdit}
+        />
+      ))}
+    </div>
+  );
 
-    const renderProposalTables = () => (
-        <div className="table-wrapper">
-            {byGroup.main.length >= 1 && (
-                <TableProposal
+  const renderProposalTables = () => (
+    <div className="table-wrapper">
+      {byGroup.main.length >= 1 && (
+        <TableProposal
 
-                    campaignId={campaignId}
-                    optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
-                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
-                    items={byGroup.main}
-                    networks={mainPromos}
-                    group="main"
-                    canEdit={config.canEdit}
-                    changeView={changeView}
-                    title="Video Distribution"
-                />
-            )}
+          campaignId={campaignId}
+          optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
+          totalPrice={campaign.isPriceHidden ? null : campaign.price}
+          items={byGroup.main}
+          networks={mainPromos}
+          group="main"
+          canEdit={config.canEdit}
+          changeView={changeView}
+          title="Video Distribution"
+        />
+      )}
 
-            {byGroup.music.length >= 1 && (
-                <TableProposal
+      {byGroup.music.length >= 1 && (
+        <TableProposal
 
-                    campaignId={campaignId}
-                    optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
-                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
-                    items={byGroup.music}
-                    networks={musicPromos}
-                    group="music"
-                    canEdit={config.canEdit}
-                    changeView={changeView}
-                    title="Music Placements"
-                />
-            )}
+          campaignId={campaignId}
+          optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
+          totalPrice={campaign.isPriceHidden ? null : campaign.price}
+          items={byGroup.music}
+          networks={musicPromos}
+          group="music"
+          canEdit={config.canEdit}
+          changeView={changeView}
+          title="Music Placements"
+        />
+      )}
 
-            {byGroup.press.length >= 1 && (
-                <TableProposal
-                    optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
-                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
-                    items={byGroup.press}
-                    networks={otherPromos}
-                    group="press"
-                    canEdit={config.canEdit}
-                    changeView={changeView}
-                    title="Press Coverage"
-                />
-            )}
-        </div>
-    );
+      {byGroup.press.length >= 1 && (
+        <TableProposal
+          optionIndex={campaign?.selectedOption?.optionIndex ?? 0}
+          totalPrice={campaign.isPriceHidden ? null : campaign.price}
+          items={byGroup.press}
+          networks={otherPromos}
+          group="press"
+          canEdit={config.canEdit}
+          changeView={changeView}
+          title="Press Coverage"
+        />
+      )}
+    </div>
+  );
 
-    const renderStrategyTables = () => (
-        <div className="table-wrapper">
-            {byGroup.main.length >= 1 && (
-                <TableStrategy
-                    campaign={campaign}
-                    campaignId={campaignId}
-                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
-                    items={byGroup.main}
-                    networks={mainPromos}
-                    group="main"
-                    canEdit={config.canEdit}
-                    title="Video Distribution"
-                    status={campaign.status}
-                />
-            )}
+  const renderStrategyTables = () => (
+    <div className="table-wrapper">
+      {byGroup.main.length >= 1 && (
+        <TableStrategy
+          campaign={campaign}
+          campaignId={campaignId}
+          totalPrice={campaign.isPriceHidden ? null : campaign.price}
+          items={byGroup.main}
+          networks={mainPromos}
+          group="main"
+          canEdit={config.canEdit}
+          title="Video Distribution"
+          status={campaign.status}
+        />
+      )}
 
-            {byGroup.music.length >= 1 && (
-                <TableStrategy
-                    campaign={campaign}
-                    campaignId={campaignId}
-                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
-                    items={byGroup.music}
-                    networks={musicPromos}
-                    group="music"
-                    canEdit={config.canEdit}
-                    title="Music Placements"
-                    status={campaign.status}
-                />
-            )}
+      {byGroup.music.length >= 1 && (
+        <TableStrategy
+          campaign={campaign}
+          campaignId={campaignId}
+          totalPrice={campaign.isPriceHidden ? null : campaign.price}
+          items={byGroup.music}
+          networks={musicPromos}
+          group="music"
+          canEdit={config.canEdit}
+          title="Music Placements"
+          status={campaign.status}
+        />
+      )}
 
-            {byGroup.press.length >= 1 && (
-                <TableStrategy
-                    campaign={campaign}
-                    campaignId={campaignId}
-                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
-                    items={byGroup.press}
-                    networks={otherPromos}
-                    group="press"
-                    canEdit={config.canEdit}
-                    title="Press Coverage"
-                    status={campaign.status}
-                />
-            )}
-        </div>
-    );
+      {byGroup.press.length >= 1 && (
+        <TableStrategy
+          campaign={campaign}
+          campaignId={campaignId}
+          totalPrice={campaign.isPriceHidden ? null : campaign.price}
+          items={byGroup.press}
+          networks={otherPromos}
+          group="press"
+          canEdit={config.canEdit}
+          title="Press Coverage"
+          status={campaign.status}
+        />
+      )}
+    </div>
+  );
 
-    const renderDraftTables = () => (
-        <div className="table-wrapper">
-            {byGroup.main.length >= 1 && (
-                <TableDraft
-                    campaignId={campaignId}
-                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
-                    items={byGroup.main}
-                    networks={mainPromos}
-                    group="main"
-                    canEdit={config.canEdit}
-                    title="Video Distribution"
-                    changeView={changeView}
-                />
-            )}
+  const renderDraftTables = () => (
+    <div className="table-wrapper">
+      {byGroup.main.length >= 1 && (
+        <TableDraft
+          campaignId={campaignId}
+          totalPrice={campaign.isPriceHidden ? null : campaign.price}
+          items={byGroup.main}
+          networks={mainPromos}
+          group="main"
+          canEdit={config.canEdit}
+          title="Video Distribution"
+          changeView={changeView}
+        />
+      )}
 
-            {byGroup.music.length >= 1 && (
-                <TableDraft
-                    campaignId={campaignId}
-                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
-                    items={byGroup.music}
-                    networks={musicPromos}
-                    group="music"
-                    canEdit={config.canEdit}
-                    title="Music Placements"
-                    changeView={changeView}
-                />
-            )}
+      {byGroup.music.length >= 1 && (
+        <TableDraft
+          campaignId={campaignId}
+          totalPrice={campaign.isPriceHidden ? null : campaign.price}
+          items={byGroup.music}
+          networks={musicPromos}
+          group="music"
+          canEdit={config.canEdit}
+          title="Music Placements"
+          changeView={changeView}
+        />
+      )}
 
-            {byGroup.press.length >= 1 && (
-                <TableDraft
-                    campaignId={campaignId}
-                    totalPrice={campaign.isPriceHidden ? null : campaign.price}
-                    items={byGroup.press}
-                    networks={otherPromos}
-                    group="press"
-                    canEdit={config.canEdit}
-                    title="Press Coverage"
-                    changeView={changeView}
-                />
-            )}
-        </div>
-    );
+      {byGroup.press.length >= 1 && (
+        <TableDraft
+          campaignId={campaignId}
+          totalPrice={campaign.isPriceHidden ? null : campaign.price}
+          items={byGroup.press}
+          networks={otherPromos}
+          group="press"
+          canEdit={config.canEdit}
+          title="Press Coverage"
+          changeView={changeView}
+        />
+      )}
+    </div>
+  );
 
-    if (kind === "proposal") {
-        return <div className="table-page">{view === 2 ? renderLiveCards() : renderProposalTables()}</div>;
-    }
+  if (kind === "proposal") {
+    return <div className="table-page">{view === 2 ? renderLiveCards() : renderProposalTables()}</div>;
+  }
 
-    if (kind === "regular") {
-        return (
-            <div className="table-page">
-                {view === 0 ? (
-                    <>
-                        {flag ? (
-                            renderLiveCards()
-                        ) : (
-                            <div className="live-view-wrapper">
-                                {accounts.map((item, i) => (
-                                    <LiveViewCardInsight key={item?._id ?? item?.accountId ?? i} campaign={campaign} item={item} />
-                                ))}
-                            </div>
-                        )}
-                    </>
-                ) : flag ? (
-                    renderStrategyTables()
-                ) : (
-                    <div className="table-wrapper">
-                        <TableDistributingInsight campaign={campaign} />
-                    </div>
-                )}
-            </div>
-        );
-    }
-
+  if (kind === "regular") {
     return (
-        <div className="table-page">
-            <div className="table-scroll">
-                {view === 0 ? renderLiveCards() : renderDraftTables()}
-            </div>
-        </div>
+      <div className="table-page">
+        {view === 0 ? (
+          <>
+            {flag ? (
+              renderLiveCards()
+            ) : (
+              <div className="live-view-wrapper">
+                {accounts.map((item, i) => (
+                  <LiveViewCardInsight key={item?._id ?? item?.accountId ?? i} campaign={campaign} item={item}/>
+                ))}
+              </div>
+            )}
+          </>
+        ) : flag ? (
+          renderStrategyTables()
+        ) : (
+          <div className="table-wrapper">
+            <TableDistributingInsight campaign={campaign}/>
+          </div>
+        )}
+      </div>
     );
+  }
+
+  return (
+    <div className="table-page">
+      <div className="table-scroll">
+        {view === 0 ? renderLiveCards() : renderDraftTables()}
+      </div>
+    </div>
+  );
 };

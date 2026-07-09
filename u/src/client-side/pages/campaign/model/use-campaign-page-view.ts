@@ -11,7 +11,7 @@ export const useCampaignPageView = (data: any) => {
     const [isRequestingPDF, setIsRequestingPDF] = React.useState(false);
     const [localExtraOptions, setLocalExtraOptions] = React.useState<number[]>([]);
     const [textareaValue, setTextareaValue] = React.useState("");
-    const [flag, setFlag] = React.useState(true);
+    const [flag, setFlag] = React.useState(false);
 
     React.useEffect(() => {
         if (data?.kind === "proposal") {
