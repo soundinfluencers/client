@@ -220,10 +220,15 @@ export const PaymentCampaign = () => {
         await approveProposalCampaign(proposalId, optionIndex, paymentDetails);
         sessionStorage.removeItem("proposalPaymentPayload");
       } else {
+        // Provenance: which draft this campaign came from (backend verifies ownership
+        // and whether it was AI-agent-built).
+        const originDraftId = builderDraftId || effectiveDraftId || null;
+
         const payload = {
           ...base,
           campaignName: finalCampaignName,
           paymentDetails,
+          ...(originDraftId ? { sourceDraftId: originDraftId } : {}),
         };
 
         await postCampaign(payload);
