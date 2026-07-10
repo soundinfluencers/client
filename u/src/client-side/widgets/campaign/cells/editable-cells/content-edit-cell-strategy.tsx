@@ -1,326 +1,326 @@
 // content-edit-cell-strategy.tsx
-import React from "react";
-import { Dropdown } from "@/shared/ui/dropdowns/dropdowns-table";
-import { Modal } from "@/shared/ui/modal-fix/Modal";
-import eye from "@/assets/icons/eye.svg";
-import plus from "@/assets/icons/plus.svg";
-import trash from "@/assets/icons/trash-2.svg";
-import { ButtonMain, ButtonSecondary } from "@/components";
-import { useStrategyCampaignStore } from "@/client-side/store";
-import { VideoPreview } from "../../live-view-card/preview/preview-video-component";
-
-type Props = {
-  campaignId: string;
-  selectedItem?: any;
-
-  isOpen: boolean;
-  onToggle: () => void;
-  onClose: () => void;
-
-  platformItems: any[];
-  selectedContent: number;
-  setSelectedContent: (v: number) => void;
-
-  setSelectedPd: (v: number) => void;
-  socialMedia?: string;
-  group: string;
-  media0?: any;
-};
-
-export const ContentCellEditStrategy = React.memo(
-  function ContentCellEditStrategy({
-    campaignId,
-    selectedItem,
-    isOpen,
-    onToggle,
-    onClose,
-    platformItems,
-    selectedContent,
-    setSelectedContent,
-    setSelectedPd,
-    socialMedia,
-    group,
-    media0,
-  }: Props) {
-    const addContentForSocial = useStrategyCampaignStore(
-      (s) => s.addContentForSocial,
-    );
-    const updateContentMainLink = useStrategyCampaignStore(
-        (s) => s.updateContentMainLink,
-    );
-    const onClickVideo = React.useCallback((idx: number, link: string) => {
-      setSelectedVideo({ index: idx + 1, link });
-      setEditableLink(link ?? "");
-      setPopUp(true);
-    }, []);
-    const [editableLink, setEditableLink] = React.useState("");
-    const removeContentItem = useStrategyCampaignStore(
-      (s) => s.removeContentItem,
-    );
-
-    const [popUp, setPopUp] = React.useState(false);
-    const [selectedVideo, setSelectedVideo] = React.useState({
-      index: 1,
-      link: "",
-    });
-
-    const [addModal, setAddModal] = React.useState(false);
-    const [newLink, setNewLink] = React.useState("");
-
-    const [deleteModal, setDeleteModal] = React.useState(false);
-    const [deleteIdx, setDeleteIdx] = React.useState<number>(-1);
-
-    const selectedLink = platformItems?.[selectedContent]?.mainLink;
-    const pathLower = media0?.pathLower;
-    const videoUrl = media0?.url ?? null;
-    const selectContent = React.useCallback(
-      (idx: number) => {
-        setSelectedContent(idx);
-        setSelectedPd(0);
-        onClose();
-      },
-      [setSelectedContent, setSelectedPd, onClose],
-    );
-
-    const saveEditedLink = React.useCallback(() => {
-      const item = platformItems?.[selectedContent];
-      const contentId = item?._id;
-      const link = editableLink.trim();
-
-      if (!contentId || !link) return;
-
-      updateContentMainLink(campaignId, String(contentId), link);
-      setSelectedVideo((prev) => ({ ...prev, link }));
-      setPopUp(false);
-    }, [
-      platformItems,
-      selectedContent,
-      editableLink,
-      updateContentMainLink,
-      campaignId,
-    ]);
-
-    const openAddModal = React.useCallback((e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      setNewLink("");
-      setAddModal(true);
-    }, []);
-
-    const closeAddModal = React.useCallback(() => {
-      setAddModal(false);
-      setNewLink("");
-    }, []);
-
-    const createVideo = React.useCallback(() => {
-      const link = newLink.trim();
-      if (!link) return;
-
-      const sm = String(socialMedia ?? "").toLowerCase();
-      if (!sm) return;
-
-      addContentForSocial(
-        campaignId,
-        sm,
-        { mainLink: link },
-        selectedItem?._id,
-      );
-
-      setSelectedContent(platformItems.length);
-      setSelectedPd(0);
-
-      closeAddModal();
-      onClose();
-    }, [
-      newLink,
-      socialMedia,
-      campaignId,
-      selectedItem?._id,
-      addContentForSocial,
-      platformItems.length,
-      setSelectedContent,
-      setSelectedPd,
-      closeAddModal,
-      onClose,
-    ]);
-    const onClickHeaderEye = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      const link = platformItems?.[selectedContent]?.mainLink ?? "";
-      onClickVideo(selectedContent, link);
-    };
-    const openDelete = React.useCallback((idx: number) => {
-      setDeleteIdx(idx);
-      setDeleteModal(true);
-    }, []);
-    const closeModal = React.useCallback(() => {
-      setPopUp(false);
-    }, []);
-    const confirmDelete = React.useCallback(() => {
-      const item = platformItems?.[deleteIdx];
-      const contentId = item?._id;
-
-      setDeleteModal(false);
-      if (!contentId) return;
-
-      removeContentItem(campaignId, String(contentId));
-
-      setSelectedContent((prev) => {
-        if (deleteIdx < 0) return prev;
-        if (prev === deleteIdx) return Math.max(0, deleteIdx - 1);
-        if (prev > deleteIdx) return prev - 1;
-        return prev;
-      });
-      setSelectedPd(0);
-    }, [
-      platformItems,
-      deleteIdx,
-      removeContentItem,
-      campaignId,
-      setSelectedContent,
-      setSelectedPd,
-    ]);
-
-    const closePreview = React.useCallback(() => setPopUp(false), []);
-
-    const groupTitle = (group: string) => {
-      switch (group) {
-        case "main":
-          return "Video";
-        case "music":
-          return "Song";
-        case "press":
-          return "Press";
-        default:
-          return "";
-      }
-    };
-    const canDelete = platformItems.length > 1;
-    return (
-      <>
-        <td className="tableBase__td">
-          <Dropdown
-            isOpen={isOpen}
-            onToggle={onToggle}
-            onClose={onClose}
-            content
-            selected={
-              <div className="content-cell-static">
-                <span onClick={onClickHeaderEye} className="eye">
-                  <img src={eye} alt="" />
-                </span>
-                <p title={selectedLink}>
-                  {selectedLink
-                    ? `${groupTitle(group)} ${selectedContent + 1}`
-                    : "—"}
-                </p>
-              </div>
-            }>
-            <div className="post-description-block">
-              <ul className="dropdown-list">
-                {platformItems.map((item: any, idx: number) => (
-                  <li className={`content-cell ${selectedContent === idx ? "active-content" : ""}`} key={item?._id ?? idx} onClick={() => selectContent(idx)}>
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onClickVideo(idx, item.mainLink);
-                      }}
-                      className="eye">
-                      <img src={eye} alt="" />
-                    </span>
-
-                    <p
-                      className="hidden-text desc-li"
-                      title={item?.mainLink ?? ""}>
-                      {item?.mainLink ? `Video ${idx + 1}` : "—"}
-                    </p>
-
-                    {canDelete && (
-                        <img
-                            className="trash"
-                            src={trash}
-                            alt=""
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openDelete(idx);
-                            }}
-                        />
-                    )}
-                  </li>
-                ))}
-              </ul>
-
-              <div onClick={openAddModal} className="add-desc">
-                <div className="add-desc__icon">
-                  <img src={plus} alt="" />
-                </div>
-                <p>Add new video</p>
-              </div>
-            </div>
-          </Dropdown>
-        </td>
-        {addModal && (
-          <Modal onClose={closeAddModal}>
-            <div className="modal-card">
-              <h2>Add video</h2>
-              <input
-                autoFocus
-                value={newLink}
-                onChange={(e) => setNewLink(e.target.value)}
-                type="text"
-                placeholder="Paste video link..."
-              />
-              <div className="modal-card-btn">
-                <ButtonSecondary className="btn" text="Cancel" onClick={closeAddModal} />
-                <ButtonMain className="btn" text="Create" onClick={createVideo} />
-              </div>
-            </div>
-          </Modal>
-        )}
-        {deleteModal && (
-          <Modal addStyles={'content-width'} onClose={() => setDeleteModal(false)}>
-            <div className="onDeleteModal">
-              <h2>
-                Are you sure you want to <br /> delete this video?
-              </h2>
-              <p>You won’t be able to restore this!</p>
-              <div className="onDeleteModal-btn">
-                <ButtonSecondary className="btn"
-                  text="Cancel"
-                  onClick={() => setDeleteModal(false)}
-                />
-                <ButtonMain className="btn" text="Delete" onClick={confirmDelete} />
-              </div>
-            </div>
-          </Modal>
-        )}
-
-        {popUp && (
-            <Modal onClose={closeModal}>
-              <div className="modal-card">
-                <h2>Video {selectedVideo.index}</h2>
-                {media0 ? (
-                    <VideoPreview
-                        className="modal-card-video"
-                        videoUrl={videoUrl}
-                        pathLower={pathLower}
-                    />
-                ) : (
-                    <>
-                      <input
-                          type="text"
-                          value={editableLink}
-                          onChange={(e) => setEditableLink(e.target.value)}
-                          placeholder="Paste video link..."
-                      />
-                      <div className="modal-card-btn">
-                        <ButtonSecondary className="btn" text="Cancel" onClick={closeModal} />
-                        <ButtonMain className="btn" text="Save" onClick={saveEditedLink} />
-                      </div>
-                    </>
-                )}
-              </div>
-            </Modal>
-        )}
-      </>
-    );
-  },
-);
+// import React from "react";
+// import { Dropdown } from "@/shared/ui/dropdowns/dropdowns-table";
+// import { Modal } from "@/shared/ui/modal-fix/Modal";
+// import eye from "@/assets/icons/eye.svg";
+// import plus from "@/assets/icons/plus.svg";
+// import trash from "@/assets/icons/trash-2.svg";
+// import { ButtonMain, ButtonSecondary } from "@/components";
+// import { useStrategyCampaignStore } from "@/client-side/store";
+// import { VideoPreview } from "../../live-view-card/preview/preview-video-component";
+//
+// type Props = {
+//   campaignId: string;
+//   selectedItem?: any;
+//
+//   isOpen: boolean;
+//   onToggle: () => void;
+//   onClose: () => void;
+//
+//   platformItems: any[];
+//   selectedContent: number;
+//   setSelectedContent: (v: number) => void;
+//
+//   setSelectedPd: (v: number) => void;
+//   socialMedia?: string;
+//   group: string;
+//   media0?: any;
+// };
+//
+// export const ContentCellEditStrategy = React.memo(
+//   function ContentCellEditStrategy({
+//     campaignId,
+//     selectedItem,
+//     isOpen,
+//     onToggle,
+//     onClose,
+//     platformItems,
+//     selectedContent,
+//     setSelectedContent,
+//     setSelectedPd,
+//     socialMedia,
+//     group,
+//     media0,
+//   }: Props) {
+//     const addContentForSocial = useStrategyCampaignStore(
+//       (s) => s.addContentForSocial,
+//     );
+//     const updateContentMainLink = useStrategyCampaignStore(
+//         (s) => s.updateContentMainLink,
+//     );
+//     const onClickVideo = React.useCallback((idx: number, link: string) => {
+//       setSelectedVideo({ index: idx + 1, link });
+//       setEditableLink(link ?? "");
+//       setPopUp(true);
+//     }, []);
+//     const [editableLink, setEditableLink] = React.useState("");
+//     const removeContentItem = useStrategyCampaignStore(
+//       (s) => s.removeContentItem,
+//     );
+//
+//     const [popUp, setPopUp] = React.useState(false);
+//     const [selectedVideo, setSelectedVideo] = React.useState({
+//       index: 1,
+//       link: "",
+//     });
+//
+//     const [addModal, setAddModal] = React.useState(false);
+//     const [newLink, setNewLink] = React.useState("");
+//
+//     const [deleteModal, setDeleteModal] = React.useState(false);
+//     const [deleteIdx, setDeleteIdx] = React.useState<number>(-1);
+//
+//     const selectedLink = platformItems?.[selectedContent]?.mainLink;
+//     const pathLower = media0?.pathLower;
+//     const videoUrl = media0?.url ?? null;
+//     const selectContent = React.useCallback(
+//       (idx: number) => {
+//         setSelectedContent(idx);
+//         setSelectedPd(0);
+//         onClose();
+//       },
+//       [setSelectedContent, setSelectedPd, onClose],
+//     );
+//
+//     const saveEditedLink = React.useCallback(() => {
+//       const item = platformItems?.[selectedContent];
+//       const contentId = item?._id;
+//       const link = editableLink.trim();
+//
+//       if (!contentId || !link) return;
+//
+//       updateContentMainLink(campaignId, String(contentId), link);
+//       setSelectedVideo((prev) => ({ ...prev, link }));
+//       setPopUp(false);
+//     }, [
+//       platformItems,
+//       selectedContent,
+//       editableLink,
+//       updateContentMainLink,
+//       campaignId,
+//     ]);
+//
+//     const openAddModal = React.useCallback((e?: React.MouseEvent) => {
+//       e?.stopPropagation();
+//       setNewLink("");
+//       setAddModal(true);
+//     }, []);
+//
+//     const closeAddModal = React.useCallback(() => {
+//       setAddModal(false);
+//       setNewLink("");
+//     }, []);
+//
+//     const createVideo = React.useCallback(() => {
+//       const link = newLink.trim();
+//       if (!link) return;
+//
+//       const sm = String(socialMedia ?? "").toLowerCase();
+//       if (!sm) return;
+//
+//       addContentForSocial(
+//         campaignId,
+//         sm,
+//         { mainLink: link },
+//         selectedItem?._id,
+//       );
+//
+//       setSelectedContent(platformItems.length);
+//       setSelectedPd(0);
+//
+//       closeAddModal();
+//       onClose();
+//     }, [
+//       newLink,
+//       socialMedia,
+//       campaignId,
+//       selectedItem?._id,
+//       addContentForSocial,
+//       platformItems.length,
+//       setSelectedContent,
+//       setSelectedPd,
+//       closeAddModal,
+//       onClose,
+//     ]);
+//     const onClickHeaderEye = (e: React.MouseEvent) => {
+//       e.stopPropagation();
+//       const link = platformItems?.[selectedContent]?.mainLink ?? "";
+//       onClickVideo(selectedContent, link);
+//     };
+//     const openDelete = React.useCallback((idx: number) => {
+//       setDeleteIdx(idx);
+//       setDeleteModal(true);
+//     }, []);
+//     const closeModal = React.useCallback(() => {
+//       setPopUp(false);
+//     }, []);
+//     const confirmDelete = React.useCallback(() => {
+//       const item = platformItems?.[deleteIdx];
+//       const contentId = item?._id;
+//
+//       setDeleteModal(false);
+//       if (!contentId) return;
+//
+//       removeContentItem(campaignId, String(contentId));
+//
+//       setSelectedContent((prev) => {
+//         if (deleteIdx < 0) return prev;
+//         if (prev === deleteIdx) return Math.max(0, deleteIdx - 1);
+//         if (prev > deleteIdx) return prev - 1;
+//         return prev;
+//       });
+//       setSelectedPd(0);
+//     }, [
+//       platformItems,
+//       deleteIdx,
+//       removeContentItem,
+//       campaignId,
+//       setSelectedContent,
+//       setSelectedPd,
+//     ]);
+//
+//     const closePreview = React.useCallback(() => setPopUp(false), []);
+//
+//     const groupTitle = (group: string) => {
+//       switch (group) {
+//         case "main":
+//           return "Video";
+//         case "music":
+//           return "Song";
+//         case "press":
+//           return "Press";
+//         default:
+//           return "";
+//       }
+//     };
+//     const canDelete = platformItems.length > 1;
+//     return (
+//       <>
+//         <td className="tableBase__td">
+//           <Dropdown
+//             isOpen={isOpen}
+//             onToggle={onToggle}
+//             onClose={onClose}
+//             content
+//             selected={
+//               <div className="content-cell-static">
+//                 <span onClick={onClickHeaderEye} className="eye">
+//                   <img src={eye} alt="" />
+//                 </span>
+//                 <p title={selectedLink}>
+//                   {selectedLink
+//                     ? `${groupTitle(group)} ${selectedContent + 1}`
+//                     : "—"}
+//                 </p>
+//               </div>
+//             }>
+//             <div className="post-description-block">
+//               <ul className="dropdown-list">
+//                 {platformItems.map((item: any, idx: number) => (
+//                   <li className={`content-cell ${selectedContent === idx ? "active-content" : ""}`} key={item?._id ?? idx} onClick={() => selectContent(idx)}>
+//                     <span
+//                       onClick={(e) => {
+//                         e.stopPropagation();
+//                         onClickVideo(idx, item.mainLink);
+//                       }}
+//                       className="eye">
+//                       <img src={eye} alt="" />
+//                     </span>
+//
+//                     <p
+//                       className="hidden-text desc-li"
+//                       title={item?.mainLink ?? ""}>
+//                       {item?.mainLink ? `Video ${idx + 1}` : "—"}
+//                     </p>
+//
+//                     {canDelete && (
+//                         <img
+//                             className="trash"
+//                             src={trash}
+//                             alt=""
+//                             onClick={(e) => {
+//                               e.stopPropagation();
+//                               openDelete(idx);
+//                             }}
+//                         />
+//                     )}
+//                   </li>
+//                 ))}
+//               </ul>
+//
+//               <div onClick={openAddModal} className="add-desc">
+//                 <div className="add-desc__icon">
+//                   <img src={plus} alt="" />
+//                 </div>
+//                 <p>Add new video</p>
+//               </div>
+//             </div>
+//           </Dropdown>
+//         </td>
+//         {addModal && (
+//           <Modal onClose={closeAddModal}>
+//             <div className="modal-card">
+//               <h2>Add video</h2>
+//               <input
+//                 autoFocus
+//                 value={newLink}
+//                 onChange={(e) => setNewLink(e.target.value)}
+//                 type="text"
+//                 placeholder="Paste video link..."
+//               />
+//               <div className="modal-card-btn">
+//                 <ButtonSecondary className="btn" text="Cancel" onClick={closeAddModal} />
+//                 <ButtonMain className="btn" text="Create" onClick={createVideo} />
+//               </div>
+//             </div>
+//           </Modal>
+//         )}
+//         {deleteModal && (
+//           <Modal addStyles={'content-width'} onClose={() => setDeleteModal(false)}>
+//             <div className="onDeleteModal">
+//               <h2>
+//                 Are you sure you want to <br /> delete this video?
+//               </h2>
+//               <p>You won’t be able to restore this!</p>
+//               <div className="onDeleteModal-btn">
+//                 <ButtonSecondary className="btn"
+//                   text="Cancel"
+//                   onClick={() => setDeleteModal(false)}
+//                 />
+//                 <ButtonMain className="btn" text="Delete" onClick={confirmDelete} />
+//               </div>
+//             </div>
+//           </Modal>
+//         )}
+//
+//         {popUp && (
+//             <Modal onClose={closeModal}>
+//               <div className="modal-card">
+//                 <h2>Video {selectedVideo.index}</h2>
+//                 {media0 ? (
+//                     <VideoPreview
+//                         className="modal-card-video"
+//                         videoUrl={videoUrl}
+//                         pathLower={pathLower}
+//                     />
+//                 ) : (
+//                     <>
+//                       <input
+//                           type="text"
+//                           value={editableLink}
+//                           onChange={(e) => setEditableLink(e.target.value)}
+//                           placeholder="Paste video link..."
+//                       />
+//                       <div className="modal-card-btn">
+//                         <ButtonSecondary className="btn" text="Cancel" onClick={closeModal} />
+//                         <ButtonMain className="btn" text="Save" onClick={saveEditedLink} />
+//                       </div>
+//                     </>
+//                 )}
+//               </div>
+//             </Modal>
+//         )}
+//       </>
+//     );
+//   },
+// );

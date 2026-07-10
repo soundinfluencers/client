@@ -6,200 +6,205 @@ import { Modal } from "@/components/ui/modal-fix/Modal";
 import { VideoPreview } from "../../live-view-card/preview/preview-video-component";
 
 type Props = {
-    isOpen: boolean;
-    onToggle: () => void;
-    onClose: () => void;
+  isOpen: boolean;
+  onToggle: () => void;
+  onClose: () => void;
 
-    platformItems: any[];
-    selectedContent: number;
-    setSelectedContent: (v: number) => void;
+  platformItems: any[];
+  selectedContent: number;
+  setSelectedContent: (v: number) => void;
 
-    setSelectedPd: (v: number) => void;
-    socialMedia?: string;
-    media0?: any;
-    group: string;
-    canEdit?: boolean;
-    status?: string;
+  setSelectedPd: (v: number) => void;
+  socialMedia?: string;
+  media0?: any;
+  group: string;
+  canEdit?: boolean;
+  status?: string;
 };
 
 export const ContentCell = React.memo(function ContentCell({
-                                                               isOpen,
-                                                               onToggle,
-                                                               onClose,
-                                                               platformItems,
-                                                               selectedContent,
-                                                               setSelectedContent,
-                                                               socialMedia,
-                                                               media0,
-                                                               group,
-                                                               canEdit = false,
-                                                               status,
-                                                           }: Props) {
-    const [popUp, setPopUp] = React.useState(false);
-    const [selectedVideo, setSelectedVideo] = React.useState({
-        index: 1,
-        link: "",
-    });
+  isOpen,
+  onToggle,
+  onClose,
+  platformItems,
+  selectedContent,
+  setSelectedContent,
+  socialMedia,
+  media0,
+  group,
+  canEdit = false,
+  status,
+}: Props) {
+  const [popUp, setPopUp] = React.useState(false);
+  const [selectedVideo, setSelectedVideo] = React.useState({
+    index: 1,
+    link: "",
+  });
 
-    const isLocked =
-        status === "closed" ||
-        status === "completed" ||
-        !canEdit;
+  console.log("Selected video: ", selectedVideo);
+  console.log("Media0: ", media0);
+  // console.log(selectedVideo);
 
-    const onClickSelect = React.useCallback(
-        (optionIndex: number) => {
-            if (isLocked) return;
+  const isLocked =
+    status === "closed" ||
+    status === "completed" ||
+    !canEdit;
 
-            setSelectedContent(optionIndex);
-            onClose();
-        },
-        [setSelectedContent, onClose, isLocked],
-    );
+  const onClickSelect = React.useCallback(
+    (optionIndex: number) => {
+      if (isLocked) return;
 
-    const onClickVideo = React.useCallback(
-        (optionIndex: number, link: string) => {
-            setSelectedVideo({ index: optionIndex + 1, link });
-            setPopUp(true);
-        },
-        [],
-    );
+      setSelectedContent(optionIndex);
+      onClose();
+    },
+    [setSelectedContent, onClose, isLocked],
+  );
 
-    const closeModal = React.useCallback(() => {
-        setPopUp(false);
-    }, []);
+  const onClickVideo = React.useCallback(
+    (optionIndex: number, link: string) => {
+      setSelectedVideo({ index: optionIndex + 1, link });
+      setPopUp(true);
+    },
+    [],
+  );
 
-    const selectedItem = platformItems?.[selectedContent];
-    const selectedLink = selectedItem?.mainLink ?? "";
+  const closeModal = React.useCallback(() => {
+    setPopUp(false);
+  }, []);
 
-    const pathLower = media0?.pathLower;
-    const videoUrl = media0?.url ?? null;
+  const selectedItem = platformItems?.[selectedContent];
+  const selectedLink = selectedItem?.mainLink ?? "";
 
-    const groupTitle = (group: string) => {
-        switch (group) {
-            case "main":
-                return "Video";
-            case "music":
-                return "Song";
-            case "press":
-                return "Press";
-            default:
-                return "";
-        }
-    };
+  const pathLower = media0?.pathLower;
+  const videoUrl = media0?.url ?? null;
 
-    const onClickHeaderEye = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        onClickVideo(selectedContent, selectedLink);
-    };
+  const groupTitle = (group: string) => {
+    switch (group) {
+      case "main":
+        return "Video";
+      case "music":
+        return "Song";
+      case "press":
+        return "Press";
+      default:
+        return "";
+    }
+  };
 
-    if (isLocked || platformItems.length <= 1) {
-        return (
-            <>
-                <td className="tableBase__td">
-                    <div className="content-cell-static no-edit">
+  const onClickHeaderEye = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClickVideo(selectedContent, selectedLink);
+  };
+
+  if (isLocked || platformItems.length <= 1) {
+    return (
+      <>
+        <td className="tableBase__td">
+          <div className="content-cell-static no-edit">
             <span onClick={onClickHeaderEye} className="eye">
-              <img src={eye} alt="" />
+              <img src={eye} alt=""/>
             </span>
 
-                        <p title={selectedLink}>
-                            {selectedLink
-                                ? `${groupTitle(group)} ${selectedContent + 1}`
-                                : "—"}
-                        </p>
-                    </div>
-                </td>
+            <p title={selectedLink}>
+              {selectedLink
+                ? `${groupTitle(group)} ${selectedContent + 1}`
+                : "—"}
+            </p>
+          </div>
+        </td>
 
-                {popUp && (
-                    <Modal onClose={closeModal}>
-                        <div className="modal-card">
-                            <h2>{groupTitle(group)} {selectedVideo.index}</h2>
+        {popUp && (
+          <Modal onClose={closeModal}>
+            <div className="modal-card">
 
-                            {media0 ? (
-                                <VideoPreview
-                                    className="modal-card-video"
-                                    videoUrl={videoUrl}
-                                    pathLower={pathLower}
-                                />
-                            ) : (
-                                <input type="text" value={selectedLink} readOnly />
-                            )}
-                        </div>
-                    </Modal>
-                )}
-            </>
-        );
-    }
+              <h2>{groupTitle(group)} {selectedVideo.index}</h2>
 
-    return (
-        <>
-            <td className="tableBase__td">
-                <Dropdown
-                    isOpen={isOpen}
-                    onToggle={onToggle}
-                    content
-                    selected={
-                        <div className="content-cell-static">
+              <input type="text" value={selectedLink} readOnly/>
+              {/*{media0 ? (*/}
+              {/*  <VideoPreview*/}
+              {/*    className="modal-card-video"*/}
+              {/*    videoUrl={videoUrl}*/}
+              {/*    pathLower={pathLower}*/}
+              {/*  />*/}
+              {/*) : (*/}
+              {/*)}*/}
+            </div>
+          </Modal>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <td className="tableBase__td">
+        <Dropdown
+          isOpen={isOpen}
+          onToggle={onToggle}
+          content
+          selected={
+            <div className="content-cell-static">
               <span onClick={onClickHeaderEye} className="eye">
-                <img src={eye} alt="" />
+                <img src={eye} alt=""/>
               </span>
 
-                            <p title={selectedLink}>
-                                {selectedLink
-                                    ? `${groupTitle(group)} ${selectedContent + 1}`
-                                    : "—"}
-                            </p>
-                        </div>
-                    }
-                >
-                    <ul className="dropdown-list">
-                        {platformItems.map((item: any, optionIndex: number) => (
-                            <li
-                                className={`content-cell ${
-                                    selectedContent === optionIndex ? "active-content" : ""
-                                }`}
-                                key={`${item?._id ?? optionIndex}-${socialMedia}`}
-                                onClick={() => onClickSelect(optionIndex)}
-                            >
+              <p title={selectedLink}>
+                {selectedLink
+                  ? `${groupTitle(group)} ${selectedContent + 1}`
+                  : "—"}
+              </p>
+            </div>
+          }
+        >
+          <ul className="dropdown-list">
+            {platformItems.map((item: any, optionIndex: number) => (
+              <li
+                className={`content-cell ${
+                  selectedContent === optionIndex ? "active-content" : ""
+                }`}
+                key={`${item?._id ?? optionIndex}-${socialMedia}`}
+                onClick={() => onClickSelect(optionIndex)}
+              >
                 <span
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onClickVideo(optionIndex, item.mainLink);
-                    }}
-                    className="eye"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClickVideo(optionIndex, item.mainLink);
+                  }}
+                  className="eye"
                 >
-                  <img src={eye} alt="" />
+                  <img src={eye} alt=""/>
                 </span>
 
-                                {item.mainLink
-                                    ? `${groupTitle(group)} ${optionIndex + 1}`
-                                    : "—"}
+                {item.mainLink
+                  ? `${groupTitle(group)} ${optionIndex + 1}`
+                  : "—"}
 
-                                {selectedContent === optionIndex && (
-                                    <img className="check" src={check} alt="" />
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-                </Dropdown>
-            </td>
+                {selectedContent === optionIndex && (
+                  <img className="check" src={check} alt=""/>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Dropdown>
+      </td>
 
-            {popUp && (
-                <Modal onClose={closeModal}>
-                    <div className="modal-card">
-                        <h2>{groupTitle(group)} {selectedVideo.index}</h2>
+      {popUp && (
+        <Modal onClose={closeModal}>
+          <div className="modal-card">
+            <h2>{groupTitle(group)} {selectedVideo.index}</h2>
 
-                        {media0 ? (
-                            <VideoPreview
-                                className="modal-card-video"
-                                videoUrl={videoUrl}
-                                pathLower={pathLower}
-                            />
-                        ) : (
-                            <input type="text" value={selectedLink} readOnly />
-                        )}
-                    </div>
-                </Modal>
+            {media0 ? (
+              <VideoPreview
+                className="modal-card-video"
+                videoUrl={videoUrl}
+                pathLower={pathLower}
+              />
+            ) : (
+              <input type="text" value={selectedLink} readOnly/>
             )}
-        </>
-    );
+          </div>
+        </Modal>
+      )}
+    </>
+  );
 });

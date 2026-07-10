@@ -19,36 +19,38 @@ type Props = {
 };
 
 export const ContentCell = React.memo(function ContentCell({
-                                                             isOpen,
-                                                             onToggle,
-                                                             onClose,
-                                                             platformItems,
-                                                             selectedContent,
-                                                             setSelectedContent,
-                                                             setSelectedPd,
-                                                             socialMedia,
-                                                             group,
-                                                           }: Props) {
+  isOpen,
+  onToggle,
+  onClose,
+  platformItems,
+  selectedContent,
+  setSelectedContent,
+  setSelectedPd,
+  socialMedia,
+  group,
+}: Props) {
   const [popUp, setPopUp] = React.useState(false);
   const [selectedVideo, setSelectedVideo] = React.useState({
     index: 1,
     link: "",
   });
 
+  console.log(selectedVideo);
+
   const onClickSelect = React.useCallback(
-      (optionIndex: number) => {
-        setSelectedContent(optionIndex);
-        onClose();
-      },
-      [setSelectedContent, setSelectedPd, onClose],
+    (optionIndex: number) => {
+      setSelectedContent(optionIndex);
+      onClose();
+    },
+    [setSelectedContent, setSelectedPd, onClose],
   );
 
   const onClickVideo = React.useCallback(
-      (optionIndex: number, link: string) => {
-        setSelectedVideo({ index: optionIndex + 1, link });
-        setPopUp(true);
-      },
-      [],
+    (optionIndex: number, link: string) => {
+      setSelectedVideo({ index: optionIndex + 1, link });
+      setPopUp(true);
+    },
+    [],
   );
 
   const closeModal = React.useCallback(() => {
@@ -77,26 +79,26 @@ export const ContentCell = React.memo(function ContentCell({
   const selectedLink = platformItems?.[selectedContent]?.mainLink;
 
   return (
-      <>
-        <td className="tableBase__td">
-            <div className="content-cell-static no-edit">
+    <>
+      <td className="tableBase__td">
+        <div className="content-cell-static no-edit">
             <span onClick={onClickHeaderEye} className="eye">
-              <img src={eye} alt="" />
+              <img src={eye} alt=""/>
             </span>
-                <p title={selectedLink}>
-                    {selectedLink ? `${groupTitle(group)} ${selectedContent + 1}` : "—"}
-                </p>
-            </div>
-        </td>
+          <p title={selectedLink}>
+            {selectedLink ? `${groupTitle(group)} ${selectedContent + 1}` : "—"}
+          </p>
+        </div>
+      </td>
 
-        {popUp && (
-            <Modal onClose={closeModal}>
-              <div className="modal-card">
-                <h2>{groupTitle(group)} {selectedVideo.index}</h2>
-                <input type="text" value={selectedVideo.link} readOnly />
-              </div>
-            </Modal>
-        )}
-      </>
+      {popUp && (
+        <Modal onClose={closeModal}>
+          <div className="modal-card">
+            <h2>{groupTitle(group)} {selectedVideo.index}</h2>
+            <input type="text" value={selectedVideo.link} readOnly/>
+          </div>
+        </Modal>
+      )}
+    </>
   );
 });
