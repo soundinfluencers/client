@@ -1,55 +1,61 @@
 export const GENRES = [
   {
-    id: "Techno (Melodic, Minimal)",
+    id: "techno_melodic_minimal",
     text: "Techno",
     subText: "Melodic, Minimal",
   },
   {
-    id: "Techno (Hard, Peak)",
+    id: "techno_hard_peak",
     text: "Techno",
     subText: "Hard, Peak",
   },
   {
-    id: "House (Tech House)",
+    id: "house_tech_house",
     text: "House",
     subText: "Tech House",
   },
   {
-    id: "House (Melodic, Afro)",
+    id: "house_melodic_afro",
     text: "House",
     subText: "Melodic, Afro",
   },
   {
-    id: "EDM",
+    id: "edm",
     text: "EDM",
     subText: "",
   },
   {
-    id: "D&B",
+    id: "drum_and_bass",
     text: "D&B",
     subText: "",
   },
   {
-    id: "Bass",
+    id: "bass",
     text: "Bass",
     subText: "",
   },
   {
-    id: "Psy",
+    id: "psy_trance",
     text: "Psy",
     subText: "",
   },
   {
-    id: "Trance",
+    id: "dubstep",
     text: "Trance",
     subText: "",
   },
   {
-    id: "Dubstep",
+    id: "hip_hop",
     text: "Dubstep",
     subText: "",
   },
+  {
+    id: "pop",
+    text: "Pop",
+    subText: "",
+  },
 ] as const;
+
 export const PLATFORMS = [
   { key: "instagram", id: "instagram", label: "Instagram", icon: "instagram" },
   { key: "tiktok-creators", id: "tiktok", label: "TikTok Creators", icon: "tiktok" },
