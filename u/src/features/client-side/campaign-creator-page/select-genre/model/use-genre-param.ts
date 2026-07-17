@@ -1,87 +1,216 @@
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+import type {
+    PlatformKey
+} from "@/features/client-side/campaign-creator-page/select-platform/model/use-platform-param.ts";
 
 export const GENRES = [
     {
-        id: "Techno (Melodic, Minimal)",
+        id: "techno_melodic_minimal",
         text: "Techno",
         subText: "Melodic, Minimal",
     },
     {
-        id: "Techno (Hard, Peak)",
+        id: "techno_hard_peak",
         text: "Techno",
         subText: "Hard, Peak",
     },
     {
-        id: "House (Tech House)",
+        id: "house_tech_house",
         text: "House",
         subText: "Tech House",
     },
     {
-        id: "House (Melodic, Afro)",
+        id: "house_melodic_afro",
         text: "House",
         subText: "Melodic, Afro",
     },
     {
-        id: "EDM",
+        id: "edm",
         text: "EDM",
         subText: "",
     },
     {
-        id: "D&B",
+        id: "drum_and_bass",
         text: "D&B",
         subText: "",
     },
     {
-        id: "Bass",
+        id: "bass",
         text: "Bass",
         subText: "",
     },
-    // {
-    //     id: "Psy, Trance",
-    //     text: "Psy,Trance",
-    //     subText: "",
-    // },
-    // {
-    //     id: "Trance",
-    //     text: "Trance",
-    //     subText: "",
-    // },
     {
-        id: "Dubstep",
+        id: "psy_trance",
+        text: "Psy",
+        subText: "",
+    },
+    {
+        id: "dubstep",
         text: "Dubstep",
         subText: "",
     },
-    // {
-    //     id: "Dance Pop",
-    //     text: "Pop",
-    //     subText: "",
-    // },
+    {
+        id: "hip_hop",
+        text: "Hip-hop",
+        subText: "",
+    },
+    {
+        id: "pop",
+        text: "Pop",
+        subText: "",
+    },
 ] as const;
 
-export type GenreId = (typeof GENRES)[number]["id"];
+export const CREATOR_GENRES = [
+    {
+        id: "electronic_techno_melodic_minimal",
+        text: "Techno",
+        subText: "Melodic, Minimal",
+    },
+    {
+        id: "electronic_techno_hard_peak",
+        text: "Techno",
+        subText: "Hard, Peak",
+    },
+    {
+        id: "electronic_house_tech_house",
+        text: "House",
+        subText: "Tech House",
+    },
+    {
+        id: "electronic_house_melodic_afro",
+        text: "House",
+        subText: "Melodic, Afro",
+    },
+    {
+        id: "electronic_edm",
+        text: "EDM",
+        subText: "",
+    },
+    {
+        id: "electronic_drum_and_bass",
+        text: "D&B",
+        subText: "",
+    },
+    {
+        id: "electronic_bass",
+        text: "Bass",
+        subText: "",
+    },
+    {
+        id: "electronic_psy_trance",
+        text: "Psy",
+        subText: "",
+    },
+    {
+        id: "electronic_dubstep",
+        text: "Dubstep",
+        subText: "",
+    },
+    {
+        id: "mainstream_hip_hop",
+        text: "Hip-hop",
+        subText: "",
+    },
+    {
+        id: "mainstream_pop",
+        text: "Pop",
+        subText: "",
+    },
+    {
+        id: "mainstream_arabic",
+        text: "Arabic",
+        subText: "",
+    },
+    {
+        id: "mainstream_k_pop",
+        text: "K-Pop",
+        subText: "",
+    },
+    {
+        id: "mainstream_metal_rock",
+        text: "Metal/Rock",
+        subText: "",
+    },
+    {
+        id: "mainstream_latin",
+        text: "Latin",
+        subText: "",
+    },
+] as const;
 
-export const DEFAULT_CAMPAIGN_CREATOR_GENRE: GenreId =
-    "Techno (Melodic, Minimal)";
+export type CommunityGenreId = (typeof GENRES)[number]["id"];
 
-const ALLOWED_GENRES = GENRES.map((item) => item.id) as GenreId[];
+export type CreatorGenreId = (typeof CREATOR_GENRES)[number]["id"];
 
-export const useGenreParam = () => {
+export type GenreId = CommunityGenreId | CreatorGenreId;
+
+export type GenreOption =
+  | (typeof GENRES)[number]
+  | (typeof CREATOR_GENRES)[number];
+
+export const DEFAULT_COMMUNITY_GENRE: CommunityGenreId =
+  "techno_melodic_minimal";
+
+export const DEFAULT_CREATOR_GENRE: CreatorGenreId =
+  "electronic_techno_melodic_minimal";
+
+export const getGenresByPlatform = (
+  platform: PlatformKey,
+): readonly GenreOption[] => {
+    return platform === "tiktok_creators"
+      ? CREATOR_GENRES
+      : GENRES;
+};
+
+export const getDefaultGenreByPlatform = (
+  platform: PlatformKey,
+): GenreId => {
+    return platform === "tiktok_creators"
+      ? DEFAULT_CREATOR_GENRE
+      : DEFAULT_COMMUNITY_GENRE;
+};
+
+export const isGenreAllowedForPlatform = (
+  value: string,
+  platform: PlatformKey,
+): value is GenreId => {
+    return getGenresByPlatform(platform).some(
+      (genre) => genre.id === value,
+    );
+};
+
+// const ALLOWED_GENRES = GENRES.map((item) => item.id) as GenreId[];
+
+export const useGenreParam = (platform: PlatformKey) => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const genre = useMemo<GenreId>(() => {
-        const raw = searchParams.get("genre");
-        if (!raw) return DEFAULT_CAMPAIGN_CREATOR_GENRE;
+        const rawGenre = searchParams.get("genre");
 
-        return ALLOWED_GENRES.includes(raw as GenreId)
-            ? (raw as GenreId)
-            : DEFAULT_CAMPAIGN_CREATOR_GENRE;
-    }, [searchParams]);
+        if (
+          rawGenre &&
+          isGenreAllowedForPlatform(rawGenre, platform)
+        ) {
+            return rawGenre;
+        }
+
+        return getDefaultGenreByPlatform(platform);
+    }, [searchParams, platform]);
 
     const setGenre = (nextGenre: GenreId) => {
-        const next = new URLSearchParams(searchParams);
-        next.set("genre", nextGenre);
-        setSearchParams(next, { replace: true });
+        if (!isGenreAllowedForPlatform(nextGenre, platform)) {
+            return;
+        }
+
+        const nextSearchParams = new URLSearchParams(searchParams);
+
+        nextSearchParams.set("genre", nextGenre);
+
+        setSearchParams(nextSearchParams, {
+            replace: true,
+        });
     };
 
     return {

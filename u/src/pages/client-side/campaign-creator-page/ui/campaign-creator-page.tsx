@@ -95,6 +95,7 @@ export const CampaignCreatorPage: React.FC = () => {
 
                         <GenreScroll
                             selectedGenre={selectedGenre}
+                            selectedPlatform={selectedPlatformKey}
                             onGenreSelect={setSelectedGenre}
                         />
                     </div>

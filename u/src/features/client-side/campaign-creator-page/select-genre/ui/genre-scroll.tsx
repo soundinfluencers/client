@@ -1,18 +1,27 @@
-import React from "react";
+import React, { useMemo } from "react";
 import chevron from "@/assets/icons/chevron-right.svg";
-import { GENRES, type GenreId } from "../model/use-genre-param";
+import { type GenreId, getGenresByPlatform } from "../model/use-genre-param";
 import styles from "./genre-scroll.module.scss";
 import {useHorizontalScroll} from "@/features/client-side/campaign-creator-page/lib/use-horizontal-scroll.ts";
+import type {
+  PlatformKey
+} from "@/features/client-side/campaign-creator-page/select-platform/model/use-platform-param.ts";
 
 type Props = {
-    selectedGenre: GenreId;
-    onGenreSelect: (genre: GenreId) => void;
+  selectedGenre: GenreId;
+  selectedPlatform: PlatformKey;
+  onGenreSelect: (genre: GenreId) => void;
 };
 
 export const GenreScroll: React.FC<Props> = React.memo(
-    ({ selectedGenre, onGenreSelect }) => {
+    ({ selectedGenre, selectedPlatform, onGenreSelect }) => {
         const { ref, showRightArrow, showLeftArrow, scrollRight, scrollLeft } =
             useHorizontalScroll<HTMLUListElement>();
+
+      const genres = useMemo(
+        () => getGenresByPlatform(selectedPlatform),
+        [selectedPlatform],
+      );
 
         return (
             <div className={styles.root}>
@@ -36,7 +45,7 @@ export const GenreScroll: React.FC<Props> = React.memo(
                 </div>
 
                 <ul ref={ref} className={styles.list}>
-                    {GENRES.map((genre) => (
+                    {genres.map((genre) => (
                         <li
                             key={genre.id}
                             className={genre.id === selectedGenre ? styles.active : ""}
