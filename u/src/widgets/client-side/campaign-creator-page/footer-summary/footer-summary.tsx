@@ -3,6 +3,8 @@ import styles from "./footer-summary.module.scss";
 
 type Props = {
     isAddInfluencerMode: boolean;
+    isAiAddPagesMode?: boolean;
+    isSaving?: boolean;
     selectedCurrency: string;
     selectedOfferId: string | null;
     selectedPromoCardIds: string[];
@@ -13,6 +15,8 @@ type Props = {
 
 export const FooterSummary = ({
                                   isAddInfluencerMode,
+                                  isAiAddPagesMode = false,
+                                  isSaving = false,
                                   selectedCurrency,
                                   selectedOfferId,
                                   selectedPromoCardIds,
@@ -23,7 +27,7 @@ export const FooterSummary = ({
     return (
         <div className={styles.root}>
             <div className={styles.content}>
-                {!isAddInfluencerMode && (
+                {!isAddInfluencerMode && !isAiAddPagesMode && (
                     <>
                         <p>
                             Offer:{" "}
@@ -52,11 +56,15 @@ export const FooterSummary = ({
             </div>
 
             <button
-                className={canProceed ? styles.active : styles.disabled}
-                disabled={!canProceed}
+                className={canProceed && !isSaving ? styles.active : styles.disabled}
+                disabled={!canProceed || isSaving}
                 onClick={onProceed}
             >
-                {isAddInfluencerMode ? "Add account" : "Proceed"}
+                {isAddInfluencerMode
+                    ? "Add account"
+                    : isAiAddPagesMode
+                        ? (isSaving ? "Saving..." : "Save pages & return")
+                        : "Proceed"}
             </button>
         </div>
     );

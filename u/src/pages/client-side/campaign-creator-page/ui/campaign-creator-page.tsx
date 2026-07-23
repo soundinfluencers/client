@@ -45,6 +45,8 @@ export const CampaignCreatorPage: React.FC = () => {
     const isAddInfluencerMode =
         searchParams.get("mode") === "add-influencer" &&
         searchParams.has("option");
+    const isAiSource = searchParams.get("source") === "ai";
+    const isAiAddPagesMode = searchParams.get("mode") === "ai-add-pages";
 
     const optionIndex = Number(searchParams.get("option") ?? 0);
 
@@ -55,9 +57,13 @@ export const CampaignCreatorPage: React.FC = () => {
         totalPrice,
         canProceed,
         handleProceed,
+        isSaving,
     } = useCampaignProceedSummary({
-        mode: isAddInfluencerMode ? "add-influencer" : "create",
+        mode: isAddInfluencerMode
+            ? "add-influencer"
+            : isAiAddPagesMode ? "ai-add-pages" : "create",
         optionIndex: isAddInfluencerMode ? optionIndex : null,
+        returnTo: searchParams.get("returnTo"),
     });
 
     const currencySymbol = selectedCurrency?.key ?? "€";
@@ -71,7 +77,7 @@ export const CampaignCreatorPage: React.FC = () => {
         isLoading,
         isFetching,
         isError,
-    } = useCampaignCreatorPage();
+    } = useCampaignCreatorPage(!isAiSource);
 
     const draft = useSaveCampaignCreatorDraft({
         postCampaignDraft,
@@ -84,12 +90,12 @@ export const CampaignCreatorPage: React.FC = () => {
             <div className={styles.navmenu}>
                 <Breadcrumbs />
 
-                {!isAddInfluencerMode && (
+                {!isAddInfluencerMode && !isAiAddPagesMode && (
                     <DraftButton onClick={draft.open} />
                 )}
             </div>
 
-            {!isAddInfluencerMode && (
+            {!isAddInfluencerMode && !isAiSource && (
                 <>
                     <h1>Ready-to-launch offers</h1>
 
@@ -138,23 +144,25 @@ export const CampaignCreatorPage: React.FC = () => {
 
                 <ButtonMain
                     className={styles.btn}
-                    text={isAddInfluencerMode ? "Add account" : "Proceed"}
-                    onClick={handleProceed}
-                    isDisabled={!canProceed}
+                    text={isAddInfluencerMode ? "Add account" : isAiAddPagesMode ? "Save pages & return" : "Proceed"}
+                    onClick={() => void handleProceed()}
+                    isDisabled={!canProceed || isSaving}
                 />
             </div>
 
             <FooterSummary
                 isAddInfluencerMode={isAddInfluencerMode}
+                isAiAddPagesMode={isAiAddPagesMode}
+                isSaving={isSaving}
                 selectedCurrency={currencySymbol}
                 selectedOfferId={selectedOfferId}
                 selectedPromoCardIds={selectedPromoCardIds}
                 totalPrice={totalPrice}
                 canProceed={canProceed}
-                onProceed={handleProceed}
+                onProceed={() => void handleProceed()}
             />
 
-            {!isAddInfluencerMode && draft.isOpen && (
+            {!isAddInfluencerMode && !isAiAddPagesMode && draft.isOpen && (
                 <Modal onClose={draft.close}>
                     <div className={styles.createOption}>
                         <h2>Save draft</h2>
