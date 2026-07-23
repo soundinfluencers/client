@@ -401,12 +401,17 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
               type="button"
               onClick={() => onPrompt("Promote [paste your content link] with the post text: [write the caption]")}
             >Continue in chat</button>
-            <button type="button" onClick={() => {
-              const nextAccount = selectedAccounts.find((account) =>
-                getDraftContentStatus(getContentForDraftAccount(draft, account)) !== "ready",
-              ) ?? selectedAccounts[0];
-              if (nextAccount) openDetails(nextAccount);
-            }}>Enter manually</button>
+            <button
+              type="button"
+              className={styles.nextStepPrimary}
+              disabled={saveStatus === "saving"}
+              onClick={() => {
+                const nextAccount = selectedAccounts.find((account) =>
+                  getDraftContentStatus(getContentForDraftAccount(draft, account)) !== "ready",
+                ) ?? selectedAccounts[0];
+                if (nextAccount) openDetails(nextAccount);
+              }}
+            >Add content</button>
           </div>
         </div>
       )}
@@ -414,26 +419,19 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
       {saveStatus === "error" && <div className={styles.saveFailure}>Changes could not be saved. <button type="button" onClick={() => void persist()}>Retry</button></div>}
       {!selectedAccounts.length && <div className={styles.warning}>Select at least one page to continue.</div>}
 
-      <footer className={styles.actions}>
-        {canCheckout && <button type="button" className={styles.secondary} disabled={!selectedAccounts.length} onClick={() => void continueTo(() => navigate(`/client/create-campaign?draftId=${draftId}&source=ai`))}>Customize</button>}
-        <button
-          type="button"
-          className={styles.primary}
-          disabled={!selectedAccounts.length || saveStatus === "saving"}
-          onClick={() => {
-            if (canCheckout) {
-              void continueTo(() => onProceedToPayment(draftId));
-              return;
-            }
-            const nextAccount = selectedAccounts.find((account) =>
-              getDraftContentStatus(getContentForDraftAccount(draft, account)) !== "ready",
-            ) ?? selectedAccounts[0];
-            if (nextAccount) openDetails(nextAccount);
-          }}
-        >
-          {canCheckout ? "Proceed to checkout" : "Add content"}
-        </button>
-      </footer>
+      {canCheckout && (
+        <footer className={styles.actions}>
+          <button type="button" className={styles.secondary} disabled={!selectedAccounts.length} onClick={() => void continueTo(() => navigate(`/client/create-campaign?draftId=${draftId}&source=ai`))}>Customize</button>
+          <button
+            type="button"
+            className={styles.primary}
+            disabled={!selectedAccounts.length || saveStatus === "saving"}
+            onClick={() => void continueTo(() => onProceedToPayment(draftId))}
+          >
+            Proceed to checkout
+          </button>
+        </footer>
+      )}
 
       {editingAccount && (
         <div className={styles.drawerOverlay} onMouseDown={(event) => { if (event.target === event.currentTarget) closeDetails(); }}>
