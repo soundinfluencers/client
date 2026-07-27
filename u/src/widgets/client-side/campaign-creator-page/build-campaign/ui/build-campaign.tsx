@@ -23,6 +23,7 @@ import {useSearchParams} from "react-router-dom";
 export const BuildCampaign = () => {
     const [searchParams] = useSearchParams();
     const isAddInfluencerMode = searchParams.get("mode") === "add-influencer";
+    const isAiAddPagesMode = searchParams.get("mode") === "ai-add-pages";
     const vm = useBuildCampaignView();
 
     return (
@@ -31,12 +32,14 @@ export const BuildCampaign = () => {
                 <h2>
                     {isAddInfluencerMode
                         ? "Add influencers to proposal"
+                        : isAiAddPagesMode ? "Add pages to your AI campaign"
                         : "Build your custom campaign"}
                 </h2>
 
                 <p>
                     {isAddInfluencerMode
                         ? "Select new networks to add to this proposal option"
+                        : isAiAddPagesMode ? "Choose pages, then save them and return to the chat review."
                         : "Handpick networks, genres, and budgets to tailor your campaign"}
                 </p>
             </div>

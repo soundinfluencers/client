@@ -5,11 +5,11 @@ import {
 } from "@/features/client-side/campaign-creator-page/select-platform/model/use-platform-param.ts";
 
 
-export const useCampaignCreatorPage = () => {
+export const useCampaignCreatorPage = (loadOffers = true) => {
     const { platformKey, platform, setPlatform } = usePlatformParam();
     const { genre, setGenre } = useGenreParam();
 
-    const query = usePublishedOffersQuery(platform, genre);
+    const query = usePublishedOffersQuery(platform, genre, loadOffers);
 
     return {
         selectedPlatformKey: platformKey,

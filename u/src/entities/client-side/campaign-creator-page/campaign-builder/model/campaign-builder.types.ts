@@ -56,6 +56,7 @@ export type CampaignBuilderState = {
     selectedOfferName: string;
     draftId: string | null;
     draftStep: CampaignDraftLatestStep | null;
+    draftRevision: number;
 
     selectedOfferId: string | null;
     selectedOfferPrice: number;
@@ -76,6 +77,7 @@ export type CampaignBuilderActions = {
     setDraftMeta: (payload: {
         draftId: string | null;
         draftStep: CampaignDraftLatestStep | null;
+        draftRevision?: number;
     }) => void;
 
     selectOffer: (payload: {
@@ -117,6 +119,7 @@ export type CampaignBuilderActions = {
     hydrateFromDraft: (payload: {
         draftId: string;
         draftStep: "addAccounts" | "addContent" | "strategyTable";
+        draftRevision: number;
         campaignName: string;
         totalPrice: number;
         selectedOfferId: null;

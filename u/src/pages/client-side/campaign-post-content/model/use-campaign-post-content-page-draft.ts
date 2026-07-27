@@ -103,6 +103,10 @@ export const useCampaignPostContentPageDraft = ({
             setDraftMeta({
                 draftId: nextDraftId,
                 draftStep: CampaignDraftLatestStep.addContent,
+                draftRevision:
+                    response?.revision ??
+                    response?.data?.revision ??
+                    0,
             });
 
             toast.success("Draft saved successfully");

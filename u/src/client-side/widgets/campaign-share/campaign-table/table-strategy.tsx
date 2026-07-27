@@ -7,17 +7,12 @@ import type {
   CampaignAddedAccount,
   CampaignContentItem,
 } from "@/types/store/index.types";
-import plus from "@/assets/icons/plus-square.svg";
 
 import { TableCard } from "../card-table/table-card-strategy";
-import type {
-  DropdownState,
-  TableGroup,
-} from "@/client-side/types/table-types";
+import type { TableGroup } from "@/client-side/types/table-types";
 import {
-  columnsStrategy, getTableColumnWidths,
+  getTableColumnWidths,
   getTitle,
-  getWidthColumn,
 } from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
 import {getColumns} from "@/client-side/utils";
@@ -30,11 +25,13 @@ type Props = {
   proposalsFlag?: boolean;
   group: TableGroup;
   title: string;
-  campaign: any
+  campaign: {
+    isPriceHidden: boolean;
+    displayCurrency: string;
+  };
 };
-type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
 const makeRowKey = (n: CampaignAddedAccount, index: number) =>
-  String((n as any).accountId ?? `${(n as any).influencerId}-${index}`);
+  String(n.addedAccountsId ?? n.socialAccountId ?? n._id ?? `${n.influencerId}-${index}`);
 
 type ActiveDropdown = {
   rowKey: string;
@@ -45,22 +42,19 @@ export function TableStrategy({
   items,
   networks,
   totalPrice,
-  proposalsFlag,
   group,
   title,
-                                campaign
+  campaign,
 }: Props) {
 
   const [networksState, setNetworksState] =
     React.useState<CampaignAddedAccount[]>(networks);
   React.useEffect(() => setNetworksState(networks), [networks]);
 
-  const [dropdownsOpen, setDropdownsOpen] = React.useState<DropdownState>({});
-
   const totalFollowers = React.useMemo(
     () =>
       networksState.reduce(
-        (sum, n) => sum + Number((n as any).followers ?? 0),
+        (sum, n) => sum + Number(n.followers ?? 0),
         0,
       ),
     [networksState],
@@ -71,7 +65,7 @@ export function TableStrategy({
   const [active, setActive] = React.useState<ActiveDropdown>(null);
 
   const toggleDropdown = React.useCallback(
-    (rowKey: string, key: ActiveDropdown extends null ? never : any) => {
+    (rowKey: string, key: NonNullable<ActiveDropdown>["key"]) => {
       setActive((prev) =>
         prev && prev.rowKey === rowKey && prev.key === key
           ? null
@@ -86,11 +80,10 @@ export function TableStrategy({
 
     return sortedNetworks.filter((n, index) => {
       const key = String(
-          (n as any).addedAccountsId ??
-          (n as any).socialAccountId ??
-          (n as any).accountId ??
-          (n as any)._id ??
-          `${(n as any).influencerId}-${index}`,
+        n.addedAccountsId ??
+        n.socialAccountId ??
+        n._id ??
+        `${n.influencerId}-${index}`,
       );
 
       if (seen.has(key)) return false;
@@ -100,20 +93,19 @@ export function TableStrategy({
     });
   }, [sortedNetworks]);
   const columns = React.useMemo(
-      () => getColumns(false, group, false),
-      [ group],
+    () => getColumns(false, group, false),
+    [group],
   );
 
   const widths = React.useMemo(
-      () =>
-          getTableColumnWidths({
-            group,
-            changeView: false,
-            canEdit: false,
-          }),
-      [group],
+    () =>
+      getTableColumnWidths({
+        group,
+        changeView: false,
+        canEdit: false,
+      }),
+    [group],
   );
-  console.log(items,'items')
   return (
     <div className="tableBase-wrap">
       <h1>{title}</h1>
@@ -166,7 +158,6 @@ export function TableStrategy({
             const rowKey = makeRowKey(network, index);
             return (
               <TableCard
-                  group={group}
                 key={rowKey}
                 rowKey={rowKey}
                 data={network}
@@ -183,31 +174,27 @@ export function TableStrategy({
         </tbody>
 
         <tfoot>
-          {/* {status === "proposal" && (
-            <tr>
-              <td className="add-influencer-main">
-                <div className="add-influencer">
-                  <img src={plus} alt="" />
-                  <p>Add Influencer</p>
-                </div>
-              </td>
-            </tr>
-          )} */}
-          {columns.map((col) => {
-            const isPrice = col === "network";
-            const isFollowers = col === "followers";
+          <tr>
+            {columns.map((col) => {
+              const isPrice = col === "network";
+              const isFollowers = col === "followers";
 
-            return (
-              <td
-                key={col}
-                className={`tableBase__td td--footer ${isPrice ? "td--footer-strategy" : ""} ${isFollowers ? "td--footer-strategy" : ""}`}>
-                {isPrice && <p className="td__price">Price: {campaign.isPriceHidden ? "" : `${totalPrice}${getCurrencySymbol(campaign.displayCurrency)}`}</p>}
-                {isFollowers && (
-                  <p className="td__followers">{totalFollowers}</p>
-                )}
-              </td>
-            );
-          })}
+              return (
+                <td
+                  key={col}
+                  className={`tableBase__td td--footer ${isPrice || isFollowers ? "td--footer-strategy" : ""}`}>
+                  {isPrice && (
+                    <p className="td__price">
+                      Price: {campaign.isPriceHidden
+                        ? ""
+                        : `${totalPrice ?? 0}${getCurrencySymbol(campaign.displayCurrency)}`}
+                    </p>
+                  )}
+                  {isFollowers && <p className="td__followers">{totalFollowers}</p>}
+                </td>
+              );
+            })}
+          </tr>
         </tfoot>
       </table>
     </div>

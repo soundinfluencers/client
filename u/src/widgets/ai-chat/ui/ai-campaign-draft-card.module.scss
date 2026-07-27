@@ -112,6 +112,8 @@
 .overwriteWarning { background: #fff4e5; border: 1px solid #f0c36d; border-radius: 10px; color: #754b0b; display: grid; gap: 3px; padding: 10px 12px; }
 .overwriteWarning strong { font-size: 12px; }
 .overwriteWarning span { font-size: 10px; line-height: 1.45; }
+.undoToast { align-items: center; display: flex; font-size: 12px; gap: 14px; justify-content: space-between; }
+.undoToast button { background: transparent; border: 0; color: #356cf6; cursor: pointer; font: inherit; font-weight: 650; padding: 5px 8px; }
 .warning, .saveFailure { background: #fff5f2; border-top: 1px solid #f1d1c8; color: #8b3d2e; font-size: 11px; padding: 9px 16px; }
 .saveFailure button { background: transparent; border: 0; color: inherit; cursor: pointer; font-weight: 700; text-decoration: underline; }
 

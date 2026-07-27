@@ -1,3 +1,4 @@
+import aiChatIcon from '../../../../../../assets/nav-bar/message-circle.svg';
 import settingsIcon from '../../../../../../assets/nav-bar/settings.svg';
 import socialAccountsIcon from '../../../../../../assets/nav-bar/user-check.svg';
 import invoicesHistoryIcon from '../../../../../../assets/nav-bar/clock.svg';
@@ -13,6 +14,12 @@ interface InfluencerNavLink {
 }
 
 export const INFLUENCER_NAV_LINKS: InfluencerNavLink[] = [
+  {
+    icon: aiChatIcon,
+    label: "AI Assistant",
+    link: '/ai-chat',
+    divider: true,
+  },
   {
     icon: settingsIcon,
     label: "Account settings",

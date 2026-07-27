@@ -43,6 +43,5 @@ export const searchPromoAccounts = async (
     );
 
     const items = response.data?.data?.accounts ?? [];
-    console.log(items,'seraacg')
     return items.map(mapPromoAccountDto);
 };

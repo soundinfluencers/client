@@ -9,6 +9,7 @@ const initialState = {
     campaignName: "",
     draftId: null,
     draftStep: null,
+    draftRevision: 0,
 
     selectedOfferId: null,
     selectedOfferName: "",
@@ -33,10 +34,11 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
             actions: {
                 setCampaignName: (value) => set({ campaignName: value }),
                 setSelectedCurrency: (value) => set({ selectedCurrency: value }),
-                setDraftMeta: ({ draftId, draftStep }) =>
+                setDraftMeta: ({ draftId, draftStep, draftRevision }) =>
                     set({
                         draftId,
                         draftStep,
+                        ...(draftRevision !== undefined ? { draftRevision } : {}),
                     }),
 
                 selectOffer: ({
@@ -221,6 +223,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                 hydrateFromDraft: ({
                                        draftId,
                                        draftStep,
+                                       draftRevision = 0,
                                        campaignName,
                                        totalPrice = 0,
                                        selectedCurrency = "€",
@@ -237,6 +240,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                         selectedCurrency,
                         draftId,
                         draftStep,
+                        draftRevision,
                         campaignName,
                         selectedOfferId,
                         selectedOfferAccountIds,
@@ -257,6 +261,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                 campaignName: state.campaignName,
                 draftId: state.draftId,
                 draftStep: state.draftStep,
+                draftRevision: state.draftRevision,
                 selectedOfferId: state.selectedOfferId,
                 selectedOfferName: state.selectedOfferName,
                 selectedOfferPrice: state.selectedOfferPrice,

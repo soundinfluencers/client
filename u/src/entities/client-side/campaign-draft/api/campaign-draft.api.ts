@@ -1,10 +1,17 @@
 
 import type { CampaignDraftDto } from "./campaign-draft.dto.ts";
 import $api from "@/api/api.ts";
+import axios from "axios";
+
+export class CampaignDraftConflictError extends Error {
+    constructor() {
+        super("Campaign draft changed elsewhere");
+        this.name = "CampaignDraftConflictError";
+    }
+}
 
 export const getCampaignDraft = async (draftId: string): Promise<CampaignDraftDto> => {
     const res = await $api.get(`/campaigns/draft/${draftId}`);
-    console.log(res,'wajhfanfawfnl,wafna');
     return res.data.data;
 };
 
@@ -13,8 +20,15 @@ export const postCampaignDraft = async (payload: Record<string, unknown>) => {
 };
 
 export const updateCampaignDraft = async (payload: Record<string, unknown>) => {
-
-    return $api.post("/campaigns/draft", payload);
+    try {
+        const res = await $api.post("/campaigns/draft", payload);
+        return res.data.data as { revision: number };
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 409) {
+            throw new CampaignDraftConflictError();
+        }
+        throw error;
+    }
 };
 export const deleteDraft = (draftId: string) =>
     $api.delete(`/campaigns/draft/${draftId}`);

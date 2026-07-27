@@ -2,8 +2,10 @@ import { ObjectId } from "bson";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import {
+  CampaignDraftConflictError,
   getCampaignDraft,
   updateCampaignDraft,
 } from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
@@ -22,7 +24,9 @@ import {
   getDraftContentReadiness,
   getDraftDetailsForm,
   getDraftSocialMediaGroup,
+  getAiDraftPayloadSignature,
   getSelectedContentRef,
+  isDraftReadyForCheckout,
   normalizeDraftPlatform,
   validateDraftDetails,
   type CampaignContentItem,
@@ -33,8 +37,9 @@ import {
 import styles from "./ai-campaign-draft-card.module.scss";
 import { registerCampaignDraftSave } from "../model/campaign-draft-save-coordinator.ts";
 import { CampaignRequiredDateControl } from "@/entities/client-side/campaign-draft/ui/campaign-required-date-control.tsx";
+import { CampaignAddPagesDrawer } from "@/entities/client-side/campaign-draft/ui/campaign-add-pages-drawer.tsx";
 
-type SaveStatus = "saved" | "saving" | "error";
+type SaveStatus = "saved" | "saving" | "error" | "conflict";
 
 interface Props {
   draftId: string;
@@ -45,7 +50,7 @@ interface Props {
 const normalizeAccounts = (draft: CampaignDraftDto) =>
   (draft.addedAccounts ?? []).map((account) => ({
     ...account,
-    isSelected: account.isSelected !== false,
+    isSelected: account.isAvailable !== false && account.isSelected !== false,
     dateRequest: account.dateRequest || "ASAP",
   }));
 
@@ -66,25 +71,30 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
   const [applyToAll, setApplyToAll] = useState(false);
   const [confirmApplyToAll, setConfirmApplyToAll] = useState(false);
   const [actionKey, setActionKey] = useState<string | null>(null);
+  const [addPagesOpen, setAddPagesOpen] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedRef = useRef("");
   const saveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true));
+  const revisionRef = useRef(0);
 
   useEffect(() => {
     if (!query.data) return;
     const nextAccounts = normalizeAccounts(query.data);
     const nextNoContent = Boolean(query.data.noContentAvailable);
     setDraft(query.data);
+    revisionRef.current = Number(query.data.revision ?? 0);
     setAccounts(nextAccounts);
     setNoContentAvailable(nextNoContent);
-    lastSavedRef.current = JSON.stringify(
+    lastSavedRef.current = getAiDraftPayloadSignature(
       buildAiDraftPayload(query.data, nextAccounts, nextNoContent),
     );
     setSaveStatus("saved");
   }, [query.data]);
 
   const selectedAccounts = useMemo(
-    () => accounts.filter((account) => account.isSelected !== false),
+    () => accounts.filter(
+      (account) => account.isAvailable !== false && account.isSelected !== false,
+    ),
     [accounts],
   );
   const totalPrice = useMemo(
@@ -105,20 +115,19 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
     () => accounts.find((account) => draftAccountKey(account) === editingKey) ?? null,
     [accounts, editingKey],
   );
+  const existingAccountIds = useMemo(
+    () => new Set(accounts.map((account) => String(account.socialAccountId))),
+    [accounts],
+  );
   const contentIsReady = useMemo(
-    () => {
-      if (!draft || selectedAccounts.length === 0) return false;
-      return selectedAccounts.every((account) =>
-        getDraftContentStatus(getContentForDraftAccount(draft, account)) === "ready",
-      );
-    },
-    [draft, selectedAccounts],
+    () => Boolean(draft && isDraftReadyForCheckout(draft, accounts)),
+    [accounts, draft],
   );
   const allReadyContentIsAssigned = useMemo(
     () => contentIsReady && selectedAccounts.every((account) => Boolean(getSelectedContentRef(account))),
     [contentIsReady, selectedAccounts],
   );
-  const canCheckout = draft?.step === "strategyTable" || noContentAvailable;
+  const canCheckout = allReadyContentIsAssigned;
 
   useEffect(() => {
     if (!draft || draft.step === "strategyTable" || !allReadyContentIsAssigned) return;
@@ -132,18 +141,27 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
   const persist = useCallback(() => {
     if (!draft) return Promise.resolve(false);
     const payload = buildAiDraftPayload(draft, accounts, noContentAvailable);
-    const signature = JSON.stringify(payload);
+    const signature = getAiDraftPayloadSignature(payload);
     if (signature === lastSavedRef.current) return Promise.resolve(true);
 
     setSaveStatus("saving");
     const request = saveQueueRef.current.then(async () => {
       try {
-        await updateCampaignDraft(payload);
+        const result = await updateCampaignDraft({
+          ...payload,
+          revision: revisionRef.current,
+        });
+        revisionRef.current = result.revision;
+        setDraft((current) => current
+          ? { ...current, revision: result.revision }
+          : current);
         lastSavedRef.current = signature;
         setSaveStatus("saved");
         return true;
-      } catch {
-        setSaveStatus("error");
+      } catch (error) {
+        setSaveStatus(
+          error instanceof CampaignDraftConflictError ? "conflict" : "error",
+        );
         return false;
       }
     });
@@ -158,7 +176,9 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
 
   useEffect(() => {
     if (!draft) return;
-    const signature = JSON.stringify(buildAiDraftPayload(draft, accounts, noContentAvailable));
+    const signature = getAiDraftPayloadSignature(
+      buildAiDraftPayload(draft, accounts, noContentAvailable),
+    );
     if (signature === lastSavedRef.current) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => void persist(), 600);
@@ -172,6 +192,23 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
       draftAccountKey(account) === key ? { ...account, ...patch } : account,
     ));
   };
+
+  const addPages = useCallback((newAccounts: DraftAddedAccountDto[]) => {
+    setAccounts((current) => {
+      const existingIds = new Set(current.map((account) => String(account.socialAccountId)));
+      return [
+        ...current,
+        ...newAccounts.filter(
+          (account) => !existingIds.has(String(account.socialAccountId)),
+        ),
+      ];
+    });
+    toast.success(
+      `${newAccounts.length} ${newAccounts.length === 1 ? "page" : "pages"} added to the draft.`,
+    );
+  }, []);
+
+  const closeAddPages = useCallback(() => setAddPagesOpen(false), []);
 
   const openDetails = (account: DraftAddedAccountDto) => {
     if (!draft) return;
@@ -289,6 +326,71 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
     saveDetails();
   };
 
+  const removeAccount = (key: string) => {
+    const index = accounts.findIndex((account) => draftAccountKey(account) === key);
+    if (index < 0) return;
+    const removedAccount = accounts[index];
+    const removedContentId = String(
+      getSelectedContentRef(removedAccount)?.campaignContentItemId ?? "",
+    );
+    const removedContent = draft?.campaignContent?.find(
+      (item) => String(item._id) === removedContentId,
+    );
+    const contentStillUsed = accounts.some((account, accountIndex) =>
+      accountIndex !== index &&
+      String(getSelectedContentRef(account)?.campaignContentItemId ?? "") === removedContentId,
+    );
+    setAccounts((current) => current.filter(
+      (account) => draftAccountKey(account) !== key,
+    ));
+    if (removedContentId && !contentStillUsed) {
+      setDraft((current) => current
+        ? {
+          ...current,
+          campaignContent: (current.campaignContent ?? []).filter(
+            (item) => String(item._id) !== removedContentId,
+          ),
+        }
+        : current);
+    }
+    setActionKey(null);
+    if (editingKey === key) closeDetails();
+
+    toast(({ closeToast }) => (
+      <div className={styles.undoToast}>
+        <span>{removedAccount.username} removed from the draft.</span>
+        <button
+          type="button"
+          onClick={() => {
+            setAccounts((current) => {
+              if (current.some((account) => draftAccountKey(account) === key)) return current;
+              const next = [...current];
+              next.splice(Math.min(index, next.length), 0, removedAccount);
+              return next;
+            });
+            if (removedContent) {
+              setDraft((current) => current &&
+                !(current.campaignContent ?? []).some(
+                  (item) => String(item._id) === removedContentId,
+                )
+                ? {
+                  ...current,
+                  campaignContent: [...(current.campaignContent ?? []), removedContent],
+                }
+                : current);
+            }
+            closeToast?.();
+          }}
+        >
+          Undo
+        </button>
+      </div>
+    ), {
+      autoClose: 7000,
+      closeButton: false,
+    });
+  };
+
   const continueTo = async (action: () => void, requireSelection = true) => {
     if (requireSelection && !selectedAccounts.length) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -312,8 +414,11 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
           <span className={styles.eyebrow}>Campaign draft</span>
           <h3>{draft.campaignName}</h3>
         </div>
-        <span className={`${styles.saveStatus} ${saveStatus === "error" ? styles.saveError : ""}`}>
-          {saveStatus === "saving" ? "Saving..." : saveStatus === "error" ? "Not saved" : "Saved"}
+        <span className={`${styles.saveStatus} ${["error", "conflict"].includes(saveStatus) ? styles.saveError : ""}`}>
+          {saveStatus === "saving"
+            ? "Saving..."
+            : saveStatus === "conflict" ? "Changed elsewhere"
+              : saveStatus === "error" ? "Not saved" : "Saved"}
         </span>
       </header>
 
@@ -327,9 +432,9 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
       <div className={styles.tableHeader}>
         <div>
           <h4>Campaign pages</h4>
-          <p>{selectedAccounts.length} of {accounts.length} included</p>
+          <p>{selectedAccounts.length} of {accounts.length} included · live prices &amp; reach</p>
         </div>
-        <button type="button" onClick={() => void continueTo(() => navigate(`/client/create-campaign?draftId=${draftId}&previewTarget=accounts&source=ai&mode=ai-add-pages&returnTo=${encodeURIComponent("/ai-chat")}`), false)}>+ Add pages</button>
+        <button type="button" onClick={() => setAddPagesOpen(true)}>+ Add pages</button>
       </div>
 
       <div className={styles.tableWrap}>
@@ -338,20 +443,21 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
           <tbody>
             {accounts.map((account) => {
               const key = draftAccountKey(account);
-              const selected = account.isSelected !== false;
+              const isAvailable = account.isAvailable !== false;
+              const selected = isAvailable && account.isSelected !== false;
               const readiness = getDraftContentReadiness(getContentForDraftAccount(draft, account));
               const status = readiness.status;
               return (
                 <tr key={key} className={selected ? "" : styles.disabledRow}>
-                  <td data-label="Include"><input type="checkbox" checked={selected} onChange={(event) => updateAccount(key, { isSelected: event.target.checked })} aria-label={`Include ${account.username}`} /></td>
+                  <td data-label="Include"><input type="checkbox" checked={selected} disabled={!isAvailable} onChange={(event) => updateAccount(key, { isSelected: event.target.checked })} aria-label={`Include ${account.username}`} /></td>
                   <td data-label="Network">
                     <div className={styles.network}>
                       {account.logoUrl ? <img src={account.logoUrl} alt="" /> : <span className={styles.avatarFallback} />}
                       <div>
                         <strong>{account.username}</strong>
                         <span>{normalizeDraftPlatform(account.socialMedia)}</span>
-                        <span className={`${styles.contentStatus} ${styles[`contentStatus_${status}`]}`}>
-                          {readiness.label}
+                        <span className={`${styles.contentStatus} ${styles[`contentStatus_${isAvailable ? status : "incomplete"}`]}`}>
+                          {isAvailable ? readiness.label : "Page unavailable"}
                         </span>
                       </div>
                     </div>
@@ -372,7 +478,7 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
                       <button type="button" className={styles.editButton} onClick={() => openDetails(account)} disabled={!selected}>Edit details</button>
                       <div className={styles.moreWrap}>
                         <button type="button" className={styles.moreButton} onClick={() => setActionKey((current) => current === key ? null : key)} aria-label={`More actions for ${account.username}`} aria-expanded={actionKey === key}>...</button>
-                        {actionKey === key && <button type="button" className={styles.removeButton} onClick={() => { setAccounts((current) => current.filter((item) => draftAccountKey(item) !== key)); setActionKey(null); }}>Remove from draft</button>}
+                        {actionKey === key && <button type="button" className={styles.removeButton} onClick={() => removeAccount(key)}>Remove from draft</button>}
                       </div>
                     </div>
                   </td>
@@ -393,30 +499,39 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
       {!canCheckout && selectedAccounts.length > 0 && (
         <div className={styles.nextStep}>
           <div>
-            <strong>Next: add campaign content</strong>
-            <span>Send the promo link and post text in chat. Tags, story link and an additional brief are optional.</span>
+            <strong>{noContentAvailable ? "Creative support requested" : "Next: add campaign content"}</strong>
+            <span>
+              {noContentAvailable
+                ? "The request is saved with this draft. Checkout stays locked until campaign content is ready."
+                : "Send the promo link and post text in chat. Tags, story link and an additional brief are optional."}
+            </span>
           </div>
           <div className={styles.nextStepActions}>
             <button
               type="button"
-              onClick={() => onPrompt("Promote [paste your content link] with the post text: [write the caption]")}
-            >Continue in chat</button>
+              onClick={() => {
+                if (noContentAvailable) setNoContentAvailable(false);
+                onPrompt("Promote [paste your content link] with the post text: [write the caption]");
+              }}
+            >{noContentAvailable ? "Add my own content in chat" : "Continue in chat"}</button>
             <button
               type="button"
               className={styles.nextStepPrimary}
               disabled={saveStatus === "saving"}
               onClick={() => {
+                if (noContentAvailable) setNoContentAvailable(false);
                 const nextAccount = selectedAccounts.find((account) =>
                   getDraftContentStatus(getContentForDraftAccount(draft, account)) !== "ready",
                 ) ?? selectedAccounts[0];
                 if (nextAccount) openDetails(nextAccount);
               }}
-            >Add content</button>
+            >{noContentAvailable ? "Add my own content" : "Add content"}</button>
           </div>
         </div>
       )}
 
       {saveStatus === "error" && <div className={styles.saveFailure}>Changes could not be saved. <button type="button" onClick={() => void persist()}>Retry</button></div>}
+      {saveStatus === "conflict" && <div className={styles.saveFailure}>This draft changed in another place. <button type="button" onClick={() => void query.refetch()}>Reload latest</button></div>}
       {!selectedAccounts.length && <div className={styles.warning}>Select at least one page to continue.</div>}
 
       {canCheckout && (
@@ -456,6 +571,19 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
           </section>
         </div>
       )}
+      <CampaignAddPagesDrawer
+        open={addPagesOpen}
+        existingAccountIds={existingAccountIds}
+        onClose={closeAddPages}
+        onAdd={addPages}
+        onAdvancedSearch={() => {
+          closeAddPages();
+          void continueTo(
+            () => navigate(`/client/create-campaign?draftId=${draftId}&previewTarget=accounts&source=ai&mode=ai-add-pages&returnTo=${encodeURIComponent("/ai-chat")}`),
+            false,
+          );
+        }}
+      />
     </section>
   );
 };

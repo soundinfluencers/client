@@ -7,8 +7,14 @@ export type DraftAddedAccountDto = {
     followers?: number;
     price?: number;
     dateRequest?: string;
+    isSelected?: boolean;
+    isAvailable?: boolean;
     profileType:  "creator" | "community";
     selectedCampaignContentItem?: {
+        campaignContentItemId: string;
+        descriptionId: string;
+    };
+    selectedContent?: {
         campaignContentItemId: string;
         descriptionId: string;
     };
@@ -16,6 +22,7 @@ export type DraftAddedAccountDto = {
 
 export type CampaignDraftDto = {
     _id: string;
+    revision?: number;
     step: "addAccounts" | "addContent" | "strategyTable";
     socialMedia: string;
     campaignName: string;
@@ -33,9 +40,13 @@ export type CampaignDraftDto = {
         taggedLink: string;
         additionalBrief: string;
         accountId?: string;
-        mediaCache?: any;
+        mediaCache?: Record<string, unknown>;
 
     }>;
     addedAccounts: DraftAddedAccountDto[];
     totalPrice?: number;
+    totalFollowers?: number;
+    selectedAccountsCount?: number;
+    source?: string;
+    noContentAvailable?: boolean;
 };

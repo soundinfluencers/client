@@ -25,6 +25,7 @@ export const setupInterceptors = (
       (url.includes("/auth/login") ||
       url.includes("/auth/refresh") ||
       url.includes("/auth/logout"));
+  const handlesErrorInline = (url?: string) => !!url && url.includes("/agent/chat");
 
   const reqId = $api.interceptors.request.use((config) => {
     const token = tokenStorage.get();
@@ -40,7 +41,7 @@ export const setupInterceptors = (
       const originalRequest: any = error.config;
 
       if (!error.response) {
-        handleApiError(error);
+        if (!handlesErrorInline(originalRequest?.url)) handleApiError(error);
         return Promise.reject(error);
       }
 
@@ -52,7 +53,7 @@ export const setupInterceptors = (
         error.response.status === 401 && !originalRequest?._retry;
 
       if (!shouldTryRefresh) {
-        handleApiError(error);
+        if (!handlesErrorInline(originalRequest?.url)) handleApiError(error);
         return Promise.reject(error);
       }
 

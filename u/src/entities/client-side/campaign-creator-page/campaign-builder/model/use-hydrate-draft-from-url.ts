@@ -17,14 +17,29 @@ export const useHydrateDraftFromUrl = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const draftId = searchParams.get("draftId");
+    const previewTarget = searchParams.get("previewTarget");
+    const mode = searchParams.get("mode");
+    const source = searchParams.get("source");
+    const returnTo = searchParams.get("returnTo");
     const storeDraftId = useCampaignBuilderStore((s) => s.draftId);
 
     useEffect(() => {
         if (!draftId) return;
 
+        const cleanTarget = () => {
+            if (previewTarget !== "accounts") return window.location.pathname;
+
+            const next = new URLSearchParams();
+            if (mode === "ai-add-pages") next.set("mode", mode);
+            if (source === "ai") next.set("source", source);
+            if (returnTo?.startsWith("/")) next.set("returnTo", returnTo);
+            const query = next.toString();
+            return `/client/create-campaign${query ? `?${query}` : ""}`;
+        };
+
         // Already working on this draft — just clean the param off the URL.
         if (draftId === storeDraftId) {
-            navigate(window.location.pathname, { replace: true });
+            navigate(cleanTarget(), { replace: true });
             return;
         }
 
@@ -36,7 +51,12 @@ export const useHydrateDraftFromUrl = () => {
                 if (cancelled) return;
 
                 hydrateCampaignBuilderFromDraft(draft);
-                navigate(draftStepRouteMap[draft.step] ?? "/client", { replace: true });
+                navigate(
+                    previewTarget === "accounts"
+                        ? cleanTarget()
+                        : draftStepRouteMap[draft.step] ?? "/client",
+                    { replace: true },
+                );
             } catch {
                 // Not found / not this client's draft — fall back to the dashboard.
                 if (!cancelled) navigate("/client", { replace: true });

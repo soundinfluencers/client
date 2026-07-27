@@ -59,6 +59,17 @@ export const DashboardHeader = ({ firstName, balance }: Props) => {
               <img src={arrowIcon} alt="" />
             </span>
                     </button>
+
+                    <button
+                        type="button"
+                        className={styles.actionCard}
+                        onClick={() => navigate("/ai-chat")}
+                    >
+                        <span>AI Assistant</span>
+                        <span className={styles.actionIcon}>
+              <img src={arrowIcon} alt="" />
+            </span>
+                    </button>
                 </div>
             </section>
         );
@@ -95,6 +106,20 @@ export const DashboardHeader = ({ firstName, balance }: Props) => {
             </span>
                         <div className={styles.tooltip}>
                             Our team designs, manages, and optimizes the campaign for you.
+                        </div>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={styles.actionCard}
+                        onClick={() => navigate("/ai-chat")}
+                    >
+                        <span>AI Assistant</span>
+                        <span className={styles.actionIcon}>
+              <img src={arrowIcon} alt="" />
+            </span>
+                        <div className={styles.tooltip}>
+                            Describe your campaign in plain words — the AI finds influencers and builds a draft for you.
                         </div>
                     </button>
                 </div>

@@ -60,7 +60,12 @@ export const useSaveCampaignCreatorDraft = ({
                     : await postCampaignDraft(payload);
 
             const maybeResponse = response as
-                | { draftId?: string; _id?: string; data?: { draftId?: string; _id?: string } }
+                | {
+                    draftId?: string;
+                    _id?: string;
+                    revision?: number;
+                    data?: { draftId?: string; _id?: string; revision?: number };
+                }
                 | undefined;
 
             const newDraftId =
@@ -74,6 +79,10 @@ export const useSaveCampaignCreatorDraft = ({
             actions.setDraftMeta({
                 draftId: newDraftId,
                 draftStep: "addAccounts",
+                draftRevision:
+                    maybeResponse?.revision ??
+                    maybeResponse?.data?.revision ??
+                    state.draftRevision,
             });
 
             actions.setCampaignName(draftName.trim());

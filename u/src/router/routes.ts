@@ -26,6 +26,7 @@ import {CampaignStrategyPage} from "@/pages/client-side/campaign-strategy-page/u
 import {DashboardPage} from "@/pages/client-side/dashboard";
 import {Campaign} from "@/pages/client-side/campaign";
 import {AiChat} from "@/widgets/ai-chat";
+import {AiCampaignDraftPage} from "@/pages/client-side/ai-campaign-draft";
 // import { CampaignAddInfluencer } from "@/pages/client/campaign-add-infuencer/campaign-add-infuencer.tsx";
 
 export const routes: IRoute[] = [
@@ -117,6 +118,12 @@ export const routes: IRoute[] = [
     name: "AccountSetting",
     path: "/client/account-settings",
     component: AccountSetting,
+    isProtected: true,
+  },
+  {
+    name: "Campaign",
+    path: "/client/campaign-draft/:draftId",
+    component: AiCampaignDraftPage,
     isProtected: true,
   },
   {

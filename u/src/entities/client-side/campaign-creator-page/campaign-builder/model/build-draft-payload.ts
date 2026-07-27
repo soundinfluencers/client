@@ -43,7 +43,7 @@ export const mapDraftAddedAccounts = (
             followers: item.followers ?? 0,
             price: item.price ?? 0,
             dateRequest: item.dateRequest ?? "ASAP",
-            selectedCampaignContentItem: item.selectedCampaignContentItem,
+            selectedContent: item.selectedCampaignContentItem,
         });
     });
 
@@ -74,18 +74,8 @@ export const buildCampaignDraftPayload = (
 
     if ((overrides?.draftId ?? state.draftId) != null) {
         payload.draftId = overrides?.draftId ?? state.draftId;
+        payload.revision = state.draftRevision;
     }
-    console.log("SAVE STATE", {
-
-        selectedOfferId: state.selectedOfferId,
-
-        selectedOfferAccountIds: state.selectedOfferAccountIds,
-
-        selectedPromoCardIds: state.selectedPromoCardIds,
-
-        selectedAccounts: state.selectedAccounts,
-
-    });
     return payload;
 };
 

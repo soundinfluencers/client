@@ -5,10 +5,14 @@ export const hydrateCampaignBuilderFromDraft = (
     draft: CampaignDraftDto,
 ) => {
     const store = useCampaignBuilderStore.getState();
+    const selectedAccounts = draft.addedAccounts?.filter(
+        (account) => account.isAvailable !== false && account.isSelected !== false,
+    ) ?? [];
 
     store.actions.hydrateFromDraft({
         draftId: String(draft._id),
         draftStep: draft.step,
+        draftRevision: Number(draft.revision ?? 0),
 
         campaignName: draft.campaignName ?? "",
 
@@ -18,12 +22,12 @@ export const hydrateCampaignBuilderFromDraft = (
         selectedOfferAccountIds: [],
 
         selectedPromoCardIds:
-            draft.addedAccounts?.map((acc) =>
+            selectedAccounts.map((acc) =>
                 String(acc.socialAccountId),
-            ) ?? [],
+            ),
 
         selectedAccounts:
-            draft.addedAccounts?.map((acc) => ({
+            selectedAccounts.map((acc) => ({
                 accountId: String(acc.socialAccountId),
 
                 influencerId: String(acc.influencerId),
@@ -52,7 +56,7 @@ export const hydrateCampaignBuilderFromDraft = (
 
                 dateRequest:
                     acc.dateRequest ?? "ASAP",
-            })) ?? [],
+            })),
 
         campaignContent: draft.campaignContent ?? [],
 

@@ -5,10 +5,12 @@ import { getPublishedOffers } from "./offer.api";
 export const usePublishedOffersQuery = (
     platform: string,
     genre: string,
+    enabled = true,
 ) => {
     return useQuery({
         queryKey: ["publishedOffers", platform, genre] as const,
         queryFn: () => getPublishedOffers(platform, genre),
+        enabled,
         staleTime: 30_000,
         retry: (failureCount, error) => {
             if (axios.isAxiosError(error)) {
