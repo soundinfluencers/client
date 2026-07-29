@@ -1,0 +1,164 @@
+name: Build and publish container
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: "Branch, tag or full commit SHA to build"
+        required: true
+        type: string
+      release_channel:
+        description: "Release channel used as Docker tag prefix"
+        required: true
+        type: choice
+        options:
+          - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_ref }}
+          fetch-depth: 0
+
+      - name: Validate source ref and release channel
+        id: release
+        shell: bash
+        env:
+          SOURCE_REF: ${{ inputs.source_ref }}
+          RELEASE_CHANNEL: ${{ inputs.release_channel }}
+        run: |
+          set -Eeuo pipefail
+
+          if [[ "$RELEASE_CHANNEL" != "main" ]]; then
+            printf 'ERROR: client publishing currently supports only the main release channel\n' >&2
+            exit 1
+          fi
+
+          if [[ "$SOURCE_REF" == "ai-agent" || "$SOURCE_REF" == "refs/heads/ai-agent" ]]; then
+            printf 'ERROR: ai-agent publishing is not enabled; use main or a commit from main\n' >&2
+            exit 1
+          fi
+
+          if [[ "$SOURCE_REF" =~ ^[0-9a-fA-F]{7,39}$ ]]; then
+            printf 'ERROR: abbreviated commit SHA is not allowed; use the full commit SHA\n' >&2
+            exit 1
+          fi
+
+          git fetch --no-tags origin \
+            "+refs/heads/main:refs/remotes/origin/main"
+
+          built_sha="$(git rev-parse HEAD)"
+          short_sha="$(git rev-parse --short=7 HEAD)"
+          created_at="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          registry_image="$(
+            printf 'ghcr.io/%s/client' "$GITHUB_REPOSITORY_OWNER" \
+              | tr '[:upper:]' '[:lower:]'
+          )"
+
+          [[ "$registry_image" == 'ghcr.io/soundinfluencers/client' ]] || {
+            printf 'ERROR: workflow must run in soundinfluencers/client\n' >&2
+            exit 1
+          }
+
+          if ! git merge-base --is-ancestor \
+            "$built_sha" "origin/main"; then
+            printf 'ERROR: commit %s from source_ref is not in origin/main history\n' \
+              "$built_sha" >&2
+            exit 1
+          fi
+
+          {
+            printf 'built_sha=%s\n' "$built_sha"
+            printf 'short_sha=%s\n' "$short_sha"
+            printf 'created_at=%s\n' "$created_at"
+            printf 'registry_image=%s\n' "$registry_image"
+            printf 'immutable_tag=main-%s\n' "$short_sha"
+            printf 'branch_alias=main\n'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: u/package-lock.json
+
+      - name: Install dependencies
+        working-directory: u
+        run: npm ci
+
+      - name: Build production application
+        working-directory: u
+        run: npm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.release.outputs.registry_image }}
+          tags: |
+            type=raw,value=${{ steps.release.outputs.immutable_tag }}
+            type=raw,value=${{ steps.release.outputs.branch_alias }}
+          labels: |
+            org.opencontainers.image.title=SoundInfluencers Client
+            org.opencontainers.image.description=Production client SPA for SoundInfluencers
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ steps.release.outputs.built_sha }}
+            org.opencontainers.image.created=${{ steps.release.outputs.created_at }}
+            org.opencontainers.image.version=${{ steps.release.outputs.immutable_tag }}
+
+      - name: Build and push image
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Write publication summary
+        env:
+          SOURCE_REF: ${{ inputs.source_ref }}
+          RELEASE_CHANNEL: ${{ inputs.release_channel }}
+          BUILT_SHA: ${{ steps.release.outputs.built_sha }}
+          SHORT_SHA: ${{ steps.release.outputs.short_sha }}
+          REGISTRY_IMAGE: ${{ steps.release.outputs.registry_image }}
+          IMMUTABLE_TAG: ${{ steps.release.outputs.immutable_tag }}
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          {
+            printf '## Published container image\n\n'
+            printf -- '- Repository: %s\n' "$GITHUB_REPOSITORY"
+            printf -- '- Source ref: %s\n' "$SOURCE_REF"
+            printf -- '- Release channel: %s\n' "$RELEASE_CHANNEL"
+            printf -- '- Full SHA: %s\n' "$BUILT_SHA"
+            printf -- '- Short SHA: %s\n' "$SHORT_SHA"
+            printf -- '- Image: %s:%s\n' "$REGISTRY_IMAGE" "$IMMUTABLE_TAG"
+            printf -- '- Digest: %s\n' "$IMAGE_DIGEST"
+            printf -- '- Branch alias: %s:%s\n' "$REGISTRY_IMAGE" "$RELEASE_CHANNEL"
+            printf '\n```dotenv\n'
+            printf 'CLIENT_IMAGE=%s:%s\n' "$REGISTRY_IMAGE" "$IMMUTABLE_TAG"
+            printf '```\n'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,4 +1,5 @@
 import $api from "@/api/api";
+import { API_URL } from "@/shared/config/runtime-config.ts";
 import axios from "axios";
 
 export type ThumbSizeTag =
@@ -26,7 +27,7 @@ export const getFilePreview = async (payload: FilePreviewRequest) => {
   return res.data as Blob;
 };
 const apiNoCred = axios.create({
-  baseURL: "https://dev-api.soundinfluencers.com",
+  baseURL: API_URL,
   withCredentials: false,
 });
 export const getVideoBlobUrl = async (payload: {

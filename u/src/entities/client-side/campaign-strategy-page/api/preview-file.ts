@@ -1,4 +1,5 @@
 import $api from "@/api/api.ts";
+import { API_URL } from "@/shared/config/runtime-config.ts";
 import axios from "axios";
 
 
@@ -29,7 +30,7 @@ export const getFilePreview = async (payload: FilePreviewRequest) => {
 };
 
 const apiNoCred = axios.create({
-    baseURL: "https://dev-api.soundinfluencers.com",
+    baseURL: API_URL,
     withCredentials: false,
 });
 
