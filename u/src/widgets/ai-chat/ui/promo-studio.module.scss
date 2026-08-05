@@ -26,129 +26,6 @@
   animation: studioIn 220ms cubic-bezier(.2, .8, .2, 1);
 }
 
-/* Inside the campaign workspace the studio is not a floating dialog: it fills the
-   panel body, so it drops the chrome the overlay used to provide. */
-.studioEmbedded {
-  width: 100%;
-  /* Fills the workspace body: without this the studio is content-sized and the
-     preview computes its height against a collapsed box. */
-  min-height: 0;
-  max-height: none;
-  flex: 1;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  animation: none;
-
-  .header {
-    padding: 0 0 18px;
-    border-bottom: 1px solid #e8edf3;
-    background: transparent;
-
-    h2 { font-size: clamp(20px, 2.2vw, 26px); }
-  }
-
-  /* This is a chooser, not a document: it fits the workspace instead of growing past
-     it. Only genuinely long things (the history strip, a long style list) scroll,
-     and they scroll inside themselves. */
-  .body {
-    display: flex;
-    min-height: 0;
-    flex-direction: column;
-    padding: 16px 0 0;
-
-    @media (min-width: 901px) {
-      overflow: hidden;
-      flex: 1;
-    }
-  }
-
-  .methodScreen,
-  .configureGrid,
-  .reviewGrid {
-    @media (min-width: 901px) {
-      min-height: 0;
-      flex: 1;
-    }
-  }
-
-  /* Fitting the surface must never cut a card in half: the visuals shrink with the
-     available height, and if even that is not enough the step scrolls itself. */
-  .methodScreen {
-    @media (min-width: 901px) {
-      overflow-y: auto;
-    }
-  }
-
-  .methodVisual {
-    height: clamp(96px, 17vh, 210px);
-    margin-bottom: 14px;
-  }
-
-  .methodCard { padding-bottom: 16px; }
-
-  .methodGrid { gap: 12px; }
-
-  .history {
-    overflow: hidden;
-    min-height: 0;
-    flex: 0 1 auto;
-    margin-bottom: 16px;
-    padding-bottom: 14px;
-  }
-
-  .historyGrid {
-    overflow-x: auto;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(190px, 220px);
-    grid-template-columns: none;
-    scrollbar-width: thin;
-  }
-
-  .formColumn,
-  .styleColumn {
-    overflow-y: auto;
-    min-height: 0;
-  }
-
-  /* The artwork is sized by the height that is left, not by the column width —
-     otherwise a 4:5 preview always overflows a chat-sized card. */
-  .carousel {
-    display: flex;
-    min-height: 0;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .artwork {
-    width: auto;
-    max-width: 100%;
-    height: 100%;
-    max-height: 100%;
-  }
-
-  .reviewGrid {
-    align-items: stretch;
-    gap: clamp(20px, 3vw, 44px);
-  }
-
-  .reviewInfo {
-    overflow-y: auto;
-    min-height: 0;
-  }
-
-  /* Pinned to the bottom of the workspace scroll area so the primary action is
-     always one click away; opaque so content never shows through it. */
-  .footer {
-    position: sticky;
-    bottom: 0;
-    min-height: 0;
-    padding: 13px 0;
-    background: #fff;
-  }
-}
-
 .header {
   display: flex;
   align-items: flex-start;
@@ -210,14 +87,19 @@
 
 .methodGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  min-height: 0;
+  flex: 1 1 auto;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
 }
 
 .methodCard {
   position: relative;
+  display: flex;
   overflow: hidden;
-  padding: 0 0 22px;
+  min-height: 0;
+  flex-direction: column;
+  padding: 0 0 16px;
   border: 1px solid #e1e6ed;
   border-radius: 20px;
   color: #202934;
@@ -264,10 +146,51 @@
   position: relative;
   display: grid;
   overflow: hidden;
-  height: 210px;
-  margin-bottom: 21px;
+  min-height: 64px;
+  flex: 1 1 auto;
+  margin-bottom: 14px;
   background: #edf2f8;
   place-items: center;
+}
+
+/* A real example of what this route produces. Shown whole — cropping a promo cuts
+   off the very headline the example is meant to demonstrate. */
+.methodExample {
+  /* The grid row is content-sized, so a percentage height would resolve to auto and
+     the image would grow past the card. Pinning it to the box keeps it inside. */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.approvedCard {
+  border-color: #bfe3ce;
+  cursor: default;
+}
+
+.approvedActions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding: 12px 20px 0;
+
+  a, button {
+    border: 1px solid #d5dce6;
+    border-radius: 999px;
+    color: #34405180;
+    color: #344051;
+    background: #fff;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 650;
+    padding: 6px 13px;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover { border-color: #202934; color: #202934; }
+  }
 }
 
 .methodVisual_upload {
@@ -289,9 +212,7 @@
   place-items: center;
 }
 
-.methodVisual_generated {
-  background: linear-gradient(145deg, #131825, #392057 62%, #ff795d);
-}
+.methodVisual_generated { background: #10131a; }
 
 .generatedGlyph {
   position: relative;
@@ -310,7 +231,7 @@
   i:nth-child(3) { inset: 45px; background: #c9ff4b; box-shadow: 0 0 40px rgba(201, 255, 75, .55); }
 }
 
-.methodVisual_photo { background: linear-gradient(145deg, #e9edf3, #cfd8e5); }
+.methodVisual_photo { background: #10131a; }
 
 .beforeAfter {
   display: grid;
@@ -323,18 +244,15 @@
     position: relative;
     overflow: hidden;
     border-radius: 13px;
-    background: linear-gradient(145deg, #d1dae7, #aeb9c9);
-
-    &:last-child { background: linear-gradient(145deg, #171329, #59407d); }
+    background: #0d1119;
   }
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 
-  > span:last-child img { filter: saturate(1.35) contrast(1.12) brightness(.64); }
   i { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(14, 10, 27, .8), transparent 70%); }
   small { position: absolute; z-index: 2; right: 8px; bottom: 8px; padding: 4px 7px; border-radius: 999px; color: #fff; background: rgba(13, 18, 28, .68); font-size: 8px; font-style: normal; }
 }
@@ -348,15 +266,24 @@
   b { margin-left: 4px; }
 }
 
+/* Fills the promo section and never scrolls: what gives way is the picture inside
+   the card, not the card's title or its button. */
 .methodScreen {
   display: flex;
+  overflow: hidden;
+  min-height: 0;
+  flex: 1;
   flex-direction: column;
+  gap: 14px;
 }
 
 .history {
   order: -1;
-  margin-bottom: 26px;
-  padding-bottom: 24px;
+  overflow: hidden;
+  min-height: 0;
+  flex: 0 1 auto;
+  margin-bottom: 0;
+  padding-bottom: 14px;
   border-bottom: 1px solid #e1e6ed;
 }
 
@@ -371,10 +298,14 @@
   > small { color: #7b8796; font-size: 10px; }
 }
 
+/* The strip scrolls sideways inside itself so the section never grows a scrollbar. */
 .historyGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow-x: auto;
   gap: 11px;
+  grid-auto-columns: minmax(180px, 210px);
+  grid-auto-flow: column;
+  scrollbar-width: thin;
 }
 
 .historyCard {

@@ -5,10 +5,14 @@ import {
   getCampaignDraft,
   saveCampaignDraftPromo,
 } from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
-import type { PromoCreativeDto } from "@/entities/client-side/campaign-draft/api/campaign-draft.dto.ts";
+import type {
+  PromoCreativeDto,
+  PromoCreativeSource,
+} from "@/entities/client-side/campaign-draft/api/campaign-draft.dto.ts";
 import type { CampaignSetupSurface } from "@/entities/client-side/campaign-setup/model/campaign-setup.model.ts";
 import { flushCampaignDraftSaves } from "../model/campaign-draft-save-coordinator.ts";
 import { AiCampaignDraftCard } from "./ai-campaign-draft-card.tsx";
+import { PromoSection } from "./promo-section.tsx";
 import { PromoStudio } from "./promo-studio.tsx";
 
 import styles from "./campaign-workspace-panel.module.scss";
@@ -45,6 +49,8 @@ export const CampaignWorkspacePanel = ({
 }: Props) => {
   const queryClient = useQueryClient();
   const [saveError, setSaveError] = useState<string | null>(null);
+  // Which creation route the client picked; the studio opens as a modal on top.
+  const [promoMethod, setPromoMethod] = useState<PromoCreativeSource | null>(null);
   const containerRef = useRef<HTMLElement>(null);
   // Only the promo editor needs the draft up here; the pages table loads its own.
   const query = useQuery({
@@ -74,6 +80,18 @@ export const CampaignWorkspacePanel = ({
       ["campaign-draft", draftId],
       { ...latest.data, revision: result.revision, promoCreative },
     );
+  };
+
+  const applyPromo = async (promo: PromoCreativeDto) => {
+    try {
+      await savePromo(promo);
+    } catch {
+      setSaveError(
+        "Promo was created but could not be attached to the campaign. Retry after the connection recovers.",
+      );
+      throw new Error("Promo save failed");
+    }
+    onNote("Promo attached to the campaign", "promo");
   };
 
   // Escape closes the workspace, but never steals the key from a nested dialog
@@ -133,33 +151,30 @@ export const CampaignWorkspacePanel = ({
         )}
 
         {surface === "promo" && query.data && (
-          <PromoStudio
-            embedded
-            open
+          <PromoSection
             draft={query.data}
-            // Approving finishes the job, so the workspace steps aside and the
-            // conversation comes back into view.
-            onClose={onClose}
-            onGenerated={(count) =>
-              onNote(
-                `${count} promo ${count === 1 ? "direction" : "directions"} created`,
-                "promo",
-              )
-            }
-            onApproved={async (promo) => {
-              try {
-                await savePromo(promo);
-              } catch {
-                setSaveError(
-                  "Promo was created but could not be attached to the campaign. Retry after the connection recovers.",
-                );
-                throw new Error("Promo save failed");
-              }
-              onNote("Promo attached to the campaign", "promo");
-            }}
+            onPick={setPromoMethod}
+            onApproved={applyPromo}
           />
         )}
       </div>
+
+      {surface === "promo" && query.data && promoMethod && (
+        <PromoStudio
+          open
+          method={promoMethod}
+          draft={query.data}
+          // Closing returns to the section, where the approved promo is now a card.
+          onClose={() => setPromoMethod(null)}
+          onGenerated={(count) =>
+            onNote(
+              `${count} promo ${count === 1 ? "direction" : "directions"} created`,
+              "promo",
+            )
+          }
+          onApproved={applyPromo}
+        />
+      )}
     </section>
   );
 };

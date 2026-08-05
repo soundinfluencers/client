@@ -6,6 +6,7 @@ import {
   type CSSProperties,
   type DragEvent,
 } from "react";
+import { createPortal } from "react-dom";
 
 import { uploadImageApi } from "@/api/upload/upload-image.api.ts";
 import type {
@@ -24,11 +25,8 @@ import {
   type PromoVariant,
 } from "@/entities/client-side/promo-creative/model/promo-creative.model.ts";
 import {
-  listPromoHistory,
-  markPromoHistoryApproved,
   savePromoHistoryBatch,
   type PromoHistoryEntry,
-  type PromoHistoryStatus,
 } from "@/entities/client-side/promo-creative/model/promo-history.store.ts";
 import {
   PromoImageError,
@@ -39,7 +37,7 @@ import { listPromoHeadlineStyles } from "@/entities/client-side/promo-creative/a
 import styles from "./promo-studio.module.scss";
 
 type PromoMethod = PromoCreativeSource;
-type StudioStep = "method" | "configure" | "review";
+type StudioStep = "configure" | "review";
 // Who puts the campaign copy on the artwork: the app (exact, re-editable for free)
 // or the image model (integrated into the scene, spelling not guaranteed).
 type PromoTextMode = "overlay" | "in-image";
@@ -52,41 +50,14 @@ interface Props {
   onApproved: (promo: PromoCreativeDto) => Promise<void>;
   // Fired once a batch of directions comes back, so the conversation can record it.
   onGenerated?: (count: number) => void;
-  // Rendered inside the campaign workspace instead of as a modal: no overlay, no
-  // scroll lock, and the surrounding panel owns closing.
-  embedded?: boolean;
+  // The route the client picked in the promo section; the modal opens straight into it.
+  method: PromoMethod;
 }
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
 // Mirrors the server-side MinLength on the prompt field.
 const MIN_PROMPT_LENGTH = 10;
 const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-
-const METHOD_OPTIONS: readonly {
-  id: PromoMethod;
-  eyebrow: string;
-  title: string;
-  description: string;
-}[] = [
-  {
-    id: "upload",
-    eyebrow: "I have a finished asset",
-    title: "Upload ready promo",
-    description: "Use artwork that is already approved and ready to publish.",
-  },
-  {
-    id: "photo",
-    eyebrow: "Start with my visual",
-    title: "Create from a photo",
-    description: "Turn an artist or release photo into campaign-ready artwork.",
-  },
-  {
-    id: "generated",
-    eyebrow: "Use a reusable direction",
-    title: "Create from a style",
-    description: "Combine the campaign copy with a template and visual style.",
-  },
-] as const;
 
 const createId = () =>
   globalThis.crypto?.randomUUID?.() ??
@@ -136,24 +107,15 @@ const splitPreviewHeadline = (value: string) => {
   return lines.slice(0, 4);
 };
 
-type PromoHistoryPreview = PromoHistoryEntry & { previewUrl: string };
-
-const historyStatusLabel: Record<PromoHistoryStatus, string> = {
-  approved: "Approved",
-  rejected: "Rejected",
-  previous: "Previous",
-};
-
 export const PromoStudio = ({
   open,
   draft,
   onClose,
   onApproved,
   onGenerated,
-  embedded,
+  method,
 }: Props) => {
-  const [step, setStep] = useState<StudioStep>("method");
-  const [method, setMethod] = useState<PromoMethod | null>(null);
+  const [step, setStep] = useState<StudioStep>("configure");
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [isDraggingSource, setIsDraggingSource] = useState(false);
@@ -176,24 +138,9 @@ export const PromoStudio = ({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [historyEntries, setHistoryEntries] = useState<PromoHistoryEntry[]>([]);
-  const [historyPreviews, setHistoryPreviews] = useState<PromoHistoryPreview[]>(
-    [],
-  );
-  const [historyRevision, setHistoryRevision] = useState(0);
   const firstControlRef = useRef<HTMLButtonElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  const selectedExample = useMemo(
-    () =>
-      (draft.addedAccounts ?? []).find(
-        (account) =>
-          account.isAvailable !== false &&
-          account.isSelected !== false &&
-          account.logoUrl,
-      )?.logoUrl,
-    [draft.addedAccounts],
-  );
   const isCustomStyle = styleId === "custom";
   const activeStyle: PromoStyle = useMemo(
     () =>
@@ -227,7 +174,7 @@ export const PromoStudio = ({
   }, [generatedFiles]);
 
   useEffect(() => {
-    if (!open || embedded) return;
+    if (!open) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     window.setTimeout(() => firstControlRef.current?.focus(), 0);
@@ -239,13 +186,12 @@ export const PromoStudio = ({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [embedded, isGenerating, isSaving, onClose, open]);
+  }, [isGenerating, isSaving, onClose, open]);
 
   useEffect(() => {
     if (!open) return;
     const restoredStyle = restoreStyleSelection(draft.promoCreative?.styleId);
-    setStep("method");
-    setMethod(null);
+    setStep("configure");
     setSourceFile(null);
     setPrompt("");
     setTextMode("overlay");
@@ -292,43 +238,7 @@ export const PromoStudio = ({
     if (open && bodyRef.current) bodyRef.current.scrollTop = 0;
   }, [method, open, step]);
 
-  useEffect(() => {
-    if (!open) return;
-    let active = true;
-    void listPromoHistory(draft._id)
-      .then((entries) => {
-        if (active) setHistoryEntries(entries);
-      })
-      .catch(() => {
-        if (active) setHistoryEntries([]);
-      });
-    return () => {
-      active = false;
-    };
-  }, [draft._id, historyRevision, open]);
-
-  useEffect(() => {
-    const previews = historyEntries.map((entry) => ({
-      ...entry,
-      previewUrl: URL.createObjectURL(entry.asset),
-    }));
-    setHistoryPreviews(previews);
-    return () =>
-      previews.forEach((entry) => URL.revokeObjectURL(entry.previewUrl));
-  }, [historyEntries]);
-
   if (!open) return null;
-
-  const selectMethod = (nextMethod: PromoMethod) => {
-    setMethod(nextMethod);
-    setSourceFile(null);
-    setVariants([]);
-    setGeneratedFiles([]);
-    setGenerationModel(null);
-    setActiveVariantIndex(0);
-    setError(null);
-    setStep("configure");
-  };
 
   const selectFile = (file?: File) => {
     if (!file) return;
@@ -540,7 +450,6 @@ export const PromoStudio = ({
       });
       try {
         await savePromoHistoryBatch(draft._id, historyBatch);
-        setHistoryRevision((revision) => revision + 1);
       } catch {
         // Browser storage should never invalidate an already saved campaign promo.
       }
@@ -554,53 +463,11 @@ export const PromoStudio = ({
     }
   };
 
-  const restoreHistoryEntry = async (entry: PromoHistoryEntry) => {
-    setIsSaving(true);
-    setError(null);
-    try {
-      const file = promoBlobToFile(entry.asset, entry.headline || entry.label);
-      const assetUrl = await uploadImageApi(file);
-      await onApproved({
-        id: entry.id,
-        assetUrl,
-        source: entry.source,
-        ...(entry.styleId ? { styleId: entry.styleId } : {}),
-        ...(entry.headline ? { headline: entry.headline } : {}),
-        ...(entry.subheadline ? { subheadline: entry.subheadline } : {}),
-        ...(entry.generator ? { generator: entry.generator } : {}),
-        createdAt: new Date().toISOString(),
-      });
-      try {
-        await markPromoHistoryApproved(draft._id, entry.id);
-        setHistoryRevision((revision) => revision + 1);
-      } catch {
-        // The campaign asset is authoritative if browser history is unavailable.
-      }
-      onClose();
-    } catch {
-      setError(
-        "This version could not be restored. Check the connection and try again.",
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const effectiveHistoryStatus = (
-    entry: PromoHistoryEntry,
-  ): PromoHistoryStatus => {
-    if (draft.promoCreative?.id === entry.id) return "approved";
-    return entry.status === "approved" ? "previous" : entry.status;
-  };
-
   const goBack = () => {
     setError(null);
+    // There is no chooser inside the modal — leaving the first step leaves the modal.
     if (step === "review" && method !== "upload") setStep("configure");
-    else {
-      setMethod(null);
-      setSourceFile(null);
-      setStep("method");
-    }
+    else onClose();
   };
 
   const promoVariables = activeVariant
@@ -627,143 +494,34 @@ export const PromoStudio = ({
 
   const studio = (
       <section
-        className={`${styles.studio} ${embedded ? styles.studioEmbedded : ""}`}
-        // Embedded, it is a region inside the workspace, not a dialog: the panel
-        // above owns Escape and the close control.
-        {...(embedded ? {} : { role: "dialog", "aria-modal": true })}
+        className={styles.studio}
+        role="dialog"
+        aria-modal="true"
         aria-labelledby="promo-studio-title"
       >
         <header className={styles.header}>
           <div>
             <span className={styles.eyebrow}>Campaign creative</span>
             <h2 id="promo-studio-title">
-              {step === "method"
-                ? "How would you like to create the promo?"
-                : step === "configure"
-                  ? "Shape the creative direction"
-                  : "Choose the strongest version"}
+              {step === "configure"
+                ? "Shape the creative direction"
+                : "Choose the strongest version"}
             </h2>
             <p>{draft.campaignName || "Untitled campaign"}</p>
           </div>
-          {!embedded && (
-            <button
-              ref={firstControlRef}
-              type="button"
-              className={styles.close}
-              onClick={onClose}
-              disabled={isSaving || isGenerating}
-              aria-label="Close promo studio"
-            >
-              ×
-            </button>
-          )}
+          <button
+            ref={firstControlRef}
+            type="button"
+            className={styles.close}
+            onClick={onClose}
+            disabled={isSaving || isGenerating}
+            aria-label="Close promo studio"
+          >
+            ×
+          </button>
         </header>
 
         <div ref={bodyRef} className={styles.body}>
-          {step === "method" && (
-            <div className={styles.methodScreen}>
-              <div className={styles.methodGrid}>
-                {METHOD_OPTIONS.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    className={styles.methodCard}
-                    onClick={() => selectMethod(option.id)}
-                  >
-                    <span
-                      className={`${styles.methodVisual} ${styles[`methodVisual_${option.id}`]}`}
-                      aria-hidden="true"
-                    >
-                      {option.id === "photo" && (
-                        <span className={styles.beforeAfter}>
-                          <span>
-                            {selectedExample && (
-                              <img src={selectedExample} alt="" />
-                            )}
-                            <small>Before</small>
-                          </span>
-                          <span>
-                            {selectedExample && (
-                              <img src={selectedExample} alt="" />
-                            )}
-                            <i />
-                            <small>Promo</small>
-                          </span>
-                        </span>
-                      )}
-                      {option.id === "upload" && (
-                        <span className={styles.uploadGlyph}>↑</span>
-                      )}
-                      {option.id === "generated" && (
-                        <span className={styles.generatedGlyph}>
-                          <i />
-                          <i />
-                          <i />
-                        </span>
-                      )}
-                    </span>
-                    <span className={styles.cardEyebrow}>{option.eyebrow}</span>
-                    <strong>{option.title}</strong>
-                    <small>{option.description}</small>
-                    <span className={styles.cardAction}>
-                      Continue <b>→</b>
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {historyPreviews.length > 0 && (
-                <section
-                  className={styles.history}
-                  aria-label="Creative history"
-                >
-                  <div className={styles.historyHeading}>
-                    <div>
-                      <span className={styles.eyebrow}>Creative history</span>
-                      <h3>Previous versions</h3>
-                    </div>
-                    <small>Saved in this browser</small>
-                  </div>
-                  <div className={styles.historyGrid}>
-                    {historyPreviews.slice(0, 9).map((entry) => {
-                      const status = effectiveHistoryStatus(entry);
-                      return (
-                        <article key={entry.id} className={styles.historyCard}>
-                          <img
-                            src={entry.previewUrl}
-                            alt={`${entry.label} promo version`}
-                          />
-                          <div>
-                            <span
-                              className={`${styles.historyStatus} ${styles[`historyStatus_${status}`]}`}
-                            >
-                              {historyStatusLabel[status]}
-                            </span>
-                            <strong>{entry.label}</strong>
-                            <small>
-                              {new Date(entry.createdAt).toLocaleDateString(
-                                undefined,
-                                { month: "short", day: "numeric" },
-                              )}
-                            </small>
-                            {status !== "approved" && (
-                              <button
-                                type="button"
-                                onClick={() => void restoreHistoryEntry(entry)}
-                                disabled={isSaving}
-                              >
-                                Restore version
-                              </button>
-                            )}
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
-            </div>
-          )}
 
           {step === "configure" && method && (
             <div className={styles.configureGrid}>
@@ -1121,10 +879,10 @@ export const PromoStudio = ({
           <button
             type="button"
             className={styles.secondary}
-            onClick={step === "method" ? onClose : goBack}
+            onClick={goBack}
             disabled={isSaving || isGenerating}
           >
-            {step === "method" ? "Cancel" : "Back"}
+            Back
           </button>
           <div>
             {step === "configure" && method !== "upload" && (
@@ -1154,9 +912,9 @@ export const PromoStudio = ({
       </section>
   );
 
-  if (embedded) return studio;
-
-  return (
+  // Rendered into the body: the workspace layer is animated with a transform, and a
+  // transformed ancestor would trap this fixed overlay inside the panel.
+  return createPortal(
     <div
       className={styles.overlay}
       onMouseDown={(event) => {
@@ -1165,6 +923,7 @@ export const PromoStudio = ({
       }}
     >
       {studio}
-    </div>
+    </div>,
+    document.body,
   );
 };

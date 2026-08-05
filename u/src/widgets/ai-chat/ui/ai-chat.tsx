@@ -339,10 +339,6 @@ export const AiChat = () => {
   return (
     <Container className={styles.root}>
       <div className={`${styles.shell} ${activeDraftId ? styles.shellWide : ""}`}>
-        <div className={styles.header}>
-          <h1>AI Assistant</h1>
-        </div>
-
         <div
           className={`${styles.card} ${messages.length === 0 ? styles.cardEmpty : ""}`}
         >

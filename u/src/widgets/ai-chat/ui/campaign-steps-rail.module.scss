@@ -86,21 +86,31 @@
   &:hover { border-color: #8fd0ae; color: #145634; }
 }
 
-/* Settled by talking, not by editing: a dashed chip that reads as "conversation",
-   set apart from the working surfaces by a divider. */
+/* Settled by talking, not by editing: a dashed chip with a speech bubble, set apart
+   from the working surfaces by a divider. It carries no done/undone state. */
+.chatGlyph {
+  position: relative;
+  width: 15px;
+  height: 12px;
+  flex: 0 0 15px;
+  border: 1px solid #9aa6b8;
+  border-radius: 4px;
+
+  &::after {
+    position: absolute;
+    top: 100%;
+    left: 3px;
+    width: 0;
+    height: 0;
+    border-top: 4px solid #9aa6b8;
+    border-right: 4px solid transparent;
+    content: "";
+  }
+}
+
 .stepChat {
   border-style: dashed;
-
-  /* Done still reads as done — only the unfinished state gets the muted chat look. */
-  &:not(.step_complete) {
-    border-color: #ccd5e0;
-
-    .dot {
-      border-style: dashed;
-      color: #8b96a8;
-      background: #fff;
-    }
-  }
+  border-color: #ccd5e0;
 
   &:hover { border-color: #9fb0c6; }
 }

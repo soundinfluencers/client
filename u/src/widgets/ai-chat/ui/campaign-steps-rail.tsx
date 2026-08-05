@@ -150,8 +150,8 @@ export const CampaignStepsRail = ({
                 type="button"
                 className={[
                   styles.step,
-                  styles[`step_${checkpoint.status}`],
-                  isChat ? styles.stepChat : "",
+                  // A conversation is not a checklist item: it has no done/undone state.
+                  isChat ? styles.stepChat : styles[`step_${checkpoint.status}`],
                   isOpen ? styles.stepOpen : "",
                   changed ? styles.stepChanged : "",
                   nudgedId === checkpoint.id ? styles.stepNudged : "",
@@ -161,8 +161,8 @@ export const CampaignStepsRail = ({
                 aria-current={isOpen ? "true" : undefined}
                 aria-label={[
                   checkpoint.label,
-                  isChat ? "— settled in the conversation" : "",
-                  showStatus ? `— ${STATUS_HINT[checkpoint.status]}` : "",
+                  isChat ? "— talk to the assistant" : "",
+                  !isChat && showStatus ? `— ${STATUS_HINT[checkpoint.status]}` : "",
                   changed ? "— updated" : "",
                 ]
                   .filter(Boolean)
@@ -176,9 +176,13 @@ export const CampaignStepsRail = ({
                 }
                 onClick={() => onSelect(checkpoint.action)}
               >
-                <i className={styles.dot} aria-hidden="true">
-                  {checkpoint.status === "complete" ? "✓" : isChat ? "…" : ""}
-                </i>
+                {isChat ? (
+                  <i className={styles.chatGlyph} aria-hidden="true" />
+                ) : (
+                  <i className={styles.dot} aria-hidden="true">
+                    {checkpoint.status === "complete" ? "✓" : ""}
+                  </i>
+                )}
                 {checkpoint.shortLabel}
                 {changed && <i className={styles.changeMark} aria-hidden="true" />}
               </button>
