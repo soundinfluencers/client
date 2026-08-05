@@ -1,10 +1,13 @@
 // The image model draws the whole poster, copy included — the app composes the brief
 // and never paints on the result.
 
+import housePoster from "@/assets/promo-examples/after.webp";
+
 export type PromoReference = {
   id: string;
   name: string;
-  description: string;
+  // The look itself — picked by eye, not by reading.
+  preview: string;
   // Style guidance handed to the model when this reference is picked.
   styleBrief: string;
 };
@@ -13,7 +16,7 @@ export const PROMO_REFERENCES: readonly PromoReference[] = [
   {
     id: "house-poster",
     name: "SoundInfluencers poster",
-    description: "Bold condensed headline over a dark club shot, one accent colour.",
+    preview: housePoster,
     styleBrief:
       "Style: bold condensed uppercase typography stacked in the lower third, white " +
       "with a single saturated accent colour on one or two key words, over a darkened " +

@@ -108,16 +108,12 @@ export const PromoSection = ({ draft, onPick }: Props) => {
                 onError={hideImage}
               />
             </span>
-            <span className={styles.cardEyebrow}>On the campaign</span>
+            <span className={styles.cardEyebrow}>Selected</span>
             <strong>{approved.headline || "Approved promo"}</strong>
-            <small>This is what goes out with the campaign.</small>
             <span className={styles.approvedActions}>
               <a href={approved.assetUrl} download target="_blank" rel="noreferrer">
                 Download
               </a>
-              <button type="button" onClick={() => onPick(approved.source)}>
-                Replace
-              </button>
             </span>
           </div>
         )}

@@ -363,17 +363,19 @@ export const PromoStudio = ({
                       className={referenceId === item.id ? styles.referenceSelected : ""}
                       onClick={() => setReferenceId(item.id)}
                     >
+                      <img src={item.preview} alt="" />
                       <b>{item.name}</b>
-                      <small>{item.description}</small>
                     </button>
                   ))}
                   <button
                     type="button"
-                    className={referenceId === CUSTOM_REFERENCE ? styles.referenceSelected : ""}
+                    className={`${styles.referenceCustom} ${
+                      referenceId === CUSTOM_REFERENCE ? styles.referenceSelected : ""
+                    }`}
                     onClick={() => setReferenceId(CUSTOM_REFERENCE)}
                   >
+                    <span aria-hidden="true">✎</span>
                     <b>Custom</b>
-                    <small>Describe the look in your own words</small>
                   </button>
                 </div>
 
@@ -425,15 +427,19 @@ export const PromoStudio = ({
             </div>
 
             <div className={styles.reviewInfo}>
-              <div className={styles.dots} aria-label="Promo options">
+              <div className={styles.filmstrip} aria-label="Promo options">
                 {previews.map((preview, index) => (
                   <button
                     key={preview}
                     type="button"
-                    className={index === activeIndex ? styles.dotActive : ""}
+                    className={index === activeIndex ? styles.filmstripActive : ""}
                     onClick={() => setActiveIndex(index)}
                     aria-label={`Show option ${index + 1}`}
-                  />
+                    aria-current={index === activeIndex ? "true" : undefined}
+                  >
+                    <img src={preview} alt="" />
+                    <small>{index + 1}</small>
+                  </button>
                 ))}
               </div>
 
