@@ -151,11 +151,7 @@ export const CampaignWorkspacePanel = ({
         )}
 
         {surface === "promo" && query.data && (
-          <PromoSection
-            draft={query.data}
-            onPick={setPromoMethod}
-            onApproved={applyPromo}
-          />
+          <PromoSection draft={query.data} onPick={setPromoMethod} />
         )}
       </div>
 

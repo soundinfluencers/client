@@ -1,11 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type DragEvent,
-} from "react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
 import { createPortal } from "react-dom";
 
 import { uploadImageApi } from "@/api/upload/upload-image.api.ts";
@@ -15,169 +8,82 @@ import type {
   PromoCreativeSource,
 } from "@/entities/client-side/campaign-draft/api/campaign-draft.dto.ts";
 import {
-  PROMO_STYLE_PRESETS,
-  createCustomPromoStyle,
-  createPromoVariants,
-  promoBlobToFile,
-  promoLineUsesAccent,
-  renderPromoVariant,
-  type PromoStyle,
-  type PromoVariant,
+  buildPromoBrief,
+  PROMO_REFERENCES,
+  type PromoReference,
 } from "@/entities/client-side/promo-creative/model/promo-creative.model.ts";
-import {
-  savePromoHistoryBatch,
-  type PromoHistoryEntry,
-} from "@/entities/client-side/promo-creative/model/promo-history.store.ts";
 import {
   PromoImageError,
   createPromoImageDirections,
 } from "@/entities/client-side/promo-creative/api/promo-image.api.ts";
-import { listPromoHeadlineStyles } from "@/entities/client-side/promo-creative/api/promo-headline-style.api.ts";
 
 import styles from "./promo-studio.module.scss";
 
-type PromoMethod = PromoCreativeSource;
 type StudioStep = "configure" | "review";
-// Who puts the campaign copy on the artwork: the app (exact, re-editable for free)
-// or the image model (integrated into the scene, spelling not guaranteed).
-type PromoTextMode = "overlay" | "in-image";
 type PromoFidelity = "low" | "high";
 
 interface Props {
   open: boolean;
   draft: CampaignDraftDto;
+  method: PromoCreativeSource;
   onClose: () => void;
   onApproved: (promo: PromoCreativeDto) => Promise<void>;
-  // Fired once a batch of directions comes back, so the conversation can record it.
   onGenerated?: (count: number) => void;
-  // The route the client picked in the promo section; the modal opens straight into it.
-  method: PromoMethod;
 }
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
-// Mirrors the server-side MinLength on the prompt field.
-const MIN_PROMPT_LENGTH = 10;
+const MIN_COPY_LENGTH = 10;
 const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const CUSTOM_REFERENCE = "custom";
 
 const createId = () =>
   globalThis.crypto?.randomUUID?.() ??
   `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 const validateImage = (file: File) => {
-  if (!ACCEPTED_IMAGE_TYPES.has(file.type))
-    return "Use a JPG, PNG, or WebP image.";
+  if (!ACCEPTED_IMAGE_TYPES.has(file.type)) return "Use a JPG, PNG, or WebP image.";
   if (file.size > MAX_FILE_SIZE) return "Choose an image smaller than 15 MB.";
   return null;
-};
-
-const restoreStyleSelection = (
-  savedStyleId?: string,
-  presets: readonly PromoStyle[] = PROMO_STYLE_PRESETS,
-) => {
-  const customMatch = savedStyleId?.match(
-    /^custom-([0-9a-f]{6})-([0-9a-f]{6})$/i,
-  );
-  if (customMatch) {
-    return {
-      styleId: "custom",
-      background: `#${customMatch[1]}`,
-      accent: `#${customMatch[2]}`,
-    };
-  }
-  return {
-    styleId: presets.some((style) => style.id === savedStyleId)
-      ? savedStyleId!
-      : presets[0]?.id ?? PROMO_STYLE_PRESETS[0].id,
-  };
-};
-
-const splitPreviewHeadline = (value: string) => {
-  const words = value.trim().split(/\s+/).filter(Boolean);
-  const lines: string[] = [];
-  let current = "";
-  words.forEach((word) => {
-    const candidate = current ? `${current} ${word}` : word;
-    if (candidate.length <= 20 || !current) current = candidate;
-    else {
-      lines.push(current);
-      current = word;
-    }
-  });
-  if (current) lines.push(current);
-  return lines.slice(0, 4);
 };
 
 export const PromoStudio = ({
   open,
   draft,
+  method,
   onClose,
   onApproved,
   onGenerated,
-  method,
 }: Props) => {
   const [step, setStep] = useState<StudioStep>("configure");
+  const [copy, setCopy] = useState("");
+  const [look, setLook] = useState("");
+  const [referenceId, setReferenceId] = useState<string>(
+    PROMO_REFERENCES[0]?.id ?? CUSTOM_REFERENCE,
+  );
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [isDraggingSource, setIsDraggingSource] = useState(false);
-  const [prompt, setPrompt] = useState("");
-  const [headline, setHeadline] = useState(draft.campaignName || "New release");
-  const [subheadline, setSubheadline] = useState("Available now");
-  const [textMode, setTextMode] = useState<PromoTextMode>("overlay");
   const [fidelity, setFidelity] = useState<PromoFidelity>("high");
-  const [stylePresets, setStylePresets] = useState<PromoStyle[]>([
-    ...PROMO_STYLE_PRESETS,
-  ]);
-  const [styleId, setStyleId] = useState(PROMO_STYLE_PRESETS[0].id);
-  const [customBackground, setCustomBackground] = useState("#17102b");
-  const [customAccent, setCustomAccent] = useState("#ff6b4a");
-  const [variants, setVariants] = useState<PromoVariant[]>([]);
-  const [generatedFiles, setGeneratedFiles] = useState<File[]>([]);
-  const [generatedPreviews, setGeneratedPreviews] = useState<string[]>([]);
+  const [generated, setGenerated] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [generationModel, setGenerationModel] = useState<string | null>(null);
-  const [activeVariantIndex, setActiveVariantIndex] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const firstControlRef = useRef<HTMLButtonElement>(null);
-  const bodyRef = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
-  const isCustomStyle = styleId === "custom";
-  const activeStyle: PromoStyle = useMemo(
-    () =>
-      isCustomStyle
-        ? createCustomPromoStyle(customBackground, customAccent)
-        : (stylePresets.find((item) => item.id === styleId) ??
-          stylePresets[0] ??
-          PROMO_STYLE_PRESETS[0]),
-    [customAccent, customBackground, isCustomStyle, styleId, stylePresets],
-  );
-  const activeVariant = variants[activeVariantIndex];
-  const previewHeadlineLines = useMemo(
-    () => splitPreviewHeadline(headline || "Your next release"),
-    [headline],
-  );
-
-  useEffect(() => {
-    if (!sourceFile) {
-      setSourcePreview(null);
-      return;
-    }
-    const url = URL.createObjectURL(sourceFile);
-    setSourcePreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [sourceFile]);
-
-  useEffect(() => {
-    const urls = generatedFiles.map((file) => URL.createObjectURL(file));
-    setGeneratedPreviews(urls);
-    return () => urls.forEach((url) => URL.revokeObjectURL(url));
-  }, [generatedFiles]);
+  const reference: PromoReference | undefined =
+    referenceId === CUSTOM_REFERENCE
+      ? undefined
+      : PROMO_REFERENCES.find((item) => item.id === referenceId);
+  const isUpload = method === "upload";
 
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    window.setTimeout(() => firstControlRef.current?.focus(), 0);
+    window.setTimeout(() => closeRef.current?.focus(), 0);
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !isSaving && !isGenerating) onClose();
     };
@@ -190,72 +96,48 @@ export const PromoStudio = ({
 
   useEffect(() => {
     if (!open) return;
-    const restoredStyle = restoreStyleSelection(draft.promoCreative?.styleId);
     setStep("configure");
+    setCopy(draft.campaignName ? `${draft.campaignName} — out now` : "");
+    setLook("");
+    setReferenceId(PROMO_REFERENCES[0]?.id ?? CUSTOM_REFERENCE);
     setSourceFile(null);
-    setPrompt("");
-    setTextMode("overlay");
-    setFidelity("high");
-    setHeadline(
-      draft.promoCreative?.headline || draft.campaignName || "New release",
-    );
-    setSubheadline(draft.promoCreative?.subheadline || "Available now");
-    setStyleId(restoredStyle.styleId);
-    if (restoredStyle.background) setCustomBackground(restoredStyle.background);
-    if (restoredStyle.accent) setCustomAccent(restoredStyle.accent);
-    setVariants([]);
-    setGeneratedFiles([]);
+    setGenerated([]);
+    setActiveIndex(0);
     setGenerationModel(null);
-    setActiveVariantIndex(0);
     setError(null);
-  }, [draft.campaignName, draft.promoCreative, open]);
+  }, [draft.campaignName, method, open]);
 
   useEffect(() => {
-    if (!open) return;
-    let active = true;
-    void listPromoHeadlineStyles()
-      .then((remoteStyles) => {
-        if (!active || !remoteStyles.length) return;
-        setStylePresets(remoteStyles);
-        setStyleId((current) => {
-          const savedStyleId = draft.promoCreative?.styleId;
-          if (savedStyleId && remoteStyles.some((style) => style.id === savedStyleId))
-            return savedStyleId;
-          if (current === "custom" || remoteStyles.some((style) => style.id === current))
-            return current;
-          return remoteStyles[0].id;
-        });
-      })
-      .catch(() => {
-        // The built-in library keeps promo creation available during an API outage.
-      });
-    return () => {
-      active = false;
-    };
-  }, [draft.promoCreative?.styleId, open]);
+    if (!sourceFile) {
+      setSourcePreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(sourceFile);
+    setSourcePreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [sourceFile]);
 
   useEffect(() => {
-    if (open && bodyRef.current) bodyRef.current.scrollTop = 0;
-  }, [method, open, step]);
+    const urls = generated.map((file) => URL.createObjectURL(file));
+    setPreviews(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [generated]);
 
   if (!open) return null;
 
   const selectFile = (file?: File) => {
     if (!file) return;
-    const validationError = validateImage(file);
-    if (validationError) {
-      setError(validationError);
+    const invalid = validateImage(file);
+    if (invalid) {
+      setError(invalid);
       return;
     }
     setSourceFile(file);
-    setGeneratedFiles([]);
-    setGenerationModel(null);
     setError(null);
-    if (method === "upload") setStep("review");
   };
 
-  // The file input is visually hidden, so the zone has to handle the drop itself.
-  // Without preventDefault the browser opens the dropped file and the draft is lost.
+  // The file input is visually hidden, so the zone handles the drop itself. Without
+  // preventDefault the browser opens the dropped file and the draft is lost.
   const allowSourceDrag = (event: DragEvent<HTMLLabelElement>) => {
     if (isSaving || isGenerating) return;
     event.preventDefault();
@@ -264,8 +146,6 @@ export const PromoStudio = ({
   };
 
   const endSourceDrag = (event: DragEvent<HTMLLabelElement>) => {
-    // Moving between child nodes fires dragleave — keep the highlight until the
-    // pointer actually leaves the zone.
     if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
     setIsDraggingSource(false);
   };
@@ -277,53 +157,35 @@ export const PromoStudio = ({
     selectFile(event.dataTransfer.files?.[0]);
   };
 
-  const createDirections = async () => {
+  const generate = async () => {
     if (method === "photo" && !sourceFile) {
-      setError("Add a source photo before creating directions.");
+      setError("Add the photo you want to work from.");
       return;
     }
-    if (!headline.trim()) {
-      setError("Add a headline for the promo.");
+    if (copy.trim().length < MIN_COPY_LENGTH) {
+      setError(`Write what the promo should say — at least ${MIN_COPY_LENGTH} characters.`);
       return;
     }
-    if (prompt.trim().length < MIN_PROMPT_LENGTH) {
-      setError(
-        `Describe the visual you want — at least ${MIN_PROMPT_LENGTH} characters.`,
-      );
-      return;
-    }
+
     setIsGenerating(true);
     setError(null);
     try {
       const result = await createPromoImageDirections({
-        // The client's own words lead; the selected style only steers palette and framing.
-        prompt: [
-          prompt.trim(),
-          `Visual direction: ${activeStyle.name}. ${activeStyle.description.replace(/\.\s*$/, "")}.`,
-          `Palette: background ${activeStyle.background}, accent ${activeStyle.accent}.`,
-          `Composition: ${activeStyle.layout}; ${activeStyle.imageTreatment} photo treatment.`,
-          "Premium editorial photography, release-campaign energy, vertical composition.",
-        ].join(" "),
+        prompt: buildPromoBrief({ copy, look, reference }),
         source: method === "photo" ? (sourceFile ?? undefined) : undefined,
         fidelity: method === "photo" ? fidelity : undefined,
-        renderText: textMode === "in-image",
-        headline: headline.trim(),
-        subheadline: subheadline.trim(),
       });
-      if (!result.files.length) throw new Error("No image directions returned");
-      setGeneratedFiles(result.files);
+      if (!result.files.length) throw new Error("No images returned");
+      setGenerated(result.files);
       setGenerationModel(result.model);
-      setVariants(
-        createPromoVariants(activeStyle).slice(0, result.files.length),
-      );
-      setActiveVariantIndex(0);
+      setActiveIndex(0);
       setStep("review");
       onGenerated?.(result.files.length);
     } catch (cause) {
       setError(
         cause instanceof PromoImageError
           ? cause.message
-          : "The visual directions could not be created. Try again in a moment.",
+          : "The promo could not be created. Try again in a moment.",
       );
     } finally {
       setIsGenerating(false);
@@ -331,585 +193,306 @@ export const PromoStudio = ({
   };
 
   const approve = async () => {
-    if (!method) return;
-    if (method === "upload" && !sourceFile) {
-      setError("Choose the finished promo first.");
-      return;
-    }
-    if (method !== "upload" && !activeVariant) {
-      setError("Create and select a direction first.");
+    const file = isUpload ? sourceFile : generated[activeIndex];
+    if (!file) {
+      setError(isUpload ? "Choose the finished promo first." : "Create a promo first.");
       return;
     }
 
     setIsSaving(true);
     setError(null);
     try {
-      const promoId = createId();
-      const createdAt = new Date().toISOString();
-      const generatorId = `${generationModel ?? "gpt-image-2"}+${
-        textMode === "in-image" ? "in-image-copy" : "template-compositor-v1"
-      }`;
-      let assetUrl: string;
+      const assetUrl = await uploadImageApi(file);
       let sourceAssetUrl: string | undefined;
-      let historyBatch: PromoHistoryEntry[];
-      if (method === "upload") {
-        assetUrl = await uploadImageApi(sourceFile!);
-        historyBatch = [
-          {
-            id: promoId,
-            draftId: draft._id,
-            asset: sourceFile!,
-            source: method,
-            status: "approved",
-            label: "Uploaded artwork",
-            createdAt,
-          },
-        ];
-      } else if (textMode === "in-image") {
-        // The model already carries the copy, so the generated file ships as it is.
-        const selectedFile = generatedFiles[activeVariantIndex];
-        if (!selectedFile) throw new Error("Generated artwork is missing");
-
-        if (method === "photo" && sourceFile) {
-          [assetUrl, sourceAssetUrl] = await Promise.all([
-            uploadImageApi(selectedFile),
-            uploadImageApi(sourceFile),
-          ]);
-        } else assetUrl = await uploadImageApi(selectedFile);
-
-        historyBatch = generatedFiles.map((file, index) => ({
-          id: index === activeVariantIndex ? promoId : createId(),
-          draftId: draft._id,
-          asset: file,
-          source: method,
-          status: index === activeVariantIndex ? "approved" : "rejected",
-          label: variants[index]?.label ?? `Direction ${index + 1}`,
-          createdAt: new Date(
-            Date.now() + (index === activeVariantIndex ? 10 : index),
-          ).toISOString(),
-          styleId: activeStyle.id,
-          headline: headline.trim(),
-          subheadline: subheadline.trim(),
-          generator: generatorId,
-          layout: variants[index]?.layout,
-        }));
-      } else {
-        const renderedVariants = await Promise.all(
-          variants.map(async (variant, index) => ({
-            variant,
-            asset: await renderPromoVariant({
-              source: method,
-              sourceFile: generatedFiles[index] ?? sourceFile ?? undefined,
-              headline: headline.trim(),
-              subheadline: subheadline.trim(),
-              variant,
-            }),
-          })),
-        );
-        const selectedAsset = renderedVariants[activeVariantIndex].asset;
-        const finalFile = promoBlobToFile(selectedAsset, headline);
-        if (method === "photo" && sourceFile) {
-          [assetUrl, sourceAssetUrl] = await Promise.all([
-            uploadImageApi(finalFile),
-            uploadImageApi(sourceFile),
-          ]);
-        } else assetUrl = await uploadImageApi(finalFile);
-
-        historyBatch = renderedVariants.map(({ variant, asset }, index) => ({
-          id: index === activeVariantIndex ? promoId : createId(),
-          draftId: draft._id,
-          asset,
-          source: method,
-          status: index === activeVariantIndex ? "approved" : "rejected",
-          label: variant.label,
-          createdAt: new Date(
-            Date.now() + (index === activeVariantIndex ? 10 : index),
-          ).toISOString(),
-          styleId: activeStyle.id,
-          headline: headline.trim(),
-          subheadline: subheadline.trim(),
-          generator: generatorId,
-          layout: variant.layout,
-        }));
-      }
+      if (method === "photo" && sourceFile) sourceAssetUrl = await uploadImageApi(sourceFile);
 
       await onApproved({
-        id: promoId,
+        id: createId(),
         assetUrl,
         source: method,
         ...(sourceAssetUrl ? { sourceAssetUrl } : {}),
-        ...(method !== "upload"
-          ? {
-              styleId: activeStyle.id,
-              headline: headline.trim(),
-              subheadline: subheadline.trim(),
-              generator: generatorId,
-            }
-          : {}),
-        createdAt,
+        ...(isUpload
+          ? {}
+          : {
+              headline: copy.trim(),
+              generator: generationModel ?? "gpt-image-2",
+              ...(reference ? { styleId: reference.id } : {}),
+            }),
+        createdAt: new Date().toISOString(),
       });
-      try {
-        await savePromoHistoryBatch(draft._id, historyBatch);
-      } catch {
-        // Browser storage should never invalidate an already saved campaign promo.
-      }
       onClose();
     } catch {
-      setError(
-        "The promo could not be saved. Check the connection and try again.",
-      );
+      setError("The promo could not be saved. Check the connection and try again.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const goBack = () => {
-    setError(null);
-    // There is no chooser inside the modal — leaving the first step leaves the modal.
-    if (step === "review" && method !== "upload") setStep("configure");
-    else onClose();
-  };
-
-  const promoVariables = activeVariant
-    ? ({
-        "--promo-background": activeVariant.style.background,
-        "--promo-accent": activeVariant.style.accent,
-        "--promo-foreground": activeVariant.style.foreground,
-        "--promo-filter": activeVariant.style.filter,
-        "--promo-overlay": String(activeVariant.style.overlayStrength / 100),
-      } as CSSProperties)
-    : undefined;
-  const artworkLayoutClass =
-    activeVariant?.layout === "center"
-      ? styles.artwork_center
-      : activeVariant?.layout === "editorial"
-        ? styles.artwork_editorial
-        : "";
-  const artworkTypographyClass =
-    activeVariant?.style.typography === "condensed"
-      ? styles.artwork_condensed
-      : activeVariant?.style.typography === "editorial"
-        ? styles.artwork_serif
-        : styles.artwork_modern;
+  const heading = isUpload
+    ? "Upload the finished promo"
+    : step === "configure"
+      ? "Describe the promo"
+      : "Pick the one to use";
 
   const studio = (
-      <section
-        className={styles.studio}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="promo-studio-title"
-      >
-        <header className={styles.header}>
-          <div>
-            <span className={styles.eyebrow}>Campaign creative</span>
-            <h2 id="promo-studio-title">
-              {step === "configure"
-                ? "Shape the creative direction"
-                : "Choose the strongest version"}
-            </h2>
-            <p>{draft.campaignName || "Untitled campaign"}</p>
-          </div>
-          <button
-            ref={firstControlRef}
-            type="button"
-            className={styles.close}
-            onClick={onClose}
-            disabled={isSaving || isGenerating}
-            aria-label="Close promo studio"
-          >
-            ×
-          </button>
-        </header>
+    <section
+      className={styles.studio}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="promo-studio-title"
+    >
+      <header className={styles.header}>
+        <div>
+          <span className={styles.eyebrow}>Campaign creative</span>
+          <h2 id="promo-studio-title">{heading}</h2>
+          <p>{draft.campaignName || "Untitled campaign"}</p>
+        </div>
+        <button
+          ref={closeRef}
+          type="button"
+          className={styles.close}
+          onClick={onClose}
+          disabled={isSaving || isGenerating}
+          aria-label="Close"
+        >
+          ×
+        </button>
+      </header>
 
-        <div ref={bodyRef} className={styles.body}>
+      {/* Failures belong at the top, where the eye already is. */}
+      {error && (
+        <div className={styles.error} role="alert">
+          {error}
+        </div>
+      )}
 
-          {step === "configure" && method && (
-            <div className={styles.configureGrid}>
-              <div className={styles.formColumn}>
-                {(method === "upload" || method === "photo") && (
-                  <label
-                    className={`${styles.dropzone} ${sourcePreview ? styles.dropzoneFilled : ""} ${isDraggingSource ? styles.dropzoneActive : ""}`}
-                    onDragEnter={allowSourceDrag}
-                    onDragOver={allowSourceDrag}
-                    onDragLeave={endSourceDrag}
-                    onDrop={dropSourceFile}
+      <div className={styles.body}>
+        {step === "configure" && (
+          <div className={styles.configureGrid}>
+            <div className={styles.formColumn}>
+              {(isUpload || method === "photo") && (
+                <label
+                  className={`${styles.dropzone} ${sourcePreview ? styles.dropzoneFilled : ""} ${
+                    isDraggingSource ? styles.dropzoneActive : ""
+                  }`}
+                  onDragEnter={allowSourceDrag}
+                  onDragOver={allowSourceDrag}
+                  onDragLeave={endSourceDrag}
+                  onDrop={dropSourceFile}
+                >
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(event) => selectFile(event.target.files?.[0])}
+                  />
+                  {sourcePreview ? (
+                    <img src={sourcePreview} alt="Selected" />
+                  ) : (
+                    <span>
+                      <b>
+                        {isDraggingSource
+                          ? "Release to add the image"
+                          : isUpload
+                            ? "Drop your finished promo here"
+                            : "Drop the photo to work from"}
+                      </b>
+                      <small>JPG, PNG, or WebP · up to 15 MB</small>
+                    </span>
+                  )}
+                </label>
+              )}
+
+              {!isUpload && (
+                <label className={styles.field}>
+                  <span>What should the promo say</span>
+                  <textarea
+                    value={copy}
+                    onChange={(event) => setCopy(event.target.value)}
+                    rows={4}
+                    maxLength={600}
+                    placeholder={`Nicole da Silva — new single "Quero Mais" is out now`}
+                  />
+                  <small className={styles.fieldHint}>
+                    Write the words exactly as they should appear. The image model prints
+                    them onto the artwork.
+                  </small>
+                </label>
+              )}
+
+              {method === "photo" && (
+                <div className={styles.field}>
+                  <span>How far the model may go</span>
+                  <div
+                    className={styles.segmented}
+                    role="group"
+                    aria-label="Source photo treatment"
                   >
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      onChange={(event) => selectFile(event.target.files?.[0])}
-                    />
-                    {sourcePreview ? (
-                      <img src={sourcePreview} alt="Selected source" />
-                    ) : (
-                      <span>
-                        <b>{isDraggingSource ? "Release to add the image" : "Drop an image here"}</b>
-                        <small>JPG, PNG, or WebP · up to 15 MB</small>
-                      </span>
-                    )}
-                  </label>
-                )}
-
-                {method === "photo" && (
-                  <div className={styles.field}>
-                    <span>How far the model may go</span>
-                    <div
-                      className={styles.segmented}
-                      role="group"
-                      aria-label="Source photo treatment"
-                    >
-                      <button
-                        type="button"
-                        className={fidelity === "high" ? styles.segmentedActive : ""}
-                        onClick={() => setFidelity("high")}
-                      >
-                        <b>Keep my photo</b>
-                        <small>Stay close to the original</small>
-                      </button>
-                      <button
-                        type="button"
-                        className={fidelity === "low" ? styles.segmentedActive : ""}
-                        onClick={() => setFidelity("low")}
-                      >
-                        <b>Reimagine it</b>
-                        <small>Let the model rework the scene</small>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {method !== "upload" && (
-                  <>
-                    <label className={styles.field}>
-                      <span>Describe the visual</span>
-                      <textarea
-                        value={prompt}
-                        onChange={(event) => setPrompt(event.target.value)}
-                        rows={4}
-                        maxLength={1200}
-                        placeholder="Neon-lit rooftop at dusk, artist silhouette against the skyline, deep shadows and teal highlights"
-                      />
-                      <small className={styles.fieldHint}>
-                        Your words lead the image; the style below only steers
-                        palette and framing.
-                      </small>
-                    </label>
-                    <label className={styles.field}>
-                      <span>Headline</span>
-                      <input
-                        value={headline}
-                        onChange={(event) => setHeadline(event.target.value)}
-                        maxLength={70}
-                        placeholder="Artist or release name"
-                      />
-                    </label>
-                    <label className={styles.field}>
-                      <span>Supporting line</span>
-                      <input
-                        value={subheadline}
-                        onChange={(event) => setSubheadline(event.target.value)}
-                        maxLength={90}
-                        placeholder="Release date, CTA, or short message"
-                      />
-                    </label>
-                    <div className={styles.field}>
-                      <span>Who sets the copy</span>
-                      <div
-                        className={styles.segmented}
-                        role="group"
-                        aria-label="Who sets the copy"
-                      >
-                        <button
-                          type="button"
-                          className={textMode === "overlay" ? styles.segmentedActive : ""}
-                          onClick={() => setTextMode("overlay")}
-                        >
-                          <b>Exact overlay</b>
-                          <small>The app types it — always spelled right</small>
-                        </button>
-                        <button
-                          type="button"
-                          className={textMode === "in-image" ? styles.segmentedActive : ""}
-                          onClick={() => setTextMode("in-image")}
-                        >
-                          <b>Model writes it</b>
-                          <small>Part of the artwork — spelling may vary</small>
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {method !== "upload" && (
-                <div className={styles.styleColumn}>
-                  <div className={styles.sectionHeading}>
-                    <span>Headline style</span>
-                    <small>
-                      Choose a reusable layout, type treatment, and palette.
-                    </small>
-                  </div>
-                  <div className={styles.styleGrid}>
-                    {stylePresets.map((preset) => {
-                      const sampleLines = splitPreviewHeadline(preset.sampleHeadline).slice(0, 3);
-                      return (
-                      <button
-                        key={preset.id}
-                        type="button"
-                        className={
-                          styleId === preset.id ? styles.styleSelected : ""
-                        }
-                        onClick={() => setStyleId(preset.id)}
-                      >
-                        <i
-                          className={styles.styleMiniPreview}
-                          style={{
-                            background: `linear-gradient(135deg, ${preset.background}, ${preset.accent})`,
-                            color: preset.foreground,
-                          }}
-                        >
-                          {sampleLines.map((line, index) => (
-                            <b
-                              key={`${line}-${index}`}
-                              style={{
-                                color: promoLineUsesAccent(
-                                  preset.accentMode,
-                                  index,
-                                  sampleLines.length,
-                                )
-                                  ? preset.accent
-                                  : preset.foreground,
-                              }}
-                            >
-                              {preset.uppercase ? line.toUpperCase() : line}
-                            </b>
-                          ))}
-                        </i>
-                        <span>
-                          <b>{preset.name}</b>
-                          <small>{preset.description}</small>
-                        </span>
-                      </button>
-                    )})}
                     <button
                       type="button"
-                      className={isCustomStyle ? styles.styleSelected : ""}
-                      onClick={() => setStyleId("custom")}
+                      className={fidelity === "high" ? styles.segmentedActive : ""}
+                      onClick={() => setFidelity("high")}
                     >
-                      <i
-                        className={styles.customSwatch}
-                        style={{
-                          background: `linear-gradient(135deg, ${customBackground}, ${customAccent})`,
-                        }}
-                      />
-                      <span>
-                        <b>Custom style</b>
-                        <small>Use your own campaign colors</small>
-                      </span>
+                      <b>Keep my photo</b>
+                      <small>Stay close to the original</small>
+                    </button>
+                    <button
+                      type="button"
+                      className={fidelity === "low" ? styles.segmentedActive : ""}
+                      onClick={() => setFidelity("low")}
+                    >
+                      <b>Reimagine it</b>
+                      <small>Let the model rework the scene</small>
                     </button>
                   </div>
-                  {isCustomStyle && (
-                    <div className={styles.colorControls}>
-                      <label>
-                        <span>Base</span>
-                        <input
-                          type="color"
-                          value={customBackground}
-                          onChange={(event) =>
-                            setCustomBackground(event.target.value)
-                          }
-                        />
-                      </label>
-                      <label>
-                        <span>Accent</span>
-                        <input
-                          type="color"
-                          value={customAccent}
-                          onChange={(event) =>
-                            setCustomAccent(event.target.value)
-                          }
-                        />
-                      </label>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
-          )}
 
-          {step === "review" && method === "upload" && sourcePreview && (
-            <div className={styles.uploadReview}>
-              <div className={styles.uploadReviewImage}>
-                <img src={sourcePreview} alt="Promo ready for approval" />
-              </div>
-              <div>
-                <span className={styles.eyebrow}>Ready to use</span>
-                <h3>Your promo is prepared</h3>
-                <p>
-                  Approve it to attach this asset to the campaign. You can
-                  replace it at any time.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {step === "review" && method !== "upload" && activeVariant && (
-            <div className={styles.reviewGrid}>
-              <div className={styles.carousel}>
-                <div
-                  className={`${styles.artwork} ${artworkLayoutClass} ${artworkTypographyClass}`}
-                  style={promoVariables}
-                >
-                  {(generatedPreviews[activeVariantIndex] || sourcePreview) && (
-                    <img
-                      src={
-                        generatedPreviews[activeVariantIndex] ||
-                        sourcePreview ||
-                        ""
-                      }
-                      alt=""
-                    />
-                  )}
-                  {/* In-image copy comes baked into the file — no overlay chrome on top. */}
-                  {textMode === "overlay" && (
-                    <>
-                  <span className={styles.artworkTint} />
-                  <span className={styles.artworkAccent} />
-                  {activeVariant.style.ctaPosition === "top-right" &&
-                    activeVariant.style.ctaLabel && (
-                      <span className={`${styles.artworkCta} ${styles.artworkCtaTop}`}>
-                        {activeVariant.style.ctaLabel} <b>»</b>
-                      </span>
-                    )}
-                  <div className={styles.artworkCopy}>
-                    <strong>
-                      {previewHeadlineLines.map((line, index) => (
-                        <span
-                          key={`${line}-${index}`}
-                          className={
-                            promoLineUsesAccent(
-                              activeVariant.style.accentMode,
-                              index,
-                              previewHeadlineLines.length,
-                            )
-                              ? styles.artworkCopyAccent
-                              : undefined
-                          }
-                        >
-                          {activeVariant.style.uppercase
-                            ? line.toUpperCase()
-                            : line}
-                        </span>
-                      ))}
-                    </strong>
-                    <small>{subheadline || "New campaign creative"}</small>
-                  </div>
-                  {activeVariant.style.ctaPosition === "bottom-center" &&
-                    activeVariant.style.ctaLabel && (
-                      <span className={`${styles.artworkCta} ${styles.artworkCtaBottom}`}>
-                        {activeVariant.style.ctaLabel} <b>»</b>
-                      </span>
-                    )}
-                  <b className={styles.artworkBrand}>Sound Influencers</b>
-                    </>
-                  )}
+            {!isUpload && (
+              <div className={styles.styleColumn}>
+                <div className={styles.sectionHeading}>
+                  <span>Look</span>
+                  <small>Pick a reference, or describe your own.</small>
                 </div>
-                <button
-                  type="button"
-                  className={`${styles.carouselArrow} ${styles.carouselArrowPrev}`}
-                  onClick={() =>
-                    setActiveVariantIndex(
-                      (activeVariantIndex + variants.length - 1) %
-                        variants.length,
-                    )
-                  }
-                  aria-label="Previous direction"
-                >
-                  ←
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.carouselArrow} ${styles.carouselArrowNext}`}
-                  onClick={() =>
-                    setActiveVariantIndex(
-                      (activeVariantIndex + 1) % variants.length,
-                    )
-                  }
-                  aria-label="Next direction"
-                >
-                  →
-                </button>
-              </div>
-              <div className={styles.reviewInfo}>
-                <span className={styles.eyebrow}>{activeVariant.label}</span>
-                <h3>{activeVariant.style.name}</h3>
-                <p>{activeVariant.style.description}</p>
-                <div className={styles.dots} aria-label="Creative directions">
-                  {variants.map((variant, index) => (
+
+                <div className={styles.referenceGrid}>
+                  {PROMO_REFERENCES.map((item) => (
                     <button
-                      key={variant.id}
+                      key={item.id}
                       type="button"
-                      className={
-                        index === activeVariantIndex ? styles.dotActive : ""
-                      }
-                      onClick={() => setActiveVariantIndex(index)}
-                      aria-label={`Show ${variant.label}`}
-                    />
+                      className={referenceId === item.id ? styles.referenceSelected : ""}
+                      onClick={() => setReferenceId(item.id)}
+                    >
+                      <b>{item.name}</b>
+                      <small>{item.description}</small>
+                    </button>
                   ))}
+                  <button
+                    type="button"
+                    className={referenceId === CUSTOM_REFERENCE ? styles.referenceSelected : ""}
+                    onClick={() => setReferenceId(CUSTOM_REFERENCE)}
+                  >
+                    <b>Custom</b>
+                    <small>Describe the look in your own words</small>
+                  </button>
                 </div>
-                <div className={styles.reviewNote}>
-                  <b>Editable later</b>
-                  <span>
-                    The template, copy, and palette remain replaceable without
-                    changing the campaign flow.
-                  </span>
-                </div>
+
+                {referenceId === CUSTOM_REFERENCE && (
+                  <label className={styles.field}>
+                    <span>Describe the look</span>
+                    <textarea
+                      value={look}
+                      onChange={(event) => setLook(event.target.value)}
+                      rows={4}
+                      maxLength={900}
+                      placeholder="Foggy harbour at night, single spotlight on the artist, deep blues, grainy film look"
+                    />
+                  </label>
+                )}
               </div>
-            </div>
-          )}
-
-          {error && (
-            <div className={styles.error} role="alert">
-              {error}
-            </div>
-          )}
-        </div>
-
-        <footer className={styles.footer}>
-          <button
-            type="button"
-            className={styles.secondary}
-            onClick={goBack}
-            disabled={isSaving || isGenerating}
-          >
-            Back
-          </button>
-          <div>
-            {step === "configure" && method !== "upload" && (
-              <button
-                type="button"
-                className={styles.primary}
-                onClick={() => void createDirections()}
-                disabled={isGenerating}
-              >
-                {isGenerating
-                  ? "Creating directions…"
-                  : "Create 3 visual directions"}
-              </button>
-            )}
-            {step === "review" && (
-              <button
-                type="button"
-                className={styles.primary}
-                onClick={() => void approve()}
-                disabled={isSaving}
-              >
-                {isSaving ? "Saving promo…" : "Approve promo"}
-              </button>
             )}
           </div>
-        </footer>
-      </section>
+        )}
+
+        {step === "review" && (
+          <div className={styles.reviewGrid}>
+            <div className={styles.carousel}>
+              {previews[activeIndex] && (
+                <img className={styles.result} src={previews[activeIndex]} alt="Promo option" />
+              )}
+              {previews.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    className={`${styles.carouselArrow} ${styles.carouselArrowPrev}`}
+                    onClick={() =>
+                      setActiveIndex((activeIndex + previews.length - 1) % previews.length)
+                    }
+                    aria-label="Previous option"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.carouselArrow} ${styles.carouselArrowNext}`}
+                    onClick={() => setActiveIndex((activeIndex + 1) % previews.length)}
+                    aria-label="Next option"
+                  >
+                    →
+                  </button>
+                </>
+              )}
+            </div>
+
+            <div className={styles.reviewInfo}>
+              <div className={styles.dots} aria-label="Promo options">
+                {previews.map((preview, index) => (
+                  <button
+                    key={preview}
+                    type="button"
+                    className={index === activeIndex ? styles.dotActive : ""}
+                    onClick={() => setActiveIndex(index)}
+                    aria-label={`Show option ${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* Wrong word, wrong mood — change the brief and run it again. */}
+              <label className={styles.field}>
+                <span>Not right? Change it and try again</span>
+                <textarea
+                  value={copy}
+                  onChange={(event) => setCopy(event.target.value)}
+                  rows={3}
+                  maxLength={600}
+                />
+              </label>
+              <button
+                type="button"
+                className={styles.secondary}
+                onClick={() => void generate()}
+                disabled={isGenerating || isSaving}
+              >
+                {isGenerating ? "Creating…" : "Try again"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <footer className={styles.footer}>
+        <button
+          type="button"
+          className={styles.secondary}
+          onClick={step === "review" ? () => setStep("configure") : onClose}
+          disabled={isSaving || isGenerating}
+        >
+          Back
+        </button>
+        <div>
+          {step === "configure" && !isUpload && (
+            <button
+              type="button"
+              className={styles.primary}
+              onClick={() => void generate()}
+              disabled={isGenerating}
+            >
+              {isGenerating ? "Creating…" : "Create"}
+            </button>
+          )}
+          {(step === "review" || isUpload) && (
+            <button
+              type="button"
+              className={styles.primary}
+              onClick={() => void approve()}
+              disabled={isSaving || isGenerating}
+            >
+              {isSaving ? "Saving…" : "Use this promo"}
+            </button>
+          )}
+        </div>
+      </footer>
+    </section>
   );
 
   // Rendered into the body: the workspace layer is animated with a transform, and a
@@ -918,8 +501,7 @@ export const PromoStudio = ({
     <div
       className={styles.overlay}
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !isSaving && !isGenerating)
-          onClose();
+        if (event.target === event.currentTarget && !isSaving && !isGenerating) onClose();
       }}
     >
       {studio}
