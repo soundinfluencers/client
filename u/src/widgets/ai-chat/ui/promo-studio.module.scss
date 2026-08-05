@@ -30,8 +30,11 @@
    panel body, so it drops the chrome the overlay used to provide. */
 .studioEmbedded {
   width: 100%;
-  max-height: none;
+  /* Fills the workspace body: without this the studio is content-sized and the
+     preview computes its height against a collapsed box. */
   min-height: 0;
+  max-height: none;
+  flex: 1;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -46,11 +49,76 @@
     h2 { font-size: clamp(20px, 2.2vw, 26px); }
   }
 
-  /* The workspace body is the scroll container — no second scrollbar in here. */
+  /* This is a chooser, not a document: it fits the workspace instead of growing past
+     it. Only genuinely long things (the history strip, a long style list) scroll,
+     and they scroll inside themselves. */
   .body {
-    overflow: visible;
-    flex: none;
-    padding: 22px 0;
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    padding: 16px 0 0;
+
+    @media (min-width: 901px) {
+      overflow: hidden;
+      flex: 1;
+    }
+  }
+
+  .methodScreen,
+  .configureGrid,
+  .reviewGrid {
+    @media (min-width: 901px) {
+      min-height: 0;
+      flex: 1;
+    }
+  }
+
+  .history {
+    overflow: hidden;
+    min-height: 0;
+    flex: 0 1 auto;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+  }
+
+  .historyGrid {
+    overflow-x: auto;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(190px, 220px);
+    grid-template-columns: none;
+    scrollbar-width: thin;
+  }
+
+  .formColumn,
+  .styleColumn {
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  /* The artwork is sized by the height that is left, not by the column width —
+     otherwise a 4:5 preview always overflows a chat-sized card. */
+  .carousel {
+    display: flex;
+    min-height: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .artwork {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .reviewGrid {
+    align-items: stretch;
+    gap: clamp(20px, 3vw, 44px);
+  }
+
+  .reviewInfo {
+    overflow-y: auto;
+    min-height: 0;
   }
 
   /* Pinned to the bottom of the workspace scroll area so the primary action is

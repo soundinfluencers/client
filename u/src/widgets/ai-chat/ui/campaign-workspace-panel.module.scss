@@ -56,6 +56,18 @@
   padding: 14px 18px 20px;
 }
 
+/* The promo surface is a chooser that fits the box: it manages its own height and
+   must not hand a scrollbar to the panel. Below the breakpoint there is simply not
+   enough height to fit anything readable, so it scrolls like normal content. */
+.bodyFitted {
+  @media (min-width: 901px) {
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    padding-bottom: 14px;
+  }
+}
+
 .state {
   margin: 24px auto;
   color: #758194;

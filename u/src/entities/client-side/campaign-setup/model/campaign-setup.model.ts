@@ -1,21 +1,15 @@
 import type { CampaignDraftDto } from "@/entities/client-side/campaign-draft/api/campaign-draft.dto.ts";
-import {
-  getContentForDraftAccount,
-  getDraftContentStatus,
-} from "@/entities/client-side/campaign-draft/model/ai-campaign-draft.model.ts";
+import { isDraftReadyForCheckout } from "@/entities/client-side/campaign-draft/model/ai-campaign-draft.model.ts";
 
-export type CampaignSetupCheckpointId =
-  | "brief"
-  | "influencers"
-  | "promo"
-  | "publishing"
-  | "schedule";
+export type CampaignSetupCheckpointId = "brief" | "influencers" | "promo" | "publishing";
 
 export type CampaignSetupCheckpointStatus = "complete" | "current" | "pending";
 
-// A step either opens a working surface next to the conversation, or it has no
+// A section either opens a working surface next to the conversation, or it has no
 // editor of its own and hands the job back to the agent as a chat prompt.
-export type CampaignSetupSurface = "pages" | "content" | "schedule" | "promo";
+// Publishing dates live in the pages table: they belong to the page row, not to a
+// section of their own.
+export type CampaignSetupSurface = "pages" | "content" | "promo";
 
 export type CampaignSetupAction =
   | { kind: "prompt"; label: string; prompt: string }
@@ -56,11 +50,15 @@ export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
   },
   {
     id: "influencers",
-    label: "Influencer selection",
+    label: "Pages and dates",
     shortLabel: "Pages",
-    description: "At least one page is included",
+    description: "Pages are chosen and every one of them has a publishing date",
     action: { kind: "surface", label: "Review pages", surface: "pages" },
-    isComplete: (draft) => selectedAccounts(draft).length > 0,
+    // A page without a date is not a finished choice, so both live in one section.
+    isComplete: (draft) => {
+      const accounts = selectedAccounts(draft);
+      return accounts.length > 0 && accounts.every((account) => Boolean(account.dateRequest?.trim()));
+    },
   },
   {
     id: "promo",
@@ -77,23 +75,9 @@ export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
     // Content is edited per page, inside the pages table.
     description: "Content link and description for every page",
     action: { kind: "surface", label: "Add content", surface: "content" },
-    isComplete: (draft) => {
-      const accounts = selectedAccounts(draft);
-      return accounts.length > 0 && accounts.every(
-        (account) => getDraftContentStatus(getContentForDraftAccount(draft, account)) === "ready",
-      );
-    },
-  },
-  {
-    id: "schedule",
-    label: "Schedule",
-    shortLabel: "Dates",
-    description: "A publishing date is set for every page",
-    action: { kind: "surface", label: "Review dates", surface: "schedule" },
-    isComplete: (draft) => {
-      const accounts = selectedAccounts(draft);
-      return accounts.length > 0 && accounts.every((account) => Boolean(account.dateRequest?.trim()));
-    },
+    // Exactly the rule checkout enforces. A looser one here would let the rail promise
+    // "ready" and the payment step refuse it a click later.
+    isComplete: (draft) => isDraftReadyForCheckout(draft),
   },
 ] as const;
 

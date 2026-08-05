@@ -24,16 +24,14 @@ interface Props {
 }
 
 const SURFACE_TITLES: Record<CampaignSetupSurface, string> = {
-  pages: "Influencer selection",
+  pages: "Pages and dates",
   content: "Publishing content",
-  schedule: "Publishing dates",
   promo: "Promo creative",
 };
 
 const PAGE_FOCUS_MODES = {
   pages: "selection",
   content: "content",
-  schedule: "schedule",
 } as const;
 
 export const CampaignWorkspacePanel = ({
@@ -108,7 +106,7 @@ export const CampaignWorkspacePanel = ({
         </div>
       )}
 
-      <div className={styles.body}>
+      <div className={`${styles.body} ${surface === "promo" ? styles.bodyFitted : ""}`}>
         {surface !== "promo" && (
           <AiCampaignDraftCard
             key={surface}

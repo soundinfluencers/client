@@ -40,7 +40,8 @@ import { CampaignRequiredDateControl } from "@/entities/client-side/campaign-dra
 import { CampaignAddPagesDrawer } from "@/entities/client-side/campaign-draft/ui/campaign-add-pages-drawer.tsx";
 
 type SaveStatus = "saved" | "saving" | "error" | "conflict";
-export type CampaignDraftFocusMode = "selection" | "content" | "schedule";
+// Selection carries the publishing date too: a page and its date are one decision.
+export type CampaignDraftFocusMode = "selection" | "content";
 
 interface Props {
   draftId: string;
@@ -453,16 +454,11 @@ export const AiCampaignDraftCard = ({
       title: "Publishing content",
       description: `${readyContentCount} of ${selectedAccounts.length} pages ready · add a link and post copy`,
     }
-    : focusMode === "schedule"
-      ? {
-        title: "Publishing dates",
-        description: `${scheduledCount} of ${selectedAccounts.length} pages scheduled · ASAP is allowed`,
-      }
-      : {
-        title: "Influencer selection",
-        description: `${selectedAccounts.length} of ${accounts.length} included · live prices and reach`,
-      };
-  const tableColumnCount = focusMode === "selection" ? 5 : focusMode === "content" ? 4 : 3;
+    : {
+      title: "Pages and dates",
+      description: `${selectedAccounts.length} of ${accounts.length} included · ${scheduledCount} scheduled · ASAP is allowed`,
+    };
+  const tableColumnCount = focusMode === "selection" ? 6 : 4;
 
   return (
     <section
@@ -512,11 +508,10 @@ export const AiCampaignDraftCard = ({
               <th>Page</th>
               {focusMode === "selection" && <th>Followers</th>}
               {focusMode === "selection" && <th>Price</th>}
+              {focusMode === "selection" && <th>Required date</th>}
               {focusMode === "content" && <th>Content status</th>}
               {focusMode === "content" && <th>Content link</th>}
-              {focusMode === "schedule" && <th>Required date</th>}
-              {focusMode === "schedule" && <th>Status</th>}
-              {focusMode !== "schedule" && <th>Actions</th>}
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -583,7 +578,7 @@ export const AiCampaignDraftCard = ({
                       </span>
                     </td>
                   )}
-                  {focusMode === "schedule" && (
+                  {focusMode === "selection" && (
                     <td data-label="Required date">
                       <CampaignRequiredDateControl
                         className={styles.dateField}
@@ -592,13 +587,6 @@ export const AiCampaignDraftCard = ({
                         label={account.username}
                         onChange={(dateRequest) => updateAccount(key, { dateRequest })}
                       />
-                    </td>
-                  )}
-                  {focusMode === "schedule" && (
-                    <td data-label="Status">
-                      <span className={account.dateRequest?.trim() ? styles.scheduleReady : styles.scheduleMissing}>
-                        {account.dateRequest?.trim() ? "Scheduled" : "Date needed"}
-                      </span>
                     </td>
                   )}
                   {focusMode === "content" && (

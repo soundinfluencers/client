@@ -23,8 +23,12 @@ export const campaignSectionFingerprints = (
   );
 
   return {
+    // Dates are part of the pages section, so a rescheduled page marks it as changed.
     pages: accounts
-      .map((account) => `${accountKey(account)}:${account.isSelected !== false ? 1 : 0}`)
+      .map(
+        (account) =>
+          `${accountKey(account)}:${account.isSelected !== false ? 1 : 0}:${account.dateRequest ?? ""}`,
+      )
       .join("|"),
     content: included
       .map(
@@ -33,9 +37,6 @@ export const campaignSectionFingerprints = (
             getContentForDraftAccount(draft, account),
           )}`,
       )
-      .join("|"),
-    schedule: included
-      .map((account) => `${accountKey(account)}:${account.dateRequest ?? ""}`)
       .join("|"),
     promo: draft.promoCreative?.id ?? "",
   };

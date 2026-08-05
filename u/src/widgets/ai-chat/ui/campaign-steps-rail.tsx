@@ -22,6 +22,8 @@ interface Props {
   draftId: string;
   activeSurface: CampaignSetupSurface | null;
   onSelect: (action: CampaignSetupAction) => void;
+  // The campaign-level action: everything is filled in, take the client to checkout.
+  onProceed: (draftId: string) => void;
 }
 
 const STATUS_HINT: Record<CampaignSetupCheckpoint["status"], string> = {
@@ -32,7 +34,12 @@ const STATUS_HINT: Record<CampaignSetupCheckpoint["status"], string> = {
 
 // Steps are orientation, not a score: no numbering, no counter, no progress bar.
 // A step is a way into the surface where that part of the campaign is edited.
-export const CampaignStepsRail = ({ draftId, activeSurface, onSelect }: Props) => {
+export const CampaignStepsRail = ({
+  draftId,
+  activeSurface,
+  onSelect,
+  onProceed,
+}: Props) => {
   const query = useQuery({
     queryKey: ["campaign-draft", draftId],
     queryFn: () => getCampaignDraft(draftId),
@@ -68,6 +75,7 @@ export const CampaignStepsRail = ({ draftId, activeSurface, onSelect }: Props) =
   const [seen, setSeen] = useState<Partial<CampaignSectionFingerprints>>(() =>
     readSeenSections(draftId),
   );
+  const [nudgedId, setNudgedId] = useState<string | null>(null);
   const fingerprints = useMemo(
     () => (query.data ? campaignSectionFingerprints(query.data) : null),
     [query.data],
@@ -102,6 +110,22 @@ export const CampaignStepsRail = ({ draftId, activeSurface, onSelect }: Props) =
         seen[surface] !== fingerprints[surface],
     );
 
+  // Clicking the campaign action while something is missing is not an error: it takes
+  // the client to the first unfinished section and says so, instead of refusing.
+  const firstIncomplete = checkpoints.find((checkpoint) => checkpoint.status !== "complete");
+  const isReady = Boolean(query.data) && !firstIncomplete;
+
+  const handleProceed = () => {
+    if (isReady) {
+      onProceed(draftId);
+      return;
+    }
+    if (!firstIncomplete) return;
+    setNudgedId(firstIncomplete.id);
+    window.setTimeout(() => setNudgedId(null), 1600);
+    onSelect(firstIncomplete.action);
+  };
+
   return (
     <nav className={styles.rail} aria-label="Campaign sections">
       <span className={styles.name} title={query.data?.campaignName || undefined}>
@@ -125,6 +149,7 @@ export const CampaignStepsRail = ({ draftId, activeSurface, onSelect }: Props) =
                   styles[`step_${checkpoint.status}`],
                   isOpen ? styles.stepOpen : "",
                   changed ? styles.stepChanged : "",
+                  nudgedId === checkpoint.id ? styles.stepNudged : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -139,7 +164,9 @@ export const CampaignStepsRail = ({ draftId, activeSurface, onSelect }: Props) =
                 title={changed ? `${checkpoint.description} · updated` : checkpoint.description}
                 onClick={() => onSelect(checkpoint.action)}
               >
-                <i className={styles.dot} aria-hidden="true" />
+                <i className={styles.dot} aria-hidden="true">
+                  {checkpoint.status === "complete" ? "✓" : ""}
+                </i>
                 {checkpoint.shortLabel}
                 {changed && <i className={styles.changeMark} aria-hidden="true" />}
               </button>
@@ -147,6 +174,21 @@ export const CampaignStepsRail = ({ draftId, activeSurface, onSelect }: Props) =
           );
         })}
       </ul>
+
+      <button
+        type="button"
+        className={`${styles.proceed} ${isReady ? styles.proceedReady : ""}`}
+        onClick={handleProceed}
+        title={
+          isReady
+            ? "Everything is filled in — go to checkout"
+            : firstIncomplete
+              ? `Still needed: ${firstIncomplete.label}`
+              : undefined
+        }
+      >
+        {isReady ? "Review & pay" : "What's left?"}
+      </button>
     </nav>
   );
 };

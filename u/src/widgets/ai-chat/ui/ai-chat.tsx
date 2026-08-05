@@ -40,19 +40,13 @@ const WORKSPACE_SURFACE_KEY = "ai-chat:workspace-surface";
 
 const readStoredSurface = (): CampaignSetupSurface | null => {
   const stored = sessionStorage.getItem(WORKSPACE_SURFACE_KEY);
-  return stored === "pages" ||
-    stored === "content" ||
-    stored === "schedule" ||
-    stored === "promo"
-    ? stored
-    : null;
+  return stored === "pages" || stored === "content" || stored === "promo" ? stored : null;
 };
 
 // Section names as the user sees them in the rail.
 const SECTION_LABELS: Record<CampaignSetupSurface, string> = {
   pages: "Pages",
   content: "Content",
-  schedule: "Dates",
   promo: "Promo",
 };
 
@@ -361,6 +355,7 @@ export const AiChat = () => {
               draftId={activeDraftId}
               activeSurface={openedSurface}
               onSelect={handleStepSelect}
+              onProceed={(id) => void handleOpenPayment(id)}
             />
           )}
 
@@ -432,7 +427,12 @@ export const AiChat = () => {
                             if (alreadyRendered) return null;
                             // The table itself lives in the workspace — the conversation
                             // only keeps a marker of where the draft changed.
-                            const section = link.section ?? "pages";
+                            // A transcript restored from an older session can name a
+                            // section that no longer exists; pages is the safe home.
+                            const section: CampaignSetupSurface =
+                              link.section && link.section in SECTION_LABELS
+                                ? link.section
+                                : "pages";
                             return (
                               <button
                                 key={campaignDraftId}

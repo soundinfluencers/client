@@ -4,14 +4,14 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 16px;
+  padding: 9px 14px;
   border-bottom: 1px solid #eef1f5;
   background: #fbfcfe;
 }
 
 .name {
   overflow: hidden;
-  max-width: 190px;
+  max-width: 170px;
   flex: 0 1 auto;
   color: #5c6878;
   font-size: 12px;
@@ -26,7 +26,7 @@
   min-width: 0;
   flex: 1;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -35,23 +35,24 @@
   &::-webkit-scrollbar { display: none; }
 }
 
+/* Sections read as chips: filled means done, outlined means still open. */
 .step {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 6px 11px;
-  border: 1px solid transparent;
+  padding: 6px 12px 6px 7px;
+  border: 1px solid #dde3ec;
   border-radius: 999px;
-  color: #6a7688;
-  background: transparent;
+  color: #55637a;
+  background: #fff;
   font: inherit;
   font-size: 12px;
-  font-weight: 550;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
 
-  &:hover { color: #202934; background: #eef2f8; }
+  &:hover { border-color: #b9c8de; color: #202934; }
 
   &:focus-visible {
     outline: 2px solid #7da1fb;
@@ -60,30 +61,56 @@
 }
 
 .dot {
-  width: 6px;
-  height: 6px;
-  flex: 0 0 6px;
-  border: 1px solid #c3ccd8;
+  display: grid;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border: 1px solid #ccd5e0;
   border-radius: 50%;
-  background: transparent;
-  transition: background 160ms ease, border-color 160ms ease;
+  color: transparent;
+  background: #fff;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+  place-items: center;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 
-.step_complete .dot {
-  border-color: #35a06a;
-  background: #35a06a;
+.step_complete {
+  border-color: #bfe3ce;
+  color: #1c6b43;
+  background: #eefaf3;
+
+  .dot { border-color: #35a06a; color: #fff; background: #35a06a; }
+  &:hover { border-color: #8fd0ae; color: #145634; }
 }
 
+/* The section to do next, not an alarm: a filled marker and a darker label. */
 .step_current {
+  border-color: #cfdbfb;
   color: #24374f;
+  background: #f5f8ff;
 
   .dot { border-color: #356cf6; background: #cddcff; }
+}
+
+.step_pending {
+  color: #7c8798;
+  background: #fff;
+}
+
+.stepOpen {
+  border-color: #356cf6;
+  color: #1f366a;
+  background: #eaf1ff;
+  box-shadow: 0 0 0 3px rgba(53, 108, 246, .1);
 }
 
 /* Something moved here while the user was elsewhere. The screen never switches on
    its own — this mark is the whole notification. */
 .stepChanged {
-  color: #24374f;
+  border-color: #f0c48a;
 }
 
 .changeMark {
@@ -94,17 +121,53 @@
   background: #f0972a;
 }
 
-.stepOpen {
-  border-color: #cfdbfb;
-  color: #1f366a;
-  background: #eaf1ff;
-
-  &:hover { background: #e2ecff; }
+/* Answer to "what's left?" — the chip the client was sent to. */
+.stepNudged {
+  animation: railNudge 1.6s ease-out;
 }
 
-@media (max-width: 640px) {
+@keyframes railNudge {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(240, 151, 42, 0); }
+  15%, 55% { box-shadow: 0 0 0 4px rgba(240, 151, 42, .28); }
+}
+
+.proceed {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border: 1px solid #d5dce6;
+  border-radius: 999px;
+  color: #55637a;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+
+  &:hover { border-color: #b9c8de; color: #202934; }
+
+  &:focus-visible {
+    outline: 2px solid #7da1fb;
+    outline-offset: 1px;
+  }
+}
+
+.proceedReady {
+  border-color: #202934;
+  color: #fff;
+  background: #202934;
+
+  &:hover { border-color: #000; color: #fff; background: #000; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepNudged { animation: none; }
+}
+
+@media (max-width: 720px) {
   .rail {
-    align-items: flex-start;
+    align-items: stretch;
     flex-direction: column;
     gap: 8px;
     padding: 9px 12px;
@@ -112,4 +175,5 @@
 
   .name { max-width: 100%; }
   .steps { width: 100%; }
+  .proceed { width: 100%; }
 }
