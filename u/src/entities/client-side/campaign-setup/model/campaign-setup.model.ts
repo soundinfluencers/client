@@ -11,8 +11,10 @@ export type CampaignSetupCheckpointStatus = "complete" | "current" | "pending";
 // section of their own.
 export type CampaignSetupSurface = "pages" | "content" | "promo";
 
+// 'chat' sections have no editor of their own: they are settled by talking to the
+// assistant. The client writes their own words — nothing is typed into the box for them.
 export type CampaignSetupAction =
-  | { kind: "prompt"; label: string; prompt: string }
+  | { kind: "chat"; label: string }
   | { kind: "surface"; label: string; surface: CampaignSetupSurface };
 
 export type CampaignSetupCheckpoint = {
@@ -41,11 +43,7 @@ export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
     label: "Campaign brief",
     shortLabel: "Brief",
     description: "Name and direction are clear",
-    action: {
-      kind: "prompt",
-      label: "Complete brief",
-      prompt: "Help me complete the campaign brief and campaign name.",
-    },
+    action: { kind: "chat", label: "Talk it through" },
     isComplete: (draft) => Boolean(draft.campaignName?.trim()),
   },
   {

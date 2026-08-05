@@ -46,7 +46,7 @@ export type CampaignDraftFocusMode = "selection" | "content";
 interface Props {
   draftId: string;
   onProceedToPayment: (draftId: string) => void;
-  onPrompt: (prompt: string) => void;
+  onGoToChat: () => void;
   // Inside the campaign workspace the panel already frames the content, so the
   // card drops its own border, radius and shadow.
   flat?: boolean;
@@ -63,7 +63,7 @@ const normalizeAccounts = (draft: CampaignDraftDto) =>
 export const AiCampaignDraftCard = ({
   draftId,
   onProceedToPayment,
-  onPrompt,
+  onGoToChat,
   flat,
   focusMode = "selection",
 }: Props) => {
@@ -635,7 +635,7 @@ export const AiCampaignDraftCard = ({
               type="button"
               onClick={() => {
                 if (noContentAvailable) setNoContentAvailable(false);
-                onPrompt("Promote [paste your content link] with the post text: [write the caption]");
+                onGoToChat();
               }}
             >{noContentAvailable ? "Add my own content in chat" : "Continue in chat"}</button>
             <button

@@ -147,10 +147,6 @@ export const AiChat = () => {
   );
   // When set, the in-chat payment modal is open for this draft.
   const [paymentDraftId, setPaymentDraftId] = useState<string | null>(null);
-  const fillPrompt = (prompt: string) => {
-    setInput(prompt);
-    window.setTimeout(() => textareaRef.current?.focus(), 0);
-  };
   const [isPreparingSend, setIsPreparingSend] = useState(false);
   const [sendPreparationError, setSendPreparationError] = useState(false);
   const [workspaceSurface, setWorkspaceSurface] = useState<CampaignSetupSurface | null>(
@@ -319,14 +315,14 @@ export const AiChat = () => {
     window.setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
-  // Steps without an editor of their own hand the job back to the agent.
+  // Sections without an editor of their own just hand the conversation back: the
+  // client says it in their own words instead of editing a canned sentence.
   const handleStepSelect = (action: CampaignSetupAction) => {
     if (action.kind === "surface") {
       openWorkspace(action.surface);
       return;
     }
     closeWorkspace();
-    fillPrompt(action.prompt);
   };
 
   const openedSurface = activeDraftId ? workspaceSurface : null;
@@ -489,10 +485,7 @@ export const AiChat = () => {
                   draftId={activeDraftId}
                   surface={openedSurface}
                   onClose={closeWorkspace}
-                  onPrompt={(prompt) => {
-                    closeWorkspace();
-                    fillPrompt(prompt);
-                  }}
+                  onGoToChat={closeWorkspace}
                   onProceedToPayment={(id) => void handleOpenPayment(id)}
                   onNote={addNote}
                 />

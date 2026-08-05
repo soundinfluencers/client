@@ -73,6 +73,23 @@
     }
   }
 
+  /* Fitting the surface must never cut a card in half: the visuals shrink with the
+     available height, and if even that is not enough the step scrolls itself. */
+  .methodScreen {
+    @media (min-width: 901px) {
+      overflow-y: auto;
+    }
+  }
+
+  .methodVisual {
+    height: clamp(96px, 17vh, 210px);
+    margin-bottom: 14px;
+  }
+
+  .methodCard { padding-bottom: 16px; }
+
+  .methodGrid { gap: 12px; }
+
   .history {
     overflow: hidden;
     min-height: 0;

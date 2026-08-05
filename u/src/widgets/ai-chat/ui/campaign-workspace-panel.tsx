@@ -17,7 +17,8 @@ interface Props {
   draftId: string;
   surface: CampaignSetupSurface;
   onClose: () => void;
-  onPrompt: (prompt: string) => void;
+  // Hands the conversation back — the client writes their own message.
+  onGoToChat: () => void;
   onProceedToPayment: (draftId: string) => void;
   // Leaves a receipt in the transcript for work the agent did not do itself.
   onNote: (text: string, section: CampaignSetupSurface) => void;
@@ -38,7 +39,7 @@ export const CampaignWorkspacePanel = ({
   draftId,
   surface,
   onClose,
-  onPrompt,
+  onGoToChat,
   onProceedToPayment,
   onNote,
 }: Props) => {
@@ -114,7 +115,7 @@ export const CampaignWorkspacePanel = ({
             draftId={draftId}
             focusMode={PAGE_FOCUS_MODES[surface]}
             onProceedToPayment={onProceedToPayment}
-            onPrompt={onPrompt}
+            onGoToChat={onGoToChat}
           />
         )}
 

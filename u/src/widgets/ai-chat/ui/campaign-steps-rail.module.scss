@@ -86,6 +86,31 @@
   &:hover { border-color: #8fd0ae; color: #145634; }
 }
 
+/* Settled by talking, not by editing: a dashed chip that reads as "conversation",
+   set apart from the working surfaces by a divider. */
+.stepChat {
+  border-style: dashed;
+
+  /* Done still reads as done — only the unfinished state gets the muted chat look. */
+  &:not(.step_complete) {
+    border-color: #ccd5e0;
+
+    .dot {
+      border-style: dashed;
+      color: #8b96a8;
+      background: #fff;
+    }
+  }
+
+  &:hover { border-color: #9fb0c6; }
+}
+
+.beforeDivider {
+  margin-right: 12px;
+  padding-right: 12px;
+  border-right: 1px solid #e3e8ef;
+}
+
 /* The section to do next, not an alarm: a filled marker and a darker label. */
 .step_current {
   border-color: #cfdbfb;

@@ -138,15 +138,20 @@ export const CampaignStepsRail = ({
           // reads as open, otherwise half the rail would light up at once.
           const isOpen = index === openIndex;
           const showStatus = Boolean(query.data);
+          const isChat = checkpoint.action.kind === "chat";
           const changed =
             checkpoint.action.kind === "surface" && hasChanged(checkpoint.action.surface);
+          // The conversation sits apart from the surfaces, so it is visible that this
+          // part is settled by talking rather than by editing a table.
+          const startsSurfaces = isChat && checkpoints[index + 1]?.action.kind === "surface";
           return (
-            <li key={checkpoint.id}>
+            <li key={checkpoint.id} className={startsSurfaces ? styles.beforeDivider : undefined}>
               <button
                 type="button"
                 className={[
                   styles.step,
                   styles[`step_${checkpoint.status}`],
+                  isChat ? styles.stepChat : "",
                   isOpen ? styles.stepOpen : "",
                   changed ? styles.stepChanged : "",
                   nudgedId === checkpoint.id ? styles.stepNudged : "",
@@ -156,16 +161,23 @@ export const CampaignStepsRail = ({
                 aria-current={isOpen ? "true" : undefined}
                 aria-label={[
                   checkpoint.label,
+                  isChat ? "— settled in the conversation" : "",
                   showStatus ? `— ${STATUS_HINT[checkpoint.status]}` : "",
                   changed ? "— updated" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                title={changed ? `${checkpoint.description} · updated` : checkpoint.description}
+                title={
+                  isChat
+                    ? `${checkpoint.description} · ask the assistant in the chat`
+                    : changed
+                      ? `${checkpoint.description} · updated`
+                      : checkpoint.description
+                }
                 onClick={() => onSelect(checkpoint.action)}
               >
                 <i className={styles.dot} aria-hidden="true">
-                  {checkpoint.status === "complete" ? "✓" : ""}
+                  {checkpoint.status === "complete" ? "✓" : isChat ? "…" : ""}
                 </i>
                 {checkpoint.shortLabel}
                 {changed && <i className={styles.changeMark} aria-hidden="true" />}
