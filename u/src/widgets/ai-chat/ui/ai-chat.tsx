@@ -10,8 +10,13 @@ import {
   type AgentLink,
 } from "@/api/agent/agent.api.ts";
 import { useUser } from "@/store/get-user";
+import type {
+  CampaignSetupAction,
+  CampaignSetupSurface,
+} from "@/entities/client-side/campaign-setup/model/campaign-setup.model.ts";
 import { AiPaymentModal } from "./ai-payment-modal.tsx";
-import { AiCampaignDraftCard } from "./ai-campaign-draft-card.tsx";
+import { CampaignStepsRail } from "./campaign-steps-rail.tsx";
+import { CampaignWorkspacePanel } from "./campaign-workspace-panel.tsx";
 import styles from "./ai-chat.module.scss";
 import { flushCampaignDraftSaves } from "../model/campaign-draft-save-coordinator.ts";
 
@@ -22,11 +27,34 @@ interface Message {
   links: AgentLink[];
   status: "pending" | "success" | "error";
   errorCode?: AgentChatErrorCode;
+  // Work the user did in the workspace, not a turn with the agent. Kept in the same
+  // list so the transcript reads as one timeline of what happened to the campaign.
+  note?: { text: string; section: CampaignSetupSurface };
 }
 
 // The chat lives in component state, so navigating to a link chip and back would wipe it.
 // Persist per tab so returning to /ai-chat restores the same conversation.
 const STORAGE_KEY = "ai-chat:v1";
+// Which working surface is open over the conversation, if any.
+const WORKSPACE_SURFACE_KEY = "ai-chat:workspace-surface";
+
+const readStoredSurface = (): CampaignSetupSurface | null => {
+  const stored = sessionStorage.getItem(WORKSPACE_SURFACE_KEY);
+  return stored === "pages" ||
+    stored === "content" ||
+    stored === "schedule" ||
+    stored === "promo"
+    ? stored
+    : null;
+};
+
+// Section names as the user sees them in the rail.
+const SECTION_LABELS: Record<CampaignSetupSurface, string> = {
+  pages: "Pages",
+  content: "Content",
+  schedule: "Dates",
+  promo: "Promo",
+};
 
 type PersistedChat = { messages: Message[]; conversationId?: string };
 
@@ -46,6 +74,7 @@ const loadPersistedChat = (): PersistedChat => {
               // A request cannot still be running after a reload.
               status: message.status === "pending" ? "error" : (message.status ?? "success"),
               errorCode: message.errorCode,
+              note: message.note,
             }))
           : [],
       };
@@ -63,6 +92,12 @@ const sanitizeReply = (html: string) =>
     ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "ul", "ol", "li"],
     ALLOWED_ATTR: [],
   });
+
+// One-line preview for the strip shown while a working surface covers the transcript.
+const toPlainText = (html: string) =>
+  DOMPurify.sanitize(html, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
+    .replace(/\s+/g, " ")
+    .trim();
 
 const CLIENT_EXAMPLE_PROMPTS = [
   "Find house influencers in Germany under 2000 €",
@@ -124,22 +159,12 @@ export const AiChat = () => {
   };
   const [isPreparingSend, setIsPreparingSend] = useState(false);
   const [sendPreparationError, setSendPreparationError] = useState(false);
+  const [workspaceSurface, setWorkspaceSurface] = useState<CampaignSetupSurface | null>(
+    readStoredSurface,
+  );
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // A draft can be updated by several tool calls. Render one live card at its latest
-  // occurrence instead of repeating stale copies throughout the conversation.
-  const latestDraftMessageIndexes = useMemo(() => {
-    const indexes = new Map<string, number>();
-    messages.forEach((message, index) => {
-      message.links.forEach((link) => {
-        const draftId = getCampaignDraftId(link);
-        if (draftId) indexes.set(draftId, index);
-      });
-    });
-    return indexes;
-  }, [messages]);
 
   const activeDraftId = useMemo(() => {
     for (let messageIndex = messages.length - 1; messageIndex >= 0; messageIndex -= 1) {
@@ -269,149 +294,262 @@ export const AiChat = () => {
     setConversationId(undefined);
     setMessages([]);
     setSendPreparationError(false);
+    setWorkspaceSurface(null);
+    sessionStorage.removeItem(WORKSPACE_SURFACE_KEY);
   };
+
+  const openWorkspace = (surface: CampaignSetupSurface) => {
+    setWorkspaceSurface(surface);
+    sessionStorage.setItem(WORKSPACE_SURFACE_KEY, surface);
+  };
+
+  // Work done in the workspace leaves the same kind of trace as work done by the agent,
+  // so re-reading the conversation explains the whole campaign, not just half of it.
+  const addNote = (text: string, section: CampaignSetupSurface) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `note-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        q: "",
+        a: "",
+        links: [],
+        status: "success",
+        note: { text, section },
+      },
+    ]);
+  };
+
+  const closeWorkspace = () => {
+    setWorkspaceSurface(null);
+    sessionStorage.removeItem(WORKSPACE_SURFACE_KEY);
+    window.setTimeout(() => textareaRef.current?.focus(), 0);
+  };
+
+  // Steps without an editor of their own hand the job back to the agent.
+  const handleStepSelect = (action: CampaignSetupAction) => {
+    if (action.kind === "surface") {
+      openWorkspace(action.surface);
+      return;
+    }
+    closeWorkspace();
+    fillPrompt(action.prompt);
+  };
+
+  const openedSurface = activeDraftId ? workspaceSurface : null;
+
+  // Latest reply, kept visible above the composer while the surface covers the transcript.
+  const lastReply = useMemo(() => {
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      const message = messages[index];
+      if (message.status === "success" && message.a) return toPlainText(message.a);
+    }
+    return null;
+  }, [messages]);
 
   return (
     <Container className={styles.root}>
-      <div className={styles.shell}>
-      <div className={styles.header}>
-        <h1>AI Assistant</h1>
-      </div>
+      <div className={`${styles.shell} ${activeDraftId ? styles.shellWide : ""}`}>
+        <div className={styles.header}>
+          <h1>AI Assistant</h1>
+        </div>
 
-      <div
-        className={`${styles.card} ${messages.length === 0 ? styles.cardEmpty : ""}`}
-      >
-        <div className={styles.messages} ref={messagesRef}>
-          {messages.length === 0 && !isPending && (
-            <div className={styles.empty}>
-              <h3>How can I help?</h3>
-              <p>Ask me to find influencers, build a campaign or guide you around the platform.</p>
-              <div className={styles.examples}>
-                {(role === "influencer" ? INFLUENCER_EXAMPLE_PROMPTS : CLIENT_EXAMPLE_PROMPTS).map((prompt) => (
-                  <button
-                    key={prompt}
-                    className={styles.exampleChip}
-                    onClick={() => setInput(prompt)}
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-            </div>
+        <div
+          className={`${styles.card} ${messages.length === 0 ? styles.cardEmpty : ""}`}
+        >
+          {activeDraftId && (
+            <CampaignStepsRail
+              draftId={activeDraftId}
+              activeSurface={openedSurface}
+              onSelect={handleStepSelect}
+            />
           )}
 
-          {messages.map((msg, i) => (
-            <div key={msg.id} className={styles.messageGroup}>
-              <div className={styles.userRow}>
-                <div className={styles.userBubble}>{msg.q}</div>
-              </div>
-
-              <div className={styles.agentRow} style={{ marginTop: "12px" }}>
-                {msg.status === "success" && (
-                  <div
-                    className={styles.agentBubble}
-                    dangerouslySetInnerHTML={{ __html: sanitizeReply(msg.a) }}
-                  />
-                )}
-
-                {msg.status === "error" && (
-                  <div className={styles.errorBubble}>
-                    <span>{AGENT_ERROR_MESSAGES[msg.errorCode ?? "UNKNOWN"]}</span>
-                    {!NON_RETRYABLE_AGENT_ERRORS.has(msg.errorCode ?? "UNKNOWN") && (
-                      <button onClick={() => void handleRetry(msg)} disabled={isPending || isPreparingSend}>
-                        Retry
+          <div className={styles.stage}>
+            <div className={styles.messages} ref={messagesRef}>
+              {messages.length === 0 && !isPending && (
+                <div className={styles.empty}>
+                  <h3>How can I help?</h3>
+                  <p>Ask me to find influencers, build a campaign or guide you around the platform.</p>
+                  <div className={styles.examples}>
+                    {(role === "influencer" ? INFLUENCER_EXAMPLE_PROMPTS : CLIENT_EXAMPLE_PROMPTS).map((prompt) => (
+                      <button
+                        key={prompt}
+                        className={styles.exampleChip}
+                        onClick={() => setInput(prompt)}
+                      >
+                        {prompt}
                       </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {messages.map((msg) =>
+                msg.note ? (
+                  <div key={msg.id} className={styles.messageGroup}>
+                    <button
+                      type="button"
+                      className={styles.noteChip}
+                      onClick={() => openWorkspace(msg.note!.section)}
+                    >
+                      <span>{msg.note.text}</span>
+                      <strong>Open {SECTION_LABELS[msg.note.section]} →</strong>
+                    </button>
+                  </div>
+                ) : (
+                <div key={msg.id} className={styles.messageGroup}>
+                  <div className={styles.userRow}>
+                    <div className={styles.userBubble}>{msg.q}</div>
+                  </div>
+
+                  <div className={styles.agentRow} style={{ marginTop: "12px" }}>
+                    {msg.status === "success" && (
+                      <div
+                        className={styles.agentBubble}
+                        dangerouslySetInnerHTML={{ __html: sanitizeReply(msg.a) }}
+                      />
+                    )}
+
+                    {msg.status === "error" && (
+                      <div className={styles.errorBubble}>
+                        <span>{AGENT_ERROR_MESSAGES[msg.errorCode ?? "UNKNOWN"]}</span>
+                        {!NON_RETRYABLE_AGENT_ERRORS.has(msg.errorCode ?? "UNKNOWN") && (
+                          <button onClick={() => void handleRetry(msg)} disabled={isPending || isPreparingSend}>
+                            Retry
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {msg.status === "success" && msg.links.length > 0 && (
+                      <div className={styles.links}>
+                        {msg.links.map((link, k) => {
+                          const campaignDraftId = getCampaignDraftId(link);
+                          if (campaignDraftId) {
+                            const alreadyRendered = msg.links
+                              .slice(0, k)
+                              .some((previousLink) => getCampaignDraftId(previousLink) === campaignDraftId);
+                            if (alreadyRendered) return null;
+                            // The table itself lives in the workspace — the conversation
+                            // only keeps a marker of where the draft changed.
+                            const section = link.section ?? "pages";
+                            return (
+                              <button
+                                key={campaignDraftId}
+                                type="button"
+                                className={styles.draftChip}
+                                onClick={() => openWorkspace(section)}
+                              >
+                                <span>{link.summary ?? link.label}</span>
+                                <strong>Open {SECTION_LABELS[section]} →</strong>
+                              </button>
+                            );
+                          }
+
+                          // Payment links open the in-chat checkout modal instead of navigating away.
+                          if (link.kind === "payment" && link.draftId) {
+                            return (
+                              <button
+                                key={k}
+                                className={styles.payChip}
+                                disabled={isPending || isPreparingSend}
+                                onClick={() => void handleOpenPayment(link.draftId!)}
+                              >
+                                {link.label} →
+                              </button>
+                            );
+                          }
+
+                          return (
+                            <Link key={k} to={withAiSource(link.path)} className={styles.linkChip}>
+                              {link.label} →
+                            </Link>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
-                )}
+                </div>
+                ),
+              )}
 
-                {msg.status === "success" && msg.links.length > 0 && (
-                  <div className={styles.links}>
-                    {msg.links.map((link, k) => {
-                      const campaignDraftId = getCampaignDraftId(link);
-                      if (campaignDraftId) {
-                        if (latestDraftMessageIndexes.get(campaignDraftId) !== i) return null;
-                        const alreadyRendered = msg.links
-                          .slice(0, k)
-                          .some((previousLink) => getCampaignDraftId(previousLink) === campaignDraftId);
-                        if (alreadyRendered) return null;
-                        return (
-                          <div key={campaignDraftId} className={styles.draftCardSlot}>
-                            <AiCampaignDraftCard
-                              draftId={campaignDraftId}
-                              onProceedToPayment={(id) => void handleOpenPayment(id)}
-                              onPrompt={fillPrompt}
-                            />
-                          </div>
-                        );
-                      }
-
-                      // Payment links open the in-chat checkout modal instead of navigating away.
-                      if (link.kind === "payment" && link.draftId) {
-                        return (
-                          <button
-                            key={k}
-                            className={styles.payChip}
-                            disabled={isPending || isPreparingSend}
-                            onClick={() => void handleOpenPayment(link.draftId!)}
-                          >
-                            {link.label} →
-                          </button>
-                        );
-                      }
-
-                      return (
-                        <Link key={k} to={withAiSource(link.path)} className={styles.linkChip}>
-                          {link.label} →
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+              {isPending && (
+                <div className={styles.thinking}>
+                  Thinking
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              )}
             </div>
-          ))}
 
-          {isPending && (
-            <div className={styles.thinking}>
-              Thinking
-              <span />
-              <span />
-              <span />
+            {activeDraftId && openedSurface && (
+              <div className={styles.workspaceLayer}>
+                <CampaignWorkspacePanel
+                  draftId={activeDraftId}
+                  surface={openedSurface}
+                  onClose={closeWorkspace}
+                  onPrompt={(prompt) => {
+                    closeWorkspace();
+                    fillPrompt(prompt);
+                  }}
+                  onProceedToPayment={(id) => void handleOpenPayment(id)}
+                  onNote={addNote}
+                />
+              </div>
+            )}
+          </div>
+
+          {openedSurface && (
+            <button
+              // Remounting on a new reply replays the highlight, so an answer that
+              // arrives while the surface is open does not go unnoticed.
+              key={isPending ? "pending" : (lastReply ?? "none")}
+              type="button"
+              className={styles.replyStrip}
+              onClick={closeWorkspace}
+            >
+              <span className={styles.replyStripLabel}>
+                {isPending ? "Assistant" : "Latest reply"}
+              </span>
+              <span className={styles.replyStripText}>
+                {isPending
+                  ? "Thinking…"
+                  : (lastReply ?? "Ask the assistant anything while you work here.")}
+              </span>
+              <span className={styles.replyStripAction}>Show conversation</span>
+            </button>
+          )}
+
+          {sendPreparationError && (
+            <div className={styles.saveBeforeSendError} role="alert">
+              Campaign changes could not be saved. Retry sending after the connection recovers.
             </div>
           )}
-        </div>
 
-        {sendPreparationError && (
-          <div className={styles.saveBeforeSendError} role="alert">
-            Campaign changes could not be saved. Retry sending after the connection recovers.
+          <div className={styles.inputArea}>
+            <textarea
+              ref={textareaRef}
+              className={styles.textarea}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isPending || isPreparingSend}
+              rows={1}
+              placeholder="Type your message…"
+            />
+            <button
+              className={styles.sendButton}
+              onClick={() => void handleSend()}
+              disabled={isPending || isPreparingSend || !input.trim()}
+            >
+              {isPending ? "Thinking…" : isPreparingSend ? "Saving…" : "Send"}
+            </button>
+            <button className={styles.resetButton} onClick={handleReset} disabled={isPending || isPreparingSend}>
+              New conversation
+            </button>
           </div>
-        )}
-
-        <div className={styles.inputArea}>
-          <textarea
-            ref={textareaRef}
-            className={styles.textarea}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isPending || isPreparingSend}
-            rows={1}
-            placeholder="Type your message…"
-          />
-          <button
-            className={styles.sendButton}
-            onClick={() => void handleSend()}
-            disabled={isPending || isPreparingSend || !input.trim()}
-          >
-            {isPending ? "Thinking…" : isPreparingSend ? "Saving…" : "Send"}
-          </button>
-          <button className={styles.resetButton} onClick={handleReset} disabled={isPending || isPreparingSend}>
-            New conversation
-          </button>
         </div>
-      </div>
-
       </div>
 
       {paymentDraftId && (

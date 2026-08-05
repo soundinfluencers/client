@@ -12,9 +12,12 @@ export const AGENT_CHAT_ERROR_CODES = [
 export type AgentChatErrorCode = (typeof AGENT_CHAT_ERROR_CODES)[number];
 
 export class AgentChatRequestError extends Error {
-  constructor(readonly code: AgentChatErrorCode) {
+  readonly code: AgentChatErrorCode;
+
+  constructor(code: AgentChatErrorCode) {
     super(code);
     this.name = "AgentChatRequestError";
+    this.code = code;
   }
 }
 
@@ -29,6 +32,10 @@ export interface AgentLink {
   // Typed hint from the backend tools: 'payment' opens the in-chat payment modal.
   kind?: string;
   draftId?: string;
+  // What the tool did, stamped server-side when it ran. Rendered as a history
+  // receipt in the transcript, so it must never be recomputed from live data.
+  summary?: string;
+  section?: "pages" | "content" | "schedule";
 }
 
 export interface AgentChatResponse {

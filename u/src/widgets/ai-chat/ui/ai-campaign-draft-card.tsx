@@ -1,6 +1,6 @@
 import { ObjectId } from "bson";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -40,11 +40,16 @@ import { CampaignRequiredDateControl } from "@/entities/client-side/campaign-dra
 import { CampaignAddPagesDrawer } from "@/entities/client-side/campaign-draft/ui/campaign-add-pages-drawer.tsx";
 
 type SaveStatus = "saved" | "saving" | "error" | "conflict";
+export type CampaignDraftFocusMode = "selection" | "content" | "schedule";
 
 interface Props {
   draftId: string;
   onProceedToPayment: (draftId: string) => void;
   onPrompt: (prompt: string) => void;
+  // Inside the campaign workspace the panel already frames the content, so the
+  // card drops its own border, radius and shadow.
+  flat?: boolean;
+  focusMode?: CampaignDraftFocusMode;
 }
 
 const normalizeAccounts = (draft: CampaignDraftDto) =>
@@ -54,8 +59,15 @@ const normalizeAccounts = (draft: CampaignDraftDto) =>
     dateRequest: account.dateRequest || "ASAP",
   }));
 
-export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: Props) => {
+export const AiCampaignDraftCard = ({
+  draftId,
+  onProceedToPayment,
+  onPrompt,
+  flat,
+  focusMode = "selection",
+}: Props) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ["campaign-draft", draftId],
     queryFn: () => getCampaignDraft(draftId),
@@ -128,6 +140,20 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
     [contentIsReady, selectedAccounts],
   );
   const canCheckout = allReadyContentIsAssigned;
+  const visibleAccounts = focusMode === "selection" ? accounts : selectedAccounts;
+  const readyContentCount = useMemo(
+    () => {
+      if (!draft) return 0;
+      return selectedAccounts.filter(
+        (account) => getDraftContentStatus(getContentForDraftAccount(draft, account)) === "ready",
+      ).length;
+    },
+    [draft, selectedAccounts],
+  );
+  const scheduledCount = useMemo(
+    () => selectedAccounts.filter((account) => Boolean(account.dateRequest?.trim())).length,
+    [selectedAccounts],
+  );
 
   useEffect(() => {
     if (!draft || draft.step === "strategyTable" || !allReadyContentIsAssigned) return;
@@ -155,6 +181,18 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
         setDraft((current) => current
           ? { ...current, revision: result.revision }
           : current);
+        queryClient.setQueryData<CampaignDraftDto>(
+          ["campaign-draft", draftId],
+          (current) => current
+            ? {
+              ...current,
+              ...draft,
+              revision: result.revision,
+              addedAccounts: accounts,
+              noContentAvailable,
+            }
+            : current,
+        );
         lastSavedRef.current = signature;
         setSaveStatus("saved");
         return true;
@@ -167,7 +205,7 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
     });
     saveQueueRef.current = request;
     return request;
-  }, [accounts, draft, noContentAvailable]);
+  }, [accounts, draft, draftId, noContentAvailable, queryClient]);
 
   useEffect(() => {
     if (!draft) return;
@@ -407,8 +445,30 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
     );
   }
 
+  const nextIncompleteContent = selectedAccounts.find(
+    (account) => getDraftContentStatus(getContentForDraftAccount(draft, account)) !== "ready",
+  );
+  const focusCopy = focusMode === "content"
+    ? {
+      title: "Publishing content",
+      description: `${readyContentCount} of ${selectedAccounts.length} pages ready · add a link and post copy`,
+    }
+    : focusMode === "schedule"
+      ? {
+        title: "Publishing dates",
+        description: `${scheduledCount} of ${selectedAccounts.length} pages scheduled · ASAP is allowed`,
+      }
+      : {
+        title: "Influencer selection",
+        description: `${selectedAccounts.length} of ${accounts.length} included · live prices and reach`,
+      };
+  const tableColumnCount = focusMode === "selection" ? 5 : focusMode === "content" ? 4 : 3;
+
   return (
-    <section className={styles.card} aria-label={`Campaign draft ${draft.campaignName}`}>
+    <section
+      className={`${styles.card} ${flat ? styles.cardFlat : ""}`}
+      aria-label={`Campaign draft ${draft.campaignName}`}
+    >
       <header className={styles.header}>
         <div>
           <span className={styles.eyebrow}>Campaign draft</span>
@@ -431,57 +491,133 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
 
       <div className={styles.tableHeader}>
         <div>
-          <h4>Campaign pages</h4>
-          <p>{selectedAccounts.length} of {accounts.length} included · live prices &amp; reach</p>
+          <h4>{focusCopy.title}</h4>
+          <p>{focusCopy.description}</p>
         </div>
-        <button type="button" onClick={() => setAddPagesOpen(true)}>+ Add pages</button>
+        {focusMode === "selection" && (
+          <button type="button" onClick={() => setAddPagesOpen(true)}>+ Add pages</button>
+        )}
+        {focusMode === "content" && nextIncompleteContent && (
+          <button type="button" onClick={() => openDetails(nextIncompleteContent)}>
+            Add next content
+          </button>
+        )}
       </div>
 
-      <div className={styles.tableWrap}>
+      <div className={`${styles.tableWrap} ${styles[`tableWrap_${focusMode}`]}`}>
         <table>
-          <thead><tr><th aria-label="Include" /><th>Network</th><th>Followers</th><th>Price</th><th>Required date</th><th>Actions</th></tr></thead>
+          <thead>
+            <tr>
+              {focusMode === "selection" && <th aria-label="Include" />}
+              <th>Page</th>
+              {focusMode === "selection" && <th>Followers</th>}
+              {focusMode === "selection" && <th>Price</th>}
+              {focusMode === "content" && <th>Content status</th>}
+              {focusMode === "content" && <th>Content link</th>}
+              {focusMode === "schedule" && <th>Required date</th>}
+              {focusMode === "schedule" && <th>Status</th>}
+              {focusMode !== "schedule" && <th>Actions</th>}
+            </tr>
+          </thead>
           <tbody>
-            {accounts.map((account) => {
+            {visibleAccounts.length === 0 && (
+              <tr>
+                <td className={styles.emptyTable} colSpan={tableColumnCount}>
+                  {focusMode === "selection"
+                    ? "No campaign pages yet. Add pages to start building the campaign."
+                    : "No pages are selected. Open Pages and include at least one influencer first."}
+                </td>
+              </tr>
+            )}
+            {visibleAccounts.map((account) => {
               const key = draftAccountKey(account);
               const isAvailable = account.isAvailable !== false;
               const selected = isAvailable && account.isSelected !== false;
-              const readiness = getDraftContentReadiness(getContentForDraftAccount(draft, account));
+              const content = getContentForDraftAccount(draft, account);
+              const readiness = getDraftContentReadiness(content);
               const status = readiness.status;
               return (
                 <tr key={key} className={selected ? "" : styles.disabledRow}>
-                  <td data-label="Include"><input type="checkbox" checked={selected} disabled={!isAvailable} onChange={(event) => updateAccount(key, { isSelected: event.target.checked })} aria-label={`Include ${account.username}`} /></td>
-                  <td data-label="Network">
+                  {focusMode === "selection" && (
+                    <td data-label="Include">
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        disabled={!isAvailable}
+                        onChange={(event) => updateAccount(key, { isSelected: event.target.checked })}
+                        aria-label={`Include ${account.username}`}
+                      />
+                    </td>
+                  )}
+                  <td data-label="Page">
                     <div className={styles.network}>
                       {account.logoUrl ? <img src={account.logoUrl} alt="" /> : <span className={styles.avatarFallback} />}
                       <div>
                         <strong>{account.username}</strong>
                         <span>{normalizeDraftPlatform(account.socialMedia)}</span>
-                        <span className={`${styles.contentStatus} ${styles[`contentStatus_${isAvailable ? status : "incomplete"}`]}`}>
-                          {isAvailable ? readiness.label : "Page unavailable"}
-                        </span>
+                        {focusMode === "selection" && (
+                          <span className={`${styles.contentStatus} ${styles[`contentStatus_${isAvailable ? status : "incomplete"}`]}`}>
+                            {isAvailable ? readiness.label : "Page unavailable"}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </td>
-                  <td data-label="Followers">{Number(account.followers ?? 0).toLocaleString("en")}</td>
-                  <td data-label="Price">{formatDraftCurrency(Number(account.price ?? 0))}</td>
-                  <td data-label="Required date">
-                    <CampaignRequiredDateControl
-                      className={styles.dateField}
-                      value={account.dateRequest}
-                      disabled={!selected}
-                      label={account.username}
-                      onChange={(dateRequest) => updateAccount(key, { dateRequest })}
-                    />
-                  </td>
-                  <td>
-                    <div className={styles.rowActions}>
-                      <button type="button" className={styles.editButton} onClick={() => openDetails(account)} disabled={!selected}>Edit details</button>
-                      <div className={styles.moreWrap}>
-                        <button type="button" className={styles.moreButton} onClick={() => setActionKey((current) => current === key ? null : key)} aria-label={`More actions for ${account.username}`} aria-expanded={actionKey === key}>...</button>
-                        {actionKey === key && <button type="button" className={styles.removeButton} onClick={() => removeAccount(key)}>Remove from draft</button>}
+                  {focusMode === "selection" && (
+                    <td data-label="Followers">{Number(account.followers ?? 0).toLocaleString("en")}</td>
+                  )}
+                  {focusMode === "selection" && (
+                    <td data-label="Price">{formatDraftCurrency(Number(account.price ?? 0))}</td>
+                  )}
+                  {focusMode === "content" && (
+                    <td data-label="Content status">
+                      <span className={`${styles.readinessBadge} ${styles[`contentStatus_${status}`]}`}>
+                        {readiness.label}
+                      </span>
+                    </td>
+                  )}
+                  {focusMode === "content" && (
+                    <td data-label="Content link">
+                      <span className={styles.contentLink} title={content?.mainLink || undefined}>
+                        {content?.mainLink || "No link yet"}
+                      </span>
+                    </td>
+                  )}
+                  {focusMode === "schedule" && (
+                    <td data-label="Required date">
+                      <CampaignRequiredDateControl
+                        className={styles.dateField}
+                        value={account.dateRequest}
+                        disabled={!selected}
+                        label={account.username}
+                        onChange={(dateRequest) => updateAccount(key, { dateRequest })}
+                      />
+                    </td>
+                  )}
+                  {focusMode === "schedule" && (
+                    <td data-label="Status">
+                      <span className={account.dateRequest?.trim() ? styles.scheduleReady : styles.scheduleMissing}>
+                        {account.dateRequest?.trim() ? "Scheduled" : "Date needed"}
+                      </span>
+                    </td>
+                  )}
+                  {focusMode === "content" && (
+                    <td data-label="Actions">
+                      <button type="button" className={styles.editButton} onClick={() => openDetails(account)}>
+                        {status === "empty" ? "Add content" : "Edit content"}
+                      </button>
+                    </td>
+                  )}
+                  {focusMode === "selection" && (
+                    <td data-label="Actions">
+                      <div className={styles.rowActions}>
+                        <div className={styles.moreWrap}>
+                          <button type="button" className={styles.moreButton} onClick={() => setActionKey((current) => current === key ? null : key)} aria-label={`More actions for ${account.username}`} aria-expanded={actionKey === key}>...</button>
+                          {actionKey === key && <button type="button" className={styles.removeButton} onClick={() => removeAccount(key)}>Remove from draft</button>}
+                        </div>
                       </div>
-                    </div>
-                  </td>
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -489,14 +625,14 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
         </table>
       </div>
 
-      {totalPrice > 1000 && (
+      {focusMode === "content" && totalPrice > 1000 && (
         <label className={styles.noContent}>
           <input type="checkbox" checked={noContentAvailable} onChange={(event) => setNoContentAvailable(event.target.checked)} />
           <span><strong>Need creative support?</strong><small>Ask our team to prepare campaign-ready meme content.</small></span>
         </label>
       )}
 
-      {!canCheckout && selectedAccounts.length > 0 && (
+      {focusMode === "content" && !canCheckout && selectedAccounts.length > 0 && (
         <div className={styles.nextStep}>
           <div>
             <strong>{noContentAvailable ? "Creative support requested" : "Next: add campaign content"}</strong>
@@ -532,7 +668,13 @@ export const AiCampaignDraftCard = ({ draftId, onProceedToPayment, onPrompt }: P
 
       {saveStatus === "error" && <div className={styles.saveFailure}>Changes could not be saved. <button type="button" onClick={() => void persist()}>Retry</button></div>}
       {saveStatus === "conflict" && <div className={styles.saveFailure}>This draft changed in another place. <button type="button" onClick={() => void query.refetch()}>Reload latest</button></div>}
-      {!selectedAccounts.length && <div className={styles.warning}>Select at least one page to continue.</div>}
+      {!selectedAccounts.length && (
+        <div className={styles.warning}>
+          {focusMode === "selection"
+            ? "Select at least one page to continue."
+            : "No pages are selected. Open Pages and include at least one influencer first."}
+        </div>
+      )}
 
       {canCheckout && (
         <footer className={styles.actions}>

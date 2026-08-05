@@ -20,6 +20,20 @@ export type DraftAddedAccountDto = {
     };
 };
 
+export type PromoCreativeSource = "upload" | "photo" | "generated";
+
+export type PromoCreativeDto = {
+    id: string;
+    assetUrl: string;
+    source: PromoCreativeSource;
+    sourceAssetUrl?: string;
+    styleId?: string;
+    headline?: string;
+    subheadline?: string;
+    generator?: string;
+    createdAt: string;
+};
+
 export type CampaignDraftDto = {
     _id: string;
     revision?: number;
@@ -49,4 +63,5 @@ export type CampaignDraftDto = {
     selectedAccountsCount?: number;
     source?: string;
     noContentAvailable?: boolean;
+    promoCreative?: PromoCreativeDto;
 };

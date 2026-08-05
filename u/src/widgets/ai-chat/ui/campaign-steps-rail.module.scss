@@ -1,0 +1,115 @@
+/* Quiet navigation strip pinned above the conversation. It never scrolls away and
+   never covers the composer — only the message area is ever covered. */
+.rail {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #eef1f5;
+  background: #fbfcfe;
+}
+
+.name {
+  overflow: hidden;
+  max-width: 190px;
+  flex: 0 1 auto;
+  color: #5c6878;
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.steps {
+  display: flex;
+  overflow-x: auto;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 11px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #6a7688;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+
+  &:hover { color: #202934; background: #eef2f8; }
+
+  &:focus-visible {
+    outline: 2px solid #7da1fb;
+    outline-offset: 1px;
+  }
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border: 1px solid #c3ccd8;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.step_complete .dot {
+  border-color: #35a06a;
+  background: #35a06a;
+}
+
+.step_current {
+  color: #24374f;
+
+  .dot { border-color: #356cf6; background: #cddcff; }
+}
+
+/* Something moved here while the user was elsewhere. The screen never switches on
+   its own — this mark is the whole notification. */
+.stepChanged {
+  color: #24374f;
+}
+
+.changeMark {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 5px;
+  border-radius: 50%;
+  background: #f0972a;
+}
+
+.stepOpen {
+  border-color: #cfdbfb;
+  color: #1f366a;
+  background: #eaf1ff;
+
+  &:hover { background: #e2ecff; }
+}
+
+@media (max-width: 640px) {
+  .rail {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+    padding: 9px 12px;
+  }
+
+  .name { max-width: 100%; }
+  .steps { width: 100%; }
+}

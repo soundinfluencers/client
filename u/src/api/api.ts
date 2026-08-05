@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { handleApiError } from "./error.api.ts";
 import { tokenStorage } from "../contexts/AuthContext.tsx";
 import { refreshAccessToken } from "@/api/refresh.manager.ts";
@@ -25,7 +25,8 @@ export const setupInterceptors = (
       (url.includes("/auth/login") ||
       url.includes("/auth/refresh") ||
       url.includes("/auth/logout"));
-  const handlesErrorInline = (url?: string) => !!url && url.includes("/agent/chat");
+  const handlesErrorInline = (url?: string) =>
+    !!url && (url.includes("/agent/chat") || url.includes("/agent/promo-images"));
 
   const reqId = $api.interceptors.request.use((config) => {
     const token = tokenStorage.get();
@@ -38,7 +39,9 @@ export const setupInterceptors = (
     async (error: AxiosError) => {
       console.count("RESPONSE INTERCEPTOR ERROR");
       console.log("url:", error.config?.url, "status:", error.response?.status);
-      const originalRequest: any = error.config;
+      const originalRequest = error.config as (InternalAxiosRequestConfig & {
+        _retry?: boolean;
+      }) | undefined;
 
       if (!error.response) {
         if (!handlesErrorInline(originalRequest?.url)) handleApiError(error);
@@ -52,7 +55,7 @@ export const setupInterceptors = (
       const shouldTryRefresh =
         error.response.status === 401 && !originalRequest?._retry;
 
-      if (!shouldTryRefresh) {
+      if (!shouldTryRefresh || !originalRequest) {
         if (!handlesErrorInline(originalRequest?.url)) handleApiError(error);
         return Promise.reject(error);
       }

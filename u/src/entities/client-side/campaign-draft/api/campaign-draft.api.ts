@@ -1,5 +1,5 @@
 
-import type { CampaignDraftDto } from "./campaign-draft.dto.ts";
+import type { CampaignDraftDto, PromoCreativeDto } from "./campaign-draft.dto.ts";
 import $api from "@/api/api.ts";
 import axios from "axios";
 
@@ -22,6 +22,25 @@ export const postCampaignDraft = async (payload: Record<string, unknown>) => {
 export const updateCampaignDraft = async (payload: Record<string, unknown>) => {
     try {
         const res = await $api.post("/campaigns/draft", payload);
+        return res.data.data as { revision: number };
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 409) {
+            throw new CampaignDraftConflictError();
+        }
+        throw error;
+    }
+};
+
+export const saveCampaignDraftPromo = async (
+    draftId: string,
+    revision: number,
+    promoCreative: PromoCreativeDto,
+) => {
+    try {
+        const res = await $api.patch(`/campaigns/draft/${draftId}/promo`, {
+            revision,
+            promoCreative,
+        });
         return res.data.data as { revision: number };
     } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 409) {

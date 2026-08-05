@@ -8,6 +8,15 @@
   width: 100%;
 }
 
+/* Framed by the workspace panel instead of by itself. */
+.cardFlat {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.cardFlat .header { padding-top: 0; }
+
 .header, .actions, .editorHeader, .editorActions, .noContent { display: flex; align-items: center; }
 .header { justify-content: space-between; padding: 16px 18px 12px; }
 .header h3 { font-size: 17px; margin: 3px 0 0; }
@@ -28,10 +37,14 @@
 .tableHeader button { background: #fff; border: 1px solid #202934; border-radius: 999px; color: #202934; cursor: pointer; font-size: 11px; font-weight: 600; padding: 7px 12px; }
 .tableWrap { border-top: 1px solid #eef1f4; overflow-x: auto; }
 .tableWrap table { border-collapse: collapse; min-width: 810px; table-layout: auto; width: 100%; }
+.tableWrap_selection table { min-width: 620px; }
+.tableWrap_content table { min-width: 680px; }
+.tableWrap_schedule table { min-width: 560px; }
 .tableWrap th { background: #f8fafc; color: #6d7889; font-size: 10px; font-weight: 600; letter-spacing: .03em; padding: 10px 11px; text-align: left; text-transform: uppercase; }
 .tableWrap td { border-top: 1px solid #eef1f4; font-size: 12px; padding: 11px; vertical-align: middle; white-space: nowrap; }
-.tableWrap td:first-child, .tableWrap th:first-child { padding-left: 14px; padding-right: 3px; text-align: center; width: 34px; }
+.tableWrap_selection td:first-child, .tableWrap_selection th:first-child { padding-left: 14px; padding-right: 3px; text-align: center; width: 34px; }
 .tableWrap input[type="checkbox"] { accent-color: #356cf6; cursor: pointer; height: 17px; width: 17px; }
+.emptyTable { color: #778396; padding: 28px 18px !important; text-align: center !important; white-space: normal !important; }
 .disabledRow { background: #f6f7f8; color: #8b949f; }
 .disabledRow td { opacity: .7; }
 .network { align-items: center; display: flex; gap: 9px; min-width: 175px; }
@@ -43,6 +56,10 @@
 .contentStatus_ready { background: #eaf7f0; color: #217348 !important; }
 .contentStatus_incomplete { background: #fff4dc; color: #98631a !important; }
 .contentStatus_empty { background: #edf1f5; color: #697586 !important; }
+.readinessBadge, .scheduleReady, .scheduleMissing { border-radius: 999px; display: inline-flex; font-size: 10px; font-weight: 650; padding: 4px 8px; }
+.contentLink { color: #526173; display: block; max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
+.scheduleReady { background: #eaf7f0; color: #217348; }
+.scheduleMissing { background: #fff4dc; color: #98631a; }
 .dateField { align-items: center; display: flex; gap: 6px; }
 .dateField select, .dateField input { background: #fff; border: 1px solid #dce2ea; border-radius: 8px; color: #26303c; font: inherit; padding: 7px 8px; }
 .dateField select { cursor: pointer; min-width: 92px; }

@@ -1,0 +1,92 @@
+/* The working surface. It fills the message area only — the steps rail above and
+   the composer below stay visible and usable while it is open. */
+.surface {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  background: #fff;
+
+  &:focus { outline: none; }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 18px;
+  border-bottom: 1px solid #eef1f5;
+
+  h2 {
+    margin: 0;
+    color: #202934;
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.25;
+  }
+
+  button {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    padding: 0;
+    border: 1px solid #e0e5ec;
+    border-radius: 50%;
+    color: #657181;
+    background: #fff;
+    font: inherit;
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
+    place-items: center;
+
+    &:hover { background: #f3f6f9; }
+  }
+}
+
+.body {
+  /* Wide content (the pages table) scrolls inside its own wrapper, so this column
+     never scrolls sideways. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
+  padding: 14px 18px 20px;
+}
+
+.state {
+  margin: 24px auto;
+  color: #758194;
+  font-size: 12px;
+  text-align: center;
+}
+
+.errorState button {
+  display: block;
+  margin: 8px auto 0;
+  padding: 0;
+  border: 0;
+  color: #356cf6;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.saveError {
+  margin: 12px 18px 0;
+  padding: 9px 11px;
+  border: 1px solid #efc7c7;
+  border-radius: 9px;
+  color: #9b3535;
+  background: #fff3f3;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .header { padding: 12px 14px 10px; }
+  .body { padding: 12px 14px 16px; }
+}
