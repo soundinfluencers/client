@@ -16,6 +16,7 @@ import {
   PromoImageError,
   createPromoImageDirections,
 } from "@/entities/client-side/promo-creative/api/promo-image.api.ts";
+import { listPromoReferences } from "@/entities/client-side/promo-creative/api/promo-reference.api.ts";
 
 import styles from "./promo-studio.module.scss";
 
@@ -57,6 +58,9 @@ export const PromoStudio = ({
   const [step, setStep] = useState<StudioStep>("configure");
   const [copy, setCopy] = useState("");
   const [look, setLook] = useState("");
+  // Admin-managed looks win; the built-in one keeps the picker useful until the
+  // team adds their own.
+  const [references, setReferences] = useState<readonly PromoReference[]>(PROMO_REFERENCES);
   const [referenceId, setReferenceId] = useState<string>(
     PROMO_REFERENCES[0]?.id ?? CUSTOM_REFERENCE,
   );
@@ -76,7 +80,7 @@ export const PromoStudio = ({
   const reference: PromoReference | undefined =
     referenceId === CUSTOM_REFERENCE
       ? undefined
-      : PROMO_REFERENCES.find((item) => item.id === referenceId);
+      : references.find((item) => item.id === referenceId);
   const isUpload = method === "upload";
 
   useEffect(() => {
@@ -99,13 +103,34 @@ export const PromoStudio = ({
     setStep("configure");
     setCopy(draft.campaignName ? `${draft.campaignName} — out now` : "");
     setLook("");
-    setReferenceId(PROMO_REFERENCES[0]?.id ?? CUSTOM_REFERENCE);
+    setReferenceId(references[0]?.id ?? CUSTOM_REFERENCE);
     setSourceFile(null);
     setGenerated([]);
     setActiveIndex(0);
     setGenerationModel(null);
     setError(null);
   }, [draft.campaignName, method, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    void listPromoReferences()
+      .then((loaded) => {
+        if (!active || !loaded.length) return;
+        setReferences(loaded);
+        setReferenceId((current) =>
+          current === CUSTOM_REFERENCE || loaded.some((item) => item.id === current)
+            ? current
+            : loaded[0].id,
+        );
+      })
+      .catch(() => {
+        // The built-in reference keeps promo creation available during an outage.
+      });
+    return () => {
+      active = false;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!sourceFile) {
@@ -356,7 +381,7 @@ export const PromoStudio = ({
                 </div>
 
                 <div className={styles.referenceGrid}>
-                  {PROMO_REFERENCES.map((item) => (
+                  {references.map((item) => (
                     <button
                       key={item.id}
                       type="button"
