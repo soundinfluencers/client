@@ -22,6 +22,26 @@ import styles from "./promo-studio.module.scss";
 
 type StudioStep = "configure" | "review";
 type PromoFidelity = "low" | "high";
+type PromoOptionStatus = "candidate" | "rejected" | "approved";
+type ImageDetails = {
+  width: number;
+  height: number;
+  mimeType: string;
+};
+
+type PromoVersion = {
+  id: string;
+  createdAt: string;
+  files: File[];
+  model: string;
+  copy: string;
+  look: string;
+  referenceId: string;
+  fidelity: PromoFidelity;
+  sourceFile?: File;
+  sourceDetails?: ImageDetails;
+  statuses: PromoOptionStatus[];
+};
 
 interface Props {
   open: boolean;
@@ -33,18 +53,110 @@ interface Props {
 }
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
+const MIN_IMAGE_EDGE = 512;
+const MAX_IMAGE_EDGE = 8192;
+const MAX_IMAGE_PIXELS = 40_000_000;
+const MIN_PROMO_ASPECT_RATIO = 1 / 2;
+const MAX_PROMO_ASPECT_RATIO = 2;
 const MIN_COPY_LENGTH = 10;
 const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const CUSTOM_REFERENCE = "custom";
+
+// Deliberately front-end only: generated binaries survive closing and reopening the
+// studio in this browser tab, without expanding the campaign schema or database yet.
+const promoHistoryByDraft = new Map<string, PromoVersion[]>();
 
 const createId = () =>
   globalThis.crypto?.randomUUID?.() ??
   `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-const validateImage = (file: File) => {
-  if (!ACCEPTED_IMAGE_TYPES.has(file.type)) return "Use a JPG, PNG, or WebP image.";
-  if (file.size > MAX_FILE_SIZE) return "Choose an image smaller than 15 MB.";
+const detectImageType = async (file: File): Promise<string | null> => {
+  const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4e &&
+    bytes[3] === 0x47 &&
+    bytes[4] === 0x0d &&
+    bytes[5] === 0x0a &&
+    bytes[6] === 0x1a &&
+    bytes[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return "image/jpeg";
+  }
+  if (
+    bytes.length >= 12 &&
+    String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" &&
+    String.fromCharCode(...bytes.slice(8, 12)) === "WEBP"
+  ) {
+    return "image/webp";
+  }
   return null;
+};
+
+const readImageDimensions = (file: File): Promise<Pick<ImageDetails, "width" | "height">> =>
+  new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    const release = () => URL.revokeObjectURL(url);
+    image.onload = () => {
+      const dimensions = { width: image.naturalWidth, height: image.naturalHeight };
+      release();
+      resolve(dimensions);
+    };
+    image.onerror = () => {
+      release();
+      reject(new Error("The image could not be read. Export it again as JPG, PNG, or WebP."));
+    };
+    image.src = url;
+  });
+
+const inspectImage = async (
+  file: File,
+  method: PromoCreativeSource,
+): Promise<ImageDetails> => {
+  if (!file.size) throw new Error("The image is empty.");
+  if (file.size > MAX_FILE_SIZE) throw new Error("Choose an image no larger than 15 MB.");
+  if (file.type && !ACCEPTED_IMAGE_TYPES.has(file.type)) {
+    throw new Error("Use a JPG, PNG, or WebP image.");
+  }
+
+  const mimeType = await detectImageType(file);
+  if (!mimeType) {
+    throw new Error("The image could not be read. Export it again as JPG, PNG, or WebP.");
+  }
+  if (file.type && file.type !== mimeType) {
+    throw new Error("The image contents do not match its file type. Export it again.");
+  }
+
+  const { width, height } = await readImageDimensions(file);
+  if (width < MIN_IMAGE_EDGE || height < MIN_IMAGE_EDGE) {
+    throw new Error(
+      `Use an image of at least ${MIN_IMAGE_EDGE} × ${MIN_IMAGE_EDGE} px. ` +
+        `This one is ${width} × ${height} px.`,
+    );
+  }
+  if (width > MAX_IMAGE_EDGE || height > MAX_IMAGE_EDGE || width * height > MAX_IMAGE_PIXELS) {
+    throw new Error(
+      `Use at most ${MAX_IMAGE_EDGE} px on either side and ` +
+        `${MAX_IMAGE_PIXELS / 1_000_000} megapixels in total.`,
+    );
+  }
+
+  const aspectRatio = width / height;
+  if (
+    method === "upload" &&
+    (aspectRatio < MIN_PROMO_ASPECT_RATIO || aspectRatio > MAX_PROMO_ASPECT_RATIO)
+  ) {
+    throw new Error(
+      "Use a standard square, portrait, story, or landscape format (between 1:2 and 2:1).",
+    );
+  }
+  return { width, height, mimeType };
 };
 
 export const PromoStudio = ({
@@ -61,14 +173,19 @@ export const PromoStudio = ({
   // Admin-managed looks win; the built-in one keeps the picker useful until the
   // team adds their own.
   const [references, setReferences] = useState<readonly PromoReference[]>(PROMO_REFERENCES);
+  const referencesRef = useRef<readonly PromoReference[]>(PROMO_REFERENCES);
   const [referenceId, setReferenceId] = useState<string>(
     PROMO_REFERENCES[0]?.id ?? CUSTOM_REFERENCE,
   );
   const [sourceFile, setSourceFile] = useState<File | null>(null);
+  const [sourceDetails, setSourceDetails] = useState<ImageDetails | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [isDraggingSource, setIsDraggingSource] = useState(false);
+  const [isInspectingImage, setIsInspectingImage] = useState(false);
   const [fidelity, setFidelity] = useState<PromoFidelity>("high");
   const [generated, setGenerated] = useState<File[]>([]);
+  const [versions, setVersions] = useState<PromoVersion[]>([]);
+  const [activeVersionIndex, setActiveVersionIndex] = useState(0);
   const [previews, setPreviews] = useState<string[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [generationModel, setGenerationModel] = useState<string | null>(null);
@@ -76,12 +193,17 @@ export const PromoStudio = ({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const imageSelectionId = useRef(0);
 
   const reference: PromoReference | undefined =
     referenceId === CUSTOM_REFERENCE
       ? undefined
       : references.find((item) => item.id === referenceId);
   const isUpload = method === "upload";
+  const historyKey = `${draft._id}:${method}`;
+  const activeVersion = versions[activeVersionIndex];
+  const activeStatus = activeVersion?.statuses[activeIndex] ?? "candidate";
+  const isBusy = isSaving || isGenerating || isInspectingImage;
 
   useEffect(() => {
     if (!open) return;
@@ -89,27 +211,36 @@ export const PromoStudio = ({
     document.body.style.overflow = "hidden";
     window.setTimeout(() => closeRef.current?.focus(), 0);
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !isSaving && !isGenerating) onClose();
+      if (event.key === "Escape" && !isBusy) onClose();
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isGenerating, isSaving, onClose, open]);
+  }, [isBusy, onClose, open]);
 
   useEffect(() => {
     if (!open) return;
     setStep("configure");
     setCopy(draft.campaignName ? `${draft.campaignName} — out now` : "");
     setLook("");
-    setReferenceId(references[0]?.id ?? CUSTOM_REFERENCE);
+    // Reuse the currently loaded admin catalogue when the studio is reopened.
+    // Falling back to the built-in id here could leave no visible style selected
+    // if the refresh request fails after a previous successful load.
+    setReferenceId(referencesRef.current[0]?.id ?? CUSTOM_REFERENCE);
+    imageSelectionId.current += 1;
+    setIsInspectingImage(false);
     setSourceFile(null);
+    setSourceDetails(null);
     setGenerated([]);
+    const storedVersions = promoHistoryByDraft.get(historyKey) ?? [];
+    setVersions(storedVersions);
+    setActiveVersionIndex(Math.max(0, storedVersions.length - 1));
     setActiveIndex(0);
     setGenerationModel(null);
     setError(null);
-  }, [draft.campaignName, method, open]);
+  }, [draft.campaignName, historyKey, method, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -117,6 +248,7 @@ export const PromoStudio = ({
     void listPromoReferences()
       .then((loaded) => {
         if (!active || !loaded.length) return;
+        referencesRef.current = loaded;
         setReferences(loaded);
         setReferenceId((current) =>
           current === CUSTOM_REFERENCE || loaded.some((item) => item.id === current)
@@ -150,39 +282,52 @@ export const PromoStudio = ({
 
   if (!open) return null;
 
-  const selectFile = (file?: File) => {
+  const selectFile = async (file?: File) => {
     if (!file) return;
-    const invalid = validateImage(file);
-    if (invalid) {
-      setError(invalid);
-      return;
-    }
-    setSourceFile(file);
+    const selectionId = ++imageSelectionId.current;
+    setIsInspectingImage(true);
     setError(null);
+    try {
+      const details = await inspectImage(file, method);
+      if (selectionId !== imageSelectionId.current) return;
+      setSourceFile(file);
+      setSourceDetails(details);
+    } catch (cause) {
+      if (selectionId !== imageSelectionId.current) return;
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "The image could not be checked. Try another file.",
+      );
+    } finally {
+      if (selectionId === imageSelectionId.current) setIsInspectingImage(false);
+    }
   };
 
   // The file input is visually hidden, so the zone handles the drop itself. Without
   // preventDefault the browser opens the dropped file and the draft is lost.
   const allowSourceDrag = (event: DragEvent<HTMLLabelElement>) => {
-    if (isSaving || isGenerating) return;
+    if (isBusy) return;
     event.preventDefault();
     event.dataTransfer.dropEffect = "copy";
     setIsDraggingSource(true);
   };
 
   const endSourceDrag = (event: DragEvent<HTMLLabelElement>) => {
-    if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+    const nextTarget = event.relatedTarget;
+    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return;
     setIsDraggingSource(false);
   };
 
   const dropSourceFile = (event: DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     setIsDraggingSource(false);
-    if (isSaving || isGenerating) return;
-    selectFile(event.dataTransfer.files?.[0]);
+    if (isBusy) return;
+    void selectFile(event.dataTransfer.files?.[0]);
   };
 
   const generate = async () => {
+    if (isBusy) return;
     if (method === "photo" && !sourceFile) {
       setError("Add the photo you want to work from.");
       return;
@@ -201,6 +346,23 @@ export const PromoStudio = ({
         fidelity: method === "photo" ? fidelity : undefined,
       });
       if (!result.files.length) throw new Error("No images returned");
+      const version: PromoVersion = {
+        id: createId(),
+        createdAt: new Date().toISOString(),
+        files: result.files,
+        model: result.model,
+        copy: copy.trim(),
+        look,
+        referenceId,
+        fidelity,
+        ...(method === "photo" && sourceFile ? { sourceFile } : {}),
+        ...(method === "photo" && sourceDetails ? { sourceDetails } : {}),
+        statuses: result.files.map(() => "candidate" as const),
+      };
+      const nextVersions = [...versions, version];
+      promoHistoryByDraft.set(historyKey, nextVersions);
+      setVersions(nextVersions);
+      setActiveVersionIndex(nextVersions.length - 1);
       setGenerated(result.files);
       setGenerationModel(result.model);
       setActiveIndex(0);
@@ -217,10 +379,47 @@ export const PromoStudio = ({
     }
   };
 
+  const openVersion = (index: number) => {
+    const version = versions[index];
+    if (!version) return;
+    setActiveVersionIndex(index);
+    setGenerated(version.files);
+    setGenerationModel(version.model);
+    setCopy(version.copy);
+    setLook(version.look);
+    setReferenceId(version.referenceId);
+    setFidelity(version.fidelity);
+    setSourceFile(version.sourceFile ?? null);
+    setSourceDetails(version.sourceDetails ?? null);
+    setActiveIndex(0);
+    setStep("review");
+    setError(null);
+  };
+
+  const setActiveStatus = (status: PromoOptionStatus) => {
+    const nextVersions = versions.map((version, versionIndex) =>
+      versionIndex === activeVersionIndex
+        ? {
+            ...version,
+            statuses: version.statuses.map((current, optionIndex) =>
+              optionIndex === activeIndex ? status : current,
+            ),
+          }
+        : version,
+    );
+    promoHistoryByDraft.set(historyKey, nextVersions);
+    setVersions(nextVersions);
+  };
+
   const approve = async () => {
+    if (isBusy) return;
     const file = isUpload ? sourceFile : generated[activeIndex];
     if (!file) {
       setError(isUpload ? "Choose the finished promo first." : "Create a promo first.");
+      return;
+    }
+    if (!isUpload && activeStatus === "rejected") {
+      setError("Restore this option before using it, or choose another one.");
       return;
     }
 
@@ -229,7 +428,10 @@ export const PromoStudio = ({
     try {
       const assetUrl = await uploadImageApi(file);
       let sourceAssetUrl: string | undefined;
-      if (method === "photo" && sourceFile) sourceAssetUrl = await uploadImageApi(sourceFile);
+      const approvalSource = activeVersion?.sourceFile ?? sourceFile;
+      if (method === "photo" && approvalSource) {
+        sourceAssetUrl = await uploadImageApi(approvalSource);
+      }
 
       await onApproved({
         id: createId(),
@@ -245,6 +447,7 @@ export const PromoStudio = ({
             }),
         createdAt: new Date().toISOString(),
       });
+      if (!isUpload) setActiveStatus("approved");
       onClose();
     } catch {
       setError("The promo could not be saved. Check the connection and try again.");
@@ -277,7 +480,7 @@ export const PromoStudio = ({
           type="button"
           className={styles.close}
           onClick={onClose}
-          disabled={isSaving || isGenerating}
+          disabled={isBusy}
           aria-label="Close"
         >
           ×
@@ -295,6 +498,17 @@ export const PromoStudio = ({
         {step === "configure" && (
           <div className={styles.configureGrid}>
             <div className={styles.formColumn}>
+              {!isUpload && versions.length > 0 && (
+                <button
+                  type="button"
+                  className={styles.historyShortcut}
+                  onClick={() => openVersion(versions.length - 1)}
+                >
+                  <span>Previous versions</span>
+                  <b>{versions.length}</b>
+                </button>
+              )}
+
               {(isUpload || method === "photo") && (
                 <label
                   className={`${styles.dropzone} ${sourcePreview ? styles.dropzoneFilled : ""} ${
@@ -308,20 +522,37 @@ export const PromoStudio = ({
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
-                    onChange={(event) => selectFile(event.target.files?.[0])}
+                    disabled={isBusy}
+                    onChange={(event) => {
+                      const file = event.currentTarget.files?.[0];
+                      event.currentTarget.value = "";
+                      void selectFile(file);
+                    }}
                   />
                   {sourcePreview ? (
-                    <img src={sourcePreview} alt="Selected" />
+                    <>
+                      <img src={sourcePreview} alt="Selected" />
+                      {sourceDetails && (
+                        <small className={styles.imageDetails}>
+                          {sourceDetails.width} × {sourceDetails.height} px
+                        </small>
+                      )}
+                    </>
                   ) : (
                     <span>
                       <b>
-                        {isDraggingSource
+                        {isInspectingImage
+                          ? "Checking image…"
+                          : isDraggingSource
                           ? "Release to add the image"
                           : isUpload
                             ? "Drop your finished promo here"
                             : "Drop the photo to work from"}
                       </b>
-                      <small>JPG, PNG, or WebP · up to 15 MB</small>
+                      <small>
+                        JPG, PNG, or WebP · at least 512 × 512 px · up to 15 MB
+                        {isUpload ? " · formats from 1:2 to 2:1" : ""}
+                      </small>
                     </span>
                   )}
                 </label>
@@ -436,6 +667,7 @@ export const PromoStudio = ({
                       setActiveIndex((activeIndex + previews.length - 1) % previews.length)
                     }
                     aria-label="Previous option"
+                    disabled={isBusy}
                   >
                     ←
                   </button>
@@ -444,6 +676,7 @@ export const PromoStudio = ({
                     className={`${styles.carouselArrow} ${styles.carouselArrowNext}`}
                     onClick={() => setActiveIndex((activeIndex + 1) % previews.length)}
                     aria-label="Next option"
+                    disabled={isBusy}
                   >
                     →
                   </button>
@@ -452,6 +685,42 @@ export const PromoStudio = ({
             </div>
 
             <div className={styles.reviewInfo}>
+              <div className={styles.versionHistory}>
+                <div>
+                  <span>Generation history</span>
+                  <strong>
+                    Version {activeVersionIndex + 1} of {versions.length}
+                  </strong>
+                  <small className={styles[`status_${activeStatus}`]}>
+                    {activeStatus === "candidate"
+                      ? "Candidate"
+                      : activeStatus === "rejected"
+                        ? "Rejected"
+                        : "Approved"}
+                  </small>
+                </div>
+                <div className={styles.versionActions}>
+                  <button
+                    type="button"
+                    onClick={() => openVersion(activeVersionIndex - 1)}
+                    disabled={isBusy || activeVersionIndex === 0}
+                    aria-label="Previous version"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openVersion(activeVersionIndex + 1)}
+                    disabled={
+                      isBusy || activeVersionIndex >= versions.length - 1
+                    }
+                    aria-label="Next version"
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
+
               <div className={styles.filmstrip} aria-label="Promo options">
                 {previews.map((preview, index) => (
                   <button
@@ -461,12 +730,30 @@ export const PromoStudio = ({
                     onClick={() => setActiveIndex(index)}
                     aria-label={`Show option ${index + 1}`}
                     aria-current={index === activeIndex ? "true" : undefined}
+                    disabled={isBusy}
                   >
                     <img src={preview} alt="" />
-                    <small>{index + 1}</small>
+                    <small>
+                      {activeVersion?.statuses[index] === "rejected" ? "Rejected" : index + 1}
+                    </small>
                   </button>
                 ))}
               </div>
+
+              <button
+                type="button"
+                className={styles.rejectOption}
+                onClick={() =>
+                  setActiveStatus(activeStatus === "rejected" ? "candidate" : "rejected")
+                }
+                disabled={isBusy || activeStatus === "approved"}
+              >
+                {activeStatus === "approved"
+                  ? "Approved option"
+                  : activeStatus === "rejected"
+                    ? "Restore this option"
+                    : "Reject this option"}
+              </button>
 
               {/* Wrong word, wrong mood — change the brief and run it again. */}
               <label className={styles.field}>
@@ -482,7 +769,7 @@ export const PromoStudio = ({
                 type="button"
                 className={styles.secondary}
                 onClick={() => void generate()}
-                disabled={isGenerating || isSaving}
+                disabled={isBusy}
               >
                 {isGenerating ? "Creating…" : "Try again"}
               </button>
@@ -496,7 +783,7 @@ export const PromoStudio = ({
           type="button"
           className={styles.secondary}
           onClick={step === "review" ? () => setStep("configure") : onClose}
-          disabled={isSaving || isGenerating}
+          disabled={isBusy}
         >
           Back
         </button>
@@ -506,7 +793,7 @@ export const PromoStudio = ({
               type="button"
               className={styles.primary}
               onClick={() => void generate()}
-              disabled={isGenerating}
+              disabled={isBusy}
             >
               {isGenerating ? "Creating…" : "Create"}
             </button>
@@ -516,7 +803,7 @@ export const PromoStudio = ({
               type="button"
               className={styles.primary}
               onClick={() => void approve()}
-              disabled={isSaving || isGenerating}
+              disabled={isBusy || (!isUpload && activeStatus === "rejected")}
             >
               {isSaving ? "Saving…" : "Use this promo"}
             </button>
@@ -532,7 +819,7 @@ export const PromoStudio = ({
     <div
       className={styles.overlay}
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !isSaving && !isGenerating) onClose();
+        if (event.target === event.currentTarget && !isBusy) onClose();
       }}
     >
       {studio}

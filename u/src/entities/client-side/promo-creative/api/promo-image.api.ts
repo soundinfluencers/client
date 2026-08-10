@@ -63,16 +63,10 @@ export const createPromoImageDirections = async ({
   prompt,
   source,
   fidelity,
-  renderText,
-  headline,
-  subheadline,
 }: {
   prompt: string;
   source?: File;
   fidelity?: "low" | "high";
-  renderText?: boolean;
-  headline?: string;
-  subheadline?: string;
 }) => {
   const form = new FormData();
   form.append("prompt", prompt);
@@ -83,12 +77,6 @@ export const createPromoImageDirections = async ({
     form.append("image", source);
     if (fidelity) form.append("fidelity", fidelity);
   }
-  if (renderText) {
-    form.append("renderText", "true");
-    if (headline) form.append("headline", headline);
-    if (subheadline) form.append("subheadline", subheadline);
-  }
-
   try {
     const response = await $api.post("/agent/promo-images", form, {
       headers: { "Content-Type": "multipart/form-data" },
