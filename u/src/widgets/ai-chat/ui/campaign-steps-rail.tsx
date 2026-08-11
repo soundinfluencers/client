@@ -30,6 +30,7 @@ const STATUS_HINT: Record<CampaignSetupCheckpoint["status"], string> = {
   complete: "done",
   current: "next up",
   pending: "not started yet",
+  optional: "optional — not added",
 };
 
 // Steps are orientation, not a score: no numbering, no counter, no progress bar.
@@ -57,7 +58,8 @@ export const CampaignStepsRail = ({
             shortLabel: checkpoint.shortLabel,
             description: checkpoint.description,
             action: checkpoint.action,
-            status: "pending" as const,
+            optional: checkpoint.optional,
+            status: checkpoint.optional ? ("optional" as const) : ("pending" as const),
           })),
     [query.data],
   );
@@ -112,7 +114,9 @@ export const CampaignStepsRail = ({
 
   // Clicking the campaign action while something is missing is not an error: it takes
   // the client to the first unfinished section and says so, instead of refusing.
-  const firstIncomplete = checkpoints.find((checkpoint) => checkpoint.status !== "complete");
+  const firstIncomplete = checkpoints.find(
+    (checkpoint) => !checkpoint.optional && checkpoint.status !== "complete",
+  );
   const isReady = Boolean(query.data) && !firstIncomplete;
 
   const handleProceed = () => {
@@ -184,6 +188,9 @@ export const CampaignStepsRail = ({
                   </i>
                 )}
                 {checkpoint.shortLabel}
+                {checkpoint.optional && (
+                  <span className={styles.optionalBadge}>Optional</span>
+                )}
                 {changed && <i className={styles.changeMark} aria-hidden="true" />}
               </button>
             </li>

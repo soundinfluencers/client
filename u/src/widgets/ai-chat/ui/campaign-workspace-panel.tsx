@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   getCampaignDraft,
+  removeCampaignDraftPromo,
   saveCampaignDraftPromo,
 } from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
 import type {
@@ -94,6 +95,23 @@ export const CampaignWorkspacePanel = ({
     onNote("Promo attached to the campaign", "promo");
   };
 
+  const removePromo = async () => {
+    setSaveError(null);
+    const flushed = await flushCampaignDraftSaves();
+    if (!flushed) throw new Error("Campaign changes are not saved");
+    const latest = await query.refetch();
+    if (!latest.data) throw new Error("Campaign draft is unavailable");
+    const result = await removeCampaignDraftPromo(
+      draftId,
+      Number(latest.data.revision ?? 0),
+    );
+    queryClient.setQueryData(
+      ["campaign-draft", draftId],
+      { ...latest.data, revision: result.revision, promoCreative: undefined },
+    );
+    onNote("Promo removed from the campaign", "promo");
+  };
+
   // Escape closes the workspace, but never steals the key from a nested dialog
   // (the per-page content form holds unsaved input).
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -151,7 +169,12 @@ export const CampaignWorkspacePanel = ({
         )}
 
         {surface === "promo" && query.data && (
-          <PromoSection draft={query.data} onPick={setPromoMethod} />
+          <PromoSection
+            draft={query.data}
+            onPick={setPromoMethod}
+            onContinueWithoutPromo={onClose}
+            onRemove={removePromo}
+          />
         )}
       </div>
 
@@ -162,9 +185,9 @@ export const CampaignWorkspacePanel = ({
           draft={query.data}
           // Closing returns to the section, where the approved promo is now a card.
           onClose={() => setPromoMethod(null)}
-          onGenerated={(count) =>
+          onGenerated={(count, version) =>
             onNote(
-              `${count} promo ${count === 1 ? "direction" : "directions"} created`,
+              `Promo version ${version} created · ${count} ${count === 1 ? "direction" : "directions"}`,
               "promo",
             )
           }

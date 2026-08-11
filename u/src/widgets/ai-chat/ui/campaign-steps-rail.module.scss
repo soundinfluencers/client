@@ -135,6 +135,27 @@
   background: #fff;
 }
 
+.step_optional {
+  border-color: #e2e6ec;
+  color: #657181;
+  background: #fff;
+
+  .dot {
+    border-style: dashed;
+    background: #f8fafc;
+  }
+}
+
+.optionalBadge {
+  padding: 2px 6px;
+  border-radius: 999px;
+  color: #6d7888;
+  background: #eef1f5;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
 .stepOpen {
   border-color: #356cf6;
   color: #1f366a;

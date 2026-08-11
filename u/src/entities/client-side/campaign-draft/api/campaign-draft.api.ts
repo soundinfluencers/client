@@ -49,5 +49,22 @@ export const saveCampaignDraftPromo = async (
         throw error;
     }
 };
+
+export const removeCampaignDraftPromo = async (
+    draftId: string,
+    revision: number,
+) => {
+    try {
+        const res = await $api.delete(`/campaigns/draft/${draftId}/promo`, {
+            data: { revision },
+        });
+        return res.data.data as { revision: number };
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 409) {
+            throw new CampaignDraftConflictError();
+        }
+        throw error;
+    }
+};
 export const deleteDraft = (draftId: string) =>
     $api.delete(`/campaigns/draft/${draftId}`);

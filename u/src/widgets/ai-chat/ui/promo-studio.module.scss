@@ -87,7 +87,7 @@
 
 .methodGrid {
   display: grid;
-  min-height: 0;
+  min-height: 330px;
   flex: 1 1 auto;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 12px;
@@ -271,15 +271,174 @@
   b { margin-left: 4px; }
 }
 
-/* Fills the promo section and never scrolls: what gives way is the picture inside
-   the card, not the card's title or its button. */
+/* The optional intro and an attached-promo preview can add height, so this surface
+   owns its vertical scrolling instead of pushing the campaign rail away. */
 .methodScreen {
   display: flex;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   min-height: 0;
   flex: 1;
   flex-direction: column;
   gap: 14px;
+  padding: 2px;
+}
+
+.methodIntro {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 14px;
+  border: 1px solid #e5e9ef;
+  border-radius: 14px;
+  background: #f8fafc;
+
+  h3 {
+    margin: 3px 0 2px;
+    color: #202934;
+    font-size: 16px;
+  }
+
+  p {
+    margin: 0;
+    color: #6f7b8b;
+    font-size: 12px;
+  }
+
+  > button {
+    flex: 0 0 auto;
+    padding: 8px 13px;
+    border: 1px solid #d5dce6;
+    border-radius: 999px;
+    color: #465365;
+    background: #fff;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover { border-color: #202934; color: #202934; }
+  }
+}
+
+.methodChoices {
+  display: flex;
+  min-height: 0;
+  flex: 1 0 auto;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.methodHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 3px;
+  color: #344051;
+  font-size: 12px;
+
+  span { color: #7a8594; font-size: 11px; }
+}
+
+.selectedPromo {
+  display: grid;
+  overflow: hidden;
+  min-height: 220px;
+  flex: 0 0 auto;
+  grid-template-columns: minmax(180px, 34%) 1fr;
+  border: 1px solid #a9dabe;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f1fbf5, #fff 62%);
+  box-shadow: 0 0 0 3px rgba(53, 160, 106, .09);
+}
+
+.selectedPreview {
+  display: grid;
+  min-height: 220px;
+  padding: 12px;
+  background: #e7f3eb;
+  place-items: center;
+
+  img {
+    width: 100%;
+    height: 196px;
+    object-fit: contain;
+  }
+}
+
+.selectedInfo {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: 22px 24px;
+
+  h3 { margin: 5px 0 6px; color: #202934; font-size: 20px; }
+  > p { margin: 0; color: #6f7b8b; font-size: 12px; line-height: 1.5; }
+  .approvedActions { margin-top: 17px; padding: 0; }
+}
+
+.removePromo {
+  border-color: #efcaca !important;
+  color: #9d3c3c !important;
+}
+
+.removeConfirmation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 13px;
+  padding: 9px 10px;
+  border: 1px solid #efcaca;
+  border-radius: 10px;
+  color: #8d3838;
+  background: #fff7f7;
+  font-size: 11px;
+
+  span { margin-right: auto; }
+
+  button {
+    padding: 5px 9px;
+    border: 1px solid #ddc2c2;
+    border-radius: 999px;
+    color: inherit;
+    background: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+}
+
+.inlineError {
+  margin-top: 8px !important;
+  color: #9d3c3c !important;
+}
+
+.promoDone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 13px;
+  border: 1px solid #e3e8ef;
+  border-radius: 12px;
+  color: #617082;
+  background: #fbfcfe;
+  font-size: 11px;
+
+  button {
+    padding: 7px 13px;
+    border: 1px solid #d5dce6;
+    border-radius: 999px;
+    color: #344051;
+    background: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
 }
 
 .configureGrid {
@@ -590,6 +749,8 @@
   .methodGrid { grid-template-columns: 1fr; }
   .methodVisual { min-height: 150px; }
   .configureGrid, .reviewGrid { grid-template-columns: 1fr; }
+  .selectedPromo { grid-template-columns: 1fr; }
+  .selectedPreview { min-height: 180px; }
   .carousel { max-width: 500px; margin: 0 auto; }
 }
 
@@ -601,6 +762,8 @@
   .footer > div, .primary, .secondary { width: 100%; }
   .carousel { padding: 0 34px; }
   .carouselArrow { width: 36px; height: 36px; }
+  .methodIntro, .methodHeading, .promoDone { align-items: stretch; flex-direction: column; }
+  .removeConfirmation { align-items: stretch; flex-direction: column; }
 }
 
 @media (max-height: 760px) and (min-width: 851px) {

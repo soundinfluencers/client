@@ -3,7 +3,11 @@ import { isDraftReadyForCheckout } from "@/entities/client-side/campaign-draft/m
 
 export type CampaignSetupCheckpointId = "brief" | "influencers" | "promo" | "publishing";
 
-export type CampaignSetupCheckpointStatus = "complete" | "current" | "pending";
+export type CampaignSetupCheckpointStatus =
+  | "complete"
+  | "current"
+  | "pending"
+  | "optional";
 
 // A section either opens a working surface next to the conversation, or it has no
 // editor of its own and hands the job back to the agent as a chat prompt.
@@ -23,6 +27,7 @@ export type CampaignSetupCheckpoint = {
   shortLabel: string;
   description: string;
   action: CampaignSetupAction;
+  optional: boolean;
   status: CampaignSetupCheckpointStatus;
 };
 
@@ -44,6 +49,7 @@ export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
     shortLabel: "Brief",
     description: "Name and direction are clear",
     action: { kind: "chat", label: "Talk it through" },
+    optional: false,
     isComplete: (draft) => Boolean(draft.campaignName?.trim()),
   },
   {
@@ -52,6 +58,7 @@ export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
     shortLabel: "Pages",
     description: "Pages are chosen and every one of them has a publishing date",
     action: { kind: "surface", label: "Review pages", surface: "pages" },
+    optional: false,
     // A page without a date is not a finished choice, so both live in one section.
     isComplete: (draft) => {
       const accounts = selectedAccounts(draft);
@@ -62,8 +69,9 @@ export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
     id: "promo",
     label: "Promo creative",
     shortLabel: "Promo",
-    description: "Upload, transform a photo, or use a template style",
-    action: { kind: "surface", label: "Create promo", surface: "promo" },
+    description: "Optional — upload a finished promo or create one with our help",
+    action: { kind: "surface", label: "Explore promo options", surface: "promo" },
+    optional: true,
     isComplete: (draft) => Boolean(draft.promoCreative?.assetUrl),
   },
   {
@@ -73,6 +81,7 @@ export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
     // Content is edited per page, inside the pages table.
     description: "Content link and description for every page",
     action: { kind: "surface", label: "Add content", surface: "content" },
+    optional: false,
     // Exactly the rule checkout enforces. A looser one here would let the rail promise
     // "ready" and the payment step refuse it a click later.
     isComplete: (draft) => isDraftReadyForCheckout(draft),
@@ -83,7 +92,9 @@ export const getCampaignSetupProgress = (draft: CampaignDraftDto) => {
   const completion = CAMPAIGN_SETUP_CHECKPOINTS.map((checkpoint) =>
     checkpoint.isComplete(draft),
   );
-  const currentIndex = completion.findIndex((complete) => !complete);
+  const currentIndex = completion.findIndex(
+    (complete, index) => !complete && !CAMPAIGN_SETUP_CHECKPOINTS[index].optional,
+  );
   const checkpoints: CampaignSetupCheckpoint[] = CAMPAIGN_SETUP_CHECKPOINTS.map(
     (checkpoint, index) => ({
       id: checkpoint.id,
@@ -91,8 +102,11 @@ export const getCampaignSetupProgress = (draft: CampaignDraftDto) => {
       shortLabel: checkpoint.shortLabel,
       description: checkpoint.description,
       action: checkpoint.action,
+      optional: checkpoint.optional,
       status: completion[index]
         ? "complete"
+        : checkpoint.optional
+          ? "optional"
         : index === currentIndex
           ? "current"
           : "pending",
@@ -101,8 +115,12 @@ export const getCampaignSetupProgress = (draft: CampaignDraftDto) => {
 
   return {
     checkpoints,
-    completed: completion.filter(Boolean).length,
-    total: completion.length,
-    isComplete: completion.every(Boolean),
+    completed: completion.filter(
+      (complete, index) => complete && !CAMPAIGN_SETUP_CHECKPOINTS[index].optional,
+    ).length,
+    total: CAMPAIGN_SETUP_CHECKPOINTS.filter((checkpoint) => !checkpoint.optional).length,
+    isComplete: completion.every(
+      (complete, index) => complete || CAMPAIGN_SETUP_CHECKPOINTS[index].optional,
+    ),
   };
 };
