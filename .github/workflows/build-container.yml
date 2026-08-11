@@ -13,6 +13,7 @@ on:
         type: choice
         options:
           - main
+          - ai-agent
       allow_non_main_source:
         description: "Allow a commit from a non-main repository branch"
         required: true
@@ -44,10 +45,13 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          if [[ "$RELEASE_CHANNEL" != "main" ]]; then
-            printf 'ERROR: client publishing currently supports only the main release channel\n' >&2
-            exit 1
-          fi
+          case "$RELEASE_CHANNEL" in
+            main|ai-agent) ;;
+            *)
+              printf 'ERROR: release_channel must be main or ai-agent\n' >&2
+              exit 1
+              ;;
+          esac
 
           if [[ "$SOURCE_REF" =~ ^[0-9a-fA-F]{7,39}$ ]]; then
             printf 'ERROR: abbreviated commit SHA is not allowed; use the full commit SHA\n' >&2
@@ -74,42 +78,66 @@ jobs:
           source_branches=""
           publish_channel_alias="true"
 
-          if git merge-base --is-ancestor "$built_sha" origin/main; then
-            source_scope="main"
-            source_branches="main"
-          else
-            if [[ "$ALLOW_NON_MAIN_SOURCE" != "true" ]]; then
-              printf 'ERROR: commit %s is not in origin/main. Set allow_non_main_source=true for an explicit manual feature build.\n' \
-                "$built_sha" >&2
-              exit 1
-            fi
+          case "$RELEASE_CHANNEL" in
+            main)
+              if git merge-base --is-ancestor "$built_sha" origin/main; then
+                source_scope="main"
+                source_branches="main"
+              else
+                if [[ "$ALLOW_NON_MAIN_SOURCE" != "true" ]]; then
+                  printf 'ERROR: commit %s is not in origin/main. Set allow_non_main_source=true for an explicit manual feature build.\n' \
+                    "$built_sha" >&2
+                  exit 1
+                fi
 
-            mapfile -t containing_branches < <(
-              git for-each-ref \
-                --contains "$built_sha" \
-                --format='%(if)%(symref)%(then)%(else)%(refname:strip=3)%(end)' \
-                refs/remotes/origin |
-                awk 'NF'
-            )
+                mapfile -t containing_branches < <(
+                  git for-each-ref \
+                    --contains "$built_sha" \
+                    --format='%(if)%(symref)%(then)%(else)%(refname:strip=3)%(end)' \
+                    refs/remotes/origin |
+                    awk 'NF'
+                )
 
-            if ((${#containing_branches[@]} == 0)); then
-              printf 'ERROR: commit %s is not reachable from any origin branch\n' \
-                "$built_sha" >&2
-              exit 1
-            fi
+                if ((${#containing_branches[@]} == 0)); then
+                  printf 'ERROR: commit %s is not reachable from any origin branch\n' \
+                    "$built_sha" >&2
+                  exit 1
+                fi
 
-            source_scope="feature"
-            source_branches="$(IFS=,; printf '%s' "${containing_branches[*]}")"
-            publish_channel_alias="false"
-          fi
+                source_scope="feature"
+                source_branches="$(IFS=,; printf '%s' "${containing_branches[*]}")"
+                publish_channel_alias="false"
+              fi
+              ;;
+            ai-agent)
+              if [[ "$ALLOW_NON_MAIN_SOURCE" != "true" ]]; then
+                printf 'ERROR: ai-agent builds require allow_non_main_source=true\n' >&2
+                exit 1
+              fi
+              if git merge-base --is-ancestor "$built_sha" origin/main; then
+                printf 'ERROR: a commit from origin/main cannot be published as ai-agent\n' >&2
+                exit 1
+              fi
+              if ! git merge-base --is-ancestor "$built_sha" origin/feat/ai-agent; then
+                printf 'ERROR: commit %s is not in the history of origin/feat/ai-agent\n' \
+                  "$built_sha" >&2
+                exit 1
+              fi
+              source_scope="feature"
+              source_branches="feat/ai-agent"
+              publish_channel_alias="false"
+              ;;
+          esac
+
+          immutable_tag="${RELEASE_CHANNEL}-${short_sha}"
 
           {
             printf 'built_sha=%s\n' "$built_sha"
             printf 'short_sha=%s\n' "$short_sha"
             printf 'created_at=%s\n' "$created_at"
             printf 'registry_image=%s\n' "$registry_image"
-            printf 'immutable_tag=main-%s\n' "$short_sha"
-            printf 'release_channel=main\n'
+            printf 'immutable_tag=%s\n' "$immutable_tag"
+            printf 'release_channel=%s\n' "$RELEASE_CHANNEL"
             printf 'source_scope=%s\n' "$source_scope"
             printf 'source_branches=%s\n' "$source_branches"
             printf 'publish_channel_alias=%s\n' "$publish_channel_alias"
