@@ -1,15 +1,19 @@
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+import {
+    getDefaultGenreByPlatform,
+    isGenreAllowedForPlatform,
+} from "@/features/client-side/campaign-creator-page/select-genre/model/use-genre-param.ts";
 
 export const PLATFORMS = [
     { key: "instagram", id: "instagram", label: "Instagram", icon: "instagram" },
-    { key: "tiktok-creators", id: "tiktok", label: "TikTok Creators", icon: "tiktok" },
-    { key: "tiktok-communities", id: "tiktok", label: "TikTok Communities", icon: "tiktok" },
-    // { key: "spotify", id: "spotify", label: "Spotify", icon: "spotify" },
-    // { key: "facebook", id: "facebook", label: "Facebook", icon: "facebook" },
-    // { key: "soundcloud", id: "soundcloud", label: "SoundCloud", icon: "soundcloud" },
-    // { key: "youtube", id: "youtube", label: "YouTube", icon: "youtube" },
-    // { key: "press", id: "press", label: "Press", icon: "press" },
+    { key: "tiktok_creators", id: "tiktok_creators", label: "TikTok Creators", icon: "tiktok" },
+    { key: "tiktok_communities", id: "tiktok_communities", label: "TikTok Communities", icon: "tiktok" },
+    { key: "spotify", id: "spotify", label: "Spotify", icon: "spotify" },
+    { key: "facebook", id: "facebook", label: "Facebook", icon: "facebook" },
+    { key: "soundcloud", id: "soundcloud", label: "SoundCloud", icon: "soundcloud" },
+    { key: "youtube", id: "youtube", label: "YouTube", icon: "youtube" },
+    { key: "press", id: "press", label: "Press", icon: "press" },
 ] as const;
 
 export type PlatformKey = (typeof PLATFORMS)[number]["key"];
@@ -37,8 +41,27 @@ export const usePlatformParam = () => {
 
     const setPlatform = (nextPlatformKey: PlatformKey) => {
         const next = new URLSearchParams(searchParams);
+
+        const currentGenre = next.get("genre");
+
         next.set("platform", nextPlatformKey);
-        setSearchParams(next, { replace: true });
+
+        if (
+          !currentGenre ||
+          !isGenreAllowedForPlatform(
+            currentGenre,
+            nextPlatformKey,
+          )
+        ) {
+            next.set(
+              "genre",
+              getDefaultGenreByPlatform(nextPlatformKey),
+            );
+        }
+
+        setSearchParams(next, {
+            replace: true,
+        });
     };
 
     return {

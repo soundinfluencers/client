@@ -7,7 +7,7 @@ import {
 
 export const useCampaignCreatorPage = (loadOffers = true) => {
     const { platformKey, platform, setPlatform } = usePlatformParam();
-    const { genre, setGenre } = useGenreParam();
+    const { genre, setGenre } = useGenreParam(platformKey);
 
     const query = usePublishedOffersQuery(platform, genre, loadOffers);
 

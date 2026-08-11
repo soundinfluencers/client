@@ -13,6 +13,39 @@ The React Compiler is enabled on this template. See [this documentation](https:/
 
 Note: This will impact Vite dev & build performances.
 
+## Docker image
+
+The production SPA is published as `ghcr.io/soundinfluencers/client` by the
+manual **Build and publish container** GitHub Actions workflow. Run the workflow
+with a `source_ref` from the `main` branch. The only enabled release channel is
+`main`, which publishes `main-<7-character-commit-sha>`.
+
+The immutable SHA tag is the deployment reference. Mutable branch aliases may
+also be published, but `latest` is not used.
+
+The image listens on port `8080` and exposes `GET /health`. It serves the Vite
+SPA through unprivileged nginx with history fallback. The public backend URL is
+required at container startup through `PUBLIC_API_URL`; it is not a Docker build
+argument. Container publication is currently enabled only for `main`.
+
+Build and verify the image locally from the repository root:
+
+```bash
+docker build -t soundinfluencers-client:test .
+
+docker run --rm -d \
+  --name soundinfluencers-client-test \
+  -p 127.0.0.1:18080:8080 \
+  -e PUBLIC_API_URL=https://dev-api.soundinfluencers.com \
+  soundinfluencers-client:test
+
+curl --fail http://127.0.0.1:18080/health
+curl --fail http://127.0.0.1:18080/deployment-smoke-route
+curl --fail http://127.0.0.1:18080/runtime-config.js
+
+docker stop soundinfluencers-client-test
+```
+
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:

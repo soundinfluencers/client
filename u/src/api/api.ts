@@ -2,15 +2,16 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { handleApiError } from "./error.api.ts";
 import { tokenStorage } from "../contexts/AuthContext.tsx";
 import { refreshAccessToken } from "@/api/refresh.manager.ts";
+import { API_URL } from "@/shared/config/runtime-config.ts";
 
 const $api = axios.create({
-  baseURL: import.meta.env.VITE_SERVER,
+  baseURL: API_URL,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
 
 export const $auth = axios.create({
-  baseURL: import.meta.env.VITE_SERVER,
+  baseURL: API_URL,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });

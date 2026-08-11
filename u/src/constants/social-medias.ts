@@ -7,7 +7,7 @@ import soundcloudIcon from "@/assets/social-medias/soundcloud.svg";
 import pressIcon from "@/assets/social-medias/press.svg";
 import multipromoIcon from "@/assets/social-medias/multipromo.svg";
 
-import instagramIconPost from "@/assets/social-medias/instagram1.svg";
+import instagramIconPost from "@/assets/social-medias/Instagram1.svg";
 import tiktokIconPost from "@/assets/social-medias/tiktok1.svg";
 import facebookIconPost from "@/assets/social-medias/facebook.1.svg";
 import youtubeIconPost from "@/assets/social-medias/youtube1.svg";

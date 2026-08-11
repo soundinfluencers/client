@@ -33,6 +33,12 @@ export const useCampaignPageView = (data: any) => {
             return;
         }
 
+        if (data?.status === "distributing") {
+            setFlag(false);
+        } else {
+            setFlag(true);
+        }
+
         setView((prev) => {
             if (prev === 0 || prev === 1) return prev;
             return 1;
