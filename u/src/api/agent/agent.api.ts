@@ -35,7 +35,7 @@ export interface AgentLink {
   // What the tool did, stamped server-side when it ran. Rendered as a history
   // receipt in the transcript, so it must never be recomputed from live data.
   summary?: string;
-  section?: "pages" | "content";
+  section?: "brief" | "strategy" | "pages" | "content" | "promo";
 }
 
 export interface AgentChatResponse {

@@ -145,6 +145,10 @@
     animation: aiChatMsgIn 220ms ease-out;
 }
 
+.messageGroup:not(.assistantOnly) .agentRow {
+    margin-top: 12px;
+}
+
 @keyframes aiChatMsgIn {
     from {
         opacity: 0;
@@ -183,10 +187,27 @@
     }
 }
 
+.suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    > .exampleChip {
+        align-self: center;
+    }
+}
+
+.empty .startError {
+    color: #9f2d2d;
+    font-size: 12.5px;
+    margin: -2px 0 2px;
+}
+
 .examples {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    column-gap: 10px;
+    row-gap: 12px;
     justify-content: center;
 }
 
@@ -308,6 +329,35 @@
     gap: 8px;
     padding-left: 4px;
     width: 100%;
+}
+
+/* The guided welcome explains both paths in the message itself. Opening the form is
+   deliberately a quiet text action below it, not the only thing on the screen. */
+.inlineBriefLink {
+    appearance: none;
+    background: none;
+    border: 0;
+    color: vars.$blue;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    padding: 3px 0;
+    text-decoration: none;
+
+    strong {
+        font-weight: 650;
+    }
+
+    &:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+    &:focus-visible {
+        border-radius: 4px;
+        outline: 2px solid vars.$blue;
+        outline-offset: 2px;
+    }
 }
 
 /* Receipt for work done in the workspace rather than by the agent. Quieter than a

@@ -23,6 +23,21 @@ export const campaignSectionFingerprints = (
   );
 
   return {
+    brief: JSON.stringify({
+      campaignName: draft.campaignName ?? "",
+      budget: draft.brief?.budget ?? null,
+      budgetCurrency: draft.brief?.budgetCurrency ?? "",
+      contentAvailability: draft.brief?.contentAvailability ?? "",
+      platforms: draft.brief?.platforms ?? [],
+      countries: draft.brief?.countries ?? [],
+      dateRequest: draft.brief?.dateRequest ?? "",
+      genre: draft.brief?.genre ?? "",
+      campaignGoal: draft.brief?.campaignGoal ?? "",
+      contentStrategy:
+        draft.brief?.contentStrategy ?? draft.strategy?.contentStrategy ?? "",
+      trackName: draft.brief?.trackName ?? "",
+      additionalContext: draft.brief?.additionalContext ?? "",
+    }),
     // Dates are part of the pages section, so a rescheduled page marks it as changed.
     pages: accounts
       .map(

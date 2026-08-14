@@ -1,7 +1,11 @@
 import type { CampaignDraftDto } from "@/entities/client-side/campaign-draft/api/campaign-draft.dto.ts";
 import { isDraftReadyForCheckout } from "@/entities/client-side/campaign-draft/model/ai-campaign-draft.model.ts";
 
-export type CampaignSetupCheckpointId = "brief" | "influencers" | "promo" | "publishing";
+export type CampaignSetupCheckpointId =
+  | "brief"
+  | "influencers"
+  | "publishing"
+  | "promo";
 
 export type CampaignSetupCheckpointStatus =
   | "complete"
@@ -13,7 +17,7 @@ export type CampaignSetupCheckpointStatus =
 // editor of its own and hands the job back to the agent as a chat prompt.
 // Publishing dates live in the pages table: they belong to the page row, not to a
 // section of their own.
-export type CampaignSetupSurface = "pages" | "content" | "promo";
+export type CampaignSetupSurface = "brief" | "pages" | "content" | "promo";
 
 // 'chat' sections have no editor of their own: they are settled by talking to the
 // assistant. The client writes their own words — nothing is typed into the box for them.
@@ -40,6 +44,21 @@ const selectedAccounts = (draft: CampaignDraftDto) =>
     (account) => account.isAvailable !== false && account.isSelected !== false,
   );
 
+const briefIsComplete = (draft: CampaignDraftDto) => {
+  const brief = draft.brief;
+  return Boolean(
+    brief &&
+    brief.campaignGoal?.trim() &&
+    Number(brief.budget) > 0 &&
+    brief.contentAvailability &&
+    brief.contentAvailability !== "unknown" &&
+    brief.dateRequest?.trim() &&
+    brief.genre?.trim() &&
+    brief.platforms?.length &&
+    brief.countries?.length,
+  );
+};
+
 // The sequence and completion rules live in one registry. New campaign steps can
 // be inserted here without changing the rail, the workspace, or the progress calculation.
 export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
@@ -47,10 +66,10 @@ export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
     id: "brief",
     label: "Campaign brief",
     shortLabel: "Brief",
-    description: "Name and direction are clear",
-    action: { kind: "chat", label: "Talk it through" },
+    description: "Goal, budget, content status, preferences, date and genre",
+    action: { kind: "surface", label: "Complete brief", surface: "brief" },
     optional: false,
-    isComplete: (draft) => Boolean(draft.campaignName?.trim()),
+    isComplete: briefIsComplete,
   },
   {
     id: "influencers",
@@ -66,15 +85,6 @@ export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
     },
   },
   {
-    id: "promo",
-    label: "Promo creative",
-    shortLabel: "Promo",
-    description: "Optional — upload a finished promo or create one with our help",
-    action: { kind: "surface", label: "Explore promo options", surface: "promo" },
-    optional: true,
-    isComplete: (draft) => Boolean(draft.promoCreative?.assetUrl),
-  },
-  {
     id: "publishing",
     label: "Publishing details",
     shortLabel: "Content",
@@ -85,6 +95,15 @@ export const CAMPAIGN_SETUP_CHECKPOINTS: readonly CheckpointDefinition[] = [
     // Exactly the rule checkout enforces. A looser one here would let the rail promise
     // "ready" and the payment step refuse it a click later.
     isComplete: (draft) => isDraftReadyForCheckout(draft),
+  },
+  {
+    id: "promo",
+    label: "Promo creative",
+    shortLabel: "Promo",
+    description: "Optional — upload a finished promo or create one with our help",
+    action: { kind: "surface", label: "Explore promo options", surface: "promo" },
+    optional: true,
+    isComplete: (draft) => Boolean(draft.promoCreative?.assetUrl),
   },
 ] as const;
 

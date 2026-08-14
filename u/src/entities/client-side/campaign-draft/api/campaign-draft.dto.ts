@@ -34,12 +34,44 @@ export type PromoCreativeDto = {
     createdAt: string;
 };
 
+export type CampaignContentAvailability =
+    | "unknown"
+    | "available"
+    | "needs_edits"
+    | "needs_creation";
+
+export type CampaignBriefDto = {
+    budget?: number;
+    budgetCurrency?: "EUR" | "GBP" | "USD";
+    campaignGoal?: string;
+    contentAvailability?: CampaignContentAvailability;
+    platforms?: string[];
+    countries?: string[];
+    dateRequest?: string;
+    genre?: string;
+    contentStrategy?: string;
+    trackName?: string;
+    additionalContext?: string;
+};
+
+// Read-only compatibility for drafts created before content strategy moved into Brief.
+export type CampaignStrategyDto = {
+    summary?: string;
+    contentStrategy?: string;
+    editsNeeded?: string[];
+    recommendedPlatforms?: string[];
+    recommendedCountries?: string[];
+    approved?: boolean;
+};
+
 export type CampaignDraftDto = {
     _id: string;
     revision?: number;
     step: "addAccounts" | "addContent" | "strategyTable";
     socialMedia: string;
     campaignName: string;
+    brief?: CampaignBriefDto;
+    strategy?: CampaignStrategyDto;
     campaignContent?: Array<{
         _id: string;
         socialMedia: string;

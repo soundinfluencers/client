@@ -15,6 +15,7 @@ import { flushCampaignDraftSaves } from "../model/campaign-draft-save-coordinato
 import { AiCampaignDraftCard } from "./ai-campaign-draft-card.tsx";
 import { PromoSection } from "./promo-section.tsx";
 import { PromoStudio } from "./promo-studio.tsx";
+import { CampaignPlanSection } from "./campaign-plan-section.tsx";
 
 import styles from "./campaign-workspace-panel.module.scss";
 
@@ -30,6 +31,7 @@ interface Props {
 }
 
 const SURFACE_TITLES: Record<CampaignSetupSurface, string> = {
+  brief: "Campaign brief",
   pages: "Pages and dates",
   content: "Publishing content",
   promo: "Promo creative",
@@ -53,12 +55,12 @@ export const CampaignWorkspacePanel = ({
   // Which creation route the client picked; the studio opens as a modal on top.
   const [promoMethod, setPromoMethod] = useState<PromoCreativeSource | null>(null);
   const containerRef = useRef<HTMLElement>(null);
-  // Only the promo editor needs the draft up here; the pages table loads its own.
+  // Brief and promo editors need the draft here; the pages table loads its own.
   const query = useQuery({
     queryKey: ["campaign-draft", draftId],
     queryFn: () => getCampaignDraft(draftId),
     retry: false,
-    enabled: surface === "promo",
+    enabled: surface === "promo" || surface === "brief",
   });
 
   useEffect(() => {
@@ -144,7 +146,7 @@ export const CampaignWorkspacePanel = ({
       )}
 
       <div className={`${styles.body} ${surface === "promo" ? styles.bodyFitted : ""}`}>
-        {surface !== "promo" && (
+        {(surface === "pages" || surface === "content") && (
           <AiCampaignDraftCard
             key={surface}
             flat
@@ -155,11 +157,30 @@ export const CampaignWorkspacePanel = ({
           />
         )}
 
+        {surface === "brief" && query.isPending && (
+          <div className={styles.state}>Loading campaign plan…</div>
+        )}
+
+        {surface === "brief" && query.isError && !query.data && (
+          <div className={`${styles.state} ${styles.errorState}`}>
+            <span>Campaign plan is unavailable.</span>
+            <button type="button" onClick={() => void query.refetch()}>Retry</button>
+          </div>
+        )}
+
+        {surface === "brief" && query.data && (
+          <CampaignPlanSection
+            draft={query.data}
+            onSaved={onNote}
+            onGoToChat={onGoToChat}
+          />
+        )}
+
         {surface === "promo" && query.isPending && (
           <div className={styles.state}>Loading campaign draft…</div>
         )}
 
-        {surface === "promo" && query.isError && (
+        {surface === "promo" && query.isError && !query.data && (
           <div className={`${styles.state} ${styles.errorState}`}>
             <span>Campaign draft is unavailable.</span>
             <button type="button" onClick={() => void query.refetch()}>
