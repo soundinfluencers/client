@@ -11,6 +11,7 @@ export type DraftAddedAccountDto = {
     selectedCampaignContentItem?: {
         campaignContentItemId: string;
         descriptionId: string;
+        additionalBriefId?: string;
     };
 };
 
@@ -31,7 +32,10 @@ export type CampaignDraftDto = {
         profileType?: "creator" | "community";
         taggedUser: string;
         taggedLink: string;
-        additionalBrief: string;
+        additionalBrief: string | Array<{
+            _id: string;
+            additionalBrief: string;
+        }>;
         accountId?: string;
         mediaCache?: any;
 

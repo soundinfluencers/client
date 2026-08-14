@@ -90,6 +90,7 @@ export const useFetchCampaign = create<any>((set, get) => ({
                 ? {
                   campaignContentItemId: a.selectedContent.campaignContentItemId,
                   descriptionId: a.selectedContent.descriptionId,
+                  additionalBriefId: a.selectedContent.additionalBriefId,
                 }
                 : undefined,
             dateRequest: a.dateRequest,
