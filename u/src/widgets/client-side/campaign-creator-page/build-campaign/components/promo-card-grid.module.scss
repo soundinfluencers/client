@@ -19,6 +19,12 @@
   border: 1px solid rgba(185, 208, 255, 1);
 }
 
+.openWithBundlePreviews {
+  height: auto;
+  max-height: none;
+  padding-bottom: 0;
+}
+
 .active {
   background-color: rgba(235, 245, 254, 1);
   border: 1px solid rgba(185, 208, 255, 1);
@@ -41,11 +47,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
 .cost {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 5px;
 
   img {
@@ -63,9 +71,29 @@
   }
 }
 
+.bundleBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 19px;
+  padding: 4px 8px;
+  overflow: hidden;
+  border-radius: 16px;
+  background-color: #f1f4fa;
+  color: #030922;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .social {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 5px;
 
   p {

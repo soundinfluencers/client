@@ -1,38 +1,65 @@
 import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 
 import {
     useCampaignBuilderStore,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 
 import {
-    type BuildCampaignOffer,
     calcBuilderTotal,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total";
+import {
+    isCampaignSelectionPricingAvailable,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-selection";
 
 import {
     useBuildCampaignParams,
 } from "@/features/client-side/campaign-creator-page/build-campaign-filters/model/use-build-campaign-params";
+import { useProposalAccountsStore } from "@/client-side/store";
+import {
+    getCampaignCurrencySymbol,
+    isCampaignDisplayCurrency,
+} from "@/shared/functions/formatCurrency";
+import type {
+    CampaignBuilderMode,
+    ProposalOptionCreateContext,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation";
+import {
+    buildProposalOptionCreateUrl,
+    PROPOSAL_OPTION_CREATE_MODE,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation";
 
 type Params = {
-    mode?: "create" | "add-influencer";
+    mode?: CampaignBuilderMode;
     optionIndex?: number | null;
+    proposalOptionCreateContext?: ProposalOptionCreateContext | null;
 };
 
 export const useCampaignProceedSummary = ({
-                                              mode = "create",
-                                              optionIndex = null,
-                                          }: Params) => {
+                                               mode = "create",
+                                               optionIndex = null,
+                                               proposalOptionCreateContext = null,
+                                           }: Params) => {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
 
-    const { selectedCurrency } = useBuildCampaignParams();
+    const {
+        selectedCurrency,
+        selectedCurrencyCode,
+    } = useBuildCampaignParams();
 
     const selectedOfferId = useCampaignBuilderStore((s) => s.selectedOfferId);
+    const selectedOfferPrice = useCampaignBuilderStore(
+        (s) => s.selectedOfferPrice,
+    );
     const selectedPromoCardIds = useCampaignBuilderStore(
         (s) => s.selectedPromoCardIds,
     );
     const selectedAccounts = useCampaignBuilderStore((s) => s.selectedAccounts);
+    const selectedOfferAccountIds = useCampaignBuilderStore(
+        (s) => s.selectedOfferAccountIds,
+    );
+    const selectedBundles = useCampaignBuilderStore(
+        (s) => s.selectedBundles,
+    );
 
     const setTotalPrice = useCampaignBuilderStore(
         (s) => s.actions.setTotalPrice,
@@ -43,24 +70,54 @@ export const useCampaignProceedSummary = ({
     );
 
     const isAddInfluencerMode = mode === "add-influencer" && optionIndex !== null;
+    const isProposalOptionCreateMode = mode === PROPOSAL_OPTION_CREATE_MODE;
 
-    const offersQueries = queryClient.getQueriesData({
-        queryKey: ["publishedOffers"],
-    });
+    const proposalSnapshot = useProposalAccountsStore((state) =>
+        isAddInfluencerMode
+            ? state.optionSnapshotsByIndex[optionIndex]
+            : undefined,
+    );
 
-    const cachedOffers = offersQueries.flatMap(([, data]) =>
-        Array.isArray(data) ? data : [],
-    ) as BuildCampaignOffer[];
+    const builderTotal = isAddInfluencerMode
+        ? 0
+        : calcBuilderTotal({
+            selectedOfferId,
+            selectedOfferPrice,
+            selectedAccounts,
+            selectedBundles,
+            selectedOfferAccountIds,
+            currency: selectedCurrencyCode,
+        });
 
-    const totalPrice = calcBuilderTotal({
-        selectedOfferId: isAddInfluencerMode ? null : selectedOfferId,
-        offers: isAddInfluencerMode ? [] : cachedOffers,
-        selectedAccounts,
-    });
+    const totalPrice = isAddInfluencerMode
+        ? Number(proposalSnapshot?.price ?? 0)
+        : builderTotal;
+    const displayCurrencySymbol =
+        isAddInfluencerMode &&
+        isCampaignDisplayCurrency(proposalSnapshot?.displayCurrency)
+            ? getCampaignCurrencySymbol(proposalSnapshot.displayCurrency)
+            : selectedCurrency?.key ?? "EUR";
 
-    const canProceed = isAddInfluencerMode
-        ? selectedPromoCardIds.length >= 1
-        : Boolean(selectedOfferId || selectedPromoCardIds.length >= 1);
+    const hasSelection = Boolean(
+            selectedOfferId ||
+            selectedPromoCardIds.length >= 1 ||
+            selectedBundles.length >= 1,
+        );
+    const hasAvailablePricing =
+        isAddInfluencerMode ||
+        isCampaignSelectionPricingAvailable({
+            selectedOfferId,
+            selectedOfferPrice,
+            selectedAccounts,
+            selectedBundles,
+            selectedOfferAccountIds,
+            currency: selectedCurrencyCode,
+        });
+    const canProceed =
+        hasSelection &&
+        hasAvailablePricing &&
+        (!isAddInfluencerMode || Boolean(proposalSnapshot)) &&
+        (!isProposalOptionCreateMode || Boolean(proposalOptionCreateContext));
 
     const handleProceed = () => {
         if (!canProceed) return;
@@ -68,11 +125,23 @@ export const useCampaignProceedSummary = ({
         const currencySymbol = selectedCurrency?.key ?? "€";
 
         setTotalPrice(totalPrice);
-        setSelectedCurrency(currencySymbol);
+        setSelectedCurrency(
+            isAddInfluencerMode ? displayCurrencySymbol : currencySymbol,
+        );
 
         if (isAddInfluencerMode) {
             navigate(
                 `/client/create-campaign/content?mode=add-influencer&option=${optionIndex}`,
+            );
+            return;
+        }
+
+        if (isProposalOptionCreateMode && proposalOptionCreateContext) {
+            navigate(
+                buildProposalOptionCreateUrl(
+                    "/client/create-campaign/content",
+                    proposalOptionCreateContext,
+                ),
             );
             return;
         }
@@ -82,11 +151,14 @@ export const useCampaignProceedSummary = ({
 
     return {
         isAddInfluencerMode,
+        isProposalOptionCreateMode,
         selectedCurrency,
         selectedOfferId,
         selectedPromoCardIds,
+        selectedBundles,
         selectedAccounts,
         totalPrice,
+        displayCurrencySymbol,
         canProceed,
         handleProceed,
     };

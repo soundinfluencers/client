@@ -15,6 +15,11 @@ export { buildAdditionalId } from "./additional-form.utils";
 export { getAdditionalIndex } from "./additional-form.utils";
 export { getPlatformItems } from "./get-platform-items";
 export { buildProposalPatchBody } from "./proposalPayload";
+export { buildProposalOptionPatchBody } from "./proposal-patch";
+export type {
+  ProposalPatchBuildResult,
+  ProposalPatchFailureCode,
+} from "./proposal-patch";
 export { groupPlatforms } from "./groupPlatforms";
 export { downloadBlob } from "./download-file";
 export { pickPrice } from "./pick-price";

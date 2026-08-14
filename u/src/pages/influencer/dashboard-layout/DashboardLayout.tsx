@@ -1,6 +1,6 @@
 import { Container } from "@/components";
 import { HistoryLink } from "./components/campaign-history-link/HistoryLink";
-import { InvoiceLink } from "./components/create-invoice-link/InvoiceLink";
+import { DashboardLink } from "./components/create-invoice-link/DashboardLink.tsx";
 import { DashboardHero } from "./components/dashboard-hero/DashboardHero";
 import { PromosFiltersBar } from "./components/promo-filters-bar/PromosFiltersBar";
 import { ViewModeTabs } from "./components/promos-view-mode-tab/ViewModeTabs";
@@ -42,7 +42,14 @@ export const DashboardLayout = () => {
         <div className="dashboard__hero-links">
           {(isPromos || isDashboard) && <HistoryLink />}
           {isHistory && <HomePageLink />}
-          <InvoiceLink />
+          <DashboardLink
+            href="create-invoice"
+            label="Creater an Invoice"
+          />
+          <DashboardLink
+            href="create-bundle"
+            label="Create Bundles"
+          />
         </div>
       </div>
 

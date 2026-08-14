@@ -13,7 +13,6 @@ import {
 import { useCampaignStore } from "@/entities/client-side/campaign/store/campaign.store";
 
 import {
-    getNextAvailableOptionIndex,
     getNextOptionAfterDelete,
     writeLastProposalOption,
 } from "./proposal-options.helpers";
@@ -83,23 +82,38 @@ export const useProposalOptions = ({ onAfterChange }: Params = {}) => {
         try {
             setIsCreating(true);
 
-            const response = await postProposalSystem(payload as any, campaignId);
+            const created = await postProposalSystem(payload as any, campaignId);
 
-            const responseData = response.data.data as any;
+            if (
+                created.campaignId !== campaignId ||
+                !Number.isInteger(created.optionIndex) ||
+                created.optionIndex < 0
+            ) {
+                throw new Error("Invalid create Proposal option response");
+            }
 
-            const nextOptionIndex = Number(
-                responseData?.selectedOption?.optionIndex ??
-                getNextAvailableOptionIndex(existingOptions),
+            const refreshed = await getProposalCampaignOption(
+                created.campaignId,
+                created.optionIndex,
             );
+            const responseData = refreshed.data.data;
+
+            if (
+                responseData.campaignId !== created.campaignId ||
+                responseData.selectedOption.optionIndex !== created.optionIndex ||
+                !responseData.existingOptions.includes(created.optionIndex)
+            ) {
+                throw new Error("Created Proposal option GET did not match POST response");
+            }
 
             writeLastProposalOption({
-                campaignId,
-                optionIndex: nextOptionIndex,
+                campaignId: created.campaignId,
+                optionIndex: created.optionIndex,
             });
 
             initCampaign(responseData, {
                 status: "proposal",
-                optionIndex: nextOptionIndex,
+                optionIndex: created.optionIndex,
             });
 
             toast.success("Proposal option created");
@@ -114,7 +128,6 @@ export const useProposalOptions = ({ onAfterChange }: Params = {}) => {
         editable,
         campaignId,
         buildSavePayload,
-        existingOptions,
         initCampaign,
         onAfterChange,
     ]);

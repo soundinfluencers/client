@@ -9,6 +9,9 @@ import { DeleteDraftModal } from "./delete-draft-modal";
 import styles from "./dashboard-campaigns-list.module.scss";
 import type { CampaignListItem, CampaignStatus } from "@/entities/client-side/dashboard/model/campaign.types.ts";
 import type { SocialMediaType } from "@/shared/types/utils/constants.types.ts";
+import {
+    formatDashboardCampaignPrice,
+} from "@/entities/client-side/dashboard/model/campaign-price";
 
 type Props = {
     list: CampaignListItem[];
@@ -76,7 +79,7 @@ export const GridListView = ({ list, onOpen, isLoading }: Props) => {
                             </div>
 
                             <div className={styles.gridItemPrice}>
-                                <p>{item.price ? `${item.price}€` : ""}</p>
+                                <p>{formatDashboardCampaignPrice(item)}</p>
                             </div>
                         </div>
 

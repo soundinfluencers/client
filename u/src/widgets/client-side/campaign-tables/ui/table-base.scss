@@ -275,32 +275,30 @@
     list-style: none;
 
     min-width: 0;
-    overflow: hidden;
-
-    max-height: calc(22px * 2 + 6px);
-  }
+    overflow: visible;
+}
 
 .td-chips .chips li {
     flex: 0 0 auto;
 
-    height: 22px;
+    min-height: 22px;
     display: inline-flex;
     align-items: center;
 
     max-width: 100%;
-    padding: 0 8px;
+    padding: 3px 8px;
 
     border: 1px solid rgba(231, 232, 241, 1);
     border-radius: 8px;
     background: #fff;
 
     font-size: 12px;
-    line-height: 12px;
+    line-height: 16px;
     font-weight: 400;
 
-    white-space: nowrap;
-    overflow: hidden;
-  }
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
 
   .isDate {
     display: flex;

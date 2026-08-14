@@ -5,9 +5,11 @@ import type {
     SearchPromoAccountsBodyDto,
     SearchPromoAccountsResponseDto,
 } from "./promo-account.dto";
-import type { PromoAccount } from "../model/promo-account.types";
+import type {
+    PromoAccount,
+} from "../model/promo-account.types";
 import {
-    mapPromoAccountDto
+    mapPromoAccountDto,
 } from "@/entities/client-side/campaign-creator-page/campaign-promo-account/model/promo-account.mappers.ts";
 import $api from "@/api/api.ts";
 

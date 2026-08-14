@@ -1,0 +1,359 @@
+@use "@/styles/variables/variables" as vars;
+
+.cardWrapper {
+  width: 100%;
+  min-width: 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  width: 100%;
+  min-height: 360px;
+  padding: 24px;
+  border: 1px solid vars.$border-secondary;
+  border-radius: 8px;
+  background: vars.$bg-white;
+  color: vars.$gray-dark;
+}
+
+.detailsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.selected {
+  border-color: vars.$blue;
+  background: vars.$brightest-gradient;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 26px;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: vars.$brightest-gradient;
+  color: vars.$black-blue;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.followers {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  line-height: normal;
+
+  strong {
+    color: vars.$black;
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compactAccounts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-height: 124px;
+  margin: 0;
+  padding: 12px 8px;
+  border: 1px solid vars.$blue;
+  border-radius: 8px;
+  list-style: none;
+}
+
+.compactAccount {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 20px;
+  gap: 12px;
+  font-size: 15px;
+  line-height: normal;
+
+  &:not(:last-child) {
+    padding-bottom: 8px;
+    border-bottom: 1px solid vars.$white-gray-2;
+  }
+}
+
+.compactUsername {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.compactMetrics {
+  display: grid;
+  grid-template-columns: 20px minmax(36px, auto) minmax(40px, auto);
+  align-items: center;
+  justify-items: end;
+  flex: 0 0 auto;
+  gap: 4px;
+
+  img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.priceSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 46px;
+  padding: 8px 12px;
+  border: 1px solid vars.$blue;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: normal;
+}
+
+.priceValues {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  del {
+    color: vars.$gray;
+  }
+
+  strong {
+    color: vars.$black-blue;
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.detailsToggle {
+  margin-top: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 24px;
+  border: 0;
+  background: transparent;
+  color: vars.$gray-dark;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+
+  &::before {
+    position: absolute;
+    inset: -8px 0;
+    content: "";
+  }
+
+  img {
+    position: absolute;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    transition: transform 0.2s ease;
+  }
+
+  &:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid vars.$black-blue;
+    outline-offset: 2px;
+  }
+}
+
+.chevronExpanded {
+  transform: rotate(180deg);
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  //min-height: 748px;
+}
+
+.accountDetails {
+  display: flex;
+  flex-direction: column;
+  //flex: 1 1 0;
+  gap: 12px;
+}
+
+.detailAccountHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 12px;
+
+  h3 {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: normal;
+  }
+}
+
+.detailAccountMetrics {
+  display: grid;
+  grid-template-columns: 20px minmax(36px, auto) minmax(40px, auto);
+  align-items: center;
+  justify-items: end;
+  flex: 0 0 auto;
+  gap: 4px;
+  font-size: 15px;
+
+  img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.detailGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  h4 {
+    width: 100%;
+    padding-bottom: 2px;
+    border-bottom: 1px solid vars.$blue;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: normal;
+  }
+}
+
+.detailGroup + .detailGroup {
+  margin-top: 4px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 4px 8px;
+    border: 1px solid vars.$white-gray-2;
+    border-radius: 4px;
+    background: vars.$bg-white;
+    font-size: 13px;
+    line-height: normal;
+    //white-space: nowrap;
+  }
+}
+
+.chooseButton {
+  min-height: 35px;
+  max-height: 35px;
+  border-radius: 222px;
+
+  p {
+    font-size: 14px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$blue;
+    outline-offset: 2px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .card {
+    padding: 16px;
+  }
+
+  .header {
+    min-height: 23px;
+  }
+
+  .badge,
+  .followers {
+    font-size: 12px;
+  }
+
+  .followers strong {
+    font-size: 13px;
+  }
+
+  .compactAccounts {
+    min-height: 116px;
+    padding: 8px;
+  }
+
+  .compactAccount {
+    font-size: 13px;
+  }
+
+  .priceSummary {
+    min-height: 42px;
+    font-size: 12px;
+  }
+
+  .priceValues strong {
+    font-size: 13px;
+  }
+
+  .detailsToggle {
+    min-height: 20px;
+    font-size: 12px;
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .detailAccountHeader h3,
+  .detailAccountMetrics,
+  .detailGroup h4 {
+    font-size: 13px;
+  }
+
+  .chips li {
+    font-size: 12px;
+  }
+
+  .details {
+    min-height: 632px;
+  }
+
+  .chooseButton {
+    min-height: 34px;
+    max-height: 34px;
+  }
+}

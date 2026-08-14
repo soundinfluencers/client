@@ -1,0 +1,297 @@
+@use "@/styles/variables/variables" as vars;
+
+.bundle-new-promo-card {
+  gap: 48px;
+  color: vars.$black-blue;
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    .promos-details-list-card__header {
+      margin-bottom: 0;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  &__details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__campaign {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+
+    h2 {
+      min-width: 0;
+      font-size: 40px;
+      font-weight: 400;
+      line-height: normal;
+      word-break: break-word;
+    }
+  }
+
+  &__campaign-marker {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 57px;
+    height: 57px;
+    border: 1px solid vars.$blue;
+    border-radius: 50%;
+    background: #fff;
+
+    img {
+      width: 30px;
+      height: 33px;
+    }
+  }
+
+  &__accounts {
+    display: grid;
+    grid-template-columns: 184px minmax(0, 592px);
+    gap: 8px;
+    align-items: start;
+  }
+
+  &__section-label,
+  &__pricing-note,
+  &__footer-fee {
+    font-size: 16px;
+  }
+
+  &__account-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__account-row {
+    display: grid;
+    grid-template-columns: minmax(0, 175px) minmax(88px, auto) auto;
+    gap: 24px;
+    align-items: center;
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  &__account-identity,
+  &__account-audience {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  &__account-identity {
+    gap: 4px;
+    font-weight: 500;
+
+    span:last-child {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__account-audience {
+    gap: 4px;
+  }
+
+  &__account-reward {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  &__platform-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+
+  &__commercial {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .promos-details-list-card__body-details-item-description {
+      font-weight: 500;
+    }
+  }
+
+  &__briefs {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__brief {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__brief-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: 20px;
+    font-weight: 400;
+
+    span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__brief-rows {
+    .promos-details-list-card__body-details-item-description {
+      font-weight: 500;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  &__footer-fee {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    strong {
+      font-weight: 500;
+    }
+  }
+
+  &__actions {
+    margin-top: 0;
+  }
+
+  @media screen and (max-width: 900px) {
+    gap: 40px;
+
+    &__campaign {
+      h2 {
+        font-size: 32px;
+      }
+    }
+
+    &__campaign-marker {
+      width: 48px;
+      height: 48px;
+
+      img {
+        width: 12px;
+        height: 13px;
+      }
+    }
+
+    &__accounts {
+      grid-template-columns: 100px minmax(0, 1fr);
+    }
+
+    &__account-row {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 16px;
+      font-size: 14px;
+    }
+
+    &__platform-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    &__section-label,
+    &__pricing-note,
+    &__footer-fee {
+      font-size: 14px;
+    }
+
+    &__brief-title {
+      font-size: 18px;
+    }
+  }
+
+  @media screen and (max-width: 500px) {
+    gap: 32px;
+
+    &__content {
+      gap: 24px;
+    }
+
+    &__main {
+      gap: 16px;
+    }
+
+    &__campaign {
+      gap: 8px;
+
+      h2 {
+        font-size: 24px;
+      }
+    }
+
+    &__campaign-marker {
+      width: 32px;
+      height: 32px;
+
+      img {
+        width: 10px;
+        height: 11px;
+      }
+    }
+
+    &__accounts {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    &__account-list {
+      width: 100%;
+    }
+
+    &__account-row {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    &__platform-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    &__brief-title {
+      font-size: 16px;
+    }
+
+    &__briefs,
+    &__brief {
+      gap: 16px;
+    }
+
+    &__actions {
+      width: 100%;
+    }
+  }
+}

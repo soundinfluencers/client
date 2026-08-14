@@ -15,7 +15,6 @@ import {
 import { ViewChange } from "@/features/client-side/campaign-tables/view-change/ui/view-change";
 import { ViewAudience } from "@/features/client-side/campaign-tables/view-audience/ui/view-audince";
 import {
-    buildStrategyDraftPayload,
     buildStrategyProposalPayload,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
 import { LiveViewCard } from "@/widgets/client-side/campaign-tables/ui/live-view-card/ui/live-view-card";
@@ -29,6 +28,16 @@ import {Checkbox} from "@/widgets/client-side/campaign-tables/ui/check-box-row/u
 import {postCampaignDraft} from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
 import {toast} from "react-toastify";
 import {DraftButton} from "@components/ui/draft-button/draft-button.tsx";
+import {
+    buildCampaignDraftPayload,
+    buildCampaignDraftWorkflowValuesByAccountId,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/build-draft-payload";
+import {
+    CampaignDraftLatestStep,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
+import {
+    parseCampaignDraftError,
+} from "@/entities/client-side/campaign-draft/model/campaign-draft.errors";
 
 
 export const CampaignStrategyPage = () => {
@@ -38,11 +47,17 @@ export const CampaignStrategyPage = () => {
     const accounts = useCampaignBuilderStore((s) => s.selectedAccounts);
     const content = useCampaignBuilderStore((s) => s.campaignContent);
     const totalPrice = useCampaignBuilderStore((s) => s.totalPrice);
-    const draftId = useCampaignBuilderStore((s) => s.draftId);
     const selectedCurrency = useCampaignBuilderStore((s) => s.selectedCurrency);
+    const selectionCurrency = useCampaignBuilderStore((s) => s.selectionCurrency);
+    const selectedOfferId = useCampaignBuilderStore((s) => s.selectedOfferId);
+    const selectedOfferAccountIds = useCampaignBuilderStore(
+        (s) => s.selectedOfferAccountIds,
+    );
 
     const reset = useCampaignBuilderStore((s) => s.actions.reset);
     const [checked, setChecked] = React.useState(true);
+    const [isSavingDraft, setIsSavingDraft] = React.useState(false);
+    const draftSaveInFlightRef = React.useRef(false);
 
     const setAccountDateRequest = useCampaignBuilderStore(
         (s) => s.actions.setAccountDateRequest,
@@ -64,7 +79,10 @@ export const CampaignStrategyPage = () => {
     );
 
     const { view, setView, insights, setInsights } =
-        useCampaignStrategyViewParams({ isProposal: false });
+        useCampaignStrategyViewParams({
+            isProposal: false,
+            tableOnly: true,
+        });
 
     const grouped = React.useMemo(
         () =>
@@ -74,6 +92,42 @@ export const CampaignStrategyPage = () => {
             }),
         [accounts, content],
     );
+
+    React.useEffect(() => {
+        if (!import.meta.env.DEV) return;
+
+        const selectedAccountIds = accounts.map((account) => account.accountId);
+        const groupedAccountIds = [
+            ...grouped.mainCreator.accounts,
+            ...grouped.mainCommunity.accounts,
+            ...grouped.music.accounts,
+            ...grouped.press.accounts,
+        ].map((account) => account.accountId);
+        const groupedAccountCounts = groupedAccountIds.reduce<Map<string, number>>(
+            (counts, accountId) => {
+                counts.set(accountId, (counts.get(accountId) ?? 0) + 1);
+                return counts;
+            },
+            new Map(),
+        );
+        const missingAccountIds = selectedAccountIds.filter(
+            (accountId) => !groupedAccountCounts.has(accountId),
+        );
+        const duplicateAccountIds = [
+            ...groupedAccountCounts.entries(),
+        ]
+            .filter(([, count]) => count > 1)
+            .map(([accountId]) => accountId);
+
+        if (missingAccountIds.length || duplicateAccountIds.length) {
+            console.warn("[Campaign Strategy account partition mismatch]", {
+                selectedAccountIds,
+                groupedAccountIds,
+                missingAccountIds,
+                duplicateAccountIds,
+            });
+        }
+    }, [accounts, grouped]);
 
     const readonlyDateActions = React.useMemo(
         () => ({
@@ -90,17 +144,59 @@ export const CampaignStrategyPage = () => {
     }, [view]);
 
     const onSaveDraft = React.useCallback(async () => {
-        const payload = buildStrategyDraftPayload({
-            campaignName,
-            draftId,
-            accounts,
-            content,
-        });
+        if (draftSaveInFlightRef.current) return;
 
-        console.log("SAVE STRATEGY DRAFT", payload);
-        await postCampaignDraft(payload);
-        toast.success("Draft saved successfully");
-    }, [campaignName, draftId, accounts, content]);
+        const state = useCampaignBuilderStore.getState();
+        const nextCampaignName = state.campaignName.trim();
+
+        if (!nextCampaignName) {
+            toast.error("Draft name is required");
+            return;
+        }
+
+        draftSaveInFlightRef.current = true;
+        setIsSavingDraft(true);
+
+        try {
+            const workflowValuesByAccountId =
+                buildCampaignDraftWorkflowValuesByAccountId(
+                    state.selectedAccounts,
+                );
+            const { payload, draftSelectionRows } =
+                buildCampaignDraftPayload(state, {
+                    campaignName: nextCampaignName,
+                    step: CampaignDraftLatestStep.strategyTable,
+                    campaignContent: state.campaignContent,
+                    workflowValuesByAccountId,
+                });
+
+            state.actions.setDraftSelectionRows(draftSelectionRows);
+
+            const expectedOperation = state.draftId ? "updated" : "created";
+            const result = await postCampaignDraft(payload);
+
+            if (
+                import.meta.env.DEV &&
+                result.operation !== expectedOperation
+            ) {
+                console.warn(
+                    `Campaign Draft was ${result.operation}; expected ${expectedOperation}.`,
+                );
+            }
+
+            state.actions.setDraftMeta({
+                draftId: result.draftId,
+                draftStep: CampaignDraftLatestStep.strategyTable,
+            });
+
+            toast.success("Draft saved successfully");
+        } catch (error) {
+            toast.error(parseCampaignDraftError(error).message);
+        } finally {
+            draftSaveInFlightRef.current = false;
+            setIsSavingDraft(false);
+        }
+    }, []);
 
     const {
         isProposalModalOpen,
@@ -110,8 +206,11 @@ export const CampaignStrategyPage = () => {
     } = useSaveProposal({
         campaignName,
         totalPrice,
+        displayCurrency: selectionCurrency,
         accounts,
         content,
+        selectedOfferId,
+        selectedOfferAccountIds,
     });
 
     const {
@@ -121,12 +220,17 @@ export const CampaignStrategyPage = () => {
     } = useProposalShare(campaignProposalId);
 
     const onProceed = React.useCallback(() => {
-        const payload = buildStrategyProposalPayload({
-            campaignName,
-            totalPrice,
-            accounts,
-            content,
-        });
+        const payload = selectionCurrency
+            ? buildStrategyProposalPayload({
+                campaignName,
+                totalPrice,
+                displayCurrency: selectionCurrency,
+                accounts,
+                content,
+                selectedOfferId,
+                selectedOfferAccountIds,
+            })
+            : null;
 
         console.log("STRATEGY PROPOSAL PAYLOAD", payload);
         console.log("strategy campaignName", campaignName);
@@ -134,7 +238,16 @@ export const CampaignStrategyPage = () => {
         console.log("strategy content", content);
         console.log("strategy totalPrice", totalPrice);
         navigate("/client/create-campaign/content/strategy/payment");
-    }, [campaignName, totalPrice, accounts, content, navigate]);
+    }, [
+        campaignName,
+        totalPrice,
+        selectionCurrency,
+        accounts,
+        content,
+        selectedOfferId,
+        selectedOfferAccountIds,
+        navigate,
+    ]);
     const barData = React.useMemo(
         () =>
             buildCampaignBarData({
@@ -164,7 +277,10 @@ export const CampaignStrategyPage = () => {
             <Container>
                 <div className={styles.navMenu}>
                     <Breadcrumbs />
-                    <DraftButton onClick={onSaveDraft} />
+                    <DraftButton
+                        onClick={onSaveDraft}
+                        isDisabled={isSavingDraft}
+                    />
                 </div>
 
                 <div className={styles.page}>
@@ -198,6 +314,7 @@ export const CampaignStrategyPage = () => {
                                 view={view}
                                 setView={setView}
                                 isProposal={false}
+                                tableOnly
                             />
 
 

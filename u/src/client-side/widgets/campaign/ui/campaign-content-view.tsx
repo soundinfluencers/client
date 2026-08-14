@@ -15,6 +15,9 @@ type Props = {
   view: number;
   changeView?: boolean;
   flag?: boolean;
+  proposalOptionIndexes: number[];
+  onDeleteProposalOption: (optionIndex: number) => Promise<void>;
+  isProposalMutationPending: boolean;
 };
 
 export const CampaignContentView: React.FC<Props> = ({
@@ -22,6 +25,9 @@ export const CampaignContentView: React.FC<Props> = ({
   view,
   changeView = false,
   flag = true,
+  proposalOptionIndexes,
+  onDeleteProposalOption,
+  isProposalMutationPending,
 }) => {
   const {
     kind,
@@ -92,6 +98,9 @@ export const CampaignContentView: React.FC<Props> = ({
           canEdit={config.canEdit}
           changeView={changeView}
           title="Video Distribution"
+          optionIndexes={proposalOptionIndexes}
+          onDeleteOption={onDeleteProposalOption}
+          isMutationPending={isProposalMutationPending}
         />
       )}
 
@@ -107,6 +116,9 @@ export const CampaignContentView: React.FC<Props> = ({
           canEdit={config.canEdit}
           changeView={changeView}
           title="Music Placements"
+          optionIndexes={proposalOptionIndexes}
+          onDeleteOption={onDeleteProposalOption}
+          isMutationPending={isProposalMutationPending}
         />
       )}
 
@@ -120,6 +132,9 @@ export const CampaignContentView: React.FC<Props> = ({
           canEdit={config.canEdit}
           changeView={changeView}
           title="Press Coverage"
+          optionIndexes={proposalOptionIndexes}
+          onDeleteOption={onDeleteProposalOption}
+          isMutationPending={isProposalMutationPending}
         />
       )}
     </div>

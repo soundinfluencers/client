@@ -1,3 +1,7 @@
+import type {
+    CampaignDisplayCurrency,
+} from "@/shared/functions/formatCurrency";
+
 export type CampaignStatusDto =
     | "draft"
     | "proposal"
@@ -11,6 +15,7 @@ export type CampaignListItemDto = {
     socialMedia: string;
     creationDate: string;
     price: number;
+    displayCurrency: CampaignDisplayCurrency;
     status: CampaignStatusDto;
     draftStep?: string;
 };

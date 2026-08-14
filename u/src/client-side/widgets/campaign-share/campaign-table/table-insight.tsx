@@ -6,7 +6,9 @@ import { TableCard } from "../card-table/table-card-insight";
 
 import chevron from "@/assets/icons/chevron-up.svg";
 import { columns, titles } from "@/client-side/data/table-campaign.data";
-import { getCurrencySymbol } from "@/pages/influencer/negotiation/utils/getCurrencySymbol.ts";
+import {
+  formatPersistedCampaignCurrency,
+} from "@/shared/functions/formatCurrency.ts";
 
 interface Props {
   campaign: CampaignResponse | any;
@@ -262,7 +264,10 @@ export const TableDistributingInsight: React.FC<Props> = ({ campaign }) => {
                         price:{" "}
                         {campaign?.isPriceHidden
                             ? "—"
-                            : `${price}${getCurrencySymbol(campaign?.displayCurrency)}`}
+                            : formatPersistedCampaignCurrency(
+                                price,
+                                campaign?.displayCurrency,
+                            )}
                       </p>
                   )}
 

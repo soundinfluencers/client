@@ -6,6 +6,7 @@ type Props = {
     selectedCurrency: string;
     selectedOfferId: string | null;
     selectedPromoCardIds: string[];
+    selectedBundlesCount: number;
     totalPrice: number;
     canProceed: boolean;
     onProceed: () => void;
@@ -16,6 +17,7 @@ export const FooterSummary = ({
                                   selectedCurrency,
                                   selectedOfferId,
                                   selectedPromoCardIds,
+                                  selectedBundlesCount,
                                   totalPrice,
                                   canProceed,
                                   onProceed,
@@ -31,7 +33,19 @@ export const FooterSummary = ({
                                 {selectedOfferId ? 1 : 0}
                             </span>
                         </p>
-                        <img src={plus} alt="" />
+                        {/*<img src={plus} alt="" />*/}
+                    </>
+                )}
+
+                {!isAddInfluencerMode && (
+                    <>
+                        <p>
+                            Bundles:{" "}
+                            <span className={styles.count}>
+                                {selectedBundlesCount}
+                            </span>
+                        </p>
+                        {/*<img src={plus} alt="" />*/}
                     </>
                 )}
 

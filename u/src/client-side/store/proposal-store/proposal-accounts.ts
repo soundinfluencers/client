@@ -4,6 +4,16 @@ import type { CampaignAddedAccount } from "@/types/store/index.types";
 import { getGroupBySocial } from "@/client-side/widgets/add-influencer-build-campaign/add-to-proposal/bc-prooced";
 import { ObjectId } from "bson";
 import {useUpdateCampaign} from "@/client-side/store";
+import type {
+  ProposalOptionDto,
+  ProposalSelectedOfferInput,
+} from "@/entities/client-side/campaign/model/campaign-api.types.ts";
+import {
+  removeFullOverlapAccounts,
+  type FullOfferBundleOverlap,
+} from "@/client-side/widgets/campaign/model/proposal-overlap-removal";
+
+type PendingBundleMembership = Record<string, string[]>;
 
 export const getAccountKey = (n: CampaignAddedAccount) =>
     String(
@@ -35,8 +45,15 @@ type CampaignContentItem = {
   }>;
 };
 type ProposalAccountsStore = {
+  optionSnapshotsByIndex: Record<number, ProposalOptionDto>;
   accountsByOption: Record<number, CampaignAddedAccount[]>;
   contentByOption: Record<number, CampaignContentItem[]>;
+  pendingBundleMembershipByOption: Record<number, PendingBundleMembership>;
+  selectedOfferChangeByOption: Record<
+    number,
+    ProposalSelectedOfferInput | null
+  >;
+  setOptionSnapshot: (option: ProposalOptionDto) => void;
   recentlyAddedKeysByOption: Record<number, Record<string, true>>;
   markRecentlyAdded: (optionIndex: number, keys: string[]) => void;
   clearRecentlyAdded: (optionIndex: number, keys?: string[]) => void;
@@ -59,6 +76,13 @@ type ProposalAccountsStore = {
     firstDescriptionId: string;
   };
   addAccounts: (optionIndex: number, accounts: CampaignAddedAccount[]) => void;
+  setPendingTopology: (
+    optionIndex: number,
+    topology: {
+      bundles: PendingBundleMembership;
+      selectedOffer?: ProposalSelectedOfferInput;
+    },
+  ) => void;
   removeContentItem: (optionIndex: number, contentId: string) => void;
   mergeContent: (optionIndex: number, contentToAdd: any[]) => void;
   setAccountDateRequest: (
@@ -78,6 +102,10 @@ type ProposalAccountsStore = {
   setCurrentCampaignId: (id: string | null) => void;
   clearAll: () => void;
   removeAccount: (optionIndex: number, accountKey: string) => void;
+  removeOfferBundleOverlap: (
+    optionIndex: number,
+    overlap: FullOfferBundleOverlap,
+  ) => void;
   setAccounts: (optionIndex: number, accounts: CampaignAddedAccount[]) => void;
   clearOption: (optionIndex: number) => void;
   updateContentMainLink: (
@@ -89,12 +117,23 @@ type ProposalAccountsStore = {
 
 export const useProposalAccountsStore = create<ProposalAccountsStore>()(
   devtools((set) => ({
+    optionSnapshotsByIndex: {},
     accountsByOption: {},
     contentByOption: {},
+    pendingBundleMembershipByOption: {},
+    selectedOfferChangeByOption: {},
     recentlyAddedKeysByOption: {},
     pendingDeleteKeysByOption: {},
     currentCampaignId: null,
     setCurrentCampaignId: (id) => set({ currentCampaignId: id }),
+    setOptionSnapshot: (option) => {
+      set((state) => ({
+        optionSnapshotsByIndex: {
+          ...state.optionSnapshotsByIndex,
+          [option.optionIndex]: option,
+        },
+      }));
+    },
     markPendingDelete: (optionIndex, key) => {
       set((state) => {
         const prev = state.pendingDeleteKeysByOption?.[optionIndex] ?? {};
@@ -133,8 +172,11 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     clearAll: () =>
         set({
           currentCampaignId: null,
+          optionSnapshotsByIndex: {},
           accountsByOption: {},
           contentByOption: {},
+          pendingBundleMembershipByOption: {},
+          selectedOfferChangeByOption: {},
           recentlyAddedKeysByOption: {},
           pendingDeleteKeysByOption: {},
         }),
@@ -172,7 +214,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
                   selectedCampaignContentItem: selected,
                 }
                 : account,
-        );
+        ) as CampaignAddedAccount[];
 
         return {
           accountsByOption: {
@@ -203,6 +245,26 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
               : [],
         }));
 
+        const pendingBundleMembershipByOption = {
+          ...state.pendingBundleMembershipByOption,
+        };
+        const selectedOfferChangeByOption = {
+          ...state.selectedOfferChangeByOption,
+        };
+        const recentlyAddedKeysByOption = {
+          ...state.recentlyAddedKeysByOption,
+        };
+        const pendingDeleteKeysByOption = {
+          ...state.pendingDeleteKeysByOption,
+        };
+
+        if (opts?.force) {
+          delete pendingBundleMembershipByOption[optionIndex];
+          delete selectedOfferChangeByOption[optionIndex];
+          delete recentlyAddedKeysByOption[optionIndex];
+          delete pendingDeleteKeysByOption[optionIndex];
+        }
+
         return {
           accountsByOption: {
             ...state.accountsByOption,
@@ -212,6 +274,10 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
             ...state.contentByOption,
             [optionIndex]: normalizedContent,
           },
+          pendingBundleMembershipByOption,
+          selectedOfferChangeByOption,
+          recentlyAddedKeysByOption,
+          pendingDeleteKeysByOption,
         };
       });
     },
@@ -425,24 +491,105 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         return { recentlyAddedKeysByOption: all };
       });
     },
+    setPendingTopology: (optionIndex, topology) => {
+      useUpdateCampaign.getState().markDirty();
+
+      set((state) => {
+        const snapshot = state.optionSnapshotsByIndex[optionIndex];
+        let accounts = state.accountsByOption[optionIndex] ?? [];
+
+        if (topology.selectedOffer && snapshot?.selectedOffer) {
+          const nextOfferAccountIds = new Set(
+            topology.selectedOffer.selectedAccountIds.map(String),
+          );
+          const persistedOfferAccountIds = new Set(
+            snapshot.selectedOffer.selectedAccountIds.map(String),
+          );
+
+          accounts = accounts.filter((account) => {
+            const socialAccountId = String(
+              (account as any).socialAccountId ??
+              (account as any).accountId ??
+              "",
+            );
+
+            if (!persistedOfferAccountIds.has(socialAccountId)) return true;
+            if (nextOfferAccountIds.has(socialAccountId)) return true;
+
+            return Boolean((account as any).bundleId);
+          });
+        }
+
+        return {
+          accountsByOption: {
+            ...state.accountsByOption,
+            [optionIndex]: accounts,
+          },
+          pendingBundleMembershipByOption: {
+            ...state.pendingBundleMembershipByOption,
+            [optionIndex]: topology.bundles,
+          },
+          ...(topology.selectedOffer
+            ? {
+              selectedOfferChangeByOption: {
+                ...state.selectedOfferChangeByOption,
+                [optionIndex]: topology.selectedOffer,
+              },
+            }
+            : {}),
+        };
+      });
+    },
     addAccounts: (optionIndex, accounts) => {
       set((state: any) => {
         useUpdateCampaign.getState().markDirty();
 
         const prev = state.accountsByOption[optionIndex] ?? [];
-        const prevKeys = new Set(prev.map(getAccountKey));
-
         const content = state.contentByOption[optionIndex] ?? [];
+        const incomingBySocialId = new Map<string, CampaignAddedAccount>();
 
-        const addedRaw = (accounts ?? []).filter((account) => {
-          const key = getAccountKey(account);
+        (accounts ?? []).forEach((account) => {
+          const socialAccountId = String(
+            (account as any).socialAccountId ??
+            (account as any).accountId ??
+            "",
+          );
 
-          if (!key) {
-            console.warn("[PROPOSAL addAccounts] account without key", account);
-            return false;
+          if (!socialAccountId) {
+            return;
           }
 
-          return !prevKeys.has(key);
+          incomingBySocialId.set(socialAccountId, account);
+        });
+
+        const existingSocialIds = new Set(
+          prev.map((account: CampaignAddedAccount) =>
+            String(
+              (account as any).socialAccountId ??
+              (account as any).accountId ??
+              "",
+            ),
+          ),
+        );
+        const addedRaw = [...incomingBySocialId.entries()]
+          .filter(([socialAccountId]) => !existingSocialIds.has(socialAccountId))
+          .map(([, account]) => account);
+
+        const mergedExisting = prev.map((account: CampaignAddedAccount) => {
+          const socialAccountId = String(
+            (account as any).socialAccountId ??
+            (account as any).accountId ??
+            "",
+          );
+          const incoming = incomingBySocialId.get(socialAccountId) as any;
+          const incomingBundleId = String(incoming?.bundleId ?? "").trim();
+
+          if (!incoming || !incomingBundleId) return account;
+
+          return {
+            ...account,
+            bundleId: incomingBundleId,
+          };
         });
 
         const next = addedRaw.map((account) => {
@@ -463,9 +610,12 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
 
           const contentItem =
               content.find(
-                  (item) => String(item.socialMedia ?? "").toLowerCase() === sm,
+                  (item: CampaignContentItem) =>
+                    String(item.socialMedia ?? "").toLowerCase() === sm,
               ) ??
-              content.find((item) => item.socialMediaGroup === group) ??
+              content.find(
+                (item: CampaignContentItem) => item.socialMediaGroup === group,
+              ) ??
               null;
 
           const selected = contentItem
@@ -511,7 +661,12 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           };
         });
 
-        if (!next.length) return state;
+        const hasExistingBundleChanges = mergedExisting.some(
+          (account: CampaignAddedAccount, index: number) =>
+            (account as any).bundleId !== (prev[index] as any)?.bundleId,
+        );
+
+        if (!next.length && !hasExistingBundleChanges) return state;
 
         const addedKeys = next.map(getAccountKey).filter(Boolean);
 
@@ -522,12 +677,10 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           marked[String(key)] = true;
         });
 
-        console.log("[PROPOSAL addAccounts] next normalized", next);
-
         return {
           accountsByOption: {
             ...state.accountsByOption,
-            [optionIndex]: [...prev, ...next],
+            [optionIndex]: [...mergedExisting, ...next],
           },
           recentlyAddedKeysByOption: {
             ...(state.recentlyAddedKeysByOption ?? {}),
@@ -567,25 +720,71 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
 
         if (!removed) return state;
 
-        const nextAcc = prevAcc.filter(
-            (account) => String(getAccountKey(account)) !== String(accountKey),
+        const snapshot = state.optionSnapshotsByIndex[optionIndex];
+        const pendingOffer = Object.prototype.hasOwnProperty.call(
+          state.selectedOfferChangeByOption,
+          optionIndex,
+        )
+          ? state.selectedOfferChangeByOption[optionIndex]
+          : undefined;
+        const effectiveOffer =
+          pendingOffer === undefined ? snapshot?.selectedOffer : pendingOffer;
+        const offerAccountIds = new Set(
+          effectiveOffer?.selectedAccountIds?.map(String) ?? [],
         );
-
-        if (nextAcc.length === prevAcc.length) return state;
-
-        const removedGroup = getGroupBySocial((removed as any).socialMedia);
-
-        const stillHasGroup = nextAcc.some(
-            (account) => getGroupBySocial((account as any).socialMedia) === removedGroup,
+        const removedSocialAccountId = String(
+          (removed as any).socialAccountId ??
+          (removed as any).accountId ??
+          "",
         );
+        const removedBundleId = String((removed as any).bundleId ?? "").trim();
+        const removesOffer =
+          !removedBundleId && offerAccountIds.has(removedSocialAccountId);
 
-        let nextContent = state.contentByOption[optionIndex] ?? [];
-
-        if (!stillHasGroup) {
-          nextContent = nextContent.filter(
-              (content) => content.socialMediaGroup !== removedGroup,
+        const nextAcc = prevAcc.flatMap((account) => {
+          const socialAccountId = String(
+            (account as any).socialAccountId ??
+            (account as any).accountId ??
+            "",
           );
+          const bundleId = String((account as any).bundleId ?? "").trim();
+
+          if (removedBundleId) {
+            if (bundleId !== removedBundleId) return [account];
+
+            if (offerAccountIds.has(socialAccountId)) {
+              const next = { ...(account as any) };
+              delete next.bundleId;
+              delete next.campaignBundleId;
+              delete next.bundlePosition;
+              return [next as CampaignAddedAccount];
+            }
+
+            return [];
+          }
+
+          if (removesOffer) {
+            if (!offerAccountIds.has(socialAccountId)) return [account];
+            return bundleId ? [account] : [];
+          }
+
+          return String(getAccountKey(account)) === String(accountKey)
+            ? []
+            : [account];
+        });
+
+        if (nextAcc.length === prevAcc.length && !removedBundleId && !removesOffer) {
+          return state;
         }
+
+        const remainingGroups = new Set(
+          nextAcc.map((account) =>
+            getGroupBySocial((account as any).socialMedia),
+          ),
+        );
+        const nextContent = (state.contentByOption[optionIndex] ?? []).filter(
+          (content) => remainingGroups.has(content.socialMediaGroup),
+        );
 
         const pendingDelete = {
           ...(state.pendingDeleteKeysByOption?.[optionIndex] ?? {}),
@@ -598,6 +797,20 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         };
 
         delete recentlyAdded[String(accountKey)];
+
+        const nextSelectedOfferChanges = {
+          ...state.selectedOfferChangeByOption,
+        };
+        if (removesOffer) {
+          nextSelectedOfferChanges[optionIndex] = null;
+        }
+
+        const nextBundleMembership = {
+          ...(state.pendingBundleMembershipByOption[optionIndex] ?? {}),
+        };
+        if (removedBundleId) {
+          delete nextBundleMembership[removedBundleId];
+        }
 
         return {
           accountsByOption: {
@@ -616,6 +829,82 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
             ...(state.recentlyAddedKeysByOption ?? {}),
             [optionIndex]: recentlyAdded,
           },
+          pendingBundleMembershipByOption: {
+            ...state.pendingBundleMembershipByOption,
+            [optionIndex]: nextBundleMembership,
+          },
+          selectedOfferChangeByOption: nextSelectedOfferChanges,
+        };
+      });
+    },
+    removeOfferBundleOverlap: (optionIndex, overlap) => {
+      useUpdateCampaign.getState().markDirty();
+
+      set((state) => {
+        const previousAccounts = state.accountsByOption[optionIndex] ?? [];
+        const nextAccounts = removeFullOverlapAccounts(
+          previousAccounts,
+          overlap,
+        );
+
+        if (nextAccounts.length === previousAccounts.length) return state;
+
+        const remainingGroups = new Set(
+          nextAccounts.map((account) =>
+            getGroupBySocial((account as any).socialMedia),
+          ),
+        );
+        const nextContent = (state.contentByOption[optionIndex] ?? []).filter(
+          (content) => remainingGroups.has(content.socialMediaGroup),
+        );
+        const removedAccountKeys = new Set(
+          previousAccounts
+            .filter((account) => !nextAccounts.includes(account))
+            .map(getAccountKey)
+            .filter(Boolean),
+        );
+        const pendingDelete = {
+          ...(state.pendingDeleteKeysByOption[optionIndex] ?? {}),
+        };
+        const recentlyAdded = {
+          ...(state.recentlyAddedKeysByOption[optionIndex] ?? {}),
+        };
+
+        removedAccountKeys.forEach((key) => {
+          delete pendingDelete[String(key)];
+          delete recentlyAdded[String(key)];
+        });
+
+        const nextBundleMembership = {
+          ...(state.pendingBundleMembershipByOption[optionIndex] ?? {}),
+        };
+        delete nextBundleMembership[overlap.bundleId];
+
+        return {
+          accountsByOption: {
+            ...state.accountsByOption,
+            [optionIndex]: nextAccounts,
+          },
+          contentByOption: {
+            ...state.contentByOption,
+            [optionIndex]: nextContent,
+          },
+          pendingDeleteKeysByOption: {
+            ...state.pendingDeleteKeysByOption,
+            [optionIndex]: pendingDelete,
+          },
+          recentlyAddedKeysByOption: {
+            ...state.recentlyAddedKeysByOption,
+            [optionIndex]: recentlyAdded,
+          },
+          pendingBundleMembershipByOption: {
+            ...state.pendingBundleMembershipByOption,
+            [optionIndex]: nextBundleMembership,
+          },
+          selectedOfferChangeByOption: {
+            ...state.selectedOfferChangeByOption,
+            [optionIndex]: null,
+          },
         };
       });
     },
@@ -623,9 +912,20 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       set((state) => {
         const nextAcc = { ...state.accountsByOption };
         const nextContent = { ...state.contentByOption };
+        const nextBundleMembership = {
+          ...state.pendingBundleMembershipByOption,
+        };
+        const nextOfferChanges = { ...state.selectedOfferChangeByOption };
         delete nextAcc[optionIndex];
         delete nextContent[optionIndex];
-        return { accountsByOption: nextAcc, contentByOption: nextContent };
+        delete nextBundleMembership[optionIndex];
+        delete nextOfferChanges[optionIndex];
+        return {
+          accountsByOption: nextAcc,
+          contentByOption: nextContent,
+          pendingBundleMembershipByOption: nextBundleMembership,
+          selectedOfferChangeByOption: nextOfferChanges,
+        };
       });
     },
   })),

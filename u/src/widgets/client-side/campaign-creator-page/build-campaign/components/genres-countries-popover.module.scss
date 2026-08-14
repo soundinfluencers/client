@@ -22,12 +22,27 @@
   }
 }
 
+.inFlow {
+  position: static;
+  width: calc(100% + 34px);
+  margin: 16px -17px -1px;
+  padding: 24px 12px 12px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  z-index: auto;
+}
+
 .content {
   padding: 12px;
   max-height: 280px;
   overflow-y: auto;
   @include sb.scrollbar-dotted-vertical;
 
+}
+
+.contentInFlow {
+  max-height: none;
+  overflow: visible;
 }
 
 .rowContent {

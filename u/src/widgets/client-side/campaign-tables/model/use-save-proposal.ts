@@ -1,46 +1,68 @@
 import React from "react";
 import { toast } from "react-toastify";
-import { buildStrategyProposalPayload } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
+import {
+    assertInitialProposalCreateTopology,
+    buildStrategyProposalPayload,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
 import {postCampaignProposal} from "@/entities/client-side/campaign-strategy-page/api/save-proposal.ts";
+import type {
+    CampaignContentItem,
+    SelectedCampaignAccount,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
+import type {
+    CampaignCurrencyCode,
+} from "@/entities/client-side/campaign-creator-page/campaign-filter/model/campaign-filter.types";
 
 type Params = {
     campaignName: string;
     totalPrice: number;
-    accounts: any[];
-    content: any[];
+    displayCurrency: CampaignCurrencyCode | null;
+    accounts: SelectedCampaignAccount[];
+    content: CampaignContentItem[];
+    selectedOfferId: string | null;
+    selectedOfferAccountIds: string[];
 };
 
 export const useSaveProposal = ({
-                                    campaignName,
-                                    totalPrice,
-                                    accounts,
-                                    content,
-                                }: Params) => {
+    campaignName,
+    totalPrice,
+    displayCurrency,
+    accounts,
+    content,
+    selectedOfferId,
+    selectedOfferAccountIds,
+}: Params) => {
     const [isProposalModalOpen, setProposalModalOpen] = React.useState(false);
     const [campaignProposalId, setCampaignProposalId] = React.useState("");
     const [socialType, setSocialType] = React.useState("");
 
     const saveProposal = React.useCallback(async () => {
         try {
+            if (!displayCurrency) {
+                throw new Error("Proposal currency is missing");
+            }
+
             const proposalPayload = buildStrategyProposalPayload({
                 campaignName,
                 totalPrice,
+                displayCurrency,
                 accounts,
                 content,
+                selectedOfferId,
+                selectedOfferAccountIds,
             });
-        console.log(proposalPayload,'proposal');
-            const response = await postCampaignProposal(proposalPayload);
+            assertInitialProposalCreateTopology(proposalPayload);
+            console.log(proposalPayload, "proposal");
+            const created = await postCampaignProposal(proposalPayload);
+            const proposalId = String(created.campaignId ?? "");
+            const socialMedia = String(proposalPayload.socialMedia ?? "");
 
-            const payload =
-                (response as any)?.data?.data ??
-                (response as any)?.data ??
-                response;
-
-            const proposalId = String(payload?.campaignId ?? "");
-            const socialMedia = String(payload?.socialMedia ?? "");
-
-            if (!proposalId) {
-                throw new Error("Proposal id was not returned");
+            if (
+                !proposalId ||
+                !Number.isInteger(created.optionIndex) ||
+                created.optionIndex < 0
+            ) {
+                throw new Error("Valid Proposal identity was not returned");
             }
 
             setCampaignProposalId(proposalId);
@@ -54,7 +76,15 @@ export const useSaveProposal = ({
 
             toast.error(message);
         }
-    }, [campaignName, totalPrice, accounts, content]);
+    }, [
+        campaignName,
+        totalPrice,
+        displayCurrency,
+        accounts,
+        content,
+        selectedOfferId,
+        selectedOfferAccountIds,
+    ]);
 
     return {
         isProposalModalOpen,

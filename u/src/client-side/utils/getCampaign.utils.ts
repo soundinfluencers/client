@@ -1,9 +1,16 @@
 import type {
   RegularCampaignData,
   CampaignPageModel,
-  ProposalCampaignData,
   DraftCampaignData,
 } from "@/pages/client/types";
+import type {
+  CampaignSocialMedia,
+  ProposalCampaignDto,
+  ProposalOptionDto,
+} from "@/entities/client-side/campaign/model/campaign-api.types.ts";
+import type {
+  CampaignDisplayCurrency,
+} from "@/shared/functions/formatCurrency.ts";
 
 export function toCampaignPageModelFromRegular(
   api: RegularCampaignData,
@@ -39,19 +46,31 @@ export function toCampaignPageModelFromRegular(
     displayCurrency:api.displayCurrency
   };
 }
-type ProposalModel = Extract<CampaignPageModel, { kind: "proposal" }>;
+export type ProposalCampaignPageModel = {
+  kind: "proposal";
+  campaignId: string;
+  campaignName: string;
+  socialMedia: CampaignSocialMedia;
+  status: "proposal";
+  existingOptions: number[];
+  selectedOption: ProposalOptionDto;
+  price: number;
+  displayCurrency: CampaignDisplayCurrency;
+};
+
 export function toCampaignPageModelFromProposal(
-  api: ProposalCampaignData,
-): ProposalModel {
+  api: ProposalCampaignDto,
+): ProposalCampaignPageModel {
   return {
     kind: "proposal",
-    campaignId: api?.campaignId,
-    campaignName: api?.campaignName,
-    socialMedia: api?.socialMedia,
+    campaignId: api.campaignId,
+    campaignName: api.campaignName,
+    socialMedia: api.socialMedia,
     status: "proposal",
-    existingOptions: api?.existingOptions ?? [],
-    selectedOption: api?.selectedOption,
-    price: api?.selectedOption?.price,
+    existingOptions: api.existingOptions,
+    selectedOption: api.selectedOption,
+    price: api.selectedOption.price,
+    displayCurrency: api.selectedOption.displayCurrency,
   };
 }
 

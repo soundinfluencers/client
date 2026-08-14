@@ -1,63 +1,40 @@
 import React from "react";
 import { toast } from "react-toastify";
 
-import type {
-    CampaignPostContentAccount,
-    BuiltCampaignPostContentPayload,
-} from "@/widgets/client-side/campaign-post-content/model/campaign-post-content.types";
-import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
+import {
+    buildCampaignDraftPayload,
+    buildCampaignDraftWorkflowValuesByAccountId,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/build-draft-payload";
+import {
+    useCampaignBuilderStore,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
+import {
+    CampaignDraftLatestStep,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
 import {
     postCampaignDraft,
-    updateCampaignDraft,
 } from "@/entities/client-side/campaign-draft/api/campaign-draft.api";
 import {
-    CampaignDraftLatestStep
-} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types.ts";
-
-type DraftApiResponse =
-    | {
-    draftId?: string;
-    _id?: string;
-    data?: {
-        draftId?: string;
-        _id?: string;
-    };
-}
-    | undefined;
+    parseCampaignDraftError,
+} from "@/entities/client-side/campaign-draft/model/campaign-draft.errors";
+import type {
+    BuiltCampaignPostContentPayload,
+} from "@/widgets/client-side/campaign-post-content/model/campaign-post-content.types";
 
 type Params = {
-    accounts: CampaignPostContentAccount[];
-    campaignPrice: number;
     buildPayload: () => BuiltCampaignPostContentPayload;
 };
 
-type SaveDraftPayload = {
-    draftId?: string;
-    step: CampaignDraftLatestStep;
-    campaignName: string;
-    socialMedia: string;
-    campaignPrice: number;
-    addedAccounts: BuiltCampaignPostContentPayload["addedAccounts"];
-
-    campaignContent: BuiltCampaignPostContentPayload["campaignContent"];
-    // postContentDraft: Record<string, unknown> | null;
-    // blocksDraft: CampaignPostContentBlock[] | null;
-    // selectedAccounts: ReturnType<typeof useCampaignBuilderStore.getState>["selectedAccounts"];
-};
-
 export const useCampaignPostContentPageDraft = ({
-                                                    campaignPrice,
-                                                    buildPayload,
-                                                }: Params) => {
-    const draftId = useCampaignBuilderStore((s) => s.draftId);
-    const campaignName = useCampaignBuilderStore((s) => s.campaignName);
-    const postContentDraft = useCampaignBuilderStore((s) => s.postContentDraft);
-    const blocksDraft = useCampaignBuilderStore((s) => s.blocksDraft);
-    const selectedAccounts = useCampaignBuilderStore((s) => s.selectedAccounts);
-    const setDraftMeta = useCampaignBuilderStore((s) => s.actions.setDraftMeta);
+    buildPayload,
+}: Params) => {
+    const campaignName = useCampaignBuilderStore((state) => state.campaignName);
+    const actions = useCampaignBuilderStore((state) => state.actions);
 
     const [draftModal, setDraftModal] = React.useState(false);
     const [draftName, setDraftName] = React.useState("");
+    const [isSaving, setIsSaving] = React.useState(false);
+    const inFlightRef = React.useRef(false);
 
     const openDraftModal = React.useCallback(() => {
         setDraftName(campaignName || "");
@@ -69,66 +46,67 @@ export const useCampaignPostContentPageDraft = ({
     }, []);
 
     const onSaveDraft = React.useCallback(async () => {
+        if (inFlightRef.current) return;
+
+        const nextCampaignName = draftName.trim() || campaignName || "";
+
+        if (!nextCampaignName) {
+            toast.error("Draft name is required");
+            return;
+        }
+
+        inFlightRef.current = true;
+        setIsSaving(true);
+
         try {
-            const payload = buildPayload();
+            const currentContentPayload = buildPayload();
+            const state = useCampaignBuilderStore.getState();
+            const workflowValuesByAccountId =
+                buildCampaignDraftWorkflowValuesByAccountId(
+                    currentContentPayload.addedAccounts,
+                );
+            const { payload, draftSelectionRows } =
+                buildCampaignDraftPayload(state, {
+                    campaignName: nextCampaignName,
+                    step: CampaignDraftLatestStep.addContent,
+                    campaignContent: currentContentPayload.campaignContent,
+                    workflowValuesByAccountId,
+                });
 
-            const nextCampaignName = draftName.trim() || campaignName || "";
+            actions.setDraftSelectionRows(draftSelectionRows);
 
-            if (!nextCampaignName) {
-                toast.error("Draft name is required");
-                return;
+            const expectedOperation = state.draftId ? "updated" : "created";
+            const result = await postCampaignDraft(payload);
+
+            if (
+                import.meta.env.DEV &&
+                result.operation !== expectedOperation
+            ) {
+                console.warn(
+                    `Campaign Draft was ${result.operation}; expected ${expectedOperation}.`,
+                );
             }
 
-            const draftPayload: SaveDraftPayload = {
-                draftId: draftId || undefined,
-                step: CampaignDraftLatestStep.addContent,
-                campaignName: nextCampaignName,
-                socialMedia: payload.socialMedia,
-                campaignPrice,
-                addedAccounts: payload.addedAccounts,
-                campaignContent: payload.campaignContent,
-            };
-            const response: DraftApiResponse = draftId
-                ? await updateCampaignDraft(draftPayload)
-                : await postCampaignDraft(draftPayload);
-
-
-            const nextDraftId =
-                response?.draftId ||
-                response?._id ||
-                response?.data?.draftId ||
-                response?.data?._id ||
-                null;
-
-            setDraftMeta({
-                draftId: nextDraftId,
+            actions.setDraftMeta({
+                draftId: result.draftId,
                 draftStep: CampaignDraftLatestStep.addContent,
             });
+            actions.setCampaignName(nextCampaignName);
 
             toast.success("Draft saved successfully");
             closeDraftModal();
         } catch (error) {
-            const message =
-                error instanceof Error ? error.message : "Failed to save draft";
-
-            toast.error(message);
+            toast.error(parseCampaignDraftError(error).message);
+        } finally {
+            inFlightRef.current = false;
+            setIsSaving(false);
         }
-    }, [
-        buildPayload,
-        draftId,
-        draftName,
-        campaignName,
-        campaignPrice,
-        postContentDraft,
-        blocksDraft,
-        selectedAccounts,
-        setDraftMeta,
-        closeDraftModal,
-    ]);
+    }, [actions, buildPayload, campaignName, closeDraftModal, draftName]);
 
     return {
         draftModal,
         draftName,
+        isSaving,
         setDraftName,
         openDraftModal,
         closeDraftModal,

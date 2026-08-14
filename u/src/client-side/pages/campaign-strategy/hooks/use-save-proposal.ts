@@ -12,15 +12,22 @@ export const useSaveProposal = () => {
 
     const saveProposal = React.useCallback(async () => {
         const proposalsPayload = actions.getProposalPayload();
-        const response = await postCampaignProposal(proposalsPayload);
+        const created = await postCampaignProposal(proposalsPayload);
+        console.log(created,'proposal-payload-id');
+        const proposalId = created.campaignId ?? "";
+        const socialMedia = String(
+            (
+                proposalsPayload as unknown as { socialMedia?: unknown }
+            )?.socialMedia ?? "",
+        );
 
-        const payload =
-            (response as any)?.data?.data ??
-            (response as any)?.data ??
-            response;
-        console.log(payload,'proposal-payload-id');
-        const proposalId = payload?.campaignId ?? "";
-        const socialMedia = payload?.socialMedia ?? "";
+        if (
+            !proposalId ||
+            !Number.isInteger(created.optionIndex) ||
+            created.optionIndex < 0
+        ) {
+            throw new Error("Valid Proposal identity was not returned");
+        }
 
         setCampaignProposalId(proposalId);
         setSocialType(socialMedia);

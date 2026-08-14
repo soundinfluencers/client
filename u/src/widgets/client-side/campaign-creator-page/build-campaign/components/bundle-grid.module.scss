@@ -1,0 +1,32 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  width: 100%;
+  gap: 24px;
+}
+
+.loading {
+  :global(.bs-card) {
+    height: 308px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 16px;
+  }
+
+  .loading {
+    :global(.bs-card) {
+      height: 273px;
+    }
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

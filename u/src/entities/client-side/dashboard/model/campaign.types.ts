@@ -1,3 +1,7 @@
+import type {
+    CampaignDisplayCurrency,
+} from "@/shared/functions/formatCurrency";
+
 export type CampaignStatus =
     | "draft"
     | "proposal"
@@ -22,6 +26,7 @@ export type CampaignListItem = {
     socialMedia: CampaignSocialMedia;
     creationDate: string;
     price: number;
+    displayCurrency: CampaignDisplayCurrency;
     status: CampaignStatus;
     draftStep?: string;
 };

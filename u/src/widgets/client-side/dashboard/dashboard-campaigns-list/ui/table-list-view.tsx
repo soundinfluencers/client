@@ -9,6 +9,9 @@ import {
     useDeleteCampaignDraft
 } from "@/features/client-side/dashboard/delete-campaign-draft/model/use-delete-campaign-draft.ts";
 import { DeleteDraftModal } from "./delete-draft-modal";
+import {
+    formatDashboardCampaignPrice,
+} from "@/entities/client-side/dashboard/model/campaign-price";
 
 type Props = {
     thead: string[];
@@ -108,7 +111,7 @@ export const TableListView = ({ thead, list, onOpen, isLoading }: Props) => {
                         </div>
 
                         <div className={styles.tableCell} style={{ width: COLS[3] }}>
-                            <p>{item.price ? `${item.price}€` : ""}</p>
+                            <p>{formatDashboardCampaignPrice(item)}</p>
                         </div>
                     </div>
                 ))}

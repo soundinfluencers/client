@@ -6,6 +6,9 @@ import type {
 import type { FilterItem } from "../client/creator-campaign/filters.types";
 import type { Profile } from "../client/profile-details/profile-detials.types";
 import type { SocialMediaType } from "../utils/constants.types";
+import type {
+  CampaignDisplayCurrency,
+} from "@/shared/functions/formatCurrency.ts";
 
 //
 // =========================
@@ -288,7 +291,7 @@ export interface CampaignAddedAccount {
 // -------------------------
 
 export interface CampaignResponse {
-  displayCurrency: any;
+  displayCurrency: CampaignDisplayCurrency;
   campaignId: ObjectId;
   campaignName: string;
   canEdit: boolean;

@@ -1,0 +1,29 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  text-align: center;
+
+  @media screen and (max-width: 599px) {
+    gap: 4px;
+  }
+}
+
+.public {
+  font-size: var(--text-xxl);
+  font-weight: 400;
+}
+
+.protected {
+  font-size: 36px;
+  font-weight: 400;
+
+  @media screen and (max-width: 811px) {
+    font-size: 24px;
+  }
+
+  @media screen and (max-width: 599px) {
+    font-size: 20px;
+  }
+}

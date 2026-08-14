@@ -28,9 +28,12 @@ import {
 } from "./campaign-post-content.helpers";
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 import {z} from "zod";
+import type {
+    CampaignBuilderMode,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation";
 
 type Params = {
-    mode?: "create" | "add-influencer";
+    mode?: CampaignBuilderMode;
     accounts: CampaignPostContentAccount[];
     campaignPrice: number;
     campaignName?: string;
@@ -292,12 +295,34 @@ export const useCampaignPostContent = ({
             campaignPrice,
             accounts,
             blocks: data.blocks,
+            previousCampaignContent: defaultCampaignContent,
         });
 
         setCampaignContent(payload.campaignContent);
 
         return payload;
-    }, [accounts, campaignPrice, form, setCampaignContent]);
+    }, [
+        accounts,
+        campaignPrice,
+        defaultCampaignContent,
+        form,
+        setCampaignContent,
+    ]);
+
+    React.useEffect(() => {
+        if (!import.meta.env.DEV || !defaultCampaignContent?.length) return;
+
+        const ids = defaultCampaignContent.map((item) => String(item._id));
+        const duplicateIds = ids.filter(
+            (id, index) => ids.indexOf(id) !== index,
+        );
+
+        if (duplicateIds.length > 0) {
+            console.warn("[Campaign Content duplicate item IDs]", {
+                duplicateIds: [...new Set(duplicateIds)],
+            });
+        }
+    }, [defaultCampaignContent]);
 
     React.useEffect(() => {
         const subscription = form.watch((values) => {

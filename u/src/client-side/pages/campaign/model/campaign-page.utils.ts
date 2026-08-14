@@ -1,4 +1,10 @@
 import type { CampaignPageData, LastCampaignSession } from "./campaign-page.types";
+import type {
+  CreateProposalOptionResult,
+} from "@/entities/client-side/campaign/model/campaign-api.types.ts";
+import {
+  isCreatedProposalOptionForCampaign,
+} from "@/entities/client-side/campaign/model/proposal-option-response.ts";
 
 export const getCampaignActionId = (data: CampaignPageData): string => {
   if (!data) return "";
@@ -46,6 +52,28 @@ export const parseLastCampaignSession = (): LastCampaignSession | null => {
   }
 };
 
+export const writeLastProposalOptionSession = ({
+  campaignId,
+  optionIndex,
+}: {
+  campaignId: string;
+  optionIndex: number;
+}) => {
+  sessionStorage.setItem(
+    "lastCampaign",
+    JSON.stringify({
+      id: campaignId,
+      status: "proposal",
+      optionIndex,
+    } satisfies LastCampaignSession),
+  );
+};
+
+export const isValidCreatedProposalOption = (
+  response: CreateProposalOptionResult,
+  currentCampaignId: string,
+): boolean => isCreatedProposalOptionForCampaign(response, currentCampaignId);
+
 export const buildPromoShareUrl = (campaignId: string) => {
   const origin = "https://go.soundinfluencers.com";
   const id = encodeURIComponent(campaignId);
@@ -69,21 +97,32 @@ export const isLockedStatus = (status?: string) =>
 export const getNextActiveOptionAfterDelete = ({
   activeOption,
   deletedOption,
-  optionsCount,
+  existingOptions,
 }: {
   activeOption: number;
   deletedOption: number;
-  optionsCount: number;
-}) => {
-  const nextOptionsCount = Math.max(0, optionsCount - 1);
-  const lastIndexAfterDelete = Math.max(0, nextOptionsCount - 1);
+  existingOptions: number[];
+}): number | null => {
+  const normalizedOptions = Array.from(new Set(existingOptions)).sort(
+    (a, b) => a - b,
+  );
+  const isContiguous = normalizedOptions.every(
+    (optionIndex, index) => optionIndex === index,
+  );
 
-  if (nextOptionsCount === 0) {
-    return 0;
+  if (
+    normalizedOptions.length <= 1 ||
+    !isContiguous ||
+    !normalizedOptions.includes(activeOption) ||
+    !normalizedOptions.includes(deletedOption)
+  ) {
+    return null;
   }
 
+  const lastIndexAfterDelete = normalizedOptions.length - 2;
+
   if (activeOption === deletedOption) {
-    return Math.min(Math.max(0, deletedOption - 1), lastIndexAfterDelete);
+    return Math.min(deletedOption, lastIndexAfterDelete);
   }
 
   if (activeOption > deletedOption) {

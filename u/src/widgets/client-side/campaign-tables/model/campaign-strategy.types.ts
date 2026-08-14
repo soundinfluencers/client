@@ -187,6 +187,15 @@ export type StrategyProposalPayload = {
     campaignContent: CampaignContentItem[];
 };
 
-export type CreateCampaignPayload = StrategyProposalPayload & {
+export type CreateCampaignAddedAccount =
+    StrategyProposalPayload["addedAccounts"][number] & {
+        bundleId?: string;
+    };
+
+export type CreateCampaignPayload = Omit<
+    StrategyProposalPayload,
+    "addedAccounts"
+> & {
+    addedAccounts: CreateCampaignAddedAccount[];
     paymentDetails: PaymentDetails;
 };

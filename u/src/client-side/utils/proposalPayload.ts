@@ -1,4 +1,8 @@
-type SelectedContent = { campaignContentItemId: string; descriptionId: string };
+type SelectedContent = {
+  campaignContentItemId: string;
+  descriptionId: string;
+  additionalBriefId?: string;
+};
 
 type AnyAccount = any;
 type AnyContent = any;
@@ -36,6 +40,9 @@ const pickSelected = (a: AnyAccount): SelectedContent | null => {
   return {
     campaignContentItemId: String(s.campaignContentItemId),
     descriptionId: String(s.descriptionId),
+    additionalBriefId: isObjectId(s.additionalBriefId)
+      ? String(s.additionalBriefId)
+      : undefined,
   };
 };
 
@@ -59,7 +66,17 @@ const ensureMongoIdsForContent = (content: AnyContent[]) => {
     next.mainLink = String(next.mainLink ?? "");
     next.taggedUser = String(next.taggedUser ?? "");
     next.taggedLink = String(next.taggedLink ?? "");
-    next.additionalBrief = String(next.additionalBrief ?? "");
+    const rawAdditionalBrief = next.additionalBrief;
+    next.additionalBrief = (
+      Array.isArray(rawAdditionalBrief)
+        ? rawAdditionalBrief
+        : String(rawAdditionalBrief ?? "").trim()
+          ? [{ additionalBrief: String(rawAdditionalBrief) }]
+          : []
+    ).map((brief: any) => ({
+      _id: isObjectId(brief?._id) ? String(brief._id) : objectId(),
+      additionalBrief: String(brief?.additionalBrief ?? ""),
+    }));
 
     return next;
   });
@@ -93,6 +110,9 @@ const pickDefaultSelectedForSocial = (
   return {
     campaignContentItemId: String(item._id),
     descriptionId: String(descId),
+    additionalBriefId: item.additionalBrief?.[0]?._id
+      ? String(item.additionalBrief[0]._id)
+      : undefined,
   };
 };
 const ensureValidSelected = (
@@ -109,7 +129,18 @@ const ensureValidSelected = (
   const has = (item.descriptions ?? []).some(
     (d: any) => String(d._id) === String(selected.descriptionId),
   );
-  if (has) return selected;
+  if (has) {
+    const hasBrief = (item.additionalBrief ?? []).some(
+      (brief: any) =>
+        String(brief?._id ?? "") === String(selected.additionalBriefId ?? ""),
+    );
+    return {
+      ...selected,
+      additionalBriefId: hasBrief
+        ? selected.additionalBriefId
+        : item.additionalBrief?.[0]?._id,
+    };
+  }
 
   const fallback = item.descriptions?.[0]?._id;
   if (!fallback) return null;
@@ -117,6 +148,7 @@ const ensureValidSelected = (
   return {
     campaignContentItemId: String(item._id),
     descriptionId: String(fallback),
+    additionalBriefId: item.additionalBrief?.[0]?._id,
   };
 };
 
@@ -149,7 +181,10 @@ const mapContentToApi = (c: AnyContent) => ({
   })),
   taggedUser: String(c.taggedUser ?? ""),
   taggedLink: String(c.taggedLink ?? ""),
-  additionalBrief: String(c.additionalBrief ?? ""),
+  additionalBrief: (c.additionalBrief ?? []).map((brief: any) => ({
+    _id: String(brief?._id ?? ""),
+    additionalBrief: String(brief?.additionalBrief ?? ""),
+  })),
 });
 
 const cloneContentForSocial = (template: AnyContent, socialMedia: string) => {

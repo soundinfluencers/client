@@ -1,15 +1,20 @@
 import React from "react";
 import styles from "./campaign-post-content-selection.module.scss";
-import type { CampaignPostContentAccount } from "../model/campaign-post-content.types";
+import type {
+    CampaignPostContentAccount,
+    CampaignPostContentBundleSummary,
+} from "../model/campaign-post-content.types";
 import { normalizeSocial } from "../model/campaign-post-content.helpers";
 import offerIcon from "@/assets/icons/multi.png";
 import { formatFollowers } from "@/utils/functions/formatFollowers.ts";
 import { getSocialMediaIconPostContent } from "@/constants/social-medias.ts";
+import { formatCurrency } from "@/shared/functions/formatCurrency.ts";
 import type { SocialMediaType } from "@/shared/types/utils/constants.types.ts";
 
 type Props = {
     accounts: CampaignPostContentAccount[];
     offerAccounts: CampaignPostContentAccount[];
+    bundles: CampaignPostContentBundleSummary[];
     manualAccounts: CampaignPostContentAccount[];
     offerName?: string;
     totalPrice: number;
@@ -25,14 +30,23 @@ type SelectionGroup = {
     items: CampaignPostContentAccount[];
 };
 
-const formatPrice = (value?: number | string) => {
-    if (value === undefined || value === null || value === "") return "";
-    return `${value}€`;
+// const formatPrice = (value?: number | string) => {
+//     if (value === undefined || value === null || value === "") return "";
+//     return `${value}€`;
+// };
+
+const formatBundlePrice = (
+    value: number | undefined,
+    currency?: string,
+) => {
+    if (value === undefined) return "—";
+    return formatCurrency(value, currency);
 };
 
 export const CampaignPostContentSelection: React.FC<Props> = ({
-                                                                  offerAccounts,
-                                                                  manualAccounts,
+                                                                   offerAccounts,
+                                                                   bundles,
+                                                                   manualAccounts,
                                                                   offerName,
                                                                   totalPrice,
                                                                   onEditSelection,offerPrice,currency
@@ -219,7 +233,7 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
                 </div>
 
                 <div className={styles.accountPrice}>
-                    <span>{formatPrice(item.price)}</span>
+                    <span>{formatBundlePrice(item.price, currency)}</span>
                 </div>
             </div>
         );
@@ -267,7 +281,7 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
                             </div>
 
                             <div>
-                                <span>{formatPrice(offerPrice)}</span>
+                                <span>{formatBundlePrice(offerPrice, currency)}</span>
                             </div>
                         </div>
 
@@ -275,6 +289,99 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
                             {offerGroups.map((group) => renderGroup(group, true))}
                         </div>
                     </section>
+                )}
+
+                {!!bundles.length && (
+                    <div className={styles.bundleSections}>
+                        {bundles.map((bundle) => (
+                            <section
+                                key={bundle.bundleId}
+                                className={styles.bundleSection}
+                            >
+                                <div className={styles.bundleHeader}>
+                                    <h4>Bundle</h4>
+
+                                    <div className={styles.bundlePrice}>
+                                        <span>Price</span>
+
+                                        <span className={styles.bundlePriceValues}>
+                                            {bundle.originalPrice !== undefined && (
+                                                <del>
+                                                    {formatBundlePrice(
+                                                        bundle.originalPrice,
+                                                        currency,
+                                                    )}
+                                                </del>
+                                            )}
+                                            <strong>
+                                                {formatBundlePrice(
+                                                    bundle.currentPrice,
+                                                    currency,
+                                                )}
+                                            </strong>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className={styles.bundleAccountsWrap}>
+                                    <ul className={styles.bundleAccounts}>
+                                        {bundle.accounts.map((account) => {
+                                            const platformIcon =
+                                                getSocialMediaIconPostContent(
+                                                    account.socialMedia as SocialMediaType,
+                                                );
+
+                                            return (
+                                                <li
+                                                    key={account.accountId}
+                                                    className={styles.bundleAccount}
+                                                >
+                                                    <span
+                                                        className={
+                                                            styles.bundleUsername
+                                                        }
+                                                    >
+                                                        {account.username}
+                                                    </span>
+
+                                                    <span
+                                                        className={
+                                                            styles.bundleAccountPlatform
+                                                        }
+                                                    >
+                                                        {platformIcon && (
+                                                            <img
+                                                                src={platformIcon}
+                                                                alt={
+                                                                    account.socialMedia
+                                                                }
+                                                            />
+                                                        )}
+                                                        <span>
+                                                            {formatFollowers(
+                                                                account.followers,
+                                                            )}
+                                                        </span>
+                                                    </span>
+
+                                                    <span
+                                                        className={
+                                                            styles.bundleAccountPrice
+                                                        }
+                                                    >
+                                                        {formatBundlePrice(
+                                                            account.price,
+                                                            currency,
+                                                        )}
+                                                    </span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            </section>
+                        ))}
+                    </div>
                 )}
 
                 {!!manualGroups.length && (

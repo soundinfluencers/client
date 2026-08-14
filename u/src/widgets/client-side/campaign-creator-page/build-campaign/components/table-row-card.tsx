@@ -19,7 +19,7 @@ interface Props {
     data: PromoAccount;
     setIsSmall: React.Dispatch<React.SetStateAction<boolean>>;
     isSmall: boolean;
-    isInclude: boolean;
+    isDisabled: boolean;
     isSelected: boolean;
 }
 
@@ -27,23 +27,23 @@ const getPriceByCurrency = (
     prices: Record<string, number>,
     currency: { currency: string },
 ) => {
-    return Number(prices?.[currency.currency] ?? prices?.EUR ?? 0);
+    return prices?.[currency.currency];
 };
 
 export const TableRowCard: React.FC<Props> = ({
                                                   data,
                                                   setIsSmall,
                                                   isSmall,
-                                                  isInclude,
+                                                  isDisabled,
                                                   isSelected,
                                               }) => {
-    const { selectedCurrency } = useBuildCampaignParams();
+    const { selectedCurrency, selectedCurrencyCode } = useBuildCampaignParams();
     const togglePromoCard = useCampaignBuilderStore((s) => s.actions.togglePromoCard);
 
 
 
     const onToggle = () => {
-        if (isInclude) return;
+        if (isDisabled) return;
 
         togglePromoCard({
             accountId: data.accountId,
@@ -52,6 +52,7 @@ export const TableRowCard: React.FC<Props> = ({
             username: data.username,
             profileType: data.profileType,
             price: getPriceByCurrency(data.prices, selectedCurrency),
+            prices: { ...data.prices },
             dateRequest: "ASAP",
             followers: data.followers,
 
@@ -59,7 +60,7 @@ export const TableRowCard: React.FC<Props> = ({
             genres: data.musicGenres,
             logoUrl: data.logoUrl,
             source: "manual",
-        });
+        }, selectedCurrencyCode);
     };
     React.useEffect(() => {
         const el = document.querySelector(`[data-id="${data.accountId}"]`);
@@ -86,7 +87,8 @@ export const TableRowCard: React.FC<Props> = ({
             <div className={styles.name}>
                 <Checkbox
                     onChange={onToggle}
-                    isChecked={isInclude || isSelected}
+                    isChecked={isDisabled || isSelected}
+                    disabled={isDisabled}
                     name={data.username}
                 />
             </div>
@@ -94,7 +96,7 @@ export const TableRowCard: React.FC<Props> = ({
             <div className={styles.price}>
                 <img src={data.logoUrl} alt="" />
                 <span>
-          {getPriceByCurrency(data.prices, selectedCurrency)}
+          {getPriceByCurrency(data.prices, selectedCurrency) ?? "—"}
                     {selectedCurrency.key}
         </span>
             </div>

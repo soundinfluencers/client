@@ -10,7 +10,11 @@ type Props = {
 
   onCloseOptionModal: () => void;
 
+  onAddOptionNo: () => void;
+
   onAddOptionYes: () => void;
+
+  isPending: boolean;
 
 };
 
@@ -22,7 +26,11 @@ export const CampaignPageModals: React.FC<Props> = ({
 
   onCloseOptionModal,
 
+  onAddOptionNo,
+
   onAddOptionYes,
+
+  isPending,
 
 }) => {
   return (
@@ -39,12 +47,14 @@ export const CampaignPageModals: React.FC<Props> = ({
               <ButtonSecondary
                 className="btn"
                 text="No"
-                onClick={onCloseOptionModal}
+                onClick={onAddOptionNo}
+                isDisabled={isPending}
               />
               <ButtonMain
                 className="btn"
                 text="Yes"
                 onClick={onAddOptionYes}
+                isDisabled={isPending}
               />
             </div>
           </div>

@@ -3,9 +3,11 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import {
   deleteProposalOption,
-  patchAddProposalOption,
   patchCampaign,
 } from "@/api/client/campaign/campaign.api";
+import {
+  patchProposalOption,
+} from "@/entities/client-side/campaign/api/proposal-system.api.ts";
 import { getPdfFile } from "@/api/client/file/get-pdf";
 import { getCsvFile } from "@/api/client/file/get-csv";
 import {
@@ -17,7 +19,7 @@ import {
 } from "@/client-side/store";
 import {
   buildProposalPatchBody,
-  calcGroupPrices,
+  buildProposalOptionPatchBody,
   downloadBlob,
 } from "@/client-side/utils";
 import {
@@ -26,17 +28,34 @@ import {
   getCampaignActionId,
   getNextActiveOptionAfterDelete,
   getOptionIndexes,
+  isValidCreatedProposalOption,
+  writeLastProposalOptionSession,
 } from "./campaign-page.utils";
 import {
   filterContentWithAccounts,
   getAccountsByContentId,
 } from "@/client-side/widgets/campaign/model/campaign-content.utils.ts";
+import {
+  useCampaignBuilderStore,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import {
+  buildProposalOptionCreateUrl,
+  PROPOSAL_OPTION_CREATE_MODE,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation.ts";
+import {
+  isCampaignDisplayCurrency,
+} from "@/shared/functions/formatCurrency.ts";
+import {
+  CreateProposalOptionResponseValidationError,
+} from "@/entities/client-side/campaign/model/proposal-option-response.ts";
+import {
+  hydrateCreatedProposalOption,
+} from "./hydrate-created-proposal-option";
 
 type Params = {
   data: any;
   activeOption: number;
   setActiveOption: React.Dispatch<React.SetStateAction<number>>;
-  localExtraOptions: number[];
   setLocalExtraOptions: React.Dispatch<React.SetStateAction<number[]>>;
   textareaValue: string;
   setOptionModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -49,7 +68,6 @@ export const useCampaignPageActions = ({
   data,
   activeOption,
   setActiveOption,
-  localExtraOptions,
   setLocalExtraOptions,
   textareaValue,
   setOptionModal,
@@ -58,11 +76,12 @@ export const useCampaignPageActions = ({
   setIsRequestingPDF,
 }: Params) => {
   const navigate = useNavigate();
+  const isCreatingOptionRef = React.useRef(false);
   const campaignIdForActions = getCampaignActionId(data);
 
   const optionIndexes = React.useMemo(
-    () => getOptionIndexes(data, localExtraOptions),
-    [data, localExtraOptions],
+    () => getOptionIndexes(data, []),
+    [data],
   );
 
   const reloadProposalOption = React.useCallback(
@@ -74,8 +93,13 @@ export const useCampaignPageActions = ({
       .setProposalOption(data.campaignId, optionIndex);
 
       if (refreshed?.kind === "proposal") {
+        const refreshedOptionIndex = refreshed.selectedOption.optionIndex;
+
+        useProposalAccountsStore
+          .getState()
+          .setOptionSnapshot(refreshed.selectedOption);
         useProposalAccountsStore.getState().initOption(
-          optionIndex,
+          refreshedOptionIndex,
           refreshed.selectedOption?.addedAccounts ?? [],
           refreshed.selectedOption?.campaignContent ?? [],
           { force: true },
@@ -101,6 +125,9 @@ export const useCampaignPageActions = ({
         .setProposalOption(campaignIdForActions, optionIndex);
 
         if (refreshed?.kind === "proposal") {
+          useProposalAccountsStore
+            .getState()
+            .setOptionSnapshot(refreshed.selectedOption);
           useProposalAccountsStore.getState().initOption(
             optionIndex,
             refreshed.selectedOption?.addedAccounts ?? [],
@@ -161,47 +188,123 @@ export const useCampaignPageActions = ({
     [setIsRequestingPDF],
   );
 
-  const onAddOption = React.useCallback(
-    async (inheritFromCurrentOption: boolean) => {
-      if (data?.kind !== "proposal") return;
+  const onStartProposalOptionCreate = React.useCallback(() => {
+    if (data?.kind !== "proposal") return;
+    if (!campaignIdForActions) return;
 
-      const currentOptions = getOptionIndexes(data, localExtraOptions);
-      const nextOptionIndex = currentOptions.length;
+    const updateState = useUpdateCampaign.getState();
+    const hasUnsavedChanges =
+      Object.keys(updateState.patches ?? {}).length > 0 ||
+      updateState.hasStructuralChanges;
+
+    if (hasUnsavedChanges) {
+      toast.error("Save the current option before creating another option");
+      return;
+    }
+
+    const campaignName = String(data.campaignName ?? "").trim();
+    const displayCurrency = data.selectedOption?.displayCurrency;
+
+    if (!campaignName || !isCampaignDisplayCurrency(displayCurrency)) {
+      toast.error("Proposal campaign context is invalid");
+      return;
+    }
+
+    const builder = useCampaignBuilderStore.getState();
+
+    builder.actions.reset();
+    builder.actions.setCampaignName(campaignName);
+
+    const currencyResult = builder.actions.switchCampaignCurrency(
+      displayCurrency,
+    );
+
+    if (!currencyResult.ok) {
+      builder.actions.reset();
+      toast.error("Proposal currency is unavailable in Campaign Builder");
+      return;
+    }
+
+    setOptionModal(false);
+    navigate(
+      buildProposalOptionCreateUrl("/client/create-campaign", {
+        mode: PROPOSAL_OPTION_CREATE_MODE,
+        campaignId: campaignIdForActions,
+        returnTo: "/client/campaign",
+        currency: displayCurrency,
+      }),
+    );
+  }, [
+    data,
+    campaignIdForActions,
+    navigate,
+    setOptionModal,
+  ]);
+
+  const onCloneOption = React.useCallback(
+    async () => {
+      if (data?.kind !== "proposal") return;
+      if (!campaignIdForActions) return;
+
+      if (isCreatingOptionRef.current) return;
+
+      const updateState = useUpdateCampaign.getState();
+      const hasUnsavedChanges =
+        Object.keys(updateState.patches ?? {}).length > 0 ||
+        updateState.hasStructuralChanges;
+
+      if (hasUnsavedChanges) {
+        toast.error("Save the current option before creating another option");
+        return;
+      }
+
+      isCreatingOptionRef.current = true;
+      let postSucceeded = false;
 
       try {
         setIsRequesting(true);
         setOptionModal(false);
 
-        await useFetchCampaign
+        const created = await useFetchCampaign
         .getState()
-        .addProposalOption(campaignIdForActions, inheritFromCurrentOption);
+        .addProposalOption(campaignIdForActions, true);
+        postSucceeded = true;
 
-        useUpdateCampaign.getState().reset();
+        if (!isValidCreatedProposalOption(created, campaignIdForActions)) {
+          throw new Error("Invalid create Proposal option response");
+        }
+
+        await hydrateCreatedProposalOption(created);
 
         setLocalExtraOptions([]);
-        setActiveOption(nextOptionIndex);
+        setActiveOption(created.optionIndex);
         setIsRequestSent(false);
-
-        await reloadProposalOption(nextOptionIndex);
 
         toast.success("Proposal option added successfully!");
       } catch (e) {
         console.error(e);
-        toast.error("Failed to add proposal option");
+        const optionMayHaveBeenCreated =
+          postSucceeded ||
+          e instanceof CreateProposalOptionResponseValidationError;
+
+        toast.error(
+          optionMayHaveBeenCreated
+            ? "Option may have been created, but it could not be loaded. Reopen the proposal to retry"
+            : "Failed to add proposal option",
+        );
       } finally {
+        isCreatingOptionRef.current = false;
         setIsRequesting(false);
       }
     },
     [
       data,
-      localExtraOptions,
       campaignIdForActions,
       setLocalExtraOptions,
       setActiveOption,
       setOptionModal,
       setIsRequesting,
       setIsRequestSent,
-      reloadProposalOption,
     ],
   );
 
@@ -209,7 +312,7 @@ export const useCampaignPageActions = ({
     async (deletedOptionIndex: number) => {
       if (data?.kind !== "proposal") return;
 
-      const currentOptions = getOptionIndexes(data, localExtraOptions);
+      const currentOptions = getOptionIndexes(data, []);
 
       if (currentOptions.length <= 1) {
         toast.error("You cannot delete the last option");
@@ -219,26 +322,76 @@ export const useCampaignPageActions = ({
       const nextActiveOption = getNextActiveOptionAfterDelete({
         activeOption,
         deletedOption: deletedOptionIndex,
-        optionsCount: currentOptions.length,
+        existingOptions: currentOptions,
       });
+
+      if (nextActiveOption === null) {
+        toast.error("Cannot safely resolve the option after deletion");
+        return;
+      }
+
+      let deleteSucceeded = false;
 
       try {
         setIsRequesting(true);
 
         await deleteProposalOption(data.campaignId, deletedOptionIndex);
+        deleteSucceeded = true;
 
         useUpdateCampaign.getState().reset();
+        useProposalAccountsStore.getState().clearAll();
 
         setLocalExtraOptions([]);
         setActiveOption(nextActiveOption);
         setIsRequestSent(false);
+        writeLastProposalOptionSession({
+          campaignId: data.campaignId,
+          optionIndex: nextActiveOption,
+        });
 
-        await reloadProposalOption(nextActiveOption);
+        const refreshed = await reloadProposalOption(nextActiveOption);
+
+        const authoritativeOptionIndex = refreshed?.selectedOption?.optionIndex;
+        const refreshedOptions = refreshed?.existingOptions ?? [];
+        const isAuthoritativeSurvivor =
+          refreshed?.kind === "proposal" &&
+          String(refreshed.campaignId) === String(data.campaignId) &&
+          typeof authoritativeOptionIndex === "number" &&
+          authoritativeOptionIndex === nextActiveOption &&
+          refreshedOptions.includes(authoritativeOptionIndex);
+
+        if (!isAuthoritativeSurvivor) {
+          useProposalAccountsStore.getState().clearAll();
+          useFetchCampaign.setState({ data: null });
+          sessionStorage.removeItem("lastCampaign");
+          toast.error(
+            "Option was deleted, but the surviving option could not be loaded",
+          );
+          navigate("/client/dashboard");
+          return;
+        }
+
+        writeLastProposalOptionSession({
+          campaignId: data.campaignId,
+          optionIndex: authoritativeOptionIndex,
+        });
 
         toast.success("Proposal option deleted successfully!");
       } catch (e) {
         console.error(e);
-        toast.error("Failed to delete option");
+
+        if (deleteSucceeded) {
+          useUpdateCampaign.getState().reset();
+          useProposalAccountsStore.getState().clearAll();
+          useFetchCampaign.setState({ data: null });
+          sessionStorage.removeItem("lastCampaign");
+          toast.error(
+            "Option was deleted, but the surviving option could not be loaded",
+          );
+          navigate("/client/dashboard");
+        } else {
+          toast.error("Failed to delete option");
+        }
       } finally {
         setIsRequesting(false);
       }
@@ -246,17 +399,19 @@ export const useCampaignPageActions = ({
     [
       data,
       activeOption,
-      localExtraOptions,
       setActiveOption,
       setLocalExtraOptions,
       setIsRequesting,
       setIsRequestSent,
       reloadProposalOption,
+      navigate,
     ],
   );
 
   const updateProposalOption = React.useCallback(async () => {
     if (!data?.campaignId) return;
+
+    let patchSucceeded = false;
 
     try {
       setIsRequesting(true);
@@ -267,27 +422,60 @@ export const useCampaignPageActions = ({
       const content = proposalState.contentByOption[activeOption] ?? [];
       const patches = useUpdateCampaign.getState().patches ?? {};
 
-      const { totalPublicPrice } = calcGroupPrices(accounts);
-
-      const body = buildProposalPatchBody({
+      const patchResult = buildProposalOptionPatchBody({
         campaignName: data.campaignName,
+        snapshot: proposalState.optionSnapshotsByIndex[activeOption],
         accounts,
         content,
         patches,
-        totalPublicPrice,
+        pendingBundleMembership:
+          proposalState.pendingBundleMembershipByOption[activeOption],
+        selectedOfferChange: Object.prototype.hasOwnProperty.call(
+          proposalState.selectedOfferChangeByOption,
+          activeOption,
+        )
+          ? proposalState.selectedOfferChangeByOption[activeOption]
+          : undefined,
       });
 
-      await patchAddProposalOption(data.campaignId, activeOption, body);
+      if (!patchResult.ok) {
+        console.warn("[PROPOSAL PATCH blocked]", patchResult.code, patchResult.message);
+        toast.error(patchResult.message);
+        return;
+      }
+
+      await patchProposalOption(
+        data.campaignId,
+        activeOption,
+        patchResult.body,
+      );
+      patchSucceeded = true;
 
       useUpdateCampaign.getState().reset();
 
-      await reloadProposalOption(activeOption);
+      const refreshed = await reloadProposalOption(activeOption);
+      if (
+        refreshed?.kind !== "proposal" ||
+        refreshed.selectedOption.optionIndex !== activeOption
+      ) {
+        throw new Error("Authoritative Proposal option refetch failed");
+      }
 
       toast.success("Proposal campaign updated successfully!");
       setIsRequestSent(true);
     } catch (e) {
       console.error(e);
-      toast.error("Failed to update proposal campaign");
+      if (patchSucceeded) {
+        useUpdateCampaign.getState().reset();
+        useProposalAccountsStore.getState().clearAll();
+        useFetchCampaign.setState({ data: null });
+        toast.error(
+          "Proposal was updated, but the authoritative option could not be reloaded",
+        );
+        navigate("/client/dashboard");
+      } else {
+        toast.error("Failed to update proposal campaign");
+      }
     } finally {
       setIsRequesting(false);
     }
@@ -297,6 +485,7 @@ export const useCampaignPageActions = ({
     setIsRequesting,
     setIsRequestSent,
     reloadProposalOption,
+    navigate,
   ]);
 
   const updateStrategyCampaign = React.useCallback(async () => {
@@ -450,7 +639,8 @@ export const useCampaignPageActions = ({
     onClickOption,
     getCSV,
     getPDF,
-    onAddOption,
+    onStartProposalOptionCreate,
+    onCloneOption,
     onDeleteOption,
     updateProposalOption,
     updateStrategyCampaign,

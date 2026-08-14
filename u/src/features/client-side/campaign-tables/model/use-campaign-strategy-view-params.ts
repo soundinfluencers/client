@@ -14,8 +14,10 @@ const normalizeView = (value: number | null | undefined): StrategyViewMode => {
 
 export const useCampaignStrategyViewParams = ({
                                                   isProposal,
+                                                  tableOnly = false,
                                               }: {
     isProposal?: boolean;
+    tableOnly?: boolean;
 }) => {
     const [params, setParams] = useQueryStates(
         {
@@ -31,7 +33,9 @@ export const useCampaignStrategyViewParams = ({
     const rawView = normalizeView(params.view);
 
     const view: StrategyViewMode =
-        isProposal
+        tableOnly
+            ? 0
+            : isProposal
             ? rawView
             : rawView === -1
                 ? 0
@@ -40,6 +44,11 @@ export const useCampaignStrategyViewParams = ({
     return {
         view,
         setView: (value: StrategyViewMode) => {
+            if (tableOnly) {
+                setParams({ view: 0 });
+                return;
+            }
+
             if (!isProposal && value === -1) {
                 setParams({ view: 0 });
                 return;

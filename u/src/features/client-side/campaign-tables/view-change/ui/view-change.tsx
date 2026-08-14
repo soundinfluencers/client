@@ -9,13 +9,30 @@ type Props = {
     view: StrategyViewMode;
     setView: (value: StrategyViewMode) => void;
     isProposal?: boolean;
+    tableOnly?: boolean;
 };
 
 export const ViewChange: React.FC<Props> = ({
                                                 view,
                                                 setView,
                                                 isProposal = false,
+                                                tableOnly = false,
                                             }) => {
+    if (tableOnly) {
+        return (
+            <div className={`${styles.changeViewTable} ${styles.static}`}>
+                <div className={styles.segmented}>
+                    <div
+                        className={`${styles.item} ${styles.active} ${styles.staticItem}`}
+                        title="Table View"
+                    >
+                        <img src={liveview} alt="Table View" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     const tabs = isProposal
         ? [
             { label: "Edit View", icon: edit, value: -1 as StrategyViewMode },

@@ -15,6 +15,8 @@ type Props = {
     open?: boolean;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     refElement: React.RefObject<HTMLDivElement | null>;
+    children?: React.ReactNode;
+    inFlow?: boolean;
 };
 
 export const GenresCountriesPopover: React.FC<Props> = ({
@@ -24,6 +26,8 @@ export const GenresCountriesPopover: React.FC<Props> = ({
                                                             open = false,
                                                             setOpen,
                                                             refElement,
+                                                            children,
+                                                            inFlow = false,
                                                         }) => {
     useClickOutside(refElement, () => setOpen(false));
 
@@ -32,9 +36,14 @@ export const GenresCountriesPopover: React.FC<Props> = ({
             data-open={open}
             className={`${styles.popup} ${isSelected ? styles.selected : ""} ${
                 isInclude ? styles.include : ""
-            }`}
+            } ${inFlow ? styles.inFlow : ""}`}
+            onClick={(event) => event.stopPropagation()}
         >
-            <div className={styles.content}>
+            <div
+                className={`${styles.content} ${
+                    inFlow ? styles.contentInFlow : ""
+                }`}
+            >
                 <div className={styles.rowContent}>
                     <p>
                         ER: <span>5.68%</span>
@@ -69,6 +78,8 @@ export const GenresCountriesPopover: React.FC<Props> = ({
                         </div>
                     )}
                 </div>
+
+                {children}
             </div>
         </div>
     );

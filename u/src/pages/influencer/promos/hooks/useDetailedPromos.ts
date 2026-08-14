@@ -4,7 +4,7 @@ import {
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 interface UseDetailedPromosParams {
-  status: string;
+  status: "ongoing" | "close";
   campaignId?: string;
   addedAccountsId?: string;
   limit?: number;

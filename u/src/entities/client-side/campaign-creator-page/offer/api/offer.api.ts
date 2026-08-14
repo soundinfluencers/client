@@ -18,3 +18,18 @@ export const getPublishedOffers = async (
     const items = response.data?.data ?? [];
     return items.map(mapPublishedOfferDto);
 };
+
+export const getPublishedOfferById = async (
+    offerId: string,
+    platform: string,
+    genre: string,
+): Promise<PublishedOffer> => {
+    const offers = await getPublishedOffers(platform, genre);
+    const offer = offers.find((item) => item.id === offerId);
+
+    if (!offer) {
+        throw new Error(`Published offer ${offerId} was not found`);
+    }
+
+    return offer;
+};

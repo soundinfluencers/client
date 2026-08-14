@@ -7,6 +7,9 @@ type Props = {
   changeView: boolean;
   view: number;
   flag: boolean;
+  proposalOptionIndexes: number[];
+  onDeleteProposalOption: (optionIndex: number) => Promise<void>;
+  isProposalMutationPending: boolean;
 };
 
 export const CampaignPageContent: React.FC<Props> = ({
@@ -14,6 +17,9 @@ export const CampaignPageContent: React.FC<Props> = ({
   changeView,
   view,
   flag,
+  proposalOptionIndexes,
+  onDeleteProposalOption,
+  isProposalMutationPending,
 }) => {
   return (
     <CampaignContentView
@@ -21,6 +27,9 @@ export const CampaignPageContent: React.FC<Props> = ({
       changeView={changeView}
       view={view}
       flag={flag}
+      proposalOptionIndexes={proposalOptionIndexes}
+      onDeleteProposalOption={onDeleteProposalOption}
+      isProposalMutationPending={isProposalMutationPending}
     />
   );
 };

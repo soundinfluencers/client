@@ -73,6 +73,15 @@
       margin-top: -2px;
     }
   }
+
+  &__helper-text {
+    font-size: 13px;
+    color: #8C8D98;
+
+    @media screen and (max-width: 599px){
+      font-size: 11px;
+    }
+  }
 }
 
 .currency-selector {

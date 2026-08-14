@@ -9,9 +9,10 @@ interface Props {
   platform?: TSocialAccounts;
   placeholder?: string;
   label?: string;
+  helperText?: string;
 }
 
-export const PriceInput: React.FC<Props> = ({ platform, placeholder, label }) => {
+export const PriceInput: React.FC<Props> = ({ platform, placeholder, label, helperText }) => {
   const { control } = useFormContext();
   const [isFocused, setIsFocused] = useState(false);
   const [draft, setDraft] = useState('');
@@ -74,6 +75,12 @@ export const PriceInput: React.FC<Props> = ({ platform, placeholder, label }) =>
               onFocus={handleFocus}
               onBlur={handleBlur}
             />
+
+            {helperText && (
+              <p className="price-input__helper-text">
+                {helperText}
+              </p>
+            )}
 
             <p
               className={`price-input__error-message ${error ? 'price-input__error-message--show' : ''}`}

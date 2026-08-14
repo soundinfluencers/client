@@ -1,3 +1,7 @@
+import type {
+    CampaignDisplayCurrency,
+} from "@/shared/functions/formatCurrency.ts";
+
 export type CampaignSocialMedia =
     | "instagram"
     | "facebook"
@@ -91,7 +95,7 @@ export type RegularCampaignDto = {
     socialMedia: CampaignSocialMedia;
     creationDate: string;
     price: number;
-    displayCurrency: string;
+    displayCurrency: CampaignDisplayCurrency;
     status: CampaignStatus;
 
     addedAccounts: CampaignAddedAccountDto[];
@@ -114,10 +118,58 @@ export type RegularCampaignDto = {
     canEdit: boolean;
 };
 
+export type ProposalSocialAccountId = string;
+export type ProposalAddedAccountId = string;
+export type ProposalBundleId = string;
+export type ProposalCampaignBundleId = string;
+export type ProposalOfferId = string;
+export type ProposalCampaignOfferId = string;
+
+export type ProposalAddedAccountDto = CampaignAddedAccountDto & {
+    _id?: string;
+    accountId?: string;
+    addedAccountsId: ProposalAddedAccountId;
+    bundleId?: ProposalBundleId;
+    campaignBundleId?: ProposalCampaignBundleId;
+    bundlePosition?: number;
+};
+
+export type ProposalBundleSnapshotDto = {
+    campaignBundleId: ProposalCampaignBundleId;
+    bundleId: ProposalBundleId;
+    influencerId: string;
+    acceptancePolicy: "all_or_nothing";
+    influencerReward: number;
+    clientPrice: number;
+    originalInfluencerReward: number;
+    originalClientPrice: number;
+    pricingStrategy: "proportional";
+    currency: CampaignDisplayCurrency;
+    snapshotAt: string;
+};
+
+export type ProposalOfferSnapshotDto = {
+    campaignOfferId: ProposalCampaignOfferId;
+    offerId: ProposalOfferId;
+    selectedAccountIds: ProposalSocialAccountId[];
+    selectedAddedAccountsIds: ProposalAddedAccountId[];
+    overlapAccountIds: ProposalSocialAccountId[];
+    title: string;
+    socialMedia: CampaignSocialMedia;
+    genre: string;
+    clientPrice: number;
+    originalClientPrice: number;
+    currency: CampaignDisplayCurrency;
+    snapshotAt: string;
+};
+
 export type ProposalOptionDto = {
     optionIndex: number;
     price: number;
-    addedAccounts: CampaignAddedAccountDto[];
+    displayCurrency: CampaignDisplayCurrency;
+    addedAccounts: ProposalAddedAccountDto[];
+    addedBundles: ProposalBundleSnapshotDto[];
+    selectedOffer?: ProposalOfferSnapshotDto | null;
     campaignContent: CampaignContentItemDto[];
     canEdit: boolean;
 };
@@ -130,11 +182,19 @@ export type ProposalCampaignDto = {
     selectedOption: ProposalOptionDto;
 };
 
+export type CreateProposalOptionResult = {
+    campaignId: string;
+    optionIndex: number;
+};
+
 export type ApiResponse<T> = {
     statusCode: number;
     message: string;
     data: T;
 };
+
+export type CreateProposalOptionResponse =
+    ApiResponse<CreateProposalOptionResult>;
 
 export type CampaignAccountPatchDto = {
     addedAccountsId?: string;
@@ -144,6 +204,44 @@ export type CampaignAccountPatchDto = {
     username: string;
     selectedCampaignContentItem: SelectedCampaignContentItem | null;
     dateRequest: string;
+};
+
+type ProposalAddedAccountInputBase = {
+    bundleId?: ProposalBundleId;
+    socialAccountId: ProposalSocialAccountId;
+    influencerId: string;
+    socialMedia: CampaignSocialMedia;
+    username: string;
+    dateRequest: string;
+};
+
+export type CreateProposalAddedAccountInput = ProposalAddedAccountInputBase & {
+    addedAccountsId?: ProposalAddedAccountId;
+    selectedCampaignContentItem?: SelectedCampaignContentItem;
+};
+
+type PatchProposalAddedAccountInputBase = ProposalAddedAccountInputBase & {
+    selectedCampaignContentItem: SelectedCampaignContentItem;
+};
+
+export type ExistingProposalAddedAccountPatchInput =
+    PatchProposalAddedAccountInputBase & {
+        addedAccountsId: ProposalAddedAccountId;
+    };
+
+export type NewProposalAddedAccountPatchInput =
+    PatchProposalAddedAccountInputBase & {
+        addedAccountsId?: never;
+    };
+
+export type PatchProposalAddedAccountInput =
+    | ExistingProposalAddedAccountPatchInput
+    | NewProposalAddedAccountPatchInput;
+
+export type ProposalSelectedOfferInput = {
+    offerId: ProposalOfferId;
+    selectedAccountIds: ProposalSocialAccountId[];
+    selectedAddedAccountsIds?: ProposalAddedAccountId[];
 };
 
 export type CampaignContentPatchDto = {
@@ -179,13 +277,65 @@ export type PaymentDetailsDto = {
     selectedPaymentMethod: string;
 };
 
-export type ProposalSystemPostBody = {
+export type CreateRegularCampaignPaymentDetailsInput = {
+    firstName: string;
+    lastName: string;
+    address: string;
+    country: string;
+    referenceNumber: string;
+    amount: number;
+    company?: string;
+    vatNumber?: string;
+    selectedPaymentMethod: string;
+};
+
+export type CreateRegularCampaignAddedAccountInput = {
+    bundleId?: string;
+    socialAccountId: string;
+    influencerId: string;
+    socialMedia: CampaignSocialMedia;
+    username: string;
+    selectedCampaignContentItem?: SelectedCampaignContentItem;
+    dateRequest: string;
+    profileType?: CampaignProfileType;
+};
+
+export type CreateRegularCampaignRequest = {
     campaignName: string;
     socialMedia: CampaignSocialMedia;
     campaignPrice: number;
-    addedAccounts: CampaignAccountPatchDto[];
+    displayCurrency: CampaignDisplayCurrency;
+    addedAccounts: CreateRegularCampaignAddedAccountInput[];
     campaignContent: CampaignContentPatchDto[];
-    paymentDetails: PaymentDetailsDto;
+    paymentDetails: CreateRegularCampaignPaymentDetailsInput;
+};
+
+export type CreateProposalCampaignRequest = {
+    campaignName: string;
+    socialMedia: CampaignSocialMedia;
+    campaignPrice: number;
+    displayCurrency: CampaignDisplayCurrency;
+    addedAccounts: CreateProposalAddedAccountInput[];
+    campaignContent: CampaignContentPatchDto[];
+    paymentDetails?: PaymentDetailsDto;
+    selectedOffer?: ProposalSelectedOfferInput;
+};
+
+export type UpdateProposalCampaignRequest = {
+    campaignName?: string;
+    isCpmAndResultHidden?: boolean;
+    isPriceHidden?: boolean;
+    addedAccounts?: PatchProposalAddedAccountInput[];
+    campaignContent?: CampaignContentPatchDto[];
+    campaignPrice?: number;
+    displayCurrency?: CampaignDisplayCurrency;
+    selectedOffer?: ProposalSelectedOfferInput | null;
+};
+
+export type ProposalSystemPostBody = CreateProposalCampaignRequest;
+
+export type AddProposalOptionRequest = CreateProposalCampaignRequest & {
+    paymentType: string;
 };
 
 export type GetCampaignParams = {

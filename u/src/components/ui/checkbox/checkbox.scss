@@ -42,3 +42,12 @@
     }
   }
 }
+
+.AutoReplace--disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+
+  .input input[type="checkbox"] {
+    cursor: not-allowed;
+  }
+}

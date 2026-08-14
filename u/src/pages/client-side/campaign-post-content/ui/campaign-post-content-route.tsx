@@ -5,13 +5,27 @@ import { CampaignPostContentPage } from "@/widgets/client-side/campaign-post-con
 import styles from "./campaign-post-content.module.scss";
 
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
-import { useCampaignStore } from "@/entities/client-side/campaign/store/campaign.store";
+import { useProposalAccountsStore } from "@/client-side/store";
 
-import { Breadcrumbs, Container } from "@/components";
+import { Breadcrumbs, Container, Loader } from "@/components";
 import {
     attachExistingContentToAccounts,
     buildProposalAccountsAfterSubmit,
 } from "@/pages/client-side/campaign-post-content/model/build-proposal-accounts.ts";
+import {
+    CAMPAIGN_CURRENCY_OPTIONS,
+} from "@/features/client-side/campaign-creator-page/build-campaign-filters/build-campaign-params.constants";
+import {
+    mapSelectedBundlesToPostContentSummaries,
+} from "@/widgets/client-side/campaign-post-content/model/campaign-post-content-selection.mappers";
+import {
+    isProposalOptionCreateRequested,
+    parseProposalOptionCreateContext,
+    PROPOSAL_OPTION_CREATE_MODE,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation";
+import {
+    useCreateProposalOptionFromBuilder,
+} from "@/pages/client-side/campaign-post-content/model/use-create-proposal-option-from-builder";
 
 type GroupKey = "main" | "music" | "press";
 
@@ -47,6 +61,7 @@ const getGroupsFromContent = (content: any[]) => {
 export const CampaignPostContentRoute = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const committedProposalAddKeyRef = React.useRef<string | null>(null);
 
     const mode = searchParams.get("mode");
     const optionIndex = Number(searchParams.get("option") ?? 0);
@@ -55,14 +70,40 @@ export const CampaignPostContentRoute = () => {
         : "/client/campaign";
 
     const isAddInfluencerMode = mode === "add-influencer";
+    const isProposalOptionCreateMode =
+        isProposalOptionCreateRequested(searchParams);
+    const proposalOptionCreateContext =
+        parseProposalOptionCreateContext(searchParams);
+    const proposalOptionCreate = useCreateProposalOptionFromBuilder(
+        proposalOptionCreateContext,
+    );
+    const hasInvalidProposalOptionCreateContext =
+        isProposalOptionCreateMode && !proposalOptionCreateContext;
+    const proposalAddKey = `${optionIndex}:${returnTo}`;
 
-    const editable = useCampaignStore((s) => s.editable);
-    const addCampaignAccounts = useCampaignStore((s) => s.addAccounts);
-    const mergeCampaignContent = useCampaignStore((s) => s.mergeCampaignContent);
+    const proposalSnapshot = useProposalAccountsStore(
+        (s) => s.optionSnapshotsByIndex[optionIndex],
+    );
+    const proposalAccounts = useProposalAccountsStore(
+        (s) => s.accountsByOption[optionIndex] ?? EMPTY_ACCOUNTS,
+    );
+    const proposalContent = useProposalAccountsStore(
+        (s) => s.contentByOption[optionIndex] ?? EMPTY_CONTENT,
+    );
+    const addProposalAccounts = useProposalAccountsStore((s) => s.addAccounts);
+    const mergeProposalContent = useProposalAccountsStore((s) => s.mergeContent);
+    const setPendingTopology = useProposalAccountsStore(
+        (s) => s.setPendingTopology,
+    );
 
     const selectedAccounts = useCampaignBuilderStore((s) => s.selectedAccounts);
+    const selectedBundles = useCampaignBuilderStore((s) => s.selectedBundles);
     const campaignName = useCampaignBuilderStore((s) => s.campaignName);
     const selectedOfferName = useCampaignBuilderStore((s) => s.selectedOfferName);
+    const selectedOfferId = useCampaignBuilderStore((s) => s.selectedOfferId);
+    const selectedOfferAccountIds = useCampaignBuilderStore(
+        (s) => s.selectedOfferAccountIds,
+    );
     const blocksDraft = useCampaignBuilderStore((s) => s.blocksDraft);
     const campaignContent = useCampaignBuilderStore((s) => s.campaignContent);
     const totalPrice = useCampaignBuilderStore((s) => s.totalPrice);
@@ -77,8 +118,16 @@ export const CampaignPostContentRoute = () => {
     );
     const clearBuilder = useCampaignBuilderStore((s) => s.actions.reset);
 
-    const proposalAccounts = editable?.addedAccounts ?? EMPTY_ACCOUNTS;
-    const proposalContent = editable?.campaignContent ?? EMPTY_CONTENT;
+    React.useEffect(() => {
+        if (!hasInvalidProposalOptionCreateContext) return;
+
+        clearBuilder();
+        navigate("/client/campaign", { replace: true });
+    }, [
+        clearBuilder,
+        hasInvalidProposalOptionCreateContext,
+        navigate,
+    ]);
 
     const mappedAccounts = React.useMemo(
         () =>
@@ -98,10 +147,30 @@ export const CampaignPostContentRoute = () => {
 
                 dateRequest: item.dateRequest ?? "ASAP",
                 source: item.source,
+                bundleId: item.bundleId,
                 countries: item.countries,
                 genres: item.genres,
             })),
         [selectedAccounts],
+    );
+
+    const selectedCurrencyCode = React.useMemo(
+        () =>
+            CAMPAIGN_CURRENCY_OPTIONS.find(
+                (option) =>
+                    option.key === selectedCurrency ||
+                    option.currency === selectedCurrency,
+            )?.currency,
+        [selectedCurrency],
+    );
+
+    const bundleSummaries = React.useMemo(
+        () =>
+            mapSelectedBundlesToPostContentSummaries(
+                selectedBundles,
+                selectedCurrencyCode,
+            ),
+        [selectedBundles, selectedCurrencyCode],
     );
 
     const accountsForPage = React.useMemo(() => {
@@ -141,13 +210,49 @@ export const CampaignPostContentRoute = () => {
 
     React.useEffect(() => {
         if (!isAddInfluencerMode) return;
+        if (committedProposalAddKeyRef.current === proposalAddKey) return;
 
-        if (!editable) {
+        if (!proposalSnapshot) {
             navigate(returnTo);
             return;
         }
 
+        const applyTopology = (preparedNewAccounts: any[]) => {
+            const preparedBySocialId = new Map(
+                preparedNewAccounts.map((account) => [
+                    String(account.socialAccountId ?? account.accountId ?? ""),
+                    account,
+                ]),
+            );
+            const intendedAccounts = mappedAccounts.map((account) =>
+                preparedBySocialId.get(
+                    String(account.socialAccountId ?? account.accountId ?? ""),
+                ) ?? account,
+            );
+
+            setPendingTopology(optionIndex, {
+                bundles: Object.fromEntries(
+                    selectedBundles.map((bundle) => [
+                        bundle.bundleId,
+                        bundle.accounts.map((account) => account.accountId),
+                    ]),
+                ),
+                ...(selectedOfferId
+                    ? {
+                        selectedOffer: {
+                            offerId: selectedOfferId,
+                            selectedAccountIds: [...selectedOfferAccountIds],
+                        },
+                    }
+                    : {}),
+            });
+            addProposalAccounts(optionIndex, intendedAccounts as any);
+        };
+
         if (!accountsForPage.length) {
+            committedProposalAddKeyRef.current = proposalAddKey;
+            applyTopology([]);
+            clearBuilder?.();
             navigate(returnTo);
             return;
         }
@@ -159,25 +264,44 @@ export const CampaignPostContentRoute = () => {
             proposalContent,
         );
 
-        addCampaignAccounts(preparedAccounts as any);
+        committedProposalAddKeyRef.current = proposalAddKey;
+        applyTopology(preparedAccounts);
 
         clearBuilder?.();
 
         navigate(returnTo);
     }, [
         isAddInfluencerMode,
-        editable,
+        proposalSnapshot,
         accountsForPage,
+        mappedAccounts,
         proposalContent,
+        selectedBundles,
+        selectedOfferId,
+        selectedOfferAccountIds,
         missingGroups.length,
-        addCampaignAccounts,
+        optionIndex,
+        addProposalAccounts,
+        setPendingTopology,
         clearBuilder,
         navigate,
         returnTo,
+        proposalAddKey,
     ]);
 
     const offerAccounts = accountsForPage.filter((item) => item.source === "offer");
-    const manualAccounts = accountsForPage.filter((item) => item.source !== "offer");
+    const manualAccounts = accountsForPage.filter(
+        (item) => item.source === "manual" || item.source == null,
+    );
+
+    if (hasInvalidProposalOptionCreateContext) return null;
+
+    if (
+        isProposalOptionCreateMode &&
+        proposalOptionCreate.isFinalizing
+    ) {
+        return <Loader />;
+    }
 
     if (isAddInfluencerMode && missingGroups.length === 0) {
         return null;
@@ -190,13 +314,21 @@ export const CampaignPostContentRoute = () => {
             </div>
 
             <CampaignPostContentPage
-                mode={isAddInfluencerMode ? "add-influencer" : "create"}
+                mode={
+                    isAddInfluencerMode
+                        ? "add-influencer"
+                        : isProposalOptionCreateMode
+                            ? PROPOSAL_OPTION_CREATE_MODE
+                            : "create"
+                }
+                proposalOptionCreateContext={proposalOptionCreateContext}
                 allowedGroups={isAddInfluencerMode ? missingGroups : undefined}
                 defaultCampaignContent={
                     isAddInfluencerMode ? proposalContent : campaignContent
                 }
                 accounts={accountsForPage}
                 offerAccounts={isAddInfluencerMode ? [] : offerAccounts}
+                bundles={isAddInfluencerMode ? [] : bundleSummaries}
                 manualAccounts={manualAccounts}
                 offerName={isAddInfluencerMode ? undefined : selectedOfferName}
                 totalPrice={totalPrice}
@@ -204,8 +336,28 @@ export const CampaignPostContentRoute = () => {
                 defaultCampaignName={campaignName}
                 defaultBlocks={blocksDraft ?? undefined}
                 currency={selectedCurrency}
-                onSubmitPayload={(payload) => {
+                isSubmitLocked={
+                    isProposalOptionCreateMode &&
+                    proposalOptionCreate.isSubmitLocked
+                }
+                submitLabel={
+                    isProposalOptionCreateMode
+                        ? proposalOptionCreate.isSubmitting
+                            ? proposalOptionCreate.isLoadingOption
+                                ? "Loading option..."
+                                : "Creating option..."
+                            : proposalOptionCreate.createdIdentity
+                                ? "Retry loading option"
+                                : "Continue"
+                        : "Continue"
+                }
+                onSubmitPayload={async (payload) => {
                     if (isAddInfluencerMode) {
+                        if (committedProposalAddKeyRef.current === proposalAddKey) {
+                            return;
+                        }
+                        committedProposalAddKeyRef.current = proposalAddKey;
+
                         const mergedContent = [
                             ...proposalContent,
                             ...payload.campaignContent,
@@ -217,12 +369,59 @@ export const CampaignPostContentRoute = () => {
                             mergedContent,
                         });
 
-                        mergeCampaignContent(payload.campaignContent as any);
-                        addCampaignAccounts(preparedAccounts as any);
+                        mergeProposalContent(
+                            optionIndex,
+                            payload.campaignContent as any,
+                        );
+
+                        const preparedBySocialId = new Map(
+                            preparedAccounts.map((account) => [
+                                String(
+                                    account.socialAccountId ??
+                                    account.accountId ??
+                                    "",
+                                ),
+                                account,
+                            ]),
+                        );
+                        const intendedAccounts = mappedAccounts.map((account) =>
+                            preparedBySocialId.get(
+                                String(
+                                    account.socialAccountId ??
+                                    account.accountId ??
+                                    "",
+                                ),
+                            ) ?? account,
+                        );
+
+                        setPendingTopology(optionIndex, {
+                            bundles: Object.fromEntries(
+                                selectedBundles.map((bundle) => [
+                                    bundle.bundleId,
+                                    bundle.accounts.map((account) => account.accountId),
+                                ]),
+                            ),
+                            ...(selectedOfferId
+                                ? {
+                                    selectedOffer: {
+                                        offerId: selectedOfferId,
+                                        selectedAccountIds: [
+                                            ...selectedOfferAccountIds,
+                                        ],
+                                    },
+                                }
+                                : {}),
+                        });
+                        addProposalAccounts(optionIndex, intendedAccounts as any);
 
                         clearBuilder?.();
 
                         navigate(returnTo);
+                        return;
+                    }
+
+                    if (isProposalOptionCreateMode) {
+                        await proposalOptionCreate.submit(payload);
                         return;
                     }
 

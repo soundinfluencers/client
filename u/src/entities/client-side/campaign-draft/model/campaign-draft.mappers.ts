@@ -1,57 +1,102 @@
-
-import type { CampaignDraftDto, DraftAddedAccountDto } from "../api/campaign-draft.dto.ts";
+import type {
+    CampaignDraftAccountGetDto,
+    CampaignDraftGetDto,
+} from "../api/campaign-draft.dto.ts";
+import {
+    CampaignDraftLatestStep,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types.ts";
 import type {
     CampaignContentItem,
-    CampaignDraftLatestStep, SelectedCampaignAccount
+    SelectedCampaignAccount,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types.ts";
+import type {
+    CampaignCurrencyCode,
+} from "@/entities/client-side/campaign-creator-page/campaign-filter/model/campaign-filter.types";
 
-export const mapDraftStepToBuilderStep = (
-    step: CampaignDraftDto["step"],
-): CampaignDraftLatestStep => {
-    if (step === "addAccounts") return "addAccounts";
-    if (step === "addContent") return "addContent";
-    return "strategyTable";
+const isProfileType = (
+    value: string | undefined,
+): value is "creator" | "community" =>
+    value === "creator" || value === "community";
+
+const unique = (values: readonly string[]): string[] =>
+    [...new Set(values)];
+
+const mapDraftAccountGenres = (
+    account: CampaignDraftAccountGetDto,
+): string[] | undefined => {
+    if (account.profileType === "community") {
+        if (
+            account.communityMusicGenres === undefined &&
+            account.communityThemeTopics === undefined
+        ) {
+            return undefined;
+        }
+
+        return unique([
+            ...(account.communityMusicGenres ?? []),
+            ...(account.communityThemeTopics ?? []),
+        ]);
+    }
+
+    if (account.profileType === "creator") {
+        if (
+            account.creatorMusicGenres === undefined &&
+            account.creatorContentFocus === undefined
+        ) {
+            return undefined;
+        }
+
+        return unique([
+            ...(account.creatorMusicGenres ?? []),
+            ...(account.creatorContentFocus ?? []),
+        ]);
+    }
+
+    return undefined;
 };
 
+export const mapDraftStepToBuilderStep = (
+    step: CampaignDraftGetDto["step"],
+): CampaignDraftLatestStep => CampaignDraftLatestStep[step];
+
 export const mapDraftAccountToSelectedAccount = (
-    account: DraftAddedAccountDto,
+    account: CampaignDraftAccountGetDto,
+    currency: CampaignCurrencyCode,
 ): SelectedCampaignAccount => ({
-    accountId: String(account.socialAccountId),
-    influencerId: String(account.influencerId),
-    socialMedia: String(account.socialMedia),
-    username: String(account.username),
-    price: Number(account.price),
-    profileType: account.profileType,
-    followers: Number(account.followers),
-    dateRequest: account.dateRequest ?? "ASAP",
+    accountId: account.socialAccountId,
+    influencerId: account.influencerId,
+    socialMedia: account.socialMedia,
+    username: account.username,
+    logoUrl: account.logoUrl || undefined,
+    followers: account.followers,
+    ...(account.source === "standalone"
+        ? { price: account.prices[currency] }
+        : {}),
+    prices: { ...account.prices },
+    dateRequest: account.dateRequest || "ASAP",
     selectedCampaignContentItem: account.selectedCampaignContentItem
-        ? {
-            campaignContentItemId: String(
-                account.selectedCampaignContentItem.campaignContentItemId,
-            ),
-            descriptionId: String(
-                account.selectedCampaignContentItem.descriptionId,
-            ),
-        }
+        ? { ...account.selectedCampaignContentItem }
         : undefined,
+    profileType: isProfileType(account.profileType)
+        ? account.profileType
+        : undefined,
+    genres: mapDraftAccountGenres(account),
+    countries: account.countries?.map((country) => ({
+        ...country,
+    })),
+    source:
+        account.source === "standalone" ? "manual" : account.source,
+    ...(account.source === "bundle" && account.bundleId
+        ? { bundleId: account.bundleId }
+        : {}),
 });
 
 export const mapDraftContentToCampaignContent = (
-    items: CampaignDraftDto["campaignContent"] = [],
+    items: CampaignDraftGetDto["campaignContent"],
 ): CampaignContentItem[] =>
     items.map((item) => ({
-        _id: String(item._id),
-        socialMedia: String(item.socialMedia),
-        socialMediaGroup: item.socialMediaGroup,
-        mainLink: String(item.mainLink ?? ""),
-        descriptions: (item.descriptions ?? []).map((description) => ({
-            _id: String(description._id),
-            description: String(description.description ?? ""),
+        ...item,
+        descriptions: item.descriptions.map((description) => ({
+            ...description,
         })),
-        profileType: item.profileType,
-        taggedUser: String(item.taggedUser ?? ""),
-        taggedLink: String(item.taggedLink ?? ""),
-        additionalBrief: String(item.additionalBrief ?? ""),
-        accountId: item.accountId ? String(item.accountId) : undefined,
     }));
-

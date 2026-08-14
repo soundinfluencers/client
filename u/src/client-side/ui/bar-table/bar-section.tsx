@@ -7,6 +7,9 @@ import { formatCampaignDate } from "@/utils/functions/formatDate";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { getResultCPM } from "@/client-side/utils";
 import {EyeHide} from "@/client-side/widgets/campaign/components/eye-hide/eye-hide.tsx";
+import {
+  formatPersistedCampaignCurrency,
+} from "@/shared/functions/formatCurrency.ts";
 
 type VisibilityState = {
   isCpmAndResultHidden: boolean;
@@ -25,20 +28,6 @@ interface Props {
   visibleStats?: VisibleStats;
 }
 
-const currencySymbols: Record<string, string> = {
-  EUR: "€",
-  USD: "$",
-  GBP: "£",
-};
-
-const formatCurrency = (
-    value: number | string | null | undefined,
-    currency: string | null | undefined,
-) => {
-  const symbol = currencySymbols[currency || "EUR"] || currency || "€";
-  return `${value ?? 0}${symbol}`;
-};
-
 export const BarSection: React.FC<Props> = ({
                                               campaign,
                                               onVisibilityChange,
@@ -46,8 +35,6 @@ export const BarSection: React.FC<Props> = ({
                                               visibleStats
                                             }) => {
   const resultCPM = getResultCPM(campaign.cpm);
-
-  const currency = campaign.displayCurrency ?? "EUR";
 
   const isPriceHidden = Boolean(campaign.isPriceHidden);
 
@@ -98,7 +85,12 @@ export const BarSection: React.FC<Props> = ({
                   {isPriceHidden ? (
                       <span>••••</span>
                   ) : (
-                      <span>{formatCurrency(campaign.price, currency)}</span>
+                      <span>
+                        {formatPersistedCampaignCurrency(
+                            campaign.price,
+                            campaign.displayCurrency,
+                        )}
+                      </span>
                   )}
                 </p>
 
@@ -176,7 +168,10 @@ export const BarSection: React.FC<Props> = ({
                       <span>••••</span>
                   ) : (
                       <span>
-                        {formatCurrency(Number(campaign.cpm ?? 0).toFixed(2), currency)}
+                        {formatPersistedCampaignCurrency(
+                            Number(campaign.cpm ?? 0).toFixed(2),
+                            campaign.displayCurrency,
+                        )}
                       </span>
                   )}
                 </p>
@@ -191,7 +186,8 @@ export const BarSection: React.FC<Props> = ({
               <p>
                 Average Instagram CPM:{" "}
                 <span>
-                {formatCurrency(5, currency)} to {formatCurrency(12, currency)}
+                {formatPersistedCampaignCurrency(5, campaign.displayCurrency)} to{" "}
+                {formatPersistedCampaignCurrency(12, campaign.displayCurrency)}
               </span>
               </p>
 

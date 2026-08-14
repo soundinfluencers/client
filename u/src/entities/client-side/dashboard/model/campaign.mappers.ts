@@ -9,6 +9,7 @@ export const mapCampaignListItemDto = (
     socialMedia: dto.socialMedia,
     creationDate: dto.creationDate,
     price: Number(dto.price ?? 0),
+    displayCurrency: dto.displayCurrency,
     status: dto.status,
     draftStep: dto.draftStep,
 });

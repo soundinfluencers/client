@@ -1,7 +1,7 @@
 import { useMatch } from "react-router-dom";
 import { useUser } from "@/store/get-user";
 import { HistoryLink } from "../campaign-history-link/HistoryLink";
-import { InvoiceLink } from "../create-invoice-link/InvoiceLink";
+import { DashboardLink } from "../create-invoice-link/DashboardLink.tsx";
 import { HomePageLink } from "../home-page-link/HomePageLink";
 import blackLogo from "../../../../../assets/logos/small-black-logo.svg";
 
@@ -33,7 +33,15 @@ export const DashboardHero = () => {
 
       <div className="dashboard-hero__bottom">
         <div className="dashboard-hero__left-bottom">
-          <InvoiceLink />
+          <DashboardLink
+            href="create-invoice"
+            label="Creater an Invoice"
+          />
+          <DashboardLink
+            href="create-bundle"
+            label="Create Bundles"
+          />
+
         </div>
         <div className="dashboard-hero__balance">
           <span className="dashboard-hero__balance-label">

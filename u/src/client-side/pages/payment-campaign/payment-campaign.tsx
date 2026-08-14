@@ -3,6 +3,7 @@ import {
   Breadcrumbs,
   ButtonMain,
   Container,
+  Loader,
   SubmitButton,
 } from "@/components";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -19,19 +20,34 @@ import { PaymentForm } from "@/client-side/client-forms";
 import {
   useCampaignStore,
   useDraftCampaignStore,
-  useProposalCampaignStore,
   useUpdateCampaign,
 } from "@/client-side/store";
 import { useInvoceDetailsQuery } from "@/client-side/react-query";
 
 import { FormPayment } from "@components/form/form-payment.tsx";
 import { Modal } from "@/shared/ui/modal-fix/Modal";
-import {approveProposalCampaign, postCampaign} from "@/api/client/campaign/campaign.api";
+import {
+  approveProposalCampaign,
+  getProposalCampaign,
+  postCampaign,
+  type ApproveProposalCampaignBody,
+} from "@/api/client/campaign/campaign.api";
 import { deleteDraft } from "@/api/client/campaign/draft.api";
 import { generatePaymentReferenceNumber } from "@/client-side/utils/payment-reference";
 
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
-import { buildStrategyCreateCampaignPayload } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
+import {
+  buildStrategyCreateCampaignPayload,
+  requireRegularCampaignDisplayCurrency,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
+import type {
+  CreateRegularCampaignRequest,
+} from "@/entities/client-side/campaign/model/campaign-api.types";
+import {
+  getCampaignCurrencySymbol,
+  isCampaignDisplayCurrency,
+  type CampaignDisplayCurrency,
+} from "@/shared/functions/formatCurrency";
 
 import "./_payment-campaign.scss";
 export type PaymentMethodId =
@@ -42,6 +58,15 @@ export type PaymentMethodId =
     | "bank_transfer_international";
 
 export type PaymentTabId = "bank_card" | "paypal" | "bank_transfer";
+
+type ProposalPaymentOption = {
+  campaignId: string;
+  optionIndex: number;
+  price: number;
+  displayCurrency: CampaignDisplayCurrency;
+};
+
+type ProposalPaymentLoadState = "idle" | "loading" | "ready" | "error";
 
 export const PaymentCampaign = () => {
 
@@ -66,6 +91,73 @@ export const PaymentCampaign = () => {
   const draftIdFromParams = searchParams.get("draft");
   const proposalId = searchParams.get("proposal");
   const optionIndex = Number(searchParams.get("option") ?? 0);
+  const isValidProposalOptionIndex =
+      Number.isInteger(optionIndex) && optionIndex >= 0;
+  const [proposalPaymentOption, setProposalPaymentOption] =
+      React.useState<ProposalPaymentOption | null>(null);
+  const [proposalPaymentLoadState, setProposalPaymentLoadState] =
+      React.useState<ProposalPaymentLoadState>(proposalId ? "loading" : "idle");
+
+  React.useEffect(() => {
+    if (!proposalId) {
+      setProposalPaymentOption(null);
+      setProposalPaymentLoadState("idle");
+      return;
+    }
+
+    sessionStorage.removeItem("proposalPaymentPayload");
+    sessionStorage.removeItem("postAuthRedirect");
+
+    if (!isValidProposalOptionIndex) {
+      setProposalPaymentOption(null);
+      setProposalPaymentLoadState("error");
+      return;
+    }
+
+    let cancelled = false;
+
+    setProposalPaymentOption(null);
+    setProposalPaymentLoadState("loading");
+
+    void getProposalCampaign(proposalId, optionIndex)
+        .then((response) => {
+          if (cancelled) return;
+
+          const proposal = response.data.data;
+          const selectedOption = proposal?.selectedOption;
+          const price = Number(selectedOption?.price);
+          const isAuthoritativeOption =
+              String(proposal?.campaignId ?? "") === String(proposalId) &&
+              selectedOption?.optionIndex === optionIndex &&
+              Number.isFinite(price) &&
+              isCampaignDisplayCurrency(selectedOption?.displayCurrency);
+
+          if (!isAuthoritativeOption) {
+            setProposalPaymentOption(null);
+            setProposalPaymentLoadState("error");
+            return;
+          }
+
+          setProposalPaymentOption({
+            campaignId: proposal.campaignId,
+            optionIndex: selectedOption.optionIndex,
+            price,
+            displayCurrency: selectedOption.displayCurrency,
+          });
+          setProposalPaymentLoadState("ready");
+        })
+        .catch((error) => {
+          if (cancelled) return;
+
+          console.error("Failed to load Proposal option for payment", error);
+          setProposalPaymentOption(null);
+          setProposalPaymentLoadState("error");
+        });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [proposalId, optionIndex, isValidProposalOptionIndex]);
 
   const { data: invoiceDetails } = useInvoceDetailsQuery();
 
@@ -80,6 +172,9 @@ export const PaymentCampaign = () => {
   const builderAccounts = useCampaignBuilderStore((s) => s.selectedAccounts);
   const builderContent = useCampaignBuilderStore((s) => s.campaignContent);
   const builderTotalPrice = useCampaignBuilderStore((s) => s.totalPrice);
+  const builderSelectionCurrency = useCampaignBuilderStore(
+      (s) => s.selectionCurrency,
+  );
   console.log("builderCampaignName", builderCampaignName);
   console.log("builderTotalPrice", builderTotalPrice);
   console.log("builderAccounts", builderAccounts);
@@ -101,6 +196,10 @@ export const PaymentCampaign = () => {
   ];
 
   const selectedCurrency = useCampaignBuilderStore((s) => s.selectedCurrency);
+  const hasAuthoritativeProposalPaymentOption =
+      proposalPaymentLoadState === "ready" &&
+      proposalPaymentOption?.campaignId === proposalId &&
+      proposalPaymentOption?.optionIndex === optionIndex;
   const handleTabChange = React.useCallback((nextTab: PaymentTabId) => {
     setTab(nextTab);
 
@@ -125,101 +224,95 @@ export const PaymentCampaign = () => {
       },
       [],
   );
-  const proposalPaymentPayload = React.useMemo(() => {
-    if (!proposalId) return null;
-
-    try {
-      const raw = sessionStorage.getItem("proposalPaymentPayload");
-      if (!raw) return null;
-
-      const parsed = JSON.parse(raw);
-
-      const isSameProposal =
-          String(parsed?.campaignId ?? "") === String(proposalId) &&
-          Number(parsed?.optionIndex ?? 0) === Number(optionIndex);
-
-      return isSameProposal ? parsed?.payload ?? null : null;
-    } catch {
-      return null;
-    }
-  }, [proposalId, optionIndex]);
   const onSent = async (values: PaymentCampaignFormValues) => {
     if (isPaymentSubmitting) return;
 
     try {
       setIsPaymentSubmitting(true);
 
-      let base: Record<string, any>;
-
-      if (effectiveDraftId) {
-        const patches = useUpdateCampaign.getState().patches ?? {};
-
-        base = draftStore.getCampaignPayload(
-            effectiveDraftId,
-            builderCampaignName || legacyCampaignName || "",
-            selectedIdPayment,
-            patches,
-        );
-      } else if (proposalId) {
-        const patches = useUpdateCampaign.getState().patches ?? {};
-
-        base =
-            proposalPaymentPayload ??
-            useProposalCampaignStore
-                .getState()
-                .getCampaignPayload(
-                    proposalId,
-                    optionIndex,
-                    builderCampaignName || legacyCampaignName || "",
-                    patches,
-                );
-      } else {
-        base = buildStrategyCreateCampaignPayload({
-          campaignName: builderCampaignName,
-          totalPrice: builderTotalPrice,
-          accounts: builderAccounts,
-          content: builderContent,
-          paymentDetails: {
-            firstName: values.firstName,
-            lastName: values.lastName,
-            address: values.address,
-            country: values.country,
-            company: values.company ?? "",
-            vatNumber: values.vatNumber ?? "",
-            amount: Number(builderTotalPrice ?? 0),
-            referenceNumber,
-            selectedPaymentMethod: selectedIdPayment,
-          },
-        });
-      }
-
-      const finalCampaignName = String(
-          base?.campaignName ?? builderCampaignName ?? legacyCampaignName ?? "",
-      );
-
-      const paymentDetails = {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        address: values.address,
-        country: values.country,
-        company: values.company ?? "",
-        vatNumber: values.vatNumber ?? "",
-        amount: Number(
-            base?.campaignPrice ??
-            base?.totalPrice ??
-            builderTotalPrice ??
-            0,
-        ),
-        selectedPaymentMethod: selectedIdPayment,
-        referenceNumber,
-      };
-
-
-
       if (proposalId) {
-        await approveProposalCampaign(proposalId, optionIndex, paymentDetails);
+        if (
+            !hasAuthoritativeProposalPaymentOption ||
+            !proposalPaymentOption
+        ) {
+          toast.error("Proposal option must be reloaded before approval");
+          return;
+        }
+
+        const proposalPaymentDetails: ApproveProposalCampaignBody = {
+          firstName: values.firstName,
+          lastName: values.lastName,
+          address: values.address,
+          country: values.country,
+          company: values.company ?? "",
+          vatNumber: values.vatNumber ?? "",
+          selectedPaymentMethod: selectedIdPayment,
+          referenceNumber,
+        };
+
+        await approveProposalCampaign(
+            proposalPaymentOption.campaignId,
+            proposalPaymentOption.optionIndex,
+            proposalPaymentDetails,
+        );
         sessionStorage.removeItem("proposalPaymentPayload");
+        sessionStorage.removeItem("postAuthRedirect");
       } else {
+        let base: CreateRegularCampaignRequest & { totalPrice?: number };
+
+        if (effectiveDraftId) {
+          const patches = useUpdateCampaign.getState().patches ?? {};
+
+          base = draftStore.getCampaignPayload(
+              effectiveDraftId,
+              builderCampaignName || legacyCampaignName || "",
+              selectedIdPayment,
+              patches,
+          );
+        } else {
+          const displayCurrency = requireRegularCampaignDisplayCurrency(
+              builderSelectionCurrency,
+          );
+
+          base = buildStrategyCreateCampaignPayload({
+            campaignName: builderCampaignName,
+            totalPrice: builderTotalPrice,
+            displayCurrency,
+            accounts: builderAccounts,
+            content: builderContent,
+            paymentDetails: {
+              firstName: values.firstName,
+              lastName: values.lastName,
+              address: values.address,
+              country: values.country,
+              company: values.company ?? "",
+              vatNumber: values.vatNumber ?? "",
+              amount: Number(builderTotalPrice ?? 0),
+              referenceNumber,
+              selectedPaymentMethod: selectedIdPayment,
+            },
+          });
+        }
+
+        const finalCampaignName = String(
+            base?.campaignName ?? builderCampaignName ?? legacyCampaignName ?? "",
+        );
+        const paymentDetails = {
+          firstName: values.firstName,
+          lastName: values.lastName,
+          address: values.address,
+          country: values.country,
+          company: values.company ?? "",
+          vatNumber: values.vatNumber ?? "",
+          amount: Number(
+              base?.campaignPrice ??
+              base?.totalPrice ??
+              builderTotalPrice ??
+              0,
+          ),
+          selectedPaymentMethod: selectedIdPayment,
+          referenceNumber,
+        };
         const payload = {
           ...base,
           campaignName: finalCampaignName,
@@ -229,7 +322,7 @@ export const PaymentCampaign = () => {
         await postCampaign(payload);
       }
 
-      if (effectiveDraftId) {
+      if (!proposalId && effectiveDraftId) {
         await deleteDraft(effectiveDraftId);
         draftStore.clearCampaign(effectiveDraftId);
       }
@@ -252,16 +345,22 @@ export const PaymentCampaign = () => {
     }
   };
   const paymentAmount = React.useMemo(() => {
-    if (proposalPaymentPayload) {
-      return Number(
-          proposalPaymentPayload?.campaignPrice ??
-          proposalPaymentPayload?.totalPrice ??
-          0,
-      );
+    if (proposalId) {
+      return hasAuthoritativeProposalPaymentOption
+          ? proposalPaymentOption?.price ?? 0
+          : 0;
     }
 
     return Number(builderTotalPrice ?? 0);
-  }, [proposalPaymentPayload, builderTotalPrice]);
+  }, [
+    proposalId,
+    hasAuthoritativeProposalPaymentOption,
+    proposalPaymentOption?.price,
+    builderTotalPrice,
+  ]);
+  const paymentCurrencySymbol = hasAuthoritativeProposalPaymentOption && proposalPaymentOption
+      ? getCampaignCurrencySymbol(proposalPaymentOption.displayCurrency)
+      : selectedCurrency;
   const defaultValues = React.useMemo<Partial<PaymentCampaignFormValues>>(
       () => ({
         firstName: invoiceDetails?.firstName ?? "",
@@ -273,6 +372,18 @@ export const PaymentCampaign = () => {
       }),
       [invoiceDetails],
   );
+
+  if (proposalId && !hasAuthoritativeProposalPaymentOption) {
+    if (proposalPaymentLoadState === "error") {
+      return (
+          <Container className="payment-campaign">
+            <p>Failed to load the selected Proposal option.</p>
+          </Container>
+      );
+    }
+
+    return <Loader/>;
+  }
 
   return (
       <Container className="payment-campaign">
@@ -323,7 +434,7 @@ export const PaymentCampaign = () => {
                   <div className="payment-campaign__confirmation">
                     {CurrentConfirmation && (
                         <CurrentConfirmation
-                            currencySymbol={selectedCurrency}
+                            currencySymbol={paymentCurrencySymbol}
                             currency={currency ? [currency] : []}
                             referenceNumber={referenceNumber}
                             isSubmitting={isPaymentSubmitting}

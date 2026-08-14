@@ -72,16 +72,33 @@ export const ExtraFieldsTableCell: React.FC<Props> = ({
         );
     }
 
+    const account = row.account as any;
+    const additionalBriefOptions = Array.isArray(item.additionalBrief)
+        ? item.additionalBrief
+        : [];
+    const selectedAdditionalBrief =
+        account?.selectedContentItem?.additionalBrief ??
+        additionalBriefOptions.find(
+            (brief: any) =>
+                String(brief?._id ?? "") ===
+                String(
+                    account?.selectedCampaignContentItem?.additionalBriefId ?? "",
+                ),
+        )?.additionalBrief ??
+        (typeof item.additionalBrief === "string"
+            ? item.additionalBrief
+            : additionalBriefOptions[0]?.additionalBrief ?? "");
+
     return canEdit ? (
         <input
             className="hidden-text"
-            value={item.additionalBrief ?? ""}
+            value={selectedAdditionalBrief}
             onChange={(e) =>
                 setContentField?.(String(item._id), "additionalBrief", e.target.value)
             }
             placeholder="Additional brief"
         />
     ) : (
-        <p className="hidden-text">{item.additionalBrief || "—"}</p>
+        <p className="hidden-text">{selectedAdditionalBrief || "—"}</p>
     );
 };

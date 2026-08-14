@@ -1,4 +1,10 @@
 import type { CampaignPostContentBlock } from "@/widgets/client-side/campaign-post-content/model/campaign-post-content.types";
+import type { Bundle } from "@/entities/client-side/campaign-creator-page/bundle";
+import type { CampaignCurrencyCode } from "@/entities/client-side/campaign-creator-page/campaign-filter/model/campaign-filter.types";
+import type {
+    CampaignDraftAccountSocialMedia,
+    CampaignDraftSource,
+} from "@/entities/client-side/campaign-draft/api/campaign-draft.dto";
 
 // @ts-ignore
 export enum CampaignDraftLatestStep {
@@ -20,10 +26,12 @@ export type SelectedCampaignAccount = {
     logoUrl?: string;
     followers?: number;
     price?: number;
+    prices?: Partial<Record<CampaignCurrencyCode, number>>;
     dateRequest?: string;
     selectedCampaignContentItem?: SelectedCampaignContentRef | null;
     profileType?: "creator" | "community";
-    source?: "manual" | "offer";
+    source?: "manual" | "offer" | "bundle";
+    bundleId?: string;
 
     genres?: string[];
     countries?: Array<{
@@ -31,6 +39,22 @@ export type SelectedCampaignAccount = {
         percentage: number;
     }>;
 };
+
+export type SelectedBundleSnapshot = Bundle;
+
+export type DraftSelectionRow = {
+    selectionId: string;
+    source: CampaignDraftSource;
+    influencerId: string;
+    socialAccountId: string;
+    socialMedia: CampaignDraftAccountSocialMedia;
+    bundleId?: string;
+    offerId?: string;
+};
+
+export type CampaignPriceMap = Partial<
+    Record<CampaignCurrencyCode, number>
+>;
 
 export type CampaignContentDescription = {
     _id: string;
@@ -58,11 +82,15 @@ export type CampaignBuilderState = {
     draftStep: CampaignDraftLatestStep | null;
 
     selectedOfferId: string | null;
-    selectedOfferPrice: number;
+    selectedOfferPrice: number | undefined;
+    selectedOfferPrices: CampaignPriceMap;
+    selectionCurrency: CampaignCurrencyCode | null;
     selectedPromoCardIds: string[];
     selectedOfferAccountIds: string[];
     selectedAccounts: SelectedCampaignAccount[];
     selectedOfferAccounts: SelectedCampaignAccount[];
+    selectedBundles: SelectedBundleSnapshot[];
+    draftSelectionRows: DraftSelectionRow[];
 
     campaignContent: CampaignContentItem[];
     postContentDraft: Record<string, unknown> | null;
@@ -70,6 +98,27 @@ export type CampaignBuilderState = {
     totalPrice: number;
     selectedCurrency: string;
 };
+
+export type HydratedCampaignBuilderDraftState = Pick<
+    CampaignBuilderState,
+    | "campaignName"
+    | "draftId"
+    | "draftStep"
+    | "selectedOfferId"
+    | "selectedOfferName"
+    | "selectedOfferPrice"
+    | "selectedOfferPrices"
+    | "selectionCurrency"
+    | "selectedPromoCardIds"
+    | "selectedOfferAccountIds"
+    | "selectedAccounts"
+    | "selectedOfferAccounts"
+    | "selectedBundles"
+    | "draftSelectionRows"
+    | "campaignContent"
+    | "totalPrice"
+    | "selectedCurrency"
+>;
 
 export type CampaignBuilderActions = {
     setCampaignName: (value: string) => void;
@@ -84,13 +133,24 @@ export type CampaignBuilderActions = {
         accounts?: SelectedCampaignAccount[];
         offerName?: string;
         offerPrice?: number;
+        offerPrices?: CampaignPriceMap;
+        currency: CampaignCurrencyCode;
     }) => void;
+    selectBundle: (
+        bundle: Bundle,
+        currency: CampaignCurrencyCode,
+    ) => void;
+    removeBundle: (bundleId: string) => void;
 
     setSelectedPromoCardIds: (ids: string[]) => void;
     togglePromoCardId: (id: string) => void;
-    togglePromoCard: (account: SelectedCampaignAccount) => void;
+    togglePromoCard: (
+        account: SelectedCampaignAccount,
+        currency: CampaignCurrencyCode,
+    ) => void;
     setSelectedAccounts: (accounts: SelectedCampaignAccount[]) => void;
     upsertSelectedAccount: (account: SelectedCampaignAccount) => void;
+    setDraftSelectionRows: (rows: DraftSelectionRow[]) => void;
 
     setSelectedCampaignContentItem: (
         accountId: string,
@@ -114,31 +174,11 @@ export type CampaignBuilderActions = {
         }>,
     ) => void;
     setSelectedCurrency: (currency: string) => void;
-    hydrateFromDraft: (payload: {
-        draftId: string;
-        draftStep: "addAccounts" | "addContent" | "strategyTable";
-        campaignName: string;
-        totalPrice: number;
-        selectedOfferId: null;
-        selectedOfferAccountIds: any[];
-        selectedPromoCardIds: string[];
-        selectedAccounts: {
-            accountId: string;
-            influencerId: string;
-            username: string;
-            socialMedia: string;
-            followers: number;
-            profileType: "creator" | "community";
-            price: number;
-            logoUrl: string;
-            source: string;
-            selectedCampaignContentItem: { campaignContentItemId: string; descriptionId: string } | null;
-            dateRequest: string
-        }[];
-        campaignContent: any[];
-        postContentDraft: null;
-        blocksDraft: null
-    }) => void;
+    setSelectionCurrency: (currency: CampaignCurrencyCode | null) => void;
+    switchCampaignCurrency: (
+        currency: CampaignCurrencyCode,
+    ) => CampaignCurrencySwitchResult;
+    hydrateFromDraft: (payload: HydratedCampaignBuilderDraftState) => void;
 
     setTotalPrice: (value: number) => void;
     reset: () => void;
@@ -147,3 +187,18 @@ export type CampaignBuilderActions = {
 export type CampaignBuilderStore = CampaignBuilderState & {
     actions: CampaignBuilderActions;
 };
+
+export type CampaignCurrencyMissingPrices = {
+    offerIds: string[];
+    bundleIds: string[];
+    accountIds: string[];
+    overlapAccountIds: string[];
+};
+
+export type CampaignCurrencySwitchResult =
+    | { ok: true }
+    | {
+        ok: false;
+        targetCurrency: CampaignCurrencyCode;
+        missing: CampaignCurrencyMissingPrices;
+    };

@@ -7,6 +7,7 @@ import {
 import type {
     AdditionalMainTarget,
     BuiltAddedAccount,
+    BuiltCampaignContentItem,
     BuiltCampaignContentWithMeta,
     BuiltCampaignPostContentPayload,
     CampaignBlockAudience,
@@ -611,18 +612,77 @@ export const buildAddedAccountsFromBlocks = ({
         .filter(Boolean) as BuiltAddedAccount[];
 };
 
+const getCampaignContentTargetKey = (
+    item: Pick<
+        BuiltCampaignContentItem,
+        "socialMedia" | "socialMediaGroup" | "profileType"
+    >,
+): string =>
+    [
+        item.socialMediaGroup,
+        normalizeSocial(item.socialMedia),
+        item.profileType ?? "",
+    ].join(":");
+
+export const reuseCampaignContentIds = ({
+    contentItems,
+    previousContent,
+}: {
+    contentItems: BuiltCampaignContentWithMeta[];
+    previousContent: readonly BuiltCampaignContentItem[];
+}): BuiltCampaignContentWithMeta[] => {
+    const previousByTarget = new Map<
+        string,
+        readonly BuiltCampaignContentItem[]
+    >();
+
+    previousContent.forEach((item) => {
+        const key = getCampaignContentTargetKey(item);
+        previousByTarget.set(key, [
+            ...(previousByTarget.get(key) ?? []),
+            item,
+        ]);
+    });
+
+    const occurrenceByTarget = new Map<string, number>();
+
+    return contentItems.map((item) => {
+        const key = getCampaignContentTargetKey(item);
+        const occurrence = occurrenceByTarget.get(key) ?? 0;
+        occurrenceByTarget.set(key, occurrence + 1);
+
+        const previous = previousByTarget.get(key)?.[occurrence];
+
+        if (!previous) return item;
+
+        return {
+            ...item,
+            _id: previous._id,
+            descriptions: item.descriptions.map((description, index) => ({
+                ...description,
+                _id: previous.descriptions[index]?._id ?? description._id,
+            })),
+        };
+    });
+};
+
 export const buildCampaignPostContentPayload = ({
                                                     campaignName,
                                                     campaignPrice,
                                                     accounts,
                                                     blocks,
+                                                    previousCampaignContent = [],
                                                 }: {
     campaignName: string;
     campaignPrice: number;
     accounts: CampaignPostContentAccount[];
     blocks: CampaignPostContentBlock[];
+    previousCampaignContent?: readonly BuiltCampaignContentItem[];
 }): BuiltCampaignPostContentPayload => {
-    const builtContent = buildCampaignContentFromBlocks(blocks, accounts);
+    const builtContent = reuseCampaignContentIds({
+        contentItems: buildCampaignContentFromBlocks(blocks, accounts),
+        previousContent: previousCampaignContent,
+    });
 
     const addedAccounts = buildAddedAccountsFromBlocks({
         accounts,
@@ -641,7 +701,12 @@ export const buildCampaignPostContentPayload = ({
         socialMedia,
         campaignPrice,
         addedAccounts,
-        campaignContent: builtContent.map(({ meta, ...item }) => item),
+        campaignContent: builtContent.map((item) => {
+            const contentItem = { ...item };
+            Reflect.deleteProperty(contentItem, "meta");
+
+            return contentItem;
+        }),
     };
 };
 
@@ -792,30 +857,8 @@ export const buildBlocksFromCampaignContent = ({
                                                    campaignContent,
                                                }: {
     accounts: CampaignPostContentAccount[];
-    campaignContent: Array<{
-        _id: string;
-        socialMedia: string;
-        socialMediaGroup: string;
-        mainLink: string;
-        descriptions: { _id: string; description: string }[];
-        taggedUser: string;
-        taggedLink: string;
-        additionalBrief: string;
-        profileType?: "creator" | "community";
-    }>;
+    campaignContent: BuiltCampaignContentItem[];
 }): CampaignPostContentBlock[] => {
-    const blocks: CampaignPostContentBlock[] = [];
-
-    const mainItems = campaignContent.filter(
-        (item) => item.socialMediaGroup === "main",
-    );
-    const musicItems = campaignContent.filter(
-        (item) => item.socialMediaGroup === "music",
-    );
-    const pressItems = campaignContent.filter(
-        (item) => item.socialMediaGroup === "press",
-    );
-
     const normalizeDescriptions = (
         descriptions: { _id: string; description: string }[],
     ): CampaignPostContentDescription[] =>
@@ -826,149 +869,99 @@ export const buildBlocksFromCampaignContent = ({
             }))
             : [createEmptyDescription()];
 
-    const isSameMainPayload = (
-        a?: typeof mainItems[number],
-        b?: typeof mainItems[number],
-    ) => {
-        if (!a || !b) return false;
-
-        const aDescriptions = JSON.stringify(
-            (a.descriptions ?? []).map((d) => String(d.description ?? "").trim()),
-        );
-        const bDescriptions = JSON.stringify(
-            (b.descriptions ?? []).map((d) => String(d.description ?? "").trim()),
-        );
-
-        return (
-            String(a.mainLink ?? "").trim() === String(b.mainLink ?? "").trim() &&
-            aDescriptions === bDescriptions &&
-            String(a.taggedUser ?? "").trim() === String(b.taggedUser ?? "").trim() &&
-            String(a.taggedLink ?? "").trim() === String(b.taggedLink ?? "").trim() &&
-            String(a.additionalBrief ?? "").trim() === String(b.additionalBrief ?? "").trim()
-        );
+    type ContentOccurrence = {
+        item: BuiltCampaignContentItem;
+        occurrence: number;
     };
 
-    const creatorMain = mainItems.filter((item) => item.profileType === "creator");
-    const communityMain = mainItems.filter((item) => item.profileType === "community");
+    const occurrenceByTarget = new Map<string, number>();
+    const occurrences = campaignContent.map((item): ContentOccurrence => {
+        const targetKey = getCampaignContentTargetKey(item);
+        const occurrence = occurrenceByTarget.get(targetKey) ?? 0;
+        occurrenceByTarget.set(targetKey, occurrence + 1);
 
-    const usedMainIds = new Set<string>();
+        return { item, occurrence };
+    });
 
-    creatorMain.forEach((creatorItem) => {
-        if (usedMainIds.has(String(creatorItem._id))) return;
+    const groupedOccurrences = new Map<string, ContentOccurrence[]>();
 
-        const matchingCommunity = communityMain.find(
-            (communityItem) =>
-                !usedMainIds.has(String(communityItem._id)) &&
-                isSameMainPayload(creatorItem, communityItem),
-        );
+    occurrences.forEach((entry) => {
+        const { item, occurrence } = entry;
+        let logicalKey: string;
 
-        if (matchingCommunity) {
-            usedMainIds.add(String(creatorItem._id));
-            usedMainIds.add(String(matchingCommunity._id));
-
-            blocks.push({
-                id: oid(),
-                group: "main",
-                platform: "main",
-                audience: "both",
-                targetSocialMedias: Array.from(
-                    new Set([
-                        normalizeSocial(creatorItem.socialMedia),
-                        normalizeSocial(matchingCommunity.socialMedia),
-                    ]),
-                ),
-                isAdditional: false,
-                isRemovable: false,
-                fields: {
-                    mainLink: String(creatorItem.mainLink ?? ""),
-                    descriptions: normalizeDescriptions(creatorItem.descriptions ?? []),
-                    taggedUser: String(creatorItem.taggedUser ?? ""),
-                    taggedLink: String(creatorItem.taggedLink ?? ""),
-                    additionalBrief: String(creatorItem.additionalBrief ?? ""),
-                },
-            });
-
-            return;
+        if (occurrence === 0) {
+            logicalKey = `${item.socialMediaGroup}:base`;
+        } else if (item.socialMediaGroup === "main") {
+            logicalKey = `main:${item.profileType ?? "unknown"}:${occurrence}`;
+        } else {
+            logicalKey = [
+                item.socialMediaGroup,
+                normalizeSocial(item.socialMedia),
+                occurrence,
+            ].join(":");
         }
 
-        usedMainIds.add(String(creatorItem._id));
-
-        blocks.push({
-            id: oid(),
-            group: "main",
-            platform: "main",
-            audience: "creator",
-            targetSocialMedias: [normalizeSocial(creatorItem.socialMedia)],
-            isAdditional: false,
-            isRemovable: false,
-            fields: {
-                mainLink: String(creatorItem.mainLink ?? ""),
-                descriptions: normalizeDescriptions(creatorItem.descriptions ?? []),
-                taggedUser: String(creatorItem.taggedUser ?? ""),
-                taggedLink: String(creatorItem.taggedLink ?? ""),
-                additionalBrief: String(creatorItem.additionalBrief ?? ""),
-            },
-        });
+        groupedOccurrences.set(logicalKey, [
+            ...(groupedOccurrences.get(logicalKey) ?? []),
+            entry,
+        ]);
     });
 
-    communityMain.forEach((communityItem) => {
-        if (usedMainIds.has(String(communityItem._id))) return;
+    const blocks = Array.from(groupedOccurrences.values()).map(
+        (entries): CampaignPostContentBlock => {
+            const first = entries[0].item;
+            const isAdditional = entries[0].occurrence > 0;
+            const targetSocialMedias = Array.from(
+                new Set(
+                    entries.map(({ item }) =>
+                        normalizeSocial(item.socialMedia),
+                    ),
+                ),
+            );
+            const profileTypes = new Set(
+                entries
+                    .map(({ item }) => item.profileType)
+                    .filter(
+                        (value): value is CampaignContentAudience =>
+                            value === "creator" || value === "community",
+                    ),
+            );
+            const audience: CampaignBlockAudience | undefined =
+                profileTypes.size > 1
+                    ? "both"
+                    : profileTypes.values().next().value;
 
-        usedMainIds.add(String(communityItem._id));
-
-        blocks.push({
-            id: oid(),
-            group: "main",
-            platform: "main",
-            audience: "community",
-            targetSocialMedias: [normalizeSocial(communityItem.socialMedia)],
-            isAdditional: false,
-            isRemovable: false,
-            fields: {
-                mainLink: String(communityItem.mainLink ?? ""),
-                descriptions: normalizeDescriptions(communityItem.descriptions ?? []),
-                taggedUser: String(communityItem.taggedUser ?? ""),
-                taggedLink: String(communityItem.taggedLink ?? ""),
-                additionalBrief: String(communityItem.additionalBrief ?? ""),
-            },
-        });
-    });
-
-    musicItems.forEach((item, index) => {
-        blocks.push({
-            id: oid(),
-            group: "music",
-            platform: normalizeSocial(item.socialMedia),
-            targetSocialMedias: [normalizeSocial(item.socialMedia)],
-            isAdditional: index > 0,
-            isRemovable: index > 0,
-            fields: {
-                mainLink: String(item.mainLink ?? ""),
-                descriptions: normalizeDescriptions(item.descriptions ?? []),
-                taggedUser: "",
-                taggedLink: "",
-                additionalBrief: String(item.additionalBrief ?? ""),
-            },
-        });
-    });
-
-    pressItems.forEach((item, index) => {
-        blocks.push({
-            id: oid(),
-            group: "press",
-            platform: "press",
-            targetSocialMedias: [normalizeSocial(item.socialMedia)],
-            isAdditional: index > 0,
-            isRemovable: index > 0,
-            fields: {
-                mainLink: String(item.mainLink ?? ""),
-                descriptions: normalizeDescriptions(item.descriptions ?? []),
-                taggedUser: "",
-                taggedLink: String(item.taggedLink ?? ""),
-                additionalBrief: String(item.additionalBrief ?? ""),
-            },
-        });
-    });
+            return {
+                id: String(first._id),
+                group: first.socialMediaGroup,
+                platform:
+                    first.socialMediaGroup === "main"
+                        ? "main"
+                        : isAdditional
+                            ? normalizeSocial(first.socialMedia)
+                            : first.socialMediaGroup,
+                ...(first.socialMediaGroup === "main" ? { audience } : {}),
+                targetSocialMedias,
+                isAdditional,
+                isRemovable: isAdditional,
+                fields: {
+                    mainLink: String(first.mainLink ?? ""),
+                    descriptions: normalizeDescriptions(
+                        first.descriptions ?? [],
+                    ),
+                    taggedUser:
+                        first.socialMediaGroup === "main"
+                            ? String(first.taggedUser ?? "")
+                            : "",
+                    taggedLink:
+                        first.socialMediaGroup === "music"
+                            ? ""
+                            : String(first.taggedLink ?? ""),
+                    additionalBrief: String(first.additionalBrief ?? ""),
+                },
+            };
+        },
+    );
 
     return syncBlocksWithAccounts({
         accounts,

@@ -1,0 +1,34 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+
+  padding-top: 24px;
+  padding-bottom: 64px;
+
+  @media screen and (max-width: 900px) {
+    padding-bottom: 32px;
+  }
+
+  @media screen and (max-width: 500px) {
+    padding-bottom: 24px;
+  }
+
+  @media screen and (max-width: 599px) {
+    gap: 24px;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @media screen and (max-width: 811px) {
+    gap: 16px;
+  }
+}
+
+.title {
+  text-align: start;
+}

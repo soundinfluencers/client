@@ -19,8 +19,24 @@ import type {
     CampaignFilterItem,
     CampaignFilterSection,
 } from "@/entities/client-side/campaign-creator-page/campaign-filter/model/campaign-filter.types";
+import type {
+    CampaignCatalogMode,
+} from "@/features/client-side/campaign-creator-page/campaign-catalog-mode-toggle";
+import {
+    useFilteredBundlesQuery,
+} from "@/entities/client-side/campaign-creator-page/bundle";
+import type {
+    GetFilteredBundlesRequest,
+} from "@/entities/client-side/campaign-creator-page/bundle";
+import {
+    buildBundleFilterBody,
+} from "./build-bundle-filter-body";
+import {
+    mapBundlesToCardDisplayModels,
+} from "@/entities/client-side/campaign-creator-page/bundle/ui/bundle-card/bundle-card.mappers";
 
 const DEFAULT_PROMO_CARDS_LIMIT = 24;
+const DEFAULT_BUNDLE_CARDS_LIMIT = 24;
 
 const normalize = (value?: string) => value?.toLowerCase().trim() ?? "";
 
@@ -63,18 +79,26 @@ const collectSectionFilterIds = (section: CampaignFilterSection) => {
     return collectFilterIds(section.filters);
 };
 
-export const useBuildCampaignView = () => {
+export const useBuildCampaignView = (
+    catalogMode: CampaignCatalogMode,
+) => {
     const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
     const ddRef = React.useRef<HTMLDivElement | null>(null);
     const loadMoreRef = React.useRef<HTMLDivElement | null>(null);
+    const bundleLoadMoreRef = React.useRef<HTMLDivElement | null>(null);
     const didInitDefaults = React.useRef(false);
 
     const [pickedFromSearch, setPickedFromSearch] =
         React.useState<PromoAccount | null>(null);
 
     const [limit, setLimit] = React.useState(DEFAULT_PROMO_CARDS_LIMIT);
+    const [bundleLimit, setBundleLimit] = React.useState(
+        DEFAULT_BUNDLE_CARDS_LIMIT,
+    );
     const [isSmall, setIsSmall] = React.useState(false);
     const [isLoadingMore, setIsLoadingMore] = React.useState(false);
+    const [isBundleLoadingMore, setIsBundleLoadingMore] =
+        React.useState(false);
 
     const {
         search,
@@ -100,7 +124,9 @@ export const useBuildCampaignView = () => {
         setPanelOpen,
         selectedFilterIds,
         setSelectedFilterIds,
-    } = useBuildCampaignParams();
+    } = useBuildCampaignParams({
+        synchronizeCampaignCurrency: true,
+    });
 
     const [initialSections, setInitialSections] = React.useState<
         CampaignFilterSection[]
@@ -243,6 +269,26 @@ export const useBuildCampaignView = () => {
     ]);
 
     const socialMedias = promoBody.socialMedias;
+    const isBundleMode = catalogMode === "bundles";
+
+    const bundleBody = React.useMemo(
+        () =>
+            buildBundleFilterBody({
+                filters: promoBody,
+                budget: selectedBudget,
+                budgetCurrency: selectedCurrencyCode,
+            }),
+        [
+            promoBody,
+            selectedBudget,
+            selectedCurrencyCode,
+        ],
+    );
+    const bundleFilterKey = JSON.stringify(bundleBody);
+
+    React.useEffect(() => {
+        setBundleLimit(DEFAULT_BUNDLE_CARDS_LIMIT);
+    }, [bundleFilterKey, selectedSortKey]);
 
     const debounced = useDebouncedValue(search, 250);
     const normalizedSearch = debounced.trim();
@@ -261,12 +307,36 @@ export const useBuildCampaignView = () => {
         enabled: isFiltersResolved && socialMedias.length > 0,
     });
 
+    const bundleRequest = React.useMemo<GetFilteredBundlesRequest>(
+        () => ({
+            page: 1,
+            limit: bundleLimit,
+            sortBy: selectedSortKey,
+            body: bundleBody,
+        }),
+        [
+            bundleBody,
+            bundleLimit,
+            selectedSortKey,
+        ],
+    );
+
+    const isBundleQueryEnabled =
+        isBundleMode &&
+        isFiltersResolved &&
+        socialMedias.length > 0;
+
+    const bundleQuery = useFilteredBundlesQuery(bundleRequest, {
+        enabled: isBundleQueryEnabled,
+    });
+
     const searchQuery = useSearchPromoAccountsQuery({
         query: normalizedSearch,
         socialMedias,
         page: 1,
         limit: 20,
         enabled:
+            !isBundleMode &&
             isFiltersResolved &&
             normalizedSearch.length > 0 &&
             socialMedias.length > 0,
@@ -279,8 +349,8 @@ export const useBuildCampaignView = () => {
     }, [search]);
 
     React.useEffect(() => {
-        setIsDropdownOpen(isSearchMode);
-    }, [isSearchMode]);
+        setIsDropdownOpen(isSearchMode && !isBundleMode);
+    }, [isBundleMode, isSearchMode]);
 
     React.useEffect(() => {
         if (!isDropdownOpen) return;
@@ -337,6 +407,56 @@ export const useBuildCampaignView = () => {
             setIsLoadingMore(false);
         }
     }, [promoQuery.isFetching]);
+
+    const canLoadMoreBundles =
+        isBundleQueryEnabled &&
+        (bundleQuery.data?.length ?? 0) >= bundleLimit &&
+        !bundleQuery.isFetching;
+
+    React.useEffect(() => {
+        if (!canLoadMoreBundles) return;
+
+        const element = bundleLoadMoreRef.current;
+
+        if (!element) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const [entry] = entries;
+
+                if (!entry?.isIntersecting) return;
+
+                setIsBundleLoadingMore(true);
+                setBundleLimit(
+                    (currentLimit) =>
+                        currentLimit + DEFAULT_BUNDLE_CARDS_LIMIT,
+                );
+            },
+            { root: null, rootMargin: "100px 0px", threshold: 0 },
+        );
+
+        observer.observe(element);
+
+        return () => observer.disconnect();
+    }, [canLoadMoreBundles]);
+
+    React.useEffect(() => {
+        if (!bundleQuery.isFetching) {
+            setIsBundleLoadingMore(false);
+        }
+    }, [bundleQuery.isFetching]);
+
+    const bundleCards = React.useMemo(
+        () =>
+            mapBundlesToCardDisplayModels(
+                bundleQuery.data ?? [],
+                selectedCurrencyCode,
+            ),
+        [
+            bundleQuery.data,
+            selectedCurrencyCode,
+        ],
+    );
 
     const displayCards = React.useMemo<PromoAccount[]>(() => {
         if (!search.trim()) {
@@ -464,9 +584,26 @@ export const useBuildCampaignView = () => {
         !promoQuery.isError &&
         displayCards.length === 0;
 
+    const hasBundles = (bundleQuery.data?.length ?? 0) > 0;
+
+    const isBundleInitialLoading =
+        isBundleMode &&
+        (!isFiltersResolved ||
+            (!hasBundles &&
+                isBundleQueryEnabled &&
+                (bundleQuery.isLoading || bundleQuery.isFetching)));
+
+    const isBundleEmpty =
+        isBundleMode &&
+        isFiltersResolved &&
+        !isBundleInitialLoading &&
+        !bundleQuery.isError &&
+        bundleCards.length === 0;
+
     return {
         ddRef,
         loadMoreRef,
+        bundleLoadMoreRef,
 
         search,
         setSearch,
@@ -516,6 +653,17 @@ export const useBuildCampaignView = () => {
         isFetchingMore,
         isRefetching,
         isEmpty,
+
+        bundleCards,
+        bundles: bundleQuery.data ?? [],
+        bundleFetching: bundleQuery.isFetching,
+        bundleError: bundleQuery.isError,
+        bundleIsInitialLoading: isBundleInitialLoading,
+        bundleIsLoadingMore:
+            hasBundles &&
+            bundleQuery.isFetching &&
+            isBundleLoadingMore,
+        bundleIsEmpty: isBundleEmpty,
 
         isSmall,
         setIsSmall,

@@ -21,7 +21,9 @@ import {
 } from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
 import {getColumns} from "@/client-side/utils";
-import {getCurrencySymbol} from "@/pages/influencer/negotiation/utils/getCurrencySymbol.ts";
+import {
+  formatPersistedCampaignCurrency,
+} from "@/shared/functions/formatCurrency.ts";
 
 type Props = {
   items: CampaignContentItem[];
@@ -201,7 +203,17 @@ export function TableStrategy({
               <td
                 key={col}
                 className={`tableBase__td td--footer ${isPrice ? "td--footer-strategy" : ""} ${isFollowers ? "td--footer-strategy" : ""}`}>
-                {isPrice && <p className="td__price">Price: {campaign.isPriceHidden ? "" : `${totalPrice}${getCurrencySymbol(campaign.displayCurrency)}`}</p>}
+                {isPrice && (
+                  <p className="td__price">
+                    Price:{" "}
+                    {campaign.isPriceHidden
+                        ? ""
+                        : formatPersistedCampaignCurrency(
+                            totalPrice,
+                            campaign.displayCurrency,
+                        )}
+                  </p>
+                )}
                 {isFollowers && (
                   <p className="td__followers">{totalFollowers}</p>
                 )}

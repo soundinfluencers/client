@@ -14,6 +14,14 @@
     padding-bottom: 24px;
   }
 
+  &__quantity-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+  }
+
   &__quantity {
     display: flex;
     align-items: center;
@@ -21,7 +29,6 @@
     height: 40px;
     padding: 8px 16px;
     border-radius: 8px;
-    margin-left: auto;
     background: vars.$light-blue;
 
     @media screen and (max-width: 900px) {

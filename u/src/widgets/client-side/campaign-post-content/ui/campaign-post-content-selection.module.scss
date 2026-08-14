@@ -225,6 +225,220 @@
   }
 }
 
+.bundleSections {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+
+  @media (max-width: 900px) {
+    gap: 24px;
+  }
+
+  @media (max-width: 600px) {
+    gap: 18px;
+  }
+
+  @media (max-width: 420px) {
+    gap: 14px;
+  }
+}
+
+.bundleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bundleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ebecff;
+
+  h4 {
+    flex-shrink: 0;
+    margin: 0;
+    color: #202934;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: normal;
+  }
+}
+
+.bundlePrice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  width: 143px;
+  color: #18181c;
+  font-size: 14px;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.bundlePriceValues {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+
+  del {
+    font-weight: 400;
+  }
+
+  strong {
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.bundleAccountsWrap {
+  width: 100%;
+  min-width: 0;
+  padding-left: 32px;
+}
+
+.bundleAccounts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 8px;
+  border: 1px solid #b9d0ff;
+  border-radius: 8px;
+  list-style: none;
+}
+
+.bundleAccount {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(56px, auto) minmax(44px, auto);
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: #18181c;
+  font-size: 15px;
+  line-height: normal;
+
+  &:not(:last-child) {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e7e8f1;
+  }
+}
+
+.bundleUsername {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.bundleAccountPlatform {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 0;
+  white-space: nowrap;
+
+  img {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+}
+
+.bundleAccountPrice {
+  justify-self: end;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .bundleAccountsWrap {
+    padding-left: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .bundleHeader {
+    gap: 8px;
+  }
+
+  .bundlePrice {
+    width: auto;
+    font-size: 12px;
+  }
+
+  .bundlePriceValues {
+    gap: 6px;
+
+    strong {
+      font-size: 13px;
+    }
+  }
+
+  .bundleAccountsWrap {
+    padding-left: 12px;
+  }
+
+  .bundleAccounts {
+    padding: 8px;
+  }
+
+  .bundleAccount {
+    grid-template-columns: minmax(0, 1fr) minmax(48px, auto) minmax(40px, auto);
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .bundleAccountPlatform img {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .bundleAccountsWrap {
+    padding-left: 8px;
+  }
+
+  .bundleHeader h4 {
+    font-size: 15px;
+  }
+
+  .bundlePrice {
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .bundlePriceValues {
+    gap: 4px;
+
+    strong {
+      font-size: 12px;
+    }
+  }
+
+  .bundleAccount {
+    grid-template-columns: minmax(0, 1fr) minmax(44px, auto) minmax(36px, auto);
+    gap: 4px;
+    font-size: 11px;
+  }
+
+  .bundleAccountPlatform img {
+    width: 16px;
+    height: 16px;
+  }
+}
+
 .selectionBody {
   overflow-y: auto;
   max-height: 550px;

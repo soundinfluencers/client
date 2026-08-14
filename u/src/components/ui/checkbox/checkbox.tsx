@@ -5,16 +5,27 @@ interface Props {
   name: string;
   isChecked?: boolean;
   onChange?: (checked: boolean) => void;
+  disabled?: boolean;
 }
 
-export const Checkbox: React.FC<Props> = ({ name, isChecked, onChange }) => {
+export const Checkbox: React.FC<Props> = ({
+  name,
+  isChecked,
+  onChange,
+  disabled = false,
+}) => {
   return (
-    <label className="AutoReplace">
+    <label
+      className={`AutoReplace ${disabled ? "AutoReplace--disabled" : ""}`}
+    >
       <div className="input">
         <input
           type="checkbox"
           checked={isChecked}
-          onChange={(e) => onChange(e?.target?.checked || false)}
+          disabled={disabled}
+          onChange={(e) =>
+            onChange?.(e?.target?.checked || false)
+          }
         />
         <img className={isChecked ? "checked" : ""} src={check} alt="" />
       </div>

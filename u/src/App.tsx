@@ -24,6 +24,7 @@ import { InvoicesHistory } from "./pages/influencer/invoices-details/InvoicesHis
 import { AccountSetting } from "./pages/influencer/account-setting/AccountSetting.tsx";
 import { ContactSupport } from "@/pages/influencer/contact-support/ContactSupport.tsx";
 import { InvoiceDetails } from "@/pages/influencer/invoice-details/InvoiceDetails.tsx";
+import { InfluencerCreateBundlePage } from "@/pages/influencer/create-bundle";
 
 // client
 import "./app.scss";
@@ -146,6 +147,11 @@ function App() {
           <Route
             path="contact-support"
             element={<ContactSupport />}
+          />
+
+          <Route
+            path="create-bundle"
+            element={<InfluencerCreateBundlePage />}
           />
 
           {/*<Route*/}

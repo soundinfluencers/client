@@ -1,8 +1,31 @@
+import type {
+    CampaignCurrencyCode,
+} from "@/entities/client-side/campaign-creator-page/campaign-filter/model/campaign-filter.types";
+
 export type PromoAccountCountryDto =
     | string
     | {
     country: string;
     percentage: number;
+};
+
+export type NetworkBundlePreviewPriceMapDto = Partial<
+    Record<CampaignCurrencyCode, number>
+>;
+
+export type NetworkBundleAccountPreviewDto = {
+    accountId: string;
+    username: string;
+    socialMedia: string;
+    followers: number;
+    prices: NetworkBundlePreviewPriceMapDto;
+};
+
+export type NetworkBundlePreviewDto = {
+    bundleId: string;
+    prices: NetworkBundlePreviewPriceMapDto;
+    originalPrices: NetworkBundlePreviewPriceMapDto;
+    accounts: NetworkBundleAccountPreviewDto[];
 };
 
 export type PromoAccountDto = {
@@ -21,6 +44,7 @@ export type PromoAccountDto = {
     communityThemeTopics: string[];
     creatorMusicGenres: string[];
     creatorContentFocus: string[];
+    bundlePreviews: NetworkBundlePreviewDto[];
 };
 
 export type GetPromoAccountsResponseDto = {

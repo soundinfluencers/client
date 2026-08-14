@@ -1,0 +1,77 @@
+@use "@/styles/variables/variables" as vars;
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin-top: 24px;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+
+  & + & {
+    padding-top: 16px;
+    border-top: 1px solid vars.$white-gray-2;
+  }
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 19px;
+  padding: 1px 0;
+  border-radius: 16px;
+  background: #eff6ff;
+  color: #030922;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: normal;
+  text-align: center;
+}
+
+.accounts {
+  min-height: 0;
+}
+
+.price {
+  min-height: 43px;
+  padding: 8px;
+
+  strong {
+    font-size: 14px;
+  }
+}
+
+.chooseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 32px;
+  padding: 8px 24px;
+  border: 0;
+  border-radius: 16px;
+  background: #364153;
+  color: vars.$bg-white;
+  font: inherit;
+  font-size: 13px;
+  line-height: normal;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 1;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .list {
+    margin-top: 16px;
+  }
+}

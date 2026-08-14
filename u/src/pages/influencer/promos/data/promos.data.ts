@@ -1,7 +1,7 @@
 import type {
   fieldsConfig,
-  IPromoDetailsModel,
   TDetailsField,
+  TPromoDetailsCardModel,
   TPromoStatus,
 } from "../types/promos.types";
 
@@ -452,7 +452,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
 };
 
 export const getPromoFields = (
-  promo: IPromoDetailsModel,
+  promo: TPromoDetailsCardModel,
   status: TPromoStatus,
 ): TDetailsField[] => {
   if (status === "completed") return COMPLETED_FIELDS[promo.accountSocialMedia];

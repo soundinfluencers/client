@@ -11,11 +11,6 @@ import { Modal } from "@/components/ui/modal-fix/Modal";
 import { postCampaignRequest } from "@/api/client/campaign/campaign.api";
 import { toast } from "react-toastify";
 
-import {
-    useProposalCampaignStore,
-    useUpdateCampaign,
-} from "@/client-side/store";
-
 import { useNavigate } from "react-router-dom";
 import { useGroupPromos } from "@/client-side/hooks";
 
@@ -84,37 +79,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
         const campaignId = String(campaign?.campaignId ?? "");
         if (!campaignId) return;
 
-        const patches = useUpdateCampaign.getState().patches ?? {};
-
-        useProposalCampaignStore.getState().initOption(
-            campaignId,
-            optionIndex,
-            accounts,
-            content,
-            { force: true },
-        );
-
-        const base = useProposalCampaignStore
-            .getState()
-            .getCampaignPayload(
-                campaignId,
-                optionIndex,
-                campaign?.campaignName ?? "",
-                patches,
-            );
-
-        useProposalCampaignStore
-            .getState()
-            .setProposalPayload(campaignId, optionIndex, base);
-
-        sessionStorage.setItem(
-            "proposalPaymentPayload",
-            JSON.stringify({
-                campaignId,
-                optionIndex,
-                payload: base,
-            }),
-        );
+        sessionStorage.removeItem("proposalPaymentPayload");
 
         const paymentPath = `/client/campaign/payment?proposal=${campaignId}&option=${optionIndex}`;
 
@@ -130,21 +95,26 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
         navigate(paymentPath);
     }, [
         campaign?.campaignId,
-        campaign?.campaignName,
         optionIndex,
-        accounts,
-        content,
         navigate,
     ]);
 
     const approveOption = React.useCallback(() => {
+        if (
+            !Number.isInteger(campaign?.selectedOption?.optionIndex) ||
+            campaign.selectedOption.optionIndex < 0
+        ) {
+            toast.error("Cannot resolve the selected Proposal option");
+            return;
+        }
+
         setApprovedOptions((prev) => ({
             ...prev,
             [optionIndex]: true,
         }));
 
         proceedProposalToPayment();
-    }, [optionIndex, proceedProposalToPayment]);
+    }, [campaign?.selectedOption?.optionIndex, optionIndex, proceedProposalToPayment]);
 
     const requestCampaign = React.useCallback(
         async (campaignId: string, text: string) => {

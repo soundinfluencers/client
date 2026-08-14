@@ -1,7 +1,6 @@
 import { useConfirmInfluencerPromo } from './hooks/useConfirmInfluencerPromo';
 // import { useInfluencerNewPromos } from './hooks/useInfluencerNewPromos';
-import { useEffect, useState } from 'react';
-import { PromosDetailsList } from '../components/promos-details-list/PromosDetailsList';
+import { useEffect, useRef, useState } from 'react';
 import { Modal } from '@components/ui/modal-fix/Modal.tsx';
 import { Breadcrumbs, Container, Loader } from '@/components';
 import { ButtonMain } from '@components/ui/buttons-fix/ButtonFix.tsx';
@@ -9,9 +8,11 @@ import successIcon from '@/assets/icons/success-icon.svg';
 // import type { IPromoDetailsModel } from "@/pages/influencer/promos/types/promos.types.ts";
 import './_new-promos.scss';
 import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
-import { useDetailedPromos } from "@/pages/influencer/promos/hooks/useDetailedPromos.ts";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
+import { useInfluencerNewPromos } from "./hooks/useInfluencerNewPromos";
+import { NewPromosList } from "./components/new-promos-list/NewPromosList";
+import type { TPromoDecisionRequest } from "../types/promos.types";
 
 type TNewPromosLocationState = {
   campaignId?: string;
@@ -22,6 +23,10 @@ export const NewPromos = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDecline, setIsDecline] = useState(false);
   const [isAccepted, setIsAccepted] = useState(false);
+  const [pendingBundleIds, setPendingBundleIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  const pendingBundleIdsRef = useRef(new Set<string>());
   const location = useLocation();
   const state = location.state as TNewPromosLocationState | undefined;
   const navigate = useNavigate();
@@ -41,9 +46,53 @@ export const NewPromos = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useDetailedPromos({ status: 'new', campaignId, addedAccountsId });
+  } = useInfluencerNewPromos({ campaignId, addedAccountsId });
 
-  const { mutate: confirmPromo, isPending, variables } = useConfirmInfluencerPromo();
+  const {
+    mutate: confirmPromo,
+    mutateAsync: confirmBundlePromo,
+    isPending,
+    variables,
+  } = useConfirmInfluencerPromo();
+
+  const setBundlePending = (campaignBundleId: string, pending: boolean) => {
+    if (pending) {
+      pendingBundleIdsRef.current.add(campaignBundleId);
+    } else {
+      pendingBundleIdsRef.current.delete(campaignBundleId);
+    }
+
+    setPendingBundleIds(new Set(pendingBundleIdsRef.current));
+  };
+
+  const confirmPromoDecision = (payload: TPromoDecisionRequest) => {
+    const campaignBundleId =
+      "campaignBundleId" in payload ? payload.campaignBundleId : undefined;
+
+    const showDecisionSuccess = () => {
+      const isAcceptedDecision = payload.campaignResponse === "accept";
+
+      setIsDecline(!isAcceptedDecision);
+      setIsAccepted(isAcceptedDecision);
+      setIsModalOpen(true);
+    };
+
+    if (!campaignBundleId) {
+      confirmPromo(payload, { onSuccess: showDecisionSuccess });
+      return;
+    }
+
+    if (pendingBundleIdsRef.current.has(campaignBundleId)) {
+      return;
+    }
+
+    setBundlePending(campaignBundleId, true);
+
+    void confirmBundlePromo(payload)
+      .then(showDecisionSuccess)
+      .catch(() => undefined)
+      .finally(() => setBundlePending(campaignBundleId, false));
+  };
 
   // TODO: if error dont clear state and show error message, if success clear state to prevent modal from showing again on page reload
   useEffect(() => {
@@ -73,37 +122,32 @@ export const NewPromos = () => {
     );
   }
 
+  const standaloneLength = promos.filter(promo => promo.promoType === "standalone").length;
+  const bundleLength = promos.filter(promo => promo.promoType === "bundle").length;
+
   // TODO: add changing check staus fro data loading error empty
   return (
     <Container className="new-promos">
       <Breadcrumbs/>
-      <div className="new-promos__quantity">
-        <p className="new-promos__label">New promos</p>
-        <span className="new-promos__number">{promos.length}</span>
+      <div className="new-promos__quantity-wrapper">
+        <div className="new-promos__quantity">
+          <p className="new-promos__label">New bundle</p>
+          <span className="new-promos__number">{bundleLength}</span>
+        </div>
+
+        <div className="new-promos__quantity">
+          <p className="new-promos__label">New promos</p>
+          <span className="new-promos__number">{standaloneLength}</span>
+        </div>
       </div>
 
+
       <div className={'new-promos__wrapper'}>
-        <PromosDetailsList
+        <NewPromosList
           data={promos}
-          status="pending"
-          onAccept={(payload) => {
-            confirmPromo(payload, {
-              onSuccess: () => {
-                setIsDecline(false);
-                setIsAccepted(true);
-                setIsModalOpen(true);
-              },
-            });
-          }}
-          onDecline={(payload) => {
-            confirmPromo(payload, {
-              onSuccess: () => {
-                setIsAccepted(false);
-                setIsDecline(true);
-                setIsModalOpen(true);
-              },
-            });
-          }}
+          onAccept={confirmPromoDecision}
+          onDecline={confirmPromoDecision}
+          pendingBundleIds={pendingBundleIds}
           mutationState={{
             isPending,
             variables,

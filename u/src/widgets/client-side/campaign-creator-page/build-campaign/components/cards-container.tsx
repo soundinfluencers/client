@@ -14,6 +14,9 @@ import type {
 import type {
     CampaignCardsViewMode
 } from "@/entities/client-side/campaign-creator-page/campaign-filter/model/campaign-filter.types.ts";
+import {
+    getSelectedBundleAccountIds,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-selection";
 
 interface Props {
     view: CampaignCardsViewMode;
@@ -23,6 +26,10 @@ interface Props {
     isInitialLoading: boolean;
     isFetchingMore: boolean;
     isRefetching: boolean;
+    selectedBundleIds: ReadonlySet<string>;
+    pendingBundleIds: ReadonlySet<string>;
+    disabledEmbeddedBundleIds: ReadonlySet<string>;
+    onChooseEmbeddedBundle: (bundleId: string) => void;
 }
 
 export const CardsContainer: React.FC<Props> = ({
@@ -33,6 +40,10 @@ export const CardsContainer: React.FC<Props> = ({
                                                     isInitialLoading,
                                                     isFetchingMore,
                                                     isRefetching,
+                                                    selectedBundleIds,
+                                                    pendingBundleIds,
+                                                    disabledEmbeddedBundleIds,
+                                                    onChooseEmbeddedBundle,
                                                 }) => {
     const dimStyle = isRefetching ? { opacity: 0.6 } : undefined;
     const selectedPromoCardIds = useCampaignBuilderStore((s) => s.selectedPromoCardIds);
@@ -40,10 +51,26 @@ export const CardsContainer: React.FC<Props> = ({
     const selectedOfferAccountIds = useCampaignBuilderStore(
         (s) => s.selectedOfferAccountIds,
     );
+    const selectedBundles = useCampaignBuilderStore(
+        (s) => s.selectedBundles,
+    );
+    const selectedBundleAccountIds = React.useMemo(
+        () => getSelectedBundleAccountIds(selectedBundles),
+        [selectedBundles],
+    );
 
     const isIncluded = React.useCallback(
         (card: PromoAccount) => selectedOfferAccountIds.includes(card.accountId),
         [selectedOfferAccountIds],
+    );
+    const isManualSelectionDisabled = React.useCallback(
+        (card: PromoAccount) =>
+            isIncluded(card) ||
+            selectedBundleAccountIds.has(card.accountId),
+        [
+            isIncluded,
+            selectedBundleAccountIds,
+        ],
     );
 
     return (
@@ -76,7 +103,7 @@ export const CardsContainer: React.FC<Props> = ({
                                     <TableRowCard
                                         key={card.accountId}
                                         data={card}
-                                        isInclude={isIncluded(card)}
+                                        isDisabled={isManualSelectionDisabled(card)}
                                         isSelected={selectedPromoCardIds.includes(card.accountId)}
                                         isSmall={isSmall}
                                         setIsSmall={setIsSmall}
@@ -91,7 +118,12 @@ export const CardsContainer: React.FC<Props> = ({
                                 key={card.accountId}
                                 data={card}
                                 isInclude={isIncluded(card)}
+                                isDisabled={isManualSelectionDisabled(card)}
                                 isSelected={selectedPromoCardIds.includes(card.accountId)}
+                                selectedBundleIds={selectedBundleIds}
+                                pendingBundleIds={pendingBundleIds}
+                                disabledBundleIds={disabledEmbeddedBundleIds}
+                                onChooseBundle={onChooseEmbeddedBundle}
                             />
                         ))
                     )}

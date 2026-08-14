@@ -17,12 +17,6 @@ export const writeLastProposalOption = ({
     );
 };
 
-export const getNextAvailableOptionIndex = (existingOptions: number[]) => {
-    if (!existingOptions.length) return 0;
-
-    return Math.max(...existingOptions) + 1;
-};
-
 export const getNextOptionAfterDelete = ({
                                              deletedOption,
                                              existingOptions,

@@ -4,6 +4,17 @@ import type {
     CampaignBuilderStore,
     SelectedCampaignAccount,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types.ts";
+import {
+    dedupeSelectedAccounts,
+    getSelectedBundleAccountIds,
+    normalizeSelectedAccounts,
+    removeBundleFromCampaignSelection,
+    selectBundleFromCampaignSelection,
+    selectOfferFromCampaignSelection,
+} from "./campaign-builder-selection";
+import {
+    buildCampaignCurrencySwitch,
+} from "./campaign-builder-currency";
 
 const initialState = {
     campaignName: "",
@@ -12,16 +23,20 @@ const initialState = {
 
     selectedOfferId: null,
     selectedOfferName: "",
+    selectedOfferPrice: undefined,
+    selectedOfferPrices: {},
+    selectionCurrency: null,
     selectedPromoCardIds: [],
     selectedOfferAccountIds: [],
     selectedAccounts: [],
     selectedOfferAccounts: [],
+    selectedBundles: [],
+    draftSelectionRows: [],
 
     campaignContent: [],
     postContentDraft: null,
     blocksDraft: null,
     totalPrice: 0,
-    selectedOfferPrice: 0,
     selectedCurrency: "€",
 } satisfies Omit<CampaignBuilderStore, "actions">;
 
@@ -33,58 +48,53 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
             actions: {
                 setCampaignName: (value) => set({ campaignName: value }),
                 setSelectedCurrency: (value) => set({ selectedCurrency: value }),
+                setSelectionCurrency: (value) =>
+                    set({ selectionCurrency: value }),
+                switchCampaignCurrency: (currency) => {
+                    const result = buildCampaignCurrencySwitch(
+                        useCampaignBuilderStore.getState(),
+                        currency,
+                    );
+
+                    if (result.patch) {
+                        set(result.patch);
+                    }
+
+                    return result.result;
+                },
                 setDraftMeta: ({ draftId, draftStep }) =>
                     set({
                         draftId,
                         draftStep,
                     }),
 
-                selectOffer: ({
-                                  offerId,
-                                  offerName,
-                                  offerPrice = 0,
-                                  accountIds = [],
-                                  accounts = [],
-                              }) =>
+                selectOffer: (payload) =>
+                    set((state) =>
+                        selectOfferFromCampaignSelection({
+                            state,
+                            payload,
+                        }),
+                    ),
+
+                selectBundle: (bundle, currency) =>
                     set((state) => {
-                        const isSame = state.selectedOfferId === offerId;
+                        const patch = selectBundleFromCampaignSelection({
+                            state,
+                            bundle,
+                            currency,
+                        });
 
-                        if (!offerId || isSame) {
-                            const nextAccounts = state.selectedAccounts.filter(
-                                (account) => account.source !== "offer",
-                            );
+                        return patch ?? state;
+                    }),
 
-                            return {
-                                selectedOfferId: null,
-                                selectedOfferName: "",
-                                selectedOfferPrice: 0,
-                                selectedOfferAccountIds: [],
-                                selectedAccounts: nextAccounts,
-                            };
-                        }
+                removeBundle: (bundleId) =>
+                    set((state) => {
+                        const patch = removeBundleFromCampaignSelection({
+                            state,
+                            bundleId,
+                        });
 
-                        const manualAccounts = state.selectedAccounts.filter(
-                            (account) => account.source !== "offer",
-                        );
-
-                        const manualIds = new Set(
-                            manualAccounts.map((account) => account.accountId),
-                        );
-
-                        const offerAccountsToAdd = accounts
-                            .filter((account) => !manualIds.has(account.accountId))
-                            .map((account) => ({
-                                ...account,
-                                source: "offer" as const,
-                            }));
-
-                        return {
-                            selectedOfferId: offerId,
-                            selectedOfferName: offerName ?? "",
-                            selectedOfferPrice: offerPrice ?? 0,
-                            selectedOfferAccountIds: accountIds,
-                            selectedAccounts: [...manualAccounts, ...offerAccountsToAdd],
-                        };
+                        return patch ?? state;
                     }),
 
                 setSelectedPromoCardIds: (ids) =>
@@ -92,6 +102,15 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
 
                 togglePromoCardId: (id) =>
                     set((state) => {
+                        if (
+                            getSelectedBundleAccountIds(
+                                state.selectedBundles,
+                            ).has(id) ||
+                            state.selectedOfferAccountIds.includes(id)
+                        ) {
+                            return state;
+                        }
+
                         const exists = state.selectedPromoCardIds.includes(id);
 
                         return {
@@ -104,7 +123,13 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                 setTotalPrice: (value) => set({ totalPrice: value }),
 
                 setSelectedAccounts: (accounts) =>
-                    set({ selectedAccounts: accounts }),
+                    set({
+                        selectedAccounts:
+                            dedupeSelectedAccounts(accounts),
+                    }),
+
+                setDraftSelectionRows: (rows) =>
+                    set({ draftSelectionRows: rows }),
 
                 upsertSelectedAccount: (account: SelectedCampaignAccount) =>
                     set((state) => {
@@ -121,8 +146,26 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                         };
                     }),
 
-                togglePromoCard: (account) =>
+                togglePromoCard: (account, currency) =>
                     set((state) => {
+                        if (
+                            state.selectionCurrency &&
+                            state.selectionCurrency !== currency
+                        ) {
+                            return state;
+                        }
+
+                        if (
+                            getSelectedBundleAccountIds(
+                                state.selectedBundles,
+                            ).has(account.accountId) ||
+                            state.selectedOfferAccountIds.includes(
+                                account.accountId,
+                            )
+                        ) {
+                            return state;
+                        }
+
                         const existing = state.selectedAccounts.find(
                             (item) => item.accountId === account.accountId,
                         );
@@ -161,6 +204,8 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                         }
 
                         return {
+                            selectionCurrency:
+                                state.selectionCurrency ?? currency,
                             selectedPromoCardIds: nextPromoIds,
                             selectedAccounts: nextAccounts,
                         };
@@ -200,7 +245,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                     set((state) => ({
                         selectedAccounts: state.selectedAccounts.map((account) => {
                             const matched = addedAccounts.find(
-                                (item: any) =>
+                                (item) =>
                                     String(item.socialAccountId) === String(account.accountId),
                             );
 
@@ -218,33 +263,10 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                         }),
                     })),
 
-                hydrateFromDraft: ({
-                                       draftId,
-                                       draftStep,
-                                       campaignName,
-                                       totalPrice = 0,
-                                       selectedCurrency = "€",
-                                       selectedOfferId = null,
-                                       selectedOfferAccountIds = [],
-                                       selectedPromoCardIds,
-                                       selectedAccounts,
-                                       campaignContent,
-                                       postContentDraft = null,
-                                       blocksDraft = null,
-                                   }) =>
+                hydrateFromDraft: (payload) =>
                     set({
-                        totalPrice,
-                        selectedCurrency,
-                        draftId,
-                        draftStep,
-                        campaignName,
-                        selectedOfferId,
-                        selectedOfferAccountIds,
-                        selectedPromoCardIds,
-                        selectedAccounts,
-                        campaignContent,
-                        postContentDraft,
-                        blocksDraft,
+                        ...initialState,
+                        ...payload,
                     }),
 
                 reset: () => set({ ...initialState }),
@@ -260,16 +282,69 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                 selectedOfferId: state.selectedOfferId,
                 selectedOfferName: state.selectedOfferName,
                 selectedOfferPrice: state.selectedOfferPrice,
+                selectedOfferPrices: state.selectedOfferPrices,
+                selectionCurrency: state.selectionCurrency,
                 selectedCurrency: state.selectedCurrency,
                 selectedOfferAccountIds: state.selectedOfferAccountIds,
                 selectedPromoCardIds: state.selectedPromoCardIds,
                 selectedAccounts: state.selectedAccounts,
+                selectedBundles: state.selectedBundles,
+                draftSelectionRows: state.draftSelectionRows,
                 campaignContent: state.campaignContent,
                 postContentDraft: state.postContentDraft,
                 blocksDraft: state.blocksDraft,
                 totalPrice: state.totalPrice,
             }),
             version: 1,
+            merge: (persistedState, currentState) => {
+                const persisted =
+                    persistedState as Partial<CampaignBuilderStore>;
+                const selectedBundles =
+                    persisted.selectedBundles ?? [];
+                const draftSelectionRows =
+                    persisted.draftSelectionRows ?? [];
+                const selectionCurrency =
+                    persisted.selectionCurrency ?? null;
+                const selectedOfferPrices =
+                    persisted.selectedOfferPrices ?? {};
+                const selectedOfferPrice =
+                    persisted.selectedOfferId && selectionCurrency
+                        ? selectedOfferPrices[selectionCurrency] ??
+                        persisted.selectedOfferPrice
+                        : undefined;
+                const selectedPromoCardIds =
+                    persisted.selectedPromoCardIds ??
+                    currentState.selectedPromoCardIds;
+                const selectedOfferAccountIds =
+                    persisted.selectedOfferAccountIds ??
+                    currentState.selectedOfferAccountIds;
+                const persistedAccounts = dedupeSelectedAccounts(
+                    persisted.selectedAccounts ??
+                        currentState.selectedAccounts,
+                );
+
+                return {
+                    ...currentState,
+                    ...persisted,
+                    selectedBundles,
+                    draftSelectionRows,
+                    selectionCurrency,
+                    selectedOfferPrice,
+                    selectedOfferPrices,
+                    selectedPromoCardIds,
+                    selectedOfferAccountIds,
+                    selectedAccounts: normalizeSelectedAccounts({
+                        currentAccounts: persistedAccounts,
+                        selectedPromoCardIds,
+                        selectedOfferAccountIds,
+                        offerAccounts: persistedAccounts.filter(
+                            (account) => account.source === "offer",
+                        ),
+                        selectedBundles,
+                    }),
+                    actions: currentState.actions,
+                };
+            },
         },
     ),
 );

@@ -1,8 +1,12 @@
 import type {
+    NetworkBundleAccountPreviewDto,
+    NetworkBundlePreviewDto,
     PromoAccountCountryDto,
     PromoAccountDto,
 } from "../api/promo-account.dto";
 import type {
+    NetworkBundleAccountPreview,
+    NetworkBundlePreview,
     PromoAccount,
     PromoAccountCountry,
 } from "../model/promo-account.types";
@@ -20,6 +24,25 @@ const mapCountry = (value: PromoAccountCountryDto): PromoAccountCountry => {
         percentage: Number(value.percentage ?? 0),
     };
 };
+
+const mapNetworkBundleAccountPreviewDto = (
+    dto: NetworkBundleAccountPreviewDto,
+): NetworkBundleAccountPreview => ({
+    accountId: dto.accountId,
+    username: dto.username,
+    socialMedia: dto.socialMedia.toLowerCase(),
+    followers: dto.followers,
+    prices: dto.prices,
+});
+
+const mapNetworkBundlePreviewDto = (
+    dto: NetworkBundlePreviewDto,
+): NetworkBundlePreview => ({
+    bundleId: dto.bundleId,
+    prices: dto.prices,
+    originalPrices: dto.originalPrices,
+    accounts: dto.accounts.map(mapNetworkBundleAccountPreviewDto),
+});
 
 export const mapPromoAccountDto = (dto: PromoAccountDto): PromoAccount => {
     const communityMusicGenres = Array.isArray(dto.communityMusicGenres)
@@ -52,5 +75,8 @@ export const mapPromoAccountDto = (dto: PromoAccountDto): PromoAccount => {
         creatorMusicGenres,
         creatorContentFocus,
         musicGenres: [...communityMusicGenres, ...creatorMusicGenres],
+        bundlePreviews: (dto.bundlePreviews ?? []).map(
+            mapNetworkBundlePreviewDto,
+        ),
     };
 };

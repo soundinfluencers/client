@@ -184,6 +184,9 @@ export const TableCard = React.memo(function TableCard({
             setAccountSelectedContent(campaignId ?? "", accountKey, {
                 campaignContentItemId: String(selectedItem?._id ?? ""),
                 descriptionId: String(descriptionId ?? ""),
+                additionalBriefId:
+                    selectedMeta?.additionalBriefId ??
+                    selectedItem?.additionalBrief?.[0]?._id,
             });
         },
         [setAccountSelectedContent, campaignId, accountKey, selectedItem],
@@ -217,6 +220,7 @@ export const TableCard = React.memo(function TableCard({
                             changeView={changeView}
                             contentId={contentId}
                             baseItem={selectedItem}
+                            account={draftAccount ?? data}
                             group={group}
                         />
                     ) : (
@@ -225,6 +229,7 @@ export const TableCard = React.memo(function TableCard({
                             group={group}
                             platformItems={platformItems}
                             selectedContent={safeSelectedContent}
+                            account={draftAccount ?? data}
                         />
                     )}
 
@@ -356,6 +361,7 @@ export const TableCard = React.memo(function TableCard({
                         <ExtraFieldsCellsEdit
                             contentId={contentId}
                             baseItem={selectedItem}
+                            account={draftAccount ?? data}
                             group={group}
                         />
                     ) : (
@@ -363,6 +369,7 @@ export const TableCard = React.memo(function TableCard({
                             group={group}
                             platformItems={platformItems}
                             selectedContent={safeSelectedContent}
+                            account={draftAccount ?? data}
                         />
                     )}
                 </>

@@ -1,0 +1,210 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: start;
+}
+
+.title {
+  font-weight: 400;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #51545B;
+
+  @media screen and (max-width: 811px){
+    font-size: 13px;
+  }
+  @media screen and (max-width: 599px){
+    font-size: 12px;
+  }
+}
+
+.list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media screen and (max-width: 599px) {
+    gap: 8px;
+  }
+}
+
+.listItem {
+  width: 100%;
+  min-width: 0;
+}
+
+.button {
+  width: 100%;
+  display: grid;
+  align-items: center;
+  grid-template-columns:
+  24px
+  minmax(160px, 1fr)
+  minmax(100px, 120px)
+  minmax(61px, 85px);
+  grid-template-areas: "mark account statistics price";
+
+  column-gap: 16px;
+  padding: 16px;
+
+  background: #FFFFFF;
+  border-radius: 8px;
+  border: 1px solid #E7E8F2;
+
+  cursor: pointer;
+
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+
+  //@include mixins.hover {
+  //  box-shadow: 0 4px 16px rgb(0 0 0 / 10%);
+  //}
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(97 155 255 / 20%);
+  }
+
+  @media screen and (max-width: 599px) {
+    row-gap: 8px;
+    column-gap: 8px;
+    grid-template-columns:
+      24px
+      minmax(0, 1fr)
+      minmax(0, 1fr);
+    grid-template-areas:
+      "mark account statistics"
+      "price price price";
+  }
+}
+
+.buttonSelected {
+  background: rgba(185, 208, 255, 0.15);
+  border-color: #B9D0FF;
+}
+
+.account,
+.statistics,
+.price {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mark {
+  grid-area: mark;
+}
+
+.accountArea {
+  grid-area: account;
+}
+
+.statisticsArea {
+  grid-area: statistics;
+}
+
+.accountArea,
+.statisticsArea {
+  @media screen and (max-width: 599px) {
+    min-width: 0;
+  }
+}
+
+.priceArea {
+  grid-area: price;
+}
+
+.accountLogo,
+.platformIcon {
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.accountLogo {
+  width: 24px;
+  height: 24px;
+}
+
+.platformIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.accountName,
+.followers,
+.price {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  @media screen and (max-width: 811px) {
+    font-size: 13px;
+  }
+}
+
+.accountName {
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+}
+
+.price {
+  min-height: 24px;
+  border-left: 1px solid #B9D0FF;
+  padding-left: 10px;
+
+  @media screen and (max-width: 599px) {
+    padding: 0;
+    border-left: 0;
+    border-bottom: 1px solid #B9D0FF;
+  }
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+
+  border-radius: 4px;
+  border: 1px solid #E7E8F2;
+  background: #FFFFFF;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  min-width: 0;
+  aspect-ratio: 1/1;
+
+  opacity: 0;
+  transform: scale(0.6);
+  transform-origin: center;
+
+  transition: opacity 150ms ease,
+  transform 150ms ease;
+}
+
+.iconVisible {
+  opacity: 1;
+  transform: scale(1);
+}

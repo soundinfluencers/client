@@ -19,23 +19,36 @@ import type {
     BuiltCampaignPostContentPayload,
     CampaignPostContentAccount,
     CampaignPostContentBlock,
+    CampaignPostContentBundleSummary,
 } from "../model/campaign-post-content.types";
 import { useCampaignPostContentPageDraft } from "@/pages/client-side/campaign-post-content/model/use-campaign-post-content-page-draft";
+import type {
+    CampaignBuilderMode,
+    ProposalOptionCreateContext,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation";
+import {
+    buildProposalOptionCreateUrl,
+    PROPOSAL_OPTION_CREATE_MODE,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation";
 
 type GroupKey = "main" | "music" | "press";
 
 type Props = {
-    mode?: "create" | "add-influencer";
+    mode?: CampaignBuilderMode;
+    proposalOptionCreateContext?: ProposalOptionCreateContext | null;
     allowedGroups?: GroupKey[];
 
     accounts: CampaignPostContentAccount[];
     offerAccounts: CampaignPostContentAccount[];
+    bundles: CampaignPostContentBundleSummary[];
     manualAccounts: CampaignPostContentAccount[];
     offerName?: string;
     totalPrice: number;
     offerPrice?: number;
     defaultCampaignName?: string;
     currency?: string
+    isSubmitLocked?: boolean;
+    submitLabel?: string;
     onSubmitPayload: (
         payload: BuiltCampaignPostContentPayload,
     ) => void | Promise<void>;
@@ -44,10 +57,12 @@ type Props = {
 };
 
 export const CampaignPostContentPage: React.FC<Props> = ({
-                                                             mode = "create",
+                                                              mode = "create",
+                                                             proposalOptionCreateContext = null,
                                                              allowedGroups,
                                                              accounts,
                                                              offerAccounts,
+                                                             bundles,
                                                              manualAccounts,
                                                              offerName,
                                                              totalPrice,
@@ -55,7 +70,10 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                                                              onSubmitPayload,
                                                              offerPrice,
                                                              defaultBlocks,
-                                                             defaultCampaignContent,currency
+                                                             defaultCampaignContent,
+                                                             currency,
+                                                             isSubmitLocked = false,
+                                                             submitLabel = "Continue",
                                                          }) => {
     const navigate = useNavigate();
     const vm = useCampaignPostContent({
@@ -70,13 +88,12 @@ export const CampaignPostContentPage: React.FC<Props> = ({
     const {
         draftModal,
         draftName,
+        isSaving,
         setDraftName,
         openDraftModal,
         closeDraftModal,
         onSaveDraft,
     } = useCampaignPostContentPageDraft({
-        accounts,
-        campaignPrice: totalPrice,
         buildPayload: vm.buildPayload,
     });
 
@@ -161,7 +178,7 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                             <div className={styles.header}>
                                 <h1>{pageTitle}</h1>
 
-                                {mode !== "add-influencer" && (
+                                {mode === "create" && (
                                     <DraftButton onClick={openDraftModal} />
                                 )}
                             </div>
@@ -390,8 +407,15 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                             )}
 
                             <div className={styles.submitSection}>
-                                <button type="submit" className={styles.submitButton}>
-                                    Continue
+                                <button
+                                    type="submit"
+                                    className={styles.submitButton}
+                                    disabled={
+                                        isSubmitLocked ||
+                                        vm.form.formState.isSubmitting
+                                    }
+                                >
+                                    {submitLabel}
                                 </button>
                             </div>
                         </div>
@@ -399,9 +423,10 @@ export const CampaignPostContentPage: React.FC<Props> = ({
 
                     <CampaignPostContentSelection
                         accounts={accounts}
-                        currency={currency}
-                        offerAccounts={mode === "add-influencer" ? [] : offerAccounts}
-                        manualAccounts={manualAccounts}
+                         currency={currency}
+                         offerAccounts={mode === "add-influencer" ? [] : offerAccounts}
+                         bundles={mode === "add-influencer" ? [] : bundles}
+                         manualAccounts={manualAccounts}
                         offerName={mode === "add-influencer" ? undefined : offerName}
                         totalPrice={totalPrice}
                         offerPrice={mode === "add-influencer" ? 0 : offerPrice ?? 0}
@@ -411,13 +436,26 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                                 return;
                             }
 
+                            if (
+                                mode === PROPOSAL_OPTION_CREATE_MODE &&
+                                proposalOptionCreateContext
+                            ) {
+                                navigate(
+                                    buildProposalOptionCreateUrl(
+                                        "/client/create-campaign",
+                                        proposalOptionCreateContext,
+                                    ),
+                                );
+                                return;
+                            }
+
                             navigate("/client/create-campaign");
                         }}
                     />
                 </div>
             </form>
 
-            {draftModal && (
+            {mode === "create" && draftModal && (
                 <Modal onClose={closeDraftModal}>
                     <div className={styles.createOption}>
                         <h2>Save draft</h2>
@@ -440,6 +478,7 @@ export const CampaignPostContentPage: React.FC<Props> = ({
 
                                 text="Save"
                                 onClick={onSaveDraft}
+                                isDisabled={isSaving}
                             />
                         </div>
                     </div>

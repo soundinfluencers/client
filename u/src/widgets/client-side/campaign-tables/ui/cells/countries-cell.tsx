@@ -1,5 +1,8 @@
 import React from "react";
 import type { StrategyRow } from "../../model/campaign-strategy.types";
+import {
+    formatBundleCountryPercentage,
+} from "@/entities/client-side/campaign-creator-page/bundle/ui/bundle-card/bundle-card.mappers";
 
 type Props = {
     row: StrategyRow;
@@ -17,7 +20,8 @@ export const CountriesCell: React.FC<Props> = ({ row }) => {
             <ul className="chips">
                 {countries.map((item) => (
                     <li key={`${item.country}-${item.percentage}`}>
-                        {item.country} {item.percentage}%
+                        {item.country}{" "}
+                        {formatBundleCountryPercentage(item.percentage)}%
                     </li>
                 ))}
             </ul>

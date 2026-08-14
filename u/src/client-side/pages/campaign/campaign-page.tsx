@@ -62,7 +62,6 @@ export const CampaignPage = () => {
     setIsRequestSent,
     isRequestingPDF,
     setIsRequestingPDF,
-    localExtraOptions,
     setLocalExtraOptions,
     textareaValue,
     flag,
@@ -73,7 +72,6 @@ export const CampaignPage = () => {
     data,
     activeOption,
     setActiveOption,
-    localExtraOptions,
     setLocalExtraOptions,
     textareaValue,
     setOptionModal,
@@ -262,6 +260,9 @@ export const CampaignPage = () => {
             changeView={changeView}
             view={view}
             flag={flag}
+            proposalOptionIndexes={actions.optionIndexes}
+            onDeleteProposalOption={actions.onDeleteOption}
+            isProposalMutationPending={isRequesting}
           />
         </div>
 
@@ -286,7 +287,9 @@ export const CampaignPage = () => {
         optionModal={optionModal}
         activeOption={activeOption}
         onCloseOptionModal={() => setOptionModal(false)}
-        onAddOptionYes={() => actions.onAddOption(true)}
+        onAddOptionNo={actions.onStartProposalOptionCreate}
+        onAddOptionYes={actions.onCloneOption}
+        isPending={isRequesting}
       />
     </>
   );

@@ -14,27 +14,41 @@ import type {
     PromoAccount
 } from "@/entities/client-side/campaign-creator-page/campaign-promo-account/model/promo-account.types.ts";
 import type {socialMediaType} from "@/pages/influencer/promos/types/promos.types.ts";
+import {
+    mapNetworkBundlePreviewsToDisplayModels,
+} from "../model/network-bundle-preview.mappers";
+import { EmbeddedBundlePreviewList } from "./embedded-bundle-preview";
 
 interface Props {
     data: PromoAccount;
     isInclude: boolean;
+    isDisabled: boolean;
     isSelected: boolean;
+    selectedBundleIds: ReadonlySet<string>;
+    pendingBundleIds: ReadonlySet<string>;
+    disabledBundleIds: ReadonlySet<string>;
+    onChooseBundle: (bundleId: string) => void;
 }
 
 const getPriceByCurrency = (
     prices: Record<string, number>,
     currency: { currency: string },
 ) => {
-    return Number(prices?.[currency.currency] ?? prices?.EUR ?? 0);
+    return prices?.[currency.currency];
 };
 
 export const PromoCardGrid: React.FC<Props> = ({
                                                    data,
                                                    isInclude,
+                                                   isDisabled,
                                                    isSelected,
+                                                   selectedBundleIds,
+                                                   pendingBundleIds,
+                                                   disabledBundleIds,
+                                                   onChooseBundle,
                                                }) => {
     const dropdownRef = React.useRef<HTMLDivElement>(null);
-    const { selectedCurrency } = useBuildCampaignParams();
+    const { selectedCurrency, selectedCurrencyCode } = useBuildCampaignParams();
     const togglePromoCard = useCampaignBuilderStore((s) => s.actions.togglePromoCard);
 
     const [open, setOpen] = React.useState(false);
@@ -42,22 +56,22 @@ export const PromoCardGrid: React.FC<Props> = ({
     const hasGenres = (data.musicGenres?.length ?? 0) > 0;
     const hasCountries = (data.countries?.length ?? 0) > 0;
     const hasMeta = hasGenres || hasCountries;
+    const isPartOfBundle = data.bundlePreviews.length > 0;
+    const bundlePreviews = React.useMemo(
+        () =>
+            mapNetworkBundlePreviewsToDisplayModels(
+                data.bundlePreviews ?? [],
+                selectedCurrency.currency,
+            ),
+        [
+            data.bundlePreviews,
+            selectedCurrency.currency,
+        ],
+    );
+    const hasBundlePreviews = bundlePreviews.length > 0;
+    const hasDetails = hasMeta || hasBundlePreviews;
     const onSelect = () => {
-        if (isInclude) return;
-
-        console.log("[TABLE CARD] selected data", data);
-        console.log("[TABLE CARD] account id fields", {
-            accountId: data.accountId,
-            socialAccountId: (data as any).socialAccountId,
-            _id: (data as any)._id,
-        });
-        console.log("[TABLE CARD] audience fields", {
-            followers: data.followers,
-            monthlyListeners: (data as any).monthlyListeners,
-            listeners: (data as any).listeners,
-            subscribers: (data as any).subscribers,
-            audience: (data as any).audience,
-        });
+        if (isDisabled) return;
 
         togglePromoCard({
             accountId: data.accountId,
@@ -66,15 +80,14 @@ export const PromoCardGrid: React.FC<Props> = ({
             username: data.username,
             profileType: data.profileType,
             price: getPriceByCurrency(data.prices, selectedCurrency),
+            prices: { ...data.prices },
             dateRequest: "ASAP",
             followers: data.followers,
             countries: data.countries,
             genres: data.musicGenres,
             logoUrl: data.logoUrl,
             source: "manual",
-        });
-
-        console.log("[BUILDER STORE] after toggle", useCampaignBuilderStore.getState());
+        }, selectedCurrencyCode);
     };
 
     return (
@@ -82,17 +95,27 @@ export const PromoCardGrid: React.FC<Props> = ({
             ref={dropdownRef}
             onClick={onSelect}
             className={`${styles.card} ${open ? styles.open : ""} ${
-                isInclude ? styles.include : ""
+                open && hasBundlePreviews
+                    ? styles.openWithBundlePreviews
+                    : ""
+            } ${
+                isDisabled ? styles.include : ""
             } ${isSelected ? styles.active : ""}`}
         >
             <div className={styles.head}>
                 <div className={styles.cost}>
                     <img src={data.logoUrl} alt="" />
                     <p>
-                        {getPriceByCurrency(data.prices, selectedCurrency)}
+                        {getPriceByCurrency(data.prices, selectedCurrency) ?? "—"}
                         {selectedCurrency.key}
                     </p>
                 </div>
+
+                {isPartOfBundle && (
+                    <span className={styles.bundleBadge}>
+                        Part of Bundle
+                    </span>
+                )}
 
                 <div className={styles.social}>
                     <img src={getSocialMediaIcon(data.socialMedia as socialMediaType) || ""} alt="" />
@@ -108,7 +131,7 @@ export const PromoCardGrid: React.FC<Props> = ({
                 </div>
 
                 <div onClick={(e) => e.stopPropagation()}>
-                    {hasMeta && (
+                    {hasDetails && (
                         <div
                             onClick={() => setOpen((prev) => !prev)}
                             className={`${styles.infoHead} ${open ? styles.infoHeadActive : ""}`}
@@ -117,21 +140,30 @@ export const PromoCardGrid: React.FC<Props> = ({
                         </div>
                     )}
                 </div>
-
-                {open && hasMeta && (
-                    <GenresCountriesPopover
-                        refElement={dropdownRef}
-                        setOpen={setOpen}
-                        open={open}
-                        data={{
-                            musicGenres: data.musicGenres ?? [],
-                            countries: data.countries ?? [],
-                        }}
-                        isInclude={isInclude}
-                        isSelected={isSelected}
-                    />
-                )}
             </div>
+
+            {open && hasDetails && (
+                <GenresCountriesPopover
+                    refElement={dropdownRef}
+                    setOpen={setOpen}
+                    open={open}
+                    data={{
+                        musicGenres: data.musicGenres ?? [],
+                        countries: data.countries ?? [],
+                    }}
+                    isInclude={isDisabled}
+                    isSelected={isSelected}
+                    inFlow={hasBundlePreviews}
+                >
+                    <EmbeddedBundlePreviewList
+                        previews={bundlePreviews}
+                        selectedBundleIds={selectedBundleIds}
+                        pendingBundleIds={pendingBundleIds}
+                        disabledBundleIds={disabledBundleIds}
+                        onChooseBundle={onChooseBundle}
+                    />
+                </GenresCountriesPopover>
+            )}
 
             {isInclude && (
                 <div className={styles.includedText}>

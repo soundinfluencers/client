@@ -1,7 +1,8 @@
 import type {
   IPromo,
   IPromoDetailsModel,
-  TAcceptDeclineRequestPromoModel,
+  NewPromo,
+  TPromoDecisionRequest,
 } from "@/pages/influencer/promos/types/promos.types";
 import $api from "../../api";
 // import type { AxiosError } from "axios";
@@ -40,7 +41,7 @@ export const getInfluencerNewPromo = async (): Promise<
 
 // accept/Decline influencer promo request
 export const conformationInfluencerPromo = async (
-  data: TAcceptDeclineRequestPromoModel,
+  data: TPromoDecisionRequest,
 ): Promise<void> => {
   await $api.patch(`/promos/requests`, data);
   console.log('Successes comformation promos', data);
@@ -55,21 +56,47 @@ export const conformationInfluencerPromo = async (
   // }
 };
 
-export type TGetDetailedPromoParams = {
+type TDetailedPromosResponse<TPromo> = {
+  statusCode: number;
+  message: string;
+  data: {
+    promos: TPromo[];
+  };
+};
+
+type TGetDetailedPromoBaseParams = {
   campaignId?: string;
   addedAccountsId?: string;
-  status?: string;
   limit?: number;
   page?: number;
 };
 
+export type TGetDetailedPromoParams = TGetDetailedPromoBaseParams & {
+  status: "ongoing" | "close";
+};
+
+export type TGetDetailedNewPromosParams = TGetDetailedPromoBaseParams & {
+  status: "new";
+};
+
+export const getDetailedNewPromos = async (
+  data: TGetDetailedNewPromosParams,
+): Promise<NewPromo[]> => {
+  const response = await $api.get<TDetailedPromosResponse<NewPromo>>(
+    `/promos/detailed`,
+    { params: data },
+  );
+
+  return response.data.data.promos;
+};
+
 export const getDetailedPromo = async (data: TGetDetailedPromoParams): Promise<IPromoDetailsModel[]> => {
   console.log('Start fetching detailed promos');
-  const res = await $api.get(`/promos/detailed`, {
+  const res = await $api.get<TDetailedPromosResponse<IPromoDetailsModel>>(`/promos/detailed`, {
     params: data,
   });
   console.log("Success get detailed promos:", res);
-  return res.data.data.promos as IPromoDetailsModel[];
+  return res.data.data.promos;
 };
 
 //create review for promo

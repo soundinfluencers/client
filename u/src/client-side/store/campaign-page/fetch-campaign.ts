@@ -11,6 +11,10 @@ import {
   toCampaignPageModelFromProposal,
   toCampaignPageModelFromRegular,
 } from "@/client-side/utils/getCampaign.utils";
+import type {
+  AddProposalOptionRequest,
+  CreateProposalOptionResult,
+} from "@/entities/client-side/campaign/model/campaign-api.types.ts";
 
 export const useFetchCampaign = create<any>((set, get) => ({
   data: null,
@@ -39,7 +43,7 @@ export const useFetchCampaign = create<any>((set, get) => ({
 
     try {
       const { data } = await getProposalCampaign(campaignId, optionIndex);
-      const payload = (data as any).data ?? data;
+      const payload = data.data;
       const next = toCampaignPageModelFromProposal(payload);
 
       set({ data: next });
@@ -72,16 +76,22 @@ export const useFetchCampaign = create<any>((set, get) => ({
     }
   },
 
-  addProposalOption: async (campaignId: string, inheritFromOption0: boolean) => {
+  addProposalOption: async (
+    campaignId: string,
+    inheritFromCurrentOption: boolean,
+  ): Promise<CreateProposalOptionResult> => {
     const data = get().data;
-    if (!data || data.kind !== "proposal") return null;
+    if (!data || data.kind !== "proposal") {
+      throw new Error("Proposal data is missing");
+    }
 
     const base = data;
 
-    const body = inheritFromOption0
+    const body: AddProposalOptionRequest = inheritFromCurrentOption
         ? {
           campaignName: base.campaignName,
           addedAccounts: base.selectedOption.addedAccounts.map((a: any) => ({
+            ...(a.bundleId ? { bundleId: String(a.bundleId) } : {}),
             socialAccountId: a.socialAccountId,
             influencerId: a.influencerId,
             socialMedia: a.socialMedia,
@@ -108,7 +118,17 @@ export const useFetchCampaign = create<any>((set, get) => ({
             additionalBrief: c.additionalBrief,
           })),
           socialMedia: base.socialMedia,
-          campaignPrice: base?.price ?? 0,
+          campaignPrice: base.selectedOption.price,
+          displayCurrency: base.selectedOption.displayCurrency,
+          ...(base.selectedOption.selectedOffer
+            ? {
+              selectedOffer: {
+                offerId: base.selectedOption.selectedOffer.offerId,
+                selectedAccountIds:
+                  base.selectedOption.selectedOffer.selectedAccountIds,
+              },
+            }
+            : {}),
           paymentType: "",
         }
         : {
@@ -116,18 +136,18 @@ export const useFetchCampaign = create<any>((set, get) => ({
           addedAccounts: [],
           campaignContent: [],
           socialMedia: base.socialMedia,
-          campaignPrice: base?.price ?? 0,
+          campaignPrice: base.selectedOption.price,
+          displayCurrency: base.selectedOption.displayCurrency,
           paymentType: "",
         };
 
     set({ isLoading: true });
 
     try {
-      await postAddProposalOption(campaignId, body);
-      return true;
+      return await postAddProposalOption(campaignId, body);
     } catch (error) {
       console.log(error);
-      return null;
+      throw error;
     } finally {
       set({ isLoading: false });
     }

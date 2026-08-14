@@ -1,4 +1,15 @@
 import $api from "../../api.ts";
+import type {
+  AddProposalOptionRequest,
+  ApiResponse,
+  CreateRegularCampaignRequest,
+  CreateProposalOptionResponse,
+  ProposalCampaignDto,
+  RegularCampaignDto,
+} from "@/entities/client-side/campaign/model/campaign-api.types.ts";
+import {
+  parseCreateProposalOptionResponse,
+} from "@/entities/client-side/campaign/model/proposal-option-response.ts";
 
 // CAMPAIGN
 
@@ -8,7 +19,7 @@ export type ApproveProposalCampaignBody = {
   address: string;
   country: string;
   referenceNumber: string;
-  amount: number;
+  amount?: never;
   company?: string;
   vatNumber?: string;
   poNumber?: string;
@@ -20,7 +31,7 @@ export const approveProposalCampaign = async (
     optionIndex: number,
     body: ApproveProposalCampaignBody,
 ) => {
-  return $api.post(`/proposal-system/approve/${campaignId}`, body, {
+  return $api.post<unknown>(`/proposal-system/approve/${campaignId}`, body, {
     params: { optionIndex },
   });
 };
@@ -43,9 +54,13 @@ export const getCampaigns = async (
   return result.data.data.campaigns;
 };
 
-export const getCampaign = async (campaignId: string) => {
+export const getCampaign = async (
+    campaignId: string,
+): Promise<ApiResponse<RegularCampaignDto>> => {
   try {
-    const res = await $api.get(`/campaigns/${campaignId}`);
+    const res = await $api.get<ApiResponse<RegularCampaignDto>>(
+        `/campaigns/${campaignId}`,
+    );
     return res.data;
   } catch (error) {
     console.log(error);
@@ -79,7 +94,9 @@ export async function patchCampaign(
   return $api.patch(`/campaigns/${campaignId}/update`, body);
 }
 
-export const postCampaign = async (payload: any) => {
+export const postCampaign = async (
+    payload: CreateRegularCampaignRequest,
+): Promise<void> => {
   try {
     await $api.post("/campaigns", payload);
   } catch (error) {
@@ -106,9 +123,12 @@ export async function getProposalCampaign(
     campaignId: string,
     optionIndex: number,
 ) {
-  const data = await $api.get(`/proposal-system/${campaignId}`, {
-    params: { optionIndex },
-  });
+  const data = await $api.get<ApiResponse<ProposalCampaignDto>>(
+    `/proposal-system/${campaignId}`,
+    {
+      params: { optionIndex },
+    },
+  );
 
   return data;
 }
@@ -129,21 +149,22 @@ export async function patchAddProposalOption(
 
 export async function postAddProposalOption(
     campaignId: string,
-    body: {
-      campaignName?: string;
-      addedAccounts?: any[];
-      campaignContent?: any[];
-    },
+    body: AddProposalOptionRequest,
 ) {
-  return $api.post(`/proposal-system`, body, {
+  const response = await $api.post<CreateProposalOptionResponse>(`/proposal-system`, body, {
     params: { campaignId },
   });
+
+  return parseCreateProposalOptionResponse(response.data);
 }
 
 export const postCampaignProposal = async (payload: any) => {
   try {
-    const response = await $api.post("/proposal-system", payload);
-    return response;
+    const response = await $api.post<CreateProposalOptionResponse>(
+      "/proposal-system",
+      payload,
+    );
+    return parseCreateProposalOptionResponse(response.data);
   } catch (error) {
     throw error;
   }

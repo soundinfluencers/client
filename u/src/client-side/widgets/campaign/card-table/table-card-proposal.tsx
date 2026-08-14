@@ -22,6 +22,12 @@ import { ActionCell } from "@/client-side/widgets/campaign/cells/action-cells/de
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
 const MUSIC_NETWORKS = ["spotify", "soundcloud"];
 
+type ProposalTableCardProps = Omit<TableRowProposalProps, "campaignId"> & {
+  optionIndexes: number[];
+  onDeleteOption?: (optionIndex: number) => Promise<void>;
+  isMutationPending: boolean;
+};
+
 export const getGroupBySocial = (
   social: string,
 ): "main" | "music" | "press" => {
@@ -44,7 +50,10 @@ export const TableCard = React.memo(function TableCard({
   onCloseDropdown,
   optionIndex,
   columns,
-}: TableRowProposalProps) {
+  optionIndexes,
+  onDeleteOption,
+  isMutationPending,
+}: ProposalTableCardProps) {
   const accountKey = getAccountKey(data);
   const proposalAccount = useProposalAccountsStore((s) => {
     const list = s.accountsByOption[optionIndex ?? 0] ?? [];
@@ -235,8 +244,7 @@ export const TableCard = React.memo(function TableCard({
 
   const setSelectedPd = React.useCallback(
     (value: React.SetStateAction<number>) => {
-      const contentIndex = safeSelectedContent;
-      const item = platformItems?.[contentIndex];
+      const item = platformItems?.[safeSelectedContent];
       const itemId = String(item?._id ?? "");
 
       setPdByContentId((prev) => {
@@ -244,15 +252,13 @@ export const TableCard = React.memo(function TableCard({
         const nextPd =
           typeof value === "function" ? value(prevPd) : value;
 
-        syncSelectedToAccount(contentIndex, nextPd);
-
         return {
           ...prev,
           [itemId]: nextPd,
         };
       });
     },
-    [platformItems, safeSelectedContent, syncSelectedToAccount],
+    [platformItems, safeSelectedContent],
   );
 
   const handleSelectDescriptionId = React.useCallback(
@@ -489,7 +495,13 @@ export const TableCard = React.memo(function TableCard({
       {columns.includes("genres") && <GenresCell data={data}/>}
       {columns.includes("countries") && <CountriesCell data={data}/>}
       {canEdit && !changeView && (
-        <ActionCell optionIndex={optionIndex ?? 0} data={data}/>
+        <ActionCell
+          optionIndex={optionIndex ?? 0}
+          data={data}
+          optionIndexes={optionIndexes}
+          onDeleteOption={onDeleteOption}
+          isMutationPending={isMutationPending}
+        />
       )}
     </tr>
   );

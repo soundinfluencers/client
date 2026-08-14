@@ -1,0 +1,46 @@
+.breadcrumbs {
+  @media screen and (max-width: 599px) {
+    display: none;
+
+  }
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+
+  @media screen and (max-width: 811px) {
+    gap: 0;
+  }
+}
+
+.item {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  @media screen and (max-width: 811px) {
+    gap: 0;
+  }
+}
+
+.link {
+  font-size: 15px;
+  @media screen and (max-width: 811px) {
+    font-size: 14px;
+  }
+}
+
+.current {
+  user-select: none;
+  font-size: 15px;
+  @media screen and (max-width: 811px) {
+    font-size: 14px;
+  }
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+}

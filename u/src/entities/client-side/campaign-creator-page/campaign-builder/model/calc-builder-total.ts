@@ -1,34 +1,39 @@
 import type {
+    SelectedBundleSnapshot,
     SelectedCampaignAccount,
 } from "./campaign-builder.types";
-
-export type BuildCampaignOffer = {
-    id: string;
-    price: number;
-};
-
-const getAccountPrice = (account?: SelectedCampaignAccount | null) => {
-    if (!account) return 0;
-    return typeof account.price === "number" ? account.price : 0;
-};
+import type {
+    CampaignCurrencyCode,
+} from "@/entities/client-side/campaign-creator-page/campaign-filter/model/campaign-filter.types";
+import {
+    calculateCampaignSelectionTotal,
+} from "./campaign-builder-selection";
 
 export const calcBuilderTotal = ({
                                      selectedOfferId,
-                                     offers,
+                                     selectedOfferPrice,
                                      selectedAccounts,
+                                     selectedBundles,
+                                     selectedOfferAccountIds,
+                                     currency,
                                  }: {
     selectedOfferId: string | null;
-    offers: BuildCampaignOffer[];
+    selectedOfferPrice?: number;
     selectedAccounts: SelectedCampaignAccount[];
+    selectedBundles: SelectedBundleSnapshot[];
+    selectedOfferAccountIds: string[];
+    currency: CampaignCurrencyCode;
 }) => {
-    const selectedOffer =
-        offers.find((item) => item.id === selectedOfferId) ?? null;
+    const offerPrice = selectedOfferId &&
+        typeof selectedOfferPrice === "number"
+        ? selectedOfferPrice
+        : 0;
 
-    const offerPrice = selectedOffer?.price ?? 0;
-
-    const accountsPrice = selectedAccounts.reduce((sum, account) => {
-        return sum + getAccountPrice(account);
-    }, 0);
-
-    return offerPrice + accountsPrice;
+    return calculateCampaignSelectionTotal({
+        offerPrice,
+        selectedAccounts,
+        selectedBundles,
+        selectedOfferAccountIds,
+        currency,
+    });
 };

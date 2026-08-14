@@ -4,7 +4,12 @@ import { ButtonMain, ButtonSecondary } from '@components/ui/buttons-fix/ButtonFi
 
 import { getTitleForPromoCard } from '../utils/getTitleForPromoCard';
 import { getPromoFields } from '../../../data/promos.data';
-import type { IPromoDetailsModel, TConfirmationType, TPromoStatus } from '../../../types/promos.types';
+import type {
+  TConfirmationType,
+  TDetailsField,
+  TPromoDetailsCardModel,
+  TPromoStatus,
+} from '../../../types/promos.types';
 // import { normalizeSocialMedia } from '../../../distributing/components/campaign-result-form/data/campaign-result-form-inputs.data';
 // import type { TCampaignInfo, TSocialMedia } from '../../../distributing/components/campaign-result-form/types/campaign-result-form.types';
 
@@ -12,7 +17,7 @@ import './_promos-details-list-card.scss';
 // import { useUser } from "@/store/get-user";
 
 interface Props {
-  promo: IPromoDetailsModel;
+  promo: TPromoDetailsCardModel;
   status: TPromoStatus;
   index: number;
   isPending?: boolean;
@@ -24,6 +29,18 @@ interface Props {
   // onMetaChange?: (newMeta: TSocialMedia) => void;
   // onFormPayloadChange?: (newPayload: TCampaignInfo) => void;
 }
+
+const getFieldValue = (
+  promo: TPromoDetailsCardModel,
+  field: TDetailsField,
+): string => {
+  const promoFields = promo as Partial<Record<TDetailsField["key"], unknown>>;
+  const value = promoFields[field.key];
+
+  return field.format
+    ? field.format(Number(value), promo)
+    : value?.toString() ?? '';
+};
 
 export const PromosDetailsListCard: React.FC<Props> = ({
   promo,
@@ -78,11 +95,7 @@ export const PromosDetailsListCard: React.FC<Props> = ({
               <DetailsRow
                 key={`${field.key}-${field.label}`}
                 label={field.label}
-                value={
-                  field.format
-                    ? field.format((promo)[field.key] as unknown as number, promo)
-                    : (promo)[field.key]?.toString() ?? ''
-                }
+                value={getFieldValue(promo, field)}
                 copyable={field.copyable}
                 linkable={field.linkable}
                 icon={field.icon}

@@ -2,11 +2,20 @@ import { Link } from "react-router-dom";
 import "./_invoice-link.scss";
 import arrowDownRight from "../../../../../assets/icons/arrow-down-right.svg";
 
-export const InvoiceLink = () => {
+interface DashboardLinkProps {
+  href: string;
+  label: string;
+}
+
+export const DashboardLink = ({
+  href,
+  label,
+}: DashboardLinkProps) => {
+
   return (
-    <Link className="invoice-link" to={"create-invoice"}>
+    <Link className="invoice-link" to={href}>
       <span className="invoice-link__create">
-        Create an Invoice
+        {label}
         <span className="invoice-link__arrow-icon">
           <img src={arrowDownRight} alt="Arrow down right icon" />
         </span>

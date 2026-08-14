@@ -10,11 +10,16 @@ import {
     getCurrentDataId,
     parseLastCampaignSession,
 } from "./campaign-page.utils";
+import type {
+    ProposalOptionDto,
+} from "@/entities/client-side/campaign/model/campaign-api.types.ts";
+import type { CampaignAddedAccount } from "@/types/store/index.types.ts";
 
 export const useCampaignPageBootstrap = (data: any) => {
     const navigate = useNavigate();
 
     const initOption = useProposalAccountsStore((s) => s.initOption);
+    const setOptionSnapshot = useProposalAccountsStore((s) => s.setOptionSnapshot);
     const initCampaign = useStrategyCampaignStore((s) => s.initCampaign);
     const initDraft = useDraftCampaignStore((s) => s.initCampaign);
 
@@ -80,8 +85,13 @@ export const useCampaignPageBootstrap = (data: any) => {
     React.useEffect(() => {
         if (data?.kind !== "proposal") return;
 
-        const idx = data.selectedOption?.optionIndex ?? 0;
+        const selectedOption: ProposalOptionDto | undefined = data.selectedOption;
+        if (!selectedOption) return;
+
+        const idx = selectedOption.optionIndex;
         const state = useProposalAccountsStore.getState();
+
+        setOptionSnapshot(selectedOption);
 
         const hasLocalAccounts = (state.accountsByOption?.[idx] ?? []).length > 0;
         const hasLocalContent = (state.contentByOption?.[idx] ?? []).length > 0;
@@ -90,10 +100,10 @@ export const useCampaignPageBootstrap = (data: any) => {
 
         initOption(
             idx,
-            data.selectedOption?.addedAccounts ?? [],
-            data.selectedOption?.campaignContent ?? [],
+            selectedOption.addedAccounts as unknown as CampaignAddedAccount[],
+            selectedOption.campaignContent,
         );
-    }, [data, initOption]);
+    }, [data, initOption, setOptionSnapshot]);
 
     React.useEffect(() => {
         if (data?.kind === "regular") {

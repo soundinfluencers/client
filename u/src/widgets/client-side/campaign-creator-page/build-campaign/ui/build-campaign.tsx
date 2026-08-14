@@ -1,6 +1,12 @@
 import filterIcon from "@/assets/icons/filter (1).svg";
 import { NoData } from "@components/ui/no-array/no-data";
 import { getSocialMediaIcon } from "@/constants/social-medias";
+import {
+    useCallback,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 
 import styles from "./build-campaign.module.scss";
 import {
@@ -19,11 +25,177 @@ import {
     CardsContainer
 } from "@/widgets/client-side/campaign-creator-page/build-campaign/components/cards-container.tsx";
 import {useSearchParams} from "react-router-dom";
+import {
+    CampaignCatalogModeToggle,
+} from "@/features/client-side/campaign-creator-page/campaign-catalog-mode-toggle";
+import type {
+    CampaignCatalogMode,
+} from "@/features/client-side/campaign-creator-page/campaign-catalog-mode-toggle";
+import {
+    BundleCatalog,
+} from "@/widgets/client-side/campaign-creator-page/build-campaign/components/bundle-catalog";
+import {
+    BundleGridSkeleton,
+} from "@/widgets/client-side/campaign-creator-page/build-campaign/components/bundle-grid";
+import {
+    useBundleByIdFetcher,
+} from "@/entities/client-side/campaign-creator-page/bundle";
+import {
+    useCampaignBuilderStore,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
+import {
+    getBundleSelectionBlockReason,
+    getSelectedBundleIds,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-selection";
 
 export const BuildCampaign = () => {
     const [searchParams] = useSearchParams();
     const isAddInfluencerMode = searchParams.get("mode") === "add-influencer";
-    const vm = useBuildCampaignView();
+    const [catalogMode, setCatalogMode] =
+        useState<CampaignCatalogMode>("networks");
+    const vm = useBuildCampaignView(catalogMode);
+    const fetchBundleById = useBundleByIdFetcher();
+    const [pendingBundleIds, setPendingBundleIds] = useState<
+        ReadonlySet<string>
+    >(() => new Set());
+    const pendingBundleIdsRef = useRef(new Set<string>());
+    const activeCurrencyRef = useRef(vm.selectedCurrencyCode);
+    activeCurrencyRef.current = vm.selectedCurrencyCode;
+    const selectedBundles = useCampaignBuilderStore(
+        (state) => state.selectedBundles,
+    );
+    const selectedOfferAccountIds = useCampaignBuilderStore(
+        (state) => state.selectedOfferAccountIds,
+    );
+    const selectBundle = useCampaignBuilderStore(
+        (state) => state.actions.selectBundle,
+    );
+    const removeBundle = useCampaignBuilderStore(
+        (state) => state.actions.removeBundle,
+    );
+    const selectedBundleIds = useMemo(
+        () => getSelectedBundleIds(selectedBundles),
+        [selectedBundles],
+    );
+    const disabledBundleIds = useMemo(
+        () =>
+            new Set(
+                vm.bundles
+                    .filter(
+                        (bundle) =>
+                            !selectedBundleIds.has(bundle.bundleId) &&
+                            getBundleSelectionBlockReason({
+                                bundle,
+                                selectedBundles,
+                                selectedOfferAccountIds,
+                                currency: vm.selectedCurrencyCode,
+                            }) !== null,
+                    )
+                    .map((bundle) => bundle.bundleId),
+            ),
+        [
+            selectedBundleIds,
+            selectedBundles,
+            selectedOfferAccountIds,
+            vm.bundles,
+            vm.selectedCurrencyCode,
+        ],
+    );
+    const disabledEmbeddedBundleIds = useMemo(() => {
+        const disabledIds = new Set<string>();
+
+        vm.displayCards.forEach((account) => {
+            account.bundlePreviews.forEach((preview) => {
+                if (
+                    !selectedBundleIds.has(preview.bundleId) &&
+                    getBundleSelectionBlockReason({
+                        bundle: preview,
+                        selectedBundles,
+                        selectedOfferAccountIds,
+                        currency: vm.selectedCurrencyCode,
+                    }) !== null
+                ) {
+                    disabledIds.add(preview.bundleId);
+                }
+            });
+        });
+
+        return disabledIds;
+    }, [
+        selectedBundleIds,
+        selectedBundles,
+        selectedOfferAccountIds,
+        vm.displayCards,
+        vm.selectedCurrencyCode,
+    ]);
+    const handleChooseBundle = useCallback(
+        (bundleId: string) => {
+            const bundle = vm.bundles.find(
+                (item) => item.bundleId === bundleId,
+            );
+
+            if (!bundle) return;
+
+            selectBundle(bundle, vm.selectedCurrencyCode);
+        },
+        [
+            selectBundle,
+            vm.bundles,
+            vm.selectedCurrencyCode,
+        ],
+    );
+    const handleRemoveBundle = useCallback(
+        (bundleId: string) => removeBundle(bundleId),
+        [removeBundle],
+    );
+    const handleChooseEmbeddedBundle = useCallback(
+        async (bundleId: string) => {
+            const currentState = useCampaignBuilderStore.getState();
+            const isAlreadySelected = currentState.selectedBundles.some(
+                (bundle) => bundle.bundleId === bundleId,
+            );
+
+            if (
+                isAlreadySelected ||
+                pendingBundleIdsRef.current.has(bundleId)
+            ) {
+                return;
+            }
+
+            pendingBundleIdsRef.current.add(bundleId);
+            setPendingBundleIds(
+                new Set(pendingBundleIdsRef.current),
+            );
+
+            try {
+                const bundle = await fetchBundleById(bundleId);
+                const latestState =
+                    useCampaignBuilderStore.getState();
+
+                if (
+                    latestState.selectedBundles.some(
+                        (selectedBundle) =>
+                            selectedBundle.bundleId === bundleId,
+                    )
+                ) {
+                    return;
+                }
+
+                latestState.actions.selectBundle(
+                    bundle,
+                    activeCurrencyRef.current,
+                );
+            } catch {
+                // The shared API interceptor reports the request error.
+            } finally {
+                pendingBundleIdsRef.current.delete(bundleId);
+                setPendingBundleIds(
+                    new Set(pendingBundleIdsRef.current),
+                );
+            }
+        },
+        [fetchBundleById],
+    );
 
     return (
         <div className={styles.root}>
@@ -55,14 +227,25 @@ export const BuildCampaign = () => {
                             <p>Filters</p>
                         </button>
 
+                        <CampaignCatalogModeToggle
+                            mode={catalogMode}
+                            onModeChange={setCatalogMode}
+                        />
+
                         <div ref={vm.ddRef} className={styles.searchWithDropdown}>
                             <SearchInput
-                                active={vm.isSearchMode}
+                                active={
+                                    catalogMode === "networks" &&
+                                    vm.isSearchMode
+                                }
                                 onChange={vm.setSearch}
                                 value={vm.search}
+                                disabled={catalogMode === "bundles"}
                             />
 
-                            {vm.isSearchMode && vm.isDropdownOpen && (
+                            {catalogMode === "networks" &&
+                                vm.isSearchMode &&
+                                vm.isDropdownOpen && (
                                 <div className={styles.searchDropdown}>
                                     {vm.searchLoading || vm.searchFetching ? (
                                         <div className={styles.searchDropdownItem}>Loading…</div>
@@ -86,7 +269,10 @@ export const BuildCampaign = () => {
                                                     <p>{account.username}</p>
                                                 </div>
                                                 <div className={styles.price}>
-                                                    {account.prices.EUR ?? 0}€
+                                                    {account.prices[
+                                                        vm.selectedCurrencyCode
+                                                    ] ?? "—"}
+                                                    {vm.selectedCurrency.key}
                                                 </div>
                                             </div>
                                         ))
@@ -118,11 +304,13 @@ export const BuildCampaign = () => {
                         onRemove={vm.removeSelectedTag}
                     />
 
-                    <ViewSwitch
-                        className={styles.viewSwitcher}
-                        view={vm.view}
-                        setView={vm.setView}
-                    />
+                    {catalogMode === "networks" && (
+                        <ViewSwitch
+                            className={styles.viewSwitcher}
+                            view={vm.view}
+                            setView={vm.setView}
+                        />
+                    )}
                 </div>
 
                 <div
@@ -143,7 +331,28 @@ export const BuildCampaign = () => {
                         />
                     )}
 
-                    {vm.promoError || vm.isEmpty ? (
+                    {catalogMode === "bundles" &&
+                    vm.bundleIsInitialLoading ? (
+                        <BundleGridSkeleton />
+                    ) : catalogMode === "bundles" && vm.bundleError ? (
+                        <NoData>
+                            <h2>Failed to load Bundles</h2>
+                            <p>Please try again later.</p>
+                        </NoData>
+                    ) : catalogMode === "bundles" && vm.bundleIsEmpty ? (
+                        <NoData>
+                            <h2>No Bundles for this filter right now</h2>
+                            <p>Try changing the selected filters.</p>
+                        </NoData>
+                    ) : catalogMode === "bundles" ? (
+                        <BundleCatalog
+                            bundles={vm.bundleCards}
+                            selectedBundleIds={selectedBundleIds}
+                            disabledBundleIds={disabledBundleIds}
+                            onChoose={handleChooseBundle}
+                            onRemove={handleRemoveBundle}
+                        />
+                    ) : vm.promoError || vm.isEmpty ? (
                         <NoData>
                             <h2>No SocialAccounts for this filter right now</h2>
                             <p>
@@ -160,12 +369,20 @@ export const BuildCampaign = () => {
                             isInitialLoading={vm.isInitialLoading}
                             isFetchingMore={vm.isFetchingMore}
                             isRefetching={vm.isRefetching}
+                            selectedBundleIds={selectedBundleIds}
+                            pendingBundleIds={pendingBundleIds}
+                            disabledEmbeddedBundleIds={
+                                disabledEmbeddedBundleIds
+                            }
+                            onChooseEmbeddedBundle={
+                                handleChooseEmbeddedBundle
+                            }
                         />
                     )}
                 </div>
             </div>
 
-            {!vm.isSearchMode && vm.loadMoreRef && (
+            {catalogMode === "networks" && !vm.isSearchMode && vm.loadMoreRef && (
                 <div
                     ref={vm.loadMoreRef}
                     style={{
@@ -178,6 +395,20 @@ export const BuildCampaign = () => {
                 >
                 </div>
             )}
+
+            {catalogMode === "bundles" &&
+                !vm.bundleIsInitialLoading &&
+                !vm.bundleError &&
+                !vm.bundleIsEmpty && (
+                    <div
+                        ref={vm.bundleLoadMoreRef}
+                        className={styles.loadMore}
+                        aria-hidden="true"
+                        style={{
+                            opacity: vm.bundleIsLoadingMore ? 0.6 : 1,
+                        }}
+                    />
+                )}
 
             {/*<ProceedSummary />*/}
         </div>

@@ -1,82 +1,92 @@
 import React from "react";
-import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+
 import {
-    useCampaignBuilderStore,
-} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
+    postCampaignDraft,
+} from "@/entities/client-side/campaign-draft/api/campaign-draft.api";
 import {
     buildCampaignDraftPayload,
     hasDraftSelection,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/build-draft-payload";
+import {
+    useCampaignBuilderStore,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
+import {
+    CampaignDraftLatestStep,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
+import {
+    parseCampaignDraftError,
+} from "@/entities/client-side/campaign-draft/model/campaign-draft.errors";
 
-type PostCampaignDraft = (payload: Record<string, unknown>) => Promise<unknown>;
-type UpdateCampaignDraft = (payload: Record<string, unknown>) => Promise<unknown>;
-
-type Params = {
-    postCampaignDraft: PostCampaignDraft;
-    updateCampaignDraft?: UpdateCampaignDraft;
-};
-
-export const useSaveCampaignCreatorDraft = ({
-                                                postCampaignDraft,
-                                                updateCampaignDraft,
-                                            }: Params) => {
-    const state = useCampaignBuilderStore();
-    const actions = useCampaignBuilderStore((s) => s.actions);
+export const useSaveCampaignCreatorDraft = () => {
+    const campaignName = useCampaignBuilderStore((state) => state.campaignName);
+    const actions = useCampaignBuilderStore((state) => state.actions);
     const queryClient = useQueryClient();
 
     const [isOpen, setIsOpen] = React.useState(false);
+    const [isSaving, setIsSaving] = React.useState(false);
     const [draftName, setDraftName] = React.useState("");
+    const inFlightRef = React.useRef(false);
 
     const open = React.useCallback(() => {
-        setDraftName(state.campaignName ?? "");
+        setDraftName(campaignName ?? "");
         setIsOpen(true);
-    }, [state.campaignName]);
+    }, [campaignName]);
 
     const close = React.useCallback(() => {
         setIsOpen(false);
     }, []);
 
     const save = React.useCallback(async () => {
+        if (inFlightRef.current) return;
+
+        const state = useCampaignBuilderStore.getState();
+        const nextCampaignName = draftName.trim();
+
         if (!hasDraftSelection(state)) {
             toast.error("Please select offer or promo cards before saving draft.");
             return;
         }
 
-        if (!draftName.trim()) {
+        if (!nextCampaignName) {
             toast.error("Draft name is required.");
             return;
         }
 
-        const payload = buildCampaignDraftPayload(state, "addAccounts", {
-            campaignName: draftName.trim(),
-            draftId: state.draftId,
-        });
+        if (!state.selectionCurrency) {
+            toast.error("Campaign currency is required to save draft.");
+            return;
+        }
+
+        inFlightRef.current = true;
+        setIsSaving(true);
 
         try {
-            const response =
-                state.draftId && updateCampaignDraft
-                    ? await updateCampaignDraft(payload)
-                    : await postCampaignDraft(payload);
+            const { payload, draftSelectionRows } =
+                buildCampaignDraftPayload(state, {
+                    campaignName: nextCampaignName,
+                });
 
-            const maybeResponse = response as
-                | { draftId?: string; _id?: string; data?: { draftId?: string; _id?: string } }
-                | undefined;
+            actions.setDraftSelectionRows(draftSelectionRows);
 
-            const newDraftId =
-                maybeResponse?.draftId ||
-                maybeResponse?._id ||
-                maybeResponse?.data?.draftId ||
-                maybeResponse?.data?._id ||
-                state.draftId ||
-                null;
+            const expectedOperation = state.draftId ? "updated" : "created";
+            const result = await postCampaignDraft(payload);
+
+            if (
+                import.meta.env.DEV &&
+                result.operation !== expectedOperation
+            ) {
+                console.warn(
+                    `Campaign Draft was ${result.operation}; expected ${expectedOperation}.`,
+                );
+            }
 
             actions.setDraftMeta({
-                draftId: newDraftId,
-                draftStep: "addAccounts",
+                draftId: result.draftId,
+                draftStep: CampaignDraftLatestStep.addAccounts,
             });
-
-            actions.setCampaignName(draftName.trim());
+            actions.setCampaignName(nextCampaignName);
 
             await queryClient.invalidateQueries({
                 queryKey: ["dashboard-campaigns"],
@@ -84,21 +94,17 @@ export const useSaveCampaignCreatorDraft = ({
 
             toast.success("Draft saved successfully!");
             close();
-        } catch {
-            toast.error("Failed to save draft");
+        } catch (error) {
+            toast.error(parseCampaignDraftError(error).message);
+        } finally {
+            inFlightRef.current = false;
+            setIsSaving(false);
         }
-    }, [
-        state,
-        draftName,
-        actions,
-        close,
-        postCampaignDraft,
-        updateCampaignDraft,
-        queryClient,
-    ]);
+    }, [actions, close, draftName, queryClient]);
 
     return {
         isOpen,
+        isSaving,
         draftName,
         setDraftName,
         open,

@@ -31,7 +31,23 @@ export type CampaignPostContentAccount = {
     followers?: number;
     price?: number;
     dateRequest?: string;
-    source?: "offer" | "manual";
+    source?: "offer" | "manual" | "bundle";
+    bundleId?: string;
+};
+
+export type CampaignPostContentBundleAccountSummary = {
+    accountId: string;
+    username: string;
+    socialMedia: string;
+    followers: number;
+    price?: number;
+};
+
+export type CampaignPostContentBundleSummary = {
+    bundleId: string;
+    currentPrice?: number;
+    originalPrice?: number;
+    accounts: CampaignPostContentBundleAccountSummary[];
 };
 
 export type CampaignPostContentBlock = {

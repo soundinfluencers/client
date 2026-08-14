@@ -1,12 +1,50 @@
+import type {
+    CreateRegularCampaignRequest,
+    CreateProposalCampaignRequest,
+} from "@/entities/client-side/campaign/model/campaign-api.types";
+import {
+    isCampaignDisplayCurrency,
+    type CampaignDisplayCurrency,
+} from "@/shared/functions/formatCurrency";
+import type {
+    CampaignContentItem,
+    SelectedCampaignAccount,
+} from "./campaign-builder.types";
+
 type BuildStrategyBaseParams = {
     campaignName: string;
     totalPrice?: number;
     draftId?: string | null;
-    accounts: any[];
-    content: any[];
+    accounts: SelectedCampaignAccount[];
+    content: CampaignContentItem[];
 };
 
-const mapAccountsForStrategy = (accounts: any[]) =>
+type BuildStrategyProposalParams = Pick<
+    BuildStrategyBaseParams,
+    "campaignName" | "accounts" | "content"
+> & {
+    totalPrice: number;
+    displayCurrency: CampaignDisplayCurrency;
+    selectedOfferId: string | null;
+    selectedOfferAccountIds: string[];
+};
+
+type BuildStrategyCreateCampaignParams = BuildStrategyBaseParams & {
+    displayCurrency: CampaignDisplayCurrency;
+    paymentDetails: CreateRegularCampaignRequest["paymentDetails"];
+};
+
+export const requireRegularCampaignDisplayCurrency = (
+    value: unknown,
+): CampaignDisplayCurrency => {
+    if (!isCampaignDisplayCurrency(value)) {
+        throw new Error("Campaign currency is required before payment");
+    }
+
+    return value;
+};
+
+const mapAccountsForStrategy = (accounts: SelectedCampaignAccount[]) =>
     accounts.map((account) => ({
         socialAccountId: String(account.accountId ?? ""),
         influencerId: String(account.influencerId ?? ""),
@@ -26,13 +64,27 @@ const mapAccountsForStrategy = (accounts: any[]) =>
         profileType: String(account.profileType ?? "community"),
     }));
 
-const mapContentForStrategy = (content: any[]) =>
+const mapAccountsForCreateCampaign = (
+    accounts: BuildStrategyBaseParams["accounts"],
+) =>
+    mapAccountsForStrategy(accounts).map((mappedAccount, index) => {
+        const bundleId = accounts[index]?.bundleId;
+
+        return {
+            ...mappedAccount,
+            ...(typeof bundleId === "string" && bundleId.trim().length > 0
+                ? { bundleId }
+                : {}),
+        };
+    });
+
+const mapContentForStrategy = (content: CampaignContentItem[]) =>
     content.map((item) => ({
         _id: String(item._id ?? ""),
         socialMedia: String(item.socialMedia ?? ""),
         socialMediaGroup: String(item.socialMediaGroup ?? ""),
         mainLink: String(item.mainLink ?? ""),
-        descriptions: (item.descriptions ?? []).map((description: any) => ({
+        descriptions: (item.descriptions ?? []).map((description) => ({
             _id: String(description._id ?? ""),
             description: String(description.description ?? ""),
         })),
@@ -42,7 +94,7 @@ const mapContentForStrategy = (content: any[]) =>
         profileType: String(item.profileType ?? "community"),
     }));
 
-const resolveStrategySocialMedia = (items: any[]) => {
+const resolveStrategySocialMedia = (items: CampaignContentItem[]) => {
     const socials = Array.from(
         new Set(
             items
@@ -72,41 +124,89 @@ export const buildStrategyDraftPayload = ({
 });
 
 export const buildStrategyProposalPayload = ({
-                                                 campaignName,
-                                                 totalPrice,
-                                                 accounts,
-                                                 content,
-                                             }: BuildStrategyBaseParams) => ({
-    campaignName: String(campaignName ?? ""),
-    socialMedia: resolveStrategySocialMedia(content),
-    campaignPrice: Number(totalPrice ?? 0),
-    addedAccounts: mapAccountsForStrategy(accounts),
-    campaignContent: mapContentForStrategy(content),
-});
+    campaignName,
+    totalPrice,
+    displayCurrency,
+    accounts,
+    content,
+    selectedOfferId,
+    selectedOfferAccountIds,
+}: BuildStrategyProposalParams): CreateProposalCampaignRequest => {
+    const offerId = selectedOfferId?.trim();
+
+    if (selectedOfferId !== null && !offerId) {
+        throw new Error("Selected Offer id is missing");
+    }
+
+    return {
+        campaignName: String(campaignName ?? ""),
+        socialMedia: resolveStrategySocialMedia(content),
+        campaignPrice: Number(totalPrice),
+        displayCurrency,
+        addedAccounts: mapAccountsForCreateCampaign(accounts),
+        campaignContent: mapContentForStrategy(content),
+        ...(offerId
+            ? {
+                selectedOffer: {
+                    offerId,
+                    selectedAccountIds: selectedOfferAccountIds.map(String),
+                },
+            }
+            : {}),
+    };
+};
+
+export const assertInitialProposalCreateTopology = (
+    payload: CreateProposalCampaignRequest,
+) => {
+    const accountIds = payload.addedAccounts.map(
+        ({ socialAccountId }) => socialAccountId,
+    );
+
+    if (accountIds.some((accountId) => !accountId.trim())) {
+        throw new Error("Proposal contains an account without a social account id");
+    }
+
+    const uniqueAccountIds = new Set(accountIds);
+
+    if (uniqueAccountIds.size !== accountIds.length) {
+        throw new Error("Proposal contains duplicate social accounts");
+    }
+
+    if (!payload.selectedOffer) return;
+
+    const offerAccountIds = payload.selectedOffer.selectedAccountIds;
+    const uniqueOfferAccountIds = new Set(offerAccountIds);
+
+    if (
+        offerAccountIds.length === 0 ||
+        offerAccountIds.some((accountId) => !accountId.trim())
+    ) {
+        throw new Error("Selected Offer account membership is missing");
+    }
+
+    if (uniqueOfferAccountIds.size !== offerAccountIds.length) {
+        throw new Error("Selected Offer contains duplicate social accounts");
+    }
+
+    if (offerAccountIds.some((accountId) => !uniqueAccountIds.has(accountId))) {
+        throw new Error("Selected Offer accounts are missing from the Proposal");
+    }
+};
 
 export const buildStrategyCreateCampaignPayload = ({
                                                        campaignName,
                                                        totalPrice,
+                                                       displayCurrency,
                                                        accounts,
                                                        content,
                                                        paymentDetails,
-                                                   }: BuildStrategyBaseParams & {
-    paymentDetails: {
-        firstName: string;
-        lastName: string;
-        address: string;
-        country: string;
-        referenceNumber: string;
-        amount: number;
-        company?: string;
-        vatNumber?: string;
-        selectedPaymentMethod: string;
-    };
-}) => ({
+                                                   }: BuildStrategyCreateCampaignParams): CreateRegularCampaignRequest => ({
     campaignName: String(campaignName ?? ""),
     socialMedia: resolveStrategySocialMedia(content),
     campaignPrice: Number(totalPrice ?? 0),
-    addedAccounts: mapAccountsForStrategy(accounts),
+    displayCurrency,
+    addedAccounts: mapAccountsForCreateCampaign(accounts),
     campaignContent: mapContentForStrategy(content),
     paymentDetails,
 });

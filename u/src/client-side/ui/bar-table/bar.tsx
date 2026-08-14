@@ -10,8 +10,9 @@ import { formatCampaignDate } from "@/utils/functions/formatDate";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { useCampaignStore, useDraftCampaignStore } from "@/client-side/store";
 import {getCampaignSelectedAccounts} from "@/client-side/pages/campaign-strategy/model/campaign-strategy.helpers.ts";
-import {calcGroupPrices} from "@/client-side/utils";
-import {formatCurrency} from "@/shared/functions/formatCurrency.ts";
+import {
+  formatPersistedCampaignCurrency,
+} from "@/shared/functions/formatCurrency.ts";
 
 type AnyCampaign = any;
 type VisibleStats = {
@@ -58,10 +59,6 @@ export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleSt
     return getCampaignSelectedAccounts(campaign, store);
   }, [campaign, store.offer, store.promoCard]);
   console.log(campaign,'aqwe')
-  const { totalPublicPrice } = React.useMemo(
-      () => calcGroupPrices(accounts),
-      [accounts],
-  );
   const content = React.useMemo(() => {
     const fromCampaign = pickContentFromCampaign(campaign);
     if (isNonEmpty(fromCampaign)) return fromCampaign as any[];
@@ -84,8 +81,6 @@ export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleSt
           ? Number(campaign.totalFollowers)
           : sumFollowers(accounts);
 
-  const currency = campaign?.displayCurrency ?? "EUR";
-
   const barUIs = [
     { name: `Status: ${campaign?.status || ""}`, img: calendar, row: true },
     { name: `Submitted: ${submitted}`, img: calendar, row: true },
@@ -93,7 +88,10 @@ export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleSt
       name: `Budget: ${
           campaign.isPriceHidden
               ? ""
-              : formatCurrency(budget || draftPrice, currency)
+              : formatPersistedCampaignCurrency(
+                  budget ?? draftPrice,
+                  campaign?.displayCurrency,
+              )
       }`,
       img: creditcard,
       row: true,

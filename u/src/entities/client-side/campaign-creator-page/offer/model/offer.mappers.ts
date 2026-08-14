@@ -21,13 +21,28 @@ export const mapOfferConnectedAccountDto = (
     username: String(dto.username ?? ""),
     logoUrl: String(dto.logoUrl ?? ""),
     profileType: dto.profileType,
-    followers: dto.followers
+    followers: dto.followers,
+    countries: (dto.countries ?? []).map((country) =>
+        typeof country === "string"
+            ? { country, percentage: 0 }
+            : {
+                country: String(country.country ?? ""),
+                percentage: Number(country.percentage ?? 0),
+            },
+    ),
+    communityMusicGenres: Array.isArray(dto.communityMusicGenres)
+        ? [...dto.communityMusicGenres]
+        : [],
+    creatorMusicGenres: Array.isArray(dto.creatorMusicGenres)
+        ? [...dto.creatorMusicGenres]
+        : [],
 });
 
 export const mapPublishedOfferDto = (dto: PublishedOfferDto): PublishedOffer => ({
     id: String(dto._id ?? ""),
     title: String(dto.title ?? ""),
     price: toNumber(dto.price),
+    prices: { ...(dto.parsedPrices ?? {}) },
     storyAndPostDetails: String(dto.storyAndPostDetails ?? ""),
 
     networksAmount: toNumber(dto.networksAmount),

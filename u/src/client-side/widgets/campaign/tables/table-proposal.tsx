@@ -11,6 +11,7 @@ import type {
 
 import { TableCard } from "../card-table/table-card-proposal";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import type { TableGroup } from "@/client-side/types/table-types";
 import { getTableColumnWidths, getTitle } from "@/client-side/data/table-campaign.data";
 
@@ -20,6 +21,11 @@ import { useProposalAccountsStore } from "@/client-side/store";
 import {
   useCampaignBuilderStore,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import {
+  buildProposalAddInfluencerUrl,
+  initializeProposalAddInfluencerCurrency,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation";
+import { isCampaignDisplayCurrency } from "@/shared/functions/formatCurrency";
 
 type Props = {
   items: CampaignContentItem[];
@@ -30,6 +36,9 @@ type Props = {
   canEdit: boolean;
   optionIndex: number;
   title: string;
+  optionIndexes?: number[];
+  onDeleteOption?: (optionIndex: number) => Promise<void>;
+  isMutationPending?: boolean;
 };
 
 const makeRowKey = (n: CampaignAddedAccount, index: number) =>
@@ -49,8 +58,14 @@ export function TableProposal({
   canEdit,
   optionIndex,
   title,
+  optionIndexes,
+  onDeleteOption,
+  isMutationPending,
 }: Props) {
   const resetCampaign = useCampaignBuilderStore((s) => s.actions.reset);
+  const switchCampaignCurrency = useCampaignBuilderStore(
+    (s) => s.actions.switchCampaignCurrency,
+  );
   const getGroupBySocial = (social?: string): TableGroup => {
     const s = String(social ?? "").toLowerCase();
 
@@ -70,6 +85,34 @@ export function TableProposal({
 
   const optionNetworks = useProposalAccountsStore(
     (s) => s.accountsByOption[optionIndex] ?? networks ?? [],
+  );
+  const proposalDisplayCurrency = useProposalAccountsStore(
+    (s) => s.optionSnapshotsByIndex[optionIndex]?.displayCurrency,
+  );
+  const addInfluencerUrl = isCampaignDisplayCurrency(proposalDisplayCurrency)
+    ? buildProposalAddInfluencerUrl({
+        optionIndex,
+        currency: proposalDisplayCurrency,
+      })
+    : "/client/campaign";
+
+  const initializeAddInfluencerBuilder = React.useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      const initialized = initializeProposalAddInfluencerCurrency({
+        currency: proposalDisplayCurrency,
+        reset: resetCampaign,
+        switchCurrency: switchCampaignCurrency,
+      });
+
+      if (initialized) return;
+
+      event.preventDefault();
+      toast.error("Proposal currency is unavailable in Campaign Builder");
+    }, [
+      proposalDisplayCurrency,
+      resetCampaign,
+      switchCampaignCurrency,
+    ],
   );
 
   const localItems = React.useMemo(
@@ -206,6 +249,9 @@ export function TableProposal({
               onCloseDropdown={closeDropdown}
               canEdit={canEdit}
               changeView={changeView}
+              optionIndexes={optionIndexes ?? []}
+              onDeleteOption={onDeleteOption}
+              isMutationPending={Boolean(isMutationPending)}
             />
           );
         })}
@@ -223,8 +269,9 @@ export function TableProposal({
                 className={`td--footer ${isAddInfluencer ? "is-left" : ""} ${col.includes("followers") ? "followers" : ""}`}
               >
                 {isAddInfluencer && (
-                  <Link onClick={() => resetCampaign()}
-                        to={`/client/create-campaign?mode=add-influencer&option=${optionIndex}`}>
+                  <Link
+                        onClick={initializeAddInfluencerBuilder}
+                        to={addInfluencerUrl}>
                     <div className="add-influencer">
                       <img src={plus} alt=""/>
                       <p>Add Influencer</p>

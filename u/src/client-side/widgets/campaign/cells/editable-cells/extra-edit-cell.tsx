@@ -36,6 +36,18 @@ export const ExtraFieldsCellsEdit = React.memo(function ExtraFieldsCellsEdit({
     }
   }, [group]);
 
+  const getValue = React.useCallback(
+    (key: (typeof keys)[number]) =>
+      (patch?.[key] ?? baseItem?.[key] ?? "") as string,
+    [patch, baseItem],
+  );
+
+  React.useEffect(() => {
+    if (!contentId) return;
+
+    console.log("PATCH for", contentId, patch);
+  }, [contentId, patch]);
+
   if (!contentId) {
     return (
       <>
@@ -48,20 +60,11 @@ export const ExtraFieldsCellsEdit = React.memo(function ExtraFieldsCellsEdit({
     );
   }
 
-  const getValue = React.useCallback(
-    (key: (typeof keys)[number]) =>
-      (patch?.[key] ?? baseItem?.[key] ?? "") as string,
-    [patch, baseItem],
-  );
-
   const placeholders: Record<string, string> = {
     taggedUser: "Tagged user",
     taggedLink: "Tagged link",
     additionalBrief: "Additional brief",
   };
-  React.useEffect(() => {
-    console.log("PATCH for", contentId, patch);
-  }, [contentId, patch]);
   return (
     <>
       {keys.map((key) => (

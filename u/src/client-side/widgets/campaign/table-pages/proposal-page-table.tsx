@@ -9,7 +9,6 @@ import { useProposalAccountsStore } from "@/client-side/store";
 import { useGroupPromos } from "@/client-side/hooks";
 import { TableProposal } from "../tables/table-proposal";
 import { Bar } from "@/client-side/ui";
-import { calcGroupPrices } from "@/client-side/utils";
 
 // type ProposelModal = Extract<CampaignPageModel, { kind: "proposal" }>;
 
@@ -36,10 +35,6 @@ export const ProposalCampaignPage: React.FC<Props> = ({
   );
   const accounts = useProposalAccountsStore(
     (s) => s.accountsByOption[optionIndex] ?? [],
-  );
-  const { groupPrices } = React.useMemo(
-    () => calcGroupPrices(accounts),
-    [accounts],
   );
   React.useEffect(() => {
     initOption(
@@ -113,7 +108,7 @@ export const ProposalCampaignPage: React.FC<Props> = ({
           {byGroup.main.length >= 1 && (
             <TableProposal
               optionIndex={optionIndex}
-              totalPrice={groupPrices.main}
+              totalPrice={campaign.selectedOption.price}
               items={byGroup.main}
               networks={mainPromos}
               group="main"
@@ -127,7 +122,7 @@ export const ProposalCampaignPage: React.FC<Props> = ({
             <TableProposal
               optionIndex={optionIndex}
               canEdit={canEditUI}
-              totalPrice={groupPrices.music}
+              totalPrice={campaign.selectedOption.price}
               items={byGroup.music}
               networks={musicPromos}
               group="music"
@@ -140,7 +135,7 @@ export const ProposalCampaignPage: React.FC<Props> = ({
             <TableProposal
               optionIndex={optionIndex}
               canEdit={canEditUI}
-              totalPrice={groupPrices.press}
+              totalPrice={campaign.selectedOption.price}
               items={byGroup.press}
               networks={otherPromos}
               group="press"

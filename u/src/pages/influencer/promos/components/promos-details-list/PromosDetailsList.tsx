@@ -1,11 +1,14 @@
-import type React from 'react';
 import { PromosDetailsListCard } from './promos-details-list-card/PromosDetailsListCard';
-import type { IPromoDetailsModel, TAcceptDeclineRequestPromoModel, TPromoStatus } from '../../types/promos.types';
+import type {
+  TAcceptDeclineRequestPromoModel,
+  TPromoDetailsCardModel,
+  TPromoStatus,
+} from '../../types/promos.types';
 
 import './_promos-details-list.scss';
 
-interface Props {
-  data: IPromoDetailsModel[];
+interface Props<TPromo extends TPromoDetailsCardModel> {
+  data: TPromo[];
   status: TPromoStatus;
   mutationState?: {
     isPending: boolean;
@@ -13,19 +16,19 @@ interface Props {
   };
   onAccept?: (payload: TAcceptDeclineRequestPromoModel) => void;
   onDecline?: (payload: TAcceptDeclineRequestPromoModel) => void;
-  onSubmitResults?: (promo: IPromoDetailsModel) => void;
+  onSubmitResults?: (promo: TPromo) => void;
 }
 
-export const PromosDetailsList: React.FC<Props> = ({
+export const PromosDetailsList = <TPromo extends TPromoDetailsCardModel,>({
   data,
   status,
   mutationState,
   onAccept,
   onDecline,
   onSubmitResults,
-}) => {
+}: Props<TPromo>) => {
 
-  const handleAccept = (promo: IPromoDetailsModel) => {
+  const handleAccept = (promo: TPromo) => {
     onAccept?.({
       campaignId: promo.campaignId,
       addedAccountsId: promo.addedAccountsId,
@@ -34,7 +37,7 @@ export const PromosDetailsList: React.FC<Props> = ({
     });
   };
 
-  const handleDecline = (promo: IPromoDetailsModel) => {
+  const handleDecline = (promo: TPromo) => {
     onDecline?.({
       campaignId: promo.campaignId,
       addedAccountsId: promo.addedAccountsId,
