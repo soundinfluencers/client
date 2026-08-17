@@ -9,6 +9,7 @@ import styles from "./embedded-bundle-preview.module.scss";
 type Props = {
     previews: readonly EmbeddedBundlePreviewDisplayModel[];
     selectedBundleIds: ReadonlySet<string>;
+    includedBundleIds: ReadonlySet<string>;
     pendingBundleIds: ReadonlySet<string>;
     disabledBundleIds: ReadonlySet<string>;
     onChooseBundle: (bundleId: string) => void;
@@ -17,6 +18,7 @@ type Props = {
 export const EmbeddedBundlePreviewList = ({
     previews,
     selectedBundleIds,
+    includedBundleIds,
     pendingBundleIds,
     disabledBundleIds,
     onChooseBundle,
@@ -34,15 +36,19 @@ export const EmbeddedBundlePreviewList = ({
                 const isPending = pendingBundleIds.has(
                     preview.bundleId,
                 );
+                const isIncludedInSelectedOffer = includedBundleIds.has(
+                    preview.bundleId,
+                );
                 const chooseDisabled =
                     isSelected ||
                     isPending ||
+                    isIncludedInSelectedOffer ||
                     disabledBundleIds.has(preview.bundleId);
                 const buttonLabel = isPending
                     ? "Choosing..."
-                    : isSelected
-                        ? "Selected"
-                        : "Choose Bundle";
+                        : isSelected
+                            ? "Selected"
+                            : "Choose Bundle";
 
                 return (
                     <section
@@ -62,6 +68,12 @@ export const EmbeddedBundlePreviewList = ({
                             originalPriceLabel={preview.originalPriceLabel}
                             className={styles.price}
                         />
+
+                        {isIncludedInSelectedOffer && (
+                            <p className={styles.includedText}>
+                                Included in your selected offer
+                            </p>
+                        )}
 
                         <button
                             type="button"

@@ -9,6 +9,7 @@ import { BundleGrid } from "./bundle-grid";
 type Props = {
     bundles: readonly BundleCardDisplayModel[];
     selectedBundleIds: ReadonlySet<string>;
+    includedBundleIds: ReadonlySet<string>;
     disabledBundleIds: ReadonlySet<string>;
     onChoose: (bundleId: string) => void;
     onRemove: (bundleId: string) => void;
@@ -17,6 +18,7 @@ type Props = {
 export const BundleCatalog = ({
     bundles,
     selectedBundleIds,
+    includedBundleIds,
     disabledBundleIds,
     onChoose,
     onRemove,
@@ -47,6 +49,7 @@ export const BundleCatalog = ({
             bundles={bundles}
             activeBundleId={activeBundleId}
             selectedBundleIds={selectedBundleIds}
+            includedBundleIds={includedBundleIds}
             disabledBundleIds={disabledBundleIds}
             onToggleDetails={handleToggleDetails}
             onCloseDetails={handleCloseDetails}

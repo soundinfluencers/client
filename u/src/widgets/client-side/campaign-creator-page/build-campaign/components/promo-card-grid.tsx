@@ -25,6 +25,7 @@ interface Props {
     isDisabled: boolean;
     isSelected: boolean;
     selectedBundleIds: ReadonlySet<string>;
+    includedBundleIds: ReadonlySet<string>;
     pendingBundleIds: ReadonlySet<string>;
     disabledBundleIds: ReadonlySet<string>;
     onChooseBundle: (bundleId: string) => void;
@@ -43,6 +44,7 @@ export const PromoCardGrid: React.FC<Props> = ({
                                                    isDisabled,
                                                    isSelected,
                                                    selectedBundleIds,
+                                                   includedBundleIds,
                                                    pendingBundleIds,
                                                    disabledBundleIds,
                                                    onChooseBundle,
@@ -158,6 +160,7 @@ export const PromoCardGrid: React.FC<Props> = ({
                     <EmbeddedBundlePreviewList
                         previews={bundlePreviews}
                         selectedBundleIds={selectedBundleIds}
+                        includedBundleIds={includedBundleIds}
                         pendingBundleIds={pendingBundleIds}
                         disabledBundleIds={disabledBundleIds}
                         onChooseBundle={onChooseBundle}

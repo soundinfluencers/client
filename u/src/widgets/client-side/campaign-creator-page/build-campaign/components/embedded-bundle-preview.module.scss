@@ -49,6 +49,18 @@
   }
 }
 
+.includedText {
+  width: 100%;
+  padding: 4px 8px;
+  border-radius: 16px;
+  background: vars.$bg-white;
+  color: vars.$black-blue;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+}
+
 .chooseButton {
   display: flex;
   align-items: center;

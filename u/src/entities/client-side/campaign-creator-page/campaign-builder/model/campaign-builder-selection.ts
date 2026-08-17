@@ -16,6 +16,7 @@ import type {
 
 export type BundleSelectionBlockReason =
     | "already-selected"
+    | "included-in-selected-offer"
     | "bundle-overlap"
     | "missing-bundle-price"
     | "missing-overlap-account-price";
@@ -232,6 +233,31 @@ export const isAccountIncludedInSelectedBundle = (
     selectedBundles: readonly SelectedBundleSnapshot[],
 ): boolean => getSelectedBundleAccountIds(selectedBundles).has(accountId);
 
+export const isExactOfferBundleOverlap = (
+    offerAccountIds: readonly string[],
+    bundle: {
+        accounts: readonly { accountId: string }[];
+    },
+): boolean => {
+    const offerAccountIdSet = new Set(offerAccountIds);
+    const bundleAccountIdSet = new Set(
+        bundle.accounts.map((account) => account.accountId),
+    );
+
+    if (offerAccountIdSet.size !== bundleAccountIdSet.size) {
+        return false;
+    }
+
+    return (
+        [...offerAccountIdSet].every((accountId) =>
+            bundleAccountIdSet.has(accountId),
+        ) &&
+        [...bundleAccountIdSet].every((accountId) =>
+            offerAccountIdSet.has(accountId),
+        )
+    );
+};
+
 export const doesBundleOverlapSelectedBundles = (
     candidate: BundleSelectionCandidate,
     selectedBundles: readonly SelectedBundleSnapshot[],
@@ -250,11 +276,13 @@ export const doesBundleOverlapSelectedBundles = (
 export const getBundleSelectionBlockReason = ({
     bundle,
     selectedBundles,
+    selectedOfferId,
     selectedOfferAccountIds,
     currency,
 }: {
     bundle: BundleSelectionCandidate;
     selectedBundles: readonly SelectedBundleSnapshot[];
+    selectedOfferId: string | null;
     selectedOfferAccountIds: readonly string[];
     currency: CampaignCurrencyCode;
 }): BundleSelectionBlockReason | null => {
@@ -265,6 +293,13 @@ export const getBundleSelectionBlockReason = ({
         )
     ) {
         return "already-selected";
+    }
+
+    if (
+        selectedOfferId &&
+        isExactOfferBundleOverlap(selectedOfferAccountIds, bundle)
+    ) {
+        return "included-in-selected-offer";
     }
 
     if (doesBundleOverlapSelectedBundles(bundle, selectedBundles)) {
@@ -455,6 +490,7 @@ export const selectBundleFromCampaignSelection = ({
     const blockReason = getBundleSelectionBlockReason({
         bundle,
         selectedBundles: state.selectedBundles,
+        selectedOfferId: state.selectedOfferId,
         selectedOfferAccountIds: state.selectedOfferAccountIds,
         currency,
     });
@@ -580,6 +616,10 @@ export const selectOfferFromCampaignSelection = ({
         state.selectedPromoCardIds.filter(
             (accountId) => !nextOfferAccountIdSet.has(accountId),
         );
+    const nextSelectedBundles = state.selectedBundles.filter(
+        (bundle) =>
+            !isExactOfferBundleOverlap(nextOfferAccountIds, bundle),
+    );
 
     return {
         selectionCurrency: state.selectionCurrency ?? currency,
@@ -589,12 +629,13 @@ export const selectOfferFromCampaignSelection = ({
         selectedOfferPrices: { ...offerPrices },
         selectedOfferAccountIds: nextOfferAccountIds,
         selectedPromoCardIds: nextSelectedPromoCardIds,
+        selectedBundles: nextSelectedBundles,
         selectedAccounts: normalizeSelectedAccounts({
             currentAccounts: state.selectedAccounts,
             selectedPromoCardIds: nextSelectedPromoCardIds,
             selectedOfferAccountIds: nextOfferAccountIds,
             offerAccounts: accounts,
-            selectedBundles: state.selectedBundles,
+            selectedBundles: nextSelectedBundles,
         }),
     };
 };

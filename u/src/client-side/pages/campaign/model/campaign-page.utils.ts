@@ -74,8 +74,13 @@ export const isValidCreatedProposalOption = (
   currentCampaignId: string,
 ): boolean => isCreatedProposalOptionForCampaign(response, currentCampaignId);
 
+const APP_ORIGIN = import.meta.env.DEV
+  ? "https://test.soundinfluencers.com"
+  : "https://go.soundinfluencers.com/m";
+
+
 export const buildPromoShareUrl = (campaignId: string) => {
-  const origin = "https://go.soundinfluencers.com";
+  const origin = APP_ORIGIN;
   const id = encodeURIComponent(campaignId);
 
   return `${origin}/promo-share/${id}/proposal`;
@@ -85,7 +90,7 @@ export const buildShareUrl = (
   campaignId: string,
   socialMedia: string,
 ) => {
-  const origin = "https://go.soundinfluencers.com";
+  const origin = APP_ORIGIN;
   const id = encodeURIComponent(campaignId);
   const media = encodeURIComponent(socialMedia);
 

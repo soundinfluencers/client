@@ -46,6 +46,7 @@ import {
 import {
     getBundleSelectionBlockReason,
     getSelectedBundleIds,
+    isExactOfferBundleOverlap,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-selection";
 
 export const BuildCampaign = () => {
@@ -64,6 +65,9 @@ export const BuildCampaign = () => {
     const selectedBundles = useCampaignBuilderStore(
         (state) => state.selectedBundles,
     );
+    const selectedOfferId = useCampaignBuilderStore(
+        (state) => state.selectedOfferId,
+    );
     const selectedOfferAccountIds = useCampaignBuilderStore(
         (state) => state.selectedOfferAccountIds,
     );
@@ -77,6 +81,39 @@ export const BuildCampaign = () => {
         () => getSelectedBundleIds(selectedBundles),
         [selectedBundles],
     );
+    const includedBundleIds = useMemo(() => {
+        const includedIds = new Set<string>();
+
+        if (!selectedOfferId) return includedIds;
+
+        const includeExactBundle = (bundle: {
+            bundleId: string;
+            accounts: readonly { accountId: string }[];
+        }) => {
+            if (
+                !selectedBundleIds.has(bundle.bundleId) &&
+                isExactOfferBundleOverlap(
+                    selectedOfferAccountIds,
+                    bundle,
+                )
+            ) {
+                includedIds.add(bundle.bundleId);
+            }
+        };
+
+        vm.bundles.forEach(includeExactBundle);
+        vm.displayCards.forEach((account) =>
+            account.bundlePreviews.forEach(includeExactBundle),
+        );
+
+        return includedIds;
+    }, [
+        selectedBundleIds,
+        selectedOfferAccountIds,
+        selectedOfferId,
+        vm.bundles,
+        vm.displayCards,
+    ]);
     const disabledBundleIds = useMemo(
         () =>
             new Set(
@@ -87,6 +124,7 @@ export const BuildCampaign = () => {
                             getBundleSelectionBlockReason({
                                 bundle,
                                 selectedBundles,
+                                selectedOfferId,
                                 selectedOfferAccountIds,
                                 currency: vm.selectedCurrencyCode,
                             }) !== null,
@@ -96,6 +134,7 @@ export const BuildCampaign = () => {
         [
             selectedBundleIds,
             selectedBundles,
+            selectedOfferId,
             selectedOfferAccountIds,
             vm.bundles,
             vm.selectedCurrencyCode,
@@ -111,6 +150,7 @@ export const BuildCampaign = () => {
                     getBundleSelectionBlockReason({
                         bundle: preview,
                         selectedBundles,
+                        selectedOfferId,
                         selectedOfferAccountIds,
                         currency: vm.selectedCurrencyCode,
                     }) !== null
@@ -124,6 +164,7 @@ export const BuildCampaign = () => {
     }, [
         selectedBundleIds,
         selectedBundles,
+        selectedOfferId,
         selectedOfferAccountIds,
         vm.displayCards,
         vm.selectedCurrencyCode,
@@ -348,6 +389,7 @@ export const BuildCampaign = () => {
                         <BundleCatalog
                             bundles={vm.bundleCards}
                             selectedBundleIds={selectedBundleIds}
+                            includedBundleIds={includedBundleIds}
                             disabledBundleIds={disabledBundleIds}
                             onChoose={handleChooseBundle}
                             onRemove={handleRemoveBundle}
@@ -370,6 +412,7 @@ export const BuildCampaign = () => {
                             isFetchingMore={vm.isFetchingMore}
                             isRefetching={vm.isRefetching}
                             selectedBundleIds={selectedBundleIds}
+                            includedBundleIds={includedBundleIds}
                             pendingBundleIds={pendingBundleIds}
                             disabledEmbeddedBundleIds={
                                 disabledEmbeddedBundleIds

@@ -17,6 +17,7 @@ type Props = {
     bundle: BundleCardDisplayModel;
     isExpanded: boolean;
     isSelected: boolean;
+    isIncludedInSelectedOffer: boolean;
     chooseDisabled: boolean;
     onToggleDetails: (bundleId: string) => void;
     onCloseDetails: () => void;
@@ -52,6 +53,7 @@ export const BundleCard = ({
     bundle,
     isExpanded,
     isSelected,
+    isIncludedInSelectedOffer,
     chooseDisabled,
     onToggleDetails,
     onCloseDetails,
@@ -62,6 +64,8 @@ export const BundleCard = ({
     const cardRef = useRef<HTMLDivElement>(null);
 
     const handleChoose = () => {
+        if (isIncludedInSelectedOffer) return;
+
         if (isSelected) {
             onRemove(bundle.bundleId);
         } else {
@@ -76,6 +80,8 @@ export const BundleCard = ({
             <article
                 className={`${styles.card} ${
                     isSelected ? styles.selected : ""
+                } ${
+                    isIncludedInSelectedOffer ? styles.included : ""
                 }`}
             >
                 <header className={styles.header}>
@@ -93,6 +99,12 @@ export const BundleCard = ({
                         originalPriceLabel={bundle.originalPriceLabel}
                     />
                 </div>
+
+                {isIncludedInSelectedOffer && (
+                    <div className={styles.includedText}>
+                        Included in your selected offer
+                    </div>
+                )}
 
                 <button
                     type="button"
@@ -120,7 +132,10 @@ export const BundleCard = ({
                         <ButtonMain
                             className={styles.chooseButton}
                             text={isSelected ? "Remove" : "Choose"}
-                            isDisabled={!isSelected && chooseDisabled}
+                            isDisabled={
+                                !isSelected &&
+                                (chooseDisabled || isIncludedInSelectedOffer)
+                            }
                             onClick={handleChoose}
                         />
                     </DetailsPanel>

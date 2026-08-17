@@ -11,6 +11,7 @@ type Props = {
     bundles: readonly BundleCardDisplayModel[];
     activeBundleId: string | null;
     selectedBundleIds: ReadonlySet<string>;
+    includedBundleIds: ReadonlySet<string>;
     disabledBundleIds: ReadonlySet<string>;
     onToggleDetails: (bundleId: string) => void;
     onCloseDetails: () => void;
@@ -114,6 +115,7 @@ export const BundleGrid = ({
     bundles,
     activeBundleId,
     selectedBundleIds,
+    includedBundleIds,
     disabledBundleIds,
     onToggleDetails,
     onCloseDetails,
@@ -128,6 +130,9 @@ export const BundleGrid = ({
                     bundle={bundle}
                     isExpanded={activeBundleId === bundle.bundleId}
                     isSelected={selectedBundleIds.has(bundle.bundleId)}
+                    isIncludedInSelectedOffer={includedBundleIds.has(
+                        bundle.bundleId,
+                    )}
                     chooseDisabled={disabledBundleIds.has(
                         bundle.bundleId,
                     )}

@@ -27,6 +27,7 @@ interface Props {
     isFetchingMore: boolean;
     isRefetching: boolean;
     selectedBundleIds: ReadonlySet<string>;
+    includedBundleIds: ReadonlySet<string>;
     pendingBundleIds: ReadonlySet<string>;
     disabledEmbeddedBundleIds: ReadonlySet<string>;
     onChooseEmbeddedBundle: (bundleId: string) => void;
@@ -41,6 +42,7 @@ export const CardsContainer: React.FC<Props> = ({
                                                     isFetchingMore,
                                                     isRefetching,
                                                     selectedBundleIds,
+                                                    includedBundleIds,
                                                     pendingBundleIds,
                                                     disabledEmbeddedBundleIds,
                                                     onChooseEmbeddedBundle,
@@ -121,6 +123,7 @@ export const CardsContainer: React.FC<Props> = ({
                                 isDisabled={isManualSelectionDisabled(card)}
                                 isSelected={selectedPromoCardIds.includes(card.accountId)}
                                 selectedBundleIds={selectedBundleIds}
+                                includedBundleIds={includedBundleIds}
                                 pendingBundleIds={pendingBundleIds}
                                 disabledBundleIds={disabledEmbeddedBundleIds}
                                 onChooseBundle={onChooseEmbeddedBundle}

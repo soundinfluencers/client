@@ -27,9 +27,20 @@
   max-width: 100%;
 }
 
-.selected {
+.selected,
+.included {
   border-color: vars.$blue;
   background: vars.$brightest-gradient;
+}
+
+.includedText {
+  padding: 4px 8px;
+  border-radius: 16px;
+  background: vars.$bg-white;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
 }
 
 .header {
