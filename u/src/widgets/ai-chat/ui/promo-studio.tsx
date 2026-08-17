@@ -49,7 +49,7 @@ interface Props {
   method: PromoCreativeSource;
   onClose: () => void;
   onApproved: (promo: PromoCreativeDto) => Promise<void>;
-  onGenerated?: (count: number) => void;
+  onGenerated?: (count: number, version: number) => void;
 }
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
@@ -367,7 +367,7 @@ export const PromoStudio = ({
       setGenerationModel(result.model);
       setActiveIndex(0);
       setStep("review");
-      onGenerated?.(result.files.length);
+      onGenerated?.(result.files.length, nextVersions.length);
     } catch (cause) {
       setError(
         cause instanceof PromoImageError

@@ -627,7 +627,7 @@ export const AiCampaignDraftCard = ({
             <span>
               {noContentAvailable
                 ? "The request is saved with this draft. Checkout stays locked until campaign content is ready."
-                : "Send the promo link and post text in chat. Tags, story link and an additional brief are optional."}
+                : "Send the promo link and post text in chat. Tags, story link, content notes and edits are optional."}
             </span>
           </div>
           <div className={styles.nextStepActions}>
@@ -693,7 +693,7 @@ export const AiCampaignDraftCard = ({
                 <label className={styles.field}><span>Story tag</span><input value={details.storyTag} onChange={(event) => updateDetails("storyTag", event.target.value)} placeholder="@artist" maxLength={100} /></label>
                 <label className={styles.field}><span>Story link</span><input type="url" value={details.storyLink} onChange={(event) => updateDetails("storyLink", event.target.value)} placeholder="https://..." maxLength={2000} aria-invalid={Boolean(detailsErrors.storyLink)} />{detailsErrors.storyLink && <small>{detailsErrors.storyLink}</small>}</label>
               </div>
-              <label className={styles.field}><span>Additional brief</span><textarea value={details.additionalBrief} onChange={(event) => updateDetails("additionalBrief", event.target.value)} placeholder="Timing, tone, visual direction, or other instructions" rows={4} maxLength={2000} /></label>
+              <label className={styles.field}><span>Content notes &amp; edits</span><textarea value={details.additionalBrief} onChange={(event) => updateDetails("additionalBrief", event.target.value)} placeholder="Requested edits, timing, tone, visual direction, or other instructions" rows={4} maxLength={2000} /></label>
               {selectedAccounts.length > 1 && <label className={styles.applyAll}><input type="checkbox" checked={applyToAll} onChange={(event) => { setApplyToAll(event.target.checked); setConfirmApplyToAll(false); }} /><span><strong>Apply these details to all selected pages</strong><small>{applyAllOverwriteCount > 0 ? `This will replace existing details for ${applyAllOverwriteCount} other ${applyAllOverwriteCount === 1 ? "page" : "pages"}.` : "Only selected pages will receive a separate editable copy."}</small></span></label>}
               {confirmApplyToAll && applyAllOverwriteCount > 0 && <div className={styles.overwriteWarning} role="alert"><strong>Existing content will be replaced</strong><span>Review the change, then confirm replacement for {applyAllOverwriteCount} {applyAllOverwriteCount === 1 ? "page" : "pages"}.</span></div>}
             </div>

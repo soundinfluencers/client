@@ -6,6 +6,7 @@ import {
     hydrateCampaignBuilderFromDraft,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/hydrate-campaign-builder-from-draft";
 import { isDraftReadyForCheckout } from "@/entities/client-side/campaign-draft/model/ai-campaign-draft.model.ts";
+import { getCampaignSetupProgress } from "@/entities/client-side/campaign-setup/model/campaign-setup.model.ts";
 
 interface Props {
     draftId: string;
@@ -26,7 +27,7 @@ export const AiPaymentModal = ({ draftId, onClose }: Props) => {
             try {
                 const draft = await getCampaignDraft(draftId);
                 if (cancelled) return;
-                if (!isDraftReadyForCheckout(draft)) {
+                if (!isDraftReadyForCheckout(draft) || !getCampaignSetupProgress(draft).isComplete) {
                     setState("not-ready");
                     return;
                 }
@@ -59,8 +60,8 @@ export const AiPaymentModal = ({ draftId, onClose }: Props) => {
                 )}
                 {state === "not-ready" && (
                     <div style={{ padding: "24px" }}>
-                        <strong>Campaign content is not ready yet.</strong>
-                        <p>Add a valid content URL and post description for every selected page before checkout.</p>
+                        <strong>The campaign plan is not ready yet.</strong>
+                        <p>Complete the brief, pages, dates and publishing content before checkout.</p>
                     </div>
                 )}
                 {state === "ready" && <PaymentCampaign />}

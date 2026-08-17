@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   getCampaignDraft,
+  removeCampaignDraftPromo,
   saveCampaignDraftPromo,
 } from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
 import type {
@@ -14,6 +15,7 @@ import { flushCampaignDraftSaves } from "../model/campaign-draft-save-coordinato
 import { AiCampaignDraftCard } from "./ai-campaign-draft-card.tsx";
 import { PromoSection } from "./promo-section.tsx";
 import { PromoStudio } from "./promo-studio.tsx";
+import { CampaignPlanSection } from "./campaign-plan-section.tsx";
 
 import styles from "./campaign-workspace-panel.module.scss";
 
@@ -29,6 +31,7 @@ interface Props {
 }
 
 const SURFACE_TITLES: Record<CampaignSetupSurface, string> = {
+  brief: "Campaign brief",
   pages: "Pages and dates",
   content: "Publishing content",
   promo: "Promo creative",
@@ -52,12 +55,12 @@ export const CampaignWorkspacePanel = ({
   // Which creation route the client picked; the studio opens as a modal on top.
   const [promoMethod, setPromoMethod] = useState<PromoCreativeSource | null>(null);
   const containerRef = useRef<HTMLElement>(null);
-  // Only the promo editor needs the draft up here; the pages table loads its own.
+  // Brief and promo editors need the draft here; the pages table loads its own.
   const query = useQuery({
     queryKey: ["campaign-draft", draftId],
     queryFn: () => getCampaignDraft(draftId),
     retry: false,
-    enabled: surface === "promo",
+    enabled: surface === "promo" || surface === "brief",
   });
 
   useEffect(() => {
@@ -94,6 +97,23 @@ export const CampaignWorkspacePanel = ({
     onNote("Promo attached to the campaign", "promo");
   };
 
+  const removePromo = async () => {
+    setSaveError(null);
+    const flushed = await flushCampaignDraftSaves();
+    if (!flushed) throw new Error("Campaign changes are not saved");
+    const latest = await query.refetch();
+    if (!latest.data) throw new Error("Campaign draft is unavailable");
+    const result = await removeCampaignDraftPromo(
+      draftId,
+      Number(latest.data.revision ?? 0),
+    );
+    queryClient.setQueryData(
+      ["campaign-draft", draftId],
+      { ...latest.data, revision: result.revision, promoCreative: undefined },
+    );
+    onNote("Promo removed from the campaign", "promo");
+  };
+
   // Escape closes the workspace, but never steals the key from a nested dialog
   // (the per-page content form holds unsaved input).
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -126,7 +146,7 @@ export const CampaignWorkspacePanel = ({
       )}
 
       <div className={`${styles.body} ${surface === "promo" ? styles.bodyFitted : ""}`}>
-        {surface !== "promo" && (
+        {(surface === "pages" || surface === "content") && (
           <AiCampaignDraftCard
             key={surface}
             flat
@@ -137,11 +157,30 @@ export const CampaignWorkspacePanel = ({
           />
         )}
 
+        {surface === "brief" && query.isPending && (
+          <div className={styles.state}>Loading campaign plan…</div>
+        )}
+
+        {surface === "brief" && query.isError && !query.data && (
+          <div className={`${styles.state} ${styles.errorState}`}>
+            <span>Campaign plan is unavailable.</span>
+            <button type="button" onClick={() => void query.refetch()}>Retry</button>
+          </div>
+        )}
+
+        {surface === "brief" && query.data && (
+          <CampaignPlanSection
+            draft={query.data}
+            onSaved={onNote}
+            onGoToChat={onGoToChat}
+          />
+        )}
+
         {surface === "promo" && query.isPending && (
           <div className={styles.state}>Loading campaign draft…</div>
         )}
 
-        {surface === "promo" && query.isError && (
+        {surface === "promo" && query.isError && !query.data && (
           <div className={`${styles.state} ${styles.errorState}`}>
             <span>Campaign draft is unavailable.</span>
             <button type="button" onClick={() => void query.refetch()}>
@@ -151,7 +190,12 @@ export const CampaignWorkspacePanel = ({
         )}
 
         {surface === "promo" && query.data && (
-          <PromoSection draft={query.data} onPick={setPromoMethod} />
+          <PromoSection
+            draft={query.data}
+            onPick={setPromoMethod}
+            onContinueWithoutPromo={onClose}
+            onRemove={removePromo}
+          />
         )}
       </div>
 
@@ -162,9 +206,9 @@ export const CampaignWorkspacePanel = ({
           draft={query.data}
           // Closing returns to the section, where the approved promo is now a card.
           onClose={() => setPromoMethod(null)}
-          onGenerated={(count) =>
+          onGenerated={(count, version) =>
             onNote(
-              `${count} promo ${count === 1 ? "direction" : "directions"} created`,
+              `Promo version ${version} created · ${count} ${count === 1 ? "direction" : "directions"}`,
               "promo",
             )
           }

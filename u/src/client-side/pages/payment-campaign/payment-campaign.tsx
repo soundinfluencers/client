@@ -27,7 +27,6 @@ import { useInvoceDetailsQuery } from "@/client-side/react-query";
 import { FormPayment } from "@components/form/form-payment.tsx";
 import { Modal } from "@/shared/ui/modal-fix/Modal";
 import {approveProposalCampaign, postCampaign} from "@/api/client/campaign/campaign.api";
-import { deleteDraft } from "@/api/client/campaign/draft.api";
 import { generatePaymentReferenceNumber } from "@/client-side/utils/payment-reference";
 
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
@@ -80,12 +79,8 @@ export const PaymentCampaign = () => {
   const builderAccounts = useCampaignBuilderStore((s) => s.selectedAccounts);
   const builderContent = useCampaignBuilderStore((s) => s.campaignContent);
   const builderTotalPrice = useCampaignBuilderStore((s) => s.totalPrice);
-  console.log("builderCampaignName", builderCampaignName);
-  console.log("builderTotalPrice", builderTotalPrice);
-  console.log("builderAccounts", builderAccounts);
-  console.log("builderContent", builderContent);
-  console.log("builderDraftId", builderDraftId);
-  const effectiveDraftId = draftIdFromParams || legacyDraftId || null;
+  const resetCampaignBuilder = useCampaignBuilderStore((s) => s.actions.reset);
+  const effectiveDraftId = draftIdFromParams || legacyDraftId || builderDraftId || null;
 
   const CurrentConfirmation = PAYMENT_CAMPAIGN_TABS.find(
       (tb) => tab === tb.id,
@@ -149,9 +144,16 @@ export const PaymentCampaign = () => {
     try {
       setIsPaymentSubmitting(true);
 
-      let base: Record<string, any>;
+      let base: Record<string, unknown>;
 
-      if (effectiveDraftId) {
+      const hasHydratedBuilderDraft = Boolean(
+          effectiveDraftId &&
+          builderDraftId === effectiveDraftId &&
+          builderAccounts.length > 0 &&
+          builderContent.length > 0,
+      );
+
+      if (effectiveDraftId && !hasHydratedBuilderDraft) {
         const patches = useUpdateCampaign.getState().patches ?? {};
 
         base = draftStore.getCampaignPayload(
@@ -222,7 +224,7 @@ export const PaymentCampaign = () => {
       } else {
         // Provenance: which draft this campaign came from (backend verifies ownership
         // and whether it was AI-agent-built).
-        const originDraftId = builderDraftId || effectiveDraftId || null;
+        const originDraftId = effectiveDraftId;
 
         const payload = {
           ...base,
@@ -235,9 +237,11 @@ export const PaymentCampaign = () => {
       }
 
       if (effectiveDraftId) {
-        await deleteDraft(effectiveDraftId);
+        // The backend removes the consumed draft in the same transaction as the
+        // campaign and invoice. Only local builder state remains to be cleared here.
         draftStore.clearCampaign(effectiveDraftId);
       }
+      resetCampaignBuilder();
 
       setModalCompleted(true);
       toast.success(

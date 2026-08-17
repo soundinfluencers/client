@@ -19,6 +19,7 @@ import { CampaignStepsRail } from "./campaign-steps-rail.tsx";
 import { CampaignWorkspacePanel } from "./campaign-workspace-panel.tsx";
 import styles from "./ai-chat.module.scss";
 import { flushCampaignDraftSaves } from "../model/campaign-draft-save-coordinator.ts";
+import { startGuidedCampaignDraft } from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
 
 interface Message {
   id: string;
@@ -30,46 +31,80 @@ interface Message {
   // Work the user did in the workspace, not a turn with the agent. Kept in the same
   // list so the transcript reads as one timeline of what happened to the campaign.
   note?: { text: string; section: CampaignSetupSurface };
+  // A hardcoded welcome from the assistant has no preceding user bubble. Keeping it
+  // in the transcript makes the guided start survive navigation and page reloads.
+  assistantOnly?: boolean;
 }
 
 // The chat lives in component state, so navigating to a link chip and back would wipe it.
 // Persist per tab so returning to /ai-chat restores the same conversation.
-const STORAGE_KEY = "ai-chat:v1";
+const STORAGE_KEY = "ai-chat:v3";
 // Which working surface is open over the conversation, if any.
 const WORKSPACE_SURFACE_KEY = "ai-chat:workspace-surface";
 
-const readStoredSurface = (): CampaignSetupSurface | null => {
-  const stored = sessionStorage.getItem(WORKSPACE_SURFACE_KEY);
-  return stored === "pages" || stored === "content" || stored === "promo" ? stored : null;
+const chatStorageKey = (role: string) => `${STORAGE_KEY}:${role}`;
+const workspaceStorageKey = (role: string) => `${WORKSPACE_SURFACE_KEY}:${role}`;
+
+const readStoredSurface = (role: string): CampaignSetupSurface | null => {
+  if (role !== "client") return null;
+  const stored = sessionStorage.getItem(workspaceStorageKey(role));
+  if (stored === "strategy") return "brief";
+  return stored === "brief" || stored === "pages" || stored === "content" || stored === "promo"
+    ? stored
+    : null;
 };
 
 // Section names as the user sees them in the rail.
 const SECTION_LABELS: Record<CampaignSetupSurface, string> = {
+  brief: "Brief",
   pages: "Pages",
   content: "Content",
   promo: "Promo",
 };
 
-type PersistedChat = { messages: Message[]; conversationId?: string };
+type PersistedChat = {
+  messages: Message[];
+  conversationId?: string;
+  activeDraftId?: string;
+  role?: string;
+};
 
-const loadPersistedChat = (): PersistedChat => {
+const GUIDED_CAMPAIGN_WELCOME =
+  "<p><strong>Let’s create your campaign.</strong></p>" +
+  "<p>I’ll guide you step by step and update the Brief as we talk. You can also fill it in yourself at any time.</p>" +
+  "<p>What is the main goal of this campaign—for example, reaching a new audience, increasing streams or generating creator content?</p>";
+
+const restoreMessage = (message: Message, index: number): Message => {
+  // Migrate the old one-line campaign receipt into the conversational welcome so
+  // an existing browser session receives the improved start as well.
+  const isLegacyGuidedStart =
+    message.note?.text === "Guided campaign started" && message.note.section === "brief";
+
+  return {
+    id: message.id ?? `restored-${index}`,
+    q: isLegacyGuidedStart ? "" : (message.q ?? ""),
+    a: isLegacyGuidedStart ? GUIDED_CAMPAIGN_WELCOME : (message.a ?? ""),
+    links: message.links ?? [],
+    // A request cannot still be running after a reload.
+    status: message.status === "pending" ? "error" : (message.status ?? "success"),
+    errorCode: message.errorCode,
+    note: isLegacyGuidedStart ? undefined : message.note,
+    assistantOnly: isLegacyGuidedStart || message.assistantOnly,
+  };
+};
+
+const loadPersistedChat = (role: string): PersistedChat => {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem(chatStorageKey(role));
     if (raw) {
       const saved = JSON.parse(raw) as Partial<PersistedChat>;
+      if (saved.role && saved.role !== role) return { messages: [], role };
       return {
         conversationId: saved.conversationId,
+        activeDraftId: role === "client" ? saved.activeDraftId : undefined,
+        role,
         messages: Array.isArray(saved.messages)
-          ? saved.messages.map((message, index) => ({
-              id: message.id ?? `restored-${index}`,
-              q: message.q,
-              a: message.a ?? "",
-              links: message.links ?? [],
-              // A request cannot still be running after a reload.
-              status: message.status === "pending" ? "error" : (message.status ?? "success"),
-              errorCode: message.errorCode,
-              note: message.note,
-            }))
+          ? saved.messages.map(restoreMessage)
           : [],
       };
     }
@@ -100,9 +135,9 @@ const CLIENT_EXAMPLE_PROMPTS = [
 ];
 
 const INFLUENCER_EXAMPLE_PROMPTS = [
-  "Show my active promos",
-  "What campaign tasks do I need to complete?",
-  "Where can I see my invoices?",
+  "How do campaign requests work?",
+  "What should I prepare before accepting a promo?",
+  "How do influencer invoices work?",
 ];
 
 const AGENT_ERROR_MESSAGES: Record<AgentChatErrorCode, string> = {
@@ -134,29 +169,38 @@ const withAiSource = (path: string) => {
   return `${path}${path.includes("?") ? "&" : "?"}source=ai`;
 };
 
-// Shared chat block: identical for client and influencer.
-// Role is resolved server-side from the JWT, so this component is role-agnostic.
+// The same chat shell serves both roles, while storage, examples and server-side
+// capabilities remain role-specific.
 export const AiChat = () => {
   const queryClient = useQueryClient();
   const role = useUser((state) => state.user?.role ?? state.role);
+  const resolvedRole = role ?? "client";
+  const initialChat = useMemo(() => loadPersistedChat(resolvedRole), [resolvedRole]);
+  const [activeStateRole, setActiveStateRole] = useState(resolvedRole);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>(() => loadPersistedChat().messages);
+  const [messages, setMessages] = useState<Message[]>(initialChat.messages);
   // Held across turns so the backend can load this conversation's memory.
   const [conversationId, setConversationId] = useState<string | undefined>(
-    () => loadPersistedChat().conversationId,
+    initialChat.conversationId,
   );
+  const [selectedDraftId, setSelectedDraftId] = useState<string | undefined>(
+    initialChat.activeDraftId,
+  );
+  const [isStartingCampaign, setIsStartingCampaign] = useState(false);
+  const [campaignStartError, setCampaignStartError] = useState(false);
   // When set, the in-chat payment modal is open for this draft.
   const [paymentDraftId, setPaymentDraftId] = useState<string | null>(null);
   const [isPreparingSend, setIsPreparingSend] = useState(false);
   const [sendPreparationError, setSendPreparationError] = useState(false);
   const [workspaceSurface, setWorkspaceSurface] = useState<CampaignSetupSurface | null>(
-    readStoredSurface,
+    () => readStoredSurface(resolvedRole),
   );
+  const [dialogueUnread, setDialogueUnread] = useState(false);
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const activeDraftId = useMemo(() => {
+  const linkedDraftId = useMemo(() => {
     for (let messageIndex = messages.length - 1; messageIndex >= 0; messageIndex -= 1) {
       const links = messages[messageIndex].links;
       for (let linkIndex = links.length - 1; linkIndex >= 0; linkIndex -= 1) {
@@ -166,6 +210,23 @@ export const AiChat = () => {
     }
     return undefined;
   }, [messages]);
+  const activeDraftId = role === "client" ? (selectedDraftId ?? linkedDraftId) : undefined;
+
+  // Auth state can change without remounting this route. Restore the new role's
+  // isolated transcript instead of retaining the previous user's in-memory state.
+  useEffect(() => {
+    if (activeStateRole === resolvedRole) return;
+    const restored = loadPersistedChat(resolvedRole);
+    setMessages(restored.messages);
+    setConversationId(restored.conversationId);
+    setSelectedDraftId(restored.activeDraftId);
+    setWorkspaceSurface(readStoredSurface(resolvedRole));
+    setPaymentDraftId(null);
+    setCampaignStartError(false);
+    setSendPreparationError(false);
+    setDialogueUnread(false);
+    setActiveStateRole(resolvedRole);
+  }, [activeStateRole, resolvedRole]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: ({ message }: { id: string; message: string }) =>
@@ -175,6 +236,7 @@ export const AiChat = () => {
       links.forEach((link) => {
         const linkedDraftId = getCampaignDraftId(link);
         if (linkedDraftId) {
+          setSelectedDraftId(linkedDraftId);
           void queryClient.invalidateQueries({ queryKey: ["campaign-draft", linkedDraftId] });
         }
       });
@@ -185,6 +247,7 @@ export const AiChat = () => {
             : message,
         ),
       );
+      if (workspaceSurface) setDialogueUnread(true);
     },
     onError: (error, variables) => {
       const errorCode =
@@ -208,12 +271,21 @@ export const AiChat = () => {
   // Persist the conversation so a chip navigation (and back) doesn't lose it.
   useEffect(() => {
     try {
-      if (messages.length === 0) sessionStorage.removeItem(STORAGE_KEY);
-      else sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ messages, conversationId }));
+      // During a live role switch, the old in-memory transcript is discarded by
+      // the effect above. Never write that old transcript into the new role's key.
+      if (activeStateRole !== resolvedRole) return;
+      const key = chatStorageKey(activeStateRole);
+      if (messages.length === 0) sessionStorage.removeItem(key);
+      else sessionStorage.setItem(key, JSON.stringify({
+        messages,
+        conversationId,
+        activeDraftId,
+        role: activeStateRole,
+      }));
     } catch {
       /* storage full / unavailable — non-critical */
     }
-  }, [messages, conversationId]);
+  }, [messages, conversationId, activeDraftId, activeStateRole, resolvedRole]);
 
   // Auto-grow: the textarea expands upward with the text and only scrolls past max-height.
   useEffect(() => {
@@ -246,6 +318,7 @@ export const AiChat = () => {
     const message = input.trim();
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
+    closeWorkspace();
     setInput("");
     setMessages((prev) => [
       ...prev,
@@ -257,6 +330,7 @@ export const AiChat = () => {
   const handleRetry = async (message: Message) => {
     if (isPending || isPreparingSend) return;
     if (!(await prepareAgentAction())) return;
+    closeWorkspace();
     setMessages((prev) =>
       prev.map((item) =>
         item.id === message.id
@@ -283,14 +357,53 @@ export const AiChat = () => {
   const handleReset = () => {
     setConversationId(undefined);
     setMessages([]);
+    setSelectedDraftId(undefined);
+    setCampaignStartError(false);
     setSendPreparationError(false);
     setWorkspaceSurface(null);
-    sessionStorage.removeItem(WORKSPACE_SURFACE_KEY);
+    setDialogueUnread(false);
+    sessionStorage.removeItem(workspaceStorageKey(resolvedRole));
+  };
+
+  const handleStartCampaign = async () => {
+    if (role !== "client" || isStartingCampaign) return;
+    setIsStartingCampaign(true);
+    setCampaignStartError(false);
+    try {
+      const { draftId } = await startGuidedCampaignDraft();
+      setSelectedDraftId(draftId);
+      // A guided campaign begins in Dialogue. The brief remains one click away in
+      // the rail and below the welcome, but never replaces the conversation.
+      setWorkspaceSurface(null);
+      setDialogueUnread(false);
+      sessionStorage.removeItem(workspaceStorageKey("client"));
+      setMessages((current) => [
+        ...current,
+        {
+          id: `guided-welcome-${Date.now()}`,
+          q: "",
+          a: GUIDED_CAMPAIGN_WELCOME,
+          links: [{
+            label: "Open Brief",
+            path: `/client/campaign-draft/${draftId}`,
+            kind: "campaign_draft",
+            draftId,
+            section: "brief",
+          }],
+          status: "success",
+          assistantOnly: true,
+        },
+      ]);
+    } catch {
+      setCampaignStartError(true);
+    } finally {
+      setIsStartingCampaign(false);
+    }
   };
 
   const openWorkspace = (surface: CampaignSetupSurface) => {
     setWorkspaceSurface(surface);
-    sessionStorage.setItem(WORKSPACE_SURFACE_KEY, surface);
+    sessionStorage.setItem(workspaceStorageKey(resolvedRole), surface);
   };
 
   // Work done in the workspace leaves the same kind of trace as work done by the agent,
@@ -311,7 +424,8 @@ export const AiChat = () => {
 
   const closeWorkspace = () => {
     setWorkspaceSurface(null);
-    sessionStorage.removeItem(WORKSPACE_SURFACE_KEY);
+    setDialogueUnread(false);
+    sessionStorage.removeItem(workspaceStorageKey(resolvedRole));
     window.setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
@@ -336,6 +450,10 @@ export const AiChat = () => {
     return null;
   }, [messages]);
 
+  // Effects restore the isolated state after a role change. Hide the old role's
+  // transcript for that single transition render so it is never flashed on screen.
+  if (activeStateRole !== resolvedRole) return null;
+
   return (
     <Container className={styles.root}>
       <div className={`${styles.shell} ${activeDraftId ? styles.shellWide : ""}`}>
@@ -346,6 +464,7 @@ export const AiChat = () => {
             <CampaignStepsRail
               draftId={activeDraftId}
               activeSurface={openedSurface}
+              dialogueUnread={dialogueUnread}
               onSelect={handleStepSelect}
               onProceed={(id) => void handleOpenPayment(id)}
             />
@@ -355,18 +474,39 @@ export const AiChat = () => {
             <div className={styles.messages} ref={messagesRef}>
               {messages.length === 0 && !isPending && (
                 <div className={styles.empty}>
-                  <h3>How can I help?</h3>
-                  <p>Ask me to find influencers, build a campaign or guide you around the platform.</p>
-                  <div className={styles.examples}>
-                    {(role === "influencer" ? INFLUENCER_EXAMPLE_PROMPTS : CLIENT_EXAMPLE_PROMPTS).map((prompt) => (
+                  <h3>{role === "influencer" ? "How can I help?" : "Hi! How can I help today?"}</h3>
+                  <p>
+                    {role === "influencer"
+                      ? "Ask a question about SoundInfluencers and how to use the platform."
+                      : "I can guide you through creating a campaign, help you find the right influencers, or answer questions about your account and invoices."}
+                  </p>
+                  <div className={styles.suggestions}>
+                    {role === "client" && (
                       <button
-                        key={prompt}
+                        type="button"
                         className={styles.exampleChip}
-                        onClick={() => setInput(prompt)}
+                        onClick={() => void handleStartCampaign()}
+                        disabled={isStartingCampaign}
                       >
-                        {prompt}
+                        {isStartingCampaign ? "Starting…" : "Start guided campaign"}
                       </button>
-                    ))}
+                    )}
+                    {campaignStartError && (
+                      <p className={styles.startError} role="alert">
+                        Couldn’t start the campaign. Please check your connection and try again.
+                      </p>
+                    )}
+                    <div className={styles.examples}>
+                      {(role === "influencer" ? INFLUENCER_EXAMPLE_PROMPTS : CLIENT_EXAMPLE_PROMPTS).map((prompt) => (
+                        <button
+                          key={prompt}
+                          className={styles.exampleChip}
+                          onClick={() => setInput(prompt)}
+                        >
+                          {prompt}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -384,12 +524,17 @@ export const AiChat = () => {
                     </button>
                   </div>
                 ) : (
-                <div key={msg.id} className={styles.messageGroup}>
-                  <div className={styles.userRow}>
-                    <div className={styles.userBubble}>{msg.q}</div>
-                  </div>
+                <div
+                  key={msg.id}
+                  className={`${styles.messageGroup} ${msg.assistantOnly ? styles.assistantOnly : ""}`}
+                >
+                  {!msg.assistantOnly && (
+                    <div className={styles.userRow}>
+                      <div className={styles.userBubble}>{msg.q}</div>
+                    </div>
+                  )}
 
-                  <div className={styles.agentRow} style={{ marginTop: "12px" }}>
+                  <div className={styles.agentRow}>
                     {msg.status === "success" && (
                       <div
                         className={styles.agentBubble}
@@ -421,19 +566,26 @@ export const AiChat = () => {
                             // only keeps a marker of where the draft changed.
                             // A transcript restored from an older session can name a
                             // section that no longer exists; pages is the safe home.
-                            const section: CampaignSetupSurface =
-                              link.section && link.section in SECTION_LABELS
-                                ? link.section
+                            const section: CampaignSetupSurface = link.section === "strategy"
+                              ? "brief"
+                              : link.section && link.section in SECTION_LABELS
+                                ? link.section as CampaignSetupSurface
                                 : "pages";
                             return (
                               <button
                                 key={campaignDraftId}
                                 type="button"
-                                className={styles.draftChip}
+                                className={msg.assistantOnly ? styles.inlineBriefLink : styles.draftChip}
                                 onClick={() => openWorkspace(section)}
                               >
-                                <span>{link.summary ?? link.label}</span>
-                                <strong>Open {SECTION_LABELS[section]} →</strong>
+                                {msg.assistantOnly ? (
+                                  <strong>Open {SECTION_LABELS[section]} →</strong>
+                                ) : (
+                                  <>
+                                    <span>{link.summary ?? link.label}</span>
+                                    <strong>Open {SECTION_LABELS[section]} →</strong>
+                                  </>
+                                )}
                               </button>
                             );
                           }

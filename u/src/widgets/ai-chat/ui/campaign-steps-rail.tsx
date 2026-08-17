@@ -21,6 +21,7 @@ import styles from "./campaign-steps-rail.module.scss";
 interface Props {
   draftId: string;
   activeSurface: CampaignSetupSurface | null;
+  dialogueUnread: boolean;
   onSelect: (action: CampaignSetupAction) => void;
   // The campaign-level action: everything is filled in, take the client to checkout.
   onProceed: (draftId: string) => void;
@@ -30,6 +31,7 @@ const STATUS_HINT: Record<CampaignSetupCheckpoint["status"], string> = {
   complete: "done",
   current: "next up",
   pending: "not started yet",
+  optional: "optional — not added",
 };
 
 // Steps are orientation, not a score: no numbering, no counter, no progress bar.
@@ -37,6 +39,7 @@ const STATUS_HINT: Record<CampaignSetupCheckpoint["status"], string> = {
 export const CampaignStepsRail = ({
   draftId,
   activeSurface,
+  dialogueUnread,
   onSelect,
   onProceed,
 }: Props) => {
@@ -57,7 +60,8 @@ export const CampaignStepsRail = ({
             shortLabel: checkpoint.shortLabel,
             description: checkpoint.description,
             action: checkpoint.action,
-            status: "pending" as const,
+            optional: checkpoint.optional,
+            status: checkpoint.optional ? ("optional" as const) : ("pending" as const),
           })),
     [query.data],
   );
@@ -112,7 +116,9 @@ export const CampaignStepsRail = ({
 
   // Clicking the campaign action while something is missing is not an error: it takes
   // the client to the first unfinished section and says so, instead of refusing.
-  const firstIncomplete = checkpoints.find((checkpoint) => checkpoint.status !== "complete");
+  const firstIncomplete = checkpoints.find(
+    (checkpoint) => !checkpoint.optional && checkpoint.status !== "complete",
+  );
   const isReady = Boolean(query.data) && !firstIncomplete;
 
   const handleProceed = () => {
@@ -133,6 +139,25 @@ export const CampaignStepsRail = ({
       </span>
 
       <ul className={styles.steps}>
+        <li className={styles.beforeDivider}>
+          <button
+            type="button"
+            className={[
+              styles.step,
+              styles.stepChat,
+              activeSurface === null ? styles.stepOpen : "",
+              dialogueUnread ? styles.stepChanged : "",
+            ].filter(Boolean).join(" ")}
+            aria-current={activeSurface === null ? "true" : undefined}
+            aria-label={`Dialogue with the assistant${dialogueUnread ? " — new reply" : ""}`}
+            title={dialogueUnread ? "The assistant has a new reply" : "Open the campaign dialogue"}
+            onClick={() => onSelect({ kind: "chat", label: "Open Dialogue" })}
+          >
+            <i className={styles.chatGlyph} aria-hidden="true" />
+            Dialogue
+            {dialogueUnread && <i className={styles.changeMark} aria-hidden="true" />}
+          </button>
+        </li>
         {checkpoints.map((checkpoint, index) => {
           // Several sections are edited in the same surface; only the one that owns it
           // reads as open, otherwise half the rail would light up at once.
@@ -143,9 +168,8 @@ export const CampaignStepsRail = ({
             checkpoint.action.kind === "surface" && hasChanged(checkpoint.action.surface);
           // The conversation sits apart from the surfaces, so it is visible that this
           // part is settled by talking rather than by editing a table.
-          const startsSurfaces = isChat && checkpoints[index + 1]?.action.kind === "surface";
           return (
-            <li key={checkpoint.id} className={startsSurfaces ? styles.beforeDivider : undefined}>
+            <li key={checkpoint.id}>
               <button
                 type="button"
                 className={[
@@ -184,6 +208,9 @@ export const CampaignStepsRail = ({
                   </i>
                 )}
                 {checkpoint.shortLabel}
+                {checkpoint.optional && (
+                  <span className={styles.optionalBadge}>Optional</span>
+                )}
                 {changed && <i className={styles.changeMark} aria-hidden="true" />}
               </button>
             </li>
