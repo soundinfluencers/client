@@ -166,6 +166,11 @@ export const CampaignStepsRail = ({
           const isChat = checkpoint.action.kind === "chat";
           const changed =
             checkpoint.action.kind === "surface" && hasChanged(checkpoint.action.surface);
+          // Forward sections used to wait for their prerequisites. Unlocked on purpose:
+          // every section is reachable in any order, the status dot still says what is done.
+          // const locked = checkpoint.status === "pending" ||
+          //   (checkpoint.status === "optional" && !isReady);
+          const locked = false;
           // The conversation sits apart from the surfaces, so it is visible that this
           // part is settled by talking rather than by editing a table.
           return (
@@ -192,12 +197,15 @@ export const CampaignStepsRail = ({
                   .filter(Boolean)
                   .join(" ")}
                 title={
-                  isChat
-                    ? `${checkpoint.description} · ask the assistant in the chat`
-                    : changed
-                      ? `${checkpoint.description} · updated`
-                      : checkpoint.description
+                  locked
+                    ? "Complete the current campaign section first"
+                    : isChat
+                      ? `${checkpoint.description} · ask the assistant in the chat`
+                      : changed
+                        ? `${checkpoint.description} · updated`
+                        : checkpoint.description
                 }
+                disabled={locked}
                 onClick={() => onSelect(checkpoint.action)}
               >
                 {isChat ? (
