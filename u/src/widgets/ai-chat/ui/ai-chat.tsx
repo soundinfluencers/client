@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import DOMPurify from "dompurify";
+import { toast } from "react-toastify";
 import { Container } from "@/components";
 import {
   AgentChatRequestError,
   sendAgentMessage,
   type AgentChatErrorCode,
   type AgentLink,
+  type AgentSearchOutcome,
 } from "@/api/agent/agent.api.ts";
 import { useUser } from "@/store/get-user";
 import type {
@@ -28,6 +30,9 @@ interface Message {
   links: AgentLink[];
   status: "pending" | "success" | "error";
   errorCode?: AgentChatErrorCode;
+  // The backend request may differ from the visible user bubble for automatic workspace actions.
+  request?: string;
+  recommendationAction?: "brief" | "more";
   // Work the user did in the workspace, not a turn with the agent. Kept in the same
   // list so the transcript reads as one timeline of what happened to the campaign.
   note?: { text: string; section: CampaignSetupSurface };
@@ -49,9 +54,7 @@ const readStoredSurface = (role: string): CampaignSetupSurface | null => {
   if (role !== "client") return null;
   const stored = sessionStorage.getItem(workspaceStorageKey(role));
   if (stored === "strategy") return "brief";
-  return stored === "brief" || stored === "pages" || stored === "content" || stored === "promo"
-    ? stored
-    : null;
+  return stored === "brief" || stored === "pages" || stored === "content" || stored === "promo" ? stored : null;
 };
 
 // Section names as the user sees them in the rail.
@@ -67,18 +70,19 @@ type PersistedChat = {
   conversationId?: string;
   activeDraftId?: string;
   role?: string;
+  recommendationsByDraft?: Record<string, AgentSearchOutcome>;
 };
 
 const GUIDED_CAMPAIGN_WELCOME =
   "<p><strong>Let’s create your campaign.</strong></p>" +
-  "<p>I’ll guide you step by step and update the Brief as we talk. You can also fill it in yourself at any time.</p>" +
-  "<p>What is the main goal of this campaign—for example, reaching a new audience, increasing streams or generating creator content?</p>";
+  "<p>We’ll complete a short campaign Brief first, then use it to find the right pages. Additional details can stay open and everything can be changed later.</p>" +
+  "<p>What should this campaign achieve? We’ll also confirm an approximate budget, genre, platforms, audience countries and timing.</p>" +
+  "<p>After you choose pages, I can help prepare one shared post or tailor the content for each page.</p>";
 
 const restoreMessage = (message: Message, index: number): Message => {
   // Migrate the old one-line campaign receipt into the conversational welcome so
   // an existing browser session receives the improved start as well.
-  const isLegacyGuidedStart =
-    message.note?.text === "Guided campaign started" && message.note.section === "brief";
+  const isLegacyGuidedStart = message.note?.text === "Guided campaign started" && message.note.section === "brief";
 
   return {
     id: message.id ?? `restored-${index}`,
@@ -88,6 +92,8 @@ const restoreMessage = (message: Message, index: number): Message => {
     // A request cannot still be running after a reload.
     status: message.status === "pending" ? "error" : (message.status ?? "success"),
     errorCode: message.errorCode,
+    request: message.request,
+    recommendationAction: message.recommendationAction,
     note: isLegacyGuidedStart ? undefined : message.note,
     assistantOnly: isLegacyGuidedStart || message.assistantOnly,
   };
@@ -102,10 +108,10 @@ const loadPersistedChat = (role: string): PersistedChat => {
       return {
         conversationId: saved.conversationId,
         activeDraftId: role === "client" ? saved.activeDraftId : undefined,
+        recommendationsByDraft:
+          role === "client" && saved.recommendationsByDraft ? saved.recommendationsByDraft : undefined,
         role,
-        messages: Array.isArray(saved.messages)
-          ? saved.messages.map(restoreMessage)
-          : [],
+        messages: Array.isArray(saved.messages) ? saved.messages.map(restoreMessage) : [],
       };
     }
   } catch {
@@ -124,9 +130,7 @@ const sanitizeReply = (html: string) =>
 
 // One-line preview for the strip shown while a working surface covers the transcript.
 const toPlainText = (html: string) =>
-  DOMPurify.sanitize(html, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
-    .replace(/\s+/g, " ")
-    .trim();
+  DOMPurify.sanitize(html, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }).replace(/\s+/g, " ").trim();
 
 const CLIENT_EXAMPLE_PROMPTS = [
   "Find house influencers in Germany under 2000 €",
@@ -141,21 +145,14 @@ const INFLUENCER_EXAMPLE_PROMPTS = [
 ];
 
 const AGENT_ERROR_MESSAGES: Record<AgentChatErrorCode, string> = {
-  AGENT_DAILY_LIMIT_REACHED:
-    "You've reached today's AI usage limit. You can use the assistant again tomorrow.",
-  AGENT_CAPACITY_REACHED:
-    "The AI Assistant has reached today's capacity. Please try again tomorrow.",
-  AGENT_TURN_IN_PROGRESS:
-    "Another AI response is already running for your account. Wait for it to finish, then retry.",
-  AGENT_USAGE_UNAVAILABLE:
-    "The AI Assistant is temporarily unavailable. Please try again shortly.",
+  AGENT_DAILY_LIMIT_REACHED: "You've reached today's AI usage limit. You can use the assistant again tomorrow.",
+  AGENT_CAPACITY_REACHED: "The AI Assistant has reached today's capacity. Please try again tomorrow.",
+  AGENT_TURN_IN_PROGRESS: "Another AI response is already running for your account. Wait for it to finish, then retry.",
+  AGENT_USAGE_UNAVAILABLE: "The AI Assistant is temporarily unavailable. Please try again shortly.",
   UNKNOWN: "Couldn't get a response. Please try again.",
 };
 
-const NON_RETRYABLE_AGENT_ERRORS = new Set<AgentChatErrorCode>([
-  "AGENT_DAILY_LIMIT_REACHED",
-  "AGENT_CAPACITY_REACHED",
-]);
+const NON_RETRYABLE_AGENT_ERRORS = new Set<AgentChatErrorCode>(["AGENT_DAILY_LIMIT_REACHED", "AGENT_CAPACITY_REACHED"]);
 
 const getCampaignDraftId = (link: AgentLink) => {
   if (link.kind === "campaign_draft" && link.draftId) return link.draftId;
@@ -169,6 +166,29 @@ const withAiSource = (path: string) => {
   return `${path}${path.includes("?") ? "&" : "?"}source=ai`;
 };
 
+const mergeSearchOutcome = (
+  current: AgentSearchOutcome | undefined,
+  incoming: AgentSearchOutcome,
+): AgentSearchOutcome => {
+  if (!current || incoming.page <= 1) return incoming;
+  // A continuation can become empty if the roster changes between batches. Keep the pages
+  // already loaded instead of replacing the useful list with an empty-state screen.
+  if (incoming.status === "empty") {
+    return {
+      ...current,
+      hasMore: false,
+      nextPage: undefined,
+      totalExact: Math.max(current.totalExact, incoming.totalExact),
+    };
+  }
+  // The toast reports the failure; Pages should remain usable with the confirmed earlier rows.
+  if (incoming.status === "failed") return current;
+  const byId = new Map(current.candidates.map((candidate) => [candidate.accountId, candidate]));
+  incoming.candidates.forEach((candidate) => byId.set(candidate.accountId, candidate));
+  const candidates = [...byId.values()];
+  return { ...incoming, candidates, loadedCount: candidates.length };
+};
+
 // The same chat shell serves both roles, while storage, examples and server-side
 // capabilities remain role-specific.
 export const AiChat = () => {
@@ -180,20 +200,23 @@ export const AiChat = () => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>(initialChat.messages);
   // Held across turns so the backend can load this conversation's memory.
-  const [conversationId, setConversationId] = useState<string | undefined>(
-    initialChat.conversationId,
+  const [conversationId, setConversationId] = useState<string | undefined>(initialChat.conversationId);
+  const [selectedDraftId, setSelectedDraftId] = useState<string | undefined>(initialChat.activeDraftId);
+  const [recommendationsByDraft, setRecommendationsByDraft] = useState<Record<string, AgentSearchOutcome>>(
+    initialChat.recommendationsByDraft ?? {},
   );
-  const [selectedDraftId, setSelectedDraftId] = useState<string | undefined>(
-    initialChat.activeDraftId,
-  );
+  const [queuedRecommendation, setQueuedRecommendation] = useState<{
+    action: "brief" | "more";
+    draftId: string;
+  } | null>(null);
   const [isStartingCampaign, setIsStartingCampaign] = useState(false);
   const [campaignStartError, setCampaignStartError] = useState(false);
   // When set, the in-chat payment modal is open for this draft.
   const [paymentDraftId, setPaymentDraftId] = useState<string | null>(null);
   const [isPreparingSend, setIsPreparingSend] = useState(false);
   const [sendPreparationError, setSendPreparationError] = useState(false);
-  const [workspaceSurface, setWorkspaceSurface] = useState<CampaignSetupSurface | null>(
-    () => readStoredSurface(resolvedRole),
+  const [workspaceSurface, setWorkspaceSurface] = useState<CampaignSetupSurface | null>(() =>
+    readStoredSurface(resolvedRole),
   );
   const [dialogueUnread, setDialogueUnread] = useState(false);
 
@@ -220,6 +243,8 @@ export const AiChat = () => {
     setMessages(restored.messages);
     setConversationId(restored.conversationId);
     setSelectedDraftId(restored.activeDraftId);
+    setRecommendationsByDraft(restored.recommendationsByDraft ?? {});
+    setQueuedRecommendation(null);
     setWorkspaceSurface(readStoredSurface(resolvedRole));
     setPaymentDraftId(null);
     setCampaignStartError(false);
@@ -229,36 +254,77 @@ export const AiChat = () => {
   }, [activeStateRole, resolvedRole]);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: ({ message }: { id: string; message: string }) =>
-      sendAgentMessage(message, conversationId, activeDraftId),
-    onSuccess: ({ reply, links, conversationId: cid }, variables) => {
+    mutationFn: ({
+      message,
+      draftId,
+    }: {
+      id: string;
+      message: string;
+      recommendationAction?: "brief" | "more";
+      draftId?: string;
+    }) => sendAgentMessage(message, conversationId, draftId ?? activeDraftId),
+    onSuccess: ({ reply, links, conversationId: cid, search }, variables) => {
       setConversationId(cid);
       links.forEach((link) => {
         const linkedDraftId = getCampaignDraftId(link);
         if (linkedDraftId) {
           setSelectedDraftId(linkedDraftId);
-          void queryClient.invalidateQueries({ queryKey: ["campaign-draft", linkedDraftId] });
+          void queryClient.invalidateQueries({
+            queryKey: ["campaign-draft", linkedDraftId],
+          });
         }
       });
       setMessages((prev) =>
         prev.map((message) =>
           message.id === variables.id
-            ? { ...message, a: reply, links, status: "success", errorCode: undefined }
+            ? {
+                ...message,
+                a: reply,
+                links,
+                status: "success",
+                errorCode: undefined,
+              }
             : message,
         ),
       );
       if (workspaceSurface) setDialogueUnread(true);
+      if (search && variables.draftId) {
+        setRecommendationsByDraft((current) => ({
+          ...current,
+          [variables.draftId!]: mergeSearchOutcome(current[variables.draftId!], search),
+        }));
+      }
+      if (variables.recommendationAction) {
+        if (!search || search.status === "failed") {
+          toast.error(
+            variables.recommendationAction === "more"
+              ? "More matching pages could not be loaded."
+              : "The brief was saved, but the page search did not complete.",
+          );
+        } else if (search.status === "empty") {
+          toast.info(
+            variables.recommendationAction === "more"
+              ? "There are no more matching pages in this search."
+              : "Brief saved. No exact matching pages were found.",
+          );
+        } else {
+          const destination = variables.recommendationAction === "more" ? "more pages" : "matching pages";
+          toast.success(`${search.loadedCount} ${destination} loaded. Review them in Pages.`);
+        }
+      }
     },
     onError: (error, variables) => {
-      const errorCode =
-        error instanceof AgentChatRequestError ? error.code : "UNKNOWN";
+      const errorCode = error instanceof AgentChatRequestError ? error.code : "UNKNOWN";
       setMessages((prev) =>
-        prev.map((message) =>
-          message.id === variables.id
-            ? { ...message, status: "error", errorCode }
-            : message,
-        ),
+        prev.map((message) => (message.id === variables.id ? { ...message, status: "error", errorCode } : message)),
       );
+      if (variables.recommendationAction) {
+        toast.error(
+          variables.recommendationAction === "more"
+            ? "More matching pages could not be loaded."
+            : "The brief was saved, but matching pages could not be loaded.",
+        );
+      }
     },
   });
 
@@ -276,16 +342,21 @@ export const AiChat = () => {
       if (activeStateRole !== resolvedRole) return;
       const key = chatStorageKey(activeStateRole);
       if (messages.length === 0) sessionStorage.removeItem(key);
-      else sessionStorage.setItem(key, JSON.stringify({
-        messages,
-        conversationId,
-        activeDraftId,
-        role: activeStateRole,
-      }));
+      else
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            messages,
+            conversationId,
+            activeDraftId,
+            recommendationsByDraft,
+            role: activeStateRole,
+          }),
+        );
     } catch {
       /* storage full / unavailable — non-critical */
     }
-  }, [messages, conversationId, activeDraftId, activeStateRole, resolvedRole]);
+  }, [messages, conversationId, activeDraftId, activeStateRole, recommendationsByDraft, resolvedRole]);
 
   // Auto-grow: the textarea expands upward with the text and only scrolls past max-height.
   useEffect(() => {
@@ -320,11 +391,8 @@ export const AiChat = () => {
 
     closeWorkspace();
     setInput("");
-    setMessages((prev) => [
-      ...prev,
-      { id, q: message, a: "", links: [], status: "pending" },
-    ]);
-    mutate({ id, message });
+    setMessages((prev) => [...prev, { id, q: message, a: "", links: [], status: "pending" }]);
+    mutate({ id, message, draftId: activeDraftId });
   };
 
   const handleRetry = async (message: Message) => {
@@ -332,13 +400,14 @@ export const AiChat = () => {
     if (!(await prepareAgentAction())) return;
     closeWorkspace();
     setMessages((prev) =>
-      prev.map((item) =>
-        item.id === message.id
-          ? { ...item, status: "pending", errorCode: undefined }
-          : item,
-      ),
+      prev.map((item) => (item.id === message.id ? { ...item, status: "pending", errorCode: undefined } : item)),
     );
-    mutate({ id: message.id, message: message.q });
+    mutate({
+      id: message.id,
+      message: message.request ?? message.q,
+      recommendationAction: message.recommendationAction,
+      draftId: activeDraftId,
+    });
   };
 
   const handleOpenPayment = async (draftId: string) => {
@@ -358,6 +427,8 @@ export const AiChat = () => {
     setConversationId(undefined);
     setMessages([]);
     setSelectedDraftId(undefined);
+    setRecommendationsByDraft({});
+    setQueuedRecommendation(null);
     setCampaignStartError(false);
     setSendPreparationError(false);
     setWorkspaceSurface(null);
@@ -383,13 +454,15 @@ export const AiChat = () => {
           id: `guided-welcome-${Date.now()}`,
           q: "",
           a: GUIDED_CAMPAIGN_WELCOME,
-          links: [{
-            label: "Open Brief",
-            path: `/client/campaign-draft/${draftId}`,
-            kind: "campaign_draft",
-            draftId,
-            section: "brief",
-          }],
+          links: [
+            {
+              label: "Open Brief",
+              path: `/client/campaign-draft/${draftId}`,
+              kind: "campaign_draft",
+              draftId,
+              section: "brief",
+            },
+          ],
           status: "success",
           assistantOnly: true,
         },
@@ -421,6 +494,62 @@ export const AiChat = () => {
       },
     ]);
   };
+
+  const startRecommendation = useCallback(
+    (action: "brief" | "more", draftId: string) => {
+      const request =
+        action === "more"
+          ? "Load the next batch of campaign page recommendations now. Reuse every filter from " +
+            "lastSearchRequest and call search_accounts with page=nextSearchPage. Do not restart at page 1."
+          : "The required campaign brief is complete. Search the roster now using every relevant value " +
+            "it contains and recommend suitable pages. " +
+            "Treat its budget as an approximate target when present, use budgetCurrency correctly, " +
+            "show the pages, ask whether the client wants to add or remove pages from the approximate " +
+            "total, and if the result is capped ask whether they want more options.";
+      const id = `${action}-recommendations-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      setMessages((prev) => [
+        ...prev,
+        {
+          id,
+          q: "",
+          request,
+          a: "",
+          links: [],
+          status: "pending",
+          assistantOnly: true,
+          recommendationAction: action,
+        },
+      ]);
+      mutate({ id, message: request, recommendationAction: action, draftId });
+    },
+    [mutate],
+  );
+
+  const queueOrStartRecommendation = useCallback(
+    (action: "brief" | "more") => {
+      if (!activeDraftId) {
+        toast.error("Open a campaign draft before searching for matching pages.");
+        return;
+      }
+      if (isPending || isPreparingSend) {
+        setQueuedRecommendation({ action, draftId: activeDraftId });
+        toast.info("The page search will start after the current assistant reply.");
+        return;
+      }
+      startRecommendation(action, activeDraftId);
+    },
+    [activeDraftId, isPending, isPreparingSend, startRecommendation],
+  );
+
+  const handleBriefReady = () => queueOrStartRecommendation("brief");
+  const handleMoreRecommendations = () => queueOrStartRecommendation("more");
+
+  useEffect(() => {
+    if (!queuedRecommendation || isPending || isPreparingSend) return;
+    const queued = queuedRecommendation;
+    setQueuedRecommendation(null);
+    startRecommendation(queued.action, queued.draftId);
+  }, [isPending, isPreparingSend, queuedRecommendation, startRecommendation]);
 
   const closeWorkspace = () => {
     setWorkspaceSurface(null);
@@ -457,9 +586,7 @@ export const AiChat = () => {
   return (
     <Container className={styles.root}>
       <div className={`${styles.shell} ${activeDraftId ? styles.shellWide : ""}`}>
-        <div
-          className={`${styles.card} ${messages.length === 0 ? styles.cardEmpty : ""}`}
-        >
+        <div className={`${styles.card} ${messages.length === 0 ? styles.cardEmpty : ""}`}>
           {activeDraftId && (
             <CampaignStepsRail
               draftId={activeDraftId}
@@ -498,11 +625,7 @@ export const AiChat = () => {
                     )}
                     <div className={styles.examples}>
                       {(role === "influencer" ? INFLUENCER_EXAMPLE_PROMPTS : CLIENT_EXAMPLE_PROMPTS).map((prompt) => (
-                        <button
-                          key={prompt}
-                          className={styles.exampleChip}
-                          onClick={() => setInput(prompt)}
-                        >
+                        <button key={prompt} className={styles.exampleChip} onClick={() => setInput(prompt)}>
                           {prompt}
                         </button>
                       ))}
@@ -514,106 +637,105 @@ export const AiChat = () => {
               {messages.map((msg) =>
                 msg.note ? (
                   <div key={msg.id} className={styles.messageGroup}>
-                    <button
-                      type="button"
-                      className={styles.noteChip}
-                      onClick={() => openWorkspace(msg.note!.section)}
-                    >
+                    <button type="button" className={styles.noteChip} onClick={() => openWorkspace(msg.note!.section)}>
                       <span>{msg.note.text}</span>
                       <strong>Open {SECTION_LABELS[msg.note.section]} →</strong>
                     </button>
                   </div>
                 ) : (
-                <div
-                  key={msg.id}
-                  className={`${styles.messageGroup} ${msg.assistantOnly ? styles.assistantOnly : ""}`}
-                >
-                  {!msg.assistantOnly && (
-                    <div className={styles.userRow}>
-                      <div className={styles.userBubble}>{msg.q}</div>
-                    </div>
-                  )}
-
-                  <div className={styles.agentRow}>
-                    {msg.status === "success" && (
-                      <div
-                        className={styles.agentBubble}
-                        dangerouslySetInnerHTML={{ __html: sanitizeReply(msg.a) }}
-                      />
-                    )}
-
-                    {msg.status === "error" && (
-                      <div className={styles.errorBubble}>
-                        <span>{AGENT_ERROR_MESSAGES[msg.errorCode ?? "UNKNOWN"]}</span>
-                        {!NON_RETRYABLE_AGENT_ERRORS.has(msg.errorCode ?? "UNKNOWN") && (
-                          <button onClick={() => void handleRetry(msg)} disabled={isPending || isPreparingSend}>
-                            Retry
-                          </button>
-                        )}
+                  <div
+                    key={msg.id}
+                    className={`${styles.messageGroup} ${msg.assistantOnly ? styles.assistantOnly : ""}`}
+                  >
+                    {!msg.assistantOnly && (
+                      <div className={styles.userRow}>
+                        <div className={styles.userBubble}>{msg.q}</div>
                       </div>
                     )}
 
-                    {msg.status === "success" && msg.links.length > 0 && (
-                      <div className={styles.links}>
-                        {msg.links.map((link, k) => {
-                          const campaignDraftId = getCampaignDraftId(link);
-                          if (campaignDraftId) {
-                            const alreadyRendered = msg.links
-                              .slice(0, k)
-                              .some((previousLink) => getCampaignDraftId(previousLink) === campaignDraftId);
-                            if (alreadyRendered) return null;
-                            // The table itself lives in the workspace — the conversation
-                            // only keeps a marker of where the draft changed.
-                            // A transcript restored from an older session can name a
-                            // section that no longer exists; pages is the safe home.
-                            const section: CampaignSetupSurface = link.section === "strategy"
-                              ? "brief"
-                              : link.section && link.section in SECTION_LABELS
-                                ? link.section as CampaignSetupSurface
-                                : "pages";
-                            return (
-                              <button
-                                key={campaignDraftId}
-                                type="button"
-                                className={msg.assistantOnly ? styles.inlineBriefLink : styles.draftChip}
-                                onClick={() => openWorkspace(section)}
-                              >
-                                {msg.assistantOnly ? (
-                                  <strong>Open {SECTION_LABELS[section]} →</strong>
-                                ) : (
-                                  <>
-                                    <span>{link.summary ?? link.label}</span>
+                    <div className={styles.agentRow}>
+                      {msg.status === "success" && (
+                        <div
+                          className={styles.agentBubble}
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeReply(msg.a),
+                          }}
+                        />
+                      )}
+
+                      {msg.status === "error" && (
+                        <div className={styles.errorBubble}>
+                          <span>{AGENT_ERROR_MESSAGES[msg.errorCode ?? "UNKNOWN"]}</span>
+                          {!NON_RETRYABLE_AGENT_ERRORS.has(msg.errorCode ?? "UNKNOWN") && (
+                            <button onClick={() => void handleRetry(msg)} disabled={isPending || isPreparingSend}>
+                              Retry
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {msg.status === "success" && msg.links.length > 0 && (
+                        <div className={styles.links}>
+                          {msg.links.map((link, k) => {
+                            const campaignDraftId = getCampaignDraftId(link);
+                            if (campaignDraftId) {
+                              const alreadyRendered = msg.links
+                                .slice(0, k)
+                                .some((previousLink) => getCampaignDraftId(previousLink) === campaignDraftId);
+                              if (alreadyRendered) return null;
+                              // The table itself lives in the workspace — the conversation
+                              // only keeps a marker of where the draft changed.
+                              // A transcript restored from an older session can name a
+                              // section that no longer exists; pages is the safe home.
+                              const section: CampaignSetupSurface =
+                                link.section === "strategy"
+                                  ? "brief"
+                                  : link.section && link.section in SECTION_LABELS
+                                    ? (link.section as CampaignSetupSurface)
+                                    : "pages";
+                              return (
+                                <button
+                                  key={campaignDraftId}
+                                  type="button"
+                                  className={msg.assistantOnly ? styles.inlineBriefLink : styles.draftChip}
+                                  onClick={() => openWorkspace(section)}
+                                >
+                                  {msg.assistantOnly ? (
                                     <strong>Open {SECTION_LABELS[section]} →</strong>
-                                  </>
-                                )}
-                              </button>
-                            );
-                          }
+                                  ) : (
+                                    <>
+                                      <span>{link.summary ?? link.label}</span>
+                                      <strong>Open {SECTION_LABELS[section]} →</strong>
+                                    </>
+                                  )}
+                                </button>
+                              );
+                            }
 
-                          // Payment links open the in-chat checkout modal instead of navigating away.
-                          if (link.kind === "payment" && link.draftId) {
+                            // Payment links open the in-chat checkout modal instead of navigating away.
+                            if (link.kind === "payment" && link.draftId) {
+                              return (
+                                <button
+                                  key={k}
+                                  className={styles.payChip}
+                                  disabled={isPending || isPreparingSend}
+                                  onClick={() => void handleOpenPayment(link.draftId!)}
+                                >
+                                  {link.label} →
+                                </button>
+                              );
+                            }
+
                             return (
-                              <button
-                                key={k}
-                                className={styles.payChip}
-                                disabled={isPending || isPreparingSend}
-                                onClick={() => void handleOpenPayment(link.draftId!)}
-                              >
+                              <Link key={k} to={withAiSource(link.path)} className={styles.linkChip}>
                                 {link.label} →
-                              </button>
+                              </Link>
                             );
-                          }
-
-                          return (
-                            <Link key={k} to={withAiSource(link.path)} className={styles.linkChip}>
-                              {link.label} →
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
                 ),
               )}
 
@@ -636,6 +758,9 @@ export const AiChat = () => {
                   onGoToChat={closeWorkspace}
                   onProceedToPayment={(id) => void handleOpenPayment(id)}
                   onNote={addNote}
+                  onBriefReady={handleBriefReady}
+                  recommendations={recommendationsByDraft[activeDraftId]}
+                  onRequestMoreRecommendations={handleMoreRecommendations}
                 />
               </div>
             )}
@@ -650,13 +775,9 @@ export const AiChat = () => {
               className={styles.replyStrip}
               onClick={closeWorkspace}
             >
-              <span className={styles.replyStripLabel}>
-                {isPending ? "Assistant" : "Latest reply"}
-              </span>
+              <span className={styles.replyStripLabel}>{isPending ? "Assistant" : "Latest reply"}</span>
               <span className={styles.replyStripText}>
-                {isPending
-                  ? "Thinking…"
-                  : (lastReply ?? "Ask the assistant anything while you work here.")}
+                {isPending ? "Thinking…" : (lastReply ?? "Ask the assistant anything while you work here.")}
               </span>
               <span className={styles.replyStripAction}>Show conversation</span>
             </button>
@@ -693,9 +814,7 @@ export const AiChat = () => {
         </div>
       </div>
 
-      {paymentDraftId && (
-        <AiPaymentModal draftId={paymentDraftId} onClose={() => setPaymentDraftId(null)} />
-      )}
+      {paymentDraftId && <AiPaymentModal draftId={paymentDraftId} onClose={() => setPaymentDraftId(null)} />}
     </Container>
   );
 };

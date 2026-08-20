@@ -94,15 +94,6 @@ export const getAiDraftPayloadSignature = (
   payload: ReturnType<typeof buildAiDraftPayload>,
 ) => JSON.stringify({ ...payload, revision: 0 });
 
-export const getSafeHttpUrl = (value: string) => {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
-  } catch {
-    return null;
-  }
-};
-
 export const getContentForDraftAccount = (
   draft: CampaignDraftDto,
   account: DraftAddedAccountDto,
@@ -117,11 +108,8 @@ export const getContentForDraftAccount = (
     if (selectedItem) return selectedItem;
   }
 
-  return content.find(
-    (item) =>
-      item.socialMedia === account.socialMedia &&
-      (!item.profileType || item.profileType === account.profileType),
-  ) ?? content.find((item) => item.socialMedia === account.socialMedia);
+  // Never make an unfinished page look complete by borrowing another page's content.
+  return undefined;
 };
 
 export const getDraftDetailsForm = (content?: CampaignContentItem): DraftDetailsForm => ({
@@ -133,22 +121,15 @@ export const getDraftDetailsForm = (content?: CampaignContentItem): DraftDetails
 });
 
 export const getDraftContentReadiness = (content?: CampaignContentItem): ContentReadiness => {
-  if (!content) return { status: "empty", label: "Missing URL & description" };
+  if (!content) return { status: "empty", label: "Add publishing details" };
 
   const form = getDraftDetailsForm(content);
-  const hasAnyValue = Object.values(form).some((value) => value.trim());
-  if (!hasAnyValue) return { status: "empty", label: "Missing URL & description" };
-
-  const hasValidUrl = Boolean(getSafeHttpUrl(form.contentUrl.trim()));
-  const hasDescription = Boolean(form.description.trim());
-
-  if (hasValidUrl && hasDescription) return { status: "ready", label: "Content ready" };
-  if (!form.contentUrl.trim() && !hasDescription) {
-    return { status: "incomplete", label: "Missing URL & description" };
-  }
-  if (!form.contentUrl.trim()) return { status: "incomplete", label: "Missing content URL" };
-  if (!hasValidUrl) return { status: "incomplete", label: "Invalid content URL" };
-  return { status: "incomplete", label: "Missing post description" };
+  const hasAnyValue =
+    Object.values(form).some((value) => value.trim()) ||
+    (content.descriptions ?? []).some((description) => description.description?.trim());
+  return hasAnyValue
+    ? { status: "ready", label: "Content added" }
+    : { status: "empty", label: "Add publishing details" };
 };
 
 export const getDraftContentStatus = (content?: CampaignContentItem): ContentStatus =>
@@ -181,15 +162,9 @@ export const getDraftSocialMediaGroup = (
   return "press";
 };
 
+// Publishing details are intentionally permissive: clients may paste a URL, handle, note,
+// description or another reference. The assistant stores what they provide without policing format.
 export const validateDraftDetails = (form: DraftDetailsForm): DraftDetailsErrors => {
-  const errors: DraftDetailsErrors = {};
-
-  if (form.contentUrl.trim() && !getSafeHttpUrl(form.contentUrl.trim())) {
-    errors.contentUrl = "Enter a valid http(s) URL.";
-  }
-  if (form.storyLink.trim() && !getSafeHttpUrl(form.storyLink.trim())) {
-    errors.storyLink = "Enter a valid http(s) URL.";
-  }
-
-  return errors;
+  void form;
+  return {};
 };

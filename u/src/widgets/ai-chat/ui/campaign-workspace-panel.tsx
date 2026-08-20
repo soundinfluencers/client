@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { AgentSearchOutcome } from "@/api/agent/agent.api.ts";
 
 import {
   getCampaignDraft,
@@ -28,6 +29,9 @@ interface Props {
   onProceedToPayment: (draftId: string) => void;
   // Leaves a receipt in the transcript for work the agent did not do itself.
   onNote: (text: string, section: CampaignSetupSurface) => void;
+  onBriefReady: () => void;
+  recommendations?: AgentSearchOutcome;
+  onRequestMoreRecommendations: () => void;
 }
 
 const SURFACE_TITLES: Record<CampaignSetupSurface, string> = {
@@ -49,6 +53,9 @@ export const CampaignWorkspacePanel = ({
   onGoToChat,
   onProceedToPayment,
   onNote,
+  onBriefReady,
+  recommendations,
+  onRequestMoreRecommendations,
 }: Props) => {
   const queryClient = useQueryClient();
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -154,6 +161,8 @@ export const CampaignWorkspacePanel = ({
             focusMode={PAGE_FOCUS_MODES[surface]}
             onProceedToPayment={onProceedToPayment}
             onGoToChat={onGoToChat}
+            recommendations={surface === "pages" ? recommendations : undefined}
+            onRequestMoreRecommendations={onRequestMoreRecommendations}
           />
         )}
 
@@ -173,6 +182,7 @@ export const CampaignWorkspacePanel = ({
             draft={query.data}
             onSaved={onNote}
             onGoToChat={onGoToChat}
+            onBriefReady={onBriefReady}
           />
         )}
 

@@ -38,11 +38,36 @@ export interface AgentLink {
   section?: "brief" | "strategy" | "pages" | "content" | "promo";
 }
 
+export interface AgentSearchCandidate {
+  accountId: string;
+  influencerId: string;
+  username: string;
+  logoUrl?: string;
+  followers: number;
+  priceEUR: number;
+  price: number;
+  currency: "EUR" | "GBP" | "USD";
+  socialMedia: string;
+  profileType: "creator" | "community";
+  countryShare?: number;
+}
+
+export interface AgentSearchOutcome {
+  status: "completed" | "empty" | "failed";
+  page: number;
+  loadedCount: number;
+  totalExact: number;
+  hasMore: boolean;
+  nextPage?: number;
+  candidates: AgentSearchCandidate[];
+}
+
 export interface AgentChatResponse {
   steps: string[];
   reply: string;
   links: AgentLink[];
   conversationId: string;
+  search?: AgentSearchOutcome;
 }
 
 // Shared by client and influencer — the backend derives the role from the JWT.

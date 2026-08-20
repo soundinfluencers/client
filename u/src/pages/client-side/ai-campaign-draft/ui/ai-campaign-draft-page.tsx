@@ -843,17 +843,17 @@ export const AiCampaignDraftPage = () => {
 
                         <div className={styles.drawerBody}>
                             <p className={styles.drawerIntro}>
-                                Add account-specific publishing details. A content URL and post description mark this page as ready.
+                                Add whatever should be used for this page. Any useful publishing detail is enough, and it can be changed later.
                             </p>
 
                             <label className={styles.field}>
-                                <span>Content URL</span>
+                                <span>Content link or reference</span>
                                 <input
                                     ref={detailsFirstFieldRef}
-                                    type="url"
+                                    type="text"
                                     value={detailsForm.contentUrl}
                                     onChange={(event) => updateDetailsField("contentUrl", event.target.value)}
-                                    placeholder="https://..."
+                                    placeholder="Paste a link or reference"
                                     maxLength={2000}
                                     aria-invalid={Boolean(detailsErrors.contentUrl)}
                                 />
@@ -883,12 +883,12 @@ export const AiCampaignDraftPage = () => {
                                     />
                                 </label>
                                 <label className={styles.field}>
-                                    <span>Story link</span>
+                                    <span>Story link or reference</span>
                                     <input
-                                        type="url"
+                                        type="text"
                                         value={detailsForm.storyLink}
                                         onChange={(event) => updateDetailsField("storyLink", event.target.value)}
-                                        placeholder="https://..."
+                                        placeholder="Paste a link or reference"
                                         maxLength={2000}
                                         aria-invalid={Boolean(detailsErrors.storyLink)}
                                     />

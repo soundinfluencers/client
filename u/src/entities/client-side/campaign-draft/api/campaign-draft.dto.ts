@@ -12,11 +12,11 @@ export type DraftAddedAccountDto = {
     profileType:  "creator" | "community";
     selectedCampaignContentItem?: {
         campaignContentItemId: string;
-        descriptionId: string;
+        descriptionId?: string;
     };
     selectedContent?: {
         campaignContentItemId: string;
-        descriptionId: string;
+        descriptionId?: string;
     };
 };
 
