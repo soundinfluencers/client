@@ -254,7 +254,13 @@ export const TableCard = React.memo(function TableCard({
                     selectedItem?.additionalBrief?.[0]?._id,
             });
         },
-        [setAccountSelectedContent, campaignId, accountKey, selectedItem],
+        [
+            setAccountSelectedContent,
+            campaignId,
+            accountKey,
+            selectedItem,
+            selectedMeta?.additionalBriefId,
+        ],
     );
 
     const dateRequestRaw = String(

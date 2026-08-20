@@ -249,6 +249,9 @@ export const buildFallbackSelectedContent = (
     return {
         campaignContentItemId: String(fallbackItem._id),
         descriptionId: String(fallbackDescription._id),
+        ...(fallbackItem.additionalBrief[0]?._id
+            ? { additionalBriefId: fallbackItem.additionalBrief[0]._id }
+            : {}),
     };
 };
 

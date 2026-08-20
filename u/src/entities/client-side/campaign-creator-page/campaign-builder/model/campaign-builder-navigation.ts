@@ -66,17 +66,25 @@ export const buildProposalOptionCreateUrl = (
 export const buildProposalAddInfluencerUrl = ({
     optionIndex,
     currency,
+    pathname = "/client/create-campaign",
+    platform,
+    genre,
 }: {
     optionIndex: number;
     currency: CampaignCurrencyCode;
+    pathname?: string;
+    platform?: string;
+    genre?: string;
 }): string => {
     const searchParams = new URLSearchParams({
         mode: "add-influencer",
         option: String(optionIndex),
         currency,
     });
+    if (platform) searchParams.set("platform", platform.toLowerCase());
+    if (genre) searchParams.set("genre", genre);
 
-    return `/client/create-campaign?${searchParams.toString()}`;
+    return `${pathname}?${searchParams.toString()}`;
 };
 
 export const initializeProposalAddInfluencerCurrency = ({

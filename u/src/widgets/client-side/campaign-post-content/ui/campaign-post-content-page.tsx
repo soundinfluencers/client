@@ -47,6 +47,7 @@ type Props = {
     offerPrice?: number;
     defaultCampaignName?: string;
     currency?: string
+    editSelectionUrl?: string;
     isSubmitLocked?: boolean;
     submitLabel?: string;
     onSubmitPayload: (
@@ -71,7 +72,8 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                                                              offerPrice,
                                                              defaultBlocks,
                                                              defaultCampaignContent,
-                                                             currency,
+                                                              currency,
+                                                              editSelectionUrl,
                                                              isSubmitLocked = false,
                                                              submitLabel = "Continue",
                                                          }) => {
@@ -424,15 +426,18 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                     <CampaignPostContentSelection
                         accounts={accounts}
                          currency={currency}
-                         offerAccounts={mode === "add-influencer" ? [] : offerAccounts}
-                         bundles={mode === "add-influencer" ? [] : bundles}
+                         offerAccounts={offerAccounts}
+                         bundles={bundles}
                          manualAccounts={manualAccounts}
-                        offerName={mode === "add-influencer" ? undefined : offerName}
+                        offerName={offerName}
                         totalPrice={totalPrice}
-                        offerPrice={mode === "add-influencer" ? 0 : offerPrice ?? 0}
+                        offerPrice={offerPrice ?? 0}
                         onEditSelection={() => {
                             if (mode === "add-influencer") {
-                                navigate(`/client/create-campaign?mode=add-influencer&option=${new URLSearchParams(window.location.search).get("option") ?? 0}`);
+                                navigate(
+                                    editSelectionUrl ??
+                                    `/client/create-campaign?mode=add-influencer&option=${new URLSearchParams(window.location.search).get("option") ?? 0}`,
+                                );
                                 return;
                             }
 

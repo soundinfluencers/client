@@ -10,6 +10,9 @@ import trash from "@/assets/icons/trash-2.svg";
 
 import { ButtonMain, ButtonSecondary } from "@/components";
 import { VideoPreview } from "../../live-view-card/preview/preview-video-component";
+import {
+  selectCreatedProposalContentForAccount,
+} from "../../model/proposal-created-content-selection";
 
 type Props = {
   optionIndex: number;
@@ -49,6 +52,9 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
 }: Props) {
   const addContentForSocial = useProposalAccountsStore(
     (s) => s.addContentForSocial,
+  );
+  const setAccountSelectedContent = useProposalAccountsStore(
+    (s) => s.setAccountSelectedContent,
   );
   const removeContentItem = useProposalAccountsStore(
     (s) => s.removeContentItem,
@@ -119,9 +125,19 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
     const sm = String(socialMedia ?? "").toLowerCase();
     if (!sm) return;
 
-    addContentForSocial(optionIndex, sm, { mainLink: link }, selectedItem?._id);
+    const created = addContentForSocial(
+      optionIndex,
+      sm,
+      { mainLink: link },
+      selectedItem?._id,
+    );
 
-    setSelectedContent(platformItems.length);
+    selectCreatedProposalContentForAccount({
+      optionIndex,
+      accountKey,
+      created,
+      setAccountSelectedContent,
+    });
 
     closeAddModal();
     onClose();
@@ -129,11 +145,10 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
     newLink,
     socialMedia,
     optionIndex,
+    accountKey,
     selectedItem?._id,
     addContentForSocial,
-    platformItems.length,
-    setSelectedContent,
-    setSelectedPd,
+    setAccountSelectedContent,
     closeAddModal,
     onClose,
   ]);

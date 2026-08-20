@@ -7,8 +7,12 @@ import type {
   SelectedCampaignContentItem,
   UpdateProposalCampaignRequest,
 } from "@/entities/client-side/campaign/model/campaign-api.types.ts";
+import {
+  normalizeAdditionalBriefVersions,
+  resolveAdditionalBriefId,
+} from "@/entities/client-side/campaign/model/campaign-content";
 
-type MutableProposalAccount = {
+export type MutableProposalAccount = {
   addedAccountsId?: unknown;
   accountId?: unknown;
   socialAccountId?: unknown;
@@ -23,7 +27,7 @@ type MutableProposalAccount = {
   dateRequest?: unknown;
 };
 
-type MutableProposalContent = {
+export type MutableProposalContent = {
   _id?: unknown;
   socialMedia?: unknown;
   profileType?: unknown;
@@ -35,11 +39,11 @@ type MutableProposalContent = {
   additionalBrief?: unknown;
 };
 
-type ProposalContentPatch = Partial<{
+export type ProposalContentPatch = Partial<{
   mainLink: string;
   taggedUser: string;
   taggedLink: string;
-  additionalBrief: string;
+  additionalBrief: unknown;
   descriptions: Array<{ _id: string; description: string }>;
 }>;
 
@@ -91,12 +95,12 @@ const toOptionalId = (value: unknown) => {
 const hasDuplicates = (values: readonly string[]) =>
   new Set(values).size !== values.length;
 
-type AccountSelectionResolution =
+export type AccountSelectionResolution =
   | { kind: "absent" }
   | { kind: "invalid" }
   | { kind: "valid"; value: SelectedCampaignContentItem };
 
-const resolveAccountSelection = (
+export const resolveAccountSelection = (
   account: MutableProposalAccount | ProposalAddedAccountDto,
 ): AccountSelectionResolution => {
   const candidates = [
@@ -111,11 +115,16 @@ const resolveAccountSelection = (
     const value = candidate as Record<string, unknown>;
     const campaignContentItemId = toRequiredId(value.campaignContentItemId);
     const descriptionId = toRequiredId(value.descriptionId);
+    const additionalBriefId = toOptionalId(value.additionalBriefId);
 
     if (campaignContentItemId && descriptionId) {
       return {
         kind: "valid",
-        value: { campaignContentItemId, descriptionId },
+        value: {
+          campaignContentItemId,
+          descriptionId,
+          ...(additionalBriefId ? { additionalBriefId } : {}),
+        },
       };
     }
 
@@ -131,9 +140,10 @@ const selectedContentEquals = (
 ) =>
   (left?.campaignContentItemId ?? "") ===
     (right?.campaignContentItemId ?? "") &&
-  (left?.descriptionId ?? "") === (right?.descriptionId ?? "");
+  (left?.descriptionId ?? "") === (right?.descriptionId ?? "") &&
+  (left?.additionalBriefId ?? "") === (right?.additionalBriefId ?? "");
 
-const mapCampaignContent = (
+export const mapCampaignContent = (
   content: readonly MutableProposalContent[],
   patches: Readonly<Record<string, ProposalContentPatch>>,
   persistedContentById?: ReadonlyMap<string, MutableProposalContent>,
@@ -173,8 +183,8 @@ const mapCampaignContent = (
       descriptions,
       taggedUser: String(patch.taggedUser ?? item.taggedUser ?? ""),
       taggedLink: String(patch.taggedLink ?? item.taggedLink ?? ""),
-      additionalBrief: String(
-        patch.additionalBrief ?? item.additionalBrief ?? "",
+      additionalBrief: normalizeAdditionalBriefVersions(
+        patch.additionalBrief ?? item.additionalBrief,
       ),
     });
   }
@@ -419,6 +429,47 @@ export const buildProposalOptionPatchBody = ({
   const persistedBySocialId = new Map(
     snapshot.addedAccounts.map((row) => [row.socialAccountId, row]),
   );
+  const persistedContentById = new Map(
+    snapshot.campaignContent.map((item) => [item._id, item]),
+  );
+  const currentContent = mapCampaignContent(
+    content,
+    patches,
+    persistedContentById,
+  );
+  const persistedContent = mapCampaignContent(snapshot.campaignContent, {});
+  if (!currentContent || !persistedContent) {
+    return failure(
+      "invalid_campaign_content",
+      "Campaign Content contains an invalid content or description identity.",
+    );
+  }
+
+  const hasContentChanges =
+    JSON.stringify(currentContent) !== JSON.stringify(persistedContent);
+  const currentContentById = new Map(
+    currentContent.map((item) => [item._id, item]),
+  );
+  const persistedMappedContentById = new Map(
+    persistedContent.map((item) => [item._id, item]),
+  );
+  const withEffectiveBrief = (
+    selection: SelectedCampaignContentItem | undefined,
+    contentById: ReadonlyMap<string, CampaignContentPatchDto>,
+  ) => {
+    if (!selection) return undefined;
+    const selectedContent = contentById.get(selection.campaignContentItemId);
+    const additionalBriefId = resolveAdditionalBriefId(
+      selectedContent?.additionalBrief ?? [],
+      selection.additionalBriefId,
+    );
+
+    return {
+      campaignContentItemId: selection.campaignContentItemId,
+      descriptionId: selection.descriptionId,
+      ...(additionalBriefId ? { additionalBriefId } : {}),
+    };
+  };
   const accountInputs: PatchProposalAddedAccountInput[] = [];
   let hasAccountValueChanges = false;
 
@@ -481,14 +532,18 @@ export const buildProposalOptionPatchBody = ({
     const persistedSelection = persisted
       ? resolveAccountSelection(persisted)
       : { kind: "absent" as const };
-    const persistedSelectedContent =
+    const persistedSelectedContent = withEffectiveBrief(
       persistedSelection.kind === "valid"
         ? persistedSelection.value
-        : undefined;
-    const selectedCampaignContentItem =
+        : undefined,
+      persistedMappedContentById,
+    );
+    const selectedCampaignContentItem = withEffectiveBrief(
       mutableSelection.kind === "valid"
         ? mutableSelection.value
-        : persistedSelectedContent;
+        : persistedSelectedContent,
+      currentContentById,
+    );
 
     if (!selectedCampaignContentItem) {
       return failure(
@@ -615,52 +670,8 @@ export const buildProposalOptionPatchBody = ({
     }
   }
 
-  const persistedContentById = new Map(
-    snapshot.campaignContent.map((item) => [item._id, item]),
-  );
-  const currentContent = mapCampaignContent(
-    content,
-    patches,
-    persistedContentById,
-  );
-  const persistedContent = mapCampaignContent(snapshot.campaignContent, {});
-  if (!currentContent || !persistedContent) {
-    return failure(
-      "invalid_campaign_content",
-      "Campaign Content contains an invalid content or description identity.",
-    );
-  }
-
-  const usedContentIds = new Set(
-    accountInputs
-      .map(
-        (account) =>
-          account.selectedCampaignContentItem?.campaignContentItemId ?? "",
-      )
-      .filter(Boolean),
-  );
-  const visibleCurrentContent = currentContent.filter((item) =>
-    usedContentIds.has(item._id),
-  );
-  const persistedUsedContentIds = new Set(
-    snapshot.addedAccounts
-      .map((account) => {
-        const selection = resolveAccountSelection(account);
-        return selection.kind === "valid"
-          ? selection.value.campaignContentItemId
-          : "";
-      })
-      .filter(Boolean),
-  );
-  const visiblePersistedContent = persistedContent.filter((item) =>
-    persistedUsedContentIds.has(item._id),
-  );
-  const hasContentChanges =
-    JSON.stringify(visibleCurrentContent) !==
-    JSON.stringify(visiblePersistedContent);
-
   const effectiveContent = hasContentChanges
-    ? visibleCurrentContent
+    ? currentContent
     : persistedContent;
   const effectiveContentById = new Map(
     effectiveContent.map((item) => [item._id, item]),
@@ -688,7 +699,7 @@ export const buildProposalOptionPatchBody = ({
   };
 
   if (hasContentChanges) {
-    body.campaignContent = visibleCurrentContent;
+    body.campaignContent = currentContent;
   }
 
   if (hasAccountValueChanges || hasAccountTopologyChanges) {

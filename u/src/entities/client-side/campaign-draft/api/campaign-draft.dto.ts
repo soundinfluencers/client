@@ -32,6 +32,7 @@ export type CampaignDraftAccountSocialMedia = Exclude<
 export type CampaignDraftContentReference = {
     campaignContentItemId: string;
     descriptionId: string;
+    additionalBriefId?: string;
 };
 
 export type CampaignDraftAccountPayload = {

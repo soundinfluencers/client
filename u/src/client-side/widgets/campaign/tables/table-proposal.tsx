@@ -10,22 +10,37 @@ import type {
 } from "@/types/store/index.types";
 
 import { TableCard } from "../card-table/table-card-proposal";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import type { TableGroup } from "@/client-side/types/table-types";
 import { getTableColumnWidths, getTitle } from "@/client-side/data/table-campaign.data";
 
 import { useFollowersSort } from "@/client-side/hooks";
 import { getAccountKey, getColumns } from "@/client-side/utils";
-import { useProposalAccountsStore } from "@/client-side/store";
+import {
+  useFetchCampaign,
+  useProposalAccountsStore,
+} from "@/client-side/store";
 import {
   useCampaignBuilderStore,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
 import {
   buildProposalAddInfluencerUrl,
-  initializeProposalAddInfluencerCurrency,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation";
 import { isCampaignDisplayCurrency } from "@/shared/functions/formatCurrency";
+import {
+  useBundleByIdFetcher,
+} from "@/entities/client-side/campaign-creator-page/bundle";
+import {
+  getPublishedOfferById,
+} from "@/entities/client-side/campaign-creator-page/offer/api/offer.api";
+import {
+  searchPromoAccounts,
+} from "@/entities/client-side/campaign-creator-page/campaign-promo-account/api/promo-account.api";
+import {
+  getProposalAddInfluencerRequirements,
+  prepareProposalAddInfluencerBuilderState,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/proposal-add-influencer-builder";
 
 type Props = {
   items: CampaignContentItem[];
@@ -62,10 +77,12 @@ export function TableProposal({
   onDeleteOption,
   isMutationPending,
 }: Props) {
-  const resetCampaign = useCampaignBuilderStore((s) => s.actions.reset);
-  const switchCampaignCurrency = useCampaignBuilderStore(
-    (s) => s.actions.switchCampaignCurrency,
+  const navigate = useNavigate();
+  const fetchBundleById = useBundleByIdFetcher();
+  const campaignName = useFetchCampaign(
+    (state) => String(state.data?.campaignName ?? ""),
   );
+  const isHydratingBuilderRef = React.useRef(false);
   const getGroupBySocial = (social?: string): TableGroup => {
     const s = String(social ?? "").toLowerCase();
 
@@ -97,21 +114,154 @@ export function TableProposal({
     : "/client/campaign";
 
   const initializeAddInfluencerBuilder = React.useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
-      const initialized = initializeProposalAddInfluencerCurrency({
-        currency: proposalDisplayCurrency,
-        reset: resetCampaign,
-        switchCurrency: switchCampaignCurrency,
-      });
-
-      if (initialized) return;
-
+    async (event: React.MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
-      toast.error("Proposal currency is unavailable in Campaign Builder");
+      if (isHydratingBuilderRef.current) return;
+      if (!isCampaignDisplayCurrency(proposalDisplayCurrency)) {
+        toast.error("Proposal currency is unavailable in Campaign Builder");
+        return;
+      }
+
+      const proposalState = useProposalAccountsStore.getState();
+      const snapshot = proposalState.optionSnapshotsByIndex[optionIndex];
+      const accounts = proposalState.accountsByOption[optionIndex] ?? [];
+      const content = proposalState.contentByOption[optionIndex] ?? [];
+      const cachedBuilderState =
+        proposalState.builderWorkingStateByOption[optionIndex];
+      const cachedCatalogContext =
+        proposalState.builderCatalogContextByOption[optionIndex];
+
+      if (!snapshot || !accounts.length || !campaignName) {
+        toast.error("Proposal option is unavailable for Campaign Builder");
+        return;
+      }
+
+      const source = {
+        campaignName,
+        snapshot,
+        accounts: accounts as any[],
+        content,
+        pendingBundleMembership: Object.prototype.hasOwnProperty.call(
+          proposalState.pendingBundleMembershipByOption,
+          optionIndex,
+        )
+          ? proposalState.pendingBundleMembershipByOption[optionIndex]
+          : undefined,
+        selectedOfferChange: Object.prototype.hasOwnProperty.call(
+          proposalState.selectedOfferChangeByOption,
+          optionIndex,
+        )
+          ? proposalState.selectedOfferChangeByOption[optionIndex]
+          : undefined,
+        cachedBuilderState,
+      };
+      const requirements = getProposalAddInfluencerRequirements(source);
+
+      isHydratingBuilderRef.current = true;
+
+      try {
+        const cachedBundlesById = new Map(
+          (cachedBuilderState?.selectedBundles ?? []).map((bundle) => [
+            bundle.bundleId,
+            bundle,
+          ] as const),
+        );
+        const bundles = await Promise.all(
+          requirements.bundleIds.map(async (bundleId) =>
+            cachedBundlesById.get(bundleId) ?? fetchBundleById(bundleId),
+          ),
+        );
+        const bundlesById = new Map(
+          bundles.map((bundle) => [bundle.bundleId, bundle] as const),
+        );
+        const hasCachedOffer =
+          Boolean(requirements.offer) &&
+          cachedBuilderState?.selectedOfferId === requirements.offer?.offerId;
+        const offer =
+          requirements.offer && !hasCachedOffer
+            ? await getPublishedOfferById(
+              requirements.offer.offerId,
+              requirements.offer.socialMedia ?? "",
+              requirements.offer.genre ?? "",
+            )
+            : undefined;
+        const cachedAccountsById = new Map(
+          (cachedBuilderState?.selectedAccounts ?? []).map((account) => [
+            account.accountId,
+            account,
+          ] as const),
+        );
+        const standaloneAccounts = await Promise.all(
+          requirements.standaloneAccounts.map(async (requiredAccount) => {
+            const cached = cachedAccountsById.get(requiredAccount.accountId);
+            if (cached?.prices && Object.keys(cached.prices).length > 1) {
+              return null;
+            }
+
+            const matches = await searchPromoAccounts({
+              query: requiredAccount.username,
+              socialMedias: [requiredAccount.socialMedia],
+              page: 1,
+              limit: 50,
+            });
+            const exact = matches.find(
+              (account) => account.accountId === requiredAccount.accountId,
+            );
+            if (!exact) {
+              throw new Error(
+                `Account ${requiredAccount.accountId} is unavailable`,
+              );
+            }
+
+            return exact;
+          }),
+        );
+        const standaloneAccountsById = new Map(
+          standaloneAccounts
+            .filter((account): account is NonNullable<typeof account> =>
+              Boolean(account),
+            )
+            .map((account) => [account.accountId, account] as const),
+        );
+        const hydrated = prepareProposalAddInfluencerBuilderState(source, {
+          bundlesById,
+          offer,
+          standaloneAccountsById,
+        });
+
+        useCampaignBuilderStore
+          .getState()
+          .actions.hydrateFromDraft(hydrated);
+        proposalState.setBuilderWorkingState(optionIndex, hydrated);
+        navigate(
+          buildProposalAddInfluencerUrl({
+            optionIndex,
+            currency: proposalDisplayCurrency,
+            platform:
+              cachedCatalogContext?.platform ??
+              requirements.offer?.socialMedia,
+            genre:
+              cachedCatalogContext?.genre ??
+              requirements.offer?.genre,
+          }),
+        );
+      } catch (error) {
+        console.error(error);
+        useCampaignBuilderStore.getState().actions.reset();
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Proposal option cannot be opened in Campaign Builder",
+        );
+      } finally {
+        isHydratingBuilderRef.current = false;
+      }
     }, [
+      campaignName,
+      fetchBundleById,
+      navigate,
+      optionIndex,
       proposalDisplayCurrency,
-      resetCampaign,
-      switchCampaignCurrency,
     ],
   );
 

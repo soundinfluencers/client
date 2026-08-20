@@ -135,6 +135,7 @@ const getWorkflowKey = (account: CampaignDraftAccountGetDto): string => {
         dateRequest: account.dateRequest || "ASAP",
         campaignContentItemId: reference?.campaignContentItemId ?? null,
         descriptionId: reference?.descriptionId ?? null,
+        additionalBriefId: reference?.additionalBriefId ?? null,
     });
 };
 

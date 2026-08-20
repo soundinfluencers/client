@@ -5,9 +5,11 @@ import {
   ButtonSecondary,
 } from "@/components/ui/buttons-fix/ButtonFix";
 import { DetailsRow } from "../../../components/promos-details-list/promos-details-list-card/DetailsRow";
+import { getPromoFieldsBySocialMedia } from "../../../data/promos.data";
 import type {
   BundleNewPromo,
   BundlePromoAccount,
+  TDetailsField,
 } from "../../../types/promos.types";
 import {
   formatFollowers,
@@ -24,13 +26,26 @@ interface Props {
   onDecline?: () => void;
 }
 
-const getOptionalValue = (value: string | null | undefined): string =>
-  value ?? "";
+const isBundleAccountDetailField = ({ key }: TDetailsField): boolean =>
+  key !== "username" && key !== "clientName";
+
+const getBundleAccountFieldValue = (
+  account: BundlePromoAccount,
+  field: TDetailsField,
+): string => {
+  if (!(field.key in account)) {
+    return "";
+  }
+
+  const value = account[field.key as keyof BundlePromoAccount];
+
+  return value?.toString() ?? "";
+};
 
 const BundleAccountSummary = ({
   account,
   index,
-  currency,
+  // currency,
 }: {
   account: BundlePromoAccount;
   index: number;
@@ -54,18 +69,19 @@ const BundleAccountSummary = ({
         )}
         <span>{formatFollowers(account.followers)}</span>
       </span>
-      <span className="bundle-new-promo-card__account-reward">
-        {formatReward(account.reward, currency)}
-      </span>
+      {/*<span className="bundle-new-promo-card__account-reward">*/}
+      {/*  {formatReward(account.reward, currency)}*/}
+      {/*</span>*/}
     </li>
   );
 };
 
 const BundleAccountBrief = ({ account }: { account: BundlePromoAccount }) => {
   const platformIcon = getSocialMediaIcon(account.accountSocialMedia);
-  const mainLink = getOptionalValue(account.mainLink);
-  const description = getOptionalValue(account.description);
-  const taggedLink = getOptionalValue(account.taggedLink);
+  const fields = getPromoFieldsBySocialMedia(
+    account.accountSocialMedia,
+    "pending",
+  ).filter(isBundleAccountDetailField);
 
   return (
     <section
@@ -84,23 +100,21 @@ const BundleAccountBrief = ({ account }: { account: BundlePromoAccount }) => {
       </h3>
 
       <div className="promos-details-list-card__body-details bundle-new-promo-card__brief-rows">
-        <DetailsRow label="Videolink" value={mainLink} linkable={Boolean(mainLink)} />
-        <DetailsRow
-          label="Description"
-          value={description}
-          copyable={Boolean(description)}
-        />
-        <DetailsRow
-          label="Story link"
-          value={taggedLink}
-          copyable={Boolean(taggedLink)}
-        />
-        <DetailsRow label="Story tag" value={getOptionalValue(account.taggedUser)} />
-        <DetailsRow label="Date request" value={getOptionalValue(account.dateRequest)} />
-        <DetailsRow
-          label="Additional brief"
-          value={getOptionalValue(account.additionalBrief)}
-        />
+        {fields.map((field) => {
+          const value = getBundleAccountFieldValue(account, field);
+          const hasValue = Boolean(value);
+
+          return (
+            <DetailsRow
+              key={`${field.key}-${field.label}`}
+              label={field.label}
+              value={value}
+              copyable={hasValue && field.copyable}
+              linkable={hasValue && field.linkable}
+              icon={field.icon}
+            />
+          );
+        })}
       </div>
     </section>
   );
@@ -153,10 +167,10 @@ export const BundleNewPromoCard = ({
                 The price of the bundle will change based on how many platforms you choose.
               </p>
               <div className="promos-details-list-card__body-details">
-                <DetailsRow
-                  label="Total amount:"
-                  value={formatReward(promo.originalReward, promo.currency)}
-                />
+                {/*<DetailsRow*/}
+                {/*  label="Total amount:"*/}
+                {/*  value={formatReward(promo.originalReward, promo.currency)}*/}
+                {/*/>*/}
                 <DetailsRow label="Bundle fee:" value={bundleFee} />
                 <DetailsRow label="Client" value={promo.clientName} />
               </div>

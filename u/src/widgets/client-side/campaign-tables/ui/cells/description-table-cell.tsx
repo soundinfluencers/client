@@ -75,9 +75,23 @@ export const DescriptionTableCell: React.FC<Props> = ({
             setAccountSelectedContent(accountId, {
                 campaignContentItemId: String(item._id),
                 descriptionId: String(descriptionId),
+                ...(row.account.selectedCampaignContentItem?.additionalBriefId
+                    ? {
+                        additionalBriefId:
+                            row.account.selectedCampaignContentItem
+                                .additionalBriefId,
+                    }
+                    : item.additionalBrief[0]?._id
+                        ? { additionalBriefId: item.additionalBrief[0]._id }
+                        : {}),
             });
         },
-        [accountId, item?._id, setAccountSelectedContent],
+        [
+            accountId,
+            item,
+            row.account.selectedCampaignContentItem?.additionalBriefId,
+            setAccountSelectedContent,
+        ],
     );
 
     React.useEffect(() => {
@@ -92,6 +106,15 @@ export const DescriptionTableCell: React.FC<Props> = ({
         setAccountSelectedContent(accountId, {
             campaignContentItemId: String(item._id),
             descriptionId: String(firstDescription._id),
+            ...(row.account.selectedCampaignContentItem?.additionalBriefId
+                ? {
+                    additionalBriefId:
+                        row.account.selectedCampaignContentItem
+                            .additionalBriefId,
+                }
+                : item.additionalBrief[0]?._id
+                    ? { additionalBriefId: item.additionalBrief[0]._id }
+                    : {}),
         });
     }, [
         accountId,
@@ -168,6 +191,19 @@ export const DescriptionTableCell: React.FC<Props> = ({
                 setAccountSelectedContent(accountId, {
                     campaignContentItemId: String(item._id),
                     descriptionId: String(created._id),
+                    ...(row.account.selectedCampaignContentItem
+                        ?.additionalBriefId
+                        ? {
+                            additionalBriefId:
+                                row.account.selectedCampaignContentItem
+                                    .additionalBriefId,
+                        }
+                        : item.additionalBrief[0]?._id
+                            ? {
+                                additionalBriefId:
+                                    item.additionalBrief[0]._id,
+                            }
+                            : {}),
                 });
             }
 

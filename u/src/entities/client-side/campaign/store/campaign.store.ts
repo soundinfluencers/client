@@ -1,4 +1,8 @@
 import { create } from "zustand";
+import {
+    normalizeAdditionalBriefVersions,
+    resolveAdditionalBriefId,
+} from "../model/campaign-content";
 
 export const getGroupBySocial = (
     social: string,
@@ -49,8 +53,7 @@ export type EditableCampaignContentItem = {
     descriptions: EditableDescription[];
     taggedUser: string;
     taggedLink: string;
-    additionalBrief: string;
-    additionalBriefOptions?: EditableAdditionalBrief[];
+    additionalBrief: EditableAdditionalBrief[];
 };
 
 export type EditableCampaignAccount = {
@@ -303,29 +306,6 @@ const normalizeAccount = (account: any): EditableCampaignAccount => {
     };
 };
 
-const normalizeAdditionalBriefOptions = (value: unknown): EditableAdditionalBrief[] => {
-    if (!Array.isArray(value)) return [];
-
-    return value.map((brief) => {
-        const candidate = brief && typeof brief === "object"
-            ? brief as { _id?: unknown; additionalBrief?: unknown }
-            : {};
-        return {
-            _id: toStringSafe(candidate._id || objectId()),
-            additionalBrief: toStringSafe(candidate.additionalBrief),
-        };
-    });
-};
-
-const normalizeAdditionalBriefText = (value: unknown) => {
-    if (typeof value === "string") return value;
-    if (Array.isArray(value)) return toStringSafe(value[0]?.additionalBrief);
-    if (value && typeof value === "object") {
-        return toStringSafe((value as { additionalBrief?: unknown }).additionalBrief);
-    }
-    return "";
-};
-
 const normalizeContentItem = (item: any): EditableCampaignContentItem => ({
     _id: toStringSafe(item?._id || objectId()),
     socialMedia: toStringSafe(item?.socialMedia).toLowerCase(),
@@ -343,8 +323,9 @@ const normalizeContentItem = (item: any): EditableCampaignContentItem => ({
         : [],
     taggedUser: toStringSafe(item?.taggedUser),
     taggedLink: toStringSafe(item?.taggedLink),
-    additionalBrief: normalizeAdditionalBriefText(item?.additionalBrief),
-    additionalBriefOptions: normalizeAdditionalBriefOptions(item?.additionalBrief),
+    additionalBrief: normalizeAdditionalBriefVersions(item?.additionalBrief, {
+        createId: objectId,
+    }),
 });
 
 export const normalizeCampaignForStore = (
@@ -463,15 +444,11 @@ const buildCampaignSavePayload = (editable: EditableCampaign) => {
         })),
         taggedUser: item.taggedUser,
         taggedLink: item.taggedLink,
-        additionalBrief: item.additionalBriefOptions?.length
-            ? item.additionalBriefOptions
-            : item.additionalBrief.trim()
-                ? [{ _id: objectId(), additionalBrief: item.additionalBrief }]
-                : [],
+        additionalBrief: item.additionalBrief.map((brief) => ({ ...brief })),
     }));
 
-    const firstBriefIdByContentId = new Map(
-        campaignContent.map((item) => [item._id, item.additionalBrief[0]?._id]),
+    const briefOptionsByContentId = new Map(
+        campaignContent.map((item) => [item._id, item.additionalBrief]),
     );
 
     return {
@@ -495,15 +472,21 @@ const buildCampaignSavePayload = (editable: EditableCampaign) => {
                     account.selectedCampaignContentItem.campaignContentItemId,
                     descriptionId:
                     account.selectedCampaignContentItem.descriptionId,
-                    ...(account.selectedCampaignContentItem.additionalBriefId ||
-                    firstBriefIdByContentId.get(
-                        account.selectedCampaignContentItem.campaignContentItemId,
+                    ...(resolveAdditionalBriefId(
+                        briefOptionsByContentId.get(
+                            account.selectedCampaignContentItem.campaignContentItemId,
+                        ) ?? [],
+                        account.selectedCampaignContentItem.additionalBriefId,
                     )
                         ? {
                             additionalBriefId:
-                                account.selectedCampaignContentItem.additionalBriefId ||
-                                firstBriefIdByContentId.get(
-                                    account.selectedCampaignContentItem.campaignContentItemId,
+                                resolveAdditionalBriefId(
+                                    briefOptionsByContentId.get(
+                                        account.selectedCampaignContentItem
+                                            .campaignContentItemId,
+                                    ) ?? [],
+                                    account.selectedCampaignContentItem
+                                        .additionalBriefId,
                                 ),
                         }
                         : {}),
@@ -581,6 +564,7 @@ type CampaignStore = {
     ) => {
         contentId: string;
         firstDescriptionId: string;
+        firstAdditionalBriefId?: string;
     };
     mergeCampaignContent: (items: EditableCampaignContentItem[]) => void;
     removeContentItem: (contentId: string) => void;
@@ -728,9 +712,10 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
                         String(selected.campaignContentItemId),
                 )
                 : null;
-            const additionalBriefId =
-                selected?.additionalBriefId ||
-                selectedContent?.additionalBriefOptions?.[0]?._id;
+            const additionalBriefId = resolveAdditionalBriefId(
+                selectedContent?.additionalBrief ?? [],
+                selected?.additionalBriefId,
+            );
 
             return {
                 editable: {
@@ -800,6 +785,12 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
                         ? {
                             campaignContentItemId: String(defaultItem._id),
                             descriptionId: String(defaultItem.descriptions[0]._id),
+                            ...(defaultItem.additionalBrief[0]?._id
+                                ? {
+                                    additionalBriefId:
+                                        defaultItem.additionalBrief[0]._id,
+                                }
+                                : {}),
                         }
                         : null;
 
@@ -828,9 +819,7 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
                     countries: Array.isArray(account.countries)
                         ? account.countries
                         : [],
-                    profileType: account.profileType
-                        ? toStringSafe(account.profileType)
-                        : undefined,
+                    profileType: toStringSafe(account.profileType),
 
                     selectedCampaignContentItem: incomingSelected ?? defaultSelected,
                     selectedContent: incomingSelected ?? defaultSelected,
@@ -946,7 +935,7 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
                 (item) => String(item._id) === String(contentId),
             );
             const fallbackBriefId =
-                targetContent?.additionalBriefOptions?.[0]?._id;
+                targetContent?.additionalBrief?.[0]?._id;
             const selectedBriefId =
                 targetAccount?.selectedCampaignContentItem?.additionalBriefId ||
                 additionalBriefId ||
@@ -973,17 +962,17 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
                         String(item._id) === String(contentId)
                             ? {
                                 ...item,
-                                additionalBriefOptions:
-                                    item.additionalBriefOptions?.some(
+                                additionalBrief:
+                                    item.additionalBrief?.some(
                                         (brief) => brief._id === nextBriefId,
                                     )
-                                        ? item.additionalBriefOptions.map((brief) =>
+                                        ? item.additionalBrief.map((brief) =>
                                             brief._id === nextBriefId
                                                 ? { ...brief, additionalBrief: value }
                                                 : brief,
                                         )
                                         : [
-                                            ...(item.additionalBriefOptions ?? []),
+                                            ...(item.additionalBrief ?? []),
                                             {
                                                 _id: nextBriefId,
                                                 additionalBrief: value,
@@ -1176,9 +1165,12 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
             mediaCache: payload?.mediaCache ?? base?.mediaCache ?? undefined,
             taggedUser: toStringSafe(payload?.taggedUser ?? base?.taggedUser),
             taggedLink: toStringSafe(payload?.taggedLink ?? base?.taggedLink),
-            additionalBrief: toStringSafe(
+            additionalBrief: normalizeAdditionalBriefVersions(
                 payload?.additionalBrief ?? base?.additionalBrief,
-            ),
+            ).map((brief) => ({
+                _id: objectId(),
+                additionalBrief: brief.additionalBrief,
+            })),
             descriptions,
         };
 
@@ -1199,6 +1191,7 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
         return {
             contentId: newId,
             firstDescriptionId,
+            firstAdditionalBriefId: nextItem.additionalBrief[0]?._id,
         };
     },
 

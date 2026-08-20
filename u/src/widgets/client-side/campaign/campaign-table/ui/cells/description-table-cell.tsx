@@ -96,6 +96,9 @@ export const DescriptionTableCell: React.FC<Props> = ({
 
     const accountKey = row.accountKey;
     const contentId = String(item?._id ?? "");
+    const effectiveAdditionalBriefId =
+        row.account.selectedCampaignContentItem?.additionalBriefId ??
+        item?.additionalBrief?.[0]?._id;
 
     React.useEffect(() => {
         return () => {
@@ -133,9 +136,17 @@ export const DescriptionTableCell: React.FC<Props> = ({
             setAccountSelectedContent(accountKey, {
                 campaignContentItemId: String(item._id),
                 descriptionId: String(descriptionId),
+                ...(effectiveAdditionalBriefId
+                    ? { additionalBriefId: effectiveAdditionalBriefId }
+                    : {}),
             });
         },
-        [accountKey, item?._id, setAccountSelectedContent],
+        [
+            accountKey,
+            item?._id,
+            effectiveAdditionalBriefId,
+            setAccountSelectedContent,
+        ],
     );
 
     React.useEffect(() => {
@@ -151,6 +162,9 @@ export const DescriptionTableCell: React.FC<Props> = ({
         setAccountSelectedContent(accountKey, {
             campaignContentItemId: String(item._id),
             descriptionId: String(firstDescription._id),
+            ...(effectiveAdditionalBriefId
+                ? { additionalBriefId: effectiveAdditionalBriefId }
+                : {}),
         });
     }, [
         accountKey,
@@ -321,6 +335,9 @@ export const DescriptionTableCell: React.FC<Props> = ({
                 setAccountSelectedContent(accountKey, {
                     campaignContentItemId: String(item._id),
                     descriptionId: String(created._id),
+                    ...(effectiveAdditionalBriefId
+                        ? { additionalBriefId: effectiveAdditionalBriefId }
+                        : {}),
                 });
             }
 
@@ -377,6 +394,9 @@ export const DescriptionTableCell: React.FC<Props> = ({
                 setAccountSelectedContent(accountKey, {
                     campaignContentItemId: String(item._id),
                     descriptionId: "",
+                    ...(effectiveAdditionalBriefId
+                        ? { additionalBriefId: effectiveAdditionalBriefId }
+                        : {}),
                 });
 
                 setDeleteIndex(null);
@@ -390,6 +410,9 @@ export const DescriptionTableCell: React.FC<Props> = ({
             setAccountSelectedContent(accountKey, {
                 campaignContentItemId: String(item._id),
                 descriptionId: String(fallbackDescription?._id ?? ""),
+                ...(effectiveAdditionalBriefId
+                    ? { additionalBriefId: effectiveAdditionalBriefId }
+                    : {}),
             });
 
             setDeleteIndex(null);

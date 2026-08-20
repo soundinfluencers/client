@@ -1,4 +1,10 @@
-import { useId, useRef, type ReactNode, type RefObject } from "react";
+import {
+    useId,
+    useRef,
+    type MouseEvent,
+    type ReactNode,
+    type RefObject,
+} from "react";
 
 import chevronDown from "@/assets/icons/chevron-down.svg";
 import { useClickOutside } from "@/hooks/global/useClickOutside";
@@ -7,6 +13,10 @@ import { ButtonMain } from "@/shared/ui";
 import { BundleAccountsCompactList } from "./bundle-accounts-compact-list";
 import { BundleDetails } from "./bundle-details";
 import { BundlePriceSummary } from "./bundle-price-summary";
+import {
+    canToggleBundleFromCard,
+    isBundleCardSurfaceClick,
+} from "./bundle-card.interactions";
 import type {
     BundleCardDisplayModel,
 } from "./bundle-card.types";
@@ -62,9 +72,14 @@ export const BundleCard = ({
 }: Props) => {
     const detailsId = `bundle-details-${useId().replaceAll(":", "")}`;
     const cardRef = useRef<HTMLDivElement>(null);
+    const canToggleSelection = canToggleBundleFromCard({
+        isSelected,
+        chooseDisabled,
+        isIncludedInSelectedOffer,
+    });
 
     const handleChoose = () => {
-        if (isIncludedInSelectedOffer) return;
+        if (!canToggleSelection) return;
 
         if (isSelected) {
             onRemove(bundle.bundleId);
@@ -75,6 +90,12 @@ export const BundleCard = ({
         onCloseDetails();
     };
 
+    const handleCardClick = (event: MouseEvent<HTMLElement>) => {
+        if (!isBundleCardSurfaceClick(event.target)) return;
+
+        handleChoose();
+    };
+
     return (
         <div ref={cardRef} className={styles.cardWrapper}>
             <article
@@ -82,7 +103,10 @@ export const BundleCard = ({
                     isSelected ? styles.selected : ""
                 } ${
                     isIncludedInSelectedOffer ? styles.included : ""
+                } ${
+                    canToggleSelection ? styles.cardInteractive : ""
                 }`}
+                onClick={handleCardClick}
             >
                 <header className={styles.header}>
                     <span className={styles.badge}>Bundle</span>
@@ -132,10 +156,7 @@ export const BundleCard = ({
                         <ButtonMain
                             className={styles.chooseButton}
                             text={isSelected ? "Remove" : "Choose"}
-                            isDisabled={
-                                !isSelected &&
-                                (chooseDisabled || isIncludedInSelectedOffer)
-                            }
+                            isDisabled={!canToggleSelection}
                             onClick={handleChoose}
                         />
                     </DetailsPanel>

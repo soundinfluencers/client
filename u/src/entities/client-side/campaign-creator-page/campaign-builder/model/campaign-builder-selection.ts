@@ -233,28 +233,30 @@ export const isAccountIncludedInSelectedBundle = (
     selectedBundles: readonly SelectedBundleSnapshot[],
 ): boolean => getSelectedBundleAccountIds(selectedBundles).has(accountId);
 
-export const isExactOfferBundleOverlap = (
-    offerAccountIds: readonly string[],
+export const isBundleFullyIncludedInOffer = (
     bundle: {
         accounts: readonly { accountId: string }[];
     },
+    offerAccountIds: readonly string[],
 ): boolean => {
-    const offerAccountIdSet = new Set(offerAccountIds);
-    const bundleAccountIdSet = new Set(
-        bundle.accounts.map((account) => account.accountId),
+    const bundleAccountIds = bundle.accounts.map(
+        (account) => account.accountId,
     );
 
-    if (offerAccountIdSet.size !== bundleAccountIdSet.size) {
+    if (
+        bundleAccountIds.length === 0 ||
+        bundleAccountIds.some((accountId) => !accountId.trim())
+    ) {
         return false;
     }
 
-    return (
-        [...offerAccountIdSet].every((accountId) =>
-            bundleAccountIdSet.has(accountId),
-        ) &&
-        [...bundleAccountIdSet].every((accountId) =>
-            offerAccountIdSet.has(accountId),
-        )
+    const offerAccountIdSet = new Set(
+        offerAccountIds.filter((accountId) => accountId.trim()),
+    );
+    const bundleAccountIdSet = new Set(bundleAccountIds);
+
+    return [...bundleAccountIdSet].every((accountId) =>
+        offerAccountIdSet.has(accountId),
     );
 };
 
@@ -297,7 +299,7 @@ export const getBundleSelectionBlockReason = ({
 
     if (
         selectedOfferId &&
-        isExactOfferBundleOverlap(selectedOfferAccountIds, bundle)
+        isBundleFullyIncludedInOffer(bundle, selectedOfferAccountIds)
     ) {
         return "included-in-selected-offer";
     }
@@ -618,7 +620,7 @@ export const selectOfferFromCampaignSelection = ({
         );
     const nextSelectedBundles = state.selectedBundles.filter(
         (bundle) =>
-            !isExactOfferBundleOverlap(nextOfferAccountIds, bundle),
+            !isBundleFullyIncludedInOffer(bundle, nextOfferAccountIds),
     );
 
     return {

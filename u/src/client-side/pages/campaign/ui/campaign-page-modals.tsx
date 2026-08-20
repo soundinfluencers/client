@@ -16,6 +16,12 @@ type Props = {
 
   isPending: boolean;
 
+  isDirtySwitchModalOpen: boolean;
+  isDirtySwitchSaving: boolean;
+  onCloseDirtySwitchModal: () => void;
+  onSaveDirtySwitch: () => void | Promise<unknown>;
+  onDiscardDirtySwitch: () => void | Promise<unknown>;
+
 };
 
 export const CampaignPageModals: React.FC<Props> = ({
@@ -31,6 +37,12 @@ export const CampaignPageModals: React.FC<Props> = ({
   onAddOptionYes,
 
   isPending,
+
+  isDirtySwitchModalOpen,
+  isDirtySwitchSaving,
+  onCloseDirtySwitchModal,
+  onSaveDirtySwitch,
+  onDiscardDirtySwitch,
 
 }) => {
   return (
@@ -55,6 +67,36 @@ export const CampaignPageModals: React.FC<Props> = ({
                 text="Yes"
                 onClick={onAddOptionYes}
                 isDisabled={isPending}
+              />
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {isDirtySwitchModalOpen && (
+        <Modal
+          onClose={onCloseDirtySwitchModal}
+          isShowCloseButton={false}
+          isCloseOnClickOutsideDisabled={isDirtySwitchSaving}
+        >
+          <div className="create-option">
+            <h2>Unsaved changes</h2>
+            <p>
+              You have unsaved changes in this option. Save them before
+              switching to another option?
+            </p>
+            <div className="create-option-btn">
+              <ButtonSecondary
+                className="btn"
+                text="Discard changes"
+                onClick={onDiscardDirtySwitch}
+                isDisabled={isDirtySwitchSaving}
+              />
+              <ButtonMain
+                className="btn"
+                text={isDirtySwitchSaving ? "Saving..." : "Save"}
+                onClick={onSaveDirtySwitch}
+                isDisabled={isDirtySwitchSaving}
               />
             </div>
           </div>

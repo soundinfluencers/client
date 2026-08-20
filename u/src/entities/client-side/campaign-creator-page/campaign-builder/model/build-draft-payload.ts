@@ -12,6 +12,7 @@ import type {
     DraftSelectionRow,
     SelectedCampaignAccount,
 } from "./campaign-builder.types";
+import { resolveAdditionalBriefId } from "@/entities/client-side/campaign/model/campaign-content";
 
 type BuildCampaignDraftPayloadOptions = {
     campaignName: string;
@@ -233,6 +234,7 @@ const getDraftSocialMedia = (
 const mapDraftAccountPayload = (
     row: DraftSelectionRow,
     runtimeAccount: SelectedCampaignAccount,
+    campaignContent: CampaignBuilderState["campaignContent"],
     workflowValuesByAccountId?: CampaignDraftWorkflowValuesByAccountId,
 ): CampaignDraftAccountPayload => {
     const hasWorkflowOverride = workflowValuesByAccountId?.has(
@@ -244,6 +246,17 @@ const mapDraftAccountPayload = (
     const selectedCampaignContentItem = hasWorkflowOverride
         ? workflowOverride?.selectedCampaignContentItem
         : runtimeAccount.selectedCampaignContentItem ?? undefined;
+    const selectedContent = selectedCampaignContentItem
+        ? campaignContent.find(
+            (item) => String(item._id) === String(
+                selectedCampaignContentItem.campaignContentItemId,
+            ),
+        )
+        : undefined;
+    const additionalBriefId = resolveAdditionalBriefId(
+        selectedContent?.additionalBrief ?? [],
+        selectedCampaignContentItem?.additionalBriefId,
+    );
     const workflowFields = selectedCampaignContentItem
         ? {
             selectedCampaignContentItem: {
@@ -251,6 +264,7 @@ const mapDraftAccountPayload = (
                     selectedCampaignContentItem.campaignContentItemId,
                 descriptionId:
                     selectedCampaignContentItem.descriptionId,
+                ...(additionalBriefId ? { additionalBriefId } : {}),
             },
         }
         : {};
@@ -318,6 +332,12 @@ export const buildCampaignDraftWorkflowValuesByAccountId = (
                                 .campaignContentItemId,
                         descriptionId:
                             account.selectedCampaignContentItem.descriptionId,
+                        ...(account.selectedCampaignContentItem.additionalBriefId
+                            ? {
+                                additionalBriefId:
+                                    account.selectedCampaignContentItem.additionalBriefId,
+                            }
+                            : {}),
                     },
                 }
                 : {}),
@@ -345,8 +365,16 @@ const assertCampaignDraftContentReferences = (
             (description) =>
                 String(description._id) === reference.descriptionId,
         );
+        const effectiveBriefId = resolveAdditionalBriefId(
+            contentItem?.additionalBrief ?? [],
+            reference.additionalBriefId,
+        );
 
-        if (!contentItem || !hasDescription) {
+        if (
+            !contentItem ||
+            !hasDescription ||
+            ((contentItem.additionalBrief?.length ?? 0) > 0 && !effectiveBriefId)
+        ) {
             throw new Error(
                 `Selected content reference is invalid for account ${account.socialAccountId}.`,
             );
@@ -372,6 +400,7 @@ export const buildCampaignDraftPayload = (
             account,
         ]),
     );
+    const campaignContent = options.campaignContent ?? state.campaignContent ?? [];
     const addedAccounts = draftSelectionRows.map((row) => {
         const runtimeAccount = runtimeAccounts.get(row.socialAccountId);
 
@@ -382,11 +411,10 @@ export const buildCampaignDraftPayload = (
         return mapDraftAccountPayload(
             row,
             runtimeAccount,
+            campaignContent,
             options.workflowValuesByAccountId,
         );
     });
-    const campaignContent = options.campaignContent ?? state.campaignContent ?? [];
-
     assertCampaignDraftContentReferences(addedAccounts, campaignContent);
     const selectedOffer = state.selectedOfferId
         ? {

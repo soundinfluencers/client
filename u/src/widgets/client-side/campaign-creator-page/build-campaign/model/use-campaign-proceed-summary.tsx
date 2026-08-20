@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import {
     useCampaignBuilderStore,
@@ -15,15 +15,12 @@ import {
     useBuildCampaignParams,
 } from "@/features/client-side/campaign-creator-page/build-campaign-filters/model/use-build-campaign-params";
 import { useProposalAccountsStore } from "@/client-side/store";
-import {
-    getCampaignCurrencySymbol,
-    isCampaignDisplayCurrency,
-} from "@/shared/functions/formatCurrency";
 import type {
     CampaignBuilderMode,
     ProposalOptionCreateContext,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation";
 import {
+    buildProposalAddInfluencerUrl,
     buildProposalOptionCreateUrl,
     PROPOSAL_OPTION_CREATE_MODE,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-navigation";
@@ -40,6 +37,7 @@ export const useCampaignProceedSummary = ({
                                                proposalOptionCreateContext = null,
                                            }: Params) => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const {
         selectedCurrency,
@@ -78,25 +76,15 @@ export const useCampaignProceedSummary = ({
             : undefined,
     );
 
-    const builderTotal = isAddInfluencerMode
-        ? 0
-        : calcBuilderTotal({
-            selectedOfferId,
-            selectedOfferPrice,
-            selectedAccounts,
-            selectedBundles,
-            selectedOfferAccountIds,
-            currency: selectedCurrencyCode,
-        });
-
-    const totalPrice = isAddInfluencerMode
-        ? Number(proposalSnapshot?.price ?? 0)
-        : builderTotal;
-    const displayCurrencySymbol =
-        isAddInfluencerMode &&
-        isCampaignDisplayCurrency(proposalSnapshot?.displayCurrency)
-            ? getCampaignCurrencySymbol(proposalSnapshot.displayCurrency)
-            : selectedCurrency?.key ?? "EUR";
+    const totalPrice = calcBuilderTotal({
+        selectedOfferId,
+        selectedOfferPrice,
+        selectedAccounts,
+        selectedBundles,
+        selectedOfferAccountIds,
+        currency: selectedCurrencyCode,
+    });
+    const displayCurrencySymbol = selectedCurrency?.key ?? "EUR";
 
     const hasSelection = Boolean(
             selectedOfferId ||
@@ -104,7 +92,6 @@ export const useCampaignProceedSummary = ({
             selectedBundles.length >= 1,
         );
     const hasAvailablePricing =
-        isAddInfluencerMode ||
         isCampaignSelectionPricingAvailable({
             selectedOfferId,
             selectedOfferPrice,
@@ -125,13 +112,19 @@ export const useCampaignProceedSummary = ({
         const currencySymbol = selectedCurrency?.key ?? "€";
 
         setTotalPrice(totalPrice);
-        setSelectedCurrency(
-            isAddInfluencerMode ? displayCurrencySymbol : currencySymbol,
-        );
+        setSelectedCurrency(currencySymbol);
 
         if (isAddInfluencerMode) {
+            const currentSearchParams = new URLSearchParams(location.search);
+
             navigate(
-                `/client/create-campaign/content?mode=add-influencer&option=${optionIndex}`,
+                buildProposalAddInfluencerUrl({
+                    optionIndex,
+                    currency: selectedCurrencyCode,
+                    pathname: "/client/create-campaign/content",
+                    platform: currentSearchParams.get("platform") ?? undefined,
+                    genre: currentSearchParams.get("genre") ?? undefined,
+                }),
             );
             return;
         }

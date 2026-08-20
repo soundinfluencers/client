@@ -30,7 +30,11 @@ type Props = {
     socialMedia: string,
     payload?: Partial<CampaignContentItem>,
     inheritFromContentId?: string,
-  ) => { contentId: string; firstDescriptionId: string };
+  ) => {
+    contentId: string;
+    firstDescriptionId: string;
+    firstAdditionalBriefId?: string;
+  };
   removeContentItem?: (contentId: string) => void;
 };
 
@@ -51,6 +55,9 @@ const getSelectedRefFromItem = (
   return {
     campaignContentItemId: String(item._id),
     descriptionId: String(item.descriptions?.[0]?._id ?? ""),
+    ...(item.additionalBrief[0]?._id
+      ? { additionalBriefId: item.additionalBrief[0]._id }
+      : {}),
   };
 };
 
@@ -169,7 +176,7 @@ export const ContentTableCell: React.FC<Props> = ({
         ],
         taggedUser: "",
         taggedLink: "",
-        additionalBrief: "",
+        additionalBrief: [],
         profileType: selectedItem?.profileType,
       },
       selectedItem?._id,
@@ -183,6 +190,9 @@ export const ContentTableCell: React.FC<Props> = ({
       setAccountSelectedContent(selectedAccountId, {
         campaignContentItemId: created.contentId,
         descriptionId: created.firstDescriptionId,
+        ...(created.firstAdditionalBriefId
+          ? { additionalBriefId: created.firstAdditionalBriefId }
+          : {}),
       });
     }
   }, [

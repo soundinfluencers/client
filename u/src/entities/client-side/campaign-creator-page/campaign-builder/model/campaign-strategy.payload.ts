@@ -10,6 +10,10 @@ import type {
     CampaignContentItem,
     SelectedCampaignAccount,
 } from "./campaign-builder.types";
+import {
+    normalizeAdditionalBriefVersions,
+    resolveAdditionalBriefId,
+} from "@/entities/client-side/campaign/model/campaign-content";
 
 type BuildStrategyBaseParams = {
     campaignName: string;
@@ -44,21 +48,37 @@ export const requireRegularCampaignDisplayCurrency = (
     return value;
 };
 
-const mapAccountsForStrategy = (accounts: SelectedCampaignAccount[]) =>
+const mapAccountsForStrategy = (
+    accounts: SelectedCampaignAccount[],
+    content: CampaignContentItem[],
+) =>
     accounts.map((account) => ({
         socialAccountId: String(account.accountId ?? ""),
         influencerId: String(account.influencerId ?? ""),
         socialMedia: String(account.socialMedia ?? ""),
         username: String(account.username ?? ""),
         selectedCampaignContentItem: account.selectedCampaignContentItem
-            ? {
+            ? (() => {
+                const selectedContent = content.find(
+                    (item) => String(item._id) === String(
+                        account.selectedCampaignContentItem?.campaignContentItemId,
+                    ),
+                );
+                const additionalBriefId = resolveAdditionalBriefId(
+                    selectedContent?.additionalBrief ?? [],
+                    account.selectedCampaignContentItem.additionalBriefId,
+                );
+
+                return {
                 campaignContentItemId: String(
                     account.selectedCampaignContentItem.campaignContentItemId ?? "",
                 ),
                 descriptionId: String(
                     account.selectedCampaignContentItem.descriptionId ?? "",
                 ),
-            }
+                ...(additionalBriefId ? { additionalBriefId } : {}),
+                };
+            })()
             : undefined,
         dateRequest: String(account.dateRequest ?? "ASAP"),
         profileType: String(account.profileType ?? "community"),
@@ -66,8 +86,9 @@ const mapAccountsForStrategy = (accounts: SelectedCampaignAccount[]) =>
 
 const mapAccountsForCreateCampaign = (
     accounts: BuildStrategyBaseParams["accounts"],
+    content: BuildStrategyBaseParams["content"],
 ) =>
-    mapAccountsForStrategy(accounts).map((mappedAccount, index) => {
+    mapAccountsForStrategy(accounts, content).map((mappedAccount, index) => {
         const bundleId = accounts[index]?.bundleId;
 
         return {
@@ -90,7 +111,9 @@ const mapContentForStrategy = (content: CampaignContentItem[]) =>
         })),
         taggedUser: String(item.taggedUser ?? ""),
         taggedLink: String(item.taggedLink ?? ""),
-        additionalBrief: String(item.additionalBrief ?? ""),
+        additionalBrief: normalizeAdditionalBriefVersions(
+            item.additionalBrief,
+        ),
         profileType: String(item.profileType ?? "community"),
     }));
 
@@ -119,7 +142,7 @@ export const buildStrategyDraftPayload = ({
     step: "strategyTable",
     campaignName: String(campaignName ?? ""),
     socialMedia: resolveStrategySocialMedia(content),
-    addedAccounts: mapAccountsForStrategy(accounts),
+    addedAccounts: mapAccountsForStrategy(accounts, content),
     campaignContent: mapContentForStrategy(content),
 });
 
@@ -143,7 +166,7 @@ export const buildStrategyProposalPayload = ({
         socialMedia: resolveStrategySocialMedia(content),
         campaignPrice: Number(totalPrice),
         displayCurrency,
-        addedAccounts: mapAccountsForCreateCampaign(accounts),
+        addedAccounts: mapAccountsForCreateCampaign(accounts, content),
         campaignContent: mapContentForStrategy(content),
         ...(offerId
             ? {
@@ -206,7 +229,7 @@ export const buildStrategyCreateCampaignPayload = ({
     socialMedia: resolveStrategySocialMedia(content),
     campaignPrice: Number(totalPrice ?? 0),
     displayCurrency,
-    addedAccounts: mapAccountsForCreateCampaign(accounts),
+    addedAccounts: mapAccountsForCreateCampaign(accounts, content),
     campaignContent: mapContentForStrategy(content),
     paymentDetails,
 });

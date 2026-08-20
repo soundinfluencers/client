@@ -12,6 +12,8 @@ import type {
 import type {
     CampaignCurrencyCode,
 } from "@/entities/client-side/campaign-creator-page/campaign-filter/model/campaign-filter.types";
+import { ObjectId } from "bson";
+import { normalizeAdditionalBriefVersions } from "@/entities/client-side/campaign/model/campaign-content";
 
 const isProfileType = (
     value: string | undefined,
@@ -96,6 +98,10 @@ export const mapDraftContentToCampaignContent = (
 ): CampaignContentItem[] =>
     items.map((item) => ({
         ...item,
+        additionalBrief: normalizeAdditionalBriefVersions(
+            item.additionalBrief,
+            { createId: () => new ObjectId().toHexString() },
+        ),
         descriptions: item.descriptions.map((description) => ({
             ...description,
         })),

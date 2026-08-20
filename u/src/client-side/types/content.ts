@@ -8,6 +8,7 @@ export type CampaignDescription = {
 export type SelectedContentRef = {
     campaignContentItemId: MongoId;
     descriptionId: MongoId;
+    additionalBriefId?: MongoId;
 };
 
 export type CampaignContentItem = {
@@ -18,7 +19,7 @@ export type CampaignContentItem = {
     descriptions: CampaignDescription[];
     taggedUser: string;
     taggedLink: string;
-    additionalBrief: string;
+    additionalBrief: Array<{ _id: MongoId; additionalBrief: string }>;
     mediaCache?: Record<string, unknown>;
 };
 

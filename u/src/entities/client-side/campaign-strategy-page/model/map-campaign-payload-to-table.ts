@@ -3,6 +3,7 @@
 type FormSelectedContent = {
     campaignContentItemId: string;
     descriptionId: string;
+    additionalBriefId?: string;
 };
 
 type FormAddedAccount = {
@@ -32,7 +33,7 @@ type FormCampaignContentItem = {
     descriptions: FormDescription[];
     taggedUser: string;
     taggedLink: string;
-    additionalBrief: string;
+    additionalBrief: Array<{ _id: string; additionalBrief: string }>;
 };
 
 export type CampaignStrategyPayload = {
@@ -73,6 +74,14 @@ export const mapCampaignPayloadToTableData = (
                 descriptionId: String(
                     account.selectedCampaignContentItem.descriptionId,
                 ),
+                ...(account.selectedCampaignContentItem.additionalBriefId
+                    ? {
+                        additionalBriefId: String(
+                            account.selectedCampaignContentItem
+                                .additionalBriefId,
+                        ),
+                    }
+                    : {}),
             }
             : null,
         dateRequest: account.dateRequest ?? "ASAP",
@@ -102,7 +111,10 @@ export const mapCampaignPayloadToTableData = (
         })),
         taggedUser: String(item.taggedUser ?? ""),
         taggedLink: String(item.taggedLink ?? ""),
-        additionalBrief: String(item.additionalBrief ?? ""),
+        additionalBrief: item.additionalBrief.map((brief) => ({
+            _id: String(brief._id),
+            additionalBrief: String(brief.additionalBrief ?? ""),
+        })),
         mediaCache: {},
     }));
 

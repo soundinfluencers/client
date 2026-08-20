@@ -15,6 +15,7 @@ type PostContentPayload = {
         selectedCampaignContentItem: {
             campaignContentItemId: string;
             descriptionId: string;
+            additionalBriefId?: string;
         };
         profileType?: "creator" | "community";
         dateRequest?: string;
@@ -31,7 +32,7 @@ type PostContentPayload = {
         }>;
         taggedUser: string;
         taggedLink: string;
-        additionalBrief: string;
+        additionalBrief: Array<{ _id: string; additionalBrief: string }>;
     }>;
 };
 

@@ -263,7 +263,11 @@ export const useCampaignStrategyStore = create<StrategyStore>((set, get) => ({
                 descriptions,
                 taggedUser: String(payload.taggedUser ?? base?.taggedUser ?? ""),
                 taggedLink: String(payload.taggedLink ?? base?.taggedLink ?? ""),
-                additionalBrief: String(payload.additionalBrief ?? base?.additionalBrief ?? ""),
+                additionalBrief: (payload.additionalBrief ?? base?.additionalBrief ?? [])
+                    .map((brief) => ({
+                        _id: createObjectId(),
+                        additionalBrief: String(brief.additionalBrief ?? ""),
+                    })),
                 profileType: payload.profileType ?? base?.profileType,
             };
 
@@ -285,6 +289,7 @@ export const useCampaignStrategyStore = create<StrategyStore>((set, get) => ({
             return {
                 contentId,
                 firstDescriptionId,
+                firstAdditionalBriefId: nextItem.additionalBrief[0]?._id,
             };
         },
 

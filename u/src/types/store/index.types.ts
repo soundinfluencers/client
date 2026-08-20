@@ -214,7 +214,7 @@ export interface CampaignContentItem {
 
   taggedUser: string;
   taggedLink: string;
-  additionalBrief: string;
+  additionalBrief: Array<{ _id: ObjectId; additionalBrief: string }>;
 }
 
 // -------------------------
@@ -224,6 +224,7 @@ export interface CampaignContentItem {
 export interface SelectedContentRef {
   campaignContentItemId: ObjectId;
   descriptionId: ObjectId;
+  additionalBriefId?: ObjectId;
 }
 
 /**

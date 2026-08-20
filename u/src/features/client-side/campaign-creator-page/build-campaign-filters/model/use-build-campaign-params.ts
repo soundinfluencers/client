@@ -21,6 +21,9 @@ import { useLocation } from "react-router-dom";
 import type {
     CampaignCurrencySwitchResult,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
+import {
+    getCampaignCurrencyQueryWriteOptions,
+} from "./campaign-currency-query";
 
 const VIEW_VALUES = ["grid", "table"] as const;
 const METHOD_VALUES = ["and", "or"] as const;
@@ -154,7 +157,10 @@ export const useBuildCampaignParams = ({
                         if (selectionCurrency) {
                             void setParams(
                                 { currency: selectionCurrency },
-                                { history: "replace" },
+                                getCampaignCurrencyQueryWriteOptions({
+                                    search: location.search,
+                                    history: "replace",
+                                }),
                             );
                         }
                     } else {
@@ -179,7 +185,10 @@ export const useBuildCampaignParams = ({
                 if (hasInvalidUrlCurrency) {
                     void setParams(
                         { currency: params.currency },
-                        { history: "replace" },
+                        getCampaignCurrencyQueryWriteOptions({
+                            search: location.search,
+                            history: "replace",
+                        }),
                     );
                 }
                 return;
@@ -191,7 +200,10 @@ export const useBuildCampaignParams = ({
             ) {
                 void setParams(
                     { currency: selectionCurrency },
-                    { history: "replace" },
+                    getCampaignCurrencyQueryWriteOptions({
+                        search: location.search,
+                        history: "replace",
+                    }),
                 ).then(() => {
                     warnCurrencyStateMismatch({
                         origin: "hydration",
@@ -207,7 +219,10 @@ export const useBuildCampaignParams = ({
         if (hasInvalidUrlCurrency) {
             void setParams(
                 { currency: activeCurrencyCode },
-                { history: "replace" },
+                getCampaignCurrencyQueryWriteOptions({
+                    search: location.search,
+                    history: "replace",
+                }),
             );
             return;
         }
@@ -237,7 +252,10 @@ export const useBuildCampaignParams = ({
                 reportCurrencySwitchFailure(result);
                 void setParams(
                     { currency: selectionCurrency },
-                    { history: "replace" },
+                    getCampaignCurrencyQueryWriteOptions({
+                        search: location.search,
+                        history: "replace",
+                    }),
                 );
             } else {
                 warnCurrencyStateMismatch({
@@ -250,6 +268,7 @@ export const useBuildCampaignParams = ({
         }
     }, [
         activeCurrencyCode,
+        location.search,
         params.currency,
         rawUrlCurrency,
         selectionCurrency,
@@ -282,7 +301,10 @@ export const useBuildCampaignParams = ({
 
         void setParams(
             { currency: value },
-            { history: "push" },
+            getCampaignCurrencyQueryWriteOptions({
+                search: location.search,
+                history: "push",
+            }),
         ).then(() => {
             warnCurrencyStateMismatch({
                 origin: "selector",

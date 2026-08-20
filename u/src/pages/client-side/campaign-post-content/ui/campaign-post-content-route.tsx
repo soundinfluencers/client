@@ -9,7 +9,6 @@ import { useProposalAccountsStore } from "@/client-side/store";
 
 import { Breadcrumbs, Container, Loader } from "@/components";
 import {
-    attachExistingContentToAccounts,
     buildProposalAccountsAfterSubmit,
 } from "@/pages/client-side/campaign-post-content/model/build-proposal-accounts.ts";
 import {
@@ -19,6 +18,7 @@ import {
     mapSelectedBundlesToPostContentSummaries,
 } from "@/widgets/client-side/campaign-post-content/model/campaign-post-content-selection.mappers";
 import {
+    buildProposalAddInfluencerUrl,
     isProposalOptionCreateRequested,
     parseProposalOptionCreateContext,
     PROPOSAL_OPTION_CREATE_MODE,
@@ -26,6 +26,13 @@ import {
 import {
     useCreateProposalOptionFromBuilder,
 } from "@/pages/client-side/campaign-post-content/model/use-create-proposal-option-from-builder";
+import {
+    reconcileProposalAccountsFromBuilder,
+    snapshotCampaignBuilderWorkingState,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/proposal-add-influencer-builder";
+import {
+    initializeNewProposalAccountContentSelections,
+} from "@/client-side/widgets/campaign/model/proposal-content-selection";
 
 type GroupKey = "main" | "music" | "press";
 
@@ -90,20 +97,14 @@ export const CampaignPostContentRoute = () => {
     const proposalContent = useProposalAccountsStore(
         (s) => s.contentByOption[optionIndex] ?? EMPTY_CONTENT,
     );
-    const addProposalAccounts = useProposalAccountsStore((s) => s.addAccounts);
-    const mergeProposalContent = useProposalAccountsStore((s) => s.mergeContent);
-    const setPendingTopology = useProposalAccountsStore(
-        (s) => s.setPendingTopology,
+    const commitBuilderWorkingOption = useProposalAccountsStore(
+        (s) => s.commitBuilderWorkingOption,
     );
 
     const selectedAccounts = useCampaignBuilderStore((s) => s.selectedAccounts);
     const selectedBundles = useCampaignBuilderStore((s) => s.selectedBundles);
     const campaignName = useCampaignBuilderStore((s) => s.campaignName);
     const selectedOfferName = useCampaignBuilderStore((s) => s.selectedOfferName);
-    const selectedOfferId = useCampaignBuilderStore((s) => s.selectedOfferId);
-    const selectedOfferAccountIds = useCampaignBuilderStore(
-        (s) => s.selectedOfferAccountIds,
-    );
     const blocksDraft = useCampaignBuilderStore((s) => s.blocksDraft);
     const campaignContent = useCampaignBuilderStore((s) => s.campaignContent);
     const totalPrice = useCampaignBuilderStore((s) => s.totalPrice);
@@ -144,8 +145,12 @@ export const CampaignPostContentRoute = () => {
                 followers: Number(item.followers ?? 0),
                 price: Number(item.price ?? 0),
                 publicPrice: Number(item.price ?? 0),
+                prices: item.prices ? { ...item.prices } : undefined,
 
                 dateRequest: item.dateRequest ?? "ASAP",
+                selectedContent: item.selectedCampaignContentItem ?? null,
+                selectedCampaignContentItem:
+                    item.selectedCampaignContentItem ?? null,
                 source: item.source,
                 bundleId: item.bundleId,
                 countries: item.countries,
@@ -173,40 +178,168 @@ export const CampaignPostContentRoute = () => {
         [selectedBundles, selectedCurrencyCode],
     );
 
-    const accountsForPage = React.useMemo(() => {
-        if (!isAddInfluencerMode) return mappedAccounts;
-
-        return mappedAccounts.filter((selected) => {
-            return !proposalAccounts.some((existing: any) => {
-                return (
-                    String(existing.socialAccountId ?? existing.accountId) ===
-                    String(selected.socialAccountId ?? selected.accountId)
-                );
-            });
-        });
-    }, [isAddInfluencerMode, mappedAccounts, proposalAccounts]);
-
-    const existingGroups = React.useMemo(
-        () => getGroupsFromContent(proposalContent),
-        [proposalContent],
-    );
+    const rawAccountsForPage = React.useMemo(() => {
+        return mappedAccounts;
+    }, [mappedAccounts]);
 
     const selectedGroups = React.useMemo(
-        () => getGroupsFromAccounts(accountsForPage),
-        [accountsForPage],
+        () => getGroupsFromAccounts(rawAccountsForPage),
+        [rawAccountsForPage],
+    );
+
+    const workingContent = React.useMemo(
+        () =>
+            proposalContent.filter((item) =>
+                selectedGroups.has(item.socialMediaGroup as GroupKey),
+            ),
+        [proposalContent, selectedGroups],
+    );
+
+    const initializedAccounts = React.useMemo(
+        () => isAddInfluencerMode
+            ? initializeNewProposalAccountContentSelections({
+                accounts: rawAccountsForPage,
+                currentAccounts: proposalAccounts,
+                contentItems: workingContent,
+            })
+            : {
+                accounts: rawAccountsForPage,
+                unresolvedNewAccountGroups: [] as GroupKey[],
+            },
+        [
+            isAddInfluencerMode,
+            rawAccountsForPage,
+            proposalAccounts,
+            workingContent,
+        ],
+    );
+    const accountsForPage = initializedAccounts.accounts;
+
+    const existingGroups = React.useMemo(
+        () => getGroupsFromContent(workingContent),
+        [workingContent],
     );
 
     const missingGroups = React.useMemo(() => {
-        const result: GroupKey[] = [];
+        const result = new Set<GroupKey>(
+            initializedAccounts.unresolvedNewAccountGroups,
+        );
 
         selectedGroups.forEach((group) => {
             if (!existingGroups.has(group)) {
-                result.push(group);
+                result.add(group);
             }
         });
 
-        return result;
-    }, [selectedGroups, existingGroups]);
+        return [...result];
+    }, [selectedGroups, existingGroups, initializedAccounts]);
+
+    const commitAddInfluencerWorkingOption = React.useCallback(
+        ({
+            preparedAccounts,
+            nextContent,
+        }: {
+            preparedAccounts: any[];
+            nextContent: any[];
+        }) => {
+            const preparedBySocialId = new Map(
+                preparedAccounts.map((account) => [
+                    String(account.socialAccountId ?? account.accountId ?? ""),
+                    account,
+                ] as const),
+            );
+            const builder = useCampaignBuilderStore.getState();
+            const selectedAccountsWithContent = builder.selectedAccounts.map(
+                (account) => {
+                    const prepared = preparedBySocialId.get(account.accountId);
+
+                    return prepared
+                        ? {
+                            ...account,
+                            dateRequest:
+                                prepared.dateRequest ??
+                                account.dateRequest ??
+                                "ASAP",
+                            selectedCampaignContentItem:
+                                prepared.selectedCampaignContentItem ??
+                                prepared.selectedContent ??
+                                account.selectedCampaignContentItem ??
+                                null,
+                        }
+                        : account;
+                },
+            );
+
+            builder.actions.setSelectedAccounts(selectedAccountsWithContent);
+            builder.actions.setCampaignContent(nextContent as any);
+
+            const latestBuilder = useCampaignBuilderStore.getState();
+            const intendedAccounts = reconcileProposalAccountsFromBuilder({
+                builderAccounts: latestBuilder.selectedAccounts,
+                currentAccounts: proposalAccounts as any[],
+            });
+            const selectedOfferId = latestBuilder.selectedOfferId;
+            const selectedOffer = selectedOfferId
+                ? (() => {
+                    const selectedAccountIds = [
+                        ...latestBuilder.selectedOfferAccountIds,
+                    ];
+                    const intendedBySocialId = new Map(
+                        intendedAccounts.map((account) => [
+                            String(
+                                account.socialAccountId ??
+                                account.accountId ??
+                                "",
+                            ),
+                            account,
+                        ] as const),
+                    );
+                    const selectedAddedAccountsIds = selectedAccountIds
+                        .map((accountId) =>
+                            String(
+                                intendedBySocialId.get(accountId)
+                                    ?.addedAccountsId ?? "",
+                            ),
+                        )
+                        .filter(Boolean);
+
+                    return {
+                        offerId: selectedOfferId,
+                        selectedAccountIds,
+                        ...(selectedAddedAccountsIds.length ===
+                            selectedAccountIds.length
+                            ? { selectedAddedAccountsIds }
+                            : {}),
+                    };
+                })()
+                : null;
+
+            commitBuilderWorkingOption(optionIndex, {
+                accounts: intendedAccounts as any,
+                content: nextContent as any,
+                bundles: Object.fromEntries(
+                    latestBuilder.selectedBundles.map((bundle) => [
+                        bundle.bundleId,
+                        bundle.accounts.map((account) => account.accountId),
+                    ]),
+                ),
+                selectedOffer,
+                builderState: snapshotCampaignBuilderWorkingState(
+                    latestBuilder,
+                ),
+                catalogContext: {
+                    platform: searchParams.get("platform") ?? undefined,
+                    genre: searchParams.get("genre") ?? undefined,
+                },
+            });
+        },
+        [
+            commitBuilderWorkingOption,
+            optionIndex,
+            proposalAccounts,
+            searchParams,
+        ],
+    );
 
     React.useEffect(() => {
         if (!isAddInfluencerMode) return;
@@ -217,55 +350,17 @@ export const CampaignPostContentRoute = () => {
             return;
         }
 
-        const applyTopology = (preparedNewAccounts: any[]) => {
-            const preparedBySocialId = new Map(
-                preparedNewAccounts.map((account) => [
-                    String(account.socialAccountId ?? account.accountId ?? ""),
-                    account,
-                ]),
-            );
-            const intendedAccounts = mappedAccounts.map((account) =>
-                preparedBySocialId.get(
-                    String(account.socialAccountId ?? account.accountId ?? ""),
-                ) ?? account,
-            );
-
-            setPendingTopology(optionIndex, {
-                bundles: Object.fromEntries(
-                    selectedBundles.map((bundle) => [
-                        bundle.bundleId,
-                        bundle.accounts.map((account) => account.accountId),
-                    ]),
-                ),
-                ...(selectedOfferId
-                    ? {
-                        selectedOffer: {
-                            offerId: selectedOfferId,
-                            selectedAccountIds: [...selectedOfferAccountIds],
-                        },
-                    }
-                    : {}),
-            });
-            addProposalAccounts(optionIndex, intendedAccounts as any);
-        };
-
         if (!accountsForPage.length) {
-            committedProposalAddKeyRef.current = proposalAddKey;
-            applyTopology([]);
-            clearBuilder?.();
-            navigate(returnTo);
             return;
         }
 
         if (missingGroups.length > 0) return;
 
-        const preparedAccounts = attachExistingContentToAccounts(
-            accountsForPage,
-            proposalContent,
-        );
-
         committedProposalAddKeyRef.current = proposalAddKey;
-        applyTopology(preparedAccounts);
+        commitAddInfluencerWorkingOption({
+            preparedAccounts: accountsForPage,
+            nextContent: workingContent,
+        });
 
         clearBuilder?.();
 
@@ -274,15 +369,9 @@ export const CampaignPostContentRoute = () => {
         isAddInfluencerMode,
         proposalSnapshot,
         accountsForPage,
-        mappedAccounts,
-        proposalContent,
-        selectedBundles,
-        selectedOfferId,
-        selectedOfferAccountIds,
+        workingContent,
         missingGroups.length,
-        optionIndex,
-        addProposalAccounts,
-        setPendingTopology,
+        commitAddInfluencerWorkingOption,
         clearBuilder,
         navigate,
         returnTo,
@@ -324,18 +413,28 @@ export const CampaignPostContentRoute = () => {
                 proposalOptionCreateContext={proposalOptionCreateContext}
                 allowedGroups={isAddInfluencerMode ? missingGroups : undefined}
                 defaultCampaignContent={
-                    isAddInfluencerMode ? proposalContent : campaignContent
+                    isAddInfluencerMode ? workingContent : campaignContent
                 }
                 accounts={accountsForPage}
-                offerAccounts={isAddInfluencerMode ? [] : offerAccounts}
-                bundles={isAddInfluencerMode ? [] : bundleSummaries}
+                offerAccounts={offerAccounts}
+                bundles={bundleSummaries}
                 manualAccounts={manualAccounts}
-                offerName={isAddInfluencerMode ? undefined : selectedOfferName}
+                offerName={selectedOfferName}
                 totalPrice={totalPrice}
-                offerPrice={isAddInfluencerMode ? 0 : offerPrice}
+                offerPrice={offerPrice}
                 defaultCampaignName={campaignName}
                 defaultBlocks={blocksDraft ?? undefined}
                 currency={selectedCurrency}
+                editSelectionUrl={
+                    isAddInfluencerMode && selectedCurrencyCode
+                        ? buildProposalAddInfluencerUrl({
+                            optionIndex,
+                            currency: selectedCurrencyCode,
+                            platform: searchParams.get("platform") ?? undefined,
+                            genre: searchParams.get("genre") ?? undefined,
+                        })
+                        : undefined
+                }
                 isSubmitLocked={
                     isProposalOptionCreateMode &&
                     proposalOptionCreate.isSubmitLocked
@@ -349,7 +448,9 @@ export const CampaignPostContentRoute = () => {
                             : proposalOptionCreate.createdIdentity
                                 ? "Retry loading option"
                                 : "Continue"
-                        : "Continue"
+                        : isAddInfluencerMode
+                            ? "Proceed"
+                            : "Continue"
                 }
                 onSubmitPayload={async (payload) => {
                     if (isAddInfluencerMode) {
@@ -358,61 +459,15 @@ export const CampaignPostContentRoute = () => {
                         }
                         committedProposalAddKeyRef.current = proposalAddKey;
 
-                        const mergedContent = [
-                            ...proposalContent,
-                            ...payload.campaignContent,
-                        ];
-
                         const preparedAccounts = buildProposalAccountsAfterSubmit({
                             sourceAccounts: accountsForPage,
                             payloadAccounts: payload.addedAccounts,
-                            mergedContent,
+                            mergedContent: payload.campaignContent,
                         });
-
-                        mergeProposalContent(
-                            optionIndex,
-                            payload.campaignContent as any,
-                        );
-
-                        const preparedBySocialId = new Map(
-                            preparedAccounts.map((account) => [
-                                String(
-                                    account.socialAccountId ??
-                                    account.accountId ??
-                                    "",
-                                ),
-                                account,
-                            ]),
-                        );
-                        const intendedAccounts = mappedAccounts.map((account) =>
-                            preparedBySocialId.get(
-                                String(
-                                    account.socialAccountId ??
-                                    account.accountId ??
-                                    "",
-                                ),
-                            ) ?? account,
-                        );
-
-                        setPendingTopology(optionIndex, {
-                            bundles: Object.fromEntries(
-                                selectedBundles.map((bundle) => [
-                                    bundle.bundleId,
-                                    bundle.accounts.map((account) => account.accountId),
-                                ]),
-                            ),
-                            ...(selectedOfferId
-                                ? {
-                                    selectedOffer: {
-                                        offerId: selectedOfferId,
-                                        selectedAccountIds: [
-                                            ...selectedOfferAccountIds,
-                                        ],
-                                    },
-                                }
-                                : {}),
+                        commitAddInfluencerWorkingOption({
+                            preparedAccounts,
+                            nextContent: payload.campaignContent,
                         });
-                        addProposalAccounts(optionIndex, intendedAccounts as any);
 
                         clearBuilder?.();
 

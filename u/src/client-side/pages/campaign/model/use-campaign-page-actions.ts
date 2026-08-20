@@ -114,8 +114,10 @@ export const useCampaignPageActions = ({
   const onClickOption = React.useCallback(
     async (optionIndex: number) => {
       if (!campaignIdForActions) return;
+      if (optionIndex === activeOption) return;
 
       try {
+        useUpdateCampaign.getState().reset();
         setIsRequestSent(false);
         setIsRequesting(true);
         setActiveOption(optionIndex);
@@ -144,6 +146,7 @@ export const useCampaignPageActions = ({
     },
     [
       campaignIdForActions,
+      activeOption,
       setActiveOption,
       setIsRequestSent,
       setIsRequesting,
@@ -409,7 +412,7 @@ export const useCampaignPageActions = ({
   );
 
   const updateProposalOption = React.useCallback(async () => {
-    if (!data?.campaignId) return;
+    if (!data?.campaignId) return false;
 
     let patchSucceeded = false;
 
@@ -441,7 +444,7 @@ export const useCampaignPageActions = ({
       if (!patchResult.ok) {
         console.warn("[PROPOSAL PATCH blocked]", patchResult.code, patchResult.message);
         toast.error(patchResult.message);
-        return;
+        return false;
       }
 
       await patchProposalOption(
@@ -463,6 +466,7 @@ export const useCampaignPageActions = ({
 
       toast.success("Proposal campaign updated successfully!");
       setIsRequestSent(true);
+      return true;
     } catch (e) {
       console.error(e);
       if (patchSucceeded) {
@@ -476,6 +480,7 @@ export const useCampaignPageActions = ({
       } else {
         toast.error("Failed to update proposal campaign");
       }
+      return false;
     } finally {
       setIsRequesting(false);
     }

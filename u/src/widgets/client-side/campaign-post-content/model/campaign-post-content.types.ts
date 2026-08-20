@@ -73,7 +73,10 @@ export type BuiltCampaignContentItem = {
     }>;
     taggedUser: string;
     taggedLink: string;
-    additionalBrief: string;
+    additionalBrief: Array<{
+        _id: string;
+        additionalBrief: string;
+    }>;
 };
 
 export type BuiltCampaignContentWithMeta = BuiltCampaignContentItem & {
@@ -95,6 +98,7 @@ export type BuiltAddedAccount = {
     selectedCampaignContentItem: {
         campaignContentItemId: string;
         descriptionId: string;
+        additionalBriefId?: string;
     };
     dateRequest: string;
 };

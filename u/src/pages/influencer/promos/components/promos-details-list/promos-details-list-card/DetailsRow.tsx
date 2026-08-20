@@ -42,7 +42,7 @@ export const DetailsRow: React.FC<Props> = ({ label, value, copyable, linkable, 
       }
     };
   }, []);
-
+  
   return (
     <div className="promos-details-list-card__body-details-item">
       <span className={`promos-details-list-card__body-details-item-label ${icon ? 'promos-details-list-card__body-details-item-label--with-icon' : ''}`}>

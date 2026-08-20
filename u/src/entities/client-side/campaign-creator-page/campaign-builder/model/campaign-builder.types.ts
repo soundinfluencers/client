@@ -16,6 +16,12 @@ export enum CampaignDraftLatestStep {
 export type SelectedCampaignContentRef = {
     campaignContentItemId: string;
     descriptionId: string;
+    additionalBriefId?: string;
+};
+
+export type AdditionalBriefVersion = {
+    _id: string;
+    additionalBrief: string;
 };
 
 export type SelectedCampaignAccount = {
@@ -69,7 +75,7 @@ export type CampaignContentItem = {
     descriptions: CampaignContentDescription[];
     taggedUser: string;
     taggedLink: string;
-    additionalBrief: string;
+    additionalBrief: AdditionalBriefVersion[];
     accountId?: string;
     profileType?: "creator" | "community";
     mediaCache?: any;
@@ -168,6 +174,7 @@ export type CampaignBuilderActions = {
             selectedCampaignContentItem?: {
                 campaignContentItemId: string;
                 descriptionId: string;
+                additionalBriefId?: string;
             } | null;
             dateRequest?: string;
             profileType?: "creator" | "community";

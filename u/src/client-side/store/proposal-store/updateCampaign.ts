@@ -6,7 +6,7 @@ type ContentPatch = Partial<{
   mainLink: string;
   taggedUser: string;
   taggedLink: string;
-  additionalBrief: string;
+  additionalBrief: Array<{ _id: string; additionalBrief: string }>;
   descriptions: Desc[];
 }>;
 

@@ -13,6 +13,10 @@ import {
   decideProposalOverlapRemoval,
   type ProposalOverlapRemovalDecision,
 } from "@/client-side/widgets/campaign/model/proposal-overlap-removal";
+import {
+  decideProposalRowRemoval,
+  executeProposalRowRemovalDecision,
+} from "@/client-side/widgets/campaign/model/proposal-row-removal";
 
 type ExecutableOverlapRemovalDecision = Extract<
   ProposalOverlapRemovalDecision,
@@ -37,9 +41,9 @@ export const ActionCell: React.FC<Props> = ({
   const [isConfirming, setIsConfirming] = React.useState(false);
   const [overlapDecision, setOverlapDecision] =
     React.useState<ExecutableOverlapRemovalDecision | null>(null);
-  const [isOverlapActionPending, setIsOverlapActionPending] =
+  const [isDestructiveActionPending, setIsDestructiveActionPending] =
     React.useState(false);
-  const overlapActionPendingRef = React.useRef(false);
+  const destructiveActionPendingRef = React.useRef(false);
   const accountKey = getAccountKey(data);
 
   const removeAccount = useProposalAccountsStore((s) => s.removeAccount);
@@ -61,7 +65,6 @@ export const ActionCell: React.FC<Props> = ({
   const markPendingDelete = useProposalAccountsStore((s) => s.markPendingDelete);
   const clearPendingDelete = useProposalAccountsStore((s) => s.clearPendingDelete);
 
-  const bundleId = String(data?.bundleId ?? "").trim();
   const snapshot = useProposalAccountsStore(
       (s) => s.optionSnapshotsByIndex?.[optionIndex],
   );
@@ -85,33 +88,21 @@ export const ActionCell: React.FC<Props> = ({
       }),
     [data, accounts, effectiveOffer, optionIndexes],
   );
-  const offerAccountIds = React.useMemo(
-      () => new Set(snapshot?.selectedOffer?.selectedAccountIds?.map(String) ?? []),
-      [snapshot?.selectedOffer?.selectedAccountIds],
+  const rowRemovalDecision = React.useMemo(
+    () =>
+      decideProposalRowRemoval({
+        targetAccount: data,
+        accounts,
+        selectedOffer: effectiveOffer,
+        optionIndexes,
+      }),
+    [data, accounts, effectiveOffer, optionIndexes],
   );
-  const removesOffer = !bundleId && offerAccountIds.has(
-      String(data?.socialAccountId ?? data?.accountId ?? ""),
-  );
-  const remainingAccountsCount = accounts.filter((account: any) => {
-      const accountBundleId = String(account?.bundleId ?? "").trim();
-      const socialAccountId = String(
-          account?.socialAccountId ?? account?.accountId ?? "",
-      );
-
-      if (bundleId) {
-          return accountBundleId !== bundleId || offerAccountIds.has(socialAccountId);
-      }
-
-      if (removesOffer) {
-          return !offerAccountIds.has(socialAccountId) || Boolean(accountBundleId);
-      }
-
-      return getAccountKey(account) !== accountKey;
-  }).length;
-  const canDelete = remainingAccountsCount > 0;
-  const deleteLabel = bundleId
+  const deleteLabel = rowRemovalDecision.kind === "not_removable"
+    ? "Delete?"
+    : rowRemovalDecision.removalKind === "bundle"
       ? "Remove Bundle?"
-      : removesOffer
+      : rowRemovalDecision.removalKind === "offer"
         ? "Remove Offer?"
         : "Delete?";
 
@@ -121,20 +112,50 @@ export const ActionCell: React.FC<Props> = ({
     clearRecentlyAdded(optionIndex, [String(accountKey)]);
   }, [isRecentlyAdded, optionIndex, accountKey, clearRecentlyAdded]);
 
-  const onDelete = (e: React.MouseEvent) => {
+  const onDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (!canDelete) return;
+    if (
+      rowRemovalDecision.kind === "not_removable" ||
+      destructiveActionPendingRef.current ||
+      isMutationPending
+    ) {
+      return;
+    }
 
-    clearPendingDelete(optionIndex, String(accountKey));
-    removeAccount(optionIndex, accountKey);
-    setIsConfirming(false);
+    if (rowRemovalDecision.kind === "delete_option" && !onDeleteOption) {
+      toast.error("This Proposal option cannot be deleted from this view.");
+      return;
+    }
+
+    destructiveActionPendingRef.current = true;
+    setIsDestructiveActionPending(true);
+
+    try {
+      await executeProposalRowRemovalDecision(rowRemovalDecision, {
+        onKeepOption: () => {
+          clearPendingDelete(optionIndex, String(accountKey));
+          removeAccount(optionIndex, accountKey);
+        },
+        onDeleteOption: async () => {
+          await onDeleteOption?.(optionIndex);
+        },
+        onBlockLastOption: () => {
+          toast.error("You cannot delete the last option");
+        },
+      });
+      setIsConfirming(false);
+    } finally {
+      clearPendingDelete(optionIndex, String(accountKey));
+      destructiveActionPendingRef.current = false;
+      setIsDestructiveActionPending(false);
+    }
   };
 
   const onDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (isMutationPending || overlapActionPendingRef.current) return;
+    if (isMutationPending || destructiveActionPendingRef.current) return;
 
     if (fullOverlapDecision.kind === "block_last_option") {
       toast.error(
@@ -151,7 +172,12 @@ export const ActionCell: React.FC<Props> = ({
       return;
     }
 
-    if (!canDelete) return;
+    if (rowRemovalDecision.kind === "block_last_option") {
+      toast.error("You cannot delete the last option");
+      return;
+    }
+
+    if (rowRemovalDecision.kind === "not_removable") return;
 
     markPendingDelete(optionIndex, String(accountKey));
     setIsConfirming(true);
@@ -165,21 +191,21 @@ export const ActionCell: React.FC<Props> = ({
   };
 
   const onCancelOverlapRemoval = () => {
-    if (isOverlapActionPending || isMutationPending) return;
+    if (isDestructiveActionPending || isMutationPending) return;
     setOverlapDecision(null);
   };
 
   const onConfirmOverlapRemoval = async () => {
     if (
       !overlapDecision ||
-      overlapActionPendingRef.current ||
+      destructiveActionPendingRef.current ||
       isMutationPending
     ) {
       return;
     }
 
-    overlapActionPendingRef.current = true;
-    setIsOverlapActionPending(true);
+    destructiveActionPendingRef.current = true;
+    setIsDestructiveActionPending(true);
 
     try {
       if (overlapDecision.kind === "remove_packages") {
@@ -194,16 +220,16 @@ export const ActionCell: React.FC<Props> = ({
 
       setOverlapDecision(null);
     } finally {
-      overlapActionPendingRef.current = false;
-      setIsOverlapActionPending(false);
+      destructiveActionPendingRef.current = false;
+      setIsDestructiveActionPending(false);
     }
   };
 
   const isFullOverlap = fullOverlapDecision.kind !== "not_full_overlap";
   const isDeleteDisabled =
     isMutationPending ||
-    isOverlapActionPending ||
-    (!isFullOverlap && !canDelete);
+    isDestructiveActionPending ||
+    (!isFullOverlap && rowRemovalDecision.kind === "not_removable");
 
   return (
     <>
@@ -222,9 +248,11 @@ export const ActionCell: React.FC<Props> = ({
                   title={
                     fullOverlapDecision.kind === "block_last_option"
                       ? "Removing the last Proposal option is not supported yet"
-                      : canDelete || isFullOverlap
-                        ? "Delete account"
-                        : "You cannot delete the last Proposal account"
+                      : rowRemovalDecision.kind === "block_last_option"
+                        ? "You cannot delete the last option"
+                        : rowRemovalDecision.kind !== "not_removable" || isFullOverlap
+                          ? "Delete account"
+                          : "You cannot delete the last Proposal account"
                   }
               >
                 <img src={trash} alt="" />
@@ -241,7 +269,9 @@ export const ActionCell: React.FC<Props> = ({
                     type="button"
                     onClick={onDelete}
                     className="trash-action__same"
-                    disabled={!canDelete}
+                    disabled={
+                      isMutationPending || isDestructiveActionPending
+                    }
                 >
                   <img src={checkConfirm} alt="" />
                 </button>
@@ -250,6 +280,9 @@ export const ActionCell: React.FC<Props> = ({
                     type="button"
                     onClick={onCancelDelete}
                     className="trash-action__same"
+                    disabled={
+                      isMutationPending || isDestructiveActionPending
+                    }
                 >
                   <img src={x} alt="" />
                 </button>
@@ -262,7 +295,7 @@ export const ActionCell: React.FC<Props> = ({
         <Modal
           isShowCloseButton={false}
           isCloseOnClickOutsideDisabled={
-            isOverlapActionPending || isMutationPending
+            isDestructiveActionPending || isMutationPending
           }
           onClose={onCancelOverlapRemoval}
         >
@@ -279,17 +312,17 @@ export const ActionCell: React.FC<Props> = ({
                 className="btn"
                 text="Cancel"
                 onClick={onCancelOverlapRemoval}
-                isDisabled={isOverlapActionPending || isMutationPending}
+                isDisabled={isDestructiveActionPending || isMutationPending}
               />
               <ButtonMain
                 className="btn"
                 text={
-                  isOverlapActionPending || isMutationPending
+                  isDestructiveActionPending || isMutationPending
                     ? "Deleting..."
                     : "Delete"
                 }
                 onClick={onConfirmOverlapRemoval}
-                isDisabled={isOverlapActionPending || isMutationPending}
+                isDisabled={isDestructiveActionPending || isMutationPending}
               />
             </div>
           </div>

@@ -34,7 +34,7 @@ const content = [{
     }],
     taggedUser: "",
     taggedLink: "",
-    additionalBrief: "",
+    additionalBrief: [],
     profileType: "creator" as const,
 }];
 

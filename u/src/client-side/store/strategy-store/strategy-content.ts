@@ -3,6 +3,7 @@ import { devtools } from "zustand/middleware";
 import type { CampaignAddedAccount } from "@/types/store/index.types";
 import { ObjectId } from "bson";
 import { getGroupBySocial } from "@/client-side/widgets/add-influencer-build-campaign/add-to-proposal/bc-prooced";
+import { normalizeAdditionalBriefVersions } from "@/entities/client-side/campaign/model/campaign-content";
 
 export const getStrategyAccountKey = (n: CampaignAddedAccount) =>
   String((n as any).addedAccountsId ?? (n as any).accountId ?? (n as any)._id);
@@ -86,7 +87,13 @@ export const useStrategyCampaignStore = create<StrategyCampaignStore>()(
           },
           contentByCampaignId: {
             ...state.contentByCampaignId,
-            [key]: serverContent ?? [],
+            [key]: (serverContent ?? []).map((item) => ({
+              ...item,
+              additionalBrief: normalizeAdditionalBriefVersions(
+                item.additionalBrief,
+                { createId: oid },
+              ),
+            })),
           },
         };
       });

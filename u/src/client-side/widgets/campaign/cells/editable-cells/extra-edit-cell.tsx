@@ -2,18 +2,20 @@ import { useUpdateCampaign } from "@/client-side/store";
 import type { TableGroup } from "@/client-side/types/table-types";
 
 import React from "react";
+import { ObjectId } from "bson";
 
 type Props = {
   group: TableGroup;
   contentId?: string;
   baseItem?: any;
   changeView?: boolean
+  account?: any;
 };
 
 export const ExtraFieldsCellsEdit = React.memo(function ExtraFieldsCellsEdit({
   group,
   contentId,
-  baseItem,changeView
+  baseItem,changeView,account
 }: Props) {
   const patch = useUpdateCampaign((s) =>
     contentId ? s.patches[contentId] : undefined,
@@ -36,10 +38,60 @@ export const ExtraFieldsCellsEdit = React.memo(function ExtraFieldsCellsEdit({
     }
   }, [group]);
 
+  const getBriefs = React.useCallback(() => {
+    const value = patch?.additionalBrief ?? baseItem?.additionalBrief;
+    return Array.isArray(value) ? value : [];
+  }, [patch?.additionalBrief, baseItem?.additionalBrief]);
+  const selectedBriefId = String(
+    account?.selectedContent?.additionalBriefId ??
+    account?.selectedCampaignContentItem?.additionalBriefId ??
+    "",
+  );
   const getValue = React.useCallback(
-    (key: (typeof keys)[number]) =>
-      (patch?.[key] ?? baseItem?.[key] ?? "") as string,
-    [patch, baseItem],
+    (key: (typeof keys)[number]) => {
+      const value = patch?.[key] ?? baseItem?.[key] ?? "";
+      if (key !== "additionalBrief") return String(value ?? "");
+      if (typeof value === "string") return value;
+
+      const briefs = Array.isArray(value) ? value : [];
+      return String(
+        briefs.find((brief: any) => String(brief?._id) === selectedBriefId)
+          ?.additionalBrief ?? briefs[0]?.additionalBrief ?? "",
+      );
+    },
+    [patch, baseItem, selectedBriefId],
+  );
+  const updateValue = React.useCallback(
+    (key: (typeof keys)[number], value: string) => {
+      if (key !== "additionalBrief") {
+        setField(contentId!, key, value);
+        return;
+      }
+
+      const briefs = getBriefs();
+      if (!briefs.length) {
+        setField(contentId!, key, [
+          { _id: new ObjectId().toHexString(), additionalBrief: value },
+        ]);
+        return;
+      }
+
+      const targetId = briefs.some(
+        (brief: any) => String(brief?._id) === selectedBriefId,
+      )
+        ? selectedBriefId
+        : String(briefs[0]?._id ?? "");
+      setField(
+        contentId!,
+        key,
+        briefs.map((brief: any) =>
+          String(brief?._id ?? "") === targetId
+            ? { ...brief, additionalBrief: value }
+            : brief,
+        ),
+      );
+    },
+    [contentId, getBriefs, selectedBriefId, setField],
   );
 
   React.useEffect(() => {
@@ -71,7 +123,7 @@ export const ExtraFieldsCellsEdit = React.memo(function ExtraFieldsCellsEdit({
         <td key={key} className="tableBase__td">
           <input
             value={getValue(key)}
-            onChange={(e) => setField(contentId, key, e.target.value)}
+            onChange={(e) => updateValue(key, e.target.value)}
             placeholder={placeholders[key] ?? key}
           />
         </td>

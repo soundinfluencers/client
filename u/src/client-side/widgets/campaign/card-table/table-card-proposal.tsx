@@ -18,9 +18,10 @@ import type { TableRowProposalProps } from "@/client-side/types/table-types";
 import { getAccountKey } from "@/client-side/utils";
 import { useProposalAccountsStore, useUpdateCampaign } from "@/client-side/store";
 import { ActionCell } from "@/client-side/widgets/campaign/cells/action-cells/delete-cell.tsx";
-
-const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
-const MUSIC_NETWORKS = ["spotify", "soundcloud"];
+import {
+  getCompatibleProposalContentItems,
+  getProposalContentGroupBySocial,
+} from "@/client-side/widgets/campaign/model/proposal-content-selection";
 
 type ProposalTableCardProps = Omit<TableRowProposalProps, "campaignId"> & {
   optionIndexes: number[];
@@ -28,15 +29,7 @@ type ProposalTableCardProps = Omit<TableRowProposalProps, "campaignId"> & {
   isMutationPending: boolean;
 };
 
-export const getGroupBySocial = (
-  social: string,
-): "main" | "music" | "press" => {
-  const s = social.toLowerCase();
-
-  if (MAIN_NETWORKS.includes(s)) return "main";
-  if (MUSIC_NETWORKS.includes(s)) return "music";
-  return "press";
-};
+export const getGroupBySocial = getProposalContentGroupBySocial;
 
 export const TableCard = React.memo(function TableCard({
   data,
@@ -76,24 +69,10 @@ export const TableCard = React.memo(function TableCard({
     activeDropdown.key === "postDescription";
 
   const platformItems = React.useMemo(() => {
-    const social = String(data.socialMedia ?? "").toLowerCase();
-
-    const socialItems = (items ?? []).filter(
-      (it: CampaignContentItem) =>
-        String(it.socialMedia ?? "").toLowerCase() === social,
+    return getCompatibleProposalContentItems(
+      data,
+      (items ?? []) as CampaignContentItem[],
     );
-
-    if (socialItems.length) return socialItems;
-
-    const socialGroup = getGroupBySocial(social);
-    const groupItems = (items ?? []).filter(
-      (it: CampaignContentItem) => it.socialMediaGroup === socialGroup,
-    );
-
-    if (social === "instagram") return groupItems;
-    if (socialGroup === "main") return groupItems.slice(0, 1);
-
-    return groupItems;
   }, [items, data.socialMedia]);
 
   const selectedMeta =
@@ -207,6 +186,9 @@ export const TableCard = React.memo(function TableCard({
       setAccountSelectedContent(optionIndex ?? 0, accountKey, {
         campaignContentItemId: String(nextItem?._id ?? ""),
         descriptionId: String(nextDesc?._id ?? ""),
+        ...(nextItem?.additionalBrief?.[0]?._id
+          ? { additionalBriefId: String(nextItem.additionalBrief[0]._id) }
+          : {}),
       });
     },
     [
@@ -268,9 +250,26 @@ export const TableCard = React.memo(function TableCard({
       setAccountSelectedContent(optionIndex ?? 0, accountKey, {
         campaignContentItemId: String(selectedItem?._id ?? ""),
         descriptionId: String(descriptionId ?? ""),
+        ...(selectedMeta?.additionalBriefId
+          ? {
+            additionalBriefId: String(selectedMeta.additionalBriefId),
+          }
+          : selectedItem?.additionalBrief?.[0]?._id
+            ? {
+              additionalBriefId: String(
+                selectedItem.additionalBrief[0]._id,
+              ),
+            }
+            : {}),
       });
     },
-    [setAccountSelectedContent, optionIndex, accountKey, selectedItem],
+    [
+      setAccountSelectedContent,
+      optionIndex,
+      accountKey,
+      selectedItem,
+      selectedMeta?.additionalBriefId,
+    ],
   );
 
   const dateRequestRaw = String((data as any).dateRequest ?? "ASAP");
@@ -314,6 +313,7 @@ export const TableCard = React.memo(function TableCard({
               contentId={contentId}
               baseItem={selectedItem}
               group={group}
+              account={proposalAccount ?? data}
             />
           ) : (
             <ExtraFieldsCells
@@ -321,6 +321,7 @@ export const TableCard = React.memo(function TableCard({
               group={group}
               platformItems={platformItems}
               selectedContent={safeSelectedContent}
+              account={proposalAccount ?? data}
             />
           )}
 
@@ -388,6 +389,7 @@ export const TableCard = React.memo(function TableCard({
               group={group}
               platformItems={platformItems}
               selectedContent={safeSelectedContent}
+              account={proposalAccount ?? data}
             />
           )}
         </>
@@ -480,6 +482,7 @@ export const TableCard = React.memo(function TableCard({
               contentId={contentId}
               baseItem={selectedItem}
               group={group}
+              account={proposalAccount ?? data}
             />
           ) : (
             <ExtraFieldsCells
@@ -487,6 +490,7 @@ export const TableCard = React.memo(function TableCard({
               group={group}
               platformItems={platformItems}
               selectedContent={safeSelectedContent}
+              account={proposalAccount ?? data}
             />
           )}
         </>

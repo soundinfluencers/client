@@ -1,5 +1,7 @@
 import React from "react";
 import type { StrategyRow } from "../../model/campaign-strategy.types";
+import { createObjectId } from "../../model/campaign-strategy.helpers";
+import type { CampaignContentItem } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
 
 type ExtraFieldType =
     | "tag"
@@ -14,7 +16,7 @@ type Props = {
     setContentField?: (
         contentId: string,
         field: "mainLink" | "taggedUser" | "taggedLink" | "additionalBrief",
-        value: string,
+        value: string | CampaignContentItem["additionalBrief"],
     ) => void;
 };
 
@@ -77,7 +79,6 @@ export const ExtraFieldsTableCell: React.FC<Props> = ({
         ? item.additionalBrief
         : [];
     const selectedAdditionalBrief =
-        account?.selectedContentItem?.additionalBrief ??
         additionalBriefOptions.find(
             (brief: any) =>
                 String(brief?._id ?? "") ===
@@ -85,6 +86,7 @@ export const ExtraFieldsTableCell: React.FC<Props> = ({
                     account?.selectedCampaignContentItem?.additionalBriefId ?? "",
                 ),
         )?.additionalBrief ??
+        account?.selectedContentItem?.additionalBrief ??
         (typeof item.additionalBrief === "string"
             ? item.additionalBrief
             : additionalBriefOptions[0]?.additionalBrief ?? "");
@@ -93,9 +95,24 @@ export const ExtraFieldsTableCell: React.FC<Props> = ({
         <input
             className="hidden-text"
             value={selectedAdditionalBrief}
-            onChange={(e) =>
-                setContentField?.(String(item._id), "additionalBrief", e.target.value)
-            }
+            onChange={(e) => {
+                const selectedId = String(
+                    account?.selectedCampaignContentItem?.additionalBriefId ??
+                    additionalBriefOptions[0]?._id ??
+                    "",
+                );
+                const next = additionalBriefOptions.length
+                    ? additionalBriefOptions.map((brief) =>
+                        String(brief._id) === selectedId
+                            ? { ...brief, additionalBrief: e.target.value }
+                            : brief,
+                    )
+                    : [{
+                        _id: createObjectId(),
+                        additionalBrief: e.target.value,
+                    }];
+                setContentField?.(String(item._id), "additionalBrief", next);
+            }}
             placeholder="Additional brief"
         />
     ) : (

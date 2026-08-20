@@ -10,13 +10,14 @@ const buildAdditionalPrefix = (
 ) => `${group}-${socialMedia}-additional-${index}`;
 
 const normalizeItemSignature = (item: CampaignContentItem) => {
+    const additionalBrief = item.additionalBrief?.[0]?.additionalBrief ?? "";
     return JSON.stringify({
         socialMediaGroup: item.socialMediaGroup,
         mainLink: item.mainLink ?? "",
         descriptions: (item.descriptions ?? []).map((d) => d.description ?? ""),
         taggedUser: item.taggedUser ?? "",
         taggedLink: item.taggedLink ?? "",
-        additionalBrief: item.additionalBrief ?? "",
+        additionalBrief,
     });
 };
 
@@ -25,6 +26,7 @@ const writeItemToDraft = (
     prefix: string,
     item: CampaignContentItem,
 ) => {
+    const additionalBrief = item.additionalBrief?.[0]?.additionalBrief ?? "";
     if (item.socialMediaGroup === "main") {
         result[`${prefix}-Content link-0`] = item.mainLink ?? "";
         result[`${prefix}-Story tag-1`] = item.taggedUser ?? "";
@@ -34,21 +36,21 @@ const writeItemToDraft = (
             result[`${prefix}-Postdescription-${index + 1}`] = desc.description ?? "";
         });
 
-        result[`${prefix}-Additional brief-0`] = item.additionalBrief ?? "";
+        result[`${prefix}-Additional brief-0`] = additionalBrief;
     }
 
     if (item.socialMediaGroup === "music") {
         result[`${prefix}-Track link-0`] = item.mainLink ?? "";
         result[`${prefix}-Track title-1`] =
             item.descriptions?.[0]?.description ?? "";
-        result[`${prefix}-Additional brief-2`] = item.additionalBrief ?? "";
+        result[`${prefix}-Additional brief-2`] = additionalBrief;
     }
 
     if (item.socialMediaGroup === "press") {
         result[`${prefix}-Link to music, events, news-0`] = item.mainLink ?? "";
         result[`${prefix}-Link to artwork & press shots-1`] =
             item.descriptions?.[0]?.description ?? "";
-        result[`${prefix}-Additional brief-0`] = item.additionalBrief ?? "";
+        result[`${prefix}-Additional brief-0`] = additionalBrief;
     }
 };
 

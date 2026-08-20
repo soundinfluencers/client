@@ -46,7 +46,7 @@ import {
 import {
     getBundleSelectionBlockReason,
     getSelectedBundleIds,
-    isExactOfferBundleOverlap,
+    isBundleFullyIncludedInOffer,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-selection";
 
 export const BuildCampaign = () => {
@@ -86,24 +86,26 @@ export const BuildCampaign = () => {
 
         if (!selectedOfferId) return includedIds;
 
-        const includeExactBundle = (bundle: {
+        const includeFullyContainedBundle = (bundle: {
             bundleId: string;
             accounts: readonly { accountId: string }[];
         }) => {
             if (
                 !selectedBundleIds.has(bundle.bundleId) &&
-                isExactOfferBundleOverlap(
-                    selectedOfferAccountIds,
+                isBundleFullyIncludedInOffer(
                     bundle,
+                    selectedOfferAccountIds,
                 )
             ) {
                 includedIds.add(bundle.bundleId);
             }
         };
 
-        vm.bundles.forEach(includeExactBundle);
+        vm.bundles.forEach(includeFullyContainedBundle);
         vm.displayCards.forEach((account) =>
-            account.bundlePreviews.forEach(includeExactBundle),
+            account.bundlePreviews.forEach(
+                includeFullyContainedBundle,
+            ),
         );
 
         return includedIds;

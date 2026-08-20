@@ -24,6 +24,12 @@ export type CampaignProfileType = "community" | "creator" | string;
 export type SelectedCampaignContentItem = {
     campaignContentItemId: string;
     descriptionId: string;
+    additionalBriefId?: string;
+};
+
+export type AdditionalBriefVersionDto = {
+    _id: string;
+    additionalBrief: string;
 };
 
 export type CampaignContentDescriptionDto = {
@@ -40,7 +46,7 @@ export type CampaignContentItemDto = {
     descriptions: CampaignContentDescriptionDto[];
     taggedUser: string;
     taggedLink: string;
-    additionalBrief: string;
+    additionalBrief: AdditionalBriefVersionDto[];
     mediaCache?: any;
 };
 
@@ -253,7 +259,7 @@ export type CampaignContentPatchDto = {
     descriptions: CampaignContentDescriptionDto[];
     taggedUser: string;
     taggedLink: string;
-    additionalBrief: string;
+    additionalBrief: AdditionalBriefVersionDto[];
 };
 
 export type CampaignPatchBody = {

@@ -52,12 +52,12 @@ export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
               : null;
           const resolvedValue =
               key === "additionalBrief"
-                  ? account?.selectedContentItem?.additionalBrief ??
+                  ? selectedBrief?.additionalBrief ??
+                    account?.selectedContentItem?.additionalBrief ??
                     (typeof account?.selectedCampaignContentItem
                         ?.additionalBrief === "string"
                         ? account.selectedCampaignContentItem.additionalBrief
                         : undefined) ??
-                    selectedBrief?.additionalBrief ??
                     (typeof rawValue === "string" ? rawValue : "")
                   : rawValue;
           const value = String(resolvedValue ?? "").trim();

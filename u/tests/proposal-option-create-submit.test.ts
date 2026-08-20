@@ -28,7 +28,7 @@ const content = [
         ],
         taggedUser: "",
         taggedLink: "",
-        additionalBrief: "",
+        additionalBrief: [],
         profileType: "creator" as const,
     },
 ];
@@ -77,6 +77,18 @@ test("builds a standalone request from the synchronized Builder snapshot", () =>
     assert.equal(request.addedAccounts.length, 1);
     assert.equal(request.addedAccounts[0].dateRequest, "ASAP");
     assert.equal(request.selectedOffer, undefined);
+});
+
+test("uses the selected Builder EUR currency for the new Option request", () => {
+    const request = buildProposalOptionCreateRequest({
+        context,
+        builder: {
+            ...builder,
+            selectionCurrency: "EUR",
+        },
+    });
+
+    assert.equal(request.displayCurrency, "EUR");
 });
 
 test("keeps Bundle business membership without lifecycle ids", () => {

@@ -7,7 +7,11 @@ import "@/client-side/styles-table/table-base.scss";
 
 import { useCopyShareLinkMutation } from "@/client-side/react-query";
 import { Bar, BarSection } from "@/client-side/ui";
-import { useFetchCampaign, useUpdateCampaign } from "@/client-side/store";
+import {
+  useFetchCampaign,
+  useProposalAccountsStore,
+  useUpdateCampaign,
+} from "@/client-side/store";
 
 import { CampaignPageHeader } from "./ui/campaign-page-header";
 import { CampaignPageControls } from "./ui/campaign-page-controls";
@@ -19,6 +23,12 @@ import { useCampaignPageActions } from "./model/use-campaign-page-actions";
 import { getBarComponentKind } from "./model/campaign-page.utils";
 import { CampaignPageContent } from "@/client-side/widgets/campaign/campaign-page-content.tsx";
 import { patchCampaign } from "@/api/client/campaign/campaign.api";
+import {
+  decideProposalOptionSwitchIntent,
+  discardBeforeProposalOptionSwitch,
+  isProposalOptionDirty,
+  saveBeforeProposalOptionSwitch,
+} from "./model/proposal-option-dirty";
 
 type VisibilityState = {
   isCpmAndResultHidden: boolean;
@@ -79,13 +89,145 @@ export const CampaignPage = () => {
     setIsRequestSent,
     setIsRequestingPDF,
   });
+  const {
+    onClickOption,
+    updateProposalOption,
+  } = actions;
 
   const patches = useUpdateCampaign((s) => s.patches);
   const hasStructuralChanges = useUpdateCampaign((s) => s.hasStructuralChanges);
+  const proposalSnapshot = useProposalAccountsStore(
+    (state) => state.optionSnapshotsByIndex[activeOption],
+  );
+  const proposalAccounts = useProposalAccountsStore(
+    (state) => state.accountsByOption[activeOption],
+  );
+  const proposalContent = useProposalAccountsStore(
+    (state) => state.contentByOption[activeOption],
+  );
+  const pendingBundleMembership = useProposalAccountsStore(
+    (state) => state.pendingBundleMembershipByOption[activeOption],
+  );
+  const selectedOfferChanges = useProposalAccountsStore(
+    (state) => state.selectedOfferChangeByOption,
+  );
+  const [pendingTargetOptionIndex, setPendingTargetOptionIndex] =
+    React.useState<number | null>(null);
+  const [isDirtySwitchSaving, setIsDirtySwitchSaving] = React.useState(false);
 
   const isDirty = React.useMemo(() => {
-    return Object.keys(patches ?? {}).length > 0 || hasStructuralChanges;
-  }, [patches, hasStructuralChanges]);
+    if (data?.kind !== "proposal") {
+      return Object.keys(patches ?? {}).length > 0 || hasStructuralChanges;
+    }
+
+    const hasSelectedOfferChange = Object.prototype.hasOwnProperty.call(
+      selectedOfferChanges,
+      activeOption,
+    );
+
+    return isProposalOptionDirty({
+      snapshot: proposalSnapshot,
+      accounts: proposalAccounts ?? [],
+      content: proposalContent ?? [],
+      patches,
+      pendingBundleMembership,
+      ...(hasSelectedOfferChange
+        ? { selectedOfferChange: selectedOfferChanges[activeOption] }
+        : {}),
+    });
+  }, [
+    data?.kind,
+    patches,
+    hasStructuralChanges,
+    selectedOfferChanges,
+    activeOption,
+    proposalSnapshot,
+    proposalAccounts,
+    proposalContent,
+    pendingBundleMembership,
+  ]);
+
+  const closeDirtySwitchModal = React.useCallback(() => {
+    if (isDirtySwitchSaving) return;
+    setPendingTargetOptionIndex(null);
+  }, [isDirtySwitchSaving]);
+
+  const handleOptionIntent = React.useCallback(
+    (targetOptionIndex: number) => {
+      const decision = decideProposalOptionSwitchIntent({
+        activeOptionIndex: activeOption,
+        targetOptionIndex,
+        isDirty,
+      });
+
+      if (decision.kind === "no_op") return;
+      if (decision.kind === "confirm") {
+        setPendingTargetOptionIndex(decision.targetOptionIndex);
+        return;
+      }
+
+      void onClickOption(decision.targetOptionIndex);
+    },
+    [activeOption, isDirty, onClickOption],
+  );
+
+  const discardAndSwitchOption = React.useCallback(async () => {
+    const targetOptionIndex = pendingTargetOptionIndex;
+    if (targetOptionIndex === null || isDirtySwitchSaving) return;
+
+    const discarded = await discardBeforeProposalOptionSwitch({
+      targetOptionIndex,
+      resetHistoricalState: () => useUpdateCampaign.getState().reset(),
+      restoreCurrentOption: () => useProposalAccountsStore
+        .getState()
+        .restoreOptionFromSnapshot(activeOption),
+      switchOption: async (optionIndex) => {
+        setPendingTargetOptionIndex(null);
+        await onClickOption(optionIndex);
+      },
+    });
+
+    if (!discarded) setPendingTargetOptionIndex(null);
+  }, [
+    pendingTargetOptionIndex,
+    isDirtySwitchSaving,
+    activeOption,
+    onClickOption,
+  ]);
+
+  const saveAndSwitchOption = React.useCallback(async () => {
+    const targetOptionIndex = pendingTargetOptionIndex;
+    if (targetOptionIndex === null || isDirtySwitchSaving) return;
+
+    setIsDirtySwitchSaving(true);
+
+    let switched = false;
+    let modalResolvedBeforeSwitch = false;
+    try {
+      switched = await saveBeforeProposalOptionSwitch({
+        targetOptionIndex,
+        saveCurrentOption: updateProposalOption,
+        switchOption: async (optionIndex) => {
+          modalResolvedBeforeSwitch = true;
+          setIsDirtySwitchSaving(false);
+          setPendingTargetOptionIndex(null);
+          await onClickOption(optionIndex);
+        },
+      });
+    } finally {
+      if (!modalResolvedBeforeSwitch) {
+        setIsDirtySwitchSaving(false);
+        setPendingTargetOptionIndex(null);
+      }
+    }
+
+    return switched;
+  }, [
+    pendingTargetOptionIndex,
+    isDirtySwitchSaving,
+    updateProposalOption,
+    onClickOption,
+  ]);
 
   const isVisibilityDirty = React.useMemo(() => {
     if (!data) return false;
@@ -237,7 +379,7 @@ export const CampaignPage = () => {
             setFlag={setFlag}
             optionIndexes={actions.optionIndexes}
             activeOption={activeOption}
-            onClickOption={actions.onClickOption}
+            onClickOption={handleOptionIntent}
             onDeleteOption={actions.onDeleteOption}
             onOpenOptionModal={() => setOptionModal(true)}
             onCopyShareLink={() => {
@@ -290,6 +432,11 @@ export const CampaignPage = () => {
         onAddOptionNo={actions.onStartProposalOptionCreate}
         onAddOptionYes={actions.onCloneOption}
         isPending={isRequesting}
+        isDirtySwitchModalOpen={pendingTargetOptionIndex !== null}
+        isDirtySwitchSaving={isDirtySwitchSaving}
+        onCloseDirtySwitchModal={closeDirtySwitchModal}
+        onSaveDirtySwitch={saveAndSwitchOption}
+        onDiscardDirtySwitch={discardAndSwitchOption}
       />
     </>
   );

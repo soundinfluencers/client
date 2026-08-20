@@ -8,7 +8,7 @@ import type {
 import {
     calculateCampaignSelectionTotal,
     getBundleSelectionBlockReason,
-    isExactOfferBundleOverlap,
+    isBundleFullyIncludedInOffer,
     selectBundleFromCampaignSelection,
     selectOfferFromCampaignSelection,
 } from "../src/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder-selection.ts";
@@ -83,39 +83,57 @@ const selectOffer = (
         },
     });
 
-for (const [offerAccountIds, bundleAccountIds, expected] of [
+for (const [bundleAccountIds, offerAccountIds, expected] of [
     [["A", "B", "C"], ["A", "B", "C"], true],
-    [["C", "A", "B"], ["A", "B", "C"], true],
+    [["A", "B", "C"], ["A", "B", "C", "D"], true],
+    [["C", "A", "B"], ["A", "B", "C", "D", "E"], true],
+    [["A", "B", "C"], ["A", "B", "D", "E"], false],
+    [["C", "D", "E"], ["A", "B", "C", "D"], false],
     [["A", "B", "C", "D"], ["A", "B", "C"], false],
-    [["A", "B"], ["A", "B", "C"], false],
-    [["A", "B", "C"], ["A", "B", "D"], false],
 ] as const) {
-    test(`exact Offer/Bundle Set equality: ${offerAccountIds.join("")} / ${bundleAccountIds.join("")}`, () => {
+    test(`Bundle subset of Offer: ${bundleAccountIds.join("")} / ${offerAccountIds.join("")}`, () => {
         assert.equal(
-            isExactOfferBundleOverlap(
-                offerAccountIds,
+            isBundleFullyIncludedInOffer(
                 createBundle("bundle", bundleAccountIds),
+                offerAccountIds,
             ),
             expected,
         );
     });
 }
 
-test("exact equality normalizes duplicate business account IDs", () => {
+test("Bundle inclusion normalizes duplicate business account IDs", () => {
     assert.equal(
-        isExactOfferBundleOverlap(
-            ["A", "A", "B", "C"],
+        isBundleFullyIncludedInOffer(
             createBundle("bundle", ["C", "B", "B", "A"]),
+            ["A", "A", "B", "C", "D"],
         ),
         true,
     );
 });
 
-test("Offer-first blocks an exact Bundle and leaves Offer-only total", () => {
+test("empty or malformed Bundle membership is not treated as included", () => {
+    assert.equal(
+        isBundleFullyIncludedInOffer(
+            createBundle("empty-bundle", []),
+            ["A", "B"],
+        ),
+        false,
+    );
+    assert.equal(
+        isBundleFullyIncludedInOffer(
+            createBundle("malformed-bundle", ["A", ""]),
+            ["A", "B"],
+        ),
+        false,
+    );
+});
+
+test("Offer-first blocks a fully-contained Bundle and leaves Offer-only total", () => {
     const bundle = createBundle("bundle-abc", ["A", "B", "C"]);
     const state = {
         ...createSelectionState(),
-        ...selectOffer(createSelectionState(), ["A", "B", "C"]),
+        ...selectOffer(createSelectionState(), ["A", "B", "C", "D"]),
     };
     const beforeBlockedChoose = structuredClone(state);
 
@@ -151,7 +169,7 @@ test("Offer-first blocks an exact Bundle and leaves Offer-only total", () => {
     );
 });
 
-test("Bundle-first exact transition selects Offer and removes Bundle in one patch", () => {
+test("Bundle-first subset transition selects Offer and removes Bundle in one patch", () => {
     const bundle = createBundle("bundle-abc", ["A", "B", "C"]);
     const initialState = createSelectionState();
     const bundlePatch = selectBundleFromCampaignSelection({
@@ -167,7 +185,7 @@ test("Bundle-first exact transition selects Offer and removes Bundle in one patc
     };
     const offerPatch = selectOffer(
         bundleSelectedState,
-        ["A", "B", "C"],
+        ["A", "B", "C", "D"],
     );
 
     assert.equal(offerPatch.selectedOfferId, "offer-1");
@@ -185,27 +203,49 @@ test("Bundle-first exact transition selects Offer and removes Bundle in one patc
     );
 });
 
-test("Bundle-first atomically removes only exact Bundles when Offer is selected", () => {
-    const exactBundle = createBundle("bundle-abc", ["A", "B", "C"]);
-    const secondExactBundle = createBundle(
-        "bundle-abc-copy",
-        ["C", "A", "B"],
-    );
-    const partialBundle = createBundle("bundle-cde", ["C", "D", "E"], 400);
+test("Offer selection removes every contained Bundle and preserves a true partial Bundle", () => {
+    const firstIncludedBundle = createBundle("bundle-ab", ["A", "B"]);
+    const secondIncludedBundle = createBundle("bundle-cd", ["C", "D"]);
+    const partialBundle = createBundle("bundle-def", ["D", "E", "F"], 400);
     const before = {
         ...createSelectionState(),
         selectionCurrency: "EUR" as const,
         selectedBundles: [
-            exactBundle,
-            secondExactBundle,
+            firstIncludedBundle,
+            secondIncludedBundle,
             partialBundle,
         ],
     };
-    const patch = selectOffer(before, ["A", "B", "C"]);
+    const patch = selectOffer(before, ["A", "B", "C", "D", "E"]);
 
     assert.equal(patch.selectedOfferId, "offer-1");
     assert.deepEqual(
         patch.selectedBundles?.map((bundle) => bundle.bundleId),
+        ["bundle-def"],
+    );
+    assert.equal(
+        calculateCampaignSelectionTotal({
+            offerPrice: patch.selectedOfferPrice ?? 0,
+            selectedAccounts: patch.selectedAccounts ?? [],
+            selectedBundles: patch.selectedBundles ?? [],
+            selectedOfferAccountIds: patch.selectedOfferAccountIds ?? [],
+            currency: "EUR",
+        }),
+        2200,
+    );
+});
+
+test("true partial overlap remains selected and keeps existing pricing semantics", () => {
+    const bundle = createBundle("bundle-cde", ["C", "D", "E"], 400);
+    const before = {
+        ...createSelectionState(),
+        selectionCurrency: "EUR" as const,
+        selectedBundles: [bundle],
+    };
+    const patch = selectOffer(before, ["A", "B", "C", "D"]);
+
+    assert.deepEqual(
+        patch.selectedBundles?.map((item) => item.bundleId),
         ["bundle-cde"],
     );
     assert.equal(
@@ -216,32 +256,7 @@ test("Bundle-first atomically removes only exact Bundles when Offer is selected"
             selectedOfferAccountIds: patch.selectedOfferAccountIds ?? [],
             currency: "EUR",
         }),
-        2300,
-    );
-});
-
-test("partial overlap remains selected and keeps existing pricing semantics", () => {
-    const bundle = createBundle("bundle-abc", ["A", "B", "C"]);
-    const before = {
-        ...createSelectionState(),
-        selectionCurrency: "EUR" as const,
-        selectedBundles: [bundle],
-    };
-    const patch = selectOffer(before, ["A", "B", "C", "D"]);
-
-    assert.deepEqual(
-        patch.selectedBundles?.map((item) => item.bundleId),
-        ["bundle-abc"],
-    );
-    assert.equal(
-        calculateCampaignSelectionTotal({
-            offerPrice: patch.selectedOfferPrice ?? 0,
-            selectedAccounts: patch.selectedAccounts ?? [],
-            selectedBundles: patch.selectedBundles ?? [],
-            selectedOfferAccountIds: patch.selectedOfferAccountIds ?? [],
-            currency: "EUR",
-        }),
-        1950,
+        2200,
     );
 });
 
@@ -252,23 +267,23 @@ test("removing or replacing Offer never restores an auto-unselected Bundle", () 
         selectionCurrency: "EUR" as const,
         selectedBundles: [bundle],
     };
-    const exactOfferState = {
+    const fullyContainedOfferState = {
         ...before,
-        ...selectOffer(before, ["A", "B", "C"]),
+        ...selectOffer(before, ["A", "B", "C", "D"]),
     };
-    const removedOfferPatch = selectOffer(exactOfferState, []);
+    const removedOfferPatch = selectOffer(fullyContainedOfferState, []);
     const replacedOfferPatch = selectOffer(
-        exactOfferState,
-        ["A", "B", "C", "D"],
+        fullyContainedOfferState,
+        ["A", "B", "D", "E"],
         "offer-2",
     );
 
     assert.deepEqual(removedOfferPatch.selectedBundles, undefined);
     assert.equal(removedOfferPatch.selectedOfferId, null);
-    assert.deepEqual(exactOfferState.selectedBundles, []);
+    assert.deepEqual(fullyContainedOfferState.selectedBundles, []);
     assert.deepEqual(replacedOfferPatch.selectedBundles, []);
     assert.equal(
-        isExactOfferBundleOverlap(["A", "B", "C", "D"], bundle),
+        isBundleFullyIncludedInOffer(bundle, ["A", "B", "D", "E"]),
         false,
     );
 });

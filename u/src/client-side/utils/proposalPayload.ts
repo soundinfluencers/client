@@ -199,6 +199,10 @@ const cloneContentForSocial = (template: AnyContent, socialMedia: string) => {
       _id: objectId(),
       description: String(d.description ?? ""),
     })),
+    additionalBrief: (template.additionalBrief ?? []).map((brief: any) => ({
+      _id: objectId(),
+      additionalBrief: String(brief?.additionalBrief ?? ""),
+    })),
   };
 
   return cloned;
@@ -209,7 +213,7 @@ type ContentPatch = Partial<{
   mainLink: string;
   taggedUser: string;
   taggedLink: string;
-  additionalBrief: string;
+  additionalBrief: Array<{ _id: string; additionalBrief: string }>;
   descriptions: Desc[];
 }>;
 

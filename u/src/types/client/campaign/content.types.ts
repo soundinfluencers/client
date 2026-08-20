@@ -14,12 +14,13 @@ export interface CampaignContentItem {
   descriptions: CampaignContentDescription[];
   taggedUser: string;
   taggedLink: string;
-  additionalBrief: string;
+  additionalBrief: Array<{ _id: ObjectId; additionalBrief: string }>;
 }
 
 export interface SelectedContentRef {
   campaignContentItemId: ObjectId;
   descriptionId: ObjectId;
+  additionalBriefId?: ObjectId;
 }
 
 export interface SelectedCampaignContentItemSnapshot {

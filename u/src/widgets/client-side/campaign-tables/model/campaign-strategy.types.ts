@@ -80,7 +80,7 @@ export type StrategyStoreActions = {
     setContentField: (
         contentId: string,
         field: "mainLink" | "taggedUser" | "taggedLink" | "additionalBrief",
-        value: string,
+        value: string | CampaignContentItem["additionalBrief"],
     ) => void;
 
     setContentDescriptions: (
@@ -106,6 +106,7 @@ export type StrategyStoreActions = {
     ) => {
         contentId: string;
         firstDescriptionId: string;
+        firstAdditionalBriefId?: string;
     };
 
     removeContentItem: (contentId: string) => void;

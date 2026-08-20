@@ -461,7 +461,9 @@ export const buildCampaignContentFromBlocks = (
                 })),
                 taggedUser: block.fields.taggedUser.trim(),
                 taggedLink: block.fields.taggedLink.trim(),
-                additionalBrief: block.fields.additionalBrief.trim(),
+                additionalBrief: block.fields.additionalBrief.trim()
+                    ? [{ _id: oid(), additionalBrief: block.fields.additionalBrief.trim() }]
+                    : [],
                 meta: {
                     blockId: block.id,
                     platform: block.platform,
@@ -494,7 +496,9 @@ export const buildCampaignContentFromBlocks = (
                     })),
                     taggedUser: "",
                     taggedLink: "",
-                    additionalBrief: block.fields.additionalBrief.trim(),
+                    additionalBrief: block.fields.additionalBrief.trim()
+                        ? [{ _id: oid(), additionalBrief: block.fields.additionalBrief.trim() }]
+                        : [],
                     meta: {
                         blockId: block.id,
                         platform: block.platform,
@@ -527,7 +531,9 @@ export const buildCampaignContentFromBlocks = (
                 })),
                 taggedUser: "",
                 taggedLink: block.fields.taggedLink.trim(),
-                additionalBrief: block.fields.additionalBrief.trim(),
+                additionalBrief: block.fields.additionalBrief.trim()
+                    ? [{ _id: oid(), additionalBrief: block.fields.additionalBrief.trim() }]
+                    : [],
                 meta: {
                     blockId: block.id,
                     platform: block.platform,
@@ -604,6 +610,7 @@ export const buildAddedAccountsFromBlocks = ({
                 selectedCampaignContentItem: {
                     campaignContentItemId: contentItem._id,
                     descriptionId: contentItem.descriptions[0]?._id ?? "",
+                    additionalBriefId: contentItem.additionalBrief[0]?._id,
                 },
                 profileType: account.profileType,
                 dateRequest: account.dateRequest ?? "ASAP",
@@ -661,6 +668,10 @@ export const reuseCampaignContentIds = ({
             descriptions: item.descriptions.map((description, index) => ({
                 ...description,
                 _id: previous.descriptions[index]?._id ?? description._id,
+            })),
+            additionalBrief: item.additionalBrief.map((brief, index) => ({
+                ...brief,
+                _id: previous.additionalBrief[index]?._id ?? brief._id,
             })),
         };
     });
@@ -957,7 +968,9 @@ export const buildBlocksFromCampaignContent = ({
                         first.socialMediaGroup === "music"
                             ? ""
                             : String(first.taggedLink ?? ""),
-                    additionalBrief: String(first.additionalBrief ?? ""),
+                    additionalBrief: Array.isArray(first.additionalBrief)
+                        ? String(first.additionalBrief[0]?.additionalBrief ?? "")
+                        : String(first.additionalBrief ?? ""),
                 },
             };
         },

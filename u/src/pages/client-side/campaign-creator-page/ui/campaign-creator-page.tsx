@@ -181,7 +181,7 @@ export const CampaignCreatorPage: React.FC = () => {
 
                 <ButtonMain
                     className={styles.btn}
-                    text={isAddInfluencerMode ? "Add account" : "Proceed"}
+                    text="Proceed"
                     onClick={handleProceed}
                     isDisabled={!canProceed}
                 />

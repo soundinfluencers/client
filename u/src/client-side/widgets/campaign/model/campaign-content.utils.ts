@@ -63,7 +63,7 @@ export const ensureContentGroupsFromAccounts = (
             descriptions: [],
             taggedUser: "",
             taggedLink: "",
-            additionalBrief: "",
+            additionalBrief: [],
         });
     });
 

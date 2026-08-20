@@ -4,6 +4,7 @@ import type { CampaignAddedAccount } from "@/types/store/index.types";
 import { ObjectId } from "bson";
 import { getGroupBySocial } from "@/client-side/widgets/add-influencer-build-campaign/add-to-proposal/bc-prooced";
 import { buildProposalPatchBody, pickPrice } from "@/client-side/utils";
+import { normalizeAdditionalBriefVersions } from "@/entities/client-side/campaign/model/campaign-content";
 
 export const getDraftAccountKey = (n: CampaignAddedAccount | any) =>
     String(
@@ -112,7 +113,13 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
           },
           contentByCampaignId: {
             ...state.contentByCampaignId,
-            [key]: serverContent ?? [],
+            [key]: (serverContent ?? []).map((item) => ({
+              ...item,
+              additionalBrief: normalizeAdditionalBriefVersions(
+                item.additionalBrief,
+                { createId: oid },
+              ),
+            })),
           },
         };
       });
@@ -234,6 +241,12 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
                   ? {
                     campaignContentItemId: String(item._id),
                     descriptionId: String(item.descriptions[0]._id),
+                    ...(item.additionalBrief?.[0]?._id
+                      ? {
+                        additionalBriefId:
+                          item.additionalBrief[0]._id,
+                      }
+                      : {}),
                   }
                   : null,
           dateRequest: a.dateRequest ?? "ASAP",
@@ -357,7 +370,10 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
 
           taggedUser: base?.taggedUser ?? "",
           taggedLink: base?.taggedLink ?? "",
-          additionalBrief: base?.additionalBrief ?? "",
+          additionalBrief: (base?.additionalBrief ?? []).map((brief) => ({
+            _id: oid(),
+            additionalBrief: brief.additionalBrief ?? "",
+          })),
           descriptions: (base?.descriptions ?? []).map((d) => ({
             _id: oid(),
             description: d?.description ?? "",

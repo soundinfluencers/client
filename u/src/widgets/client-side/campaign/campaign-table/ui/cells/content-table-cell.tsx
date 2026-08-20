@@ -36,6 +36,7 @@ type Props = {
     ) => {
         contentId: string;
         firstDescriptionId: string;
+        firstAdditionalBriefId?: string;
     };
     removeContentItem?: (contentId: string) => void;
 };
@@ -78,6 +79,9 @@ const getSelectedRefFromItem = (
     return {
         campaignContentItemId: String(item._id),
         descriptionId: String(item.descriptions?.[0]?._id ?? ""),
+        ...(item.additionalBrief[0]?._id
+            ? { additionalBriefId: item.additionalBrief[0]._id }
+            : {}),
     };
 };
 
@@ -207,7 +211,7 @@ export const ContentTableCell: React.FC<Props> = ({
                 ],
                 taggedUser: "",
                 taggedLink: "",
-                additionalBrief: "",
+                additionalBrief: [],
                 profileType: selectedItem?.profileType ?? row.account.profileType,
             },
             selectedItem?._id,
@@ -221,6 +225,11 @@ export const ContentTableCell: React.FC<Props> = ({
             setAccountSelectedContent(selectedAccountKey, {
                 campaignContentItemId: created.contentId,
                 descriptionId: created.firstDescriptionId,
+                ...(created.firstAdditionalBriefId
+                    ? {
+                        additionalBriefId: created.firstAdditionalBriefId,
+                    }
+                    : {}),
             });
         }
     }, [

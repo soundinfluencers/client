@@ -19,6 +19,10 @@
   color: vars.$gray-dark;
 }
 
+.cardInteractive {
+  cursor: pointer;
+}
+
 .detailsPanel {
   display: flex;
   flex-direction: column;

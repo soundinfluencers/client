@@ -1,5 +1,6 @@
 import type {
   fieldsConfig,
+  socialMediaType,
   TDetailsField,
   TPromoDetailsCardModel,
   TPromoStatus,
@@ -451,12 +452,18 @@ const COMPLETED_FIELDS: fieldsConfig = {
   ],
 };
 
+export const getPromoFieldsBySocialMedia = (
+  socialMedia: socialMediaType,
+  status: TPromoStatus,
+): TDetailsField[] => {
+  if (status === "completed") return COMPLETED_FIELDS[socialMedia];
+  if (status === "distributing") return DISTRIBUTING_FIELDS[socialMedia];
+
+  return NEW_PROMOS_FIELDS[socialMedia];
+};
+
 export const getPromoFields = (
   promo: TPromoDetailsCardModel,
   status: TPromoStatus,
-): TDetailsField[] => {
-  if (status === "completed") return COMPLETED_FIELDS[promo.accountSocialMedia];
-  if (status === "distributing") return DISTRIBUTING_FIELDS[promo.accountSocialMedia];
-
-  return NEW_PROMOS_FIELDS[promo.accountSocialMedia];
-};
+): TDetailsField[] =>
+  getPromoFieldsBySocialMedia(promo.accountSocialMedia, status);

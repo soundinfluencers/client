@@ -6,14 +6,37 @@ import { ObjectId } from "bson";
 import {useUpdateCampaign} from "@/client-side/store";
 import type {
   ProposalOptionDto,
+  ProposalAddedAccountDto,
   ProposalSelectedOfferInput,
 } from "@/entities/client-side/campaign/model/campaign-api.types.ts";
 import {
   removeFullOverlapAccounts,
   type FullOfferBundleOverlap,
 } from "@/client-side/widgets/campaign/model/proposal-overlap-removal";
+import type {
+  HydratedCampaignBuilderDraftState,
+} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
+import type { AdditionalBriefVersion } from "@/entities/client-side/campaign/model/campaign-content";
+import {
+  normalizeAdditionalBriefVersions,
+  resolveAdditionalBriefId,
+} from "@/entities/client-side/campaign/model/campaign-content";
 
 type PendingBundleMembership = Record<string, string[]>;
+
+type ProposalBuilderCatalogContext = {
+  platform?: string;
+  genre?: string;
+};
+
+type CommitBuilderWorkingOptionPayload = {
+  accounts: CampaignAddedAccount[];
+  content: CampaignContentItem[];
+  bundles: PendingBundleMembership;
+  selectedOffer: ProposalSelectedOfferInput | null;
+  builderState: HydratedCampaignBuilderDraftState;
+  catalogContext?: ProposalBuilderCatalogContext;
+};
 
 export const getAccountKey = (n: CampaignAddedAccount) =>
     String(
@@ -34,11 +57,12 @@ const oid = () => new ObjectId().toHexString();
 type CampaignContentItem = {
   _id: string;
   socialMedia: string;
+  profileType?: "creator" | "community";
   socialMediaGroup: "main" | "music" | "press";
   mainLink: string;
   taggedUser: string;
   taggedLink: string;
-  additionalBrief: string;
+  additionalBrief: AdditionalBriefVersion[];
   descriptions: Array<{
     _id: string;
     description: string;
@@ -53,7 +77,16 @@ type ProposalAccountsStore = {
     number,
     ProposalSelectedOfferInput | null
   >;
+  builderWorkingStateByOption: Record<
+    number,
+    HydratedCampaignBuilderDraftState
+  >;
+  builderCatalogContextByOption: Record<
+    number,
+    ProposalBuilderCatalogContext
+  >;
   setOptionSnapshot: (option: ProposalOptionDto) => void;
+  restoreOptionFromSnapshot: (optionIndex: number) => boolean;
   recentlyAddedKeysByOption: Record<number, Record<string, true>>;
   markRecentlyAdded: (optionIndex: number, keys: string[]) => void;
   clearRecentlyAdded: (optionIndex: number, keys?: string[]) => void;
@@ -74,14 +107,23 @@ type ProposalAccountsStore = {
   ) => {
     contentId: string;
     firstDescriptionId: string;
+    firstAdditionalBriefId?: string;
   };
   addAccounts: (optionIndex: number, accounts: CampaignAddedAccount[]) => void;
   setPendingTopology: (
     optionIndex: number,
     topology: {
       bundles: PendingBundleMembership;
-      selectedOffer?: ProposalSelectedOfferInput;
+      selectedOffer?: ProposalSelectedOfferInput | null;
     },
+  ) => void;
+  setBuilderWorkingState: (
+    optionIndex: number,
+    builderState: HydratedCampaignBuilderDraftState,
+  ) => void;
+  commitBuilderWorkingOption: (
+    optionIndex: number,
+    payload: CommitBuilderWorkingOptionPayload,
   ) => void;
   removeContentItem: (optionIndex: number, contentId: string) => void;
   mergeContent: (optionIndex: number, contentToAdd: any[]) => void;
@@ -96,6 +138,7 @@ type ProposalAccountsStore = {
       selected: {
         campaignContentItemId: string;
         descriptionId: string;
+        additionalBriefId?: string;
       },
   ) => void;
   currentCampaignId: string | null;
@@ -115,24 +158,90 @@ type ProposalAccountsStore = {
   ) => void;
 };
 
+const normalizeContentItems = (content: readonly any[]): CampaignContentItem[] =>
+  (content ?? []).map((item: any) => ({
+    _id: String(item?._id ?? oid()),
+    socialMedia: String(item?.socialMedia ?? "").toLowerCase(),
+    ...(item?.profileType === "creator" || item?.profileType === "community"
+      ? { profileType: item.profileType }
+      : {}),
+    socialMediaGroup:
+      item?.socialMediaGroup ?? getGroupBySocial(item?.socialMedia),
+    mainLink: String(item?.mainLink ?? ""),
+    taggedUser: String(item?.taggedUser ?? ""),
+    taggedLink: String(item?.taggedLink ?? ""),
+    additionalBrief: normalizeAdditionalBriefVersions(item?.additionalBrief, {
+      createId: oid,
+    }),
+    descriptions: Array.isArray(item?.descriptions)
+      ? item.descriptions.map((desc: any) => ({
+          _id: String(desc?._id ?? oid()),
+          description: String(desc?.description ?? ""),
+        }))
+      : [],
+  }));
+
+const normalizeAccountSelections = (
+  accounts: readonly CampaignAddedAccount[],
+  content: readonly CampaignContentItem[],
+): CampaignAddedAccount[] =>
+  accounts.map((account: any) => {
+    const selected = account.selectedContent ?? account.selectedCampaignContentItem;
+    if (!selected || typeof selected !== "object") return account;
+
+    const selectedContent = content.find(
+      (item) => String(item._id) === String(selected.campaignContentItemId ?? ""),
+    );
+    const additionalBriefId = resolveAdditionalBriefId(
+      selectedContent?.additionalBrief ?? [],
+      selected.additionalBriefId,
+    );
+    const normalizedSelection = {
+      campaignContentItemId: String(selected.campaignContentItemId ?? ""),
+      descriptionId: String(selected.descriptionId ?? ""),
+      ...(additionalBriefId ? { additionalBriefId } : {}),
+    };
+
+    return {
+      ...account,
+      selectedContent: normalizedSelection,
+      selectedCampaignContentItem: normalizedSelection,
+    } as CampaignAddedAccount;
+  });
+
 export const useProposalAccountsStore = create<ProposalAccountsStore>()(
-  devtools((set) => ({
+  devtools((set, get) => ({
     optionSnapshotsByIndex: {},
     accountsByOption: {},
     contentByOption: {},
     pendingBundleMembershipByOption: {},
     selectedOfferChangeByOption: {},
+    builderWorkingStateByOption: {},
+    builderCatalogContextByOption: {},
     recentlyAddedKeysByOption: {},
     pendingDeleteKeysByOption: {},
     currentCampaignId: null,
     setCurrentCampaignId: (id) => set({ currentCampaignId: id }),
     setOptionSnapshot: (option) => {
-      set((state) => ({
-        optionSnapshotsByIndex: {
-          ...state.optionSnapshotsByIndex,
-          [option.optionIndex]: option,
-        },
-      }));
+      set((state) => {
+        const campaignContent = normalizeContentItems(option.campaignContent);
+        const addedAccounts = normalizeAccountSelections(
+          option.addedAccounts as unknown as CampaignAddedAccount[],
+          campaignContent,
+        );
+
+        return {
+          optionSnapshotsByIndex: {
+            ...state.optionSnapshotsByIndex,
+            [option.optionIndex]: {
+              ...option,
+              campaignContent,
+              addedAccounts:
+                addedAccounts as unknown as ProposalAddedAccountDto[],
+            },
+          },
+        };
+      });
     },
     markPendingDelete: (optionIndex, key) => {
       set((state) => {
@@ -177,6 +286,8 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           contentByOption: {},
           pendingBundleMembershipByOption: {},
           selectedOfferChangeByOption: {},
+          builderWorkingStateByOption: {},
+          builderCatalogContextByOption: {},
           recentlyAddedKeysByOption: {},
           pendingDeleteKeysByOption: {},
         }),
@@ -229,21 +340,16 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         const exists = state.contentByOption[optionIndex];
         if (exists && !opts?.force) return state;
 
-        const normalizedContent = (serverContent ?? []).map((item: any) => ({
-          _id: String(item?._id ?? oid()),
-          socialMedia: String(item?.socialMedia ?? "").toLowerCase(),
-          socialMediaGroup: item?.socialMediaGroup ?? getGroupBySocial(item?.socialMedia),
-          mainLink: String(item?.mainLink ?? ""),
-          taggedUser: String(item?.taggedUser ?? ""),
-          taggedLink: String(item?.taggedLink ?? ""),
-          additionalBrief: String(item?.additionalBrief ?? ""),
-          descriptions: Array.isArray(item?.descriptions)
-              ? item.descriptions.map((desc: any) => ({
-                _id: String(desc?._id ?? oid()),
-                description: String(desc?.description ?? ""),
-              }))
-              : [],
-        }));
+        const snapshot = state.optionSnapshotsByIndex[optionIndex];
+        const normalizedContent = normalizeContentItems(
+          snapshot?.campaignContent ?? serverContent,
+        );
+        const normalizedAccounts = normalizeAccountSelections(
+          (snapshot?.addedAccounts as unknown as CampaignAddedAccount[]) ??
+            serverAccounts ??
+            [],
+          normalizedContent,
+        );
 
         const pendingBundleMembershipByOption = {
           ...state.pendingBundleMembershipByOption,
@@ -257,18 +363,26 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         const pendingDeleteKeysByOption = {
           ...state.pendingDeleteKeysByOption,
         };
+        const builderWorkingStateByOption = {
+          ...state.builderWorkingStateByOption,
+        };
+        const builderCatalogContextByOption = {
+          ...state.builderCatalogContextByOption,
+        };
 
         if (opts?.force) {
           delete pendingBundleMembershipByOption[optionIndex];
           delete selectedOfferChangeByOption[optionIndex];
           delete recentlyAddedKeysByOption[optionIndex];
           delete pendingDeleteKeysByOption[optionIndex];
+          delete builderWorkingStateByOption[optionIndex];
+          delete builderCatalogContextByOption[optionIndex];
         }
 
         return {
           accountsByOption: {
             ...state.accountsByOption,
-            [optionIndex]: serverAccounts ?? [],
+            [optionIndex]: normalizedAccounts,
           },
           contentByOption: {
             ...state.contentByOption,
@@ -278,6 +392,8 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           selectedOfferChangeByOption,
           recentlyAddedKeysByOption,
           pendingDeleteKeysByOption,
+          builderWorkingStateByOption,
+          builderCatalogContextByOption,
         };
       });
     },
@@ -313,6 +429,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       const newId = oid();
 
       let firstDescriptionId = "";
+      let firstAdditionalBriefId: string | undefined;
 
       set((state) => {
         const prev = state.contentByOption[optionIndex] ?? [];
@@ -329,6 +446,11 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         }));
 
         firstDescriptionId = String(descriptions?.[0]?._id ?? "");
+        const additionalBrief = normalizeAdditionalBriefVersions(
+          base?.additionalBrief,
+          { createId: oid },
+        ).map((brief) => ({ ...brief, _id: oid() }));
+        firstAdditionalBriefId = additionalBrief[0]?._id;
 
         const nextItem: CampaignContentItem = {
           _id: newId,
@@ -337,7 +459,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           mainLink: payload.mainLink,
           taggedUser: base?.taggedUser ?? "",
           taggedLink: base?.taggedLink ?? "",
-          additionalBrief: base?.additionalBrief ?? "",
+          additionalBrief,
           descriptions,
         };
 
@@ -352,6 +474,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       return {
         contentId: newId,
         firstDescriptionId,
+        firstAdditionalBriefId,
       };
     },
     removeContentItem: (optionIndex, contentId) => {
@@ -376,21 +499,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
       set((state) => {
         const prev = state.contentByOption[optionIndex] ?? [];
 
-        const incoming = (contentToAdd ?? []).map((item: any) => ({
-          _id: String(item?._id ?? oid()),
-          socialMedia: String(item?.socialMedia ?? "").toLowerCase(),
-          socialMediaGroup: item?.socialMediaGroup ?? getGroupBySocial(item?.socialMedia),
-          mainLink: String(item?.mainLink ?? ""),
-          taggedUser: String(item?.taggedUser ?? ""),
-          taggedLink: String(item?.taggedLink ?? ""),
-          additionalBrief: String(item?.additionalBrief ?? ""),
-          descriptions: Array.isArray(item?.descriptions)
-              ? item.descriptions.map((desc: any) => ({
-                _id: String(desc?._id ?? oid()),
-                description: String(desc?.description ?? ""),
-              }))
-              : [],
-        }));
+        const incoming = normalizeContentItems(contentToAdd ?? []);
 
         const map = new Map<string, CampaignContentItem>();
 
@@ -529,7 +638,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
             ...state.pendingBundleMembershipByOption,
             [optionIndex]: topology.bundles,
           },
-          ...(topology.selectedOffer
+          ...(topology.selectedOffer !== undefined
             ? {
               selectedOfferChangeByOption: {
                 ...state.selectedOfferChangeByOption,
@@ -537,6 +646,188 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
               },
             }
             : {}),
+        };
+      });
+    },
+    setBuilderWorkingState: (optionIndex, builderState) => {
+      set((state) => ({
+        builderWorkingStateByOption: {
+          ...state.builderWorkingStateByOption,
+          [optionIndex]: builderState,
+        },
+      }));
+    },
+    restoreOptionFromSnapshot: (optionIndex) => {
+      const snapshot = get().optionSnapshotsByIndex[optionIndex];
+      if (!snapshot) return false;
+
+      get().initOption(
+        optionIndex,
+        snapshot.addedAccounts as unknown as CampaignAddedAccount[],
+        snapshot.campaignContent,
+        { force: true },
+      );
+
+      return true;
+    },
+    commitBuilderWorkingOption: (optionIndex, payload) => {
+      set((state) => {
+        const normalizedContent = normalizeContentItems(payload.content);
+        const normalizedAccounts = normalizeAccountSelections(
+          payload.accounts,
+          normalizedContent,
+        );
+        const snapshot = state.optionSnapshotsByIndex[optionIndex];
+        const currentAccounts = state.accountsByOption[optionIndex] ?? [];
+        const currentContent = state.contentByOption[optionIndex] ?? [];
+        const currentBundles = Object.prototype.hasOwnProperty.call(
+          state.pendingBundleMembershipByOption,
+          optionIndex,
+        )
+          ? state.pendingBundleMembershipByOption[optionIndex]
+          : Object.fromEntries(
+            (snapshot?.addedBundles ?? []).map((bundle) => [
+              bundle.bundleId,
+              currentAccounts
+                .filter(
+                  (account) =>
+                    String((account as any).bundleId ?? "") === bundle.bundleId,
+                )
+                .map((account) =>
+                  String(
+                    (account as any).socialAccountId ??
+                    (account as any).accountId ??
+                    "",
+                  ),
+                )
+                .filter(Boolean),
+            ]),
+          );
+        const currentOffer = Object.prototype.hasOwnProperty.call(
+          state.selectedOfferChangeByOption,
+          optionIndex,
+        )
+          ? state.selectedOfferChangeByOption[optionIndex]
+          : snapshot?.selectedOffer
+            ? {
+              offerId: snapshot.selectedOffer.offerId,
+              selectedAccountIds: snapshot.selectedOffer.selectedAccountIds,
+              selectedAddedAccountsIds:
+                snapshot.selectedOffer.selectedAddedAccountsIds,
+            }
+            : null;
+
+        const normalizeSelection = (selection: any) =>
+          selection
+            ? {
+              offerId: String(selection.offerId ?? ""),
+              selectedAccountIds: [
+                ...(selection.selectedAccountIds ?? []),
+              ].map(String).sort(),
+            }
+            : null;
+        const normalizeBundles = (bundles: PendingBundleMembership) =>
+          Object.fromEntries(
+            Object.entries(bundles)
+              .sort(([left], [right]) => left.localeCompare(right))
+              .map(([bundleId, accountIds]) => [
+                bundleId,
+                [...accountIds].map(String).sort(),
+              ]),
+          );
+        const projectAccounts = (accounts: CampaignAddedAccount[]) =>
+          accounts.map((account: any) => ({
+            addedAccountsId: String(account.addedAccountsId ?? ""),
+            socialAccountId: String(
+              account.socialAccountId ?? account.accountId ?? "",
+            ),
+            influencerId: String(account.influencerId ?? ""),
+            socialMedia: String(account.socialMedia ?? "").toLowerCase(),
+            username: String(account.username ?? ""),
+            bundleId: String(account.bundleId ?? ""),
+            dateRequest: String(account.dateRequest ?? "ASAP"),
+            selectedCampaignContentItem:
+              account.selectedCampaignContentItem ??
+              account.selectedContent ??
+              null,
+          }));
+        const projectContent = (content: CampaignContentItem[]) =>
+          content.map((item) => ({
+            _id: String(item._id ?? ""),
+            socialMedia: String(item.socialMedia ?? "").toLowerCase(),
+            profileType: item.profileType,
+            socialMediaGroup: item.socialMediaGroup,
+            mainLink: String(item.mainLink ?? ""),
+            taggedUser: String(item.taggedUser ?? ""),
+            taggedLink: String(item.taggedLink ?? ""),
+            additionalBrief: item.additionalBrief.map((brief) => ({ ...brief })),
+            descriptions: (item.descriptions ?? []).map((description) => ({
+              _id: String(description._id ?? ""),
+              description: String(description.description ?? ""),
+            })),
+          }));
+        const hasWorkingChanges =
+          JSON.stringify(projectAccounts(currentAccounts)) !==
+            JSON.stringify(projectAccounts(normalizedAccounts)) ||
+          JSON.stringify(projectContent(currentContent)) !==
+            JSON.stringify(projectContent(normalizedContent)) ||
+          JSON.stringify(normalizeBundles(currentBundles)) !==
+            JSON.stringify(normalizeBundles(payload.bundles)) ||
+          JSON.stringify(normalizeSelection(currentOffer)) !==
+            JSON.stringify(normalizeSelection(payload.selectedOffer));
+
+        if (hasWorkingChanges) {
+          useUpdateCampaign.getState().markDirty();
+        }
+
+        const recentlyAdded = Object.fromEntries(
+          normalizedAccounts
+            .filter((account: any) => !String(account.addedAccountsId ?? ""))
+            .map((account) => [String(getAccountKey(account)), true as const])
+            .filter(([key]) => Boolean(key)),
+        );
+        const retainedAccountKeys = new Set(
+          normalizedAccounts.map(getAccountKey).filter(Boolean),
+        );
+        const pendingDelete = Object.fromEntries(
+          Object.entries(
+            state.pendingDeleteKeysByOption[optionIndex] ?? {},
+          ).filter(([key]) => retainedAccountKeys.has(key)),
+        );
+
+        return {
+          accountsByOption: {
+            ...state.accountsByOption,
+            [optionIndex]: normalizedAccounts,
+          },
+          contentByOption: {
+            ...state.contentByOption,
+            [optionIndex]: normalizedContent,
+          },
+          pendingBundleMembershipByOption: {
+            ...state.pendingBundleMembershipByOption,
+            [optionIndex]: payload.bundles,
+          },
+          selectedOfferChangeByOption: {
+            ...state.selectedOfferChangeByOption,
+            [optionIndex]: payload.selectedOffer,
+          },
+          builderWorkingStateByOption: {
+            ...state.builderWorkingStateByOption,
+            [optionIndex]: payload.builderState,
+          },
+          builderCatalogContextByOption: {
+            ...state.builderCatalogContextByOption,
+            [optionIndex]: payload.catalogContext ?? {},
+          },
+          recentlyAddedKeysByOption: {
+            ...state.recentlyAddedKeysByOption,
+            [optionIndex]: recentlyAdded,
+          },
+          pendingDeleteKeysByOption: {
+            ...state.pendingDeleteKeysByOption,
+            [optionIndex]: pendingDelete,
+          },
         };
       });
     },
@@ -622,6 +913,12 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
               ? {
                 campaignContentItemId: contentItem._id,
                 descriptionId: contentItem.descriptions?.[0]?._id ?? "",
+                ...(contentItem.additionalBrief?.[0]?._id
+                  ? {
+                    additionalBriefId:
+                      contentItem.additionalBrief[0]._id,
+                  }
+                  : {}),
               }
               : null;
 
@@ -916,15 +1213,25 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           ...state.pendingBundleMembershipByOption,
         };
         const nextOfferChanges = { ...state.selectedOfferChangeByOption };
+        const nextBuilderWorkingState = {
+          ...state.builderWorkingStateByOption,
+        };
+        const nextBuilderCatalogContext = {
+          ...state.builderCatalogContextByOption,
+        };
         delete nextAcc[optionIndex];
         delete nextContent[optionIndex];
         delete nextBundleMembership[optionIndex];
         delete nextOfferChanges[optionIndex];
+        delete nextBuilderWorkingState[optionIndex];
+        delete nextBuilderCatalogContext[optionIndex];
         return {
           accountsByOption: nextAcc,
           contentByOption: nextContent,
           pendingBundleMembershipByOption: nextBundleMembership,
           selectedOfferChangeByOption: nextOfferChanges,
+          builderWorkingStateByOption: nextBuilderWorkingState,
+          builderCatalogContextByOption: nextBuilderCatalogContext,
         };
       });
     },
