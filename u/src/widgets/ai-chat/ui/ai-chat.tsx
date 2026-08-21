@@ -21,7 +21,16 @@ import { CampaignStepsRail } from "./campaign-steps-rail.tsx";
 import { CampaignWorkspacePanel } from "./campaign-workspace-panel.tsx";
 import styles from "./ai-chat.module.scss";
 import { flushCampaignDraftSaves } from "../model/campaign-draft-save-coordinator.ts";
-import { startGuidedCampaignDraft } from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
+import {
+  getCampaignDraft,
+  startGuidedCampaignDraft,
+} from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
+import type { CampaignDraftDto } from "@/entities/client-side/campaign-draft/api/campaign-draft.dto.ts";
+import { campaignSectionFingerprints } from "@/entities/client-side/campaign-setup/model/campaign-section-changes.ts";
+
+// A turn the workspace starts on the client's behalf: the brief is complete, more pages are
+// wanted, or the pages changed while the panel was open.
+type WorkspaceFollowUp = "brief" | "more" | "pages";
 
 interface Message {
   id: string;
@@ -206,10 +215,13 @@ export const AiChat = () => {
     initialChat.recommendationsByDraft ?? {},
   );
   const [queuedRecommendation, setQueuedRecommendation] = useState<{
-    action: "brief" | "more";
+    action: WorkspaceFollowUp;
     draftId: string;
   } | null>(null);
   const [isStartingCampaign, setIsStartingCampaign] = useState(false);
+  // The pages signature as it was when the surface opened. Edits there are saved on a
+  // debounce, so the close handler compares against this instead of watching every keystroke.
+  const pagesOnOpenRef = useRef<string | null>(null);
   const [campaignStartError, setCampaignStartError] = useState(false);
   // When set, the in-chat payment modal is open for this draft.
   const [paymentDraftId, setPaymentDraftId] = useState<string | null>(null);
@@ -475,8 +487,19 @@ export const AiChat = () => {
   };
 
   const openWorkspace = (surface: CampaignSetupSurface) => {
+    // Switching straight from Pages to another section never passes through closeWorkspace,
+    // so leaving the table has to be handled here too or those edits go unnoticed.
+    if (surface !== "pages") leavePagesSurface();
     setWorkspaceSurface(surface);
     sessionStorage.setItem(workspaceStorageKey(resolvedRole), surface);
+    // Only the pages table is watched: content is edited page by page and would fire on
+    // nearly every visit, and the brief already reports itself through onBriefReady.
+    if (surface === "pages" && activeDraftId) {
+      const cached = queryClient.getQueryData<CampaignDraftDto>(["campaign-draft", activeDraftId]);
+      pagesOnOpenRef.current = cached ? campaignSectionFingerprints(cached).pages : null;
+    } else {
+      pagesOnOpenRef.current = null;
+    }
   };
 
   // Work done in the workspace leaves the same kind of trace as work done by the agent,
@@ -496,13 +519,25 @@ export const AiChat = () => {
   };
 
   const startRecommendation = useCallback(
-    (action: "brief" | "more", draftId: string) => {
+    (action: WorkspaceFollowUp, draftId: string) => {
       const request =
-        action === "more"
+        action === "pages"
+          ? // Not a search: the pages are already chosen. The only open question is what the
+            // change did to the publishing content that was written for the previous set.
+            "The client just changed the selected pages in the Pages table. Read the campaign " +
+            "draft, then answer in at most two lines: name any selected page that now has no " +
+            "publishing content, and offer to apply the existing shared details to it. If every " +
+            "selected page already has content, say only that the pages are up to date. Do not " +
+            "search for new pages and do not change anything until the client agrees."
+          : action === "more"
           ? "Load the next batch of campaign page recommendations now. Reuse every filter from " +
             "lastSearchRequest and call search_accounts with page=nextSearchPage. Do not restart at page 1."
-          : "The required campaign brief is complete. Search the roster now using every relevant value " +
-            "it contains and recommend suitable pages. " +
+          : // The brief can also be re-saved long after pages were chosen, so this must not read
+            // as "start over": a changed brief is a reason to offer a swap, not to perform one.
+            "The saved campaign brief is complete. If pages are already selected, check them against " +
+            "the brief first: name in one line the ones that no longer fit and offer to replace them, " +
+            "changing nothing until the client agrees. Otherwise search the roster using every relevant " +
+            "value the brief contains and recommend suitable pages. " +
             "Treat its budget as an approximate target when present, use budgetCurrency correctly, " +
             "show the pages, ask whether the client wants to add or remove pages from the approximate " +
             "total, and if the result is capped ask whether they want more options.";
@@ -517,23 +552,33 @@ export const AiChat = () => {
           links: [],
           status: "pending",
           assistantOnly: true,
-          recommendationAction: action,
+          // A page-change follow-up runs no search, so the search toasts must stay out of it.
+          recommendationAction: action === "pages" ? undefined : action,
         },
       ]);
-      mutate({ id, message: request, recommendationAction: action, draftId });
+      mutate({
+        id,
+        message: request,
+        recommendationAction: action === "pages" ? undefined : action,
+        draftId,
+      });
     },
     [mutate],
   );
 
   const queueOrStartRecommendation = useCallback(
-    (action: "brief" | "more") => {
+    (action: WorkspaceFollowUp) => {
       if (!activeDraftId) {
         toast.error("Open a campaign draft before searching for matching pages.");
         return;
       }
       if (isPending || isPreparingSend) {
         setQueuedRecommendation({ action, draftId: activeDraftId });
-        toast.info("The page search will start after the current assistant reply.");
+        toast.info(
+          action === "pages"
+            ? "The assistant will check the changed pages after the current reply."
+            : "The page search will start after the current assistant reply.",
+        );
         return;
       }
       startRecommendation(action, activeDraftId);
@@ -551,7 +596,38 @@ export const AiChat = () => {
     startRecommendation(queued.action, queued.draftId);
   }, [isPending, isPreparingSend, queuedRecommendation, startRecommendation]);
 
+  // The pages table saves on a debounce, so the signature it had on open is only comparable
+  // once those saves have landed. Flushing first is what makes one editing session produce
+  // one follow-up instead of one per keystroke.
+  const checkPagesChangedOnClose = useCallback(
+    async (draftId: string, before: string) => {
+      try {
+        if (!(await flushCampaignDraftSaves())) return;
+        const draft = await getCampaignDraft(draftId);
+        if (!draft) return;
+        queryClient.setQueryData(["campaign-draft", draftId], draft);
+        if (campaignSectionFingerprints(draft).pages === before) return;
+        queueOrStartRecommendation("pages");
+      } catch {
+        // A follow-up the client did not ask for is not worth a toast: the rail still marks
+        // the section as changed, and the next thing they say reads the draft anyway.
+      }
+    },
+    [queryClient, queueOrStartRecommendation],
+  );
+
+  // Leaving the pages table — by closing the panel or by switching to another section — is
+  // the one moment the edits are worth a look. A no-op when pages was not the open surface.
+  const leavePagesSurface = () => {
+    const before = workspaceSurface === "pages" ? pagesOnOpenRef.current : null;
+    const draftId = activeDraftId;
+    pagesOnOpenRef.current = null;
+    // The panel closes immediately; the comparison happens behind it.
+    if (before !== null && draftId) void checkPagesChangedOnClose(draftId, before);
+  };
+
   const closeWorkspace = () => {
+    leavePagesSurface();
     setWorkspaceSurface(null);
     setDialogueUnread(false);
     sessionStorage.removeItem(workspaceStorageKey(resolvedRole));
