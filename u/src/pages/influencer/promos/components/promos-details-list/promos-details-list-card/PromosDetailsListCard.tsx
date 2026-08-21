@@ -4,6 +4,7 @@ import { ButtonMain, ButtonSecondary } from '@components/ui/buttons-fix/ButtonFi
 
 import { getTitleForPromoCard } from '../utils/getTitleForPromoCard';
 import { getPromoFields } from '../../../data/promos.data';
+import { hasDisplayValue } from '../../../utils/promo-field-value';
 import type {
   TConfirmationType,
   TDetailsField,
@@ -30,13 +31,20 @@ interface Props {
   // onFormPayloadChange?: (newPayload: TCampaignInfo) => void;
 }
 
+const getRawFieldValue = (
+  promo: TPromoDetailsCardModel,
+  field: TDetailsField,
+): unknown => {
+  const promoFields = promo as Partial<Record<TDetailsField["key"], unknown>>;
+
+  return promoFields[field.key];
+};
+
 const getFieldValue = (
   promo: TPromoDetailsCardModel,
   field: TDetailsField,
+  value: unknown,
 ): string => {
-  const promoFields = promo as Partial<Record<TDetailsField["key"], unknown>>;
-  const value = promoFields[field.key];
-
   return field.format
     ? field.format(Number(value), promo)
     : value?.toString() ?? '';
@@ -91,16 +99,24 @@ export const PromosDetailsListCard: React.FC<Props> = ({
         </span>
         <div className="promos-details-list-card__body-details">
           {fields
-            .map(field => (
-              <DetailsRow
-                key={`${field.key}-${field.label}`}
-                label={field.label}
-                value={getFieldValue(promo, field)}
-                copyable={field.copyable}
-                linkable={field.linkable}
-                icon={field.icon}
-              />
-            ))}
+            .map(field => {
+              const rawValue = getRawFieldValue(promo, field);
+
+              if (!hasDisplayValue(rawValue)) {
+                return null;
+              }
+
+              return (
+                <DetailsRow
+                  key={`${field.key}-${field.label}`}
+                  label={field.label}
+                  value={getFieldValue(promo, field, rawValue)}
+                  copyable={field.copyable}
+                  linkable={field.linkable}
+                  icon={field.icon}
+                />
+              );
+            })}
         </div>
       </div>
 

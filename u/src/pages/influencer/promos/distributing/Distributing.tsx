@@ -108,7 +108,7 @@ export const Distributing: React.FC = () => {
           onSubmitResults={openFormScreen}
         />
 
-        {!campaignId && !addedAccountsId && (
+        {!campaignId && !addedAccountsId && hasNextPage && (
           <ButtonMain
             label={isFetchingNextPage ? "Loading..." : "View more"}
             onClick={() => fetchNextPage()}

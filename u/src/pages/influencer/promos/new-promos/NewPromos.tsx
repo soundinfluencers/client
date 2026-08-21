@@ -154,11 +154,13 @@ export const NewPromos = () => {
           }}
         />
 
-        <ButtonMain
-          label={isFetchingNextPage ? "Loading..." : "View more"}
-          onClick={() => fetchNextPage()}
-          isDisabled={!hasNextPage}
-        />
+        {hasNextPage && (
+          <ButtonMain
+            label={isFetchingNextPage ? "Loading..." : "View more"}
+            onClick={() => fetchNextPage()}
+            isDisabled={!hasNextPage}
+          />
+        )}
       </div>
 
       {isModalOpen && (

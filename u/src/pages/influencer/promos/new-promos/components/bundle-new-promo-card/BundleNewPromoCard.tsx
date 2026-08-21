@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/buttons-fix/ButtonFix";
 import { DetailsRow } from "../../../components/promos-details-list/promos-details-list-card/DetailsRow";
 import { getPromoFieldsBySocialMedia } from "../../../data/promos.data";
+import { hasDisplayValue } from "../../../utils/promo-field-value";
 import type {
   BundleNewPromo,
   BundlePromoAccount,
@@ -32,14 +33,12 @@ const isBundleAccountDetailField = ({ key }: TDetailsField): boolean =>
 const getBundleAccountFieldValue = (
   account: BundlePromoAccount,
   field: TDetailsField,
-): string => {
+): unknown => {
   if (!(field.key in account)) {
-    return "";
+    return undefined;
   }
 
-  const value = account[field.key as keyof BundlePromoAccount];
-
-  return value?.toString() ?? "";
+  return account[field.key as keyof BundlePromoAccount];
 };
 
 const BundleAccountSummary = ({
@@ -101,16 +100,19 @@ const BundleAccountBrief = ({ account }: { account: BundlePromoAccount }) => {
 
       <div className="promos-details-list-card__body-details bundle-new-promo-card__brief-rows">
         {fields.map((field) => {
-          const value = getBundleAccountFieldValue(account, field);
-          const hasValue = Boolean(value);
+          const rawValue = getBundleAccountFieldValue(account, field);
+
+          if (!hasDisplayValue(rawValue)) {
+            return null;
+          }
 
           return (
             <DetailsRow
               key={`${field.key}-${field.label}`}
               label={field.label}
-              value={value}
-              copyable={hasValue && field.copyable}
-              linkable={hasValue && field.linkable}
+              value={String(rawValue)}
+              copyable={field.copyable}
+              linkable={field.linkable}
               icon={field.icon}
             />
           );
