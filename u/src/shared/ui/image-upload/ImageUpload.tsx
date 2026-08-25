@@ -80,7 +80,9 @@ export const ImageUpload: React.FC<Props> = ({
               id={name}
               ref={inputRef}
               type="file"
-              accept='image/*'
+              // Only what the backend accepts. Never image/*: it lets a desktop user pick an
+              // iPhone HEIC that the upload will reject after the round trip.
+              accept="image/jpeg,image/png,image/webp"
               hidden
               onChange={handleSelect}
             />
