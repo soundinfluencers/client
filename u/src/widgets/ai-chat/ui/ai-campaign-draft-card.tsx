@@ -3,7 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import type { AgentSearchCandidate, AgentSearchOutcome } from "@/api/agent/agent.api.ts";
+import type {
+  AgentSearchCandidate,
+  AgentSearchOutcome,
+} from "@/api/agent/agent.api.ts";
 
 import {
   CampaignDraftConflictError,
@@ -97,7 +100,9 @@ export const AiCampaignDraftCard = ({
   const [confirmApplyToAll, setConfirmApplyToAll] = useState(false);
   const [actionKey, setActionKey] = useState<string | null>(null);
   const [addPagesOpen, setAddPagesOpen] = useState(false);
-  const [recommendedSelection, setRecommendedSelection] = useState<Set<string>>(new Set());
+  const [recommendedSelection, setRecommendedSelection] = useState<Set<string>>(
+    new Set(),
+  );
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedRef = useRef("");
   const saveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true));
@@ -111,31 +116,49 @@ export const AiCampaignDraftCard = ({
     revisionRef.current = Number(query.data.revision ?? 0);
     setAccounts(nextAccounts);
     setNoContentAvailable(nextNoContent);
-    lastSavedRef.current = getAiDraftPayloadSignature(buildAiDraftPayload(query.data, nextAccounts, nextNoContent));
+    lastSavedRef.current = getAiDraftPayloadSignature(
+      buildAiDraftPayload(query.data, nextAccounts, nextNoContent),
+    );
     setSaveStatus("saved");
   }, [query.data]);
 
   const selectedAccounts = useMemo(
-    () => accounts.filter((account) => account.isAvailable !== false && account.isSelected !== false),
+    () =>
+      accounts.filter(
+        (account) =>
+          account.isAvailable !== false && account.isSelected !== false,
+      ),
     [accounts],
   );
   const totalPrice = useMemo(
-    () => selectedAccounts.reduce((sum, account) => sum + Number(account.price ?? 0), 0),
+    () =>
+      selectedAccounts.reduce(
+        (sum, account) => sum + Number(account.price ?? 0),
+        0,
+      ),
     [selectedAccounts],
   );
   const totalFollowers = useMemo(
-    () => selectedAccounts.reduce((sum, account) => sum + Number(account.followers ?? 0), 0),
+    () =>
+      selectedAccounts.reduce(
+        (sum, account) => sum + Number(account.followers ?? 0),
+        0,
+      ),
     [selectedAccounts],
   );
   const platforms = useMemo(
     () =>
-      Array.from(new Set(selectedAccounts.map((account) => account.socialMedia)))
+      Array.from(
+        new Set(selectedAccounts.map((account) => account.socialMedia)),
+      )
         .map(normalizeDraftPlatform)
         .join(" + ") || "-",
     [selectedAccounts],
   );
   const editingAccount = useMemo(
-    () => accounts.find((account) => draftAccountKey(account) === editingKey) ?? null,
+    () =>
+      accounts.find((account) => draftAccountKey(account) === editingKey) ??
+      null,
     [accounts, editingKey],
   );
   const existingAccountIds = useMemo(
@@ -146,32 +169,44 @@ export const AiCampaignDraftCard = ({
   useEffect(() => {
     setRecommendedSelection(new Set());
   }, [recommendations?.page]);
-  const contentIsReady = useMemo(() => Boolean(draft && isDraftReadyForCheckout(draft, accounts)), [accounts, draft]);
+  const contentIsReady = useMemo(
+    () => Boolean(draft && isDraftReadyForCheckout(draft, accounts)),
+    [accounts, draft],
+  );
   const allReadyContentIsAssigned = useMemo(
-    () => contentIsReady && selectedAccounts.every((account) => Boolean(getSelectedContentRef(account))),
+    () =>
+      contentIsReady &&
+      selectedAccounts.every((account) =>
+        Boolean(getSelectedContentRef(account)),
+      ),
     [contentIsReady, selectedAccounts],
   );
-  const canCheckout = allReadyContentIsAssigned;
-  const visibleAccounts = focusMode === "selection" ? accounts : selectedAccounts;
+  const canCheckout =
+    selectedAccounts.length > 0 &&
+    (noContentAvailable || allReadyContentIsAssigned);
+  const visibleAccounts =
+    focusMode === "selection" ? accounts : selectedAccounts;
   const readyContentCount = useMemo(() => {
     if (!draft) return 0;
     return selectedAccounts.filter(
-      (account) => getDraftContentStatus(getContentForDraftAccount(draft, account)) === "ready",
+      (account) =>
+        getDraftContentStatus(getContentForDraftAccount(draft, account)) ===
+        "ready",
     ).length;
   }, [draft, selectedAccounts]);
   const scheduledCount = useMemo(
-    () => selectedAccounts.filter((account) => Boolean(account.dateRequest?.trim())).length,
+    () =>
+      selectedAccounts.filter((account) => Boolean(account.dateRequest?.trim()))
+        .length,
     [selectedAccounts],
   );
 
   useEffect(() => {
-    if (!draft || draft.step === "strategyTable" || !allReadyContentIsAssigned) return;
-    setDraft((current) => (current ? { ...current, step: "strategyTable" } : current));
-  }, [allReadyContentIsAssigned, draft]);
-
-  useEffect(() => {
-    if (totalPrice <= 1000 && noContentAvailable) setNoContentAvailable(false);
-  }, [noContentAvailable, totalPrice]);
+    if (!draft || draft.step === "strategyTable" || !canCheckout) return;
+    setDraft((current) =>
+      current ? { ...current, step: "strategyTable" } : current,
+    );
+  }, [canCheckout, draft]);
 
   const persist = useCallback(() => {
     if (!draft) return Promise.resolve(false);
@@ -187,23 +222,29 @@ export const AiCampaignDraftCard = ({
           revision: revisionRef.current,
         });
         revisionRef.current = result.revision;
-        setDraft((current) => (current ? { ...current, revision: result.revision } : current));
-        queryClient.setQueryData<CampaignDraftDto>(["campaign-draft", draftId], (current) =>
-          current
-            ? {
-                ...current,
-                ...draft,
-                revision: result.revision,
-                addedAccounts: accounts,
-                noContentAvailable,
-              }
-            : current,
+        setDraft((current) =>
+          current ? { ...current, revision: result.revision } : current,
+        );
+        queryClient.setQueryData<CampaignDraftDto>(
+          ["campaign-draft", draftId],
+          (current) =>
+            current
+              ? {
+                  ...current,
+                  ...draft,
+                  revision: result.revision,
+                  addedAccounts: accounts,
+                  noContentAvailable,
+                }
+              : current,
         );
         lastSavedRef.current = signature;
         setSaveStatus("saved");
         return true;
       } catch (error) {
-        setSaveStatus(error instanceof CampaignDraftConflictError ? "conflict" : "error");
+        setSaveStatus(
+          error instanceof CampaignDraftConflictError ? "conflict" : "error",
+        );
         return false;
       }
     });
@@ -218,7 +259,9 @@ export const AiCampaignDraftCard = ({
 
   useEffect(() => {
     if (!draft) return;
-    const signature = getAiDraftPayloadSignature(buildAiDraftPayload(draft, accounts, noContentAvailable));
+    const signature = getAiDraftPayloadSignature(
+      buildAiDraftPayload(draft, accounts, noContentAvailable),
+    );
     if (signature === lastSavedRef.current) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => void persist(), 600);
@@ -229,16 +272,27 @@ export const AiCampaignDraftCard = ({
 
   const updateAccount = (key: string, patch: Partial<DraftAddedAccountDto>) => {
     setAccounts((current) =>
-      current.map((account) => (draftAccountKey(account) === key ? { ...account, ...patch } : account)),
+      current.map((account) =>
+        draftAccountKey(account) === key ? { ...account, ...patch } : account,
+      ),
     );
   };
 
   const addPages = useCallback((newAccounts: DraftAddedAccountDto[]) => {
     setAccounts((current) => {
-      const existingIds = new Set(current.map((account) => String(account.socialAccountId)));
-      return [...current, ...newAccounts.filter((account) => !existingIds.has(String(account.socialAccountId)))];
+      const existingIds = new Set(
+        current.map((account) => String(account.socialAccountId)),
+      );
+      return [
+        ...current,
+        ...newAccounts.filter(
+          (account) => !existingIds.has(String(account.socialAccountId)),
+        ),
+      ];
     });
-    toast.success(`${newAccounts.length} ${newAccounts.length === 1 ? "page" : "pages"} added to the draft.`);
+    toast.success(
+      `${newAccounts.length} ${newAccounts.length === 1 ? "page" : "pages"} added to the draft.`,
+    );
   }, []);
 
   const toggleRecommendedPage = (accountId: string) => {
@@ -254,7 +308,9 @@ export const AiCampaignDraftCard = ({
   const addRecommendedPages = () => {
     const selected = (recommendations?.candidates ?? [])
       .filter(
-        (candidate) => recommendedSelection.has(candidate.accountId) && !existingAccountIds.has(candidate.accountId),
+        (candidate) =>
+          recommendedSelection.has(candidate.accountId) &&
+          !existingAccountIds.has(candidate.accountId),
       )
       .map((candidate): DraftAddedAccountDto => ({
         influencerId: candidate.influencerId,
@@ -341,7 +397,9 @@ export const AiCampaignDraftCard = ({
           socialMediaGroup: getDraftSocialMediaGroup(account.socialMedia),
           profileType: account.profileType,
           mainLink: details.contentUrl.trim(),
-          descriptions: [{ _id: descriptionId, description: details.description.trim() }],
+          descriptions: [
+            { _id: descriptionId, description: details.description.trim() },
+          ],
           taggedUser: details.storyTag.trim(),
           taggedLink: details.storyLink.trim(),
           additionalBrief: details.additionalBrief.trim(),
@@ -368,9 +426,14 @@ export const AiCampaignDraftCard = ({
             ...current,
             campaignContent: [
               ...(current.campaignContent ?? []).filter(
-                (item) => !replacedIds.has(String(item._id)) || retainedIds.has(String(item._id)),
+                (item) =>
+                  !replacedIds.has(String(item._id)) ||
+                  retainedIds.has(String(item._id)),
               ),
-              ...Array.from(contentByAccount.values(), ({ content }) => content),
+              ...Array.from(
+                contentByAccount.values(),
+                ({ content }) => content,
+              ),
             ],
           }
         : current,
@@ -396,7 +459,8 @@ export const AiCampaignDraftCard = ({
     return selectedAccounts.filter(
       (account) =>
         draftAccountKey(account) !== editingKey &&
-        getDraftContentStatus(getContentForDraftAccount(draft, account)) !== "empty",
+        getDraftContentStatus(getContentForDraftAccount(draft, account)) !==
+          "empty",
     ).length;
   }, [applyToAll, draft, editingAccount, selectedAccounts]);
 
@@ -409,23 +473,34 @@ export const AiCampaignDraftCard = ({
   };
 
   const removeAccount = (key: string) => {
-    const index = accounts.findIndex((account) => draftAccountKey(account) === key);
+    const index = accounts.findIndex(
+      (account) => draftAccountKey(account) === key,
+    );
     if (index < 0) return;
     const removedAccount = accounts[index];
-    const removedContentId = String(getSelectedContentRef(removedAccount)?.campaignContentItemId ?? "");
-    const removedContent = draft?.campaignContent?.find((item) => String(item._id) === removedContentId);
+    const removedContentId = String(
+      getSelectedContentRef(removedAccount)?.campaignContentItemId ?? "",
+    );
+    const removedContent = draft?.campaignContent?.find(
+      (item) => String(item._id) === removedContentId,
+    );
     const contentStillUsed = accounts.some(
       (account, accountIndex) =>
         accountIndex !== index &&
-        String(getSelectedContentRef(account)?.campaignContentItemId ?? "") === removedContentId,
+        String(getSelectedContentRef(account)?.campaignContentItemId ?? "") ===
+          removedContentId,
     );
-    setAccounts((current) => current.filter((account) => draftAccountKey(account) !== key));
+    setAccounts((current) =>
+      current.filter((account) => draftAccountKey(account) !== key),
+    );
     if (removedContentId && !contentStillUsed) {
       setDraft((current) =>
         current
           ? {
               ...current,
-              campaignContent: (current.campaignContent ?? []).filter((item) => String(item._id) !== removedContentId),
+              campaignContent: (current.campaignContent ?? []).filter(
+                (item) => String(item._id) !== removedContentId,
+              ),
             }
           : current,
       );
@@ -441,17 +516,24 @@ export const AiCampaignDraftCard = ({
             type="button"
             onClick={() => {
               setAccounts((current) => {
-                if (current.some((account) => draftAccountKey(account) === key)) return current;
+                if (current.some((account) => draftAccountKey(account) === key))
+                  return current;
                 const next = [...current];
                 next.splice(Math.min(index, next.length), 0, removedAccount);
                 return next;
               });
               if (removedContent) {
                 setDraft((current) =>
-                  current && !(current.campaignContent ?? []).some((item) => String(item._id) === removedContentId)
+                  current &&
+                  !(current.campaignContent ?? []).some(
+                    (item) => String(item._id) === removedContentId,
+                  )
                     ? {
                         ...current,
-                        campaignContent: [...(current.campaignContent ?? []), removedContent],
+                        campaignContent: [
+                          ...(current.campaignContent ?? []),
+                          removedContent,
+                        ],
                       }
                     : current,
                 );
@@ -476,7 +558,8 @@ export const AiCampaignDraftCard = ({
     if (await persist()) action();
   };
 
-  if (query.isLoading) return <div className={styles.state}>Loading campaign draft...</div>;
+  if (query.isLoading)
+    return <div className={styles.state}>Loading campaign draft...</div>;
   if (query.isError || !draft) {
     return (
       <div className={`${styles.state} ${styles.errorState}`}>
@@ -489,7 +572,9 @@ export const AiCampaignDraftCard = ({
   }
 
   const nextIncompleteContent = selectedAccounts.find(
-    (account) => getDraftContentStatus(getContentForDraftAccount(draft, account)) !== "ready",
+    (account) =>
+      getDraftContentStatus(getContentForDraftAccount(draft, account)) !==
+      "ready",
   );
   const focusCopy =
     focusMode === "content"
@@ -513,7 +598,9 @@ export const AiCampaignDraftCard = ({
           <span className={styles.eyebrow}>Campaign draft</span>
           <h3>{draft.campaignName}</h3>
         </div>
-        <span className={`${styles.saveStatus} ${["error", "conflict"].includes(saveStatus) ? styles.saveError : ""}`}>
+        <span
+          className={`${styles.saveStatus} ${["error", "conflict"].includes(saveStatus) ? styles.saveError : ""}`}
+        >
           {saveStatus === "saving"
             ? "Saving..."
             : saveStatus === "conflict"
@@ -544,7 +631,10 @@ export const AiCampaignDraftCard = ({
       </div>
 
       {focusMode === "selection" && recommendations && (
-        <section className={styles.recommendations} aria-label="AI page recommendations">
+        <section
+          className={styles.recommendations}
+          aria-label="AI page recommendations"
+        >
           <header className={styles.recommendationsHeader}>
             <div>
               <span className={styles.eyebrow}>Matched from your brief</span>
@@ -556,13 +646,17 @@ export const AiCampaignDraftCard = ({
                     : "Recommendations could not be loaded"}
               </h4>
             </div>
-            {recommendations.status === "completed" && <span>Choose pages to add to this campaign.</span>}
+            {recommendations.status === "completed" && (
+              <span>Choose pages to add to this campaign.</span>
+            )}
           </header>
 
           {recommendations.status === "completed" && (
             <div className={styles.recommendationList}>
               {recommendations.candidates.map((candidate) => {
-                const alreadyAdded = existingAccountIds.has(candidate.accountId);
+                const alreadyAdded = existingAccountIds.has(
+                  candidate.accountId,
+                );
                 const selected = recommendedSelection.has(candidate.accountId);
                 return (
                   <label
@@ -573,7 +667,9 @@ export const AiCampaignDraftCard = ({
                       type="checkbox"
                       checked={alreadyAdded || selected}
                       disabled={alreadyAdded}
-                      onChange={() => toggleRecommendedPage(candidate.accountId)}
+                      onChange={() =>
+                        toggleRecommendedPage(candidate.accountId)
+                      }
                     />
                     {candidate.logoUrl ? (
                       <img src={candidate.logoUrl} alt="" />
@@ -582,14 +678,22 @@ export const AiCampaignDraftCard = ({
                     )}
                     <span className={styles.recommendationName}>
                       <strong>{candidate.username}</strong>
-                      <small>{normalizeDraftPlatform(candidate.socialMedia)}</small>
+                      <small>
+                        {normalizeDraftPlatform(candidate.socialMedia)}
+                      </small>
                     </span>
                     <span className={styles.recommendationMetric}>
-                      <strong>{formatCompactNumber(candidate.followers)}</strong>
+                      <strong>
+                        {formatCompactNumber(candidate.followers)}
+                      </strong>
                       <small>followers</small>
                     </span>
                     <span className={styles.recommendationMetric}>
-                      <strong>{typeof candidate.countryShare === "number" ? `${candidate.countryShare}%` : "—"}</strong>
+                      <strong>
+                        {typeof candidate.countryShare === "number"
+                          ? `${candidate.countryShare}%`
+                          : "—"}
+                      </strong>
                       <small>target audience</small>
                     </span>
                     <span className={styles.recommendationPrice}>
@@ -615,12 +719,20 @@ export const AiCampaignDraftCard = ({
             </span>
             <div>
               {recommendations.hasMore && (
-                <button type="button" className={styles.secondary} onClick={onRequestMoreRecommendations}>
+                <button
+                  type="button"
+                  className={styles.secondary}
+                  onClick={onRequestMoreRecommendations}
+                >
                   Load more matches
                 </button>
               )}
               {recommendations.status === "completed" && (
-                <button type="button" onClick={addRecommendedPages} disabled={recommendedSelection.size === 0}>
+                <button
+                  type="button"
+                  onClick={addRecommendedPages}
+                  disabled={recommendedSelection.size === 0}
+                >
                   Add selected pages
                 </button>
               )}
@@ -640,13 +752,18 @@ export const AiCampaignDraftCard = ({
           </button>
         )}
         {focusMode === "content" && nextIncompleteContent && (
-          <button type="button" onClick={() => openDetails(nextIncompleteContent)}>
+          <button
+            type="button"
+            onClick={() => openDetails(nextIncompleteContent)}
+          >
             Add next content
           </button>
         )}
       </div>
 
-      <div className={`${styles.tableWrap} ${styles[`tableWrap_${focusMode}`]}`}>
+      <div
+        className={`${styles.tableWrap} ${styles[`tableWrap_${focusMode}`]}`}
+      >
         <table>
           <thead>
             <tr>
@@ -703,7 +820,9 @@ export const AiCampaignDraftCard = ({
                       )}
                       <div>
                         <strong>{account.username}</strong>
-                        <span>{normalizeDraftPlatform(account.socialMedia)}</span>
+                        <span>
+                          {normalizeDraftPlatform(account.socialMedia)}
+                        </span>
                         {focusMode === "selection" && (
                           <span
                             className={`${styles.contentStatus} ${styles[`contentStatus_${isAvailable ? status : "incomplete"}`]}`}
@@ -715,21 +834,30 @@ export const AiCampaignDraftCard = ({
                     </div>
                   </td>
                   {focusMode === "selection" && (
-                    <td data-label="Followers">{Number(account.followers ?? 0).toLocaleString("en")}</td>
+                    <td data-label="Followers">
+                      {Number(account.followers ?? 0).toLocaleString("en")}
+                    </td>
                   )}
                   {focusMode === "selection" && (
-                    <td data-label="Price">{formatDraftCurrency(Number(account.price ?? 0))}</td>
+                    <td data-label="Price">
+                      {formatDraftCurrency(Number(account.price ?? 0))}
+                    </td>
                   )}
                   {focusMode === "content" && (
                     <td data-label="Content status">
-                      <span className={`${styles.readinessBadge} ${styles[`contentStatus_${status}`]}`}>
+                      <span
+                        className={`${styles.readinessBadge} ${styles[`contentStatus_${status}`]}`}
+                      >
                         {readiness.label}
                       </span>
                     </td>
                   )}
                   {focusMode === "content" && (
                     <td data-label="Content link">
-                      <span className={styles.contentLink} title={content?.mainLink || undefined}>
+                      <span
+                        className={styles.contentLink}
+                        title={content?.mainLink || undefined}
+                      >
                         {content?.mainLink || "No link yet"}
                       </span>
                     </td>
@@ -741,13 +869,19 @@ export const AiCampaignDraftCard = ({
                         value={account.dateRequest}
                         disabled={!selected}
                         label={account.username}
-                        onChange={(dateRequest) => updateAccount(key, { dateRequest })}
+                        onChange={(dateRequest) =>
+                          updateAccount(key, { dateRequest })
+                        }
                       />
                     </td>
                   )}
                   {focusMode === "content" && (
                     <td data-label="Actions">
-                      <button type="button" className={styles.editButton} onClick={() => openDetails(account)}>
+                      <button
+                        type="button"
+                        className={styles.editButton}
+                        onClick={() => openDetails(account)}
+                      >
                         {status === "empty" ? "Add content" : "Edit content"}
                       </button>
                     </td>
@@ -759,14 +893,22 @@ export const AiCampaignDraftCard = ({
                           <button
                             type="button"
                             className={styles.moreButton}
-                            onClick={() => setActionKey((current) => (current === key ? null : key))}
+                            onClick={() =>
+                              setActionKey((current) =>
+                                current === key ? null : key,
+                              )
+                            }
                             aria-label={`More actions for ${account.username}`}
                             aria-expanded={actionKey === key}
                           >
                             ...
                           </button>
                           {actionKey === key && (
-                            <button type="button" className={styles.removeButton} onClick={() => removeAccount(key)}>
+                            <button
+                              type="button"
+                              className={styles.removeButton}
+                              onClick={() => removeAccount(key)}
+                            >
                               Remove from draft
                             </button>
                           )}
@@ -781,58 +923,76 @@ export const AiCampaignDraftCard = ({
         </table>
       </div>
 
-      {focusMode === "content" && totalPrice > 1000 && (
-        <label className={styles.noContent}>
+      {focusMode === "content" && selectedAccounts.length > 0 && (
+        <label
+          className={`${styles.noContent} ${noContentAvailable ? styles.noContentChecked : ""}`}
+        >
           <input
             type="checkbox"
             checked={noContentAvailable}
             onChange={(event) => setNoContentAvailable(event.target.checked)}
           />
+          <i aria-hidden="true">{noContentAvailable ? "✓" : ""}</i>
           <span>
             <strong>Need creative support?</strong>
-            <small>Ask our team to prepare campaign-ready meme content.</small>
+            <small>
+              {noContentAvailable
+                ? "Selected — our team will prepare the content. Checkout is unlocked."
+                : "Ask our team to prepare campaign-ready content for these pages."}
+            </small>
           </span>
         </label>
       )}
 
-      {focusMode === "content" && !canCheckout && selectedAccounts.length > 0 && (
-        <div className={styles.nextStep}>
-          <div>
-            <strong>{noContentAvailable ? "Creative support requested" : "Next: add campaign content"}</strong>
-            <span>
-              {noContentAvailable
-                ? "The request is saved with this draft. Checkout stays locked until campaign content is ready."
-                : "Send the promo link and post text in chat. Tags, story link, content notes and edits are optional."}
-            </span>
+      {focusMode === "content" &&
+        !canCheckout &&
+        selectedAccounts.length > 0 && (
+          <div className={styles.nextStep}>
+            <div>
+              <strong>
+                {noContentAvailable
+                  ? "Creative support requested"
+                  : "Next: add campaign content"}
+              </strong>
+              <span>
+                {noContentAvailable
+                  ? "The request is saved with this draft. Checkout stays locked until campaign content is ready."
+                  : "Send the promo link and post text in chat. Tags, story link, content notes and edits are optional."}
+              </span>
+            </div>
+            <div className={styles.nextStepActions}>
+              <button
+                type="button"
+                onClick={() => {
+                  if (noContentAvailable) setNoContentAvailable(false);
+                  onGoToChat();
+                }}
+              >
+                {noContentAvailable
+                  ? "Add my own content in chat"
+                  : "Continue in chat"}
+              </button>
+              <button
+                type="button"
+                className={styles.nextStepPrimary}
+                disabled={saveStatus === "saving"}
+                onClick={() => {
+                  if (noContentAvailable) setNoContentAvailable(false);
+                  const nextAccount =
+                    selectedAccounts.find(
+                      (account) =>
+                        getDraftContentStatus(
+                          getContentForDraftAccount(draft, account),
+                        ) !== "ready",
+                    ) ?? selectedAccounts[0];
+                  if (nextAccount) openDetails(nextAccount);
+                }}
+              >
+                {noContentAvailable ? "Add my own content" : "Add content"}
+              </button>
+            </div>
           </div>
-          <div className={styles.nextStepActions}>
-            <button
-              type="button"
-              onClick={() => {
-                if (noContentAvailable) setNoContentAvailable(false);
-                onGoToChat();
-              }}
-            >
-              {noContentAvailable ? "Add my own content in chat" : "Continue in chat"}
-            </button>
-            <button
-              type="button"
-              className={styles.nextStepPrimary}
-              disabled={saveStatus === "saving"}
-              onClick={() => {
-                if (noContentAvailable) setNoContentAvailable(false);
-                const nextAccount =
-                  selectedAccounts.find(
-                    (account) => getDraftContentStatus(getContentForDraftAccount(draft, account)) !== "ready",
-                  ) ?? selectedAccounts[0];
-                if (nextAccount) openDetails(nextAccount);
-              }}
-            >
-              {noContentAvailable ? "Add my own content" : "Add content"}
-            </button>
-          </div>
-        </div>
-      )}
+        )}
 
       {saveStatus === "error" && (
         <div className={styles.saveFailure}>
@@ -864,7 +1024,13 @@ export const AiCampaignDraftCard = ({
             type="button"
             className={styles.secondary}
             disabled={!selectedAccounts.length}
-            onClick={() => void continueTo(() => navigate(`/client/create-campaign?draftId=${draftId}&source=ai`))}
+            onClick={() =>
+              void continueTo(() =>
+                navigate(
+                  `/client/create-campaign?draftId=${draftId}&source=ai`,
+                ),
+              )
+            }
           >
             Customize
           </button>
@@ -894,35 +1060,49 @@ export const AiCampaignDraftCard = ({
           >
             <header className={styles.drawerHeader}>
               <div>
-                <span>{normalizeDraftPlatform(editingAccount.socialMedia)}</span>
-                <h2 id="inline-campaign-content-title">Content for {editingAccount.username}</h2>
+                <span>
+                  {normalizeDraftPlatform(editingAccount.socialMedia)}
+                </span>
+                <h2 id="inline-campaign-content-title">
+                  Content for {editingAccount.username}
+                </h2>
               </div>
-              <button type="button" onClick={closeDetails} aria-label="Close content details">
+              <button
+                type="button"
+                onClick={closeDetails}
+                aria-label="Close content details"
+              >
                 ×
               </button>
             </header>
             <div className={styles.drawerBody}>
               <p className={styles.drawerIntro}>
-                Add whatever should be used for this page. Any useful publishing detail is enough, and it can be changed
-                later.
+                Add whatever should be used for this page. Any useful publishing
+                detail is enough, and it can be changed later.
               </p>
               <label className={styles.field}>
                 <span>Content link or reference</span>
                 <input
                   type="text"
                   value={details.contentUrl}
-                  onChange={(event) => updateDetails("contentUrl", event.target.value)}
+                  onChange={(event) =>
+                    updateDetails("contentUrl", event.target.value)
+                  }
                   placeholder="Paste a link or reference"
                   maxLength={2000}
                   aria-invalid={Boolean(detailsErrors.contentUrl)}
                 />
-                {detailsErrors.contentUrl && <small>{detailsErrors.contentUrl}</small>}
+                {detailsErrors.contentUrl && (
+                  <small>{detailsErrors.contentUrl}</small>
+                )}
               </label>
               <label className={styles.field}>
                 <span>Post description</span>
                 <textarea
                   value={details.description}
-                  onChange={(event) => updateDetails("description", event.target.value)}
+                  onChange={(event) =>
+                    updateDetails("description", event.target.value)
+                  }
                   placeholder="What should be published with the post?"
                   rows={5}
                   maxLength={2000}
@@ -933,7 +1113,9 @@ export const AiCampaignDraftCard = ({
                   <span>Story tag</span>
                   <input
                     value={details.storyTag}
-                    onChange={(event) => updateDetails("storyTag", event.target.value)}
+                    onChange={(event) =>
+                      updateDetails("storyTag", event.target.value)
+                    }
                     placeholder="@artist"
                     maxLength={100}
                   />
@@ -943,19 +1125,25 @@ export const AiCampaignDraftCard = ({
                   <input
                     type="text"
                     value={details.storyLink}
-                    onChange={(event) => updateDetails("storyLink", event.target.value)}
+                    onChange={(event) =>
+                      updateDetails("storyLink", event.target.value)
+                    }
                     placeholder="Paste a link or reference"
                     maxLength={2000}
                     aria-invalid={Boolean(detailsErrors.storyLink)}
                   />
-                  {detailsErrors.storyLink && <small>{detailsErrors.storyLink}</small>}
+                  {detailsErrors.storyLink && (
+                    <small>{detailsErrors.storyLink}</small>
+                  )}
                 </label>
               </div>
               <label className={styles.field}>
                 <span>Content notes &amp; edits</span>
                 <textarea
                   value={details.additionalBrief}
-                  onChange={(event) => updateDetails("additionalBrief", event.target.value)}
+                  onChange={(event) =>
+                    updateDetails("additionalBrief", event.target.value)
+                  }
                   placeholder="Requested edits, timing, tone, visual direction, or other instructions"
                   rows={4}
                   maxLength={2000}
@@ -985,7 +1173,8 @@ export const AiCampaignDraftCard = ({
                 <div className={styles.overwriteWarning} role="alert">
                   <strong>Existing content will be replaced</strong>
                   <span>
-                    Review the change, then confirm replacement for {applyAllOverwriteCount}{" "}
+                    Review the change, then confirm replacement for{" "}
+                    {applyAllOverwriteCount}{" "}
                     {applyAllOverwriteCount === 1 ? "page" : "pages"}.
                   </span>
                 </div>
@@ -994,10 +1183,18 @@ export const AiCampaignDraftCard = ({
             <footer className={styles.drawerFooter}>
               <span>Campaign content details</span>
               <div>
-                <button type="button" className={styles.secondary} onClick={closeDetails}>
+                <button
+                  type="button"
+                  className={styles.secondary}
+                  onClick={closeDetails}
+                >
                   Cancel
                 </button>
-                <button type="button" className={styles.primary} onClick={handleSaveDetails}>
+                <button
+                  type="button"
+                  className={styles.primary}
+                  onClick={handleSaveDetails}
+                >
                   {confirmApplyToAll && applyAllOverwriteCount > 0
                     ? `Replace details for ${applyAllOverwriteCount} ${applyAllOverwriteCount === 1 ? "page" : "pages"}`
                     : applyAllOverwriteCount > 0

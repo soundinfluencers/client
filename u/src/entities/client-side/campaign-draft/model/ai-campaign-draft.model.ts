@@ -3,7 +3,9 @@ import type {
   DraftAddedAccountDto,
 } from "../api/campaign-draft.dto.ts";
 
-export type CampaignContentItem = NonNullable<CampaignDraftDto["campaignContent"]>[number];
+export type CampaignContentItem = NonNullable<
+  CampaignDraftDto["campaignContent"]
+>[number];
 export type ContentStatus = "ready" | "incomplete" | "empty";
 export type ContentReadiness = {
   status: ContentStatus;
@@ -18,7 +20,9 @@ export type DraftDetailsForm = {
   additionalBrief: string;
 };
 
-export type DraftDetailsErrors = Partial<Record<keyof DraftDetailsForm, string>>;
+export type DraftDetailsErrors = Partial<
+  Record<keyof DraftDetailsForm, string>
+>;
 
 export const EMPTY_DRAFT_DETAILS: DraftDetailsForm = {
   contentUrl: "",
@@ -29,7 +33,10 @@ export const EMPTY_DRAFT_DETAILS: DraftDetailsForm = {
 };
 
 export const formatCompactNumber = (value: number) =>
-  new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(value);
+  new Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
 
 export const formatDraftCurrency = (value: number) =>
   new Intl.NumberFormat("en", {
@@ -69,25 +76,20 @@ export const buildAiDraftPayload = (
   })),
   ...(draft.campaignContent?.length
     ? {
-      campaignContent: draft.campaignContent.map((item) => ({
-        _id: item._id,
-        socialMedia: item.socialMedia,
-        socialMediaGroup: item.socialMediaGroup,
-        mainLink: item.mainLink,
-        descriptions: item.descriptions,
-        profileType: item.profileType,
-        taggedUser: item.taggedUser,
-        taggedLink: item.taggedLink,
-        additionalBrief: item.additionalBrief,
-      })),
-    }
+        campaignContent: draft.campaignContent.map((item) => ({
+          _id: item._id,
+          socialMedia: item.socialMedia,
+          socialMediaGroup: item.socialMediaGroup,
+          mainLink: item.mainLink,
+          descriptions: item.descriptions,
+          profileType: item.profileType,
+          taggedUser: item.taggedUser,
+          taggedLink: item.taggedLink,
+          additionalBrief: item.additionalBrief,
+        })),
+      }
     : {}),
-  noContentAvailable:
-    accounts
-      .filter((account) => account.isSelected !== false)
-      .reduce((sum, account) => sum + Number(account.price ?? 0), 0) > 1000
-      ? noContentAvailable
-      : false,
+  noContentAvailable,
 });
 
 export const getAiDraftPayloadSignature = (
@@ -103,7 +105,8 @@ export const getContentForDraftAccount = (
 
   if (selectedContent) {
     const selectedItem = content.find(
-      (item) => String(item._id) === String(selectedContent.campaignContentItemId),
+      (item) =>
+        String(item._id) === String(selectedContent.campaignContentItemId),
     );
     if (selectedItem) return selectedItem;
   }
@@ -112,7 +115,9 @@ export const getContentForDraftAccount = (
   return undefined;
 };
 
-export const getDraftDetailsForm = (content?: CampaignContentItem): DraftDetailsForm => ({
+export const getDraftDetailsForm = (
+  content?: CampaignContentItem,
+): DraftDetailsForm => ({
   contentUrl: content?.mainLink ?? "",
   description: content?.descriptions?.[0]?.description ?? "",
   storyTag: content?.taggedUser ?? "",
@@ -120,20 +125,25 @@ export const getDraftDetailsForm = (content?: CampaignContentItem): DraftDetails
   additionalBrief: content?.additionalBrief ?? "",
 });
 
-export const getDraftContentReadiness = (content?: CampaignContentItem): ContentReadiness => {
+export const getDraftContentReadiness = (
+  content?: CampaignContentItem,
+): ContentReadiness => {
   if (!content) return { status: "empty", label: "Add publishing details" };
 
   const form = getDraftDetailsForm(content);
   const hasAnyValue =
     Object.values(form).some((value) => value.trim()) ||
-    (content.descriptions ?? []).some((description) => description.description?.trim());
+    (content.descriptions ?? []).some((description) =>
+      description.description?.trim(),
+    );
   return hasAnyValue
     ? { status: "ready", label: "Content added" }
     : { status: "empty", label: "Add publishing details" };
 };
 
-export const getDraftContentStatus = (content?: CampaignContentItem): ContentStatus =>
-  getDraftContentReadiness(content).status;
+export const getDraftContentStatus = (
+  content?: CampaignContentItem,
+): ContentStatus => getDraftContentReadiness(content).status;
 
 export const isDraftReadyForCheckout = (
   draft: CampaignDraftDto,
@@ -143,12 +153,16 @@ export const isDraftReadyForCheckout = (
     (account) => account.isAvailable !== false && account.isSelected !== false,
   );
 
-  return selectedAccounts.length > 0 && selectedAccounts.every((account) => {
+  if (!selectedAccounts.length) return false;
+  if (draft.noContentAvailable) return true;
+
+  return selectedAccounts.every((account) => {
     const selectedContent = getSelectedContentRef(account);
     if (!selectedContent?.campaignContentItemId) return false;
 
     const content = (draft.campaignContent ?? []).find(
-      (item) => String(item._id) === String(selectedContent.campaignContentItemId),
+      (item) =>
+        String(item._id) === String(selectedContent.campaignContentItemId),
     );
     return getDraftContentStatus(content) === "ready";
   });
@@ -158,13 +172,16 @@ export const getDraftSocialMediaGroup = (
   socialMedia: string,
 ): CampaignContentItem["socialMediaGroup"] => {
   if (["spotify", "soundcloud"].includes(socialMedia)) return "music";
-  if (["instagram", "tiktok", "facebook", "youtube"].includes(socialMedia)) return "main";
+  if (["instagram", "tiktok", "facebook", "youtube"].includes(socialMedia))
+    return "main";
   return "press";
 };
 
 // Publishing details are intentionally permissive: clients may paste a URL, handle, note,
 // description or another reference. The assistant stores what they provide without policing format.
-export const validateDraftDetails = (form: DraftDetailsForm): DraftDetailsErrors => {
+export const validateDraftDetails = (
+  form: DraftDetailsForm,
+): DraftDetailsErrors => {
   void form;
   return {};
 };

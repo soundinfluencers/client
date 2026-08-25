@@ -61,7 +61,10 @@ export const CampaignStepsRail = ({
             description: checkpoint.description,
             action: checkpoint.action,
             optional: checkpoint.optional,
-            status: checkpoint.optional ? ("optional" as const) : ("pending" as const),
+            status: checkpoint.optional
+              ? ("optional" as const)
+              : ("pending" as const),
+            remaining: checkpoint.description,
           })),
     [query.data],
   );
@@ -93,14 +96,16 @@ export const CampaignStepsRail = ({
       // Sections the user has never opened start as seen: a fresh draft is not "changed".
       const next: Partial<CampaignSectionFingerprints> = { ...current };
       let touched = false;
-      (Object.keys(fingerprints) as CampaignSetupSurface[]).forEach((section) => {
-        const isOpen = section === activeSurface;
-        const unknown = next[section] === undefined;
-        if ((isOpen || unknown) && next[section] !== fingerprints[section]) {
-          next[section] = fingerprints[section];
-          touched = true;
-        }
-      });
+      (Object.keys(fingerprints) as CampaignSetupSurface[]).forEach(
+        (section) => {
+          const isOpen = section === activeSurface;
+          const unknown = next[section] === undefined;
+          if ((isOpen || unknown) && next[section] !== fingerprints[section]) {
+            next[section] = fingerprints[section];
+            touched = true;
+          }
+        },
+      );
       if (touched) writeSeenSections(draftId, next);
       return touched ? next : current;
     });
@@ -109,9 +114,9 @@ export const CampaignStepsRail = ({
   const hasChanged = (surface: CampaignSetupSurface) =>
     Boolean(
       fingerprints &&
-        surface !== activeSurface &&
-        seen[surface] !== undefined &&
-        seen[surface] !== fingerprints[surface],
+      surface !== activeSurface &&
+      seen[surface] !== undefined &&
+      seen[surface] !== fingerprints[surface],
     );
 
   // Clicking the campaign action while something is missing is not an error: it takes
@@ -120,6 +125,9 @@ export const CampaignStepsRail = ({
     (checkpoint) => !checkpoint.optional && checkpoint.status !== "complete",
   );
   const isReady = Boolean(query.data) && !firstIncomplete;
+  const remaining = checkpoints.filter(
+    (checkpoint) => !checkpoint.optional && checkpoint.status !== "complete",
+  );
 
   const handleProceed = () => {
     if (isReady) {
@@ -134,7 +142,10 @@ export const CampaignStepsRail = ({
 
   return (
     <nav className={styles.rail} aria-label="Campaign sections">
-      <span className={styles.name} title={query.data?.campaignName || undefined}>
+      <span
+        className={styles.name}
+        title={query.data?.campaignName || undefined}
+      >
         {query.data?.campaignName || "Campaign draft"}
       </span>
 
@@ -147,15 +158,23 @@ export const CampaignStepsRail = ({
               styles.stepChat,
               activeSurface === null ? styles.stepOpen : "",
               dialogueUnread ? styles.stepChanged : "",
-            ].filter(Boolean).join(" ")}
+            ]
+              .filter(Boolean)
+              .join(" ")}
             aria-current={activeSurface === null ? "true" : undefined}
             aria-label={`Dialogue with the assistant${dialogueUnread ? " — new reply" : ""}`}
-            title={dialogueUnread ? "The assistant has a new reply" : "Open the campaign dialogue"}
+            title={
+              dialogueUnread
+                ? "The assistant has a new reply"
+                : "Open the campaign dialogue"
+            }
             onClick={() => onSelect({ kind: "chat", label: "Open Dialogue" })}
           >
             <i className={styles.chatGlyph} aria-hidden="true" />
             Dialogue
-            {dialogueUnread && <i className={styles.changeMark} aria-hidden="true" />}
+            {dialogueUnread && (
+              <i className={styles.changeMark} aria-hidden="true" />
+            )}
           </button>
         </li>
         {checkpoints.map((checkpoint, index) => {
@@ -165,7 +184,8 @@ export const CampaignStepsRail = ({
           const showStatus = Boolean(query.data);
           const isChat = checkpoint.action.kind === "chat";
           const changed =
-            checkpoint.action.kind === "surface" && hasChanged(checkpoint.action.surface);
+            checkpoint.action.kind === "surface" &&
+            hasChanged(checkpoint.action.surface);
           // Forward sections used to wait for their prerequisites. Unlocked on purpose:
           // every section is reachable in any order, the status dot still says what is done.
           // const locked = checkpoint.status === "pending" ||
@@ -180,7 +200,9 @@ export const CampaignStepsRail = ({
                 className={[
                   styles.step,
                   // A conversation is not a checklist item: it has no done/undone state.
-                  isChat ? styles.stepChat : styles[`step_${checkpoint.status}`],
+                  isChat
+                    ? styles.stepChat
+                    : styles[`step_${checkpoint.status}`],
                   isOpen ? styles.stepOpen : "",
                   changed ? styles.stepChanged : "",
                   nudgedId === checkpoint.id ? styles.stepNudged : "",
@@ -191,7 +213,9 @@ export const CampaignStepsRail = ({
                 aria-label={[
                   checkpoint.label,
                   isChat ? "— talk to the assistant" : "",
-                  !isChat && showStatus ? `— ${STATUS_HINT[checkpoint.status]}` : "",
+                  !isChat && showStatus
+                    ? `— ${STATUS_HINT[checkpoint.status]}`
+                    : "",
                   changed ? "— updated" : "",
                 ]
                   .filter(Boolean)
@@ -219,27 +243,45 @@ export const CampaignStepsRail = ({
                 {checkpoint.optional && (
                   <span className={styles.optionalBadge}>Optional</span>
                 )}
-                {changed && <i className={styles.changeMark} aria-hidden="true" />}
+                {changed && (
+                  <i className={styles.changeMark} aria-hidden="true" />
+                )}
               </button>
             </li>
           );
         })}
       </ul>
 
-      <button
-        type="button"
-        className={`${styles.proceed} ${isReady ? styles.proceedReady : ""}`}
-        onClick={handleProceed}
-        title={
-          isReady
-            ? "Everything is filled in — go to checkout"
-            : firstIncomplete
-              ? `Still needed: ${firstIncomplete.label}`
-              : undefined
-        }
-      >
-        {isReady ? "Review & pay" : "What's left?"}
-      </button>
+      <div className={styles.proceedWrap}>
+        <button
+          type="button"
+          className={`${styles.proceed} ${isReady ? styles.proceedReady : ""}`}
+          onClick={handleProceed}
+          aria-describedby={
+            !isReady && remaining.length ? "campaign-remaining" : undefined
+          }
+        >
+          {isReady ? "Review & pay" : `What's left? (${remaining.length})`}
+        </button>
+        {!isReady && remaining.length > 0 && (
+          <div
+            id="campaign-remaining"
+            className={styles.remainingPopover}
+            role="tooltip"
+          >
+            <strong>Still needed</strong>
+            <ul>
+              {remaining.map((checkpoint) => (
+                <li key={checkpoint.id}>
+                  <b>{checkpoint.shortLabel}</b>
+                  <span>{checkpoint.remaining ?? checkpoint.description}</span>
+                </li>
+              ))}
+            </ul>
+            <small>Click to open the first unfinished section.</small>
+          </div>
+        )}
+      </div>
     </nav>
   );
 };

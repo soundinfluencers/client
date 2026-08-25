@@ -32,7 +32,9 @@
   list-style: none;
   scrollbar-width: none;
 
-  &::-webkit-scrollbar { display: none; }
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Sections read as chips: filled means done, outlined means still open. */
@@ -50,9 +52,15 @@
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
 
-  &:hover { border-color: #b9c8de; color: #202934; }
+  &:hover {
+    border-color: #b9c8de;
+    color: #202934;
+  }
 
   &:focus-visible {
     outline: 2px solid #7da1fb;
@@ -74,7 +82,10 @@
   font-weight: 700;
   line-height: 1;
   place-items: center;
-  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
 }
 
 .step_complete {
@@ -82,8 +93,15 @@
   color: #1c6b43;
   background: #eefaf3;
 
-  .dot { border-color: #35a06a; color: #fff; background: #35a06a; }
-  &:hover { border-color: #8fd0ae; color: #145634; }
+  .dot {
+    border-color: #35a06a;
+    color: #fff;
+    background: #35a06a;
+  }
+  &:hover {
+    border-color: #8fd0ae;
+    color: #145634;
+  }
 }
 
 /* Settled by talking, not by editing: a dashed chip with a speech bubble, set apart
@@ -112,7 +130,9 @@
   border-style: dashed;
   border-color: #ccd5e0;
 
-  &:hover { border-color: #9fb0c6; }
+  &:hover {
+    border-color: #9fb0c6;
+  }
 }
 
 .beforeDivider {
@@ -127,7 +147,10 @@
   color: #24374f;
   background: #f5f8ff;
 
-  .dot { border-color: #356cf6; background: #cddcff; }
+  .dot {
+    border-color: #356cf6;
+    background: #cddcff;
+  }
 }
 
 .step_pending {
@@ -153,14 +176,14 @@
   background: #eef1f5;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: .02em;
+  letter-spacing: 0.02em;
 }
 
 .stepOpen {
   border-color: #356cf6;
   color: #1f366a;
   background: #eaf1ff;
-  box-shadow: 0 0 0 3px rgba(53, 108, 246, .1);
+  box-shadow: 0 0 0 3px rgba(53, 108, 246, 0.1);
 }
 
 /* Something moved here while the user was elsewhere. The screen never switches on
@@ -183,8 +206,19 @@
 }
 
 @keyframes railNudge {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(240, 151, 42, 0); }
-  15%, 55% { box-shadow: 0 0 0 4px rgba(240, 151, 42, .28); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(240, 151, 42, 0);
+  }
+  15%,
+  55% {
+    box-shadow: 0 0 0 4px rgba(240, 151, 42, 0.28);
+  }
+}
+
+.proceedWrap {
+  position: relative;
+  flex: 0 0 auto;
 }
 
 .proceed {
@@ -199,9 +233,15 @@
   font-weight: 650;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
 
-  &:hover { border-color: #b9c8de; color: #202934; }
+  &:hover {
+    border-color: #b9c8de;
+    color: #202934;
+  }
 
   &:focus-visible {
     outline: 2px solid #7da1fb;
@@ -209,16 +249,86 @@
   }
 }
 
+.remainingPopover {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 9px);
+  right: 0;
+  width: min(340px, 82vw);
+  padding: 14px;
+  border: 1px solid #dce3ec;
+  border-radius: 13px;
+  color: #202934;
+  background: #fff;
+  box-shadow: 0 14px 38px rgba(24, 36, 52, 0.16);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease,
+    visibility 150ms ease;
+  pointer-events: none;
+
+  > strong {
+    display: block;
+    margin-bottom: 9px;
+    font-size: 12px;
+  }
+
+  ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 62px 1fr;
+    gap: 8px;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  b {
+    color: #356cf6;
+  }
+  span {
+    color: #5f6c7d;
+  }
+  small {
+    display: block;
+    margin-top: 10px;
+    color: #8a95a4;
+    font-size: 10px;
+  }
+}
+
+.proceedWrap:hover .remainingPopover,
+.proceedWrap:focus-within .remainingPopover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
 .proceedReady {
   border-color: #202934;
   color: #fff;
   background: #202934;
 
-  &:hover { border-color: #000; color: #fff; background: #000; }
+  &:hover {
+    border-color: #000;
+    color: #fff;
+    background: #000;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stepNudged { animation: none; }
+  .stepNudged {
+    animation: none;
+  }
 }
 
 @media (max-width: 720px) {
@@ -229,7 +339,18 @@
     padding: 9px 12px;
   }
 
-  .name { max-width: 100%; }
-  .steps { width: 100%; }
-  .proceed { width: 100%; }
+  .name {
+    max-width: 100%;
+  }
+  .steps {
+    width: 100%;
+  }
+  .proceedWrap,
+  .proceed {
+    width: 100%;
+  }
+  .remainingPopover {
+    right: auto;
+    left: 0;
+  }
 }

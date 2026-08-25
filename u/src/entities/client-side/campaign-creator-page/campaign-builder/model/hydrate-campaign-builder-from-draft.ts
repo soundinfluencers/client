@@ -1,67 +1,111 @@
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 import type { CampaignDraftDto } from "@/entities/client-side/campaign-draft/api/campaign-draft.dto";
+import { ObjectId } from "bson";
+import {
+  getDraftSocialMediaGroup,
+  getSelectedContentRef,
+} from "@/entities/client-side/campaign-draft/model/ai-campaign-draft.model.ts";
 
-export const hydrateCampaignBuilderFromDraft = (
-    draft: CampaignDraftDto,
-) => {
-    const store = useCampaignBuilderStore.getState();
-    const selectedAccounts = draft.addedAccounts?.filter(
-        (account) => account.isAvailable !== false && account.isSelected !== false,
+export const hydrateCampaignBuilderFromDraft = (draft: CampaignDraftDto) => {
+  const store = useCampaignBuilderStore.getState();
+  const selectedAccounts =
+    draft.addedAccounts?.filter(
+      (account) =>
+        account.isAvailable !== false && account.isSelected !== false,
     ) ?? [];
 
-    store.actions.hydrateFromDraft({
-        draftId: String(draft._id),
-        draftStep: draft.step,
-        draftRevision: Number(draft.revision ?? 0),
+  // Creative support is a real checkout route, not just a UI override. The paid campaign
+  // schema still requires a content assignment for every page, so missing assignments receive
+  // an explicit team-support placeholder. Admins also receive `noContentAvailable` from the
+  // origin draft and can replace these placeholders with the finished assets.
+  const campaignContent = [...(draft.campaignContent ?? [])];
+  const supportAssignments = new Map<
+    string,
+    { campaignContentItemId: string; descriptionId: string }
+  >();
+  if (draft.noContentAvailable) {
+    for (const account of selectedAccounts) {
+      const existing = getSelectedContentRef(account);
+      const existingContent =
+        existing &&
+        campaignContent.some(
+          (item) => String(item._id) === String(existing.campaignContentItemId),
+        );
+      if (existing && existingContent) continue;
 
-        campaignName: draft.campaignName ?? "",
+      const contentId = new ObjectId().toHexString();
+      const descriptionId = new ObjectId().toHexString();
+      campaignContent.push({
+        _id: contentId,
+        socialMedia: account.socialMedia,
+        socialMediaGroup: getDraftSocialMediaGroup(account.socialMedia),
+        mainLink: "",
+        descriptions: [{ _id: descriptionId, description: "" }],
+        profileType: account.profileType,
+        taggedUser: "",
+        taggedLink: "",
+        additionalBrief:
+          "Creative support requested — SoundInfluencers will prepare campaign-ready content.",
+        accountId: account.socialAccountId,
+      });
+      supportAssignments.set(String(account.socialAccountId), {
+        campaignContentItemId: contentId,
+        descriptionId,
+      });
+    }
+  }
 
-        totalPrice: Number(draft.totalPrice ?? 0),
+  store.actions.hydrateFromDraft({
+    draftId: String(draft._id),
+    draftStep: draft.step,
+    draftRevision: Number(draft.revision ?? 0),
 
-        selectedOfferId: null,
-        selectedOfferAccountIds: [],
+    campaignName: draft.campaignName ?? "",
 
-        selectedPromoCardIds:
-            selectedAccounts.map((acc) =>
-                String(acc.socialAccountId),
-            ),
+    totalPrice: Number(draft.totalPrice ?? 0),
 
-        selectedAccounts:
-            selectedAccounts.map((acc) => ({
-                accountId: String(acc.socialAccountId),
+    selectedOfferId: null,
+    selectedOfferAccountIds: [],
 
-                influencerId: String(acc.influencerId),
+    selectedPromoCardIds: selectedAccounts.map((acc) =>
+      String(acc.socialAccountId),
+    ),
 
-                username: acc.username ?? "",
+    selectedAccounts: selectedAccounts.map((acc) => ({
+      accountId: String(acc.socialAccountId),
 
-                socialMedia: acc.socialMedia,
+      influencerId: String(acc.influencerId),
 
-                followers: Number(acc.followers ?? 0),
+      username: acc.username ?? "",
 
-                profileType: acc.profileType,
+      socialMedia: acc.socialMedia,
 
-                price: Number(acc.price ?? 0),
+      followers: Number(acc.followers ?? 0),
 
-                logoUrl: acc.logoUrl ?? "",
+      profileType: acc.profileType,
 
-                source: "manual" as const,
+      price: Number(acc.price ?? 0),
 
-                // The backend GET returns the assignment as `selectedContent`; older callers
-                // expected `selectedCampaignContentItem`. Accept both so the content-to-account
-                // assignment survives draft resume (it silently dropped before).
-                selectedCampaignContentItem:
-                    acc.selectedCampaignContentItem ??
-                    (acc as any).selectedContent ??
-                    null,
+      logoUrl: acc.logoUrl ?? "",
 
-                dateRequest:
-                    acc.dateRequest ?? "ASAP",
-            })),
+      source: "manual" as const,
 
-        campaignContent: draft.campaignContent ?? [],
+      // The backend GET returns the assignment as `selectedContent`; older callers
+      // expected `selectedCampaignContentItem`. Accept both so the content-to-account
+      // assignment survives draft resume (it silently dropped before).
+      selectedCampaignContentItem:
+        supportAssignments.get(String(acc.socialAccountId)) ??
+        acc.selectedCampaignContentItem ??
+        (acc as any).selectedContent ??
+        null,
 
-        postContentDraft: null,
+      dateRequest: acc.dateRequest ?? "ASAP",
+    })),
 
-        blocksDraft: null,
-    });
+    campaignContent,
+
+    postContentDraft: null,
+
+    blocksDraft: null,
+  });
 };
