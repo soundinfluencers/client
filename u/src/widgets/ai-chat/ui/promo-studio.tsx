@@ -17,18 +17,19 @@ import {
   createPromoImageDirections,
 } from "@/entities/client-side/promo-creative/api/promo-image.api.ts";
 import { listPromoReferences } from "@/entities/client-side/promo-creative/api/promo-reference.api.ts";
+import {
+  ACCEPTED_IMAGE_ACCEPT,
+  inspectPromoImage,
+  MAX_PROMO_IMAGE_MB,
+  type PromoImageDetails,
+} from "@/entities/client-side/promo-creative/model/promo-image-validation.ts";
+import { fitPromoImage } from "@/entities/client-side/promo-creative/model/promo-image-fit.ts";
 
 import styles from "./promo-studio.module.scss";
 
 type StudioStep = "configure" | "review";
 type PromoFidelity = "low" | "high";
 type PromoOptionStatus = "candidate" | "rejected" | "approved";
-type ImageDetails = {
-  width: number;
-  height: number;
-  mimeType: string;
-};
-
 type PromoVersion = {
   id: string;
   createdAt: string;
@@ -39,7 +40,7 @@ type PromoVersion = {
   referenceId: string;
   fidelity: PromoFidelity;
   sourceFile?: File;
-  sourceDetails?: ImageDetails;
+  sourceDetails?: PromoImageDetails;
   statuses: PromoOptionStatus[];
 };
 
@@ -52,14 +53,7 @@ interface Props {
   onGenerated?: (count: number, version: number) => void;
 }
 
-const MAX_FILE_SIZE = 15 * 1024 * 1024;
-const MIN_IMAGE_EDGE = 512;
-const MAX_IMAGE_EDGE = 8192;
-const MAX_IMAGE_PIXELS = 40_000_000;
-const MIN_PROMO_ASPECT_RATIO = 1 / 2;
-const MAX_PROMO_ASPECT_RATIO = 2;
 const MIN_COPY_LENGTH = 10;
-const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const CUSTOM_REFERENCE = "custom";
 
 // Deliberately front-end only: generated binaries survive closing and reopening the
@@ -69,95 +63,6 @@ const promoHistoryByDraft = new Map<string, PromoVersion[]>();
 const createId = () =>
   globalThis.crypto?.randomUUID?.() ??
   `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
-const detectImageType = async (file: File): Promise<string | null> => {
-  const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());
-  if (
-    bytes.length >= 8 &&
-    bytes[0] === 0x89 &&
-    bytes[1] === 0x50 &&
-    bytes[2] === 0x4e &&
-    bytes[3] === 0x47 &&
-    bytes[4] === 0x0d &&
-    bytes[5] === 0x0a &&
-    bytes[6] === 0x1a &&
-    bytes[7] === 0x0a
-  ) {
-    return "image/png";
-  }
-  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
-    return "image/jpeg";
-  }
-  if (
-    bytes.length >= 12 &&
-    String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" &&
-    String.fromCharCode(...bytes.slice(8, 12)) === "WEBP"
-  ) {
-    return "image/webp";
-  }
-  return null;
-};
-
-const readImageDimensions = (file: File): Promise<Pick<ImageDetails, "width" | "height">> =>
-  new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const image = new Image();
-    const release = () => URL.revokeObjectURL(url);
-    image.onload = () => {
-      const dimensions = { width: image.naturalWidth, height: image.naturalHeight };
-      release();
-      resolve(dimensions);
-    };
-    image.onerror = () => {
-      release();
-      reject(new Error("The image could not be read. Export it again as JPG, PNG, or WebP."));
-    };
-    image.src = url;
-  });
-
-const inspectImage = async (
-  file: File,
-  method: PromoCreativeSource,
-): Promise<ImageDetails> => {
-  if (!file.size) throw new Error("The image is empty.");
-  if (file.size > MAX_FILE_SIZE) throw new Error("Choose an image no larger than 15 MB.");
-  if (file.type && !ACCEPTED_IMAGE_TYPES.has(file.type)) {
-    throw new Error("Use a JPG, PNG, or WebP image.");
-  }
-
-  const mimeType = await detectImageType(file);
-  if (!mimeType) {
-    throw new Error("The image could not be read. Export it again as JPG, PNG, or WebP.");
-  }
-  if (file.type && file.type !== mimeType) {
-    throw new Error("The image contents do not match its file type. Export it again.");
-  }
-
-  const { width, height } = await readImageDimensions(file);
-  if (width < MIN_IMAGE_EDGE || height < MIN_IMAGE_EDGE) {
-    throw new Error(
-      `Use an image of at least ${MIN_IMAGE_EDGE} × ${MIN_IMAGE_EDGE} px. ` +
-        `This one is ${width} × ${height} px.`,
-    );
-  }
-  if (width > MAX_IMAGE_EDGE || height > MAX_IMAGE_EDGE || width * height > MAX_IMAGE_PIXELS) {
-    throw new Error(
-      `Use at most ${MAX_IMAGE_EDGE} px on either side and ` +
-        `${MAX_IMAGE_PIXELS / 1_000_000} megapixels in total.`,
-    );
-  }
-
-  const aspectRatio = width / height;
-  if (
-    method === "upload" &&
-    (aspectRatio < MIN_PROMO_ASPECT_RATIO || aspectRatio > MAX_PROMO_ASPECT_RATIO)
-  ) {
-    throw new Error(
-      "Use a standard square, portrait, story, or landscape format (between 1:2 and 2:1).",
-    );
-  }
-  return { width, height, mimeType };
-};
 
 export const PromoStudio = ({
   open,
@@ -172,13 +77,16 @@ export const PromoStudio = ({
   const [look, setLook] = useState("");
   // Admin-managed looks win; the built-in one keeps the picker useful until the
   // team adds their own.
-  const [references, setReferences] = useState<readonly PromoReference[]>(PROMO_REFERENCES);
+  const [references, setReferences] =
+    useState<readonly PromoReference[]>(PROMO_REFERENCES);
   const referencesRef = useRef<readonly PromoReference[]>(PROMO_REFERENCES);
   const [referenceId, setReferenceId] = useState<string>(
     PROMO_REFERENCES[0]?.id ?? CUSTOM_REFERENCE,
   );
   const [sourceFile, setSourceFile] = useState<File | null>(null);
-  const [sourceDetails, setSourceDetails] = useState<ImageDetails | null>(null);
+  const [sourceDetails, setSourceDetails] = useState<PromoImageDetails | null>(
+    null,
+  );
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [isDraggingSource, setIsDraggingSource] = useState(false);
   const [isInspectingImage, setIsInspectingImage] = useState(false);
@@ -251,7 +159,8 @@ export const PromoStudio = ({
         referencesRef.current = loaded;
         setReferences(loaded);
         setReferenceId((current) =>
-          current === CUSTOM_REFERENCE || loaded.some((item) => item.id === current)
+          current === CUSTOM_REFERENCE ||
+          loaded.some((item) => item.id === current)
             ? current
             : loaded[0].id,
         );
@@ -288,9 +197,12 @@ export const PromoStudio = ({
     setIsInspectingImage(true);
     setError(null);
     try {
-      const details = await inspectImage(file, method);
+      // Only a photo the model will work from gets resized. An "upload" is the client's
+      // finished artwork, and silently re-encoding their deliverable is not ours to do.
+      const prepared = method === "photo" ? await fitPromoImage(file) : file;
+      const details = await inspectPromoImage(prepared, method);
       if (selectionId !== imageSelectionId.current) return;
-      setSourceFile(file);
+      setSourceFile(prepared);
       setSourceDetails(details);
     } catch (cause) {
       if (selectionId !== imageSelectionId.current) return;
@@ -315,7 +227,8 @@ export const PromoStudio = ({
 
   const endSourceDrag = (event: DragEvent<HTMLLabelElement>) => {
     const nextTarget = event.relatedTarget;
-    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return;
+    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget))
+      return;
     setIsDraggingSource(false);
   };
 
@@ -333,7 +246,9 @@ export const PromoStudio = ({
       return;
     }
     if (copy.trim().length < MIN_COPY_LENGTH) {
-      setError(`Write what the promo should say — at least ${MIN_COPY_LENGTH} characters.`);
+      setError(
+        `Write what the promo should say — at least ${MIN_COPY_LENGTH} characters.`,
+      );
       return;
     }
 
@@ -415,7 +330,9 @@ export const PromoStudio = ({
     if (isBusy) return;
     const file = isUpload ? sourceFile : generated[activeIndex];
     if (!file) {
-      setError(isUpload ? "Choose the finished promo first." : "Create a promo first.");
+      setError(
+        isUpload ? "Choose the finished promo first." : "Create a promo first.",
+      );
       return;
     }
     if (!isUpload && activeStatus === "rejected") {
@@ -450,7 +367,9 @@ export const PromoStudio = ({
       if (!isUpload) setActiveStatus("approved");
       onClose();
     } catch {
-      setError("The promo could not be saved. Check the connection and try again.");
+      setError(
+        "The promo could not be saved. Check the connection and try again.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -521,7 +440,7 @@ export const PromoStudio = ({
                 >
                   <input
                     type="file"
-                    accept="image/jpeg,image/png,image/webp"
+                    accept={ACCEPTED_IMAGE_ACCEPT}
                     disabled={isBusy}
                     onChange={(event) => {
                       const file = event.currentTarget.files?.[0];
@@ -544,13 +463,14 @@ export const PromoStudio = ({
                         {isInspectingImage
                           ? "Checking image…"
                           : isDraggingSource
-                          ? "Release to add the image"
-                          : isUpload
-                            ? "Drop your finished promo here"
-                            : "Drop the photo to work from"}
+                            ? "Release to add the image"
+                            : isUpload
+                              ? "Drop your finished promo here"
+                              : "Drop the photo to work from"}
                       </b>
                       <small>
-                        JPG, PNG, or WebP · at least 512 × 512 px · up to 15 MB
+                        JPG, PNG, or WebP · at least 512 × 512 px · up to{" "}
+                        {MAX_PROMO_IMAGE_MB} MB
                         {isUpload ? " · formats from 1:2 to 2:1" : ""}
                       </small>
                     </span>
@@ -569,8 +489,8 @@ export const PromoStudio = ({
                     placeholder={`Nicole da Silva — new single "Quero Mais" is out now`}
                   />
                   <small className={styles.fieldHint}>
-                    Write the words exactly as they should appear. The image model prints
-                    them onto the artwork.
+                    Write the words exactly as they should appear. The image
+                    model prints them onto the artwork.
                   </small>
                 </label>
               )}
@@ -585,7 +505,9 @@ export const PromoStudio = ({
                   >
                     <button
                       type="button"
-                      className={fidelity === "high" ? styles.segmentedActive : ""}
+                      className={
+                        fidelity === "high" ? styles.segmentedActive : ""
+                      }
                       onClick={() => setFidelity("high")}
                     >
                       <b>Keep my photo</b>
@@ -593,7 +515,9 @@ export const PromoStudio = ({
                     </button>
                     <button
                       type="button"
-                      className={fidelity === "low" ? styles.segmentedActive : ""}
+                      className={
+                        fidelity === "low" ? styles.segmentedActive : ""
+                      }
                       onClick={() => setFidelity("low")}
                     >
                       <b>Reimagine it</b>
@@ -616,7 +540,9 @@ export const PromoStudio = ({
                     <button
                       key={item.id}
                       type="button"
-                      className={referenceId === item.id ? styles.referenceSelected : ""}
+                      className={
+                        referenceId === item.id ? styles.referenceSelected : ""
+                      }
                       onClick={() => setReferenceId(item.id)}
                     >
                       <img src={item.preview} alt="" />
@@ -626,7 +552,9 @@ export const PromoStudio = ({
                   <button
                     type="button"
                     className={`${styles.referenceCustom} ${
-                      referenceId === CUSTOM_REFERENCE ? styles.referenceSelected : ""
+                      referenceId === CUSTOM_REFERENCE
+                        ? styles.referenceSelected
+                        : ""
                     }`}
                     onClick={() => setReferenceId(CUSTOM_REFERENCE)}
                   >
@@ -656,7 +584,11 @@ export const PromoStudio = ({
           <div className={styles.reviewGrid}>
             <div className={styles.carousel}>
               {previews[activeIndex] && (
-                <img className={styles.result} src={previews[activeIndex]} alt="Promo option" />
+                <img
+                  className={styles.result}
+                  src={previews[activeIndex]}
+                  alt="Promo option"
+                />
               )}
               {previews.length > 1 && (
                 <>
@@ -664,7 +596,9 @@ export const PromoStudio = ({
                     type="button"
                     className={`${styles.carouselArrow} ${styles.carouselArrowPrev}`}
                     onClick={() =>
-                      setActiveIndex((activeIndex + previews.length - 1) % previews.length)
+                      setActiveIndex(
+                        (activeIndex + previews.length - 1) % previews.length,
+                      )
                     }
                     aria-label="Previous option"
                     disabled={isBusy}
@@ -674,7 +608,9 @@ export const PromoStudio = ({
                   <button
                     type="button"
                     className={`${styles.carouselArrow} ${styles.carouselArrowNext}`}
-                    onClick={() => setActiveIndex((activeIndex + 1) % previews.length)}
+                    onClick={() =>
+                      setActiveIndex((activeIndex + 1) % previews.length)
+                    }
                     aria-label="Next option"
                     disabled={isBusy}
                   >
@@ -726,7 +662,9 @@ export const PromoStudio = ({
                   <button
                     key={preview}
                     type="button"
-                    className={index === activeIndex ? styles.filmstripActive : ""}
+                    className={
+                      index === activeIndex ? styles.filmstripActive : ""
+                    }
                     onClick={() => setActiveIndex(index)}
                     aria-label={`Show option ${index + 1}`}
                     aria-current={index === activeIndex ? "true" : undefined}
@@ -734,7 +672,9 @@ export const PromoStudio = ({
                   >
                     <img src={preview} alt="" />
                     <small>
-                      {activeVersion?.statuses[index] === "rejected" ? "Rejected" : index + 1}
+                      {activeVersion?.statuses[index] === "rejected"
+                        ? "Rejected"
+                        : index + 1}
                     </small>
                   </button>
                 ))}
@@ -744,7 +684,9 @@ export const PromoStudio = ({
                 type="button"
                 className={styles.rejectOption}
                 onClick={() =>
-                  setActiveStatus(activeStatus === "rejected" ? "candidate" : "rejected")
+                  setActiveStatus(
+                    activeStatus === "rejected" ? "candidate" : "rejected",
+                  )
                 }
                 disabled={isBusy || activeStatus === "approved"}
               >

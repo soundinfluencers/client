@@ -62,12 +62,20 @@ export interface AgentSearchOutcome {
   candidates: AgentSearchCandidate[];
 }
 
+export interface AgentMedia {
+  type: "image";
+  url: string;
+  alt: string;
+  draftId?: string;
+}
+
 export interface AgentChatResponse {
   steps: string[];
   reply: string;
   links: AgentLink[];
   conversationId: string;
   search?: AgentSearchOutcome;
+  media?: AgentMedia[];
 }
 
 // Shared by client and influencer — the backend derives the role from the JWT.
@@ -75,18 +83,34 @@ export const sendAgentMessage = async (
   message: string,
   conversationId?: string,
   activeDraftId?: string,
+  image?: File,
 ): Promise<AgentChatResponse> => {
   try {
-    const result = await $api.post("/agent/chat", {
-      message,
-      conversationId,
-      activeDraftId,
-    });
+    const body = image
+      ? (() => {
+          const form = new FormData();
+          form.append("message", message);
+          if (conversationId) form.append("conversationId", conversationId);
+          if (activeDraftId) form.append("activeDraftId", activeDraftId);
+          form.append("image", image);
+          return form;
+        })()
+      : { message, conversationId, activeDraftId };
+    const result = await $api.post(
+      "/agent/chat",
+      body,
+      image
+        ? { headers: { "Content-Type": "multipart/form-data" } }
+        : undefined,
+    );
     return result.data.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      const code = (error.response?.data as { code?: unknown } | undefined)?.code;
-      throw new AgentChatRequestError(isAgentChatErrorCode(code) ? code : "UNKNOWN");
+      const code = (error.response?.data as { code?: unknown } | undefined)
+        ?.code;
+      throw new AgentChatRequestError(
+        isAgentChatErrorCode(code) ? code : "UNKNOWN",
+      );
     }
     throw new AgentChatRequestError("UNKNOWN");
   }
