@@ -73,8 +73,7 @@ export const PromosDetailsListCard: React.FC<Props> = ({
           <span>{promo.campaignName}</span>
         </span>
         <div className="promos-details-list-card__body-details">
-          {fields
-            .map(field => (
+          {fields?.map(field => (
               <DetailsRow
                 key={`${field.key}-${field.label}`}
                 label={field.label}
