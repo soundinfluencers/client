@@ -1,0 +1,97 @@
+.account-data-reviews {
+  margin: 40px 0;
+  padding: 24px;
+  border: 1px solid #ccd3e0;
+  border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.account-data-reviews h2 {
+  font-size: 23px;
+  margin: 10px 0;
+}
+.account-data-reviews h3 {
+  font-size: 18px;
+  margin: 20px 0;
+}
+.account-data-reviews p {
+  line-height: 1.5;
+  margin: 12px 0;
+}
+.account-data-reviews fieldset {
+  border: 1px solid #ccd3e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 18px 0;
+}
+.account-data-reviews legend {
+  padding: 0 8px;
+}
+.account-data-reviews label {
+  display: block;
+  margin: 10px 0;
+}
+.account-data-reviews select,
+.account-data-reviews textarea,
+.account-data-reviews input:not([type="checkbox"]) {
+  display: block;
+  border: 1px solid #aab8c9;
+  border-radius: 6px;
+  padding: 9px;
+  margin: 7px 0;
+  color: #17253d;
+  background: #fff;
+  font: inherit;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.account-data-reviews textarea {
+  width: 100%;
+}
+.account-data-reviews button {
+  padding: 9px 14px;
+  border: 1px solid #aab8c9;
+  border-radius: 6px;
+  color: #17253d;
+  background: #edf2fc;
+  cursor: pointer;
+  margin: 4px;
+  font: inherit;
+}
+.account-data-reviews button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.account-data-reviews pre {
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 260px;
+  overflow: auto;
+  margin: 8px 0;
+}
+.account-data-reviews details {
+  margin: 12px 0;
+}
+.account-data-reviews summary {
+  cursor: pointer;
+}
+.account-data-reviews li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ccd3e0;
+  padding: 10px;
+}
+.review-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.review-error {
+  background: #ffe4e4;
+  color: #811d1d;
+  padding: 12px;
+  border-radius: 6px;
+}

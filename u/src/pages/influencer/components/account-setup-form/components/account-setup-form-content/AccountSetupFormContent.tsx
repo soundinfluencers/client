@@ -129,7 +129,7 @@ export const AccountSetupFormContent = ({ platform, isEdit, onRemove, onSave }: 
             />
             <ButtonMain
               onClick={handleSubmit(handleSave)}
-              label={isSaveLoading ? "Saving..." : "Save"}
+              label={isSaveLoading ? "Submitting..." : "Send for approval"}
               type='submit'
             />
           </>

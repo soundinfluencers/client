@@ -7,6 +7,8 @@ import type { TSocialAccounts } from "@/types/user/influencer.types.ts";
 import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 import { useSocialAccountStatusStore } from "@/pages/influencer/social-accounts/store/store.ts";
 import { useEffect } from "react";
+import { toast } from 'react-toastify';
+import { AccountDataReviews } from './components/AccountDataReviews';
 
 import {
   ReviewOfferModal
@@ -89,12 +91,14 @@ export const SocialAccounts = () => {
               accountId: accountId!,
               payload: cleanedData,
             });
+            toast.success('Changes sent for admin approval. Your published account remains current until approval.');
             onResetAccountForm();
             if (cleanedData.price && cleanedData.price !== account?.price) {
               // setIsPriceModalOpen(true);
             }
           } catch (error) {
             console.error('Error saving social account:', error);
+            toast.error('Unable to submit changes. Please check the values and try again.');
             // setLocal error toaster?
           }
         }}
@@ -148,6 +152,7 @@ export const SocialAccounts = () => {
           <h2 className="social-accounts-page__title">Social accounts</h2>
         </div>
         <SocialAccountsList getAccounts={getProfileAccounts} />
+        <AccountDataReviews profile={rqProfileData} />
       </div>
 
       {isModalOpen === 'reviewOffer' && (
