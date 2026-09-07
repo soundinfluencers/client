@@ -15,7 +15,7 @@ type CampaignContentItem = {
   mainLink?: string;
   taggedUser?: string;
   taggedLink?: string;
-  additionalBrief?: string;
+  additionalBrief?: Array<{ _id: string; additionalBrief: string }>;
 };
 
 type StrategyCampaignStore = {
@@ -35,6 +35,7 @@ type StrategyCampaignStore = {
       selected: {
         campaignContentItemId: string;
         descriptionId: string;
+        additionalBriefId?: string;
       },
   ) => void;
 
@@ -187,7 +188,10 @@ export const useStrategyCampaignStore = create<StrategyCampaignStore>()(
 
           taggedUser: base?.taggedUser ?? "",
           taggedLink: base?.taggedLink ?? "",
-          additionalBrief: base?.additionalBrief ?? "",
+          additionalBrief: (base?.additionalBrief ?? []).map((brief) => ({
+            _id: oid(),
+            additionalBrief: brief.additionalBrief ?? "",
+          })),
           descriptions: (base?.descriptions ?? []).map((d) => ({
             _id: oid(), // ✅ уникальный id для каждой desc
             description: d?.description ?? "",

@@ -28,7 +28,7 @@ type CampaignContentItem = {
   mainLink: string;
   taggedUser: string;
   taggedLink: string;
-  additionalBrief: string;
+  additionalBrief: Array<{ _id: string; additionalBrief: string }>;
   descriptions: Array<{
     _id: string;
     description: string;
@@ -72,6 +72,7 @@ type ProposalAccountsStore = {
       selected: {
         campaignContentItemId: string;
         descriptionId: string;
+        additionalBriefId?: string;
       },
   ) => void;
   currentCampaignId: string | null;
@@ -194,7 +195,15 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           mainLink: String(item?.mainLink ?? ""),
           taggedUser: String(item?.taggedUser ?? ""),
           taggedLink: String(item?.taggedLink ?? ""),
-          additionalBrief: String(item?.additionalBrief ?? ""),
+          additionalBrief: (Array.isArray(item?.additionalBrief)
+              ? item.additionalBrief
+              : String(item?.additionalBrief ?? "").trim()
+                ? [{ additionalBrief: String(item.additionalBrief) }]
+                : []
+          ).map((brief: any) => ({
+            _id: String(brief?._id ?? oid()),
+            additionalBrief: String(brief?.additionalBrief ?? ""),
+          })),
           descriptions: Array.isArray(item?.descriptions)
               ? item.descriptions.map((desc: any) => ({
                 _id: String(desc?._id ?? oid()),
@@ -271,7 +280,10 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           mainLink: payload.mainLink,
           taggedUser: base?.taggedUser ?? "",
           taggedLink: base?.taggedLink ?? "",
-          additionalBrief: base?.additionalBrief ?? "",
+          additionalBrief: (base?.additionalBrief ?? []).map((brief) => ({
+            _id: oid(),
+            additionalBrief: brief.additionalBrief ?? "",
+          })),
           descriptions,
         };
 
@@ -317,7 +329,15 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
           mainLink: String(item?.mainLink ?? ""),
           taggedUser: String(item?.taggedUser ?? ""),
           taggedLink: String(item?.taggedLink ?? ""),
-          additionalBrief: String(item?.additionalBrief ?? ""),
+          additionalBrief: (Array.isArray(item?.additionalBrief)
+              ? item.additionalBrief
+              : String(item?.additionalBrief ?? "").trim()
+                ? [{ additionalBrief: String(item.additionalBrief) }]
+                : []
+          ).map((brief: any) => ({
+            _id: String(brief?._id ?? oid()),
+            additionalBrief: String(brief?.additionalBrief ?? ""),
+          })),
           descriptions: Array.isArray(item?.descriptions)
               ? item.descriptions.map((desc: any) => ({
                 _id: String(desc?._id ?? oid()),

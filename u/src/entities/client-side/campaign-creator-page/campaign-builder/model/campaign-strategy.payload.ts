@@ -6,7 +6,7 @@ type BuildStrategyBaseParams = {
     content: any[];
 };
 
-const mapAccountsForStrategy = (accounts: any[]) =>
+const mapAccountsForStrategy = (accounts: any[], content: any[]) =>
     accounts.map((account) => ({
         socialAccountId: String(account.accountId ?? ""),
         influencerId: String(account.influencerId ?? ""),
@@ -20,6 +20,22 @@ const mapAccountsForStrategy = (accounts: any[]) =>
                 descriptionId: String(
                     account.selectedCampaignContentItem.descriptionId ?? "",
                 ),
+                ...(() => {
+                    const contentItem = content.find(
+                        (item) =>
+                            String(item._id) ===
+                            String(
+                                account.selectedCampaignContentItem
+                                    .campaignContentItemId ?? "",
+                            ),
+                    );
+                    const additionalBriefId =
+                        account.selectedCampaignContentItem.additionalBriefId ??
+                        contentItem?.additionalBrief?.[0]?._id;
+                    return additionalBriefId
+                        ? { additionalBriefId: String(additionalBriefId) }
+                        : {};
+                })(),
             }
             : undefined,
         dateRequest: String(account.dateRequest ?? "ASAP"),
@@ -38,7 +54,17 @@ const mapContentForStrategy = (content: any[]) =>
         })),
         taggedUser: String(item.taggedUser ?? ""),
         taggedLink: String(item.taggedLink ?? ""),
-        additionalBrief: String(item.additionalBrief ?? ""),
+        additionalBrief: Array.isArray(item.additionalBrief)
+            ? item.additionalBrief.map((brief: any) => ({
+                _id: String(brief?._id ?? new ObjectId().toHexString()),
+                additionalBrief: String(brief?.additionalBrief ?? ""),
+            }))
+            : String(item.additionalBrief ?? "").trim()
+                ? [{
+                    _id: new ObjectId().toHexString(),
+                    additionalBrief: String(item.additionalBrief),
+                }]
+                : [],
         profileType: String(item.profileType ?? "community"),
     }));
 
@@ -62,27 +88,33 @@ export const buildStrategyDraftPayload = ({
                                               draftId,
                                               accounts,
                                               content,
-                                          }: BuildStrategyBaseParams) => ({
+                                          }: BuildStrategyBaseParams) => {
+    const campaignContent = mapContentForStrategy(content);
+    return {
     ...(draftId ? { draftId } : {}),
     step: "strategyTable",
     campaignName: String(campaignName ?? ""),
     socialMedia: resolveStrategySocialMedia(content),
-    addedAccounts: mapAccountsForStrategy(accounts),
-    campaignContent: mapContentForStrategy(content),
-});
+    addedAccounts: mapAccountsForStrategy(accounts, campaignContent),
+    campaignContent,
+    };
+};
 
 export const buildStrategyProposalPayload = ({
                                                  campaignName,
                                                  totalPrice,
                                                  accounts,
                                                  content,
-                                             }: BuildStrategyBaseParams) => ({
+                                             }: BuildStrategyBaseParams) => {
+    const campaignContent = mapContentForStrategy(content);
+    return {
     campaignName: String(campaignName ?? ""),
     socialMedia: resolveStrategySocialMedia(content),
     campaignPrice: Number(totalPrice ?? 0),
-    addedAccounts: mapAccountsForStrategy(accounts),
-    campaignContent: mapContentForStrategy(content),
-});
+    addedAccounts: mapAccountsForStrategy(accounts, campaignContent),
+    campaignContent,
+    };
+};
 
 export const buildStrategyCreateCampaignPayload = ({
                                                        campaignName,
@@ -102,11 +134,15 @@ export const buildStrategyCreateCampaignPayload = ({
         vatNumber?: string;
         selectedPaymentMethod: string;
     };
-}) => ({
+                                                   }) => {
+    const campaignContent = mapContentForStrategy(content);
+    return {
     campaignName: String(campaignName ?? ""),
     socialMedia: resolveStrategySocialMedia(content),
     campaignPrice: Number(totalPrice ?? 0),
-    addedAccounts: mapAccountsForStrategy(accounts),
-    campaignContent: mapContentForStrategy(content),
+    addedAccounts: mapAccountsForStrategy(accounts, campaignContent),
+    campaignContent,
     paymentDetails,
-});
+    };
+};
+import { ObjectId } from "bson";

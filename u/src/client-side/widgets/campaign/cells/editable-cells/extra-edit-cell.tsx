@@ -7,13 +7,16 @@ type Props = {
   group: TableGroup;
   contentId?: string;
   baseItem?: any;
-  changeView?: boolean
+  changeView?: boolean;
+  account?: any;
 };
 
 export const ExtraFieldsCellsEdit = React.memo(function ExtraFieldsCellsEdit({
   group,
   contentId,
-  baseItem,changeView
+  baseItem,
+  changeView,
+  account,
 }: Props) {
   const patch = useUpdateCampaign((s) =>
     contentId ? s.patches[contentId] : undefined,
@@ -49,9 +52,31 @@ export const ExtraFieldsCellsEdit = React.memo(function ExtraFieldsCellsEdit({
   }
 
   const getValue = React.useCallback(
-    (key: (typeof keys)[number]) =>
-      (patch?.[key] ?? baseItem?.[key] ?? "") as string,
-    [patch, baseItem],
+    (key: (typeof keys)[number]) => {
+      const raw = patch?.[key] ?? baseItem?.[key] ?? "";
+      if (key !== "additionalBrief") return String(raw ?? "");
+
+      const selectedBriefId =
+        account?.selectedContent?.additionalBriefId ??
+        account?.selectedCampaignContentItem?.additionalBriefId;
+      const selectedBrief = Array.isArray(raw)
+        ? raw.find(
+            (brief: any) =>
+              String(brief?._id ?? "") === String(selectedBriefId ?? ""),
+          ) ?? raw[0]
+        : null;
+
+      return String(
+        account?.selectedContentItem?.additionalBrief ??
+          (typeof account?.selectedCampaignContentItem?.additionalBrief ===
+          "string"
+            ? account.selectedCampaignContentItem.additionalBrief
+            : undefined) ??
+          selectedBrief?.additionalBrief ??
+          (typeof raw === "string" ? raw : ""),
+      );
+    },
+    [patch, baseItem, account],
   );
 
   const placeholders: Record<string, string> = {
@@ -59,9 +84,6 @@ export const ExtraFieldsCellsEdit = React.memo(function ExtraFieldsCellsEdit({
     taggedLink: "Tagged link",
     additionalBrief: "Additional brief",
   };
-  React.useEffect(() => {
-    console.log("PATCH for", contentId, patch);
-  }, [contentId, patch]);
   return (
     <>
       {keys.map((key) => (

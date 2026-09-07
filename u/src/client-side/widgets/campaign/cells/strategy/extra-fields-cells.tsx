@@ -6,13 +6,16 @@ type Props = {
   group: TableGroup;
   platformItems: any[];
   selectedContent: number;
-    changeView?: boolean
+  changeView?: boolean;
+  account?: any;
 };
 
 export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
                                                                        group,
                                                                        platformItems,
-                                                                       selectedContent,changeView
+                                                                       selectedContent,
+                                                                       changeView,
+                                                                       account,
                                                                      }: Props) {
   const keys = React.useMemo(() => {
       if (changeView) {
@@ -29,7 +32,7 @@ export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
       default:
         return [] as const;
     }
-  }, [group]);
+  }, [group, changeView]);
 
   const normalizeLink = React.useCallback((value: string) => {
     return value.startsWith("https") ? value : `https://${value}`;
@@ -39,7 +42,26 @@ export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
       <>
         {keys.map((key) => {
           const raw = platformItems?.[selectedContent]?.[key];
-          const value = String(raw ?? "").trim();
+          const selectedBriefId =
+              account?.selectedContent?.additionalBriefId ??
+              account?.selectedCampaignContentItem?.additionalBriefId;
+          const selectedBrief = Array.isArray(raw)
+              ? raw.find(
+                  (brief: any) =>
+                      String(brief?._id ?? "") === String(selectedBriefId ?? ""),
+              ) ?? raw[0]
+              : null;
+          const resolved =
+              key === "additionalBrief"
+                  ? account?.selectedContentItem?.additionalBrief ??
+                    (typeof account?.selectedCampaignContentItem
+                        ?.additionalBrief === "string"
+                        ? account.selectedCampaignContentItem.additionalBrief
+                        : undefined) ??
+                    selectedBrief?.additionalBrief ??
+                    (typeof raw === "string" ? raw : "")
+                  : raw;
+          const value = String(resolved ?? "").trim();
           const shown = value || "—";
 
           return (

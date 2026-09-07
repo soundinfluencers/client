@@ -32,6 +32,10 @@ export const mapDraftAccountToSelectedAccount = (
             descriptionId: String(
                 account.selectedCampaignContentItem.descriptionId,
             ),
+            additionalBriefId:
+                account.selectedCampaignContentItem.additionalBriefId
+                    ? String(account.selectedCampaignContentItem.additionalBriefId)
+                    : undefined,
         }
         : undefined,
 });
@@ -51,7 +55,9 @@ export const mapDraftContentToCampaignContent = (
         profileType: item.profileType,
         taggedUser: String(item.taggedUser ?? ""),
         taggedLink: String(item.taggedLink ?? ""),
-        additionalBrief: String(item.additionalBrief ?? ""),
+        additionalBrief: Array.isArray(item.additionalBrief)
+            ? String(item.additionalBrief[0]?.additionalBrief ?? "")
+            : String(item.additionalBrief ?? ""),
         accountId: item.accountId ? String(item.accountId) : undefined,
     }));
 

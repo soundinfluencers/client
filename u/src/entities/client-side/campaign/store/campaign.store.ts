@@ -21,11 +21,17 @@ export type CampaignKind = "regular" | "proposal";
 export type SelectedCampaignContentItem = {
     campaignContentItemId: string;
     descriptionId: string;
+    additionalBriefId?: string;
 };
 
 export type EditableDescription = {
     _id: string;
     description: string;
+};
+
+export type EditableAdditionalBrief = {
+    _id: string;
+    additionalBrief: string;
 };
 
 export type EditableCampaignContentItem = {
@@ -44,6 +50,7 @@ export type EditableCampaignContentItem = {
     taggedUser: string;
     taggedLink: string;
     additionalBrief: string;
+    additionalBriefOptions?: EditableAdditionalBrief[];
 };
 
 export type EditableCampaignAccount = {
@@ -139,7 +146,7 @@ export type CampaignContentSavePayload = {
     descriptions: EditableDescription[];
     taggedUser: string;
     taggedLink: string;
-    additionalBrief: string;
+    additionalBrief: EditableAdditionalBrief[];
 };
 
 export type ProposalCampaignSavePayload = {
@@ -241,6 +248,9 @@ const normalizeSelected = (account: any): SelectedCampaignContentItem | null => 
     return {
         campaignContentItemId: toStringSafe(selected.campaignContentItemId),
         descriptionId: toStringSafe(selected.descriptionId),
+        additionalBriefId: selected.additionalBriefId
+            ? toStringSafe(selected.additionalBriefId)
+            : undefined,
     };
 };
 
@@ -293,6 +303,29 @@ const normalizeAccount = (account: any): EditableCampaignAccount => {
     };
 };
 
+const normalizeAdditionalBriefOptions = (value: unknown): EditableAdditionalBrief[] => {
+    if (!Array.isArray(value)) return [];
+
+    return value.map((brief) => {
+        const candidate = brief && typeof brief === "object"
+            ? brief as { _id?: unknown; additionalBrief?: unknown }
+            : {};
+        return {
+            _id: toStringSafe(candidate._id || objectId()),
+            additionalBrief: toStringSafe(candidate.additionalBrief),
+        };
+    });
+};
+
+const normalizeAdditionalBriefText = (value: unknown) => {
+    if (typeof value === "string") return value;
+    if (Array.isArray(value)) return toStringSafe(value[0]?.additionalBrief);
+    if (value && typeof value === "object") {
+        return toStringSafe((value as { additionalBrief?: unknown }).additionalBrief);
+    }
+    return "";
+};
+
 const normalizeContentItem = (item: any): EditableCampaignContentItem => ({
     _id: toStringSafe(item?._id || objectId()),
     socialMedia: toStringSafe(item?.socialMedia).toLowerCase(),
@@ -310,7 +343,8 @@ const normalizeContentItem = (item: any): EditableCampaignContentItem => ({
         : [],
     taggedUser: toStringSafe(item?.taggedUser),
     taggedLink: toStringSafe(item?.taggedLink),
-    additionalBrief: toStringSafe(item?.additionalBrief),
+    additionalBrief: normalizeAdditionalBriefText(item?.additionalBrief),
+    additionalBriefOptions: normalizeAdditionalBriefOptions(item?.additionalBrief),
 });
 
 export const normalizeCampaignForStore = (
@@ -417,6 +451,29 @@ const buildCampaignSavePayload = (editable: EditableCampaign) => {
         };
     }
 
+    const campaignContent = editable.campaignContent.map((item) => ({
+        _id: item._id,
+        socialMedia: item.socialMedia,
+        profileType: item.profileType || undefined,
+        socialMediaGroup: item.socialMediaGroup,
+        mainLink: item.mainLink,
+        descriptions: item.descriptions.map((description) => ({
+            _id: description._id,
+            description: description.description,
+        })),
+        taggedUser: item.taggedUser,
+        taggedLink: item.taggedLink,
+        additionalBrief: item.additionalBriefOptions?.length
+            ? item.additionalBriefOptions
+            : item.additionalBrief.trim()
+                ? [{ _id: objectId(), additionalBrief: item.additionalBrief }]
+                : [],
+    }));
+
+    const firstBriefIdByContentId = new Map(
+        campaignContent.map((item) => [item._id, item.additionalBrief[0]?._id]),
+    );
+
     return {
         campaignName: editable.campaignName,
         isCpmAndResultHidden: editable.isCpmAndResultHidden,
@@ -438,26 +495,25 @@ const buildCampaignSavePayload = (editable: EditableCampaign) => {
                     account.selectedCampaignContentItem.campaignContentItemId,
                     descriptionId:
                     account.selectedCampaignContentItem.descriptionId,
+                    ...(account.selectedCampaignContentItem.additionalBriefId ||
+                    firstBriefIdByContentId.get(
+                        account.selectedCampaignContentItem.campaignContentItemId,
+                    )
+                        ? {
+                            additionalBriefId:
+                                account.selectedCampaignContentItem.additionalBriefId ||
+                                firstBriefIdByContentId.get(
+                                    account.selectedCampaignContentItem.campaignContentItemId,
+                                ),
+                        }
+                        : {}),
                 }
                 : null,
 
             dateRequest: account.dateRequest || "ASAP",
         })),
 
-        campaignContent: editable.campaignContent.map((item) => ({
-            _id: item._id,
-            socialMedia: item.socialMedia,
-            profileType: item.profileType || undefined,
-            socialMediaGroup: item.socialMediaGroup,
-            mainLink: item.mainLink,
-            descriptions: item.descriptions.map((description) => ({
-                _id: description._id,
-                description: description.description,
-            })),
-            taggedUser: item.taggedUser,
-            taggedLink: item.taggedLink,
-            additionalBrief: item.additionalBrief,
-        })),
+        campaignContent,
     };
 };
 
@@ -501,6 +557,8 @@ type CampaignStore = {
         contentId: string,
         field: "mainLink" | "taggedUser" | "taggedLink" | "additionalBrief",
         value: string,
+        additionalBriefId?: string,
+        accountKey?: string,
     ) => void;
 
     setContentDescriptions: (
@@ -663,6 +721,17 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
         set((state) => {
             if (!state.editable) return state;
 
+            const selectedContent = selected
+                ? state.editable.campaignContent.find(
+                    (item) =>
+                        String(item._id) ===
+                        String(selected.campaignContentItemId),
+                )
+                : null;
+            const additionalBriefId =
+                selected?.additionalBriefId ||
+                selectedContent?.additionalBriefOptions?.[0]?._id;
+
             return {
                 editable: {
                     ...state.editable,
@@ -678,6 +747,9 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
                                         descriptionId: toStringSafe(
                                             selected.descriptionId,
                                         ),
+                                        ...(additionalBriefId
+                                            ? { additionalBriefId }
+                                            : {}),
                                     }
                                     : null,
                                 selectedContent: selected
@@ -688,6 +760,9 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
                                         descriptionId: toStringSafe(
                                             selected.descriptionId,
                                         ),
+                                        ...(additionalBriefId
+                                            ? { additionalBriefId }
+                                            : {}),
                                     }
                                     : null,
                             }
@@ -840,17 +915,107 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
 
     setDeletingAccountKey: (accountKey) => set({ deletingAccountKey: accountKey }),
 
-    setContentField: (contentId, field, value) =>
+    setContentField: (
+        contentId,
+        field,
+        value,
+        additionalBriefId,
+        accountKey,
+    ) =>
         set((state) => {
             if (!state.editable) return state;
+
+            if (field !== "additionalBrief" || !accountKey) {
+                return {
+                    editable: {
+                        ...state.editable,
+                        campaignContent: state.editable.campaignContent.map((item) =>
+                            String(item._id) === String(contentId)
+                                ? { ...item, [field]: value }
+                                : item,
+                        ),
+                    },
+                };
+            }
+
+            const targetAccount = state.editable.addedAccounts.find(
+                (account) =>
+                    getCampaignAccountKey(account) === String(accountKey),
+            );
+            const targetContent = state.editable.campaignContent.find(
+                (item) => String(item._id) === String(contentId),
+            );
+            const fallbackBriefId =
+                targetContent?.additionalBriefOptions?.[0]?._id;
+            const selectedBriefId =
+                targetAccount?.selectedCampaignContentItem?.additionalBriefId ||
+                additionalBriefId ||
+                fallbackBriefId;
+            const selectedByAccountsCount = selectedBriefId
+                ? state.editable.addedAccounts.filter(
+                    (account) =>
+                        account.selectedCampaignContentItem?.campaignContentItemId ===
+                        String(contentId) &&
+                        (account.selectedCampaignContentItem?.additionalBriefId ||
+                            fallbackBriefId) ===
+                        selectedBriefId,
+                ).length
+                : 0;
+            const nextBriefId =
+                !selectedBriefId || selectedByAccountsCount > 1
+                    ? objectId()
+                    : selectedBriefId;
 
             return {
                 editable: {
                     ...state.editable,
                     campaignContent: state.editable.campaignContent.map((item) =>
                         String(item._id) === String(contentId)
-                            ? { ...item, [field]: value }
+                            ? {
+                                ...item,
+                                additionalBriefOptions:
+                                    item.additionalBriefOptions?.some(
+                                        (brief) => brief._id === nextBriefId,
+                                    )
+                                        ? item.additionalBriefOptions.map((brief) =>
+                                            brief._id === nextBriefId
+                                                ? { ...brief, additionalBrief: value }
+                                                : brief,
+                                        )
+                                        : [
+                                            ...(item.additionalBriefOptions ?? []),
+                                            {
+                                                _id: nextBriefId,
+                                                additionalBrief: value,
+                                            },
+                                        ],
+                            }
                             : item,
+                    ),
+                    addedAccounts: state.editable.addedAccounts.map((account) =>
+                        getCampaignAccountKey(account) === String(accountKey)
+                            ? {
+                                ...account,
+                                selectedCampaignContentItem:
+                                    account.selectedCampaignContentItem
+                                        ? {
+                                            ...account.selectedCampaignContentItem,
+                                            additionalBriefId: nextBriefId,
+                                        }
+                                        : null,
+                                selectedContent:
+                                    account.selectedContent
+                                        ? {
+                                            ...account.selectedContent,
+                                            additionalBriefId: nextBriefId,
+                                        }
+                                        : account.selectedContent,
+                                selectedContentItem: {
+                                    ...(account.selectedContentItem ?? {}),
+                                    additionalBrief: value,
+                                },
+                            }
+                            : account,
                     ),
                 },
             };

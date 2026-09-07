@@ -23,7 +23,7 @@ type CampaignContentItem = {
   mainLink?: string;
   taggedUser?: string;
   taggedLink?: string;
-  additionalBrief?: string;
+  additionalBrief?: Array<{ _id: string; additionalBrief: string }>;
 };
 
 type DraftCampaignStore = {
@@ -79,6 +79,7 @@ type DraftCampaignStore = {
       selected: {
         campaignContentItemId: string;
         descriptionId: string;
+        additionalBriefId?: string;
       },
   ) => void;
   clearCampaign: (campaignId: string) => void;

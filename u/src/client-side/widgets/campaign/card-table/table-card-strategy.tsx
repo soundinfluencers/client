@@ -191,6 +191,7 @@ export const TableCard = React.memo(function TableCard({
             setAccountSelectedContent(campaignId ?? "", accountKey, {
                 campaignContentItemId: String(nextItem?._id ?? ""),
                 descriptionId: String(nextDesc?._id ?? ""),
+                additionalBriefId: String(nextItem?.additionalBrief?.[0]?._id ?? "") || undefined,
             });
         },
         [platformItems, setAccountSelectedContent, campaignId, accountKey],
@@ -248,6 +249,9 @@ export const TableCard = React.memo(function TableCard({
             setAccountSelectedContent(campaignId ?? "", accountKey, {
                 campaignContentItemId: String(selectedItem?._id ?? ""),
                 descriptionId: String(descriptionId ?? ""),
+                additionalBriefId:
+                    selectedMeta?.additionalBriefId ??
+                    selectedItem?.additionalBrief?.[0]?._id,
             });
         },
         [setAccountSelectedContent, campaignId, accountKey, selectedItem],
@@ -285,6 +289,7 @@ export const TableCard = React.memo(function TableCard({
                             changeView={changeView}
                             contentId={contentId}
                             baseItem={selectedItem}
+                            account={strategyAccount ?? data}
                             group={group}
                         />
                     ) : (
@@ -293,6 +298,7 @@ export const TableCard = React.memo(function TableCard({
                             group={group}
                             platformItems={platformItems}
                             selectedContent={safeSelectedContent}
+                            account={strategyAccount ?? data}
                         />
                     )}
 
@@ -358,6 +364,7 @@ export const TableCard = React.memo(function TableCard({
                             changeView={changeView}
                             contentId={contentId}
                             baseItem={selectedItem}
+                            account={strategyAccount ?? data}
                             group={group}
                         />
                     ) : null}
@@ -428,6 +435,7 @@ export const TableCard = React.memo(function TableCard({
                             onClose={onCloseDropdown}
                             platformItems={platformItems}
                             selectedContent={safeSelectedContent}
+                            account={strategyAccount ?? data}
                             selectedPd={safeSelectedPd}
                             setSelectedPd={setSelectedPd}
                             group={group}
@@ -451,6 +459,7 @@ export const TableCard = React.memo(function TableCard({
                         <ExtraFieldsCellsEdit
                             contentId={contentId}
                             baseItem={selectedItem}
+                            account={strategyAccount ?? data}
                             group={group}
                         />
                     ) : (
@@ -458,6 +467,7 @@ export const TableCard = React.memo(function TableCard({
                             group={group}
                             platformItems={platformItems}
                             selectedContent={safeSelectedContent}
+                            account={strategyAccount ?? data}
                         />
                     )}
                 </>

@@ -250,6 +250,7 @@ export const TableCard = React.memo(function TableCard({
                             group={group}
                             platformItems={platformItems}
                             selectedContent={safeSelectedContent}
+                            account={data}
                         />
                     )}
                 </>
@@ -296,6 +297,7 @@ export const TableCard = React.memo(function TableCard({
                         group={group}
                         platformItems={platformItems}
                         selectedContent={safeSelectedContent}
+                        account={data}
                     />
                 </>
             )}

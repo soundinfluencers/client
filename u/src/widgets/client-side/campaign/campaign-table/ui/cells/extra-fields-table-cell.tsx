@@ -17,6 +17,8 @@ type Props = {
         contentId: string,
         field: "mainLink" | "taggedUser" | "taggedLink" | "additionalBrief",
         value: string,
+        additionalBriefId?: string,
+        accountKey?: string,
     ) => void;
 };
 
@@ -92,6 +94,15 @@ export const ExtraFieldsTableCell: React.FC<Props> = ({
     }
 
     if (field === "brief" || field === "pressBrief") {
+        const selectedAdditionalBrief =
+            row.account.selectedContentItem?.additionalBrief ??
+            item.additionalBriefOptions?.find(
+                (brief) =>
+                    brief._id ===
+                    row.account.selectedCampaignContentItem?.additionalBriefId,
+            )?.additionalBrief ??
+            item.additionalBrief;
+
         return canEdit ? (
             <input
                 className="hidden-text"
@@ -101,12 +112,14 @@ export const ExtraFieldsTableCell: React.FC<Props> = ({
                         String(item._id),
                         "additionalBrief",
                         e.target.value,
+                        row.account.selectedCampaignContentItem?.additionalBriefId,
+                        row.accountKey,
                     )
                 }
                 placeholder="Additional brief"
             />
         ) : (
-            <p className="hidden-text">{item.additionalBrief || "—"}</p>
+            <p className="hidden-text">{selectedAdditionalBrief || "—"}</p>
         );
     }
 

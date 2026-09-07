@@ -6,6 +6,7 @@ type Props = {
   group: TableGroup;
   platformItems: any[];
   selectedContent: number;changeView?: boolean;
+  account?: any;
 };
 
 export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
@@ -13,6 +14,7 @@ export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
                                                                        platformItems,
                                                                        selectedContent,
                                                                        changeView,
+                                                                       account,
                                                                      }: Props) {
   const keys = React.useMemo(() => {
     if (changeView) {
@@ -39,7 +41,26 @@ export const ExtraFieldsCells = React.memo(function ExtraFieldsCells({
       <>
         {keys.map((key) => {
           const rawValue = platformItems?.[selectedContent]?.[key];
-          const value = String(rawValue ?? "").trim();
+          const selectedBriefId =
+              account?.selectedContent?.additionalBriefId ??
+              account?.selectedCampaignContentItem?.additionalBriefId;
+          const selectedBrief = Array.isArray(rawValue)
+              ? rawValue.find(
+                  (brief: any) =>
+                      String(brief?._id ?? "") === String(selectedBriefId ?? ""),
+              ) ?? rawValue[0]
+              : null;
+          const resolvedValue =
+              key === "additionalBrief"
+                  ? account?.selectedContentItem?.additionalBrief ??
+                    (typeof account?.selectedCampaignContentItem
+                        ?.additionalBrief === "string"
+                        ? account.selectedCampaignContentItem.additionalBrief
+                        : undefined) ??
+                    selectedBrief?.additionalBrief ??
+                    (typeof rawValue === "string" ? rawValue : "")
+                  : rawValue;
+          const value = String(resolvedValue ?? "").trim();
           const isLink = key === "taggedLink" || key === "mainLink";
 
           return (

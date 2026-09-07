@@ -280,7 +280,7 @@ export const useBuildCampaignView = () => {
 
     React.useEffect(() => {
         setIsDropdownOpen(isSearchMode);
-    }, [isSearchMode]);
+    }, [isSearchMode, normalizedSearch]);
 
     React.useEffect(() => {
         if (!isDropdownOpen) return;
