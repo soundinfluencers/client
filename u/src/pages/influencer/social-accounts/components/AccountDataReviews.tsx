@@ -232,7 +232,12 @@ export function AccountDataReviews({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [requestDetail, setRequestDetail] = useState<{
-    item: { draft: Values; reason: string; status: string };
+    item: {
+      draft: Values;
+      reason: string;
+      submissionReason?: string;
+      status: string;
+    };
     current: Values;
   } | null>(null);
   const accounts = platforms.flatMap((platform) =>
@@ -488,7 +493,9 @@ export function AccountDataReviews({
               @{item.handle} ·{" "}
               {item.source === "self_reported"
                 ? "Your correction"
-                : item.source === 'modash_pdf' ? "Modash report" : 'Reviewed account data'}{" "}
+                : item.source === "modash_pdf"
+                  ? "Modash report"
+                  : "Reviewed account data"}{" "}
               · {item.status}
             </span>
             <button
@@ -538,7 +545,20 @@ export function AccountDataReviews({
       {requestDetail && (
         <details open>
           <summary>Request details · {requestDetail.item.status}</summary>
-          <p>{requestDetail.item.reason}</p>
+          {requestDetail.item.submissionReason && (
+            <p>
+              Your original explanation: {requestDetail.item.submissionReason}
+            </p>
+          )}
+          {(requestDetail.item.status !== "pending" ||
+            !requestDetail.item.submissionReason) && (
+            <p>
+              {requestDetail.item.status === "pending"
+                ? "Explanation"
+                : "Admin decision"}
+              : {requestDetail.item.reason}
+            </p>
+          )}
           {Object.entries(requestDetail.item.draft).map(([key, value]) => (
             <div key={key}>
               <strong>{labels[key] ?? key}</strong>
