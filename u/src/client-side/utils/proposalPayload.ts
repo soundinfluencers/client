@@ -229,14 +229,6 @@ const applyPatchesToContent = (
     };
   });
 };
-const getSelectedContentId = (account: AnyAccount) => {
-  return String(
-      account?.selectedCampaignContentItem?.campaignContentItemId ??
-      account?.selectedContent?.campaignContentItemId ??
-      account?.selectedContentItem?._id ??
-      "",
-  );
-};
 export function buildProposalPatchBody(args: {
   campaignName: string;
   accounts: AnyAccount[];

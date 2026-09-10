@@ -1,40 +1,18 @@
+import { useEffect } from "react";
+import { useWatch } from "react-hook-form";
 import { useLocalProfileStore } from "@/client-side/store/mock-photo/mock-photo";
 import { ImageUpload } from "@/components";
-import { Controller, useFormContext } from "react-hook-form";
-
-export function RHFImageUpload({
-  name,
-  label,
-  placeholder,
-  description,
-  size,
-}: {
-  name: "logoUrl"; // или string
+export function RHFImageUpload(props: {
+  name: "logoUrl";
   label: string;
   placeholder: string;
   description?: string;
   size: "small" | "large";
 }) {
-  const { control } = useFormContext();
-  const { setAvatar } = useLocalProfileStore();
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState }) => (
-        <ImageUpload
-          name={name}
-          label={label}
-          placeholder={placeholder}
-          size={size}
-          value={field.value ?? null}
-          onChange={(url) => {
-            field.onChange(url);
-            setAvatar(url);
-          }}
-          error={fieldState.error}
-        />
-      )}
-    />
-  );
+  const value: unknown = useWatch({ name: props.name });
+  const setAvatar = useLocalProfileStore((state) => state.setAvatar);
+  useEffect(() => {
+    setAvatar(typeof value === "string" ? value : null);
+  }, [value, setAvatar]);
+  return <ImageUpload {...props} />;
 }

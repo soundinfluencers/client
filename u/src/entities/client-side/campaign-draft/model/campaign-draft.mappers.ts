@@ -56,7 +56,10 @@ export const mapDraftContentToCampaignContent = (
         taggedUser: String(item.taggedUser ?? ""),
         taggedLink: String(item.taggedLink ?? ""),
         additionalBrief: Array.isArray(item.additionalBrief)
-            ? String(item.additionalBrief[0]?.additionalBrief ?? "")
+            ? item.additionalBrief.map((brief) => ({
+                _id: String(brief._id),
+                additionalBrief: String(brief.additionalBrief ?? ""),
+            }))
             : String(item.additionalBrief ?? ""),
         accountId: item.accountId ? String(item.accountId) : undefined,
     }));

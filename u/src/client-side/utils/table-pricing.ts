@@ -1,27 +1,27 @@
 
 import { getGroupBySocial } from "@/client-side/widgets/add-influencer-build-campaign/add-to-proposal/bc-prooced";
-import type {ConnectedAccount} from "@/client-side/types/offers.ts";
+type PricedAccount = { socialMedia: string; username?: string; publicPrice?: number; price?: number; prices?: { EUR?: number } };
 
 export type PriceGroup = "main" | "music" | "press";
 export type GroupPrices = Record<PriceGroup, number>;
-export function calcGroupPrices(accounts: ConnectedAccount[]): {
+export function calcGroupPrices(accounts: PricedAccount[]): {
   groupPrices: GroupPrices;
   totalPublicPrice: number;
 } {
   const groupPrices: GroupPrices = { main: 0, music: 0, press: 0 };
 
   for (const a of accounts ?? []) {
-    const social = String((a as any).socialMedia ?? "").toLowerCase();
+    const social = String(a.socialMedia ?? "").toLowerCase();
     const group = getGroupBySocial(social);
     const price = Number(
-        (a as any).publicPrice ??
-        (a as any).price ??
-        (a as any).prices?.EUR ??
+        a.publicPrice ??
+        a.price ??
+        a.prices?.EUR ??
         0,
     );
 
     console.log({
-      username: (a as any).username,
+      username: a.username,
       social,
       group,
       price,

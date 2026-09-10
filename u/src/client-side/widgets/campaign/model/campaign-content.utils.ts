@@ -1,11 +1,8 @@
 import { calcGroupPrices } from "@/client-side/utils";
 import type {
-    CampaignContentConfig,
-    CampaignContentKind,
-    CampaignContentResolved,
+  CampaignContentKind,
+  CampaignContentResolved,
 } from "./campaign-content.types";
-
-
 
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
 const MUSIC_NETWORKS = ["spotify", "soundcloud"];

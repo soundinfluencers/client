@@ -15,12 +15,14 @@ export type AccountItem = {
     } | null;
 
     selectedCampaignContentItem?: {
+        _id?: string;
         campaignContentItemId?: string;
         descriptionId?: string;
     } | null;
 
     selectedContentItem?: {
         _id?: string;
+        socialMedia?: string;
     } | null;
 
     socialMedia?: string;
@@ -39,7 +41,7 @@ export const getAccountSelectedContentId = (account: AccountItem) => {
     );
 };
 
-export const groupContentBySocialGroup = (content: ContentItem[]) => {
+export const groupContentBySocialGroup = <T extends ContentItem>(content: T[]) => {
     return {
         main: (content ?? []).filter(
             (item) => String(item?.socialMediaGroup ?? "") === "main",
@@ -53,8 +55,8 @@ export const groupContentBySocialGroup = (content: ContentItem[]) => {
     };
 };
 
-export const buildAccountsByContentId = (accounts: AccountItem[]) => {
-    return (accounts ?? []).reduce<Record<string, AccountItem[]>>(
+export const buildAccountsByContentId = <T extends AccountItem>(accounts: T[]) => {
+    return (accounts ?? []).reduce<Record<string, T[]>>(
         (result, account) => {
             const contentId = getAccountSelectedContentId(account);
 
@@ -72,8 +74,8 @@ export const buildAccountsByContentId = (accounts: AccountItem[]) => {
     );
 };
 
-export const filterContentWithAccounts = (
-    content: ContentItem[],
+export const filterContentWithAccounts = <T extends ContentItem>(
+    content: T[],
     accountsByContentId: Record<string, AccountItem[]>,
 ) => {
     return (content ?? []).filter((item) => {
@@ -90,12 +92,12 @@ export const getNetworksForContentItem = (
     return accountsByContentId[contentId] ?? [];
 };
 
-export const buildLiveViewGroups = ({
+export const buildLiveViewGroups = <C extends ContentItem, A extends AccountItem>({
                                         content,
                                         accounts,
                                     }: {
-    content: ContentItem[];
-    accounts: AccountItem[];
+    content: C[];
+    accounts: A[];
 }) => {
     const byGroup = groupContentBySocialGroup(content);
     const accountsByContentId = buildAccountsByContentId(accounts);

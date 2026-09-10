@@ -1,25 +1,12 @@
-import {
-  type ChangeEvent,
-  type FC,
-  useEffect,
-  useState,
-  useMemo,
-  useRef,
-} from "react";
+import { type ChangeEvent, type FC, useEffect, useState, useMemo, useRef } from "react";
 import "./_input-phone.scss";
 import openMenu from "@/assets/icons/chevron-down.svg";
 import smallSearch from "@/assets/icons/small-search.svg";
 import check from "@/assets/icons/check.svg";
-import {
-  validateLetters,
-  validatePhoneNumber,
-} from "@/utils/validators/validators.ts";
+import { validateLetters, validatePhoneNumber } from "@/utils/validators/validators.ts";
 import type { PhoneNumberType } from "@/types/utils/constants.types.ts";
 import { phoneNumbers } from "@/constants/phone-numbers.ts";
 import { useClickOutside } from "@/hooks/global/useClickOutside.ts";
-import {
-  useInfluencerSignupStore,
-} from "@/store/influencer/account-settings/useInfluenserSignupStore.ts";
 
 export interface InputPhoneProps {
   value: string;

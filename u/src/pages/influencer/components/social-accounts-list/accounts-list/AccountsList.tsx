@@ -1,26 +1,26 @@
 import React from "react";
-import { useAccountSetupStore } from '../../account-setup-form/store/useAccountSetupStore';
-import { EditButton } from '@components/ui/edit-button/EditButton.tsx';
+import { useAccountSetupStore } from "../../account-setup-form/store/useAccountSetupStore";
+import { EditButton } from "@components/ui/edit-button/EditButton.tsx";
 // import { Navigate } from "react-router-dom";
 import type {
   TSocialAccounts,
   TSocialAccountShort,
-} from '@/types/user/influencer.types.ts';
-import refreshIcon from '@/assets/icons/refresh-ccw.svg';
+} from "@/types/user/influencer.types.ts";
+import refreshIcon from "@/assets/icons/refresh-ccw.svg";
 
-import './_accounts-list.scss';
+import "./_accounts-list.scss";
 import { useSocialAccountStatusStore } from "@/pages/influencer/social-accounts/store/store.ts";
 
 interface Props {
   id: TSocialAccounts;
-  accounts: TSocialAccountShort[];
+  accounts: SocialAccountListItem[];
 }
 
 export const AccountsList: React.FC<Props> = ({ id, accounts }) => {
   const { onEditAccount } = useAccountSetupStore();
   const { setIsModalOpen, setAccountId, setSocialMedia } = useSocialAccountStatusStore();
 
-  const renderEditButton = (account: TSocialAccountShort, index: number) => (
+  const renderEditButton = (account: SocialAccountListItem, index: number) => (
     <EditButton
       variants="social"
       onClick={() => {
@@ -29,7 +29,7 @@ export const AccountsList: React.FC<Props> = ({ id, accounts }) => {
     />
   );
 
-  const renderStatusAction = (account: TSocialAccountShort, index: number) => {
+  const renderStatusAction = (account: SocialAccountListItem, index: number) => {
     switch (account.labelStatus) {
       case 'waitForAdmin':
         return <LabelStatus text={'Pending Review'} />;
@@ -90,3 +90,5 @@ export const LabelStatus = ({ text }: { text: string }) => {
     </div>
   )
 };
+
+type SocialAccountListItem = Omit<TSocialAccountShort, "labelStatus"> & { labelStatus?: TSocialAccountShort["labelStatus"] };

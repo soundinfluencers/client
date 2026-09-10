@@ -9,9 +9,9 @@ import "../styles/table-components.scss";
 import { formatCampaignDate } from "@/utils/functions/formatDate";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { useCampaignStore, useDraftCampaignStore } from "@/client-side/store";
-import {getCampaignSelectedAccounts} from "@/client-side/pages/campaign-strategy/model/campaign-strategy.helpers.ts";
-import {calcGroupPrices} from "@/client-side/utils";
-import {formatCurrency} from "@/shared/functions/formatCurrency.ts";
+import { getCampaignSelectedAccounts } from "@/client-side/pages/campaign-strategy/model/campaign-strategy.helpers.ts";
+import { calcGroupPrices } from "@/client-side/utils";
+import { formatCurrency } from "@/shared/functions/formatCurrency.ts";
 
 type AnyCampaign = any;
 type VisibleStats = {
@@ -25,15 +25,6 @@ const sumFollowers = (arr: any[] = []) =>
 
 const isNonEmpty = (v: any) => Array.isArray(v) && v.length > 0;
 
-function pickAccountsFromCampaign(c: AnyCampaign): any[] | undefined {
-  if (!c) return undefined;
-
-  if (c.kind === "proposal") return c.selectedOption?.addedAccounts;
-  if (c.kind === "draft") return c.addedAccounts;
-
-  return c.addedAccounts;
-}
-
 function pickContentFromCampaign(c: AnyCampaign): any[] | undefined {
   if (!c) return undefined;
 
@@ -43,7 +34,7 @@ function pickContentFromCampaign(c: AnyCampaign): any[] | undefined {
   return c.campaignContent;
 }
 
-export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleStats:VisibleStats  }) => {
+export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleStats?:VisibleStats  }) => {
   const store = useCampaignStore();
   const useDraftCampaignPrice = (campaignId: string) =>
     useDraftCampaignStore((s) => s.getCampaignPrice(campaignId));
@@ -58,10 +49,10 @@ export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleSt
     return getCampaignSelectedAccounts(campaign, store);
   }, [campaign, store.offer, store.promoCard]);
   console.log(campaign,'aqwe')
-  const { totalPublicPrice } = React.useMemo(
-      () => calcGroupPrices(accounts),
-      [accounts],
-  );
+  React.useMemo(
+() => calcGroupPrices(accounts),
+[accounts]
+);
   const content = React.useMemo(() => {
     const fromCampaign = pickContentFromCampaign(campaign);
     if (isNonEmpty(fromCampaign)) return fromCampaign as any[];
@@ -75,7 +66,6 @@ export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleSt
   const submitted = formatCampaignDate(
     String(campaign?.submittedAt ?? campaign?.createdAt ?? new Date()),
   );
-
 
   console.log(accounts, 'awdjawnlwnadjnwajawdnawdjjawjwad');
   const postsCount = visibleStats?.postsCount ?? accounts.length;

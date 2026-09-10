@@ -1,3 +1,4 @@
+import type { CampaignContentItem } from "@/types/store/index.types";
 import React from "react";
 import "@/client-side/styles-table/_table-campaign.scss";
 
@@ -5,15 +6,10 @@ import { LiveViewCardInsight } from "../live-view-card/live-view-card-insight";
 import { LiveViewCard } from "../live-view-card/live-view";
 // import type { CampaignPageModel } from "@/pages/client/types";
 import { useGroupPromos } from "@/client-side/hooks";
-import { Bar, BarSection, ToggleTables } from "@/client-side/ui";
 
 import { TableStrategy } from "../tables/table-strategy";
 import { TableDistributingInsight } from "../tables/table-insight";
-import {
-  useStrategyCampaignStore,
-  useUpdateCampaign,
-} from "@/client-side/store";
-import { Modal } from "@/components/ui/modal-fix/Modal";
+import { useStrategyCampaignStore, useUpdateCampaign } from "@/client-side/store";
 import { calcGroupPrices } from "@/client-side/utils";
 
 // type RegularModel = Extract<CampaignPageModel, { kind: "regular" }>;
@@ -36,7 +32,6 @@ export function applyPatches<T extends { _id: string }>(
 }
 export const CampaignTablePage: React.FC<Props> = ({
   campaign,
-  statusFlag,
   view,
   flag,
 }) => {
@@ -48,7 +43,7 @@ export const CampaignTablePage: React.FC<Props> = ({
   );
   const patches = useUpdateCampaign((s) => s.patches);
 
-  const baseContent =
+  const baseContent: CampaignContentItem[] =
     storeContent && storeContent.length
       ? storeContent
       : campaign.campaignContent;
@@ -103,7 +98,7 @@ export const CampaignTablePage: React.FC<Props> = ({
             </>
           ) : (
             <>
-              {accounts.map((instightCard, i) => (
+              {accounts.map((instightCard) => (
                 <LiveViewCardInsight campaign={campaign} item={instightCard} />
               ))}
             </>
@@ -114,7 +109,7 @@ export const CampaignTablePage: React.FC<Props> = ({
           {flag ? (
             <>
               {byGroup.main.length >= 1 && (
-                <TableStrategy
+                <TableStrategy status={campaign.status} campaign={campaign}
                   campaignId={campaign.campaignId}
                   totalPrice={groupPrices.main}
                   items={byGroup.main}
@@ -126,7 +121,7 @@ export const CampaignTablePage: React.FC<Props> = ({
               )}
 
               {byGroup.music.length >= 1 && (
-                <TableStrategy
+                <TableStrategy status={campaign.status} campaign={campaign}
                   campaignId={campaign.campaignId}
                   canEdit={campaign.canEdit}
                   totalPrice={groupPrices.music}
@@ -138,7 +133,7 @@ export const CampaignTablePage: React.FC<Props> = ({
               )}
 
               {byGroup.press.length >= 1 && (
-                <TableStrategy
+                <TableStrategy status={campaign.status} campaign={campaign}
                   campaignId={campaign.campaignId}
                   canEdit={campaign.canEdit}
                   totalPrice={groupPrices.press}

@@ -2,20 +2,11 @@ import React from "react";
 import { ButtonMain } from "@/components";
 import { useNavigate } from "react-router-dom";
 import "./_bc_prooced.scss";
-import {
-  useProposalAccountsStore,
-  useSelectCampaignProposal,
-} from "@/client-side/store";
+import { useProposalAccountsStore, useSelectCampaignProposal } from "@/client-side/store";
 
 interface Props {
   optionIndex: number;
 }
-const hasContentForGroup = (
-  content: { socialMediaGroup: string }[],
-  group: string,
-) => {
-  return content.some((c) => c.socialMediaGroup === group);
-};
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
 const MUSIC_NETWORKS = ["spotify", "soundcloud"];
 

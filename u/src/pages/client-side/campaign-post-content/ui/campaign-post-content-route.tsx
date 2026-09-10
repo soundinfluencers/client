@@ -10,8 +10,8 @@ import { useCampaignStore } from "@/entities/client-side/campaign/store/campaign
 
 import { Breadcrumbs, Container } from "@/components";
 import {
-    attachExistingContentToAccounts,
-    buildProposalAccountsAfterSubmit,
+  attachExistingContentToAccounts,
+  buildProposalAccountsAfterSubmit,
 } from "@/pages/client-side/campaign-post-content/model/build-proposal-accounts.ts";
 
 type GroupKey = "main" | "music" | "press";
@@ -52,7 +52,6 @@ export const CampaignPostContentRoute = () => {
     const [searchParams] = useSearchParams();
 
     const mode = searchParams.get("mode");
-    const optionIndex = Number(searchParams.get("option") ?? 0);
     const returnTo = searchParams.get("returnTo")
         ? decodeURIComponent(String(searchParams.get("returnTo")))
         : "/client/campaign";

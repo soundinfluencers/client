@@ -1,9 +1,6 @@
 import React from "react";
 import "./option-slider.scss";
 import chevron from "@/assets/icons/chevron-right.svg";
-import x from "@/assets/icons/x.svg";
-import { deleteProposalOption } from "@/api/client/campaign/campaign.api";
-import { toast } from "react-toastify";
 type Props = {
   optionIndexes: number[];
   activeOption: number;

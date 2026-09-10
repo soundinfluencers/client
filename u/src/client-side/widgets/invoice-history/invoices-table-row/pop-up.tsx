@@ -1,15 +1,15 @@
 import React from "react";
 import { Modal } from "@/components/ui/modal-fix/Modal";
-import logo from './assets/logo.png'
-import mail from './assets/mail.svg'
-import phone from './assets/phone.svg'
-import bank from './assets/image 20.png'
-import card from './assets/image 20 (1).png'
-import paypal from './assets//image 20 (2).png'
+import logo from "./assets/logo.png";
+import mail from "./assets/mail.svg";
+import phone from "./assets/phone.svg";
+import bank from "./assets/image 20.png";
+import card from "./assets/image 20 (1).png";
+import paypal from "./assets//image 20 (2).png";
 import { getInvoiceById, patchInvoiceById } from "@/api/client/invoice/invoice.api";
 import { toast } from "react-toastify";
-import './_table-row.scss'
-import {formatFollowers} from "@/utils/functions/formatFollowers.ts";
+import "./_table-row.scss";
+import { formatFollowers } from "@/utils/functions/formatFollowers.ts";
 type InvoiceDetails = {
     invoiceId: string;
     creationDate: string;
@@ -37,8 +37,8 @@ type InvoiceForm = {
 };
 
 export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [isSaving, setIsSaving] = React.useState(false);
+    const [, setIsLoading] = React.useState(true);
+    const [, setIsSaving] = React.useState(false);
     const [invoice, setInvoice] = React.useState<InvoiceDetails | null>(null);
     const [initialForm, setInitialForm] = React.useState<InvoiceForm>({
         poNumber: "",
@@ -203,7 +203,6 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
     const renderValue = (value: string) => {
         if (!value) return "-";
 
-
         if (value.includes("@") && !value.startsWith("http")) {
             return (
                 <a href={`mailto:${value}`} target="_blank" rel="noopener noreferrer">
@@ -211,7 +210,6 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                 </a>
             );
         }
-
 
         if (value.startsWith("http")) {
             return (
@@ -319,12 +317,11 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                                         onChange={(e) => setField("poNumber", e.target.value)}
                                     />
                                 </div>
-                                <div><p>{formatFollowers(item.reach)}</p></div>
+                                <div><p>{formatFollowers(Number(item.reach) || 0)}</p></div>
                                 <div><p>{item.total}</p></div>
                             </div>
                         ))}
                     </div>
-
 
                    <div className='popup-edit-row'></div>
                    <div className="invoice-total-edit">

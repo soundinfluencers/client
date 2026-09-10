@@ -18,7 +18,7 @@ type Props = {
 
   platformItems: any[];
   selectedContent: number;
-  setSelectedContent: (v: number) => void;
+  setSelectedContent: React.Dispatch<React.SetStateAction<number>>;
 
   setSelectedPd: (v: number) => void;
   socialMedia?: string;

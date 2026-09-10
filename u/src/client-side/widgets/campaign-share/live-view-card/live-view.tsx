@@ -1,18 +1,10 @@
 import { getSocialMediaIcon } from "@/constants/social-medias";
 import type { SocialMediaType } from "@/types/utils/constants.types";
-import edit from "@/assets/icons/edit.svg";
-import bookmark from "@/assets/icons/bookmark.svg";
-import link from "@/assets/icons/link (1).svg";
-import preview from "@/assets/icons/video (1).png";
 
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import "@/client-side/styles-table/campaign-view-card.scss";
-import { Dropdown } from "@/components/table-ui/dropdowns-table";
 import React from "react";
-import check from "@/assets/icons/check.svg";
-import { Link } from "react-router-dom";
 import { PreviewPhoto } from "./preview/preview-component";
-import { Modal } from "@/shared/ui/modal-fix/Modal";
 import { ModalVideo } from "@/shared/ui/modal-video/ModalVideo";
 import { VideoPreview } from "./preview/preview-video-component";
 import { ExtraFieldsCard } from "./card-editor/ExtraFieldsCard";

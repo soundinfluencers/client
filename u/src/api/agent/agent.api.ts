@@ -1,3 +1,4 @@
+import { isAgentChatResponse } from "./agent-response.validation.ts";
 import axios from "axios";
 import $api from "../api.ts";
 
@@ -113,7 +114,9 @@ export const sendAgentMessage = async (
         ? { headers: { "Content-Type": "multipart/form-data" } }
         : undefined,
     );
-    return result.data.data;
+    const response: unknown = result.data.data;
+    if (!isAgentChatResponse(response)) throw new AgentChatRequestError("UNKNOWN");
+    return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const code = (error.response?.data as { code?: unknown } | undefined)

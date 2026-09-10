@@ -29,7 +29,6 @@ export const CampaignContentView: React.FC<Props> = ({
     byGroup,
     visibleByGroup,
     accountsByContentId,
-    groupPrices,
     config,
     accounts,
     mainPromos,

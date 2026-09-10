@@ -1,3 +1,4 @@
+import React from "react";
 import "@/client-side/styles-table/table-base.scss";
 
 import { TableHeader } from "../components/table-header";

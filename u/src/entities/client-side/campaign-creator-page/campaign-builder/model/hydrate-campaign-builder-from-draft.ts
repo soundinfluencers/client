@@ -1,3 +1,4 @@
+import { mapDraftContentToCampaignContent } from "@/entities/client-side/campaign-draft/model/campaign-draft.mappers";
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 import type { CampaignDraftDto } from "@/entities/client-side/campaign-draft/api/campaign-draft.dto";
 import { ObjectId } from "bson";
@@ -93,16 +94,19 @@ export const hydrateCampaignBuilderFromDraft = (draft: CampaignDraftDto) => {
       // The backend GET returns the assignment as `selectedContent`; older callers
       // expected `selectedCampaignContentItem`. Accept both so the content-to-account
       // assignment survives draft resume (it silently dropped before).
-      selectedCampaignContentItem:
-        supportAssignments.get(String(acc.socialAccountId)) ??
-        acc.selectedCampaignContentItem ??
-        (acc as any).selectedContent ??
-        null,
+      selectedCampaignContentItem: (() => {
+        const selected = supportAssignments.get(String(acc.socialAccountId)) ??
+          getSelectedContentRef(acc);
+        return selected ? {
+          ...selected,
+          descriptionId: selected.descriptionId ?? "",
+        } : null;
+      })(),
 
       dateRequest: acc.dateRequest ?? "ASAP",
     })),
 
-    campaignContent,
+    campaignContent: mapDraftContentToCampaignContent(campaignContent),
 
     postContentDraft: null,
 

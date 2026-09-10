@@ -1,19 +1,14 @@
 import React from "react";
 import Styles from "./selection.module.scss";
 
-import chevron from "@/assets/icons/chevron-down.svg";
 import { getSocialMediaIcon } from "@/constants/social-medias";
 import type { SocialMediaType } from "@/types/utils/constants.types";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 
-import type {
-  IApiOffer,
-  IPromoCard,
-} from "@/types/client/creator-campaign/creator-campaign.types";
+import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaign.types";
 
 import { useNavigate } from "react-router-dom";
 import { getPriceByCurrency } from "@/client-side/utils";
-import { GenresCountries } from "@/shared/ui";
 import { useBuildCampaignFilters } from "@/client-side/store";
 interface Props {
   promoCard: IPromoCard[];
@@ -25,10 +20,7 @@ export const SelectionAddInfluencer: React.FC<Props> = ({
   totalPrice,
 }) => {
   const { selectedCurrency } = useBuildCampaignFilters();
-  const [openId, setOpenId] = React.useState<string | null>(null);
-  const toggleFlag = (id: string) => {
-    setOpenId((prev) => (prev === id ? null : id));
-  };
+  const [] = React.useState<string | null>(null);
   const navigate = useNavigate();
   const grouped = React.useMemo(() => {
     const map = new Map<string, IPromoCard[]>();
@@ -65,7 +57,7 @@ export const SelectionAddInfluencer: React.FC<Props> = ({
       </div>
       <div className={Styles.selection__content}>
         <div className={Styles.selection__body}>
-          {grouped.map((group, gi) => (
+          {grouped.map((group) => (
             <div key={group.key} className={Styles.PromoCards}>
               <div className={Styles.PromoCards__header}>
                 {/* <div className={Styles.queue}>{offer ? gi + 2 : gi + 1}</div> */}

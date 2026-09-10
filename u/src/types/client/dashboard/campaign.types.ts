@@ -2,6 +2,8 @@ import type { SocialMediaType } from "@/types/utils/constants.types";
 
 export type CampaignStatusType =
   | "pending"
+  | "under_review"
+  | "closed"
   | "distributing"
   | "completed"
   | "draft"

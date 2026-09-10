@@ -51,7 +51,6 @@ export const useCampaignPageActions = ({
   setActiveOption,
   localExtraOptions,
   setLocalExtraOptions,
-  textareaValue,
   setOptionModal,
   setIsRequesting,
   setIsRequestSent,

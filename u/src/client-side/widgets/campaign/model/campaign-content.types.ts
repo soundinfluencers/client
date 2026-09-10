@@ -1,4 +1,3 @@
-import type { TableGroup } from "@/client-side/types/table-types";
 
 export type CampaignContentKind = "proposal" | "regular" | "draft";
 

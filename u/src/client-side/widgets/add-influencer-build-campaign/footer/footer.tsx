@@ -1,12 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./_footer.scss";
-import {
-  useProposalAccountsStore,
-  useSelectCampaignProposal,
-} from "@/client-side/store";
+import { useProposalAccountsStore, useSelectCampaignProposal } from "@/client-side/store";
 import { getGroupBySocial } from "../add-to-proposal/bc-prooced";
-import { ButtonMain } from "@/components";
 interface Props {
   optionIndex: number;
 }

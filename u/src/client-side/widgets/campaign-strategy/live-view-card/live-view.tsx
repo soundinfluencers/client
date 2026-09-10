@@ -2,7 +2,6 @@ import { getSocialMediaIcon } from "@/constants/social-medias";
 import type { SocialMediaType } from "@/types/utils/constants.types";
 import bookmark from "@/assets/icons/bookmark.svg";
 import link from "@/assets/icons/link (1).svg";
-import preview from "@/assets/icons/video (1).png";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import "@/client-side/styles-table/campaign-view-card.scss";
 import { Dropdown } from "@/components/table-ui/dropdowns-table";
@@ -10,8 +9,7 @@ import React from "react";
 import check from "@/assets/icons/check.svg";
 import { Link } from "react-router-dom";
 import editIcon from "@/assets/icons/edit.svg";
-import {PreviewPhoto} from "@/client-side/widgets/campaign/live-view-card/preview/preview-component.tsx";
-
+import { PreviewPhoto } from "@/client-side/widgets/campaign/live-view-card/preview/preview-component.tsx";
 
 interface LiveViewCardProps {
   isMusic?: boolean;
@@ -26,8 +24,6 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
   const [selected, setSelected] = React.useState(0);
   const [dropdown, setDropdown] = React.useState(false);
   const media0 = item?.mediaCache?.items?.[0];
-  const pathLower = media0?.pathLower;
-  const videoUrl = media0?.url ?? null;
   return (
     <div className="live-view-card">
       <div className="live-view-card__content">
@@ -95,8 +91,6 @@ export const LiveViewCard: React.FC<LiveViewCardProps> = ({
                   </div>
                 </div>
             )}
-
-
 
         {item.socialMediaGroup !== "music" && (
             <div className="live-view-card__fill-data">

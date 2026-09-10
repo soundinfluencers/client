@@ -1,16 +1,15 @@
 import React from "react";
 
 import type {
-    EditableCampaignAccount,
-    EditableCampaignContentItem,
+  EditableCampaignAccount,
+  EditableCampaignContentItem,
 } from "@/entities/client-side/campaign/store/campaign.store";
 import { useCampaignStore } from "@/entities/client-side/campaign/store/campaign.store";
 
 import {
-    buildCampaignTableRows,
-    getCampaignAccountKey,
-    getTotalFollowers,
-    getTotalPrice,
+  buildCampaignTableRows,
+  getCampaignAccountKey,
+  getTotalFollowers,
 } from "../model/campaign-table.helpers";
 
 import { getCampaignTableColumns } from "../model/campaign-table.columns";
@@ -18,8 +17,8 @@ import { getCampaignInsightColumns } from "../model/campaign-insight.columns";
 
 import type { StrategyGroup } from "../model/campaign-table.types";
 import type {
-    CampaignTableMode,
-    CampaignView,
+  CampaignTableMode,
+  CampaignView,
 } from "@/features/client-side/campaign/campaign-view/model/campaign-view.types";
 
 import { TableCampaign } from "@/widgets/client-side/campaign-tables/ui/strategy-table.tsx";
@@ -47,7 +46,6 @@ type Props = {
 
 export const CampaignTableSection = ({
                                          mode,
-                                         view,
                                          isAdvancedInsights,
                                          title,
                                          group,

@@ -1,10 +1,8 @@
 import Styles from "./_modal-video.module.scss";
-import { createPortal } from "react-dom";
 import { type PropsWithChildren } from "react";
 import { useRef } from "react";
 import { useClickOutside } from "../../../hooks/global/useClickOutside";
 import x from "@/assets/icons/x.svg";
-import React from "react";
 
 interface Props extends PropsWithChildren {
   onClose: () => void;

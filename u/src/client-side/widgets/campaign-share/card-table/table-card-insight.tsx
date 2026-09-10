@@ -2,8 +2,6 @@ import React from "react";
 import imageIcon from "@/assets/icons/image.svg";
 
 import type { CampaignAddedAccount } from "@/types/store/index.types";
-import { getSocialMediaIcon } from "@/constants/social-medias";
-import type { SocialMediaType } from "@/types/utils/constants.types";
 import { NetworkCell } from "../cells/insight/network-cell";
 import { FollowersCell } from "../cells/insight/followers-cell";
 import { LinkCell } from "../cells/insight/LinkCell";

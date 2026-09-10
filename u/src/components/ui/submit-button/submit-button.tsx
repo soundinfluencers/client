@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormContext, useFormState } from "react-hook-form";
-import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
+import { CircleLoader } from "@/features/auth/sign-up-client/ui/circle-loader";
 
 interface Props {
     type?: "submit";
@@ -14,9 +14,7 @@ export const SubmitButton: React.FC<Props> = ({
                                                   className,
                                               }) => {
     const { control } = useFormContext();
-    const { isSubmitting, isValid, submitCount } = useFormState({ control });
-
-    const showInvalidState = submitCount > 0 && !isValid;
+    const { isSubmitting,  } = useFormState({ control });
 
     return (
         <button

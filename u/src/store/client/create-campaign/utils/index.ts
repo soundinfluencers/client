@@ -159,10 +159,6 @@ function buildItemFromPrefix(
     if (global) item.additionalBrief = global;
   }
 
-  item.descriptions.sort((a, b) => {
-    return 0;
-  });
-
   return item;
 }
 
@@ -194,25 +190,6 @@ export function parseFormsForDisplay(
 
     items.push(item);
   }
-
-  items.sort((a, b) => {
-    const pa = parsePrefix(
-      prefixes.find(
-        (p) =>
-          buildItemFromPrefix(formData, p, socialMediaGroup, platform)._id ===
-          a._id,
-      ) ?? "",
-    );
-    const pb = parsePrefix(
-      prefixes.find(
-        (p) =>
-          buildItemFromPrefix(formData, p, socialMediaGroup, platform)._id ===
-          b._id,
-      ) ?? "",
-    );
-
-    return 0;
-  });
 
   return items;
 }

@@ -1,15 +1,15 @@
-import type {
-  RegularCampaignData,
-  CampaignPageModel,
-  ProposalCampaignData,
-  DraftCampaignData,
-} from "@/pages/client/types";
+import type { CampaignDetails, CampaignDraft } from "@/client-side/types/campaign";
+import type { ProposalSystem } from "@/client-side/types/proposal";
+type RegularCampaignData = CampaignDetails & { displayCurrency?: string };
+type DraftCampaignData = CampaignDraft;
+type ProposalCampaignData = ProposalSystem;
+type CampaignPageModel = ReturnType<typeof toCampaignPageModelFromRegular> | ReturnType<typeof toCampaignPageModelFromDraft> | ReturnType<typeof toCampaignPageModelFromProposal>;
 
 export function toCampaignPageModelFromRegular(
   api: RegularCampaignData,
-): CampaignPageModel {
+) {
   return {
-    kind: "regular",
+    kind: "regular" as const,
 
     campaignId: api.campaignId,
     campaignName: api.campaignName,
@@ -39,12 +39,12 @@ export function toCampaignPageModelFromRegular(
     displayCurrency:api.displayCurrency
   };
 }
-type ProposalModel = Extract<CampaignPageModel, { kind: "proposal" }>;
+
 export function toCampaignPageModelFromProposal(
   api: ProposalCampaignData,
-): ProposalModel {
+) {
   return {
-    kind: "proposal",
+    kind: "proposal" as const,
     campaignId: api?.campaignId,
     campaignName: api?.campaignName,
     socialMedia: api?.socialMedia,
@@ -57,9 +57,9 @@ export function toCampaignPageModelFromProposal(
 
 export function toCampaignPageModelFromDraft(
   api: DraftCampaignData,
-): CampaignPageModel {
+) {
   return {
-    kind: "draft",
+    kind: "draft" as const,
 
     draftId: api._id,
     campaignName: api.campaignName,

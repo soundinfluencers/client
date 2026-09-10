@@ -1,7 +1,9 @@
 
-import { FormInput, FormTextArea } from "@/components";
 import { BudgetField } from "@/components/ui/inputs/budget-input/budget-input";
-import {CampaignTextArea, CampaignTextInput} from "@components/form/input-post-content.tsx";
+import {
+  CampaignTextArea,
+  CampaignTextInput,
+} from "@components/form/input-post-content.tsx";
 
 export function BespokeArtistForm() {
   return (

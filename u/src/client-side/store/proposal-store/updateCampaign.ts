@@ -16,7 +16,7 @@ type UpdateState = {
 
   setField: (contentId: string, field: keyof ContentPatch, value: any) => void;
 
-  setDescriptions: (contentId: string, next: Desc[]) => void;
+  setDescriptions: (contentId: string, next: { _id?: string; description: string }[]) => void;
   addDescription: (contentId: string, text?: string) => void;
   updateDescription: (contentId: string, index: number, text: string) => void;
   removeDescription: (contentId: string, index: number) => void;
@@ -62,7 +62,7 @@ export const useUpdateCampaign = create<UpdateState>((set, get) => ({
           ...s.patches,
           [contentId]: {
             ...(s.patches[contentId] ?? {}),
-            descriptions: next,
+            descriptions: next.map(description => ({ ...description, _id: description._id || objectId() })),
           },
         },
       })),

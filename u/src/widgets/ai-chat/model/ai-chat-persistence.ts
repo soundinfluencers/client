@@ -1,3 +1,4 @@
+import { isAgentSearchOutcome } from "../../../api/agent/agent-response.validation.ts";
 export type AiChatRole = "client" | "influencer";
 
 export interface AiChatIdentity {
@@ -33,10 +34,7 @@ export const isAiChatPersistedState = (
     const validRecommendations = Object.values(
       value.recommendationsByDraft,
     ).every(
-      (outcome) =>
-        isRecord(outcome) &&
-        Array.isArray(outcome.candidates) &&
-        (outcome.bundles === undefined || Array.isArray(outcome.bundles)),
+      isAgentSearchOutcome,
     );
     if (!validRecommendations) return false;
   }

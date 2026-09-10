@@ -1,5 +1,27 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { mapDraftContentToCampaignContent } from '../src/entities/client-side/campaign-draft/model/campaign-draft.mappers.ts';
+import { buildStrategyDraftPayload } from '../src/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload.ts';
+
+test('resumed draft preserves all note variants and the selected second note through save', () => {
+  const notes = [
+    { _id: 'note-a', additionalBrief: 'First instruction' },
+    { _id: 'note-b', additionalBrief: 'Selected instruction' },
+  ];
+  const content = mapDraftContentToCampaignContent([{
+    _id: 'content', socialMedia: 'instagram', socialMediaGroup: 'main',
+    descriptions: [{ _id: 'caption', description: 'Caption' }], additionalBrief: notes,
+  }]);
+  const result = buildStrategyDraftPayload({
+    campaignName: 'Resume', content,
+    accounts: [{ accountId: 'account', selectedCampaignContentItem: {
+      campaignContentItemId: 'content', descriptionId: 'caption', additionalBriefId: 'note-b',
+    } }],
+  });
+  assert.deepEqual(result.campaignContent[0].additionalBrief, notes);
+  const selectedId = result.addedAccounts[0].selectedCampaignContentItem.additionalBriefId;
+  assert.equal(result.campaignContent[0].additionalBrief.find(note => note._id === selectedId)?.additionalBrief, 'Selected instruction');
+});
 import { getDraftDetailsForm, getDraftContentStatus, buildAiDraftPayload } from '../src/entities/client-side/campaign-draft/model/ai-campaign-draft.model.ts';
 
 test('current note arrays can be opened and legacy notes are serialized as current variants', () => {

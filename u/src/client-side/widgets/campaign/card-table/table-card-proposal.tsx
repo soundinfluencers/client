@@ -291,11 +291,6 @@ export const TableCard = React.memo(function TableCard({
     [onToggleDropdown, rowKey],
   );
 
-  const isMarked = useProposalAccountsStore(
-    (s: any) =>
-      !!s.recentlyAddedKeysByOption?.[optionIndex ?? 0]?.[String(accountKey)],
-  );
-
   return (
     <tr
       className={`table-campaign-page__tr  ${isPendingDelete ? "row--delete" : ""}`}

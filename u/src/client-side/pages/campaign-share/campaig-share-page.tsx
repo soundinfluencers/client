@@ -5,14 +5,8 @@ import "@/client-side/styles-table/campaignBase.scss";
 
 import { useParams } from "react-router-dom";
 import { useShareCampaignQuery } from "@/client-side/react-query";
-import {
-  CampaignTablePageShare,
-  ProposalCampaignPageShare,
-} from "@/client-side/widgets";
-import {
-  useFetchCampaign,
-  useProposalCampaignStore,
-} from "@/client-side/store";
+import { CampaignTablePageShare, ProposalCampaignPageShare } from "@/client-side/widgets";
+import { useFetchCampaign, useProposalCampaignStore } from "@/client-side/store";
 import { OptionsSlider } from "@/client-side/widgets/campaign-share/components/option-slider";
 import {
   Bar,
@@ -21,14 +15,14 @@ import {
   ViewAudience,
   ViewChange,
 } from "@/client-side/ui";
-import {getVisibleCampaignStats} from "@/client-side/pages/campaign-share/model/campaign-campaign.helpers.ts";
+import { getVisibleCampaignStats } from "@/client-side/pages/campaign-share/model/campaign-campaign.helpers.ts";
 interface Props {}
 
 export const CampaignSharePage: React.FC<Props> = () => {
   const { id, type } = useParams<{ id: string; type: string }>();
   const isProposal = type === "proposal";
   const [activeOption, setActiveOption] = React.useState(0);
-  const [localExtraOptions, setLocalExtraOptions] = React.useState<number[]>(
+  const [localExtraOptions] = React.useState<number[]>(
     [],
   );
   const [changeView, setChangeView] = React.useState(false);
@@ -40,8 +34,6 @@ export const CampaignSharePage: React.FC<Props> = () => {
   const {
     data: campaign,
     isLoading,
-    isError,
-    refetch,
   } = useShareCampaignQuery(id, {
     enabled: !!id && !isProposal,
   });
@@ -62,7 +54,6 @@ export const CampaignSharePage: React.FC<Props> = () => {
     setProposalOption(id, idx);
     setActiveOption(idx);
   }, [id, isProposal, data?.selectedOption?.optionIndex]);
-
 
   const isBarSection =
     campaign && ["distributing", "completed"].includes(campaign?.status);

@@ -35,7 +35,6 @@ export const TableCard = React.memo(function TableCard({
                                                          items,
                                                          activeDropdown,
                                                          onToggleDropdown,
-                                                         canEdit,
                                                          onCloseDropdown,
                                                          optionIndex,
                                                          columns,
@@ -144,8 +143,6 @@ export const TableCard = React.memo(function TableCard({
   const setAccountDateRequest = useProposalAccountsStore(
       (s) => s.setAccountDateRequest,
   );
-
-  const selectedItem = platformItems?.[safeSelectedContent];
 
   const dateRequestRaw = String(data.dateRequest ?? "ASAP");
   const [mode, dateVal = ""] = dateRequestRaw.split(":");

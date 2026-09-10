@@ -2,23 +2,23 @@ import React from "react";
 import { toast } from "react-toastify";
 
 import type {
-    CampaignPostContentAccount,
-    BuiltCampaignPostContentPayload,
+  CampaignPostContentAccount,
+  BuiltCampaignPostContentPayload,
 } from "@/widgets/client-side/campaign-post-content/model/campaign-post-content.types";
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 import {
-    postCampaignDraft,
-    updateCampaignDraft,
+  postCampaignDraft,
+  updateCampaignDraft,
 } from "@/entities/client-side/campaign-draft/api/campaign-draft.api";
-import {
-    CampaignDraftLatestStep
-} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types.ts";
+import { CampaignDraftLatestStep } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types.ts";
 
 type DraftApiResponse =
     | {
+    revision?: number;
     draftId?: string;
     _id?: string;
     data?: {
+        revision?: number;
         draftId?: string;
         _id?: string;
     };
@@ -90,10 +90,10 @@ export const useCampaignPostContentPageDraft = ({
             };
             const response: DraftApiResponse = draftId
                 ? await updateCampaignDraft(draftPayload)
-                : await postCampaignDraft(draftPayload);
-
+                : (await postCampaignDraft(draftPayload)).data.data;
 
             const nextDraftId =
+                draftId ||
                 response?.draftId ||
                 response?._id ||
                 response?.data?.draftId ||

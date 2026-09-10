@@ -1,7 +1,5 @@
 import React from "react";
-import { Dropdown } from "@/components/table-ui/dropdowns-table";
-import check from "@/assets/icons/check.svg";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 type Props = {
   isOpen: boolean;
@@ -16,28 +14,17 @@ type Props = {
 };
 
 export const DescriptionCell = React.memo(function DescriptionCell({
-  isOpen,
-  onToggle,
-  onClose,
   platformItems,
   selectedContent,
   selectedPd,
-  setSelectedPd,
-                                                                     group
+  group
 }: Props) {
   const descriptions = platformItems?.[selectedContent]?.descriptions ?? [];
   const normalizeLink = React.useCallback((value: string) => {
     return value.startsWith("http") ? value : `https://${value}`;
   }, []);
-  const [show, setShow] = React.useState(false);
+  const [] = React.useState(false);
 
-  const selectPd = React.useCallback(
-    (idx: number) => {
-      setSelectedPd(idx);
-      onClose();
-    },
-    [setSelectedPd, onClose],
-  );
   // if (descriptions.length <= 1) {
   //   const text = String(descriptions?.[0]?.description ?? "").trim();
   //   const shown = text || "—";

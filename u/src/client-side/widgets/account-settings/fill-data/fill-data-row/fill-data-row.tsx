@@ -7,7 +7,7 @@ interface Props {
   name: string;
 }
 
-export const FillDataRow: React.FC<Props> = ({ label, name, key }) => {
+export const FillDataRow: React.FC<Props> = ({ label, name }) => {
   return (
     <div className="fill-data-row">
       <p className="fill-data-row__label">{label}</p>

@@ -1,5 +1,4 @@
-import type {SocialMedia} from "@/client-side/types/common.ts";
-
+import type { SocialMedia } from "@/client-side/types/common.ts";
 
 export type GroupKey = "main" | "music" | "press";
 export type EntityType = 0 | 1;
@@ -26,7 +25,7 @@ export type PlatformFormConfigTextArea = {
 };
 
 export type PlatformFormConfig = {
-    inputs: PlatformFormConfigField[];
+    inputs?: PlatformFormConfigField[];
     textAreas?: PlatformFormConfigTextArea[];
     contentTitle: string;
 };

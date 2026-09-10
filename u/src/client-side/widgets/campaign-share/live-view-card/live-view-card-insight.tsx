@@ -1,19 +1,18 @@
-import {getSocialMediaIcon} from "@/constants/social-medias";
-import type {SocialMediaType} from "@/types/utils/constants.types";
+import { getSocialMediaIcon } from "@/constants/social-medias";
+import type { SocialMediaType } from "@/types/utils/constants.types";
 import comment from "@/assets/icons/mage_message-dots-round.svg";
 import heart from "@/assets/icons/mdi_heart.svg";
 import bookmark from "@/assets/icons/iconoir_bookmark.svg";
 import share from "@/assets/icons/share.svg";
 import link from "@/assets/icons/link (1).svg";
 import chat from "@/assets/icons/bar-chart.svg";
-import preview from "@/assets/icons/video (1).png";
 
-import type {CampaignResponse} from "@/types/store/index.types";
+import type { CampaignResponse } from "@/types/store/index.types";
 import "@/client-side/styles-table/campaign-view-card.scss";
-import {PreviewPhoto} from "./preview/preview-component";
+import { PreviewPhoto } from "./preview/preview-component";
 import React from "react";
-import {ModalVideo} from "@/shared/ui/modal-video/ModalVideo";
-import {VideoPreview} from "./preview/preview-video-component";
+import { ModalVideo } from "@/shared/ui/modal-video/ModalVideo";
+import { VideoPreview } from "./preview/preview-video-component";
 
 interface LiveViewCardProps {
     isMusic?: boolean;
@@ -23,7 +22,6 @@ interface LiveViewCardProps {
 
 export const LiveViewCardInsight: React.FC<LiveViewCardProps> = ({
                                                                      item,
-                                                                     campaign,
                                                                  }) => {
     const [isVideoOpen, setIsVideoOpen] = React.useState(false);
 

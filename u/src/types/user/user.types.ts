@@ -1,4 +1,4 @@
-import type { TSocialAccountVerifiedStatus } from "@/types/user/influencer.types.ts";
+import type { TLabelStatus } from "@/types/user/influencer.types.ts";
 
 export type UserRoleType = "client" | "influencer";
 
@@ -25,7 +25,7 @@ export interface BaseUser {
   role: UserRoleType | null;
   logoUrl: string | null;
   needAgreementRedirect?: boolean;
-  verifiedStatus?: TSocialAccountVerifiedStatus;
+  verifiedStatus?: TLabelStatus;
 }
 
 export type IUser = BaseUser;

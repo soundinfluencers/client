@@ -17,11 +17,10 @@ import { getTableColumnWidths, getTitle } from "@/client-side/data/table-campaig
 import { useFollowersSort } from "@/client-side/hooks";
 import { getAccountKey, getColumns } from "@/client-side/utils";
 import { useProposalAccountsStore } from "@/client-side/store";
-import {
-  useCampaignBuilderStore,
-} from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
 
 type Props = {
+  campaignId?: string;
   items: CampaignContentItem[];
   networks: CampaignAddedAccount[];
   totalPrice: number;
@@ -43,7 +42,6 @@ type ActiveDropdown = {
 export function TableProposal({
   items,
   networks,
-  totalPrice,
   changeView,
   group,
   canEdit,

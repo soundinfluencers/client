@@ -1,10 +1,9 @@
-import React from "react";
 import {
-    useController,
-    useFormContext,
-    useFormState,
-    type FieldValues,
-    type Path,
+  useController,
+  useFormContext,
+  useFormState,
+  type FieldValues,
+  type Path,
 } from "react-hook-form";
 
 type Props<T extends FieldValues> = {

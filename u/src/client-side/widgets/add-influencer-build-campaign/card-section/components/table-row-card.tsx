@@ -8,8 +8,7 @@ import { Checkbox } from "@/components";
 import { getPriceByCurrency } from "@/client-side/utils";
 
 import { TagsDropdown } from "./tags-dropdown";
-import {useBuildCampaignFilters, useCampaignStore, useProposalAccountsStore} from "@/client-side/store";
-import {useSearchParams} from "react-router-dom";
+import { useBuildCampaignFilters, useCampaignStore } from "@/client-side/store";
 
 interface Props {
   data: IPromoCard;

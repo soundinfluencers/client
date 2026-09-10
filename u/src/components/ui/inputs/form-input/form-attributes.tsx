@@ -1,12 +1,12 @@
 import React from "react";
 import "./_form-attributes.scss";
 import {
-    useController,
-    useFormContext,
-    get,
-    type FieldValues,
-    type Path,
-    type RegisterOptions,
+  useController,
+  useFormContext,
+  get,
+  type FieldValues,
+  type Path,
+  type RegisterOptions,
 } from "react-hook-form";
 
 interface FormInputProps<T extends FieldValues> {
@@ -54,7 +54,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps<any>>
             name,
             control,
             rules: validation,
-            defaultValue: "",
+
         });
 
         const errorMsg =
@@ -118,7 +118,7 @@ export function FormTextArea<T extends FieldValues>({
         name,
         control,
         rules: validation,
-        defaultValue: "",
+
     });
 
     const errorMsg =

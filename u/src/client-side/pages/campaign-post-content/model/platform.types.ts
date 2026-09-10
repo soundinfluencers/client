@@ -13,7 +13,7 @@ export type PlatformFormTextArea = {
 };
 
 export type PlatformFormConfig = {
-    inputs: PlatformFormField[];
+    inputs?: PlatformFormField[];
     textAreas?: PlatformFormTextArea[];
     contentTitle: string;
 };

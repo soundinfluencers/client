@@ -6,9 +6,9 @@ import type { SocialMediaType } from "@/types/utils/constants.types";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { getPriceByCurrency } from "@/client-side/utils";
 import {
-    useBuildCampaignFilters,
-    useSelectCampaignProposal,
-    useProposalAccountsStore,
+  useBuildCampaignFilters,
+  useSelectCampaignProposal,
+  useProposalAccountsStore,
 } from "@/client-side/store";
 import { GenresCountries } from "@/shared/ui";
 import type { ConnectedAccount } from "@/client-side/types/offers.ts";
@@ -100,8 +100,8 @@ export const Card: React.FC<Props> = ({ data, isInclude }) => {
                         setOpen={setFlag}
                         open={flag}
                         data={{
-                            engagementRate: data.engagementRate,
-                            averageViews: data.averageViews,
+                            engagementRate: data.engagementRate ?? 0,
+                            averageViews: data.averageViews ?? 0,
                             musicGenres: data.musicGenres ?? [],
                             countries: data.countries ?? [],
                         }}

@@ -1,18 +1,18 @@
+import type { SocialMedia } from "@/client-side/types/common";
 import { ObjectId } from "bson";
-import {getCampaignContentFromForm} from "@/client-side/utils/get-campaign-content-from-form.ts";
+import { getCampaignContentFromForm } from "@/client-side/utils/get-campaign-content-from-form.ts";
 
 type Group = "main" | "music" | "press";
 
 export type AnyItem = {
   _id: string;
-  socialMedia: string;
+  socialMedia: SocialMedia;
   socialMediaGroup: Group;
   mainLink: string;
   descriptions: Array<{ _id: string; description: string }>;
   taggedUser: string;
   taggedLink: string;
   additionalBrief: string;
-
 
   accountId?: string;
 };
@@ -113,11 +113,12 @@ function buildItemFromPrefix(
   group: Group,
   platformOut: string,
 ): AnyItem {
+  if (!["instagram", "tiktok", "youtube", "facebook", "spotify", "soundcloud", "press", "multipromo"].includes(platformOut)) throw new Error("Unsupported content platform");
   const dict = FIELDS[group];
 
   const item: AnyItem = {
     _id: oid(),
-    socialMedia: platformOut,
+    socialMedia: platformOut as SocialMedia,
     socialMediaGroup: group,
     mainLink: "",
     descriptions: [],
@@ -165,10 +166,6 @@ function buildItemFromPrefix(
     if (global) item.additionalBrief = global;
   }
 
-  item.descriptions.sort((a, b) => {
-    return 0;
-  });
-
   return item;
 }
 
@@ -201,25 +198,6 @@ export function parseFormsForDisplay(
     items.push(item);
   }
 
-  items.sort((a, b) => {
-    const pa = parsePrefix(
-      prefixes.find(
-        (p) =>
-          buildItemFromPrefix(formData, p, socialMediaGroup, platform)._id ===
-          a._id,
-      ) ?? "",
-    );
-    const pb = parsePrefix(
-      prefixes.find(
-        (p) =>
-          buildItemFromPrefix(formData, p, socialMediaGroup, platform)._id ===
-          b._id,
-      ) ?? "",
-    );
-
-    return 0;
-  });
-
   return items;
 }
 
@@ -244,10 +222,10 @@ export function buildPressCampaignContent(
   return parseFormsForDisplay(formData, platform, "press");
 }
 export const getCampaignContentFromFormByAccounts = (
-    formData,
-    selectedPlatforms,
-    grouped,
-    accounts,
+    formData: Record<string, unknown>,
+    selectedPlatforms: string[],
+    grouped: Record<Group, string[]>,
+    accounts: { accountId: string; socialMedia: string }[],
 ) => {
   const templates = getCampaignContentFromForm(
       formData,

@@ -1,9 +1,7 @@
 import * as React from "react";
 
-import type {ConnectedAccount} from "@/client-side/types/offers.ts";
-
 type SortDir = "asc" | "desc" | null;
-export function useFollowersSort(networks: ConnectedAccount[]) {
+export function useFollowersSort<T extends { followers?: number | null }>(networks: T[]) {
   const [followersSort, setFollowersSort] = React.useState<SortDir>(null);
 
   const toggleFollowersSort = (dir: Exclude<SortDir, null>) => {

@@ -1,7 +1,7 @@
 import React from "react";
 import chevron from "@/assets/icons/chevron-up.svg";
 import type { SortDir } from "@/client-side/types/table-types";
-import { getTitle, titles } from "@/client-side/data/table-campaign.data";
+import { getTitle } from "@/client-side/data/table-campaign.data";
 import type { TableView } from "@/client-side/utils/getColumns";
 
 type Props = {

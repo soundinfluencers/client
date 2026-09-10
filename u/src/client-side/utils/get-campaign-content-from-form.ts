@@ -1,7 +1,8 @@
+import type { AnyItem } from "./prepare-campaign-content";
 import {
-    buildMainCampaignContent,
-    buildMusicCampaignContent,
-    buildPressCampaignContent
+  buildMainCampaignContent,
+  buildMusicCampaignContent,
+  buildPressCampaignContent,
 } from "@/client-side/utils/prepare-campaign-content.ts";
 
 export const getCampaignContentFromForm = (
@@ -9,7 +10,7 @@ export const getCampaignContentFromForm = (
     selectedPlatforms: string[],
     grouped: Record<"main" | "music" | "press", string[]>,
 ) => {
-    const campaignContent: any[] = [];
+    const campaignContent: AnyItem[] = [];
 
     (["main", "music", "press"] as const).forEach((group) => {
         grouped[group]?.forEach((platform) => {

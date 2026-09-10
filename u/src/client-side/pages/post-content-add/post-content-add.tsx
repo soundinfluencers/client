@@ -14,17 +14,11 @@ import { platformFormsMap } from "@/client-side/constants/plattforms-data-form";
 import { getSocialMediaIcon } from "@/constants/social-medias";
 
 import type { SocialMediaType } from "@/types/utils/constants.types";
-import {
-  useProposalAccountsStore,
-  useSelectCampaignProposal,
-} from "@/client-side/store";
+import { useProposalAccountsStore, useSelectCampaignProposal } from "@/client-side/store";
 import { useAdditionalForms } from "@/client-side/hooks";
 import { campaignPostContentSchema } from "@/client-side/schemas";
 import { SelectionAddInfluencer } from "@/client-side/widgets";
-import {
-  AdditionalPlatformForm,
-  PlatformForm,
-} from "@/client-side/client-forms";
+import { AdditionalPlatformForm, PlatformForm } from "@/client-side/client-forms";
 import { groupPlatforms } from "@/client-side/utils";
 
 const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"];
@@ -61,7 +55,7 @@ const pickPlatformsForGroup = (promoCard: any[], group: GroupKey): string[] => {
 };
 
 export const PostContentAdd: React.FC = () => {
-  const [selectedEntity, setSelectedEntity] = React.useState(0);
+  const [] = React.useState(0);
   const navigate = useNavigate();
   const [sp] = useSearchParams();
 
@@ -120,7 +114,7 @@ export const PostContentAdd: React.FC = () => {
     getAdditionalIndex,
     getFormPrefix,
     removeAdditionalForm,
-  } = useAdditionalForms(postContentDraft ?? undefined);
+  } = useAdditionalForms(postContentDraft ?? undefined, actions.setPostContentDraft);
 
   // const handleSubmit = React.useCallback(
   //   (formData: Record<string, string>) => {
@@ -195,8 +189,6 @@ export const PostContentAdd: React.FC = () => {
         console.log("PROPOSAL STORE contentByOption", proposalStoreAfter.contentByOption?.[optionIndex]);
         console.log("PROPOSAL STORE accountsByOption", proposalStoreAfter.accountsByOption?.[optionIndex]);
 
-
-
         navigate("/client/campaign");
           actions.clearPromoCards();
       },
@@ -215,7 +207,6 @@ export const PostContentAdd: React.FC = () => {
         return (
             <div key={group} className="platform-group">
                 <PlatformForm
-                    selectedEntity={selectedEntity}
                     data={baseForm}
                     selectedPlatforms={platforms}
                     formPrefix={`${group}-0`}
@@ -227,8 +218,7 @@ export const PostContentAdd: React.FC = () => {
 
                     return (
                         <AdditionalPlatformForm
-                            selectedEntity={selectedEntity}
-                            key={f.id}
+                                    key={f.id}
                             data={{
                                 ...baseForm,
                                 _id: f.id,

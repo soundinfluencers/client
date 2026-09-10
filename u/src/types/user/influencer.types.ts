@@ -1,7 +1,5 @@
 // Social account enum type
-import type {
-  TNotificationViaApi
-} from "@/pages/influencer/account-setting/components/notifications-via/types/notification-via.types.ts";
+import type { TNotificationViaApi } from "@/pages/influencer/account-setting/components/notifications-via/types/notification-via.types.ts";
 
 export type TSocialAccounts =
   | "instagram"
@@ -57,7 +55,7 @@ export type TSocialAccountShort = {
 // Signup draft type
 export interface ISignupInfluencerDraft {
   firstName: string;
-  lastName: string;
+  lastName?: string;
   email: string;
   phone: string;
   password: string;

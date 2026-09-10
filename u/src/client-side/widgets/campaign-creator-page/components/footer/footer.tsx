@@ -1,6 +1,5 @@
 
 import { useNavigate } from "react-router-dom";
-import plus from "@/assets/icons/plus.svg";
 import "./_footer.scss";
 import { useCampaignStore } from "@/client-side/store";
 

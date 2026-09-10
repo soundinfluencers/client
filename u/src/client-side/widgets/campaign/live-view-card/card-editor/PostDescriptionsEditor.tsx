@@ -57,7 +57,6 @@ export const LiveDescriptionsEditorDropdown: React.FC<Props> = ({
                                                                     addDescription,
                                                                     updateDescription,
                                                                     removeDescription,
-                                                                    resetDescriptions,
                                                                     onSelectDescriptionId,
                                                                     setDescriptions,
                                                                 }) => {

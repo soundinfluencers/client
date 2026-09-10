@@ -4,7 +4,6 @@ import { Modal } from "@/shared/ui/modal-fix/Modal";
 import { useProposalAccountsStore } from "@/client-side/store";
 import eye from "@/assets/icons/eye.svg";
 
-import check from "@/assets/icons/check (1).svg";
 import plus from "@/assets/icons/plus.svg";
 import trash from "@/assets/icons/trash-2.svg";
 
@@ -22,7 +21,7 @@ type Props = {
 
   platformItems: any[];
   selectedContent: number;
-  setSelectedContent: (v: number) => void;
+  setSelectedContent: React.Dispatch<React.SetStateAction<number>>;
 
   setSelectedPd: (v: number) => void;
   socialMedia?: string;
@@ -32,7 +31,6 @@ type Props = {
 
 export const ContentCellEdit = React.memo(function ContentCellEdit({
   optionIndex,
-  accountKey,
   selectedItem,
 
   isOpen,

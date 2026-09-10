@@ -1,9 +1,13 @@
-import type { TSocialAccounts, ISignupInfluencerDraft, TSocialAccountShort } from "@/types/user/influencer.types";
+import type {
+  TSocialAccounts,
+  ISignupInfluencerDraft,
+  TSocialAccountShort,
+} from "@/types/user/influencer.types";
 
 export const signupAccountsForList = (
   platform: TSocialAccounts,
   user: ISignupInfluencerDraft,
-): TSocialAccountShort[] => {
+): Pick<TSocialAccountShort, "username">[] => {
   return user[platform].map((account) => ({
     username: account.username,
   }));

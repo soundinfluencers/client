@@ -3,7 +3,7 @@ import { FormInput } from "@/shared/ui";
 
 import type { IPaymentCampaignField } from "@/types/client/form-clients/payment-campaign-inputs";
 
-export function PaymentForm({ data }: { data: IPaymentCampaignField }) {
+export function PaymentForm({ }: { data: IPaymentCampaignField }) {
   return (
     <>
       <div className="inputs">

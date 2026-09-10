@@ -31,7 +31,7 @@ export type TableRowProps = {
   onCloseDropdown: () => void;
   optionIndex?: number;
   columns: any;
-  status: string
+  status?: string
 };
 
 type ActiveDropdownProposal = {
@@ -40,7 +40,7 @@ type ActiveDropdownProposal = {
 } | null;
 
 export type TableRowProposalProps = {
-  campaignId: string;
+  campaignId?: string;
   rowKey: string;
   data: any;
   items: any[];
@@ -57,7 +57,6 @@ export type TableRowProposalProps = {
   optionIndex?: number;
 };
 export type DropKey = "date" | "content" | "postDescription";
-
 
 export type TableMode = "default" | "changeView";
 export type TableVariant = "readonly" | "editable";

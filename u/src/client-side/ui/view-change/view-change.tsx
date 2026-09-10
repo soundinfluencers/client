@@ -2,10 +2,9 @@ import React from "react";
 import "../styles/table-components.scss";
 import edit from "@/assets/icons/edit.svg";
 import proview from "@/assets/icons/Vector (15).svg";
-import liveview from "@/assets/icons/Vector (16).svg";
-import type {ViewMode} from "@/client-side/pages/campaign-strategy/types/campaign-strategy.types.ts";
+import type { ViewMode } from "@/client-side/pages/campaign-strategy/types/campaign-strategy.types.ts";
 interface Props {
-  setView: React.Dispatch<React.SetStateAction<ViewMode>>;
+  setView: (view: ViewMode) => void;
   view: number | null;
   isProposal?: boolean;
 }
@@ -25,7 +24,7 @@ export const ViewChange: React.FC<Props> = ({ setView, view, isProposal }) => {
     //   icon: liveview,
     // },
   ];
-  const regularTabs = [
+  const regularTabs: typeof proposalTabs = [
     // {
     //   label: "Live View",
     //   icon: liveview,
@@ -42,7 +41,7 @@ export const ViewChange: React.FC<Props> = ({ setView, view, isProposal }) => {
 
   const active = typeof view === "number" ? view : 0;
 
-  const onSelect = (label: string, index: number) => {
+  const onSelect = (label: string) => {
     if (label === "Edit View") {
       setView(-1);
       return;
@@ -68,7 +67,7 @@ export const ViewChange: React.FC<Props> = ({ setView, view, isProposal }) => {
               className={`changeView-table__item ${
                 active === (tab.label === "Edit View" ? -1 : i) ? "active" : ""
               }`}
-              onClick={() => onSelect(tab.label, i)}
+              onClick={() => onSelect(tab.label)}
               role="button"
               tabIndex={0}>
               <img src={tab.icon} alt="" />

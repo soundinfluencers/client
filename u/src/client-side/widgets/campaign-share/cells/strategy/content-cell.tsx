@@ -1,7 +1,5 @@
 import React from "react";
-import { Dropdown } from "@/components/table-ui/dropdowns-table";
 import eye from "@/assets/icons/eye.svg";
-import check from "@/assets/icons/check.svg";
 import { Modal } from "@/components/ui/modal-fix/Modal";
 
 type Props = {
@@ -19,14 +17,8 @@ type Props = {
 };
 
 export const ContentCell = React.memo(function ContentCell({
-  isOpen,
-  onToggle,
-  onClose,
   platformItems,
   selectedContent,
-  setSelectedContent,
-  setSelectedPd,
-  socialMedia,
   group,
 }: Props) {
   const [popUp, setPopUp] = React.useState(false);
@@ -36,14 +28,6 @@ export const ContentCell = React.memo(function ContentCell({
   });
 
   console.log(selectedVideo);
-
-  const onClickSelect = React.useCallback(
-    (optionIndex: number) => {
-      setSelectedContent(optionIndex);
-      onClose();
-    },
-    [setSelectedContent, setSelectedPd, onClose],
-  );
 
   const onClickVideo = React.useCallback(
     (optionIndex: number, link: string) => {

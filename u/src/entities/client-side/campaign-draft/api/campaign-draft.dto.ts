@@ -18,6 +18,7 @@ export type DraftAddedAccountDto = {
     selectedContent?: {
         campaignContentItemId: string;
         descriptionId?: string;
+        additionalBriefId?: string;
     };
 };
 

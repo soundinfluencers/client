@@ -1,4 +1,4 @@
-import type { PaymentMethodId } from "@/client-side/pages/payment-campaign/PaymentCampaign";
+import type { PaymentMethodId } from "@/client-side/pages/payment-campaign/payment-campaign";
 
 const PAYMENT_PREFIX_MAP: Record<PaymentMethodId, string> = {
     bank_card: "BC",

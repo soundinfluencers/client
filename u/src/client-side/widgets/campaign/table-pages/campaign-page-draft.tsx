@@ -1,9 +1,9 @@
+import type { CampaignContentItem } from "@/types/store/index.types";
 import React from "react";
 import "@/client-side/styles-table/_table-campaign.scss";
 
 import { LiveViewCard } from "../live-view-card/live-view";
 import { useGroupPromos } from "@/client-side/hooks";
-import { Bar } from "@/client-side/ui";
 
 import { useDraftCampaignStore, useUpdateCampaign } from "@/client-side/store";
 import { TableDraft } from "../tables/table-draft";
@@ -31,9 +31,6 @@ export const CampaignTablePageDraft: React.FC<Props> = ({
   changeView,
   view,
 }) => {
-  const useDraftCampaignPrice = (campaignId: string) =>
-    useDraftCampaignStore((s) => s.getCampaignPrice(campaignId));
-  const draftPrice = useDraftCampaignPrice(campaign.draftId);
   const storeContent = useDraftCampaignStore(
     (s) => s.contentByCampaignId[campaign.draftId],
   );
@@ -43,7 +40,7 @@ export const CampaignTablePageDraft: React.FC<Props> = ({
   );
   const patches = useUpdateCampaign((s) => s.patches);
 
-  const baseContent =
+  const baseContent: CampaignContentItem[] =
     storeContent && storeContent.length
       ? storeContent
       : (campaign.campaignContentDraft ?? []);

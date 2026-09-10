@@ -9,7 +9,7 @@ import check from "@/assets/icons/check.svg";
 import { useClickOutside } from "../../../../../../hooks/global/useClickOutside.ts";
 
 export interface CompanySelectProps {
-  selectedType: ClientCompanyType;
+  selectedType: ClientCompanyType | undefined;
   selectType: (value: ClientCompanyType) => void;
   isMenuOpen: boolean;
   setIsMenuOpen: (isOpen: boolean) => void;

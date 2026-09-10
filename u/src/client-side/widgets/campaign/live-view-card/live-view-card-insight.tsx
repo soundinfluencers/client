@@ -6,7 +6,6 @@ import bookmark from "@/assets/icons/iconoir_bookmark.svg";
 import share from "@/assets/icons/share.svg";
 import link from "@/assets/icons/link (1).svg";
 import chat from "@/assets/icons/bar-chart.svg";
-import preview from "@/assets/icons/video (1).png";
 
 import type { CampaignResponse } from "@/types/store/index.types";
 import "@/client-side/styles-table/campaign-view-card.scss";

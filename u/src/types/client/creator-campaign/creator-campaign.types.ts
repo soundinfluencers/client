@@ -1,6 +1,6 @@
 // IApiOffer for offers in CreateCampaign //
 
-import type { CampaignAddedAccount } from "@/types/store/index.types";
+import type { ConnectedAccount } from "@/client-side/types/offers";
 
 export interface IApiOffer {
   _id: string;
@@ -40,21 +40,6 @@ export interface ICampaignAccount extends Pick<
   };
   dateRequest: string;
 }
-export interface IPromoCard extends CampaignAddedAccount {
-  accountId: string;
-  influencerId: string;
-  username: string;
-  logoUrl: string;
-  followers: number;
-  prices: Prices;
-  socialMedia: string;
-  countries: Country[];
-  communityMusicGenres?: string[];
-  communityThemeTopics?: string[];
-  creatorMusicGenres?: string[];
-  creatorContentFocus?: string[];
-  musicGenres: string[];
-  creatorCategories: string[];
-  categories: string[];
+export interface IPromoCard extends ConnectedAccount {
   fromOffer?: boolean;
 }

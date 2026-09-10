@@ -13,9 +13,7 @@ import { routes } from "./router/routes";
 // influencer
 import { DashboardLayout } from "./pages/influencer/dashboard-layout/DashboardLayout";
 import { PromosList } from "./pages/influencer/dashboard-layout/components/promos-list/PromosList";
-import {
-  CampaignHistoryList,
-} from "./pages/influencer/dashboard-layout/components/campaign-history-list/CampaignHistoryList";
+import { CampaignHistoryList } from "./pages/influencer/dashboard-layout/components/campaign-history-list/CampaignHistoryList";
 import { NewPromos } from "./pages/influencer/promos/new-promos/NewPromos";
 import { Distributing } from "./pages/influencer/promos/distributing/Distributing";
 import { Completed } from "./pages/influencer/promos/completed/Completed";
@@ -33,19 +31,11 @@ import { PaymentDetails } from "@/pages/influencer/payment-details/PaymentDetail
 import { SocialAccounts } from "@/pages/influencer/social-accounts/SocialAccounts.tsx";
 import { InfluencerTermsPage } from "@/pages/auth/terms/influencer/InfluencerTermsPage.tsx";
 import { Agreement } from "@/pages/influencer/agreement/Agreement.tsx";
-import { HomePage } from "@/client-side";
-import {
-  EditPassword,
-} from "@/pages/influencer/account-setting/components/edit-password-flow/edit-password/EditPassword.tsx";
-import {
-  AccountSettingMain,
-} from "@/pages/influencer/account-setting/components/account-setting-main/AccountSettingMain.tsx";
-import {
-  NewPassword
-} from "@/pages/auth/new-password/NewPassword.tsx";
+import { EditPassword } from "@/pages/influencer/account-setting/components/edit-password-flow/edit-password/EditPassword.tsx";
+import { AccountSettingMain } from "@/pages/influencer/account-setting/components/account-setting-main/AccountSettingMain.tsx";
+import { NewPassword } from "@/pages/auth/new-password/NewPassword.tsx";
 import { Negotiation } from "@/pages/influencer/negotiation/Negotiation.tsx";
-import {DashboardPage} from "@/pages/client-side/dashboard";
-
+import { DashboardPage } from "@/pages/client-side/dashboard";
 
 function App() {
   const { setAccessToken, logout } = useAuth();
@@ -171,7 +161,6 @@ function App() {
           path="influencer/profile/agreement/:influencerId"
           element={<Agreement />}
         />
-
 
         <Route
           path="/reset-password/:token"

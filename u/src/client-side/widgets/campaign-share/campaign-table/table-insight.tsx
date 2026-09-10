@@ -159,8 +159,9 @@ export const TableDistributingInsight: React.FC<Props> = ({ campaign }) => {
 
     if (!sort.key || !sort.dir) return arr;
 
+    const key = sort.key;
     arr.sort((a, b) => {
-      const field = sort.key === "likes" ? "like" : sort.key;
+      const field = key === "likes" ? "like" : key;
 
       const av = toNumber((a as any)?.[field]);
       const bv = toNumber((b as any)?.[field]);

@@ -1,22 +1,23 @@
+import { AiChatTranscript } from "./ai-chat-transcript.tsx";
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type DragEvent,
-} from "react";
+  type WorkspaceFollowUp,
+  type Message,
+  readStoredSurface,
+  GUIDED_CAMPAIGN_WELCOME,
+  loadPersistedChat,
+  toPlainText,
+  CLIENT_EXAMPLE_PROMPTS,
+  INFLUENCER_EXAMPLE_PROMPTS,
+  getCampaignDraftId,
+  mergeSearchOutcome,
+} from "../model/ai-chat-session.model.ts";
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import DOMPurify from "dompurify";
 import { toast } from "react-toastify";
 import { Container } from "@/components";
 import {
   AgentChatRequestError,
   sendAgentMessage,
-  type AgentChatErrorCode,
-  type AgentLink,
-  type AgentMedia,
   type AgentSearchOutcome,
 } from "@/api/agent/agent.api.ts";
 import { useUser } from "@/store/get-user";
@@ -45,9 +46,6 @@ import { fitPromoImage } from "@/entities/client-side/promo-creative/model/promo
 import imageIcon from "@/assets/icons/image.svg";
 import {
   identityFromAccessToken,
-  isAiChatPersistedState,
-  readAiChatState,
-  readAiWorkspaceSurface,
   removeAiChatState,
   writeAiChatState,
   writeAiWorkspaceSurface,
@@ -55,215 +53,6 @@ import {
   type AiChatRole,
 } from "../model/ai-chat-persistence.ts";
 import { resolveSearchDraftId } from "../model/recommendation-bundles.ts";
-
-// A turn the workspace starts on the client's behalf: the brief is complete, more pages are
-// wanted, or the pages changed while the panel was open.
-type WorkspaceFollowUp = "brief" | "more" | "pages";
-
-interface Message {
-  id: string;
-  q: string;
-  a: string; // final conclusion — simple HTML, sanitized at render time below
-  links: AgentLink[];
-  media: AgentMedia[];
-  status: "pending" | "success" | "error";
-  errorCode?: AgentChatErrorCode;
-  // The backend request may differ from the visible user bubble for automatic workspace actions.
-  request?: string;
-  recommendationAction?: "brief" | "more";
-  // Work the user did in the workspace, not a turn with the agent. Kept in the same
-  // list so the transcript reads as one timeline of what happened to the campaign.
-  note?: { text: string; section: CampaignSetupSurface };
-  // A hardcoded welcome from the assistant has no preceding user bubble. Keeping it
-  // in the transcript makes the guided start survive navigation and page reloads.
-  assistantOnly?: boolean;
-  // A local preview of the file sent with this turn. Generated output lives in `media`.
-  userImage?: { url: string; name: string };
-}
-
-const readStoredSurface = (
-  identity: AiChatIdentity | null,
-): CampaignSetupSurface | null => {
-  if (identity?.role !== "client") return null;
-  const stored = readAiWorkspaceSurface(sessionStorage, identity);
-  if (stored === "strategy") return "brief";
-  return stored === "brief" ||
-    stored === "pages" ||
-    stored === "content" ||
-    stored === "promo"
-    ? stored
-    : null;
-};
-
-// Section names as the user sees them in the rail.
-const SECTION_LABELS: Record<CampaignSetupSurface, string> = {
-  brief: "Brief",
-  pages: "Pages",
-  content: "Content",
-  promo: "Promo",
-};
-
-type PersistedChat = {
-  messages: Message[];
-  conversationId?: string;
-  activeDraftId?: string;
-  role?: string;
-  recommendationsByDraft?: Record<string, AgentSearchOutcome>;
-};
-
-const isPersistedChat = (value: unknown): value is Partial<PersistedChat> => {
-  return isAiChatPersistedState(value);
-};
-
-const GUIDED_CAMPAIGN_WELCOME =
-  "<p><strong>Let’s create your campaign.</strong></p>" +
-  "<p>Send the essentials in one message:</p>" +
-  "<ul><li>campaign goal</li><li>approximate budget and currency</li><li>music genre(s)</li><li>platform(s)</li><li>target countries or Worldwide</li><li>timing or Flexible</li></ul>" +
-  "<p>Then I’ll recommend pages, explain the budget fit and tell you the next action. Content and First Slide can be added later.</p>";
-
-const restoreMessage = (message: Message, index: number): Message => {
-  // Migrate the old one-line campaign receipt into the conversational welcome so
-  // an existing browser session receives the improved start as well.
-  const isLegacyGuidedStart =
-    message.note?.text === "Guided campaign started" &&
-    message.note.section === "brief";
-
-  return {
-    id: message.id ?? `restored-${index}`,
-    q: isLegacyGuidedStart ? "" : (message.q ?? ""),
-    a: isLegacyGuidedStart ? GUIDED_CAMPAIGN_WELCOME : (message.a ?? ""),
-    links: message.links ?? [],
-    media: message.media ?? [],
-    // A request cannot still be running after a reload.
-    status:
-      message.status === "pending" ? "error" : (message.status ?? "success"),
-    errorCode: message.errorCode,
-    request: message.request,
-    recommendationAction: message.recommendationAction,
-    note: isLegacyGuidedStart ? undefined : message.note,
-    assistantOnly: isLegacyGuidedStart || message.assistantOnly,
-    // blob: URLs belong to the previous document and cannot survive a reload.
-    userImage: message.userImage?.url?.startsWith("blob:")
-      ? undefined
-      : message.userImage,
-  };
-};
-
-const loadPersistedChat = (
-  identity: AiChatIdentity | null,
-): PersistedChat => {
-  const role = identity?.role;
-  if (identity) {
-    const saved = readAiChatState<Partial<PersistedChat>>(
-      sessionStorage,
-      identity,
-      isPersistedChat,
-    );
-    if (saved) {
-      if (saved.role && saved.role !== role) return { messages: [], role };
-      return {
-        conversationId: saved.conversationId,
-        activeDraftId: role === "client" ? saved.activeDraftId : undefined,
-        recommendationsByDraft:
-          role === "client" && saved.recommendationsByDraft
-            ? saved.recommendationsByDraft
-            : undefined,
-        role,
-        messages: Array.isArray(saved.messages)
-          ? saved.messages.map(restoreMessage)
-          : [],
-      };
-    }
-  }
-  return { messages: [] };
-};
-
-// Whitelist-only: no <a>/<img>, no attributes at all. Navigation never comes from this HTML —
-// it always comes from the separate `links` field, built server-side from verified routes.
-const sanitizeReply = (html: string) =>
-  DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "ul", "ol", "li"],
-    ALLOWED_ATTR: [],
-  });
-
-// One-line preview for the strip shown while a working surface covers the transcript.
-const toPlainText = (html: string) =>
-  DOMPurify.sanitize(html, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
-    .replace(/\s+/g, " ")
-    .trim();
-
-const CLIENT_EXAMPLE_PROMPTS = [
-  "Find house influencers in Germany under 2000 €",
-  "Create a campaign for my new track",
-  "Where can I see my invoices?",
-];
-
-const INFLUENCER_EXAMPLE_PROMPTS = [
-  "How do campaign requests work?",
-  "What should I prepare before accepting a promo?",
-  "How do influencer invoices work?",
-];
-
-const AGENT_ERROR_MESSAGES: Record<AgentChatErrorCode, string> = {
-  AGENT_DAILY_LIMIT_REACHED:
-    "You've reached today's AI usage limit. You can use the assistant again tomorrow.",
-  AGENT_CAPACITY_REACHED:
-    "The AI Assistant has reached today's capacity. Please try again tomorrow.",
-  AGENT_TURN_IN_PROGRESS:
-    "Another AI response is already running for your account. Wait for it to finish, then retry.",
-  AGENT_USAGE_UNAVAILABLE:
-    "The AI Assistant is temporarily unavailable. Please try again shortly.",
-  UNKNOWN: "Couldn't get a response. Please try again.",
-};
-
-const NON_RETRYABLE_AGENT_ERRORS = new Set<AgentChatErrorCode>([
-  "AGENT_DAILY_LIMIT_REACHED",
-  "AGENT_CAPACITY_REACHED",
-]);
-
-const getCampaignDraftId = (link: AgentLink) => {
-  if (link.kind === "campaign_draft" && link.draftId) return link.draftId;
-  return (
-    /^\/client\/campaign-draft\/([a-f\d]{24})$/i.exec(link.path)?.[1] ?? null
-  );
-};
-
-const withAiSource = (path: string) => {
-  if (
-    !path.startsWith("/client/create-campaign") ||
-    /(?:\?|&)source=ai(?:&|$)/.test(path)
-  ) {
-    return path;
-  }
-  return `${path}${path.includes("?") ? "&" : "?"}source=ai`;
-};
-
-const mergeSearchOutcome = (
-  current: AgentSearchOutcome | undefined,
-  incoming: AgentSearchOutcome,
-): AgentSearchOutcome => {
-  if (!current || incoming.page <= 1) return incoming;
-  // A continuation can become empty if the roster changes between batches. Keep the pages
-  // already loaded instead of replacing the useful list with an empty-state screen.
-  if (incoming.status === "empty") {
-    return {
-      ...current,
-      hasMore: false,
-      nextPage: undefined,
-      totalExact: Math.max(current.totalExact, incoming.totalExact),
-    };
-  }
-  // The toast reports the failure; Pages should remain usable with the confirmed earlier rows.
-  if (incoming.status === "failed") return current;
-  const byId = new Map(
-    current.candidates.map((candidate) => [candidate.accountId, candidate]),
-  );
-  incoming.candidates.forEach((candidate) =>
-    byId.set(candidate.accountId, candidate),
-  );
-  const candidates = [...byId.values()];
-  return { ...incoming, candidates, loadedCount: candidates.length };
-};
 
 // The same chat shell serves both roles, while storage, examples and server-side
 // capabilities remain role-specific.
@@ -960,173 +749,7 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
                 </div>
               )}
 
-              {messages.map((msg) =>
-                msg.note ? (
-                  <div key={msg.id} className={styles.messageGroup}>
-                    <button
-                      type="button"
-                      className={styles.noteChip}
-                      onClick={() => openWorkspace(msg.note!.section)}
-                    >
-                      <span>{msg.note.text}</span>
-                      <strong>Open {SECTION_LABELS[msg.note.section]} →</strong>
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    key={msg.id}
-                    className={`${styles.messageGroup} ${msg.assistantOnly ? styles.assistantOnly : ""}`}
-                  >
-                    {!msg.assistantOnly && (
-                      <div className={styles.userRow}>
-                        <div className={styles.userBubble}>
-                          {msg.userImage && (
-                            <img
-                              className={styles.userImage}
-                              src={msg.userImage.url}
-                              alt={`Attached ${msg.userImage.name}`}
-                            />
-                          )}
-                          <span>{msg.q}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className={styles.agentRow}>
-                      {msg.status === "success" && (
-                        <div
-                          className={styles.agentBubble}
-                          dangerouslySetInnerHTML={{
-                            __html: sanitizeReply(msg.a),
-                          }}
-                        />
-                      )}
-
-                      {msg.status === "success" && msg.media.length > 0 && (
-                        <div className={styles.generatedMedia}>
-                          {msg.media.map((item) => (
-                            <figure
-                              key={item.url}
-                              className={styles.generatedMediaCard}
-                            >
-                              <img src={item.url} alt={item.alt} />
-                              <figcaption>
-                                <span>Saved to this campaign’s Promo</span>
-                                {item.draftId && (
-                                  <button
-                                    type="button"
-                                    onClick={() => openWorkspace("promo")}
-                                  >
-                                    Open Promo →
-                                  </button>
-                                )}
-                              </figcaption>
-                            </figure>
-                          ))}
-                        </div>
-                      )}
-
-                      {msg.status === "error" && (
-                        <div className={styles.errorBubble}>
-                          <span>
-                            {AGENT_ERROR_MESSAGES[msg.errorCode ?? "UNKNOWN"]}
-                          </span>
-                          {!NON_RETRYABLE_AGENT_ERRORS.has(
-                            msg.errorCode ?? "UNKNOWN",
-                          ) && (
-                            <button
-                              onClick={() => void handleRetry(msg)}
-                              disabled={isPending || isPreparingSend}
-                            >
-                              Retry
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-                      {msg.status === "success" && msg.links.length > 0 && (
-                        <div className={styles.links}>
-                          {msg.links.map((link, k) => {
-                            const campaignDraftId = getCampaignDraftId(link);
-                            if (campaignDraftId) {
-                              const alreadyRendered = msg.links
-                                .slice(0, k)
-                                .some(
-                                  (previousLink) =>
-                                    getCampaignDraftId(previousLink) ===
-                                    campaignDraftId,
-                                );
-                              if (alreadyRendered) return null;
-                              // The table itself lives in the workspace — the conversation
-                              // only keeps a marker of where the draft changed.
-                              // A transcript restored from an older session can name a
-                              // section that no longer exists; pages is the safe home.
-                              const section: CampaignSetupSurface =
-                                link.section === "strategy"
-                                  ? "brief"
-                                  : link.section &&
-                                      link.section in SECTION_LABELS
-                                    ? (link.section as CampaignSetupSurface)
-                                    : "pages";
-                              return (
-                                <button
-                                  key={campaignDraftId}
-                                  type="button"
-                                  className={
-                                    msg.assistantOnly
-                                      ? styles.inlineBriefLink
-                                      : styles.draftChip
-                                  }
-                                  onClick={() => openWorkspace(section)}
-                                >
-                                  {msg.assistantOnly ? (
-                                    <strong>
-                                      Open {SECTION_LABELS[section]} →
-                                    </strong>
-                                  ) : (
-                                    <>
-                                      <span>{link.summary ?? link.label}</span>
-                                      <strong>
-                                        Open {SECTION_LABELS[section]} →
-                                      </strong>
-                                    </>
-                                  )}
-                                </button>
-                              );
-                            }
-
-                            // Payment links open the in-chat checkout modal instead of navigating away.
-                            if (link.kind === "payment" && link.draftId) {
-                              return (
-                                <button
-                                  key={k}
-                                  className={styles.payChip}
-                                  disabled={isPending || isPreparingSend}
-                                  onClick={() =>
-                                    void handleOpenPayment(link.draftId!)
-                                  }
-                                >
-                                  {link.label} →
-                                </button>
-                              );
-                            }
-
-                            return (
-                              <Link
-                                key={k}
-                                to={withAiSource(link.path)}
-                                className={styles.linkChip}
-                              >
-                                {link.label} →
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ),
-              )}
+              <AiChatTranscript messages={messages} isPending={isPending} isPreparingSend={isPreparingSend} openWorkspace={openWorkspace} handleRetry={handleRetry} handleOpenPayment={handleOpenPayment} />
 
               {isPending && (
                 <div className={styles.thinking}>

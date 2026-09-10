@@ -25,7 +25,6 @@ interface Props {
 export const CampaignTablePageShare: React.FC<Props> = ({
                                                           campaign,
                                                           proposalsFlag,
-                                                          statusFlag,
                                                           flag,
                                                           view,
                                                         }) => {
@@ -84,7 +83,7 @@ export const CampaignTablePageShare: React.FC<Props> = ({
                             key={
                                 instightCard?.addedAccountsId ??
                                 instightCard?.socialAccountId ??
-                                instightCard?.accountId ??
+
                                 i
                             }
                             campaign={campaign}

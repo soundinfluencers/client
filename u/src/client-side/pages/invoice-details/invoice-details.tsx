@@ -9,7 +9,7 @@ interface Props {}
 
 export const InvoiceDetails: React.FC<Props> = () => {
   const [invoiceFlag, setInvoiceFlag] = React.useState(false);
-  const { data: InvoiceDetails, isLoading } = useInvoceDetailsQuery();
+  const { data: InvoiceDetails } = useInvoceDetailsQuery();
   console.log(InvoiceDetails, "InvoiceDetails");
   const invoiceData = {
     firstName: InvoiceDetails?.firstName || "No data",

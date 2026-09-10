@@ -1,7 +1,6 @@
 import React from "react";
 import { Dropdown } from "@/components/table-ui/dropdowns-table";
 import eye from "@/assets/icons/eye.svg";
-import check from "@/assets/icons/check.svg";
 import { Modal } from "@/components/ui/modal-fix/Modal";
 
 type Props = {

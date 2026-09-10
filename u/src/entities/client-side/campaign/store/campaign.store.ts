@@ -828,9 +828,7 @@ export const useCampaignStore = create<CampaignStore>((set, get) => ({
                     countries: Array.isArray(account.countries)
                         ? account.countries
                         : [],
-                    profileType: account.profileType
-                        ? toStringSafe(account.profileType)
-                        : undefined,
+                    profileType: toStringSafe(account.profileType),
 
                     selectedCampaignContentItem: incomingSelected ?? defaultSelected,
                     selectedContent: incomingSelected ?? defaultSelected,

@@ -4,7 +4,7 @@ import type { CampaignBackendStatus, SocialMedia } from "./enums.types";
 import type {
   CampaignAddedAccount,
   CampaignContentItem,
-} from "@/pages/client/types";
+} from "@/types/store/index.types";
 
 export interface CampaignResponse {
   campaignId: ObjectId;

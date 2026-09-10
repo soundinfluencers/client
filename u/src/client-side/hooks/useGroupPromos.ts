@@ -1,20 +1,19 @@
 import { useMemo } from "react";
-import type {ConnectedAccount} from "@/client-side/types/offers.ts";
 
-const MUSIC_NETWORKS = ["soundcloud", "spotify"] as const;
-const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"] as const;
+const MUSIC_NETWORKS = ["soundcloud", "spotify"] as readonly string[];
+const MAIN_NETWORKS = ["facebook", "instagram", "youtube", "tiktok"] as readonly string[];
 
-type GroupedPromos = {
-  musicPromos: ConnectedAccount[];
-  mainPromos: ConnectedAccount[];
-  otherPromos: ConnectedAccount[];
+type GroupedPromos<T> = {
+  musicPromos: T[];
+  mainPromos: T[];
+  otherPromos: T[];
 };
 
-export const useGroupPromos = (
-  promos: ConnectedAccount[],
-): GroupedPromos => {
+export const useGroupPromos = <T extends { socialMedia: string },>(
+  promos: T[],
+): GroupedPromos<T> => {
   return useMemo(() => {
-    const grouped: GroupedPromos = {
+    const grouped: GroupedPromos<T> = {
       musicPromos: [],
       mainPromos: [],
       otherPromos: [],
@@ -23,12 +22,12 @@ export const useGroupPromos = (
     promos.forEach((promo) => {
       const network = promo.socialMedia.toLowerCase();
 
-      if (MUSIC_NETWORKS.includes(network as any)) {
+      if (MUSIC_NETWORKS.includes(network)) {
         grouped.musicPromos.push(promo);
         return;
       }
 
-      if (MAIN_NETWORKS.includes(network as any)) {
+      if (MAIN_NETWORKS.includes(network)) {
         grouped.mainPromos.push(promo);
         return;
       }

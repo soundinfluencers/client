@@ -15,8 +15,6 @@ import spotifyIconPost from "@/assets/social-medias/spotify.1.svg";
 import soundcloudIconPost from "@/assets/social-medias/sound cloud1.svg";
 import pressPost from "@/assets/social-medias/press1.svg";
 
-
-
 import plattform_multi from "../assets/plattform-social_medias/plattform_multi.svg";
 import plattform_instagram from "../assets/plattform-social_medias/plattform_instagram.svg";
 import plattform_tiktok from "../assets/plattform-social_medias/plattform_tiktok.svg";
@@ -46,11 +44,9 @@ export const getSocialMediaIcon = (socialMedia: SocialMediaType) => {
     case "multipromo":
       return multipromoIcon;
     default:
-      return null;
+      return undefined;
   }
 };
-
-
 
 export const getSocialMediaIconPostContent = (socialMedia: SocialMediaType) => {
   switch (socialMedia) {
@@ -71,7 +67,7 @@ export const getSocialMediaIconPostContent = (socialMedia: SocialMediaType) => {
     case "multipromo":
       return multipromoIcon;
     default:
-      return null;
+      return undefined;
   }
 };
 export const getSocialMediaIconPlattform = (socialMedia: SocialMediaType) => {
@@ -94,6 +90,6 @@ export const getSocialMediaIconPlattform = (socialMedia: SocialMediaType) => {
       return plattform_press;
 
     default:
-      return null;
+      return undefined;
   }
 };

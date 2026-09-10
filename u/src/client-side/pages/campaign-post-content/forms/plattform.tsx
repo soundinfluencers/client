@@ -5,7 +5,10 @@ import x from "@/assets/icons/x.svg";
 import { getSocialMediaIconPostContent } from "@/constants/social-medias";
 import type { SocialMediaType } from "@/types/utils/constants.types";
 import type { PlatformFormConfig } from "@/client-side/pages/campaign-post-content/model/platform.types.ts";
-import { CampaignTextArea, CampaignTextInput } from "@components/form/input-post-content.tsx";
+import {
+  CampaignTextArea,
+  CampaignTextInput,
+} from "@components/form/input-post-content.tsx";
 import { useFormContext } from "react-hook-form";
 
 interface PlatformFormProps {
@@ -69,7 +72,7 @@ export function PlatformForm({
             )}
 
             <div className="inputs">
-                {data.inputs.map((input, index) => (
+                {data.inputs?.map((input, index) => (
                     <React.Fragment key={input.id}>
                         <CampaignTextInput
                             required={!!input.required}

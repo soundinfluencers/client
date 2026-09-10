@@ -1,10 +1,4 @@
-import React from "react";
-import {
-    Controller,
-    get,
-    useFormContext,
-    useFormState,
-} from "react-hook-form";
+import { Controller, get, useFormContext, useFormState } from "react-hook-form";
 import "./budget-input.scss";
 
 const CURRENCIES = ["£", "$", "€"] as const;

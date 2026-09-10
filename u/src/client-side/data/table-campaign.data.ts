@@ -1,4 +1,9 @@
-import type {ColumnWidths, DropdownKey, TableMode, TableVariant} from "../types/table-types";
+import type {
+  ColumnWidths,
+  DropdownKey,
+  TableMode,
+  TableVariant,
+} from "../types/table-types";
 import type { TableGroup } from "@/client-side/types/table-types";
 
 export const columns = [
@@ -77,8 +82,6 @@ export const getWidthColumn = (flag: boolean, isProposal: boolean) => {
                 tracktitle: 200,
             };
 };
-
-type ColumnKey = string;
 
 const baseTitles: Record<string, string> = {
     network: "Networks",

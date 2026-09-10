@@ -117,7 +117,6 @@ const buildFiltersRequestBody = ({
 };
 
 export const Filters: React.FC<Props> = ({ onToggle, isSmall }) => {
-  const contentRef = React.useRef<HTMLDivElement | null>(null);
   const [filter, setFilter] = React.useState<FilterData[]>([]);
   const [loading, setLoading] = React.useState(false);
   const didInitDefaults = React.useRef(false);

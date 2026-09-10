@@ -5,7 +5,7 @@ import type { CampaignAddedAccount } from "@/types/store/index.types";
 
 type Props = { data: CampaignAddedAccount };
 
-export const NetworkCell = React.memo(({ data }: { data: any }) => {
+export const NetworkCell = React.memo(({ data }: Props) => {
 
   const icon = React.useMemo(
     () => getSocialMediaIcon(data.socialMedia as SocialMediaType),
@@ -17,13 +17,10 @@ export const NetworkCell = React.memo(({ data }: { data: any }) => {
       <div className="username_row">
         <img src={icon} alt="" />
         <span
-          className="tooltip-wrap"
-          onMouseEnter={() => setShow(true)}
-          onMouseLeave={() => setShow(false)}>
+          className="tooltip-wrap">
           <p className="hidden-text username" title={data.username}>
             {data.username}
           </p>
-
 
         </span>
       </div>

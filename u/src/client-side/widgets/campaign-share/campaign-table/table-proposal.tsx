@@ -11,12 +11,7 @@ import plus from "@/assets/icons/plus-square.svg";
 
 import { Link } from "react-router-dom";
 import type { TableGroup } from "@/client-side/types/table-types";
-import {
-  getTableColumnWidths,
-  getTitle,
-  getWidthColumn,
-  titles,
-} from "@/client-side/data/table-campaign.data";
+import { getTableColumnWidths, getTitle } from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
 import { getAccountKey, getColumns } from "@/client-side/utils";
 import { TableCard } from "../card-table/table-card-proposal";
@@ -31,8 +26,6 @@ type Props = {
   optionIndex: number;
   title: string;
 };
-
-type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
 
 const makeRowKey = (n: CampaignAddedAccount, index: number) =>
   String((n as any).accountId ?? `${(n as any).influencerId}-${index}`);

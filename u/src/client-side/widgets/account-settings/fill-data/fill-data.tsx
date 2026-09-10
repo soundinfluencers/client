@@ -2,7 +2,6 @@ import React from "react";
 
 import "./_fill-data.scss";
 import { FillDataRow } from "./fill-data-row/fill-data-row";
-import { useLocalProfileStore } from "@/client-side/store/mock-photo/mock-photo";
 
 interface Props {
   data: Record<string, any>;

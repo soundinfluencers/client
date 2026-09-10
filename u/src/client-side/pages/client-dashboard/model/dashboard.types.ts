@@ -1,5 +1,8 @@
-import type { CampaignStatusType, CampaignForList } from "@/types/client/dashboard/campaign.types";
-
+export type { CampaignListViewMode } from "@/client-side/types/common";
+import type {
+  CampaignStatusType,
+  CampaignForList,
+} from "@/types/client/dashboard/campaign.types";
 
 export type CampaignFilterStatus = CampaignStatusType | "all";
 

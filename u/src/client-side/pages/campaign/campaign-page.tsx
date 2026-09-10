@@ -169,12 +169,6 @@ export const CampaignPage = () => {
 
   const isProposal = data?.status === "proposal";
 
-  const campaignWithVisibility = {
-    ...data,
-    isCpmAndResultHidden: visibility.isCpmAndResultHidden,
-    isPriceHidden: visibility.isPriceHidden,
-  };
-
   const headerAction = (() => {
     if (data.kind === "proposal") {
       if (data?.selectedOption?.canEdit) {

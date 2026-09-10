@@ -111,7 +111,7 @@ export type CampaignState = {
   promoCard: IPromoCard[];
   selectedAccounts: ICampaignAccount[];
   campaignName?: string;
-  promoCardUI: [];
+  promoCardUI: IPromoCard[];
   campaignContent: any[];
 
   campaignPayload: any | null;
@@ -186,7 +186,7 @@ export type ClosePromo = "close" | "open" | "wait" | string;
  */
 export type DateRequest = string;
 
-export type SocialMediaGroup = "main" | "music" | "press" | string;
+export type SocialMediaGroup = "main" | "music" | "press";
 
 // -------------------------
 // campaignContent (контент кампании)

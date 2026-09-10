@@ -14,7 +14,7 @@ export const Checkbox: React.FC<Props> = ({ name, isChecked, onChange }) => {
         <input
           type="checkbox"
           checked={isChecked}
-          onChange={(e) => onChange(e?.target?.checked || false)}
+          onChange={(e) => onChange?.(e?.target?.checked || false)}
         />
         <img className={isChecked ? "checked" : ""} src={check} alt="" />
       </div>

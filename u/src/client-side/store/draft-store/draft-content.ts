@@ -357,7 +357,7 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
 
           taggedUser: base?.taggedUser ?? "",
           taggedLink: base?.taggedLink ?? "",
-          additionalBrief: base?.additionalBrief ?? "",
+          additionalBrief: Array.isArray(base?.additionalBrief) ? base.additionalBrief : base?.additionalBrief ? [{ _id: oid(), additionalBrief: base.additionalBrief }] : [],
           descriptions: (base?.descriptions ?? []).map((d) => ({
             _id: oid(),
             description: d?.description ?? "",

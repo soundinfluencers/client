@@ -12,9 +12,41 @@ import {
   buildPressCampaignContent,
   parseFormsForDisplay,
 } from "@/client-side/utils";
-// import type { useSelectCampaignProposalProps } from "@/pages/client/campaign/store/types";
+import type { AnyItem } from "@/client-side/utils/prepare-campaign-content";
+type Group = "main" | "music" | "press";
+type ProposalSelectionState = {
+  promoCard: IPromoCard[];
+  selectedAccounts: ICampaignAccount[];
+  postContent: Record<Group, AnyItem[]>;
+  campaignPayload: null;
+  totalPrice: number;
+  campaignName: string;
+  campaignContent: AnyItem[];
+  postContentDraft: Record<string, string> | null;
+  actions: {
+    setPostContentDraft: (value: Record<string, string>) => void;
+    clearPostContentDraft: () => void;
+    clearPromoCards: () => void;
+    setPromoCards: (cards: IPromoCard | IPromoCard[]) => void;
+    setCampaignAccount: (account: ICampaignAccount) => void;
+    addPostContent: (
+      group: Group,
+      formData: Record<string, unknown>,
+      socialMedia: string,
+    ) => void;
+    buildCampaignContentFromForm: (
+      formData: Record<string, unknown>,
+      selectedPlatforms: string[],
+      grouped: Record<Group, string[]>,
+    ) => void;
+    getCampaignPayload: (paymentMethod: string) => Record<string, unknown>;
+    getDraftPayload: () => Record<string, unknown>;
+    getProposalPayload: () => Record<string, unknown>;
+    resetCampaign: () => void;
+  };
+};
 
-export const useSelectCampaignProposal = create<any>((set, get) => ({
+export const useSelectCampaignProposal = create<ProposalSelectionState>((set, get) => ({
   promoCard: [],
   selectedAccounts: [],
   postContent: {
@@ -93,28 +125,22 @@ export const useSelectCampaignProposal = create<any>((set, get) => ({
     },
 
     buildCampaignContentFromForm: (formData, selectedPlatforms, grouped) => {
-      const campaignContent: any[] = [];
+      const campaignContent: AnyItem[] = [];
 
       (["main", "music", "press"] as const).forEach((group) => {
         grouped[group]?.forEach((platform) => {
           if (!selectedPlatforms.includes(platform)) return;
 
           if (group === "main") {
-            campaignContent.push(
-              ...buildMainCampaignContent(formData, platform),
-            );
+            campaignContent.push(...buildMainCampaignContent(formData, platform));
           }
 
           if (group === "music") {
-            campaignContent.push(
-              ...buildMusicCampaignContent(formData, platform),
-            );
+            campaignContent.push(...buildMusicCampaignContent(formData, platform));
           }
 
           if (group === "press") {
-            campaignContent.push(
-              ...buildPressCampaignContent(formData, platform),
-            );
+            campaignContent.push(...buildPressCampaignContent(formData, platform));
           }
         });
       });
@@ -141,8 +167,7 @@ export const useSelectCampaignProposal = create<any>((set, get) => ({
         new Set(addedAccounts.map((x) => x.socialMedia).filter(Boolean)),
       );
 
-      const socialMedia =
-        socials.length > 1 ? "multipromo" : (socials[0] ?? "");
+      const socialMedia = socials.length > 1 ? "multipromo" : (socials[0] ?? "");
 
       return {
         socialMedia,
@@ -200,8 +225,7 @@ export const useSelectCampaignProposal = create<any>((set, get) => ({
       const socials = Array.from(
         new Set(addedAccounts.map((x) => x.socialMedia).filter(Boolean)),
       );
-      const socialMedia =
-        socials.length > 1 ? "multipromo" : (socials[0] ?? "instagram");
+      const socialMedia = socials.length > 1 ? "multipromo" : (socials[0] ?? "instagram");
 
       return {
         campaignName: "",

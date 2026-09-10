@@ -15,6 +15,7 @@ import type {
 export const useCampaignStore = create<CampaignState>((set, get) => ({
   offer: null,
   promoCard: [],
+  promoCardUI: [],
   selectedAccounts: [],
   postContent: {
     main: [],
@@ -29,6 +30,18 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
   postContentDraft: null,
 
   actions: {
+    setPromoCardsUI: (cards) =>
+      set(() => {
+        const promoCard = Array.isArray(cards) ? cards : [cards];
+        return { promoCardUI: promoCard };
+      }),
+    clearPostContentAll: () =>
+      set({
+        postContent: { main: [], music: [], press: [] },
+        campaignContent: [],
+        postContentDraft: null,
+        selectedAccounts: [],
+      }),
     setPostContentDraft: (v) => set({ postContentDraft: v }),
 
     clearPostContentDraft: () => set({ postContentDraft: null }),
@@ -44,6 +57,7 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
             offer: null,
             activeOfferId: null,
             promoCard: [],
+            promoCardUI: [],
             totalPrice: calcTotal(null, []),
           };
         }
@@ -52,6 +66,7 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
           offer,
           activeOfferId: incomingId || null,
           promoCard: [],
+          promoCardUI: [],
           totalPrice: calcTotal(offer, []),
         };
       }),
@@ -125,21 +140,15 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
           if (!selectedPlatforms.includes(platform)) return;
 
           if (group === "main") {
-            campaignContent.push(
-              ...buildMainCampaignContent(formData, platform),
-            );
+            campaignContent.push(...buildMainCampaignContent(formData, platform));
           }
 
           if (group === "music") {
-            campaignContent.push(
-              ...buildMusicCampaignContent(formData, platform),
-            );
+            campaignContent.push(...buildMusicCampaignContent(formData, platform));
           }
 
           if (group === "press") {
-            campaignContent.push(
-              ...buildPressCampaignContent(formData, platform),
-            );
+            campaignContent.push(...buildPressCampaignContent(formData, platform));
           }
         });
       });
@@ -166,8 +175,7 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
         new Set(addedAccounts.map((x) => x.socialMedia).filter(Boolean)),
       );
 
-      const socialMedia =
-        socials.length > 1 ? "multipromo" : (socials[0] ?? "");
+      const socialMedia = socials.length > 1 ? "multipromo" : (socials[0] ?? "");
 
       return {
         campaignName: state.campaignName ?? "",
@@ -227,8 +235,7 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
       const socials = Array.from(
         new Set(addedAccounts.map((x) => x.socialMedia).filter(Boolean)),
       );
-      const socialMedia =
-        socials.length > 1 ? "multipromo" : (socials[0] ?? "instagram");
+      const socialMedia = socials.length > 1 ? "multipromo" : (socials[0] ?? "instagram");
 
       return {
         campaignName: state.campaignName ?? "",
@@ -244,6 +251,7 @@ export const useCampaignStore = create<CampaignState>((set, get) => ({
       set({
         offer: null,
         promoCard: [],
+        promoCardUI: [],
         postContent: { main: [], music: [], press: [] },
         campaignPayload: null,
         totalPrice: 0,

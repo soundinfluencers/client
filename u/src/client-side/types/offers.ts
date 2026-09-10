@@ -19,8 +19,8 @@ export type ConnectedAccount = {
     musicGenres: string[];
     creatorCategories: string[];
     categories: string[];
-    engagementRate: number;
-    averageViews: number;
+    engagementRate?: number;
+    averageViews?: number;
 };
 
 export type Offer = {

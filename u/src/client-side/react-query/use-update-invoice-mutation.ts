@@ -1,5 +1,4 @@
 import { updateInvoceDetails } from "@/api/client/invoice/invoice.api";
-import { updateProfile } from "@/api/client/profile/profile.api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useUpdateInvoiceMutation = () => {

@@ -1,3 +1,4 @@
+import type { CampaignListViewMode } from "@/client-side/types/common";
 import React from "react";
 import "./_build-compaign.scss";
 
@@ -11,7 +12,7 @@ import type { IPromoCard } from "@/types/client/creator-campaign/creator-campaig
 
 import { getSocialMediaIcon } from "@/constants/social-medias";
 import type { SocialMediaType } from "@/types/utils/constants.types";
-import { ButtonMain, Container } from "@/components";
+import { Container } from "@/components";
 import { useSearchParams } from "react-router-dom";
 
 import { Search, SelectBudget, SwitchView } from "@/client-side/ui";
@@ -28,8 +29,7 @@ import {
   useFilter,
 } from "@/client-side/store";
 import { usePromoCardsAndSearch } from "@/client-side/hooks";
-import { useClickOutside } from "@/shared/lib/hooks/useClickOutside";
-import type {ConnectedAccount} from "@/client-side/types/offers.ts";
+import type { ConnectedAccount } from "@/client-side/types/offers.ts";
 
 export const AddInfluencerBuildCampaign: React.FC = () => {
   const [sp] = useSearchParams();
@@ -42,7 +42,7 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
   const [limit, setLimit] = React.useState(24);
   const { selected, removeItem } = useFilter();
   const [filterFlag, setFilterFlag] = React.useState(true);
-  const [view, setView] = React.useState<number>(1);
+  const [view, setView] = React.useState<CampaignListViewMode>("table");
   const [isSmall, setIsSmall] = React.useState(false);
   const loadMoreRef = React.useRef<HTMLDivElement | null>(null);
   const [isLoadingMore, setIsLoadingMore] = React.useState(false);
@@ -78,7 +78,6 @@ export const AddInfluencerBuildCampaign: React.FC = () => {
     limit,
   });
 
-  const promoPending = useCreateCampaign((s) => s.pending.promoCards);
   const setPending = useCreateCampaign((s) => s.setPending);
   const setPromoCards = useCreateCampaign((s) => s.setPromoCards);
   const canLoadMore =

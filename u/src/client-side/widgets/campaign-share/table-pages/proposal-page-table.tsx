@@ -1,3 +1,7 @@
+import type {
+  CampaignContentItem,
+  CampaignAddedAccount,
+} from "@/types/store/index.types";
 import React from "react";
 import "@/client-side/styles-table/_table-campaign.scss";
 
@@ -11,17 +15,14 @@ import { Modal } from "@/components/ui/modal-fix/Modal";
 import { postCampaignRequest } from "@/api/client/campaign/campaign.api";
 import { toast } from "react-toastify";
 
-import {
-    useProposalCampaignStore,
-    useUpdateCampaign,
-} from "@/client-side/store";
+import { useProposalCampaignStore, useUpdateCampaign } from "@/client-side/store";
 
 import { useNavigate } from "react-router-dom";
 import { useGroupPromos } from "@/client-side/hooks";
 
 import {
-    buildLiveViewGroups,
-    getNetworksForContentItem,
+  buildLiveViewGroups,
+  getNetworksForContentItem,
 } from "../model/live-view-content.helpers";
 
 interface Props {
@@ -54,12 +55,12 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
 
     const isApproved = Boolean(approvedOptions[optionIndex]);
 
-    const accounts = React.useMemo(
+    const accounts = React.useMemo<CampaignAddedAccount[]>(
         () => campaign?.selectedOption?.addedAccounts ?? [],
         [campaign?.selectedOption?.addedAccounts],
     );
 
-    const content = React.useMemo(
+    const content = React.useMemo<CampaignContentItem[]>(
         () => campaign?.selectedOption?.campaignContent ?? [],
         [campaign?.selectedOption?.campaignContent],
     );

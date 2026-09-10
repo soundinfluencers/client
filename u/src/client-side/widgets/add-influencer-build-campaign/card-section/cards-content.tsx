@@ -6,9 +6,8 @@ import { TableRowCard } from "./components/table-row-card";
 import { Card } from "./components/card-grid";
 import { TableCardSkeleton } from "@/components/ui/skeletons/table-card-skeleton";
 import { CardSkeleton } from "@/components/ui/skeletons/card-skeleton";
-import { useCampaignStore } from "@/client-side/store";
-import type {ConnectedAccount} from "@/client-side/types/offers.ts";
-import type {CampaignListViewMode} from "@/client-side/types/common.ts";
+import type { ConnectedAccount } from "@/client-side/types/offers.ts";
+import type { CampaignListViewMode } from "@/client-side/types/common.ts";
 
 interface Props {
   view: CampaignListViewMode;

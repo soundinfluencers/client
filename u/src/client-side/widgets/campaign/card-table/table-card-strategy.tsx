@@ -289,7 +289,7 @@ export const TableCard = React.memo(function TableCard({
                             changeView={changeView}
                             contentId={contentId}
                             baseItem={selectedItem}
-                            account={strategyAccount ?? data}
+
                             group={group}
                         />
                     ) : (
@@ -298,7 +298,6 @@ export const TableCard = React.memo(function TableCard({
                             group={group}
                             platformItems={platformItems}
                             selectedContent={safeSelectedContent}
-                            account={strategyAccount ?? data}
                         />
                     )}
 
@@ -364,7 +363,6 @@ export const TableCard = React.memo(function TableCard({
                             changeView={changeView}
                             contentId={contentId}
                             baseItem={selectedItem}
-                            account={strategyAccount ?? data}
                             group={group}
                         />
                     ) : null}
@@ -435,7 +433,6 @@ export const TableCard = React.memo(function TableCard({
                             onClose={onCloseDropdown}
                             platformItems={platformItems}
                             selectedContent={safeSelectedContent}
-                            account={strategyAccount ?? data}
                             selectedPd={safeSelectedPd}
                             setSelectedPd={setSelectedPd}
                             group={group}
@@ -459,7 +456,6 @@ export const TableCard = React.memo(function TableCard({
                         <ExtraFieldsCellsEdit
                             contentId={contentId}
                             baseItem={selectedItem}
-                            account={strategyAccount ?? data}
                             group={group}
                         />
                     ) : (
@@ -467,7 +463,6 @@ export const TableCard = React.memo(function TableCard({
                             group={group}
                             platformItems={platformItems}
                             selectedContent={safeSelectedContent}
-                            account={strategyAccount ?? data}
                         />
                     )}
                 </>

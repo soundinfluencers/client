@@ -12,6 +12,20 @@ export type TypeCommonRoutes = {
 };
 
 export type TypeClientRoutes = {
+  Content: undefined;
+  Strategy: undefined;
+  Payment: undefined;
+  PaymentDraft: undefined;
+  BespokeCampaign: undefined;
+  AccountSetting: undefined;
+  Campaign: undefined;
+  CampaignAddInfluencer: undefined;
+  AddInfluencerPostContent: undefined;
+  PromoShare: undefined;
+  AiChat: undefined;
+  InvoiceHistory: undefined;
+  InvoiceDetails: undefined;
+  ContactSupport: undefined;
   SignupClient: undefined;
 };
 

@@ -1,14 +1,17 @@
 import React from "react";
-import { useAccountSetupStore } from '../account-setup-form/store/useAccountSetupStore';
-import { AccountsList } from './accounts-list/AccountsList';
-import { SOCIAL_ACCOUNTS_DATA } from './data/social-account.data';
-import type { TSocialAccounts, TSocialAccountShort } from '@/types/user/influencer.types.ts';
+import { useAccountSetupStore } from "../account-setup-form/store/useAccountSetupStore";
+import { AccountsList } from "./accounts-list/AccountsList";
+import { SOCIAL_ACCOUNTS_DATA } from "./data/social-account.data";
+import type {
+  TSocialAccounts,
+  TSocialAccountShort,
+} from "@/types/user/influencer.types.ts";
 
-import plus from '@/assets/icons/plus.svg';
-import './_social-accounts-list.scss';
+import plus from "@/assets/icons/plus.svg";
+import "./_social-accounts-list.scss";
 
 interface Props {
-  getAccounts: (platform: TSocialAccounts) => TSocialAccountShort[];
+  getAccounts: (platform: TSocialAccounts) => SocialAccountListItem[];
 }
 
 export const SocialAccountsList: React.FC<Props> = ({ getAccounts }) => {
@@ -42,3 +45,5 @@ export const SocialAccountsList: React.FC<Props> = ({ getAccounts }) => {
     </ul>
   );
 };
+
+type SocialAccountListItem = Omit<TSocialAccountShort, "labelStatus"> & { labelStatus?: TSocialAccountShort["labelStatus"] };

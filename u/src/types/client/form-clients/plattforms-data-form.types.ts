@@ -1,10 +1,3 @@
-type PlatformName =
-  | "spotify"
-  | "soundcloud"
-  | "press"
-  | "youtube"
-  | "tiktok"
-  | "instagram";
 
 type FormField = {
   id: string;

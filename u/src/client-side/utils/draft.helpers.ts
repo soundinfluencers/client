@@ -1,4 +1,7 @@
-import {CampaignDraftLatestStep, type SaveDraftParams} from "@/client-side/types/draft.types";
+import {
+  CampaignDraftLatestStep,
+  type SaveDraftParams,
+} from "@/client-side/types/draft.types";
 export const uid = (): string => {
     return Array.from(crypto.getRandomValues(new Uint8Array(12)))
         .map((b) => b.toString(16).padStart(2, "0"))
@@ -51,19 +54,6 @@ export const mapDraftAddedAccounts = (
         ).toLowerCase();
 
         const username = String(item?.username ?? "");
-
-        const incomingSelected =
-            item?.selectedCampaignContentItem ??
-            item?.selectedContent ??
-            null;
-
-        const incomingCampaignContentItemId = String(
-            incomingSelected?.campaignContentItemId ?? "",
-        );
-
-        const incomingDescriptionId = String(
-            incomingSelected?.descriptionId ?? "",
-        );
 
         const existing = map.get(socialAccountId);
 
@@ -129,8 +119,6 @@ export const hasDraftSelection = (state: any) => {
         state.promoCardUI?.length,
     );
 };
-
-
 
 export const saveCampaignDraftByStep = async ({
                                                   step,

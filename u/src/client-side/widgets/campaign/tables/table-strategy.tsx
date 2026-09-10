@@ -9,11 +9,7 @@ import type {
 } from "@/types/store/index.types";
 
 import { TableCard } from "../card-table/table-card-strategy";
-import {
-  getTableColumnWidths,
-  getTitle,
-  getWidthColumn,
-} from "@/client-side/data/table-campaign.data";
+import { getTableColumnWidths, getTitle } from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
 import type { TableGroup } from "@/client-side/types/table-types";
 import { getColumns } from "@/client-side/utils";
@@ -32,7 +28,6 @@ type Props = {
   status: string
   campaign: any;
 };
-type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
 const makeRowKey = (n: CampaignAddedAccount, index: number) =>
   String((n as any).accountId ?? `${(n as any).influencerId}-${index}`);
 

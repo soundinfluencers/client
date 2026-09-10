@@ -1,17 +1,16 @@
 import React from "react";
 import {
-    useBuildCampaignFilters,
-    useCreateCampaign,
-    useFilter,
+  useBuildCampaignFilters,
+  useCreateCampaign,
+  useFilter,
 } from "@/client-side/store";
 import { usePromoCardsAndSearch } from "@/client-side/hooks";
 import {
-    DEFAULT_BUILD_CAMPAIGN_VIEW,
-    DEFAULT_PROMO_CARDS_LIMIT
+  DEFAULT_BUILD_CAMPAIGN_VIEW,
+  DEFAULT_PROMO_CARDS_LIMIT,
 } from "@/client-side/pages/campaign-creator-page/model/campaign-creator.constants.ts";
-import type {CampaignListViewMode} from "@/client-side/types/common.ts";
-import type {ConnectedAccount} from "@/client-side/types/offers.ts";
-
+import type { CampaignListViewMode } from "@/client-side/types/common.ts";
+import type { ConnectedAccount } from "@/client-side/types/offers.ts";
 
 export const useBuildCampaignView = () => {
     const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -55,7 +54,7 @@ export const useBuildCampaignView = () => {
         searchRefetch,
     } = usePromoCardsAndSearch({
         selected,
-        budget: String(selectedBudget),
+        budget: selectedBudget,
         currency: selectedCurrency.currency,
         sortBy: selectedFilter.key,
         query: search,

@@ -1,18 +1,18 @@
-import './_form-fields.scss';
+import "./_form-fields.scss";
 
-import { Controller, useFormContext } from 'react-hook-form';
-import { BaseInput } from '@/components';
-import { ImageUpload } from '@/components';
-import { StarRatingField } from '@/components';
+import { Controller, useFormContext } from "react-hook-form";
+import { BaseInput } from "@/components";
+import { ImageUpload } from "@/components";
+import { StarRatingField } from "@/components";
 
 // import type { TCampaignResultInput } from '../../../types/influencer/form/campaign-result/campaign-result.types';
 // import type { TInvoiceInputConfig } from '../../../pages/influencer/create-invoice/components/invoice-form-content/types/invoice-form-inputs.types';
 // import {Fragment} from 'react/jsx-runtime';
-import { InfluencerDateInput } from '../../ui/influencer-date-input/InfluencerDateInput';
+import { InfluencerDateInput } from "../../ui/influencer-date-input/InfluencerDateInput";
 import { CountryField } from "@/pages/influencer/shared/components/CountryField.tsx";
 
 interface Props {
-  inputs: any;
+  inputs: Array<{ name: string; type: string; label: string; placeholder?: string; description?: string; size?: "small" | "large"; maxRating?: number }>;
 }
 
 export const FormFields = ({ inputs }: Props) => {
@@ -32,7 +32,7 @@ export const FormFields = ({ inputs }: Props) => {
                 key={input.name}
                 name={input.name}
                 label={input.label}
-                placeholder={input.placeholder}
+                placeholder={input.placeholder ?? ""}
                 type={input.type}
               />
 
@@ -43,9 +43,9 @@ export const FormFields = ({ inputs }: Props) => {
                 key={input.name}
                 name={input.name}
                 label={input.label}
-                placeholder={input.placeholder}
+                placeholder={input.placeholder ?? ""}
                 description={input.description}
-                size={input.size}
+                size={input.size ?? "small"}
                 // value={field.value}
                 // onChange={field.onChange}
                 // error={fieldState.error}
@@ -74,7 +74,7 @@ export const FormFields = ({ inputs }: Props) => {
                 key={input.name}
                 name={input.name}
                 label={input.label}
-                placeholder={input.placeholder}
+                placeholder={input.placeholder ?? ""}
               />
             );
           case 'country':
@@ -83,7 +83,7 @@ export const FormFields = ({ inputs }: Props) => {
                 key={input.name}
                 name={input.name}
                 label={input.label}
-                placeholder={input.placeholder}
+                placeholder={input.placeholder ?? ""}
               />
             );
           default:
@@ -98,7 +98,7 @@ export const FormFields = ({ inputs }: Props) => {
 //   <BaseInput
 //     name={input.name}
 //     label={input.label}
-//     placeholder={input.placeholder}
+//     placeholder={input.placeholder ?? ""}
 //     type={input.type}
 //   />
 //
@@ -119,9 +119,9 @@ export const FormFields = ({ inputs }: Props) => {
 //         <ImageUpload
 //           name={input.name}
 //           label={input.label}
-//           placeholder={input.placeholder}
+//           placeholder={input.placeholder ?? ""}
 //           description={input.description}
-//           size={input.size}
+//           size={input.size ?? "small"}
 //           // value={field.value}
 //           // onChange={field.onChange}
 //           // error={fieldState.error}

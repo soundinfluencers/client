@@ -3,10 +3,10 @@ import type {
   CampaignContentDescription,
   CampaignContentItem,
 } from "@/types/store/index.types";
-import type { NetworkRowResolved } from "@/pages/client/campaign/components/tables/types";
+type ContentSelection = { selectedContent?: { campaignContentItemId?: string; descriptionId?: string } };
 
-export function useResolvedNetworks(
-  networksState: any[],
+export function useResolvedNetworks<T extends ContentSelection>(
+  networksState: T[],
   items: CampaignContentItem[],
   extraDescriptionsByContentId: Record<string, CampaignContentDescription[]>,
 ) {
@@ -20,7 +20,7 @@ export function useResolvedNetworks(
     const map = new Map<string, CampaignContentDescription>();
 
     items.forEach((it) => {
-      (it as any).descriptions?.forEach((d: CampaignContentDescription) => {
+      it.descriptions?.forEach((d: CampaignContentDescription) => {
         map.set(d._id, d);
       });
     });
@@ -32,10 +32,10 @@ export function useResolvedNetworks(
     return map;
   }, [items, extraDescriptionsByContentId]);
 
-  const resolvedNetworks: NetworkRowResolved[] = React.useMemo(() => {
+  const resolvedNetworks = React.useMemo(() => {
     return networksState.map((n) => {
-      const contentId = (n as any).selectedContent?.campaignContentItemId;
-      const descId = (n as any).selectedContent?.descriptionId;
+      const contentId = n.selectedContent?.campaignContentItemId;
+      const descId = n.selectedContent?.descriptionId;
 
       return {
         ...n,

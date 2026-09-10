@@ -1,10 +1,8 @@
 import React from "react";
 
-import type {
-    CampaignFilterStatus,
-} from "../model/dashboard.types";
-import type {CampaignListViewMode} from "@/client-side/types/common.ts";
-import {useGetCampaignsInfiniteQuery} from "@/client-side/react-query";
+import type { CampaignFilterStatus } from "../model/dashboard.types";
+import type { CampaignListViewMode } from "@/client-side/types/common.ts";
+import { useGetCampaignsInfiniteQuery } from "@/client-side/react-query";
 
 export const useDashboardCampaigns = () => {
     const [view, setView] = React.useState<CampaignListViewMode>("grid");
@@ -14,7 +12,7 @@ export const useDashboardCampaigns = () => {
     const query = useGetCampaignsInfiniteQuery({ status: filterStatus });
     console.log("query", query);
     const campaigns = React.useMemo(() => {
-        return query.data?.pages.flat() ?? [];
+        return query.data ?? [];
     }, [query.data]);
 
     const changeStatus = React.useCallback((next: CampaignFilterStatus) => {

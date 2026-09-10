@@ -1,14 +1,13 @@
+import type { CampaignContentItem } from "@/types/store/index.types";
 import React from "react";
 import "@/client-side/styles-table/_table-campaign.scss";
 
-import { LiveViewCardInsight } from "../live-view-card/live-view-card-insight";
 import { LiveViewCard } from "../live-view-card/live-view";
 
 // import type { CampaignPageModel } from "@/pages/client/types";
 import { useProposalAccountsStore } from "@/client-side/store";
 import { useGroupPromos } from "@/client-side/hooks";
 import { TableProposal } from "../tables/table-proposal";
-import { Bar } from "@/client-side/ui";
 import { calcGroupPrices } from "@/client-side/utils";
 
 // type ProposelModal = Extract<CampaignPageModel, { kind: "proposal" }>;
@@ -32,7 +31,7 @@ export const ProposalCampaignPage: React.FC<Props> = ({
   const initOption = useProposalAccountsStore((s) => s.initOption);
 
   const storeContent = useProposalAccountsStore(
-    (s) => (s as any).contentByOption?.[optionIndex],
+    (s) => s.contentByOption?.[optionIndex],
   );
   const accounts = useProposalAccountsStore(
     (s) => s.accountsByOption[optionIndex] ?? [],
@@ -55,7 +54,7 @@ export const ProposalCampaignPage: React.FC<Props> = ({
   ]);
 
   const { mainPromos, musicPromos, otherPromos } = useGroupPromos(accounts);
-  const content =
+  const content: CampaignContentItem[] =
     storeContent && storeContent.length
       ? storeContent
       : campaign.selectedOption.campaignContent;

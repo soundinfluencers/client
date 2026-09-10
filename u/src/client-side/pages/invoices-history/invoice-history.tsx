@@ -4,9 +4,7 @@ import { Breadcrumbs, Container, Loader } from "../../../components";
 
 import { ButtonMain } from "@/components/ui/buttons-fix/ButtonFix";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getInfluencerInvoices } from "@/api/influencer/invoice/invoices.api";
 import { InvoicesTable } from "@/client-side/widgets";
-import React from "react";
 import { getInvoiceHistory } from "@/api/client/invoice/invoice.api";
 
 const LIMIT = 11;

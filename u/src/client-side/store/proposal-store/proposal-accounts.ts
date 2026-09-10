@@ -1,11 +1,12 @@
+import type { ConnectedAccount } from "@/client-side/types/offers";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { CampaignAddedAccount } from "@/types/store/index.types";
 import { getGroupBySocial } from "@/client-side/widgets/add-influencer-build-campaign/add-to-proposal/bc-prooced";
 import { ObjectId } from "bson";
-import {useUpdateCampaign} from "@/client-side/store";
+import { useUpdateCampaign } from "@/client-side/store";
 
-export const getAccountKey = (n: CampaignAddedAccount) =>
+export const getAccountKey = (n: { addedAccountsId?: string; accountId?: string; socialAccountId?: string; _id?: string }) =>
     String(
         (n as any).addedAccountsId ??
         (n as any).accountId ??
@@ -58,7 +59,7 @@ type ProposalAccountsStore = {
     contentId: string;
     firstDescriptionId: string;
   };
-  addAccounts: (optionIndex: number, accounts: CampaignAddedAccount[]) => void;
+  addAccounts: (optionIndex: number, accounts: (CampaignAddedAccount | ConnectedAccount)[]) => void;
   removeContentItem: (optionIndex: number, contentId: string) => void;
   mergeContent: (optionIndex: number, contentToAdd: any[]) => void;
   setAccountDateRequest: (
@@ -170,7 +171,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
                 ? {
                   ...account,
                   selectedContent: selected,
-                  selectedCampaignContentItem: selected,
+                  selectedCampaignContentItem: undefined,
                 }
                 : account,
         );
@@ -368,7 +369,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     //     const prev = state.accountsByOption[optionIndex] ?? [];
     //     const prevKeys = new Set(prev.map(getAccountKey));
 
-    //     const content = state.contentByOption[optionIndex] ?? [];
+    //     const content: CampaignContentItem[] = state.contentByOption[optionIndex] ?? [];
     //     const mainItem = content.find((c) => c.socialMediaGroup === "main");
 
     //     const next = (accounts ?? [])
@@ -452,7 +453,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         const prev = state.accountsByOption[optionIndex] ?? [];
         const prevKeys = new Set(prev.map(getAccountKey));
 
-        const content = state.contentByOption[optionIndex] ?? [];
+        const content: CampaignContentItem[] = state.contentByOption[optionIndex] ?? [];
 
         const addedRaw = (accounts ?? []).filter((account) => {
           const key = getAccountKey(account);

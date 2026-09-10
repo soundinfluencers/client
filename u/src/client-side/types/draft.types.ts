@@ -1,8 +1,9 @@
-export enum CampaignDraftLatestStep {
-    addAccounts = "addAccounts",
-    addContent = "addContent",
-    strategyTable = "strategyTable",
-}
+export const CampaignDraftLatestStep = {
+    addAccounts : "addAccounts",
+    addContent : "addContent",
+    strategyTable : "strategyTable",
+} as const;
+export type CampaignDraftLatestStep = typeof CampaignDraftLatestStep[keyof typeof CampaignDraftLatestStep];
 export type SaveDraftParams = {
     step: CampaignDraftLatestStep;
     state: any;

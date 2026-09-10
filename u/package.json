@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --pretty false",
+    "test:ai": "node --experimental-strip-types --test tests/ai-chat-reliability.test.mjs tests/agent-response-validation.test.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

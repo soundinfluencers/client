@@ -4,7 +4,7 @@ import { TableSpacerRow } from "../table-spacer-row/table-spacer-row";
 import "./_invoices-table.scss";
 
 interface Props {
-  invoices: any;
+  invoices: { shortInvoiceId: string }[];
 }
 
 export const InvoicesTable: React.FC<Props> = ({ invoices }) => {
@@ -34,7 +34,7 @@ export const InvoicesTable: React.FC<Props> = ({ invoices }) => {
           {invoices.map((item) => (
             <TableRow key={item.shortInvoiceId} item={item} />
           ))}
-          <TableRow key={1} item={[]} />
+
           <TableSpacerRow colSpan={5} />
         </tbody>
 

@@ -10,7 +10,6 @@ import { TermsPage } from "../pages/auth/terms/TermsPage.tsx";
 import {
   AccountSetting,
   AddInfluencerBuildCampaign,
-
   CampaignPage,
   CampaignSharePage,
   InvoiceDetails,
@@ -20,13 +19,12 @@ import {
 } from "@/client-side/index.ts";
 import { ContactSupport } from "@/pages/influencer/contact-support/ContactSupport.tsx";
 import { AgencyCampaignPage } from "@/pages/client-side/agency-campaign/index.ts";
-import {CampaignCreatorPage} from "@/pages/client-side/campaign-creator-page";
-import {CampaignPostContentRoute} from "@/pages/client-side/campaign-post-content/ui/campaign-post-content-route.tsx";
-import {CampaignStrategyPage} from "@/pages/client-side/campaign-strategy-page/ui/campaign-strategy-page.tsx";
-import {DashboardPage} from "@/pages/client-side/dashboard";
-import {Campaign} from "@/pages/client-side/campaign";
-import {AiChat} from "@/widgets/ai-chat";
-import {AiCampaignDraftPage} from "@/pages/client-side/ai-campaign-draft";
+import { CampaignCreatorPage } from "@/pages/client-side/campaign-creator-page";
+import { CampaignPostContentRoute } from "@/pages/client-side/campaign-post-content/ui/campaign-post-content-route.tsx";
+import { CampaignStrategyPage } from "@/pages/client-side/campaign-strategy-page/ui/campaign-strategy-page.tsx";
+import { DashboardPage } from "@/pages/client-side/dashboard";
+import { AiChat } from "@/widgets/ai-chat";
+import { AiCampaignDraftPage } from "@/pages/client-side/ai-campaign-draft";
 // import { CampaignAddInfluencer } from "@/pages/client/campaign-add-infuencer/campaign-add-infuencer.tsx";
 
 export const routes: IRoute[] = [

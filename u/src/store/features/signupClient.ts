@@ -1,7 +1,15 @@
 import { create } from "zustand";
-import type { IUser, ClientCompanyType } from "../../types/user/user.types.ts";
+import type { ClientCompanyType } from "../../types/user/user.types.ts";
 
-interface SignupClientState extends IUser {
+interface SignupClientState {
+  firstName: string;
+  lastName: string;
+  company: string;
+  companyType: ClientCompanyType | undefined;
+  instagramLink: string;
+  email: string;
+  referralCode: string;
+  phone: string;
   page: number;
   password: string;
   errors: {
@@ -26,7 +34,7 @@ export const useSignupClientStore = create<SignupClientState>((set) => ({
   firstName: "",
   lastName: "",
   company: "",
-  companyType: undefined as unknown as ClientCompanyType,
+  companyType: undefined,
   instagramLink: "",
   email: "",
   referralCode: "",
