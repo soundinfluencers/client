@@ -9,6 +9,10 @@ import { getMe, logoutApi } from "../api/auth/auth.api.ts";
 import { refreshAccessToken } from "@/api/refresh.manager.ts";
 import { queryClient } from "@/app/queryClient.ts";
 import { useUser } from "@/store/get-user";
+import {
+  clearAiChatPersistence,
+  identityFromAccessToken,
+} from "@/widgets/ai-chat/model/ai-chat-persistence.ts";
 
 
 interface AuthContextType {
@@ -42,22 +46,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   //     tokenStorage.set(token);
   // };
 
-  useEffect(() => {
-    console.log(accessToken, 'accessToken')
-  }, [accessToken]);
-
   const logout = useCallback(async () => {
     try {
       await logoutApi();
     } catch (err) {
       console.error("Logout failed", err);
     } finally {
+      clearAiChatPersistence(
+        sessionStorage,
+        identityFromAccessToken(accessToken),
+      );
       setAccessToken(null);
       setUser(null);
       queryClient.clear();
       // window.location.href = "/auth";
     }
-  }, [setAccessToken, setUser]);
+  }, [accessToken, setAccessToken, setUser]);
 
   useEffect(() => {
     const bootstrapAuth = async () => {

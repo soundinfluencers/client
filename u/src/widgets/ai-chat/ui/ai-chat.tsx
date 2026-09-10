@@ -20,6 +20,7 @@ import {
   type AgentSearchOutcome,
 } from "@/api/agent/agent.api.ts";
 import { useUser } from "@/store/get-user";
+import { useAuth } from "@/contexts/AuthContext.tsx";
 import type {
   CampaignSetupAction,
   CampaignSetupSurface,
@@ -42,6 +43,18 @@ import {
 } from "@/entities/client-side/promo-creative/model/promo-image-validation.ts";
 import { fitPromoImage } from "@/entities/client-side/promo-creative/model/promo-image-fit.ts";
 import imageIcon from "@/assets/icons/image.svg";
+import {
+  identityFromAccessToken,
+  isAiChatPersistedState,
+  readAiChatState,
+  readAiWorkspaceSurface,
+  removeAiChatState,
+  writeAiChatState,
+  writeAiWorkspaceSurface,
+  type AiChatIdentity,
+  type AiChatRole,
+} from "../model/ai-chat-persistence.ts";
+import { resolveSearchDraftId } from "../model/recommendation-bundles.ts";
 
 // A turn the workspace starts on the client's behalf: the brief is complete, more pages are
 // wanted, or the pages changed while the panel was open.
@@ -68,19 +81,11 @@ interface Message {
   userImage?: { url: string; name: string };
 }
 
-// The chat lives in component state, so navigating to a link chip and back would wipe it.
-// Persist per tab so returning to /ai-chat restores the same conversation.
-const STORAGE_KEY = "ai-chat:v3";
-// Which working surface is open over the conversation, if any.
-const WORKSPACE_SURFACE_KEY = "ai-chat:workspace-surface";
-
-const chatStorageKey = (role: string) => `${STORAGE_KEY}:${role}`;
-const workspaceStorageKey = (role: string) =>
-  `${WORKSPACE_SURFACE_KEY}:${role}`;
-
-const readStoredSurface = (role: string): CampaignSetupSurface | null => {
-  if (role !== "client") return null;
-  const stored = sessionStorage.getItem(workspaceStorageKey(role));
+const readStoredSurface = (
+  identity: AiChatIdentity | null,
+): CampaignSetupSurface | null => {
+  if (identity?.role !== "client") return null;
+  const stored = readAiWorkspaceSurface(sessionStorage, identity);
   if (stored === "strategy") return "brief";
   return stored === "brief" ||
     stored === "pages" ||
@@ -106,11 +111,15 @@ type PersistedChat = {
   recommendationsByDraft?: Record<string, AgentSearchOutcome>;
 };
 
+const isPersistedChat = (value: unknown): value is Partial<PersistedChat> => {
+  return isAiChatPersistedState(value);
+};
+
 const GUIDED_CAMPAIGN_WELCOME =
   "<p><strong>Let’s create your campaign.</strong></p>" +
-  "<p>We’ll complete a short campaign Brief first, then use it to find the right pages. Additional details can stay open and everything can be changed later.</p>" +
-  "<p>What should this campaign achieve? We’ll also confirm an approximate budget, genre, platforms, audience countries and timing.</p>" +
-  "<p>After you choose pages, I can help prepare one shared post or tailor the content for each page.</p>";
+  "<p>Send the essentials in one message:</p>" +
+  "<ul><li>campaign goal</li><li>approximate budget and currency</li><li>music genre(s)</li><li>platform(s)</li><li>target countries or Worldwide</li><li>timing or Flexible</li></ul>" +
+  "<p>Then I’ll recommend pages, explain the budget fit and tell you the next action. Content and First Slide can be added later.</p>";
 
 const restoreMessage = (message: Message, index: number): Message => {
   // Migrate the old one-line campaign receipt into the conversational welcome so
@@ -140,11 +149,17 @@ const restoreMessage = (message: Message, index: number): Message => {
   };
 };
 
-const loadPersistedChat = (role: string): PersistedChat => {
-  try {
-    const raw = sessionStorage.getItem(chatStorageKey(role));
-    if (raw) {
-      const saved = JSON.parse(raw) as Partial<PersistedChat>;
+const loadPersistedChat = (
+  identity: AiChatIdentity | null,
+): PersistedChat => {
+  const role = identity?.role;
+  if (identity) {
+    const saved = readAiChatState<Partial<PersistedChat>>(
+      sessionStorage,
+      identity,
+      isPersistedChat,
+    );
+    if (saved) {
       if (saved.role && saved.role !== role) return { messages: [], role };
       return {
         conversationId: saved.conversationId,
@@ -159,8 +174,6 @@ const loadPersistedChat = (role: string): PersistedChat => {
           : [],
       };
     }
-  } catch {
-    /* private mode / corrupt value — start fresh */
   }
   return { messages: [] };
 };
@@ -254,15 +267,17 @@ const mergeSearchOutcome = (
 
 // The same chat shell serves both roles, while storage, examples and server-side
 // capabilities remain role-specific.
-export const AiChat = () => {
+interface AiChatSessionProps {
+  identity: AiChatIdentity | null;
+  role: AiChatRole;
+}
+
+const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
   const queryClient = useQueryClient();
-  const role = useUser((state) => state.user?.role ?? state.role);
-  const resolvedRole = role ?? "client";
   const initialChat = useMemo(
-    () => loadPersistedChat(resolvedRole),
-    [resolvedRole],
+    () => loadPersistedChat(identity),
+    [identity],
   );
-  const [activeStateRole, setActiveStateRole] = useState(resolvedRole);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>(initialChat.messages);
   // Held across turns so the backend can load this conversation's memory.
@@ -290,7 +305,7 @@ export const AiChat = () => {
   const [sendPreparationError, setSendPreparationError] = useState(false);
   const [workspaceSurface, setWorkspaceSurface] =
     useState<CampaignSetupSurface | null>(() =>
-      readStoredSurface(resolvedRole),
+      readStoredSurface(identity),
     );
   const [dialogueUnread, setDialogueUnread] = useState(false);
   const [attachment, setAttachment] = useState<{
@@ -306,6 +321,14 @@ export const AiChat = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const attachmentsByMessageRef = useRef(new Map<string, File>());
+  const aliveRef = useRef(true);
+
+  useEffect(() => {
+    aliveRef.current = true;
+    return () => {
+      aliveRef.current = false;
+    };
+  }, []);
 
   const linkedDraftId = useMemo(() => {
     for (
@@ -323,29 +346,6 @@ export const AiChat = () => {
   }, [messages]);
   const activeDraftId =
     role === "client" ? (selectedDraftId ?? linkedDraftId) : undefined;
-
-  // Auth state can change without remounting this route. Restore the new role's
-  // isolated transcript instead of retaining the previous user's in-memory state.
-  useEffect(() => {
-    if (activeStateRole === resolvedRole) return;
-    const restored = loadPersistedChat(resolvedRole);
-    setMessages(restored.messages);
-    setConversationId(restored.conversationId);
-    setSelectedDraftId(restored.activeDraftId);
-    setRecommendationsByDraft(restored.recommendationsByDraft ?? {});
-    setQueuedRecommendation(null);
-    setWorkspaceSurface(readStoredSurface(resolvedRole));
-    setPaymentDraftId(null);
-    setCampaignStartError(false);
-    setSendPreparationError(false);
-    setDialogueUnread(false);
-    setAttachment((current) => {
-      if (current) URL.revokeObjectURL(current.previewUrl);
-      return null;
-    });
-    setAttachmentError(null);
-    setActiveStateRole(resolvedRole);
-  }, [activeStateRole, resolvedRole]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: ({
@@ -369,7 +369,9 @@ export const AiChat = () => {
       { reply, links, conversationId: cid, search, media = [] },
       variables,
     ) => {
+      if (!aliveRef.current) return;
       setConversationId(cid);
+      const searchDraftId = resolveSearchDraftId(variables.draftId, links);
       links.forEach((link) => {
         const linkedDraftId = getCampaignDraftId(link);
         if (linkedDraftId) {
@@ -395,11 +397,11 @@ export const AiChat = () => {
       );
       if (workspaceSurface) setDialogueUnread(true);
       attachmentsByMessageRef.current.delete(variables.id);
-      if (search && variables.draftId) {
+      if (search && searchDraftId) {
         setRecommendationsByDraft((current) => ({
           ...current,
-          [variables.draftId!]: mergeSearchOutcome(
-            current[variables.draftId!],
+          [searchDraftId]: mergeSearchOutcome(
+            current[searchDraftId],
             search,
           ),
         }));
@@ -429,6 +431,7 @@ export const AiChat = () => {
       }
     },
     onError: (error, variables) => {
+      if (!aliveRef.current) return;
       const errorCode =
         error instanceof AgentChatRequestError ? error.code : "UNKNOWN";
       setMessages((prev) =>
@@ -457,22 +460,15 @@ export const AiChat = () => {
   // Persist the conversation so a chip navigation (and back) doesn't lose it.
   useEffect(() => {
     try {
-      // During a live role switch, the old in-memory transcript is discarded by
-      // the effect above. Never write that old transcript into the new role's key.
-      if (activeStateRole !== resolvedRole) return;
-      const key = chatStorageKey(activeStateRole);
-      if (messages.length === 0) sessionStorage.removeItem(key);
+      if (messages.length === 0) removeAiChatState(sessionStorage, identity);
       else
-        sessionStorage.setItem(
-          key,
-          JSON.stringify({
-            messages,
-            conversationId,
-            activeDraftId,
-            recommendationsByDraft,
-            role: activeStateRole,
-          }),
-        );
+        writeAiChatState(sessionStorage, identity, {
+          messages,
+          conversationId,
+          activeDraftId,
+          recommendationsByDraft,
+          role,
+        });
     } catch {
       /* storage full / unavailable — non-critical */
     }
@@ -480,9 +476,9 @@ export const AiChat = () => {
     messages,
     conversationId,
     activeDraftId,
-    activeStateRole,
+    identity,
     recommendationsByDraft,
-    resolvedRole,
+    role,
   ]);
 
   // Auto-grow: the textarea expands upward with the text and only scrolls past max-height.
@@ -500,13 +496,15 @@ export const AiChat = () => {
     setSendPreparationError(false);
     try {
       const saved = await flushCampaignDraftSaves();
+      if (!aliveRef.current) return false;
       if (!saved) setSendPreparationError(true);
       return saved;
     } catch {
+      if (!aliveRef.current) return false;
       setSendPreparationError(true);
       return false;
     } finally {
-      setIsPreparingSend(false);
+      if (aliveRef.current) setIsPreparingSend(false);
     }
   };
 
@@ -525,6 +523,7 @@ export const AiChat = () => {
       // image service takes rather than bouncing the client's camera photo back at them.
       const prepared = await fitPromoImage(file);
       await inspectPromoImage(prepared, "photo");
+      if (!aliveRef.current) return;
       const previewUrl = URL.createObjectURL(prepared);
       setAttachment((current) => {
         if (current) URL.revokeObjectURL(current.previewUrl);
@@ -532,12 +531,15 @@ export const AiChat = () => {
       });
       window.setTimeout(() => textareaRef.current?.focus(), 0);
     } catch (error) {
+      if (!aliveRef.current) return;
       setAttachmentError(
         error instanceof Error ? error.message : "This image cannot be used.",
       );
     } finally {
-      setIsInspectingAttachment(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (aliveRef.current) {
+        setIsInspectingAttachment(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -661,7 +663,7 @@ export const AiChat = () => {
     setDialogueUnread(false);
     setAttachment(null);
     setAttachmentError(null);
-    sessionStorage.removeItem(workspaceStorageKey(resolvedRole));
+    writeAiWorkspaceSurface(sessionStorage, identity, null);
   };
 
   const handleStartCampaign = async () => {
@@ -670,12 +672,13 @@ export const AiChat = () => {
     setCampaignStartError(false);
     try {
       const { draftId } = await startGuidedCampaignDraft();
+      if (!aliveRef.current) return;
       setSelectedDraftId(draftId);
       // A guided campaign begins in Dialogue. The brief remains one click away in
       // the rail and below the welcome, but never replaces the conversation.
       setWorkspaceSurface(null);
       setDialogueUnread(false);
-      sessionStorage.removeItem(workspaceStorageKey("client"));
+      writeAiWorkspaceSurface(sessionStorage, identity, null);
       setMessages((current) => [
         ...current,
         {
@@ -697,9 +700,9 @@ export const AiChat = () => {
         },
       ]);
     } catch {
-      setCampaignStartError(true);
+      if (aliveRef.current) setCampaignStartError(true);
     } finally {
-      setIsStartingCampaign(false);
+      if (aliveRef.current) setIsStartingCampaign(false);
     }
   };
 
@@ -708,7 +711,7 @@ export const AiChat = () => {
     // so leaving the table has to be handled here too or those edits go unnoticed.
     if (surface !== "pages") leavePagesSurface();
     setWorkspaceSurface(surface);
-    sessionStorage.setItem(workspaceStorageKey(resolvedRole), surface);
+    writeAiWorkspaceSurface(sessionStorage, identity, surface);
     // Only the pages table is watched: content is edited page by page and would fire on
     // nearly every visit, and the brief already reports itself through onBriefReady.
     if (surface === "pages" && activeDraftId) {
@@ -830,7 +833,7 @@ export const AiChat = () => {
       try {
         if (!(await flushCampaignDraftSaves())) return;
         const draft = await getCampaignDraft(draftId);
-        if (!draft) return;
+        if (!aliveRef.current || !draft) return;
         queryClient.setQueryData(["campaign-draft", draftId], draft);
         if (campaignSectionFingerprints(draft).pages === before) return;
         queueOrStartRecommendation("pages");
@@ -857,7 +860,7 @@ export const AiChat = () => {
     leavePagesSurface();
     setWorkspaceSurface(null);
     setDialogueUnread(false);
-    sessionStorage.removeItem(workspaceStorageKey(resolvedRole));
+    writeAiWorkspaceSurface(sessionStorage, identity, null);
     window.setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
@@ -882,10 +885,6 @@ export const AiChat = () => {
     }
     return null;
   }, [messages]);
-
-  // Effects restore the isolated state after a role change. Hide the old role's
-  // transcript for that single transition render so it is never flashed on screen.
-  if (activeStateRole !== resolvedRole) return null;
 
   return (
     <Container className={styles.root}>
@@ -1306,4 +1305,19 @@ export const AiChat = () => {
       )}
     </Container>
   );
+};
+
+export const AiChat = () => {
+  const { accessToken } = useAuth();
+  const storedRole = useUser((state) => state.user?.role ?? state.role);
+  const identity = useMemo(
+    () => identityFromAccessToken(accessToken),
+    [accessToken],
+  );
+  const role = identity?.role ?? storedRole ?? "client";
+  const sessionKey = identity
+    ? `${identity.userId}:${identity.role}`
+    : "anonymous";
+
+  return <AiChatSession key={sessionKey} identity={identity} role={role} />;
 };

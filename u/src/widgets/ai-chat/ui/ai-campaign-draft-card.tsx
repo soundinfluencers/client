@@ -42,6 +42,10 @@ import styles from "./ai-campaign-draft-card.module.scss";
 import { registerCampaignDraftSave } from "../model/campaign-draft-save-coordinator.ts";
 import { CampaignRequiredDateControl } from "@/entities/client-side/campaign-draft/ui/campaign-required-date-control.tsx";
 import { CampaignAddPagesDrawer } from "@/entities/client-side/campaign-draft/ui/campaign-add-pages-drawer.tsx";
+import {
+  getRecommendationBundleLabel,
+  resolveRecommendationBundle,
+} from "../model/recommendation-bundles.ts";
 
 type SaveStatus = "saved" | "saving" | "error" | "conflict";
 // Selection carries the publishing date too: a page and its date are one decision.
@@ -63,8 +67,20 @@ const formatCandidatePrice = (candidate: AgentSearchCandidate) =>
   new Intl.NumberFormat("en", {
     style: "currency",
     currency: candidate.currency,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(candidate.price);
+
+const formatBundleTotal = (
+  total: number,
+  currency: "EUR" | "GBP" | "USD",
+) =>
+  new Intl.NumberFormat("en", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(total);
 
 const normalizeAccounts = (draft: CampaignDraftDto) =>
   (draft.addedAccounts ?? []).map((account) => ({
@@ -330,6 +346,45 @@ export const AiCampaignDraftCard = ({
     setRecommendedSelection(new Set());
   };
 
+  const addRecommendationBundle = (
+    bundle: NonNullable<AgentSearchOutcome["bundles"]>[number],
+  ) => {
+    const resolution = resolveRecommendationBundle(
+      bundle,
+      recommendations?.candidates ?? [],
+      existingAccountIds,
+      accounts.length,
+    );
+    if (resolution.status !== "ready") {
+      const message =
+        resolution.status === "already-added"
+          ? "All pages in this bundle are already in the draft."
+          : resolution.status === "over-capacity"
+            ? `This bundle needs ${resolution.candidates.length} open slots; the draft has ${resolution.remainingCapacity}.`
+            : "This recommendation is no longer complete. Load fresh recommendations and try again.";
+      toast.info(message);
+      return;
+    }
+    addPages(
+      resolution.candidates.map(
+        (candidate): DraftAddedAccountDto => ({
+          influencerId: candidate.influencerId,
+          socialAccountId: candidate.accountId,
+          socialMedia: candidate.socialMedia,
+          username: candidate.username,
+          logoUrl: candidate.logoUrl,
+          followers: candidate.followers,
+          price: candidate.priceEUR,
+          dateRequest: "ASAP",
+          isSelected: true,
+          isAvailable: true,
+          profileType: candidate.profileType,
+        }),
+      ),
+    );
+    setRecommendedSelection(new Set());
+  };
+
   const closeAddPages = useCallback(() => setAddPagesOpen(false), []);
 
   const openDetails = (account: DraftAddedAccountDto) => {
@@ -389,8 +444,13 @@ export const AiCampaignDraftCard = ({
     targets.forEach((account) => {
       const contentId = new ObjectId().toHexString();
       const descriptionId = new ObjectId().toHexString();
+      const additionalBrief = details.additionalBrief.trim()
+        ? [{ _id: new ObjectId().toHexString(), additionalBrief: details.additionalBrief.trim() }]
+        : [];
       contentByAccount.set(draftAccountKey(account), {
-        selectedContent: { campaignContentItemId: contentId, descriptionId },
+        selectedContent: { campaignContentItemId: contentId, descriptionId,
+          ...(additionalBrief[0] ? { additionalBriefId: additionalBrief[0]._id } : {}),
+        },
         content: {
           _id: contentId,
           socialMedia: account.socialMedia,
@@ -402,7 +462,7 @@ export const AiCampaignDraftCard = ({
           ],
           taggedUser: details.storyTag.trim(),
           taggedLink: details.storyLink.trim(),
-          additionalBrief: details.additionalBrief.trim(),
+          additionalBrief,
         },
       });
     });
@@ -651,6 +711,62 @@ export const AiCampaignDraftCard = ({
             )}
           </header>
 
+          {recommendations.status === "completed" &&
+            Boolean(recommendations.bundles?.length) && (
+            <div className={styles.bundleList}>
+              {(recommendations.bundles ?? []).map((bundle) => {
+                const resolution = resolveRecommendationBundle(
+                  bundle,
+                  recommendations.candidates,
+                  existingAccountIds,
+                  accounts.length,
+                );
+                const blockedBySave = saveStatus !== "saved";
+                const buttonLabel =
+                  saveStatus === "saving"
+                    ? "Saving draft…"
+                    : saveStatus === "error" || saveStatus === "conflict"
+                      ? "Resolve save issue"
+                      : resolution.status === "already-added"
+                        ? "Already added"
+                        : resolution.status === "over-capacity"
+                          ? `Only ${resolution.remainingCapacity} slots left`
+                          : resolution.status === "missing-candidates"
+                            ? "Refresh recommendations"
+                            : "Add these pages";
+                return (
+                  <article className={styles.bundleCard} key={bundle.id}>
+                    <div className={styles.bundleSummary}>
+                      <div>
+                        <span className={styles.eyebrow}>Recommended bundle</span>
+                        <strong>{getRecommendationBundleLabel(bundle.name)}</strong>
+                        <small>
+                          {bundle.accountIds.length} {bundle.accountIds.length === 1 ? "page" : "pages"}
+                        </small>
+                      </div>
+                      <strong>{formatBundleTotal(bundle.total, bundle.currency)}</strong>
+                    </div>
+                    <details>
+                      <summary>See included pages</summary>
+                      <ul>
+                        {resolution.memberNames.map((name, index) => (
+                          <li key={`${bundle.accountIds[index]}:${index}`}>{name}</li>
+                        ))}
+                      </ul>
+                    </details>
+                    <button
+                      type="button"
+                      disabled={blockedBySave || resolution.status !== "ready"}
+                      onClick={() => addRecommendationBundle(bundle)}
+                    >
+                      {buttonLabel}
+                    </button>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+
           {recommendations.status === "completed" && (
             <div className={styles.recommendationList}>
               {recommendations.candidates.map((candidate) => {
@@ -680,6 +796,9 @@ export const AiCampaignDraftCard = ({
                       <strong>{candidate.username}</strong>
                       <small>
                         {normalizeDraftPlatform(candidate.socialMedia)}
+                        {candidate.musicGenres?.length
+                          ? ` · ${candidate.musicGenres.join(", ")}`
+                          : " · Genre not specified"}
                       </small>
                     </span>
                     <span className={styles.recommendationMetric}>

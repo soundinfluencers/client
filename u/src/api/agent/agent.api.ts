@@ -49,6 +49,7 @@ export interface AgentSearchCandidate {
   currency: "EUR" | "GBP" | "USD";
   socialMedia: string;
   profileType: "creator" | "community";
+  musicGenres: string[];
   countryShare?: number;
 }
 
@@ -60,6 +61,15 @@ export interface AgentSearchOutcome {
   hasMore: boolean;
   nextPage?: number;
   candidates: AgentSearchCandidate[];
+  bundles?: AgentSearchBundle[];
+}
+
+export interface AgentSearchBundle {
+  id: string;
+  name: string;
+  total: number;
+  currency: "EUR" | "GBP" | "USD";
+  accountIds: string[];
 }
 
 export interface AgentMedia {

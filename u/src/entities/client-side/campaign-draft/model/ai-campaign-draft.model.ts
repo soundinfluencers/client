@@ -85,7 +85,11 @@ export const buildAiDraftPayload = (
           profileType: item.profileType,
           taggedUser: item.taggedUser,
           taggedLink: item.taggedLink,
-          additionalBrief: item.additionalBrief,
+          additionalBrief: Array.isArray(item.additionalBrief)
+            ? item.additionalBrief
+            : item.additionalBrief?.trim()
+              ? [{ _id: item._id, additionalBrief: item.additionalBrief.trim() }]
+              : [],
         })),
       }
     : {}),
@@ -108,7 +112,14 @@ export const getContentForDraftAccount = (
       (item) =>
         String(item._id) === String(selectedContent.campaignContentItemId),
     );
-    if (selectedItem) return selectedItem;
+    if (selectedItem) {
+      const notes = selectedItem.additionalBrief;
+      if (Array.isArray(notes)) {
+        const note = notes.find(item => item._id === selectedContent.additionalBriefId) ?? notes[0];
+        return { ...selectedItem, additionalBrief: note?.additionalBrief ?? '' };
+      }
+      return selectedItem;
+    }
   }
 
   // Never make an unfinished page look complete by borrowing another page's content.
@@ -122,7 +133,9 @@ export const getDraftDetailsForm = (
   description: content?.descriptions?.[0]?.description ?? "",
   storyTag: content?.taggedUser ?? "",
   storyLink: content?.taggedLink ?? "",
-  additionalBrief: content?.additionalBrief ?? "",
+  additionalBrief: Array.isArray(content?.additionalBrief)
+    ? content.additionalBrief[0]?.additionalBrief ?? ""
+    : content?.additionalBrief ?? "",
 });
 
 export const getDraftContentReadiness = (
