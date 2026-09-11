@@ -11,13 +11,14 @@ import { getCampaignSetupProgress } from "@/entities/client-side/campaign-setup/
 interface Props {
     draftId: string;
     onClose: () => void;
+    onCompleted: () => void;
 }
 
 // In-chat checkout: hydrates the builder store from the finalized draft (same as the
 // deep-link path) and renders the app's own PaymentCampaign inside a modal, so the
 // client completes the whole campaign without leaving the chat page. The agent never
 // touches the payment itself — this is the human's screen.
-export const AiPaymentModal = ({ draftId, onClose }: Props) => {
+export const AiPaymentModal = ({ draftId, onClose, onCompleted }: Props) => {
     const [state, setState] = useState<"loading" | "ready" | "not-ready" | "error">("loading");
 
     useEffect(() => {
@@ -64,7 +65,7 @@ export const AiPaymentModal = ({ draftId, onClose }: Props) => {
                         <p>Complete the brief, pages, dates and publishing content before checkout.</p>
                     </div>
                 )}
-                {state === "ready" && <PaymentCampaign />}
+                {state === "ready" && <PaymentCampaign onCompleted={onCompleted} />}
             </div>
         </Modal>
     );

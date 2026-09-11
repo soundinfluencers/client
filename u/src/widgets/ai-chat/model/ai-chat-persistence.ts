@@ -225,3 +225,16 @@ export const clearAiChatPersistence = (
     // Logout must continue even when storage is unavailable.
   }
 };
+
+export const clearCompletedAiCheckout = (
+  storage: BrowserStorage,
+  identity: AiChatIdentity | null,
+) => {
+  clearAiChatPersistence(storage, identity);
+  return {
+    messages: [],
+    conversationId: undefined,
+    activeDraftId: undefined,
+    recommendationsByDraft: {},
+  };
+};

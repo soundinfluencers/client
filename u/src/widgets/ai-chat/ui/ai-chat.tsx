@@ -46,6 +46,7 @@ import { fitPromoImage } from "@/entities/client-side/promo-creative/model/promo
 import imageIcon from "@/assets/icons/image.svg";
 import {
   identityFromAccessToken,
+  clearCompletedAiCheckout,
   removeAiChatState,
   writeAiChatState,
   writeAiWorkspaceSurface,
@@ -453,6 +454,17 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
     setAttachment(null);
     setAttachmentError(null);
     writeAiWorkspaceSurface(sessionStorage, identity, null);
+  };
+
+  const handleCheckoutCompleted = () => {
+    const empty = clearCompletedAiCheckout(sessionStorage, identity);
+    setMessages(empty.messages);
+    setConversationId(empty.conversationId);
+    setSelectedDraftId(empty.activeDraftId);
+    setRecommendationsByDraft(empty.recommendationsByDraft);
+    setQueuedRecommendation(null);
+    setWorkspaceSurface(null);
+    setDialogueUnread(false);
   };
 
   const handleStartCampaign = async () => {
@@ -924,6 +936,7 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
         <AiPaymentModal
           draftId={paymentDraftId}
           onClose={() => setPaymentDraftId(null)}
+          onCompleted={handleCheckoutCompleted}
         />
       )}
     </Container>

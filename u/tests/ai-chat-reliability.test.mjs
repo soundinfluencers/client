@@ -122,6 +122,23 @@ test("logout cleanup removes only the owning identity's chat data", () => {
   });
 });
 
+test("completed checkout clears the consumed AI chat session", () => {
+  assert.equal(typeof persistence.clearCompletedAiCheckout, "function");
+  const storage = new MemoryStorage();
+  persistence.writeAiChatState(storage, clientA, { messages: [{ id: "paid" }] });
+  persistence.writeAiWorkspaceSurface(storage, clientA, "content");
+
+  const next = persistence.clearCompletedAiCheckout(storage, clientA);
+
+  assert.deepEqual(next, {
+    messages: [],
+    conversationId: undefined,
+    activeDraftId: undefined,
+    recommendationsByDraft: {},
+  });
+  assert.equal(storage.length, 0);
+});
+
 test("malformed storage and invalid tokens fail closed", () => {
   assert.equal(typeof persistence.aiChatStorageKey, "function");
   const storage = new MemoryStorage();

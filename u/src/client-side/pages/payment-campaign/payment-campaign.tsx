@@ -42,7 +42,7 @@ export type PaymentMethodId =
 
 export type PaymentTabId = "bank_card" | "paypal" | "bank_transfer";
 
-export const PaymentCampaign = () => {
+export const PaymentCampaign = ({ onCompleted }: { onCompleted?: () => void } = {}) => {
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -244,6 +244,7 @@ export const PaymentCampaign = () => {
         draftStore.clearCampaign(effectiveDraftId);
       }
       resetCampaignBuilder();
+      onCompleted?.();
 
       setModalCompleted(true);
       toast.success(
