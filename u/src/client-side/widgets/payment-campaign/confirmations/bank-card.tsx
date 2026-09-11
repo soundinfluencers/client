@@ -20,7 +20,6 @@ interface Props {
 export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting,currencySymbol,amount}) => {
   const { totalPrice } = useCampaignBuilderStore();
     const displayAmount = Number(amount ?? totalPrice ?? 0);
-  const referenceId = "P935872";
   console.log(totalPrice);
   const handleCopy = async (text: string, label: string) => {
     try {
@@ -62,7 +61,7 @@ export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting,currency
               <button
                   type="button"
                   className="base-confirmations__count"
-                  onClick={() => handleCopy(referenceId, "Reference ID")}
+                  onClick={() => handleCopy(referenceNumber, "Reference ID")}
               >
                 <img src={copy} alt="Copy reference ID" />
               </button>
@@ -99,7 +98,7 @@ export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting,currency
               <div className="base-confirmations__step-number">3</div>
               <div className="base-confirmations__step-text">
                 In the "NOTE" section, enter the payment reference number:{" "}
-                <span className="strong-row-field">*C935872</span>
+                <span className="strong-row-field">{referenceNumber}</span>
               </div>
             </div>
 
@@ -124,7 +123,7 @@ export const BankCard: React.FC<Props> = ({referenceNumber,isSubmitting,currency
               <div className="base-confirmations__step-number">7</div>
               <div className="base-confirmations__step-text">
                 Add this payment reference number:{" "}
-                <span className="strong-row-field">*C935872</span>
+                <span className="strong-row-field">{referenceNumber}</span>
               </div>
             </div>
           </div>

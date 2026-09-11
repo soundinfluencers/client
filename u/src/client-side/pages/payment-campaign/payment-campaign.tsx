@@ -53,6 +53,7 @@ export const PaymentCampaign = () => {
   const [tab, setTab] = React.useState<PaymentTabId>("bank_card");
   const [modalCompleted, setModalCompleted] = React.useState(false);
   const [isPaymentSubmitting, setIsPaymentSubmitting] = React.useState(false);
+  const [submissionError, setSubmissionError] = React.useState<string | null>(null);
   const [selectedIdPayment, setSelectedIdPayment] =
       React.useState<PaymentMethodId>("bank_card");
   const [currency, setCurrency] = React.useState<
@@ -143,6 +144,7 @@ export const PaymentCampaign = () => {
 
     try {
       setIsPaymentSubmitting(true);
+      setSubmissionError(null);
 
       let base: Record<string, unknown>;
 
@@ -250,6 +252,7 @@ export const PaymentCampaign = () => {
               : "Campaign saved successfully!",
       );
     } catch (e) {
+      setSubmissionError("We couldn't submit your campaign. Your details are still here. Please try again or contact support if this continues.");
       console.error(e);
       toast.error(
           proposalId
@@ -290,6 +293,7 @@ export const PaymentCampaign = () => {
         </div>
 
         <h1>Payment method</h1>
+        {submissionError && <p role="alert">{submissionError}</p>}
 
         <div className="payment-campaign__content">
           <div className="payment-campaign__form">

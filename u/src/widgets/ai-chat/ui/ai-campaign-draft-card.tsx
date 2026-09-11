@@ -911,7 +911,9 @@ export const AiCampaignDraftCard = ({
               const isAvailable = account.isAvailable !== false;
               const selected = isAvailable && account.isSelected !== false;
               const content = getContentForDraftAccount(draft, account);
-              const readiness = getDraftContentReadiness(content);
+              const readiness = draft.noContentAvailable
+                ? { status: "ready" as const, label: "Creative support requested" }
+                : getDraftContentReadiness(content);
               const status = readiness.status;
               return (
                 <tr key={key} className={selected ? "" : styles.disabledRow}>
@@ -977,7 +979,7 @@ export const AiCampaignDraftCard = ({
                         className={styles.contentLink}
                         title={content?.mainLink || undefined}
                       >
-                        {content?.mainLink || "No link yet"}
+                        {content?.mainLink || (draft.noContentAvailable ? "Our team will prepare the content" : "No link yet")}
                       </span>
                     </td>
                   )}
