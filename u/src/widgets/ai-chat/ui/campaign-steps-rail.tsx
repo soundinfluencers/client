@@ -261,7 +261,7 @@ export const CampaignStepsRail = ({
             !isReady && remaining.length ? "campaign-remaining" : undefined
           }
         >
-          {isReady ? "Review & pay" : `What's left? (${remaining.length})`}
+          {isReady ? "Review & pay" : firstIncomplete ? `Next: ${firstIncomplete.shortLabel}` : "Loading…"}
         </button>
         {!isReady && remaining.length > 0 && (
           <div

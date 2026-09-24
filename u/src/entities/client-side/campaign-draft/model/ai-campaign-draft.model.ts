@@ -42,7 +42,8 @@ export const formatDraftCurrency = (value: number) =>
   new Intl.NumberFormat("en", {
     style: "currency",
     currency: "EUR",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value);
 
 export const draftAccountKey = (account: DraftAddedAccountDto) =>

@@ -32,6 +32,9 @@ interface Props {
   onBriefReady: () => void;
   recommendations?: AgentSearchOutcome;
   onRequestMoreRecommendations: () => void;
+  recommendationActivity?: { status: "pending" | "failed"; message?: string };
+  onRetryRecommendations: () => void;
+  onOpenSection: (surface: CampaignSetupSurface) => void;
 }
 
 const SURFACE_TITLES: Record<CampaignSetupSurface, string> = {
@@ -56,11 +59,16 @@ export const CampaignWorkspacePanel = ({
   onBriefReady,
   recommendations,
   onRequestMoreRecommendations,
+  recommendationActivity,
+  onRetryRecommendations,
+  onOpenSection,
 }: Props) => {
   const queryClient = useQueryClient();
   const [saveError, setSaveError] = useState<string | null>(null);
   // Which creation route the client picked; the studio opens as a modal on top.
-  const [promoMethod, setPromoMethod] = useState<PromoCreativeSource | null>(null);
+  const [promoMethod, setPromoMethod] = useState<PromoCreativeSource | null>(
+    null,
+  );
   const containerRef = useRef<HTMLElement>(null);
   // Brief and promo editors need the draft here; the pages table loads its own.
   const query = useQuery({
@@ -86,10 +94,11 @@ export const CampaignWorkspacePanel = ({
       Number(latest.data.revision ?? 0),
       promoCreative,
     );
-    queryClient.setQueryData(
-      ["campaign-draft", draftId],
-      { ...latest.data, revision: result.revision, promoCreative },
-    );
+    queryClient.setQueryData(["campaign-draft", draftId], {
+      ...latest.data,
+      revision: result.revision,
+      promoCreative,
+    });
   };
 
   const applyPromo = async (promo: PromoCreativeDto) => {
@@ -114,10 +123,11 @@ export const CampaignWorkspacePanel = ({
       draftId,
       Number(latest.data.revision ?? 0),
     );
-    queryClient.setQueryData(
-      ["campaign-draft", draftId],
-      { ...latest.data, revision: result.revision, promoCreative: undefined },
-    );
+    queryClient.setQueryData(["campaign-draft", draftId], {
+      ...latest.data,
+      revision: result.revision,
+      promoCreative: undefined,
+    });
     onNote("Promo removed from the campaign", "promo");
   };
 
@@ -141,7 +151,11 @@ export const CampaignWorkspacePanel = ({
     >
       <header className={styles.header}>
         <h2>{SURFACE_TITLES[surface]}</h2>
-        <button type="button" onClick={onClose} aria-label="Close campaign workspace">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close campaign workspace"
+        >
           ×
         </button>
       </header>
@@ -152,10 +166,48 @@ export const CampaignWorkspacePanel = ({
         </div>
       )}
 
-      <div className={`${styles.body} ${surface === "promo" ? styles.bodyFitted : ""}`}>
+      <div
+        className={`${styles.body} ${surface === "promo" ? styles.bodyFitted : ""}`}
+      >
+        {surface === "pages" && recommendationActivity && (
+          <div
+            className={styles.searchStatus}
+            role={
+              recommendationActivity.status === "failed" ? "alert" : "status"
+            }
+          >
+            <strong>
+              {recommendationActivity.status === "pending"
+                ? "Finding matching pages…"
+                : "Page search did not complete"}
+            </strong>
+            <span>
+              {recommendationActivity.message ??
+                (recommendationActivity.status === "pending"
+                  ? "Your brief is saved. The recommendations will appear here when ready."
+                  : "Your brief and selected pages are saved. Retry to load recommendations.")}
+            </span>
+            {recommendationActivity.status === "failed" && (
+              <button type="button" onClick={onRetryRecommendations}>
+                Retry search
+              </button>
+            )}
+          </div>
+        )}
+        {surface === "pages" && !recommendationActivity && !recommendations && (
+          <div className={styles.searchStatus}>
+            <span>
+              Find pages from your saved brief, or review the pages already in
+              your campaign.
+            </span>
+            <button type="button" onClick={onRetryRecommendations}>
+              Find matching pages
+            </button>
+          </div>
+        )}
         {(surface === "pages" || surface === "content") && (
           <AiCampaignDraftCard
-            key={surface}
+            key={`${draftId}:${surface}`}
             flat
             draftId={draftId}
             focusMode={PAGE_FOCUS_MODES[surface]}
@@ -163,6 +215,9 @@ export const CampaignWorkspacePanel = ({
             onGoToChat={onGoToChat}
             recommendations={surface === "pages" ? recommendations : undefined}
             onRequestMoreRecommendations={onRequestMoreRecommendations}
+            recommendationsBusy={recommendationActivity?.status === "pending"}
+            onRetryRecommendations={onRetryRecommendations}
+            onOpenSection={onOpenSection}
           />
         )}
 
@@ -173,7 +228,9 @@ export const CampaignWorkspacePanel = ({
         {surface === "brief" && query.isError && !query.data && (
           <div className={`${styles.state} ${styles.errorState}`}>
             <span>Campaign plan is unavailable.</span>
-            <button type="button" onClick={() => void query.refetch()}>Retry</button>
+            <button type="button" onClick={() => void query.refetch()}>
+              Retry
+            </button>
           </div>
         )}
 

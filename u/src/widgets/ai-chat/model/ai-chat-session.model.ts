@@ -74,7 +74,7 @@ export const isPersistedChat = (value: unknown): value is Partial<PersistedChat>
 export const GUIDED_CAMPAIGN_WELCOME =
   "<p><strong>Let’s create your campaign.</strong></p>" +
   "<p>Send the essentials in one message:</p>" +
-  "<ul><li>campaign goal</li><li>approximate budget and currency</li><li>music genre(s)</li><li>platform(s)</li><li>target countries or Worldwide</li><li>timing or Flexible</li></ul>" +
+  "<ul><li>campaign goal</li><li>maximum budget and currency</li><li>music genre(s)</li><li>platform(s)</li><li>target countries or Worldwide</li><li>timing or Flexible</li></ul>" +
   "<p>Then I’ll recommend pages, explain the budget fit and tell you the next action. Content and First Slide can be added later.</p>";
 
 export const restoreMessage = (message: Message, index: number): Message => {
@@ -138,7 +138,7 @@ export const sanitizeReply = (html: string) =>
 
 // One-line preview for the strip shown while a working surface covers the transcript.
 export const toPlainText = (html: string) =>
-  DOMPurify.sanitize(html, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
+  DOMPurify.sanitize(html.replace(/<\/(?:p|li|ul|ol)>|<br\s*\/?\s*>/gi, " "), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
     .replace(/\s+/g, " ")
     .trim();
 

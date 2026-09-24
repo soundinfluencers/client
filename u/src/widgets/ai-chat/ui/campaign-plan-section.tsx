@@ -225,6 +225,7 @@ export const CampaignPlanSection = ({ draft, onSaved, onGoToChat, onBriefReady }
         toast.success("Brief saved. Finding matching pages…");
         onBriefReady();
       } else {
+        setStatus(`Saved. Still needed: ${missingRequired.join(", ")}.`);
         toast.info(
           `Brief saved. Complete ${missingRequired.length} required ${
             missingRequired.length === 1 ? "answer" : "answers"
@@ -279,7 +280,7 @@ export const CampaignPlanSection = ({ draft, onSaved, onGoToChat, onBriefReady }
       <div className={styles.grid}>
         <label>
           <span>
-            Budget <small>Required · approximate</small>
+            Budget <small>Required · maximum</small>
           </span>
           <div className={styles.inline}>
             <input
@@ -445,7 +446,7 @@ export const CampaignPlanSection = ({ draft, onSaved, onGoToChat, onBriefReady }
       <div className={styles.actions}>
         {status && <span role={status === "Saved" ? "status" : "alert"}>{status}</span>}
         <button type="button" onClick={() => void save()} disabled={saving}>
-          {saving ? "Saving…" : "Save brief"}
+          {saving ? "Saving…" : isRequiredBriefComplete(brief) ? "Save & find pages" : "Save brief"}
         </button>
       </div>
     </div>

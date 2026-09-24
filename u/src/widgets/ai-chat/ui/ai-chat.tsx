@@ -9,7 +9,6 @@ import {
   CLIENT_EXAMPLE_PROMPTS,
   INFLUENCER_EXAMPLE_PROMPTS,
   getCampaignDraftId,
-  mergeSearchOutcome,
 } from "../model/ai-chat-session.model.ts";
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +17,7 @@ import { Container } from "@/components";
 import {
   AgentChatRequestError,
   sendAgentMessage,
+  findCampaignRecommendations,
   type AgentSearchOutcome,
 } from "@/api/agent/agent.api.ts";
 import { useUser } from "@/store/get-user";
@@ -31,6 +31,8 @@ import { CampaignStepsRail } from "./campaign-steps-rail.tsx";
 import { CampaignWorkspacePanel } from "./campaign-workspace-panel.tsx";
 import styles from "./ai-chat.module.scss";
 import { flushCampaignDraftSaves } from "../model/campaign-draft-save-coordinator.ts";
+import { mergeSearchOutcome } from "../model/campaign-selection.ts";
+import { isRequiredBriefComplete } from "@/entities/client-side/campaign-setup/model/campaign-brief-readiness.ts";
 import {
   getCampaignDraft,
   startGuidedCampaignDraft,
@@ -74,12 +76,33 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
   const [conversationId, setConversationId] = useState<string | undefined>(
     initialChat.conversationId,
   );
+  const conversationRef = useRef(conversationId);
+  const searchGeneration = useRef(new Map<string, number>());
+  const searchSequence = useRef(0);
+  const searchInFlight = useRef(new Set<string>());
+  const getConversationId = useCallback(() => {
+    if (!conversationRef.current) {
+      conversationRef.current = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, "0")).join("");
+      setConversationId(conversationRef.current);
+    }
+    return conversationRef.current;
+  }, []);
   const [selectedDraftId, setSelectedDraftId] = useState<string | undefined>(
     initialChat.activeDraftId,
   );
   const [recommendationsByDraft, setRecommendationsByDraft] = useState<
     Record<string, AgentSearchOutcome>
   >(initialChat.recommendationsByDraft ?? {});
+  const [recommendationActivity, setRecommendationActivity] = useState<
+    Record<
+      string,
+      {
+        status: "pending" | "failed";
+        action: "brief" | "more";
+        message?: string;
+      }
+    >
+  >({});
   const [queuedRecommendation, setQueuedRecommendation] = useState<{
     action: WorkspaceFollowUp;
     draftId: string;
@@ -151,17 +174,20 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
     }) =>
       sendAgentMessage(
         message,
-        conversationId,
+        getConversationId(),
         draftId ?? activeDraftId,
         image,
       ),
+    onMutate: (variables) => ({ generation: searchGeneration.current.get(variables.draftId ?? activeDraftId ?? "") }),
     onSuccess: (
       { reply, links, conversationId: cid, search, media = [] },
       variables,
+      context,
     ) => {
       if (!aliveRef.current) return;
       setConversationId(cid);
       const searchDraftId = resolveSearchDraftId(variables.draftId, links);
+      conversationRef.current = cid;
       links.forEach((link) => {
         const linkedDraftId = getCampaignDraftId(link);
         if (linkedDraftId) {
@@ -187,7 +213,7 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
       );
       if (workspaceSurface) setDialogueUnread(true);
       attachmentsByMessageRef.current.delete(variables.id);
-      if (search && searchDraftId) {
+      if (search && searchDraftId && context?.generation === searchGeneration.current.get(searchDraftId)) {
         setRecommendationsByDraft((current) => ({
           ...current,
           [searchDraftId]: mergeSearchOutcome(
@@ -195,29 +221,6 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
             search,
           ),
         }));
-      }
-      if (variables.recommendationAction) {
-        if (!search || search.status === "failed") {
-          toast.error(
-            variables.recommendationAction === "more"
-              ? "More matching pages could not be loaded."
-              : "The brief was saved, but the page search did not complete.",
-          );
-        } else if (search.status === "empty") {
-          toast.info(
-            variables.recommendationAction === "more"
-              ? "There are no more matching pages in this search."
-              : "Brief saved. No exact matching pages were found.",
-          );
-        } else {
-          const destination =
-            variables.recommendationAction === "more"
-              ? "more pages"
-              : "matching pages";
-          toast.success(
-            `${search.loadedCount} ${destination} loaded. Review them in Pages.`,
-          );
-        }
       }
     },
     onError: (error, variables) => {
@@ -231,13 +234,6 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
             : message,
         ),
       );
-      if (variables.recommendationAction) {
-        toast.error(
-          variables.recommendationAction === "more"
-            ? "More matching pages could not be loaded."
-            : "The brief was saved, but matching pages could not be loaded.",
-        );
-      }
     },
   });
 
@@ -403,6 +399,10 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
   };
 
   const handleRetry = async (message: Message) => {
+    if (message.recommendationAction && activeDraftId) {
+      void startDirectRecommendation(message.recommendationAction, activeDraftId);
+      return;
+    }
     if (isPending || isPreparingSend) return;
     if (!(await prepareAgentAction())) return;
     closeWorkspace();
@@ -443,9 +443,13 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
     });
     attachmentsByMessageRef.current.clear();
     setConversationId(undefined);
+    conversationRef.current = undefined;
+    searchGeneration.current.clear();
+    searchInFlight.current.clear();
     setMessages([]);
     setSelectedDraftId(undefined);
     setRecommendationsByDraft({});
+    setRecommendationActivity({});
     setQueuedRecommendation(null);
     setCampaignStartError(false);
     setSendPreparationError(false);
@@ -507,7 +511,13 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
     }
   };
 
-  const openWorkspace = (surface: CampaignSetupSurface) => {
+  const openWorkspace = async (surface: CampaignSetupSurface) => {
+    if (!(await flushCampaignDraftSaves())) {
+      toast.error(
+        "Your changes could not be saved. Retry before leaving this section.",
+      );
+      return;
+    }
     // Switching straight from Pages to another section never passes through closeWorkspace,
     // so leaving the table has to be handled here too or those edits go unnoticed.
     if (surface !== "pages") leavePagesSurface();
@@ -545,54 +555,69 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
     ]);
   };
 
-  const startRecommendation = useCallback(
-    (action: WorkspaceFollowUp, draftId: string) => {
-      const request =
-        action === "pages"
-          ? // Not a search: the pages are already chosen. The only open question is what the
-            // change did to the publishing content that was written for the previous set.
-            "The client just changed the selected pages in the Pages table. Read the campaign " +
-            "draft, then answer in at most two lines: name any selected page that now has no " +
-            "publishing content, and offer to apply the existing shared details to it. If every " +
-            "selected page already has content, say only that the pages are up to date. Do not " +
-            "search for new pages and do not change anything until the client agrees."
-          : action === "more"
-            ? "Load the next batch of campaign page recommendations now. Reuse every filter from " +
-              "lastSearchRequest and call search_accounts with page=nextSearchPage. Do not restart at page 1."
-            : // The brief can also be re-saved long after pages were chosen, so this must not read
-              // as "start over": a changed brief is a reason to offer a swap, not to perform one.
-              "The saved campaign brief is complete. If pages are already selected, check them against " +
-              "the brief first: name in one line the ones that no longer fit and offer to replace them, " +
-              "changing nothing until the client agrees. Otherwise search the roster using every relevant " +
-              "value the brief contains and recommend suitable pages. " +
-              "Treat its budget as an approximate target when present, use budgetCurrency correctly, " +
-              "show the pages, ask whether the client wants to add or remove pages from the approximate " +
-              "total, and if the result is capped ask whether they want more options.";
-      const id = `${action}-recommendations-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      setMessages((prev) => [
-        ...prev,
-        {
-          id,
-          q: "",
-          request,
-          a: "",
-          links: [],
-          media: [],
-          status: "pending",
-          assistantOnly: true,
-          // A page-change follow-up runs no search, so the search toasts must stay out of it.
-          recommendationAction: action === "pages" ? undefined : action,
-        },
-      ]);
-      mutate({
-        id,
-        message: request,
-        recommendationAction: action === "pages" ? undefined : action,
+  const startDirectRecommendation = useCallback(async (action: "brief" | "more", draftId: string) => {
+    if (action === "more" && searchInFlight.current.has(draftId)) return;
+    const previous = recommendationsByDraft[draftId];
+    const generation = ++searchSequence.current;
+    searchGeneration.current.set(draftId, generation);
+    searchInFlight.current.add(draftId);
+    setRecommendationActivity((current) => ({ ...current, [draftId]: { status: "pending", action } }));
+    if (action === "brief") setRecommendationsByDraft((current) => {
+      const next = { ...current };
+      delete next[draftId];
+      return next;
+    });
+    try {
+      const result = await findCampaignRecommendations({
         draftId,
+        conversationId: getConversationId(),
+        page: action === "more" ? (previous?.nextPage ?? 1) : 1,
+        ...(action === "more" && previous?.request ? { request: previous.request } : {}),
       });
-    },
-    [mutate],
-  );
+      if (!aliveRef.current || searchGeneration.current.get(draftId) !== generation) return;
+      setRecommendationsByDraft((current) => ({ ...current, [draftId]: mergeSearchOutcome(current[draftId], result.search) }));
+      setRecommendationActivity((current) => {
+        const next = { ...current };
+        delete next[draftId];
+        return next;
+      });
+      const text = result.search.status === "empty"
+        ? "No matching pages found. Adjust the brief to search again."
+        : action === "more"
+          ? result.search.loadedCount + " more matching pages loaded."
+          : result.search.totalExact + " matching pages found. Choose pages or include a recommended package in Pages.";
+      setMessages((current) => [...current, {
+        id: "search-result-" + draftId + "-" + generation + "-" + Date.now(),
+        q: "", a: "", links: [], media: [], status: "success", note: { text, section: "pages" },
+      }]);
+      if (result.search.status === "empty") toast.info(text);
+    } catch (error) {
+      if (!aliveRef.current || searchGeneration.current.get(draftId) !== generation) return;
+      const response = (error as { response?: { status?: number } }).response;
+      const restart = response?.status === 400 || response?.status === 409;
+      setRecommendationActivity((current) => ({ ...current, [draftId]: {
+        status: "failed", action: restart ? "brief" : action,
+        message: restart ? "The brief or search changed. Find matching pages again." : "Matching pages could not be loaded. Your brief and selection are saved. Retry the search.",
+      } }));
+    } finally {
+      if (searchGeneration.current.get(draftId) === generation) searchInFlight.current.delete(draftId);
+    }
+  }, [getConversationId, recommendationsByDraft]);
+
+  const startRecommendation = useCallback((action: WorkspaceFollowUp, draftId: string) => {
+    if (action !== "pages") {
+      void startDirectRecommendation(action, draftId);
+      return;
+    }
+    const request = "The client just changed the selected pages in the Pages table. Read the campaign " +
+      "draft, then answer in at most two lines: name any selected page that now has no " +
+      "publishing content, and offer to apply the existing shared details to it. If every " +
+      "selected page already has content, say only that the pages are up to date. Do not " +
+      "search for new pages and do not change anything until the client agrees.";
+    const id = "pages-followup-" + Date.now();
+    setMessages((current) => [...current, { id, q: "", request, a: "", links: [], media: [], status: "pending", assistantOnly: true }]);
+    mutate({ id, message: request, draftId });
+  }, [mutate, startDirectRecommendation]);
 
   const queueOrStartRecommendation = useCallback(
     (action: WorkspaceFollowUp) => {
@@ -602,13 +627,9 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
         );
         return;
       }
-      if (isPending || isPreparingSend) {
+      if (action === "pages" && (isPending || isPreparingSend)) {
         setQueuedRecommendation({ action, draftId: activeDraftId });
-        toast.info(
-          action === "pages"
-            ? "The assistant will check the changed pages after the current reply."
-            : "The page search will start after the current assistant reply.",
-        );
+        toast.info("The assistant will check the changed pages after the current reply.");
         return;
       }
       startRecommendation(action, activeDraftId);
@@ -616,8 +637,26 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
     [activeDraftId, isPending, isPreparingSend, startRecommendation],
   );
 
-  const handleBriefReady = () => queueOrStartRecommendation("brief");
+  const handleBriefReady = () => {
+    void openWorkspace("pages");
+    queueOrStartRecommendation("brief");
+  };
   const handleMoreRecommendations = () => queueOrStartRecommendation("more");
+  const handleRetryRecommendations = () => {
+    if (!activeDraftId || searchInFlight.current.has(activeDraftId)) return;
+    const saved = queryClient.getQueryData<CampaignDraftDto>([
+      "campaign-draft",
+      activeDraftId,
+    ]);
+    if (saved && !isRequiredBriefComplete(saved.brief)) {
+      void openWorkspace("brief");
+      toast.info("Complete the required brief answers to find matching pages.");
+      return;
+    }
+    queueOrStartRecommendation(
+      recommendationActivity[activeDraftId]?.action ?? "brief",
+    );
+  };
 
   useEffect(() => {
     if (!queuedRecommendation || isPending || isPreparingSend) return;
@@ -657,7 +696,13 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
       void checkPagesChangedOnClose(draftId, before);
   };
 
-  const closeWorkspace = () => {
+  const closeWorkspace = async () => {
+    if (!(await flushCampaignDraftSaves())) {
+      toast.error(
+        "Your changes could not be saved. Retry before leaving this section.",
+      );
+      return;
+    }
     leavePagesSurface();
     setWorkspaceSurface(null);
     setDialogueUnread(false);
@@ -785,6 +830,9 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
                   onBriefReady={handleBriefReady}
                   recommendations={recommendationsByDraft[activeDraftId]}
                   onRequestMoreRecommendations={handleMoreRecommendations}
+                  recommendationActivity={recommendationActivity[activeDraftId]}
+                  onRetryRecommendations={handleRetryRecommendations}
+                  onOpenSection={(surface) => void openWorkspace(surface)}
                 />
               </div>
             )}

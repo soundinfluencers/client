@@ -3,7 +3,7 @@ import type { CampaignBriefDto } from "@/entities/client-side/campaign-draft/api
 export const getMissingRequiredBriefFields = (brief?: CampaignBriefDto) => [
   ...(!brief?.campaignGoal?.trim() ? ["campaign goal"] : []),
   ...(!(typeof brief?.budget === "number" && brief.budget > 0)
-    ? ["approximate budget"]
+    ? ["budget limit"]
     : []),
   ...(!brief?.genre?.trim() ? ["genre"] : []),
   ...(!brief?.platforms?.length ? ["platforms"] : []),

@@ -43,9 +43,12 @@ import { registerCampaignDraftSave } from "../model/campaign-draft-save-coordina
 import { CampaignRequiredDateControl } from "@/entities/client-side/campaign-draft/ui/campaign-required-date-control.tsx";
 import { CampaignAddPagesDrawer } from "@/entities/client-side/campaign-draft/ui/campaign-add-pages-drawer.tsx";
 import {
-  getRecommendationBundleLabel,
-  resolveRecommendationBundle,
-} from "../model/recommendation-bundles.ts";
+  getSelectionTotals,
+  getConvertedSelectionTotal,
+  includeRecommendedPages,
+  formatSearchPrice,
+} from "../model/campaign-selection.ts";
+import { CampaignRecommendations } from "./campaign-recommendations.tsx";
 
 type SaveStatus = "saved" | "saving" | "error" | "conflict";
 // Selection carries the publishing date too: a page and its date are one decision.
@@ -61,26 +64,10 @@ interface Props {
   focusMode?: CampaignDraftFocusMode;
   recommendations?: AgentSearchOutcome;
   onRequestMoreRecommendations: () => void;
+  recommendationsBusy?: boolean;
+  onRetryRecommendations: () => void;
+  onOpenSection: (surface: "brief" | "content") => void;
 }
-
-const formatCandidatePrice = (candidate: AgentSearchCandidate) =>
-  new Intl.NumberFormat("en", {
-    style: "currency",
-    currency: candidate.currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(candidate.price);
-
-const formatBundleTotal = (
-  total: number,
-  currency: "EUR" | "GBP" | "USD",
-) =>
-  new Intl.NumberFormat("en", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(total);
 
 const normalizeAccounts = (draft: CampaignDraftDto) =>
   (draft.addedAccounts ?? []).map((account) => ({
@@ -97,6 +84,9 @@ export const AiCampaignDraftCard = ({
   focusMode = "selection",
   recommendations,
   onRequestMoreRecommendations,
+  recommendationsBusy = false,
+  onRetryRecommendations,
+  onOpenSection,
 }: Props) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -116,16 +106,31 @@ export const AiCampaignDraftCard = ({
   const [confirmApplyToAll, setConfirmApplyToAll] = useState(false);
   const [actionKey, setActionKey] = useState<string | null>(null);
   const [addPagesOpen, setAddPagesOpen] = useState(false);
-  const [recommendedSelection, setRecommendedSelection] = useState<Set<string>>(
-    new Set(),
-  );
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedRef = useRef("");
   const saveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true));
   const revisionRef = useRef(0);
+  const adoptedDraftRef = useRef<CampaignDraftDto | null>(null);
 
   useEffect(() => {
     if (!query.data) return;
+    // Acknowledging our own save must not replace edits made while it was in flight.
+    if (adoptedDraftRef.current && Number(query.data.revision ?? 0) <= revisionRef.current) {
+      if (Number(query.data.revision ?? 0) === revisionRef.current) {
+        const fresh = new Map((query.data.addedAccounts ?? []).map(account => [draftAccountKey(account), account]));
+        setAccounts(current => current.map(account => {
+          const metadata = fresh.get(draftAccountKey(account));
+          if (!metadata) return account;
+          const next = { ...account };
+          for (const field of ["price", "followers", "isAvailable", "username", "logoUrl"] as const) {
+            if (Object.prototype.hasOwnProperty.call(metadata, field)) Object.assign(next, { [field]: metadata[field] });
+          }
+          return next;
+        }));
+      }
+      return;
+    }
+    adoptedDraftRef.current = query.data;
     const nextAccounts = normalizeAccounts(query.data);
     const nextNoContent = Boolean(query.data.noContentAvailable);
     setDraft(query.data);
@@ -162,6 +167,16 @@ export const AiCampaignDraftCard = ({
       ),
     [selectedAccounts],
   );
+  const selectionTotals = getSelectionTotals(accounts);
+  const budget = draft?.brief?.budget;
+  const budgetCurrency = draft?.brief?.budgetCurrency ?? "EUR";
+  const budgetSpend = getConvertedSelectionTotal(
+    accounts,
+    recommendations,
+    budgetCurrency,
+  );
+  const budgetDifference =
+    budget && budgetSpend !== undefined ? budget - budgetSpend : undefined;
   const platforms = useMemo(
     () =>
       Array.from(
@@ -182,9 +197,6 @@ export const AiCampaignDraftCard = ({
     [accounts],
   );
 
-  useEffect(() => {
-    setRecommendedSelection(new Set());
-  }, [recommendations?.page]);
   const contentIsReady = useMemo(
     () => Boolean(draft && isDraftReadyForCheckout(draft, accounts)),
     [accounts, draft],
@@ -228,10 +240,14 @@ export const AiCampaignDraftCard = ({
     if (!draft) return Promise.resolve(false);
     const payload = buildAiDraftPayload(draft, accounts, noContentAvailable);
     const signature = getAiDraftPayloadSignature(payload);
-    if (signature === lastSavedRef.current) return Promise.resolve(true);
-
     setSaveStatus("saving");
+    // Equality must be checked after earlier writes. A user may revert their last edit
+    // while the previous value is still being saved, and leaving must persist that revert.
     const request = saveQueueRef.current.then(async () => {
+      if (signature === lastSavedRef.current) {
+        setSaveStatus("saved");
+        return true;
+      }
       try {
         const result = await updateCampaignDraft({
           ...payload,
@@ -311,78 +327,46 @@ export const AiCampaignDraftCard = ({
     );
   }, []);
 
-  const toggleRecommendedPage = (accountId: string) => {
-    if (existingAccountIds.has(accountId)) return;
-    setRecommendedSelection((current) => {
-      const next = new Set(current);
-      if (next.has(accountId)) next.delete(accountId);
-      else next.add(accountId);
-      return next;
+  const toggleRecommendedPage = (candidate: AgentSearchCandidate) => {
+    if (!existingAccountIds.has(candidate.accountId) && accounts.length >= 50) {
+      toast.info(
+        "A campaign can contain up to 50 pages. Remove a page before adding another.",
+      );
+      return;
+    }
+    setAccounts((current) => {
+      const existing = current.find(
+        (account) => String(account.socialAccountId) === candidate.accountId,
+      );
+      if (existing?.isAvailable === false) return current;
+      if (existing)
+        return current.map((account) =>
+          account === existing
+            ? { ...account, isSelected: account.isSelected === false }
+            : account,
+        );
+      return includeRecommendedPages(
+        current,
+        [candidate],
+        draft?.brief?.dateRequest,
+      );
     });
   };
 
-  const addRecommendedPages = () => {
-    const selected = (recommendations?.candidates ?? [])
-      .filter(
-        (candidate) =>
-          recommendedSelection.has(candidate.accountId) &&
-          !existingAccountIds.has(candidate.accountId),
-      )
-      .map((candidate): DraftAddedAccountDto => ({
-        influencerId: candidate.influencerId,
-        socialAccountId: candidate.accountId,
-        socialMedia: candidate.socialMedia,
-        username: candidate.username,
-        logoUrl: candidate.logoUrl,
-        followers: candidate.followers,
-        price: candidate.priceEUR,
-        dateRequest: "ASAP",
-        isSelected: true,
-        isAvailable: true,
-        profileType: candidate.profileType,
-      }));
-    if (!selected.length) return;
-    addPages(selected);
-    setRecommendedSelection(new Set());
-  };
-
-  const addRecommendationBundle = (
-    bundle: NonNullable<AgentSearchOutcome["bundles"]>[number],
-  ) => {
-    const resolution = resolveRecommendationBundle(
-      bundle,
-      recommendations?.candidates ?? [],
-      existingAccountIds,
-      accounts.length,
-    );
-    if (resolution.status !== "ready") {
-      const message =
-        resolution.status === "already-added"
-          ? "All pages in this bundle are already in the draft."
-          : resolution.status === "over-capacity"
-            ? `This bundle needs ${resolution.candidates.length} open slots; the draft has ${resolution.remainingCapacity}.`
-            : "This recommendation is no longer complete. Load fresh recommendations and try again.";
-      toast.info(message);
+  const addRecommendedPages = (pages: AgentSearchCandidate[]) => {
+    const combinedIds = new Set([
+      ...existingAccountIds,
+      ...pages.map((page) => page.accountId),
+    ]);
+    if (combinedIds.size > 50) {
+      toast.info(
+        "This package would exceed 50 campaign pages. Remove pages or select individual recommendations.",
+      );
       return;
     }
-    addPages(
-      resolution.candidates.map(
-        (candidate): DraftAddedAccountDto => ({
-          influencerId: candidate.influencerId,
-          socialAccountId: candidate.accountId,
-          socialMedia: candidate.socialMedia,
-          username: candidate.username,
-          logoUrl: candidate.logoUrl,
-          followers: candidate.followers,
-          price: candidate.priceEUR,
-          dateRequest: "ASAP",
-          isSelected: true,
-          isAvailable: true,
-          profileType: candidate.profileType,
-        }),
-      ),
+    setAccounts((current) =>
+      includeRecommendedPages(current, pages, draft?.brief?.dateRequest),
     );
-    setRecommendedSelection(new Set());
   };
 
   const closeAddPages = useCallback(() => setAddPagesOpen(false), []);
@@ -674,15 +658,17 @@ export const AiCampaignDraftCard = ({
       <div className={styles.summary}>
         <div>
           <strong>{formatCompactNumber(totalFollowers)}</strong>
-          <span>Total reach</span>
+          <span title="Sum of page followers. Audiences can overlap; this is not predicted post reach.">
+            Combined followers
+          </span>
         </div>
         <div>
           <strong>{formatDraftCurrency(totalPrice)}</strong>
-          <span>Total budget</span>
+          <span>Selected cost · EUR</span>
         </div>
         <div>
           <strong>{selectedAccounts.length}</strong>
-          <span>Posts</span>
+          <span>Selected pages</span>
         </div>
         <div>
           <strong>{platforms}</strong>
@@ -691,173 +677,16 @@ export const AiCampaignDraftCard = ({
       </div>
 
       {focusMode === "selection" && recommendations && (
-        <section
-          className={styles.recommendations}
-          aria-label="AI page recommendations"
-        >
-          <header className={styles.recommendationsHeader}>
-            <div>
-              <span className={styles.eyebrow}>Matched from your brief</span>
-              <h4>
-                {recommendations.status === "completed"
-                  ? `${recommendations.candidates.length} of ${recommendations.totalExact} pages ready to review`
-                  : recommendations.status === "empty"
-                    ? "No exact matches found"
-                    : "Recommendations could not be loaded"}
-              </h4>
-            </div>
-            {recommendations.status === "completed" && (
-              <span>Choose pages to add to this campaign.</span>
-            )}
-          </header>
-
-          {recommendations.status === "completed" &&
-            Boolean(recommendations.bundles?.length) && (
-            <div className={styles.bundleList}>
-              {(recommendations.bundles ?? []).map((bundle) => {
-                const resolution = resolveRecommendationBundle(
-                  bundle,
-                  recommendations.candidates,
-                  existingAccountIds,
-                  accounts.length,
-                );
-                const blockedBySave = saveStatus !== "saved";
-                const buttonLabel =
-                  saveStatus === "saving"
-                    ? "Saving draft…"
-                    : saveStatus === "error" || saveStatus === "conflict"
-                      ? "Resolve save issue"
-                      : resolution.status === "already-added"
-                        ? "Already added"
-                        : resolution.status === "over-capacity"
-                          ? `Only ${resolution.remainingCapacity} slots left`
-                          : resolution.status === "missing-candidates"
-                            ? "Refresh recommendations"
-                            : "Add these pages";
-                return (
-                  <article className={styles.bundleCard} key={bundle.id}>
-                    <div className={styles.bundleSummary}>
-                      <div>
-                        <span className={styles.eyebrow}>Recommended bundle</span>
-                        <strong>{getRecommendationBundleLabel(bundle.name)}</strong>
-                        <small>
-                          {bundle.accountIds.length} {bundle.accountIds.length === 1 ? "page" : "pages"}
-                        </small>
-                      </div>
-                      <strong>{formatBundleTotal(bundle.total, bundle.currency)}</strong>
-                    </div>
-                    <details>
-                      <summary>See included pages</summary>
-                      <ul>
-                        {resolution.memberNames.map((name, index) => (
-                          <li key={`${bundle.accountIds[index]}:${index}`}>{name}</li>
-                        ))}
-                      </ul>
-                    </details>
-                    <button
-                      type="button"
-                      disabled={blockedBySave || resolution.status !== "ready"}
-                      onClick={() => addRecommendationBundle(bundle)}
-                    >
-                      {buttonLabel}
-                    </button>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-
-          {recommendations.status === "completed" && (
-            <div className={styles.recommendationList}>
-              {recommendations.candidates.map((candidate) => {
-                const alreadyAdded = existingAccountIds.has(
-                  candidate.accountId,
-                );
-                const selected = recommendedSelection.has(candidate.accountId);
-                return (
-                  <label
-                    key={`${candidate.socialMedia}:${candidate.accountId}`}
-                    className={`${styles.recommendationRow} ${alreadyAdded ? styles.recommendationAdded : ""}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={alreadyAdded || selected}
-                      disabled={alreadyAdded}
-                      onChange={() =>
-                        toggleRecommendedPage(candidate.accountId)
-                      }
-                    />
-                    {candidate.logoUrl ? (
-                      <img src={candidate.logoUrl} alt="" />
-                    ) : (
-                      <span className={styles.recommendationAvatar} />
-                    )}
-                    <span className={styles.recommendationName}>
-                      <strong>{candidate.username}</strong>
-                      <small>
-                        {normalizeDraftPlatform(candidate.socialMedia)}
-                        {candidate.musicGenres?.length
-                          ? ` · ${candidate.musicGenres.join(", ")}`
-                          : " · Genre not specified"}
-                      </small>
-                    </span>
-                    <span className={styles.recommendationMetric}>
-                      <strong>
-                        {formatCompactNumber(candidate.followers)}
-                      </strong>
-                      <small>followers</small>
-                    </span>
-                    <span className={styles.recommendationMetric}>
-                      <strong>
-                        {typeof candidate.countryShare === "number"
-                          ? `${candidate.countryShare}%`
-                          : "—"}
-                      </strong>
-                      <small>target audience</small>
-                    </span>
-                    <span className={styles.recommendationPrice}>
-                      {alreadyAdded ? "Added" : formatCandidatePrice(candidate)}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
-
-          <footer className={styles.recommendationsFooter}>
-            <span>
-              {recommendedSelection.size
-                ? `${recommendedSelection.size} selected`
-                : recommendations.status === "failed"
-                  ? "Retry the search from Dialogue."
-                  : recommendations.status === "empty"
-                    ? "Adjust the brief or ask the assistant to widen the search."
-                    : recommendations.hasMore
-                      ? "More matching pages are available."
-                      : "You are viewing all exact matches."}
-            </span>
-            <div>
-              {recommendations.hasMore && (
-                <button
-                  type="button"
-                  className={styles.secondary}
-                  onClick={onRequestMoreRecommendations}
-                >
-                  Load more matches
-                </button>
-              )}
-              {recommendations.status === "completed" && (
-                <button
-                  type="button"
-                  onClick={addRecommendedPages}
-                  disabled={recommendedSelection.size === 0}
-                >
-                  Add selected pages
-                </button>
-              )}
-            </div>
-          </footer>
-        </section>
+        <CampaignRecommendations
+          search={recommendations}
+          accounts={accounts}
+          busy={recommendationsBusy}
+          onToggle={toggleRecommendedPage}
+          onAddBundle={addRecommendedPages}
+          onLoadMore={onRequestMoreRecommendations}
+          onEditBrief={() => onOpenSection("brief")}
+          onRetry={onRetryRecommendations}
+        />
       )}
 
       <div className={styles.tableHeader}>
@@ -916,7 +745,16 @@ export const AiCampaignDraftCard = ({
                 : getDraftContentReadiness(content);
               const status = readiness.status;
               return (
-                <tr key={key} className={selected ? "" : styles.disabledRow}>
+                <tr
+                  key={key}
+                  className={
+                    !isAvailable
+                      ? styles.disabledRow
+                      : selected
+                        ? ""
+                        : styles.excludedRow
+                  }
+                >
                   {focusMode === "selection" && (
                     <td data-label="Include">
                       <input
@@ -1137,6 +975,53 @@ export const AiCampaignDraftCard = ({
             ? "Select at least one page to continue."
             : "No pages are selected. Open Pages and include at least one influencer first."}
         </div>
+      )}
+
+      {focusMode === "selection" && (
+        <footer className={styles.selectionBar} aria-label="Current selection">
+          <div aria-live="polite">
+            <strong>
+              {selectionTotals.count} pages ·{" "}
+              {formatDraftCurrency(selectionTotals.priceEUR)}
+            </strong>
+            <span>
+              {formatCompactNumber(selectionTotals.followers)} combined
+              followers · audiences may overlap
+            </span>
+            {budget && budget > 0 ? (
+              <span
+                className={
+                  budgetDifference !== undefined && budgetDifference < 0
+                    ? styles.overBudget
+                    : undefined
+                }
+              >
+                Budget target: {formatSearchPrice(budget, budgetCurrency)}
+                {budgetCurrency !== "EUR" &&
+                  budgetSpend !== undefined &&
+                  ` · Selected: ${formatSearchPrice(budgetSpend, budgetCurrency)}`}
+                {budgetDifference !== undefined &&
+                  ` · ${formatSearchPrice(Math.abs(budgetDifference), budgetCurrency)} ${budgetDifference < 0 ? "over target" : "remaining"}`}
+              </span>
+            ) : null}
+          </div>
+          <div className={styles.selectionNext}>
+            <span>
+              {selectionTotals.count
+                ? "Next: add your content link or publishing instructions."
+                : "Choose pages or include a recommended package."}
+            </span>
+            <button
+              type="button"
+              disabled={!selectionTotals.count || saveStatus === "saving"}
+              onClick={() => void continueTo(() => onOpenSection("content"))}
+            >
+              {saveStatus === "saving"
+                ? "Saving selection…"
+                : "Next: add content"}
+            </button>
+          </div>
+        </footer>
       )}
 
       {canCheckout && (

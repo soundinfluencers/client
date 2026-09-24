@@ -21,25 +21,27 @@ export const CampaignRequiredDateControl = ({
     onChange,
 }: Props) => {
     const dateValue = toDateValue(value);
+    const customDate = value?.trim() && !dateValue && !/^(ASAP|Flexible)$/i.test(value.trim()) ? value.trim() : "";
     const [isScheduled, setIsScheduled] = useState(Boolean(dateValue));
 
     useEffect(() => {
-        if (dateValue) setIsScheduled(true);
-    }, [dateValue]);
+        setIsScheduled(Boolean(dateValue));
+    }, [dateValue, value]);
 
     return (
         <div className={className}>
             <select
-                value={isScheduled ? "scheduled" : "asap"}
+                value={isScheduled ? "scheduled" : customDate ? "custom" : "asap"}
                 disabled={disabled}
                 onChange={(event) => {
                     const scheduled = event.target.value === "scheduled";
                     setIsScheduled(scheduled);
-                    if (!scheduled) onChange("ASAP");
+                    if (event.target.value === "asap") onChange("ASAP");
                 }}
                 aria-label={`Date preference for ${label}`}
             >
                 <option value="asap">ASAP</option>
+                {customDate && <option value="custom">{customDate}</option>}
                 <option value="scheduled">Choose date</option>
             </select>
             {isScheduled && (

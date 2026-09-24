@@ -1,4 +1,4 @@
-import { isAgentChatResponse } from "./agent-response.validation.ts";
+import { isAgentSearchOutcome, isAgentChatResponse } from "./agent-response.validation.ts";
 import axios from "axios";
 import $api from "../api.ts";
 
@@ -55,6 +55,7 @@ export interface AgentSearchCandidate {
 }
 
 export interface AgentSearchOutcome {
+  request?: Record<string, unknown>;
   status: "completed" | "empty" | "failed";
   page: number;
   loadedCount: number;
@@ -62,6 +63,9 @@ export interface AgentSearchOutcome {
   hasMore: boolean;
   nextPage?: number;
   candidates: AgentSearchCandidate[];
+  countries?: string[];
+  currency?: "EUR" | "GBP" | "USD";
+  currencyPerEUR?: number;
   bundles?: AgentSearchBundle[];
 }
 
@@ -71,6 +75,8 @@ export interface AgentSearchBundle {
   total: number;
   currency: "EUR" | "GBP" | "USD";
   accountIds: string[];
+  pages?: AgentSearchCandidate[];
+  followers?: number;
 }
 
 export interface AgentMedia {
@@ -88,6 +94,18 @@ export interface AgentChatResponse {
   search?: AgentSearchOutcome;
   media?: AgentMedia[];
 }
+
+export const findCampaignRecommendations = async (input: {
+  draftId: string;
+  conversationId?: string;
+  page: number;
+  request?: Record<string, unknown>;
+}): Promise<{ conversationId: string; draftId: string; search: AgentSearchOutcome }> => {
+  const response = await $api.post('/agent/recommendations', input);
+  const result = response.data.data;
+  if (result?.draftId !== input.draftId || typeof result?.conversationId !== "string" || !isAgentSearchOutcome(result?.search)) throw new Error("Invalid recommendations response");
+  return result;
+};
 
 // Shared by client and influencer — the backend derives the role from the JWT.
 export const sendAgentMessage = async (

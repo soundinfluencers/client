@@ -7,7 +7,9 @@
   flex-direction: column;
   background: #fff;
 
-  &:focus { outline: none; }
+  &:focus {
+    outline: none;
+  }
 }
 
 .header {
@@ -42,7 +44,9 @@
     cursor: pointer;
     place-items: center;
 
-    &:hover { background: #f3f6f9; }
+    &:hover {
+      background: #f3f6f9;
+    }
   }
 }
 
@@ -98,7 +102,32 @@
   line-height: 1.45;
 }
 
+.searchStatus {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border: 1px solid #dce5f3;
+  border-radius: 10px;
+  background: #f5f8ff;
+  color: #38485e;
+  font-size: 12px;
+  button {
+    border: 1px solid #b3c5e8;
+    border-radius: 20px;
+    background: #fff;
+    padding: 7px 14px;
+    cursor: pointer;
+  }
+}
+
 @media (max-width: 640px) {
-  .header { padding: 12px 14px 10px; }
-  .body { padding: 12px 14px 16px; }
+  .header {
+    padding: 12px 14px 10px;
+  }
+  .body {
+    padding: 12px 14px 16px;
+  }
 }
