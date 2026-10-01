@@ -12,63 +12,91 @@ import {
   toCampaignPageModelFromRegular,
 } from "@/client-side/utils/getCampaign.utils";
 
+// A single data slot: only its latest request may publish data/loading/error.
+let latestRequest = 0;
+
 export const useFetchCampaign = create<any>((set, get) => ({
   data: null,
+  dataKey: null,
+  requestKey: null,
   isLoading: false,
+  error: null,
 
   setDraft: async (draftId: string) => {
-    set({ data: null, isLoading: true });
+    const requestId = ++latestRequest;
+    const requestKey = `draft:${draftId}`;
+    set({
+      data: get().dataKey === requestKey ? get().data : null,
+      isLoading: true, error: null, requestKey,
+    });
 
     try {
       const data = await getCampaignDraft(draftId);
+      if (requestId !== latestRequest) return null;
       const next = toCampaignPageModelFromDraft(data);
 
-      set({ data: next });
+      set({ data: next, dataKey: requestKey });
       return next;
     } catch (error) {
+      if (requestId !== latestRequest) return null;
       console.log(error);
-      set({ data: null });
+      set({ error });
       return null;
     } finally {
-      set({ isLoading: false });
+      if (requestId === latestRequest) set({ isLoading: false });
     }
   },
 
   setProposalOption: async (campaignId: string, optionIndex: number) => {
-    set({ isLoading: true });
+    const requestId = ++latestRequest;
+    const requestKey = `proposal:${campaignId}:${optionIndex}`;
+    set({
+      data: get().dataKey === requestKey ? get().data : null,
+      isLoading: true, error: null, requestKey,
+    });
 
     try {
       const { data } = await getProposalCampaign(campaignId, optionIndex);
+      if (requestId !== latestRequest) return null;
       const payload = (data as any).data ?? data;
       const next = toCampaignPageModelFromProposal(payload);
 
-      set({ data: next });
+      set({ data: next, dataKey: requestKey });
       return next;
     } catch (error) {
+      if (requestId !== latestRequest) return null;
       console.log(error);
+      set({ error });
       return null;
     } finally {
-      set({ isLoading: false });
+      if (requestId === latestRequest) set({ isLoading: false });
     }
   },
 
   setCampaign: async (campaignId: string) => {
-    set({ data: null, isLoading: true });
+    const requestId = ++latestRequest;
+    const requestKey = `regular:${campaignId}`;
+    set({
+      data: get().dataKey === requestKey ? get().data : null,
+      isLoading: true, error: null, requestKey,
+    });
 
     try {
       const { data: res } = await getCampaign(campaignId);
+      if (requestId !== latestRequest) return null;
       const payload = (res as any).data ?? res;
 
       const next = toCampaignPageModelFromRegular(payload);
 
-      set({ data: next });
+      set({ data: next, dataKey: requestKey });
       return next;
     } catch (error) {
+      if (requestId !== latestRequest) return null;
       console.log(error);
-      set({ data: null });
+      set({ error });
       return null;
     } finally {
-      set({ isLoading: false });
+      if (requestId === latestRequest) set({ isLoading: false });
     }
   },
 
@@ -121,16 +149,20 @@ export const useFetchCampaign = create<any>((set, get) => ({
           paymentType: "",
         };
 
-    set({ isLoading: true });
+    const requestId = ++latestRequest;
+    set({ isLoading: true, error: null });
 
     try {
       await postAddProposalOption(campaignId, body);
+      // A newer read can supersede UI ownership, but cannot undo a successful write.
       return true;
     } catch (error) {
+      if (requestId !== latestRequest) return null;
       console.log(error);
+      set({ error });
       return null;
     } finally {
-      set({ isLoading: false });
+      if (requestId === latestRequest) set({ isLoading: false });
     }
   },
 }));

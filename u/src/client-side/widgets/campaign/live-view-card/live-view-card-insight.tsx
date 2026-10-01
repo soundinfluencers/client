@@ -55,7 +55,7 @@ export const LiveViewCardInsight: React.FC<LiveViewCardProps> = ({
           e.stopPropagation();
 
           window.open(
-            item.taggedLink as string,
+            item.postLink as string,
             "_blank",
             "noopener,noreferrer",
           );

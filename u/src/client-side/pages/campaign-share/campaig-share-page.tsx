@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Loader } from "@/components";
+import { ButtonMain, Container, Loader } from "@/components";
 import "@/client-side/styles-table/_table-campaign.scss";
 import "@/client-side/styles-table/campaignBase.scss";
 
@@ -9,10 +9,7 @@ import {
   CampaignTablePageShare,
   ProposalCampaignPageShare,
 } from "@/client-side/widgets";
-import {
-  useFetchCampaign,
-  useProposalCampaignStore,
-} from "@/client-side/store";
+import { useFetchCampaign } from "@/client-side/store";
 import { OptionsSlider } from "@/client-side/widgets/campaign-share/components/option-slider";
 import {
   Bar,
@@ -22,46 +19,47 @@ import {
   ViewChange,
 } from "@/client-side/ui";
 import {getVisibleCampaignStats} from "@/client-side/pages/campaign-share/model/campaign-campaign.helpers.ts";
-interface Props {}
-
-export const CampaignSharePage: React.FC<Props> = () => {
+export const CampaignSharePage = () => {
   const { id, type } = useParams<{ id: string; type: string }>();
+  // Route changes reset the selected option and view before rendering the new flow.
+  return <CampaignShareView key={JSON.stringify([id, type])} id={id} type={type} />;
+};
+
+const CampaignShareView = ({ id, type }: { id?: string; type?: string }) => {
   const isProposal = type === "proposal";
   const [activeOption, setActiveOption] = React.useState(0);
-  const [localExtraOptions, setLocalExtraOptions] = React.useState<number[]>(
-    [],
-  );
   const [changeView, setChangeView] = React.useState(false);
   const [view, setView] = React.useState<number>(1);
   const [flag, setFlag] = React.useState<boolean>(false);
-  const loadingProposal = useFetchCampaign((state) => state.isLoading)
-  const { data, setProposalOption } = useFetchCampaign();
+  const {
+    data, dataKey, requestKey,
+    isLoading: loadingProposal,
+    error: proposalError,
+    setProposalOption,
+  } = useFetchCampaign();
+  const proposalKey = `proposal:${id}:${activeOption}`;
+  const isCurrentProposalRequest = requestKey === proposalKey;
+  const proposal =
+    isProposal && isCurrentProposalRequest && dataKey === proposalKey &&
+    data?.kind === "proposal" && String(data.campaignId) === id &&
+    data.selectedOption?.optionIndex === activeOption
+      ? data
+      : undefined;
 
   const {
-    data: campaign,
+    data: regularCampaign,
     isLoading,
     isError,
+    isFetching,
     refetch,
   } = useShareCampaignQuery(id, {
     enabled: !!id && !isProposal,
   });
-  console.log("campaign", campaign);
+  const campaign = isProposal ? undefined : regularCampaign;
   React.useEffect(() => {
     if (!id || !isProposal) return;
-
-    const idx = data?.selectedOption?.optionIndex ?? 0;
-    useProposalCampaignStore
-      .getState()
-      .initOption(
-        data?.campaignId,
-        idx,
-        data?.selectedOption?.addedAccounts ?? [],
-        data?.selectedOption?.campaignContent ?? [],
-        { force: true },
-      );
-    setProposalOption(id, idx);
-    setActiveOption(idx);
-  }, [id, isProposal, data?.selectedOption?.optionIndex]);
+    setProposalOption(id, activeOption);
+  }, [id, isProposal, activeOption, setProposalOption]);
 
 
   const isBarSection =
@@ -70,31 +68,29 @@ export const CampaignSharePage: React.FC<Props> = () => {
     ? isBarSection
       ? BarSection
       : Bar
-    : data
+    : proposal
       ? Bar
       : null;
-  // if (isError || !campaign || !data) {
-  //   return (
-  //     <Container>
-  //       <p>Failed to load campaign</p>
-  //       <button onClick={() => refetch()}>Retry</button>
-  //     </Container>
-  //   );
-  // }
   const onClickOption = (optionIndex: number) => {
     setActiveOption(optionIndex);
-    setProposalOption(data?.campaignId ?? "", optionIndex);
   };
   const optionIndexes =
-    type === "proposal"
-      ? Array.from(
-          new Set([...(data?.existingOptions ?? []), ...localExtraOptions]),
-        ).sort((a, b) => a - b)
+    isProposal
+      ? [...(proposal?.existingOptions ?? [])].sort((a, b) => a - b)
       : [];
   const statusFlag = ["distributing", "completed"].includes(
     campaign?.status ?? "",
   );
-  const barCampaign = campaign || data;
+  const barCampaign = isProposal ? proposal : campaign;
+  const fetching = isProposal ? !isCurrentProposalRequest || loadingProposal : isFetching;
+  const hasError = isProposal ? isCurrentProposalRequest && Boolean(proposalError) : isError;
+  const retry = () => {
+    if (isProposal && id) {
+      setProposalOption(id, activeOption);
+    } else if (!isProposal) {
+      refetch();
+    }
+  };
 
   const visibleStats = React.useMemo(() => {
     if (!barCampaign) {
@@ -121,22 +117,33 @@ export const CampaignSharePage: React.FC<Props> = () => {
       content,
     });
   }, [barCampaign, type]);
-  console.log(campaign, "cam");
-  if (isLoading || loadingProposal) {
+  if (!barCampaign && (isProposal ? fetching : isLoading)) {
     return <Loader />;
+  }
+  const errorMessage = (hasError || !barCampaign) && (
+    <div role="alert">
+      <p>{barCampaign
+        ? "Unable to refresh campaign. Showing previously loaded data."
+        : "Failed to load campaign."}</p>
+      <ButtonMain text={fetching ? "Retrying..." : "Retry"} isDisabled={fetching} onClick={retry} />
+    </div>
+  );
+  if (!barCampaign) {
+    return <Container className="campaignBase">{errorMessage}</Container>;
   }
   return (
     <Container className="campaignBase">
+      {errorMessage}
       <div className="campaignBase__title">
         <h1>
-          {campaign?.campaignName || data?.campaignName} - Campaign
+          {barCampaign.campaignName} - Campaign
           SoundInfluencers
         </h1>
       </div>{" "}
       {BarComponent && barCampaign && (
           <BarComponent campaign={barCampaign} visibleStats={visibleStats} />
       )}
-      {data && (
+      {isProposal && proposal && (
         <OptionsSlider
           optionIndexes={optionIndexes}
           activeOption={activeOption}
@@ -146,13 +153,13 @@ export const CampaignSharePage: React.FC<Props> = () => {
       <div className="controls-second">
         {" "}
         <div className='controls-second_share-row'>
-          {data && flag === true && view !== 0 && (
+          {isProposal && proposal && flag === true && view !== 0 && (
               <ViewAudience
                   flag={changeView}
                   onChange={() => setChangeView((prev) => !prev)}
               />
           )}{" "}
-          {(campaign || data) && (
+          {barCampaign && (
               <ToggleTables onChange={() => setFlag((prev) => !prev)} flag={flag} />
           )}
         </div>
@@ -162,7 +169,7 @@ export const CampaignSharePage: React.FC<Props> = () => {
       </div>
       <div className="campaignBase__content">
         <div className="campaignBase__table-wrapper">
-          {campaign && (
+          {!isProposal && campaign && (
             <CampaignTablePageShare
               flag={flag}
               statusFlag={statusFlag}
@@ -170,15 +177,15 @@ export const CampaignSharePage: React.FC<Props> = () => {
               campaign={campaign}
             />
           )}
-          {data && (
+          {isProposal && proposal && (
               <ProposalCampaignPageShare
-                  campaign={data}
+                  campaign={proposal}
                   changeView={changeView}
                   view={view}
                   flag={flag}
               />
           )}
-          {data && (
+          {isProposal && proposal && (
             <p className="option-chose">
               Option {activeOption + 1} is already selected
             </p>

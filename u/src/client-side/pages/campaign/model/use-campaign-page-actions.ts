@@ -59,6 +59,12 @@ export const useCampaignPageActions = ({
 }: Params) => {
   const navigate = useNavigate();
   const campaignIdForActions = getCampaignActionId(data);
+  const isMounted = React.useRef(false);
+
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
 
   const optionIndexes = React.useMemo(
     () => getOptionIndexes(data, localExtraOptions),
@@ -167,14 +173,22 @@ export const useCampaignPageActions = ({
 
       const currentOptions = getOptionIndexes(data, localExtraOptions);
       const nextOptionIndex = currentOptions.length;
+      const isCurrentCampaign = () => isMounted.current &&
+        useFetchCampaign.getState().requestKey?.startsWith(`proposal:${campaignIdForActions}:`);
 
       try {
         setIsRequesting(true);
         setOptionModal(false);
 
-        await useFetchCampaign
+        const created = await useFetchCampaign
         .getState()
         .addProposalOption(campaignIdForActions, inheritFromCurrentOption);
+
+        if (!isCurrentCampaign()) return;
+        if (!created) {
+          toast.error("Failed to add proposal option");
+          return;
+        }
 
         useUpdateCampaign.getState().reset();
 
@@ -184,12 +198,13 @@ export const useCampaignPageActions = ({
 
         await reloadProposalOption(nextOptionIndex);
 
-        toast.success("Proposal option added successfully!");
+        if (isCurrentCampaign()) toast.success("Proposal option added successfully!");
       } catch (e) {
+        if (!isCurrentCampaign()) return;
         console.error(e);
         toast.error("Failed to add proposal option");
       } finally {
-        setIsRequesting(false);
+        if (isCurrentCampaign()) setIsRequesting(false);
       }
     },
     [

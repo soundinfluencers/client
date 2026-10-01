@@ -12,6 +12,7 @@ export const useShareCampaignQuery = (
       return data;
     },
     enabled: !!id,
+    refetchOnMount: "always",
     ...options,
     staleTime: 60_000,
   });

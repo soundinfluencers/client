@@ -623,7 +623,27 @@
   text-align: left;
   max-width: 150px !important;
   flex: 1 1 auto;
-}.edit-desc{
+}
+
+.tableBase__tdpage__td {
+  .tooltip-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .username {
+    min-width: 0;
+    max-width: 100% !important;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
+.edit-desc{
    max-width: 140px !important;
    white-space: nowrap;
    overflow: hidden;
