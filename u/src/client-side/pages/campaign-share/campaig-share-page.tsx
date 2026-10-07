@@ -2,6 +2,7 @@ import React from "react";
 import { ButtonMain, Container, Loader } from "@/components";
 import "@/client-side/styles-table/_table-campaign.scss";
 import "@/client-side/styles-table/campaignBase.scss";
+import styles from "./campaign-share-views.module.scss";
 
 import { useParams } from "react-router-dom";
 import { useShareCampaignQuery } from "@/client-side/react-query";
@@ -15,7 +16,6 @@ import {
   Bar,
   BarSection,
   ToggleTables,
-  ViewAudience,
   ViewChange,
 } from "@/client-side/ui";
 import {getVisibleCampaignStats} from "@/client-side/pages/campaign-share/model/campaign-campaign.helpers.ts";
@@ -30,7 +30,7 @@ const CampaignShareView = ({ id, type }: { id?: string; type?: string }) => {
   const [activeOption, setActiveOption] = React.useState(0);
   const [changeView, setChangeView] = React.useState(false);
   const [view, setView] = React.useState<number>(1);
-  const [flag, setFlag] = React.useState<boolean>(false);
+  const [flag, setFlag] = React.useState<boolean>(isProposal);
   const {
     data, dataKey, requestKey,
     isLoading: loadingProposal,
@@ -152,20 +152,56 @@ const CampaignShareView = ({ id, type }: { id?: string; type?: string }) => {
       )}{" "}
       <div className="controls-second">
         {" "}
-        <div className='controls-second_share-row'>
-          {isProposal && proposal && flag === true && view !== 0 && (
-              <ViewAudience
-                  flag={changeView}
-                  onChange={() => setChangeView((prev) => !prev)}
-              />
-          )}{" "}
-          {barCampaign && (
-              <ToggleTables onChange={() => setFlag((prev) => !prev)} flag={flag} />
-          )}
-        </div>
-        <div className="controls-second__content">
-          <ViewChange isProposal={false} setView={setView} view={view} />
-        </div>
+        {isProposal ? (
+          proposal && (
+            <div className={styles.views} role="group" aria-label="Campaign views">
+              <button
+                type="button"
+                className={styles.button}
+                aria-pressed={view === 1 && flag && !changeView}
+                onClick={() => {
+                  setView(1);
+                  setFlag(true);
+                  setChangeView(false);
+                }}>
+                Campaign Strategy
+              </button>
+              <button
+                type="button"
+                className={styles.button}
+                aria-pressed={view === 1 && !flag}
+                onClick={() => {
+                  setView(1);
+                  setFlag(false);
+                  setChangeView(false);
+                }}>
+                Campaign Insights
+              </button>
+              <button
+                type="button"
+                className={styles.button}
+                aria-pressed={view === 1 && flag && changeView}
+                onClick={() => {
+                  setView(1);
+                  setFlag(true);
+                  setChangeView(true);
+                }}>
+                Advanced Insights
+              </button>
+            </div>
+          )
+        ) : (
+          <>
+            <div className="controls-second_share-row">
+              {barCampaign && (
+                <ToggleTables onChange={() => setFlag((prev) => !prev)} flag={flag} />
+              )}
+            </div>
+            <div className="controls-second__content">
+              <ViewChange isProposal={false} setView={setView} view={view} />
+            </div>
+          </>
+        )}
       </div>
       <div className="campaignBase__content">
         <div className="campaignBase__table-wrapper">

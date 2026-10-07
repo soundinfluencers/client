@@ -1,0 +1,27 @@
+.views {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 8px 12px;
+  border: 1px solid #ebecff;
+  border-radius: 8px;
+  background-color: #fff;
+  color: inherit;
+  font-family: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &[aria-pressed="true"] {
+    background: linear-gradient(180deg, #ebecff 0%, #dff0ff 100%);
+  }
+}

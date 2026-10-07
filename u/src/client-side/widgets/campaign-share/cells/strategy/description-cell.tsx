@@ -13,6 +13,7 @@ type Props = {
   group: string;
   selectedPd: number;
   setSelectedPd: (v: number) => void;
+  enableTitle?: boolean;
 };
 
 export const DescriptionCell = React.memo(function DescriptionCell({
@@ -23,6 +24,7 @@ export const DescriptionCell = React.memo(function DescriptionCell({
   selectedContent,
   selectedPd,
   setSelectedPd,
+  enableTitle = false,
                                                                      group
 }: Props) {
   const descriptions = platformItems?.[selectedContent]?.descriptions ?? [];
@@ -57,7 +59,7 @@ export const DescriptionCell = React.memo(function DescriptionCell({
   return (
     <td className="tableBase__td">
       {group !== 'press' ? <div className="no-edit">
-        <p className="hidden-text desc">
+        <p className="hidden-text desc" title={enableTitle ? descriptions?.[selectedPd]?.description ?? "" : undefined}>
           {descriptions?.[selectedPd]?.description}
         </p>
       </div> : <Link  to={normalizeLink(descriptions?.[selectedPd]?.description)}
