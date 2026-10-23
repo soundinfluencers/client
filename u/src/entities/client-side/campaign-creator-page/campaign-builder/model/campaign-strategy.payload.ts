@@ -1,9 +1,15 @@
+import type { CampaignPaymentDetails, CreateRegularCampaignRequest } from "@/api/client/campaign/create-campaign.types";
+import { assertSupportedSelections, currencyCode, getDraftRowIds, serializeDraftSelection, serializeSelectedOffer, type SelectedOffer } from "./selected-offer";
+import type { CampaignContentItem, SelectedCampaignAccount } from "./campaign-builder.types";
+import { serializeCampaignContent, serializeContentReference } from "./campaign-content.transport";
+
 type BuildStrategyBaseParams = {
     campaignName: string;
     totalPrice?: number;
     draftId?: string | null;
     accounts: any[];
     content: any[];
+    displayCurrency?: string;
 };
 
 const mapAccountsForStrategy = (accounts: any[], content: any[]) =>
@@ -12,61 +18,12 @@ const mapAccountsForStrategy = (accounts: any[], content: any[]) =>
         influencerId: String(account.influencerId ?? ""),
         socialMedia: String(account.socialMedia ?? ""),
         username: String(account.username ?? ""),
-        selectedCampaignContentItem: account.selectedCampaignContentItem
-            ? {
-                campaignContentItemId: String(
-                    account.selectedCampaignContentItem.campaignContentItemId ?? "",
-                ),
-                descriptionId: String(
-                    account.selectedCampaignContentItem.descriptionId ?? "",
-                ),
-                ...(() => {
-                    const contentItem = content.find(
-                        (item) =>
-                            String(item._id) ===
-                            String(
-                                account.selectedCampaignContentItem
-                                    .campaignContentItemId ?? "",
-                            ),
-                    );
-                    const additionalBriefId =
-                        account.selectedCampaignContentItem.additionalBriefId ??
-                        contentItem?.additionalBrief?.[0]?._id;
-                    return additionalBriefId
-                        ? { additionalBriefId: String(additionalBriefId) }
-                        : {};
-                })(),
-            }
-            : undefined,
+        selectedCampaignContentItem: serializeContentReference(account.selectedCampaignContentItem, content) ?? undefined,
         dateRequest: String(account.dateRequest ?? "ASAP"),
         profileType: String(account.profileType ?? "community"),
     }));
 
-const mapContentForStrategy = (content: any[]) =>
-    content.map((item) => ({
-        _id: String(item._id ?? ""),
-        socialMedia: String(item.socialMedia ?? ""),
-        socialMediaGroup: String(item.socialMediaGroup ?? ""),
-        mainLink: String(item.mainLink ?? ""),
-        descriptions: (item.descriptions ?? []).map((description: any) => ({
-            _id: String(description._id ?? ""),
-            description: String(description.description ?? ""),
-        })),
-        taggedUser: String(item.taggedUser ?? ""),
-        taggedLink: String(item.taggedLink ?? ""),
-        additionalBrief: Array.isArray(item.additionalBrief)
-            ? item.additionalBrief.map((brief: any) => ({
-                _id: String(brief?._id ?? new ObjectId().toHexString()),
-                additionalBrief: String(brief?.additionalBrief ?? ""),
-            }))
-            : String(item.additionalBrief ?? "").trim()
-                ? [{
-                    _id: new ObjectId().toHexString(),
-                    additionalBrief: String(item.additionalBrief),
-                }]
-                : [],
-        profileType: String(item.profileType ?? "community"),
-    }));
+const mapContentForStrategy = serializeCampaignContent;
 
 const resolveStrategySocialMedia = (items: any[]) => {
     const socials = Array.from(
@@ -88,14 +45,21 @@ export const buildStrategyDraftPayload = ({
                                               draftId,
                                               accounts,
                                               content,
-                                          }: BuildStrategyBaseParams) => {
+                                              selectedOffer = null,
+                                              displayCurrency = "EUR",
+                                          }: BuildStrategyBaseParams & { selectedOffer?: SelectedOffer | null }) => {
+    assertSupportedSelections(accounts);
     const campaignContent = mapContentForStrategy(content);
     return {
     ...(draftId ? { draftId } : {}),
     step: "strategyTable",
+    displayCurrency: currencyCode(displayCurrency),
     campaignName: String(campaignName ?? ""),
     socialMedia: resolveStrategySocialMedia(content),
-    addedAccounts: mapAccountsForStrategy(accounts, campaignContent),
+    ...serializeDraftSelection(mapAccountsForStrategy(accounts, campaignContent).map((row, index) => ({
+        ...row,
+        ...getDraftRowIds(accounts[index]),
+    })), selectedOffer),
     campaignContent,
     };
 };
@@ -122,27 +86,27 @@ export const buildStrategyCreateCampaignPayload = ({
                                                        accounts,
                                                        content,
                                                        paymentDetails,
-                                                   }: BuildStrategyBaseParams & {
-    paymentDetails: {
-        firstName: string;
-        lastName: string;
-        address: string;
-        country: string;
-        referenceNumber: string;
-        amount: number;
-        company?: string;
-        vatNumber?: string;
-        selectedPaymentMethod: string;
-    };
-                                                   }) => {
+                                                       selectedOffer = null,
+                                                       offerIsAvailable,
+                                                       displayCurrency = "EUR",
+                                                   }: Omit<BuildStrategyBaseParams, "accounts" | "content"> & {
+    accounts: SelectedCampaignAccount[];
+    content: CampaignContentItem[];
+    paymentDetails: CampaignPaymentDetails;
+    selectedOffer?: SelectedOffer | null;
+    offerIsAvailable?: boolean | null;
+                                                   }): CreateRegularCampaignRequest => {
+    assertSupportedSelections(accounts);
     const campaignContent = mapContentForStrategy(content);
+    const addedAccounts = mapAccountsForStrategy(accounts, campaignContent);
     return {
     campaignName: String(campaignName ?? ""),
     socialMedia: resolveStrategySocialMedia(content),
     campaignPrice: Number(totalPrice ?? 0),
-    addedAccounts: mapAccountsForStrategy(accounts, campaignContent),
+    displayCurrency: currencyCode(displayCurrency),
+    addedAccounts,
+    selectedOffer: serializeSelectedOffer(selectedOffer, addedAccounts, offerIsAvailable),
     campaignContent,
     paymentDetails,
     };
 };
-import { ObjectId } from "bson";

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { BuiltCampaignContentItem } from "./campaign-post-content.types";
 
 const normalizeUrl = (value: string) => {
     const trimmed = value.trim();
@@ -86,6 +87,8 @@ export const campaignPostContentFieldsSchema = z.object({
 });
 
 export const campaignPostContentBlockSchema = z.object({
+    briefFieldId: z.string().nullable().optional(),
+    savedContent: z.array(z.custom<BuiltCampaignContentItem>()).optional(),
     id: z.string(),
     group: z.enum(["main", "music", "press"]),
     platform: z.string(),

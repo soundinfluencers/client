@@ -1,4 +1,5 @@
 import $api from "../../api.ts";
+import type { CreateRegularCampaignRequest } from "./create-campaign.types";
 
 // CAMPAIGN
 
@@ -79,7 +80,7 @@ export async function patchCampaign(
   return $api.patch(`/campaigns/${campaignId}/update`, body);
 }
 
-export const postCampaign = async (payload: any) => {
+export const postCampaign = async (payload: CreateRegularCampaignRequest) => {
   try {
     await $api.post("/campaigns", payload);
   } catch (error) {

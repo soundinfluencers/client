@@ -8,6 +8,8 @@ import {
     CAMPAIGN_CURRENCY_OPTIONS,
     CAMPAIGN_SORT_OPTIONS,
 } from "@/features/client-side/campaign-creator-page/build-campaign-filters/build-campaign-params.constants";
+import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
+import { currencyCode } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
 
 const VIEW_VALUES = ["grid", "table"] as const;
 const METHOD_VALUES = ["and", "or"] as const;
@@ -38,11 +40,13 @@ const serializeFiltersValue = (value: string[]) => {
 };
 
 export const useBuildCampaignParams = () => {
+    const savedCurrency = useCampaignBuilderStore((state) => state.selectedCurrency);
+    const setBuilderCurrency = useCampaignBuilderStore((state) => state.actions.setSelectedCurrency);
     const [params, setParams] = useQueryStates(
         {
             q: parseAsString.withDefault(""),
             budget: parseAsInteger,
-            currency: parseAsStringLiteral(CURRENCY_VALUES).withDefault("EUR"),
+            currency: parseAsStringLiteral(CURRENCY_VALUES).withDefault(currencyCode(savedCurrency)),
             sort: parseAsStringLiteral(SORT_VALUES).withDefault("bestMatch"),
             view: parseAsStringLiteral(VIEW_VALUES).withDefault("grid"),
             method: parseAsStringLiteral(METHOD_VALUES).withDefault("and"),
@@ -55,6 +59,10 @@ export const useBuildCampaignParams = () => {
         },
     );
 
+    const setCurrencyCode = (value: "EUR" | "USD" | "GBP") => {
+        setBuilderCurrency(value);
+        return setParams({ currency: value });
+    };
     const selectedFilterIds = parseFiltersValue(params.filters);
 
     const selectedCurrency =
@@ -79,9 +87,8 @@ export const useBuildCampaignParams = () => {
         selectedCurrencyCode: params.currency,
         selectedCurrency,
         setCurrency: (value: { key: string; currency: "EUR" | "USD" | "GBP" }) =>
-            setParams({ currency: value.currency }),
-        setCurrencyCode: (value: "EUR" | "USD" | "GBP") =>
-            setParams({ currency: value }),
+            setCurrencyCode(value.currency),
+        setCurrencyCode,
 
         selectedSortKey: params.sort,
         selectedSort,

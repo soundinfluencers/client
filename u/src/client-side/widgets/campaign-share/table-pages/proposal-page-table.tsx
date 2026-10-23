@@ -94,7 +94,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
             { force: true },
         );
 
-        const base = useProposalCampaignStore
+        const prepared = useProposalCampaignStore
             .getState()
             .getCampaignPayload(
                 campaignId,
@@ -102,6 +102,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
                 campaign?.campaignName ?? "",
                 patches,
             );
+        const base = { ...prepared, campaignPrice: Number(campaign?.selectedOption?.price ?? prepared.campaignPrice) };
 
         useProposalCampaignStore
             .getState()
@@ -131,6 +132,7 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
     }, [
         campaign?.campaignId,
         campaign?.campaignName,
+        campaign?.selectedOption?.price,
         optionIndex,
         accounts,
         content,

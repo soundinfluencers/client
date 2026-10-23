@@ -108,6 +108,7 @@ export const useCampaignPageBootstrap = (campaignData: any) => {
                 data.draftId,
                 data.addedAccounts ?? [],
                 data.campaignContent ?? [],
+                { campaignName: data.campaignName, selectedOffer: data.selectedOffer ?? null, displayCurrency: data.displayCurrency },
             );
         }
     }, [data, initDraft]);

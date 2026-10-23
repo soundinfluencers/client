@@ -1,34 +1,37 @@
-import type {
-    SelectedCampaignAccount,
-} from "./campaign-builder.types";
+import type { SelectedCampaignAccount } from "./campaign-builder.types";
+import { currencyCode, type OfferPrices } from "./selected-offer";
 
-export type BuildCampaignOffer = {
-    id: string;
-    price: number;
+export type BuildCampaignOffer = { id: string; price: number };
+
+export const priceForCurrency = (
+    prices: Partial<OfferPrices> | undefined | null, currency: string,
+): number | null => {
+    const value = prices?.[currencyCode(currency)];
+    return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
 };
 
-const getAccountPrice = (account?: SelectedCampaignAccount | null) => {
-    if (!account) return 0;
-    return typeof account.price === "number" ? account.price : 0;
-};
-
+// Converted GET maps are used as-is. A scalar catalogue price is EUR only.
+// NaN means "not ready", never a display amount or a price to submit.
 export const calcBuilderTotal = ({
-                                     selectedOfferId,
-                                     offers,
-                                     selectedAccounts,
-                                 }: {
+    selectedOfferId, offers = [], selectedAccounts, selectedOfferAccountIds = [],
+    selectedOfferPrices, selectedCurrency = "EUR",
+}: {
     selectedOfferId: string | null;
-    offers: BuildCampaignOffer[];
+    offers?: BuildCampaignOffer[];
     selectedAccounts: SelectedCampaignAccount[];
+    selectedOfferAccountIds?: string[];
+    selectedOfferPrices?: Partial<OfferPrices> | null;
+    selectedOfferPrice?: number | null;
+    selectedCurrency?: string;
 }) => {
-    const selectedOffer =
-        offers.find((item) => item.id === selectedOfferId) ?? null;
-
-    const offerPrice = selectedOffer?.price ?? 0;
-
-    const accountsPrice = selectedAccounts.reduce((sum, account) => {
-        return sum + getAccountPrice(account);
+    const code = currencyCode(selectedCurrency);
+    const membership = new Set(selectedOfferId ? selectedOfferAccountIds : []);
+    const catalogue = offers.find((offer) => offer.id === selectedOfferId);
+    const offerPrice = selectedOfferId ? priceForCurrency(selectedOfferPrices, code) ??
+        (code === "EUR" ? catalogue?.price ?? NaN : NaN) : 0;
+    return offerPrice + selectedAccounts.reduce((sum, account) => {
+        const price = priceForCurrency(account.prices, code) ??
+            (account.priceCurrency === code ? account.price ?? NaN : NaN);
+        return sum + (membership.has(account.accountId) ? 0 : price);
     }, 0);
-
-    return offerPrice + accountsPrice;
 };

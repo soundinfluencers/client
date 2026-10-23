@@ -63,10 +63,13 @@ export const CampaignPostContentRoute = () => {
     const selectedAccounts = useCampaignBuilderStore((s) => s.selectedAccounts);
     const campaignName = useCampaignBuilderStore((s) => s.campaignName);
     const selectedOfferName = useCampaignBuilderStore((s) => s.selectedOfferName);
+    const selectedOfferAccountIds = useCampaignBuilderStore((s) => s.selectedOfferAccountIds);
     const blocksDraft = useCampaignBuilderStore((s) => s.blocksDraft);
     const campaignContent = useCampaignBuilderStore((s) => s.campaignContent);
     const totalPrice = useCampaignBuilderStore((s) => s.totalPrice);
+    const totalPriceReady = useCampaignBuilderStore((s) => s.totalPriceReady);
     const offerPrice = useCampaignBuilderStore((s) => s.selectedOfferPrice);
+    const offerAvailable = useCampaignBuilderStore((s) => s.selectedOfferIsAvailable);
     const selectedCurrency = useCampaignBuilderStore((s) => s.selectedCurrency);
 
     const setCampaignContent = useCampaignBuilderStore(
@@ -83,6 +86,8 @@ export const CampaignPostContentRoute = () => {
     const mappedAccounts = React.useMemo(
         () =>
             selectedAccounts.map((item) => ({
+                selectionId: item.selectionId,
+                selectedCampaignContentItem: item.selectedCampaignContentItem,
                 accountId: item.accountId,
                 socialAccountId: item.accountId,
 
@@ -93,8 +98,8 @@ export const CampaignPostContentRoute = () => {
                 logoUrl: item.logoUrl,
 
                 followers: Number(item.followers ?? 0),
-                price: Number(item.price ?? 0),
-                publicPrice: Number(item.price ?? 0),
+                price: item.price,
+                publicPrice: item.price,
 
                 dateRequest: item.dateRequest ?? "ASAP",
                 source: item.source,
@@ -176,8 +181,10 @@ export const CampaignPostContentRoute = () => {
         returnTo,
     ]);
 
-    const offerAccounts = accountsForPage.filter((item) => item.source === "offer");
-    const manualAccounts = accountsForPage.filter((item) => item.source !== "offer");
+    const isOfferRow = (item: typeof accountsForPage[number]) => item.source === "offer" ||
+        selectedOfferAccountIds.includes(item.accountId);
+    const offerAccounts = accountsForPage.filter(isOfferRow);
+    const manualAccounts = accountsForPage.filter((item) => !isOfferRow(item));
 
     if (isAddInfluencerMode && missingGroups.length === 0) {
         return null;
@@ -188,6 +195,13 @@ export const CampaignPostContentRoute = () => {
             <div className={styles.navMenu}>
                 <Breadcrumbs />
             </div>
+            {!isAddInfluencerMode && new Set(selectedAccounts.map((a) => a.accountId)).size !== selectedAccounts.length && <div role="alert">
+                <p>This draft contains duplicate account selections with potentially different content. Review the rows and explicitly remove unwanted selections before checkout.</p>
+                {selectedAccounts.filter((a) => selectedAccounts.filter((b) => b.accountId === a.accountId).length > 1).map((a) =>
+                    <p key={a.selectionId}>{a.username} — selection {a.selectionId}, description {a.selectedCampaignContentItem?.descriptionId ?? "none"}
+                        <button type="button" onClick={() => useCampaignBuilderStore.getState().actions.removeSelection(a.selectionId!)}>Remove this selection</button>
+                    </p>)}
+            </div>}
 
             <CampaignPostContentPage
                 mode={isAddInfluencerMode ? "add-influencer" : "create"}
@@ -199,7 +213,9 @@ export const CampaignPostContentRoute = () => {
                 offerAccounts={isAddInfluencerMode ? [] : offerAccounts}
                 manualAccounts={manualAccounts}
                 offerName={isAddInfluencerMode ? undefined : selectedOfferName}
+                offerAvailable={isAddInfluencerMode ? undefined : offerAvailable}
                 totalPrice={totalPrice}
+                totalPriceReady={isAddInfluencerMode ? true : totalPriceReady}
                 offerPrice={isAddInfluencerMode ? 0 : offerPrice}
                 defaultCampaignName={campaignName}
                 defaultBlocks={blocksDraft ?? undefined}
@@ -227,9 +243,12 @@ export const CampaignPostContentRoute = () => {
                     }
 
                     setCampaignContent(payload.campaignContent);
-                    syncSelectedAccountsContent(payload.addedAccounts);
+                    const current = useCampaignBuilderStore.getState();
+                    const remainingRows = payload.addedAccounts.filter((row) => current.selectedAccounts.some((account) =>
+                        row.selectionId ? account.selectionId === row.selectionId : account.accountId === row.socialAccountId));
+                    syncSelectedAccountsContent(remainingRows);
 
-                    navigate("/client/create-campaign/content/strategy");
+                    navigate(`/client/create-campaign/content/strategy?currency=${selectedCurrency === "$" ? "USD" : selectedCurrency === "£" ? "GBP" : "EUR"}`);
                 }}
             />
         </Container>

@@ -8,6 +8,9 @@ import {
     buildCampaignDraftPayload,
     hasDraftSelection,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/build-draft-payload";
+import { getSavedDraftId } from "@/entities/client-side/campaign-draft/api/draft-save-result";
+import { isInvalidOfferError } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
+import { CampaignDraftLatestStep } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
 
 type PostCampaignDraft = (payload: Record<string, unknown>) => Promise<unknown>;
 type UpdateCampaignDraft = (payload: Record<string, unknown>) => Promise<unknown>;
@@ -21,23 +24,27 @@ export const useSaveCampaignCreatorDraft = ({
                                                 postCampaignDraft,
                                                 updateCampaignDraft,
                                             }: Params) => {
-    const state = useCampaignBuilderStore();
+    const campaignName = useCampaignBuilderStore((s) => s.campaignName);
     const actions = useCampaignBuilderStore((s) => s.actions);
     const queryClient = useQueryClient();
 
     const [isOpen, setIsOpen] = React.useState(false);
+    const [isSaving, setIsSaving] = React.useState(false);
+    const inFlightRef = React.useRef(false);
     const [draftName, setDraftName] = React.useState("");
 
     const open = React.useCallback(() => {
-        setDraftName(state.campaignName ?? "");
+        setDraftName(campaignName ?? "");
         setIsOpen(true);
-    }, [state.campaignName]);
+    }, [campaignName]);
 
     const close = React.useCallback(() => {
         setIsOpen(false);
     }, []);
 
     const save = React.useCallback(async () => {
+        if (inFlightRef.current) return;
+        const state = useCampaignBuilderStore.getState();
         if (!hasDraftSelection(state)) {
             toast.error("Please select offer or promo cards before saving draft.");
             return;
@@ -48,32 +55,23 @@ export const useSaveCampaignCreatorDraft = ({
             return;
         }
 
-        const payload = buildCampaignDraftPayload(state, "addAccounts", {
-            campaignName: draftName.trim(),
-            draftId: state.draftId,
-        });
-
+        inFlightRef.current = true;
+        setIsSaving(true);
         try {
+            const payload = buildCampaignDraftPayload(state, CampaignDraftLatestStep.addAccounts, {
+                campaignName: draftName.trim(),
+                draftId: state.draftId,
+            });
             const response =
                 state.draftId && updateCampaignDraft
                     ? await updateCampaignDraft(payload)
                     : await postCampaignDraft(payload);
 
-            const maybeResponse = response as
-                | { draftId?: string; _id?: string; data?: { draftId?: string; _id?: string } }
-                | undefined;
-
-            const newDraftId =
-                maybeResponse?.draftId ||
-                maybeResponse?._id ||
-                maybeResponse?.data?.draftId ||
-                maybeResponse?.data?._id ||
-                state.draftId ||
-                null;
+            const newDraftId = getSavedDraftId(response, state.draftId);
 
             actions.setDraftMeta({
                 draftId: newDraftId,
-                draftStep: "addAccounts",
+                draftStep: CampaignDraftLatestStep.addAccounts,
             });
 
             actions.setCampaignName(draftName.trim());
@@ -84,11 +82,13 @@ export const useSaveCampaignCreatorDraft = ({
 
             toast.success("Draft saved successfully!");
             close();
-        } catch {
-            toast.error("Failed to save draft");
+        } catch (error) {
+            toast.error(isInvalidOfferError(error) ? "Your selected offer has changed or is unavailable. Refresh the catalogue and review your selection before saving again." : error instanceof Error ? error.message : "Failed to save draft");
+        } finally {
+            inFlightRef.current = false;
+            setIsSaving(false);
         }
     }, [
-        state,
         draftName,
         actions,
         close,
@@ -99,6 +99,7 @@ export const useSaveCampaignCreatorDraft = ({
 
     return {
         isOpen,
+        isSaving,
         draftName,
         setDraftName,
         open,

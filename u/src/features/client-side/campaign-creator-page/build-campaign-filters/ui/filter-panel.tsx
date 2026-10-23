@@ -36,8 +36,6 @@ export const FilterPanel = ({
                                 filterMethod,
                                 setFilterMethod,
                             }: Props) => {
-    const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
-
     const [openSectionIds, setOpenSectionIds] = React.useState<string[]>(
         DEFAULT_OPEN_IDS,
     );
@@ -60,7 +58,7 @@ export const FilterPanel = ({
                     <img onClick={onToggle} src={cross} alt="" />
                 </div>
 
-                <div ref={scrollContainerRef} className={styles.content}>
+                <div className={styles.content}>
                     {isLoading
                         ? Array.from({ length: 12 }).map((_, index) => (
                             <FilterSkeleton key={index} />
@@ -73,7 +71,6 @@ export const FilterPanel = ({
                                 onToggleFilter={onToggleFilter}
                                 filterMethod={filterMethod}
                                 setFilterMethod={setFilterMethod}
-                                scrollContainerRef={scrollContainerRef}
                                 open={openSectionIds.includes(section.id)}
                                 onToggleSection={() => toggleSection(section.id)}
                             />

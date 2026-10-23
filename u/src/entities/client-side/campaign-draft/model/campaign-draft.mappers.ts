@@ -16,11 +16,15 @@ export const mapDraftStepToBuilderStep = (
 export const mapDraftAccountToSelectedAccount = (
     account: DraftAddedAccountDto,
 ): SelectedCampaignAccount => ({
+    selectionId: account.selectionId,
     accountId: String(account.socialAccountId),
     influencerId: String(account.influencerId),
     socialMedia: String(account.socialMedia),
     username: String(account.username),
-    price: Number(account.price),
+    price: account.prices?.EUR ?? 0,
+    priceCurrency: "EUR",
+    prices: account.prices,
+    source: account.source === "offer" ? "offer" : account.source === "bundle" ? "bundle" : "manual",
     profileType: account.profileType,
     followers: Number(account.followers),
     dateRequest: account.dateRequest ?? "ASAP",
@@ -29,13 +33,9 @@ export const mapDraftAccountToSelectedAccount = (
             campaignContentItemId: String(
                 account.selectedCampaignContentItem.campaignContentItemId,
             ),
-            descriptionId: String(
-                account.selectedCampaignContentItem.descriptionId,
-            ),
+            descriptionId: account.selectedCampaignContentItem.descriptionId,
             additionalBriefId:
-                account.selectedCampaignContentItem.additionalBriefId
-                    ? String(account.selectedCampaignContentItem.additionalBriefId)
-                    : undefined,
+                account.selectedCampaignContentItem.additionalBriefId,
         }
         : undefined,
 });
@@ -55,9 +55,7 @@ export const mapDraftContentToCampaignContent = (
         profileType: item.profileType,
         taggedUser: String(item.taggedUser ?? ""),
         taggedLink: String(item.taggedLink ?? ""),
-        additionalBrief: Array.isArray(item.additionalBrief)
-            ? String(item.additionalBrief[0]?.additionalBrief ?? "")
-            : String(item.additionalBrief ?? ""),
+        additionalBrief: item.additionalBrief ?? [],
         accountId: item.accountId ? String(item.accountId) : undefined,
     }));
 

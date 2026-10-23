@@ -62,6 +62,8 @@ export function toCampaignPageModelFromDraft(
     kind: "draft",
 
     draftId: api._id,
+    selectedOffer: api.selectedOffer ?? null,
+    displayCurrency: api.displayCurrency ?? "EUR",
     campaignName: api.campaignName,
     socialMedia: api.socialMedia,
 

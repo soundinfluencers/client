@@ -12,9 +12,11 @@ type Props = {
     offerAccounts: CampaignPostContentAccount[];
     manualAccounts: CampaignPostContentAccount[];
     offerName?: string;
+    offerAvailable?: boolean | null;
     totalPrice: number;
+    totalPriceReady?: boolean;
     onEditSelection: () => void;
-    offerPrice: number;
+    offerPrice: number | null;
     currency?: string;
 };
 
@@ -25,16 +27,18 @@ type SelectionGroup = {
     items: CampaignPostContentAccount[];
 };
 
-const formatPrice = (value?: number | string) => {
+const formatPrice = (value?: number | string, currency = "€") => {
     if (value === undefined || value === null || value === "") return "";
-    return `${value}€`;
+    return `${value}${currency}`;
 };
 
 export const CampaignPostContentSelection: React.FC<Props> = ({
                                                                   offerAccounts,
                                                                   manualAccounts,
                                                                   offerName,
+                                                                  offerAvailable,
                                                                   totalPrice,
+                                                                  totalPriceReady = true,
                                                                   onEditSelection,offerPrice,currency
                                                               }) => {
     const offerGroups: SelectionGroup[] = [
@@ -205,7 +209,7 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
 
     const renderAccountRow = (item: CampaignPostContentAccount) => {
         return (
-            <div key={item.accountId} className={styles.accountRow}>
+            <div key={item.selectionId ?? item.accountId} className={styles.accountRow}>
                 <div className={styles.accountMain}>
                     {item.logoUrl ? <img src={item.logoUrl} alt="" /> : null}
 
@@ -219,7 +223,7 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
                 </div>
 
                 <div className={styles.accountPrice}>
-                    <span>{formatPrice(item.price)}</span>
+                    <span>{totalPriceReady ? formatPrice(item.price, currency) : "Price unavailable"}</span>
                 </div>
             </div>
         );
@@ -258,7 +262,7 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
             </div>
 
             <div className={styles.selectionContent}>
-                {!!offerGroups.length && (
+                {(!!offerGroups.length || offerAvailable === false) && (
                     <section className={styles.offerSection}>
                         <div className={styles.offerHeader}>
                             <div className={styles.offerHeader__title}>
@@ -267,7 +271,7 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
                             </div>
 
                             <div>
-                                <span>{formatPrice(offerPrice)}</span>
+                                <span>{offerAvailable === false ? "Offer unavailable — edit selection" : offerPrice === null ? "Refresh the catalogue to see the offer price" : formatPrice(offerPrice, currency)}</span>
                             </div>
                         </div>
 
@@ -285,7 +289,7 @@ export const CampaignPostContentSelection: React.FC<Props> = ({
             </div>
 
             <div className={styles.selectionFooter}>
-                <h2>Total price: {totalPrice}{currency}</h2>
+                <h2>{offerAvailable === false ? "Review unavailable offer before checkout" : !totalPriceReady ? "Prices unavailable for the selected currency" : `Total price: ${totalPrice}${currency}`}</h2>
             </div>
         </aside>
     );

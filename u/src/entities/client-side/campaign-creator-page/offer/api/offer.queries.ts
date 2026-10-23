@@ -8,6 +8,7 @@ export const usePublishedOffersQuery = (
 ) => {
     return useQuery({
         queryKey: ["publishedOffers", platform, genre] as const,
+        enabled: Boolean(platform && genre),
         queryFn: () => getPublishedOffers(platform, genre),
         staleTime: 30_000,
         retry: (failureCount, error) => {

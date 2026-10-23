@@ -21,6 +21,7 @@ import type {
     CampaignPostContentBlock,
 } from "../model/campaign-post-content.types";
 import { useCampaignPostContentPageDraft } from "@/pages/client-side/campaign-post-content/model/use-campaign-post-content-page-draft";
+import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 
 type GroupKey = "main" | "music" | "press";
 
@@ -32,8 +33,10 @@ type Props = {
     offerAccounts: CampaignPostContentAccount[];
     manualAccounts: CampaignPostContentAccount[];
     offerName?: string;
+    offerAvailable?: boolean | null;
     totalPrice: number;
-    offerPrice?: number;
+    totalPriceReady?: boolean;
+    offerPrice?: number | null;
     defaultCampaignName?: string;
     currency?: string
     onSubmitPayload: (
@@ -50,7 +53,9 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                                                              offerAccounts,
                                                              manualAccounts,
                                                              offerName,
+                                                             offerAvailable,
                                                              totalPrice,
+                                                             totalPriceReady = true,
                                                              defaultCampaignName,
                                                              onSubmitPayload,
                                                              offerPrice,
@@ -74,6 +79,7 @@ export const CampaignPostContentPage: React.FC<Props> = ({
         openDraftModal,
         closeDraftModal,
         onSaveDraft,
+        isSaving,
     } = useCampaignPostContentPageDraft({
         accounts,
         campaignPrice: totalPrice,
@@ -92,6 +98,7 @@ export const CampaignPostContentPage: React.FC<Props> = ({
     const musicBlocks = visibleBlocks.filter((item) => item.group === "music");
     const pressBlocks = visibleBlocks.filter((item) => item.group === "press");
     const submit = vm.form.handleSubmit(async () => {
+        if (!totalPriceReady) return;
         const payload = vm.buildPayload();
         await onSubmitPayload(payload);
     });
@@ -390,7 +397,7 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                             )}
 
                             <div className={styles.submitSection}>
-                                <button type="submit" className={styles.submitButton}>
+                                <button type="submit" className={styles.submitButton} disabled={!totalPriceReady}>
                                     Continue
                                 </button>
                             </div>
@@ -403,15 +410,22 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                         offerAccounts={mode === "add-influencer" ? [] : offerAccounts}
                         manualAccounts={manualAccounts}
                         offerName={mode === "add-influencer" ? undefined : offerName}
+                        offerAvailable={offerAvailable}
                         totalPrice={totalPrice}
-                        offerPrice={mode === "add-influencer" ? 0 : offerPrice ?? 0}
+                        totalPriceReady={totalPriceReady}
+                        offerPrice={mode === "add-influencer" ? 0 : offerPrice ?? null}
                         onEditSelection={() => {
                             if (mode === "add-influencer") {
                                 navigate(`/client/create-campaign?mode=add-influencer&option=${new URLSearchParams(window.location.search).get("option") ?? 0}`);
                                 return;
                             }
 
-                            navigate("/client/create-campaign");
+                            const catalogue = useCampaignBuilderStore.getState().offerCatalogContext;
+                            navigate(`/client/create-campaign?${new URLSearchParams({
+                                currency: currency === "$" ? "USD" : currency === "£" ? "GBP" : "EUR",
+                                ...(catalogue?.platform ? { platform: catalogue.platform } : {}),
+                                ...(catalogue?.genre ? { genre: catalogue.genre } : {}),
+                            })}`);
                         }}
                     />
                 </div>
@@ -438,8 +452,9 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                             <ButtonMain
                                 className={styles.btn}
 
-                                text="Save"
+                                text={isSaving ? "Saving…" : "Save"}
                                 onClick={onSaveDraft}
+                                isDisabled={isSaving}
                             />
                         </div>
                     </div>

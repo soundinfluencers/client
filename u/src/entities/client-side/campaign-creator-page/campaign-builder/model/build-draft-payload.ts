@@ -2,6 +2,8 @@ import type {
     CampaignBuilderState,
     CampaignDraftLatestStep,
 } from "../model/campaign-builder.types";
+import { currencyCode, getBuilderSelectedOffer, getDraftRowIds, serializeDraftSelection } from "./selected-offer";
+import { serializeCampaignContent, serializeContentReference } from "./campaign-content.transport";
 
 type DraftPayloadOverrides = {
     campaignName?: string;
@@ -26,13 +28,10 @@ export const mapDraftAddedAccounts = (
     state: CampaignBuilderState,
     fallbackSocialMedia: string,
 ) => {
-    const map = new Map<string, unknown>();
-
-    state.selectedAccounts.forEach((item) => {
+    return state.selectedAccounts.map((item) => {
         const socialAccountId = String(item.accountId ?? "");
-        if (!socialAccountId) return;
-
-        map.set(socialAccountId, {
+        return {
+            ...getDraftRowIds(item),
             influencerId: String(item.influencerId ?? ""),
             socialAccountId,
             socialMedia: String(
@@ -41,13 +40,11 @@ export const mapDraftAddedAccounts = (
             username: String(item.username ?? ""),
             logoUrl: item.logoUrl ?? "",
             followers: item.followers ?? 0,
-            price: item.price ?? 0,
+            profileType: item.profileType,
             dateRequest: item.dateRequest ?? "ASAP",
             selectedCampaignContentItem: item.selectedCampaignContentItem,
-        });
-    });
-
-    return Array.from(map.values());
+        };
+    }).filter((item) => item.socialAccountId);
 };
 
 export const buildCampaignDraftPayload = (
@@ -61,31 +58,21 @@ export const buildCampaignDraftPayload = (
         campaignName: overrides?.campaignName ?? state.campaignName ?? "",
         socialMedia: draftSocialMedia,
         step,
-        addedAccounts: mapDraftAddedAccounts(state, draftSocialMedia),
-
-        selectedOfferId: state.selectedOfferId,
-        selectedOfferAccountIds: state.selectedOfferAccountIds,
+        displayCurrency: currencyCode(state.selectedCurrency),
+        ...serializeDraftSelection(mapDraftAddedAccounts(state, draftSocialMedia), getBuilderSelectedOffer(state)),
     };
 
     if (step === "addContent" || step === "strategyTable") {
-        payload.campaignContent =
-            overrides?.campaignContent ?? state.campaignContent ?? [];
+        const campaignContent = serializeCampaignContent(overrides?.campaignContent ?? state.campaignContent ?? []);
+        payload.campaignContent = campaignContent;
+        payload.addedAccounts = (payload.addedAccounts as ReturnType<typeof mapDraftAddedAccounts>).map((row) => ({
+            ...row, selectedCampaignContentItem: serializeContentReference(row.selectedCampaignContentItem, campaignContent),
+        }));
     }
 
     if ((overrides?.draftId ?? state.draftId) != null) {
         payload.draftId = overrides?.draftId ?? state.draftId;
     }
-    console.log("SAVE STATE", {
-
-        selectedOfferId: state.selectedOfferId,
-
-        selectedOfferAccountIds: state.selectedOfferAccountIds,
-
-        selectedPromoCardIds: state.selectedPromoCardIds,
-
-        selectedAccounts: state.selectedAccounts,
-
-    });
     return payload;
 };
 

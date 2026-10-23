@@ -1,3 +1,5 @@
+import type { DisplayCurrency } from "@/shared/functions/formatCurrency.ts";
+
 export type CampaignStatus =
     | "draft"
     | "proposal"
@@ -23,5 +25,7 @@ export type CampaignListItem = {
     creationDate: string;
     price: number;
     status: CampaignStatus;
+    displayCurrency: DisplayCurrency;
+    currency: DisplayCurrency;
     draftStep?: string;
 };

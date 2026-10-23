@@ -7,7 +7,9 @@ type Props = {
     selectedOfferId: string | null;
     selectedPromoCardIds: string[];
     totalPrice: number;
+    totalPriceReady?: boolean;
     canProceed: boolean;
+    offerAvailable?: boolean | null;
     onProceed: () => void;
 };
 
@@ -17,7 +19,9 @@ export const FooterSummary = ({
                                   selectedOfferId,
                                   selectedPromoCardIds,
                                   totalPrice,
+                                  totalPriceReady = true,
                                   canProceed,
+                                  offerAvailable,
                                   onProceed,
                               }: Props) => {
     return (
@@ -45,8 +49,7 @@ export const FooterSummary = ({
                 <p>
                     Total:{" "}
                     <span className={styles.count}>
-                        {totalPrice}
-                        {selectedCurrency}
+                        {offerAvailable === false ? "Review unavailable offer" : !totalPriceReady ? "Prices unavailable for the selected currency" : `${totalPrice}${selectedCurrency}`}
                     </span>
                 </p>
             </div>

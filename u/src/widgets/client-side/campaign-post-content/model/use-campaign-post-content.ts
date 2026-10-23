@@ -103,6 +103,7 @@ export const useCampaignPostContent = ({
         const accountsKey = JSON.stringify(
             accounts.map((item) => ({
                 accountId: item.accountId,
+                selectionId: item.selectionId,
                 socialMedia: item.socialMedia,
                 profileType: item.profileType,
             })),
@@ -292,12 +293,16 @@ export const useCampaignPostContent = ({
             campaignPrice,
             accounts,
             blocks: data.blocks,
+            onBuiltBlocks: (blocks) => {
+                form.setValue("blocks", blocks, { shouldDirty: false, shouldValidate: false });
+                setBlocksDraft(blocks);
+            },
         });
 
         setCampaignContent(payload.campaignContent);
 
         return payload;
-    }, [accounts, campaignPrice, form, setCampaignContent]);
+    }, [accounts, campaignPrice, form, setCampaignContent, setBlocksDraft]);
 
     React.useEffect(() => {
         const subscription = form.watch((values) => {

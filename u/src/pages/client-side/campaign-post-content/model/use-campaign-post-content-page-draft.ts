@@ -1,4 +1,7 @@
 import React from "react";
+import { serializeCampaignContent, serializeContentReference } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-content.transport";
+import { currencyCode, getBuilderSelectedOffer, getDraftRowIds, isInvalidOfferError, serializeDraftSelection } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
+import { getSavedDraftId } from "@/entities/client-side/campaign-draft/api/draft-save-result";
 import { toast } from "react-toastify";
 
 import type {
@@ -14,49 +17,20 @@ import {
     CampaignDraftLatestStep
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types.ts";
 
-type DraftApiResponse =
-    | {
-    draftId?: string;
-    _id?: string;
-    data?: {
-        draftId?: string;
-        _id?: string;
-    };
-}
-    | undefined;
-
 type Params = {
     accounts: CampaignPostContentAccount[];
     campaignPrice: number;
     buildPayload: () => BuiltCampaignPostContentPayload;
 };
 
-type SaveDraftPayload = {
-    draftId?: string;
-    step: CampaignDraftLatestStep;
-    campaignName: string;
-    socialMedia: string;
-    campaignPrice: number;
-    addedAccounts: BuiltCampaignPostContentPayload["addedAccounts"];
-
-    campaignContent: BuiltCampaignPostContentPayload["campaignContent"];
-    // postContentDraft: Record<string, unknown> | null;
-    // blocksDraft: CampaignPostContentBlock[] | null;
-    // selectedAccounts: ReturnType<typeof useCampaignBuilderStore.getState>["selectedAccounts"];
-};
-
 export const useCampaignPostContentPageDraft = ({
-                                                    campaignPrice,
                                                     buildPayload,
                                                 }: Params) => {
-    const draftId = useCampaignBuilderStore((s) => s.draftId);
     const campaignName = useCampaignBuilderStore((s) => s.campaignName);
-    const postContentDraft = useCampaignBuilderStore((s) => s.postContentDraft);
-    const blocksDraft = useCampaignBuilderStore((s) => s.blocksDraft);
-    const selectedAccounts = useCampaignBuilderStore((s) => s.selectedAccounts);
-    const setDraftMeta = useCampaignBuilderStore((s) => s.actions.setDraftMeta);
 
     const [draftModal, setDraftModal] = React.useState(false);
+    const [isSaving, setIsSaving] = React.useState(false);
+    const inFlightRef = React.useRef(false);
     const [draftName, setDraftName] = React.useState("");
 
     const openDraftModal = React.useCallback(() => {
@@ -69,38 +43,44 @@ export const useCampaignPostContentPageDraft = ({
     }, []);
 
     const onSaveDraft = React.useCallback(async () => {
+        if (inFlightRef.current) return;
+        inFlightRef.current = true;
+        setIsSaving(true);
         try {
             const payload = buildPayload();
-
-            const nextCampaignName = draftName.trim() || campaignName || "";
+            const state = useCampaignBuilderStore.getState();
+            const campaignContent = serializeCampaignContent(payload.campaignContent);
+            const draftId = state.draftId;
+            const nextCampaignName = draftName.trim() || state.campaignName || "";
 
             if (!nextCampaignName) {
                 toast.error("Draft name is required");
                 return;
             }
 
-            const draftPayload: SaveDraftPayload = {
+            const rows = payload.addedAccounts.filter((row) => state.selectedAccounts.some((account) =>
+                row.selectionId ? account.selectionId === row.selectionId : account.accountId === row.socialAccountId)).map((row) => {
+                const original = state.selectedAccounts.find((account) => row.selectionId
+                    ? account.selectionId === row.selectionId : account.accountId === row.socialAccountId);
+                return { ...row, ...getDraftRowIds(original ?? {}), selectedCampaignContentItem: serializeContentReference(row.selectedCampaignContentItem, campaignContent) };
+            });
+            const draftPayload = {
                 draftId: draftId || undefined,
                 step: CampaignDraftLatestStep.addContent,
                 campaignName: nextCampaignName,
                 socialMedia: payload.socialMedia,
-                campaignPrice,
-                addedAccounts: payload.addedAccounts,
-                campaignContent: payload.campaignContent,
+                displayCurrency: currencyCode(state.selectedCurrency),
+                ...serializeDraftSelection(rows, getBuilderSelectedOffer(state)),
+                campaignContent,
             };
-            const response: DraftApiResponse = draftId
+            const response = draftId
                 ? await updateCampaignDraft(draftPayload)
                 : await postCampaignDraft(draftPayload);
 
 
-            const nextDraftId =
-                response?.draftId ||
-                response?._id ||
-                response?.data?.draftId ||
-                response?.data?._id ||
-                null;
+            const nextDraftId = getSavedDraftId(response, draftId);
 
-            setDraftMeta({
+            state.actions.setDraftMeta({
                 draftId: nextDraftId,
                 draftStep: CampaignDraftLatestStep.addContent,
             });
@@ -111,23 +91,20 @@ export const useCampaignPostContentPageDraft = ({
             const message =
                 error instanceof Error ? error.message : "Failed to save draft";
 
-            toast.error(message);
+            toast.error(isInvalidOfferError(error) ? "Your selected offer has changed or is unavailable. Return to Edit selection and refresh the catalogue before saving again." : message);
+        } finally {
+            inFlightRef.current = false;
+            setIsSaving(false);
         }
     }, [
         buildPayload,
-        draftId,
         draftName,
-        campaignName,
-        campaignPrice,
-        postContentDraft,
-        blocksDraft,
-        selectedAccounts,
-        setDraftMeta,
         closeDraftModal,
     ]);
 
     return {
         draftModal,
+        isSaving,
         draftName,
         setDraftName,
         openDraftModal,

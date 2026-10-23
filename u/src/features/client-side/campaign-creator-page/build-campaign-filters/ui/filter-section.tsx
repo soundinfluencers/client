@@ -1,5 +1,3 @@
-import { useEffect, useRef } from "react";
-
 import { FilterNode } from "./filter-node";
 import styles from "./filter-panel.module.scss";
 import type {
@@ -18,7 +16,6 @@ type Props = {
     }) => void;
     filterMethod: CampaignFilterMethod;
     setFilterMethod: (value: CampaignFilterMethod) => void;
-    scrollContainerRef: React.RefObject<HTMLDivElement | null>;
     open: boolean;
     onToggleSection: () => void;
 };
@@ -29,55 +26,20 @@ export const FilterSectionView = ({
                                       onToggleFilter,
                                       filterMethod,
                                       setFilterMethod,
-                                      scrollContainerRef,
                                       open,
                                       onToggleSection,
                                   }: Props) => {
-    const rootRef = useRef<HTMLDivElement | null>(null);
-    const shouldScrollRef = useRef(false);
-
-    useEffect(() => {
-        if (!open) return;
-        if (!shouldScrollRef.current) return;
-
-        requestAnimationFrame(() => {
-            const container = scrollContainerRef.current;
-            const node = rootRef.current;
-
-            if (!container || !node) return;
-
-            const containerRect = container.getBoundingClientRect();
-            const nodeRect = node.getBoundingClientRect();
-
-            const isAbove = nodeRect.top < containerRect.top;
-            const isBelow = nodeRect.bottom > containerRect.bottom;
-
-            if (isAbove) {
-                container.scrollTop += nodeRect.top - containerRect.top - 8;
-            } else if (isBelow) {
-                container.scrollTop += nodeRect.bottom - containerRect.bottom + 8;
-            }
-
-            shouldScrollRef.current = false;
-        });
-    }, [open, scrollContainerRef]);
-
-    const handleToggleSection = () => {
-        shouldScrollRef.current = !open;
-        onToggleSection();
-    };
-
     return (
-        <div ref={rootRef} className={styles.dropdown}>
-            <div className={styles.dropdownHead} onClick={handleToggleSection}>
-                <p>{section.title}</p>
+        <div className={styles.dropdown}>
+            <button type="button" className={styles.dropdownHead} onClick={onToggleSection} aria-expanded={open}>
+                <span>{section.title}</span>
 
                 <span
                     className={`${styles.arrow} ${
                         open ? styles.arrowOpen : ""
                     }`}
                 />
-            </div>
+            </button>
 
             {open && (
                 <>
