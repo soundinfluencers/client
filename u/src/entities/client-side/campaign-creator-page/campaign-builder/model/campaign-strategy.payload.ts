@@ -1,4 +1,5 @@
 import type { CampaignPaymentDetails, CreateRegularCampaignRequest } from "@/api/client/campaign/create-campaign.types";
+import type { CreateCampaignProposalRequest } from "@/entities/client-side/campaign-strategy-page/api/save-proposal";
 import { assertSupportedSelections, currencyCode, getDraftRowIds, serializeDraftSelection, serializeSelectedOffer, type SelectedOffer } from "./selected-offer";
 import type { CampaignContentItem, SelectedCampaignAccount } from "./campaign-builder.types";
 import { serializeCampaignContent, serializeContentReference } from "./campaign-content.transport";
@@ -69,12 +70,26 @@ export const buildStrategyProposalPayload = ({
                                                  totalPrice,
                                                  accounts,
                                                  content,
-                                             }: BuildStrategyBaseParams) => {
+                                                 displayCurrency,
+                                             }: Omit<BuildStrategyBaseParams, "displayCurrency" | "totalPrice" | "accounts" | "content"> & {
+    displayCurrency: string;
+    totalPrice: number;
+    accounts: SelectedCampaignAccount[];
+    content: CampaignContentItem[];
+                                             }): CreateCampaignProposalRequest => {
+    // currencyCode has an EUR fallback for older callers. Never use it to hide an invalid proposal currency.
+    if (!["EUR", "USD", "GBP", "€", "$", "£"].includes(displayCurrency)) {
+        throw new Error("Choose EUR, USD or GBP before saving the proposal.");
+    }
+    if (!Number.isFinite(totalPrice) || totalPrice < 0) {
+        throw new Error("Prices are unavailable for the selected currency. Review the selection before saving the proposal.");
+    }
     const campaignContent = mapContentForStrategy(content);
     return {
     campaignName: String(campaignName ?? ""),
     socialMedia: resolveStrategySocialMedia(content),
-    campaignPrice: Number(totalPrice ?? 0),
+    campaignPrice: totalPrice,
+    displayCurrency: currencyCode(displayCurrency),
     addedAccounts: mapAccountsForStrategy(accounts, campaignContent),
     campaignContent,
     };

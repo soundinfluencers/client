@@ -2,33 +2,27 @@ import React from "react";
 import { toast } from "react-toastify";
 import { buildStrategyProposalPayload } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
 import {postCampaignProposal} from "@/entities/client-side/campaign-strategy-page/api/save-proposal.ts";
+import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 
-type Params = {
-    campaignName: string;
-    totalPrice: number;
-    accounts: any[];
-    content: any[];
-};
-
-export const useSaveProposal = ({
-                                    campaignName,
-                                    totalPrice,
-                                    accounts,
-                                    content,
-                                }: Params) => {
+export const useSaveProposal = () => {
     const [isProposalModalOpen, setProposalModalOpen] = React.useState(false);
     const [campaignProposalId, setCampaignProposalId] = React.useState("");
     const [socialType, setSocialType] = React.useState("");
 
     const saveProposal = React.useCallback(async () => {
+        setProposalModalOpen(false);
         try {
+            const state = useCampaignBuilderStore.getState();
+            if (!state.totalPriceReady) {
+                throw new Error("Prices are unavailable for the selected currency. Review the selection before saving the proposal.");
+            }
             const proposalPayload = buildStrategyProposalPayload({
-                campaignName,
-                totalPrice,
-                accounts,
-                content,
+                campaignName: state.campaignName,
+                totalPrice: state.totalPrice,
+                accounts: state.selectedAccounts,
+                content: state.campaignContent,
+                displayCurrency: state.selectedCurrency,
             });
-        console.log(proposalPayload,'proposal');
             const response = await postCampaignProposal(proposalPayload);
 
             const payload =
@@ -54,7 +48,7 @@ export const useSaveProposal = ({
 
             toast.error(message);
         }
-    }, [campaignName, totalPrice, accounts, content]);
+    }, []);
 
     return {
         isProposalModalOpen,

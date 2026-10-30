@@ -120,12 +120,7 @@ export const CampaignStrategyPage = () => {
         campaignProposalId,
         setProposalModalOpen,
         saveProposal,
-    } = useSaveProposal({
-        campaignName,
-        totalPrice,
-        accounts,
-        content,
-    });
+    } = useSaveProposal();
 
     const {
         shareUrl,
@@ -140,6 +135,7 @@ export const CampaignStrategyPage = () => {
             totalPrice,
             accounts,
             content,
+            displayCurrency: selectedCurrency,
         });
 
         console.log("STRATEGY PROPOSAL PAYLOAD", payload);

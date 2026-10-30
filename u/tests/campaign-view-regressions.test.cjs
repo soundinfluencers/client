@@ -743,10 +743,17 @@ test('account-only currency changes update actual selection state and payload wi
 });
 
 
-function strategyFixture(store, { save, toast = { success() {}, error() {} }, view = 0 } = {}) {
+function strategyFixture(store, { save, toast = { success() {}, error() {} }, view = 0, proposalPost } = {}) {
   const harness = hookHarness(); const navigation = []; const ButtonMain = () => {}; const Bar = () => {};
   const Section = () => {}; const ViewChange = () => {}; const LiveViewCard = () => {};
   const DraftButton = load('src/components/ui/draft-button/draft-button.tsx').DraftButton;
+  const useSaveProposal = proposalPost ? load('src/widgets/client-side/campaign-tables/model/use-save-proposal.ts', {
+    react: harness.hooks, 'react-toastify': { toast }, [builderModule]: { useCampaignBuilderStore: store },
+    [strategyModule]: strategyPayloads,
+    '@/entities/client-side/campaign-strategy-page/api/save-proposal.ts': load('src/entities/client-side/campaign-strategy-page/api/save-proposal.ts', {
+      '@/api/api.ts': { post: proposalPost },
+    }),
+  }).useSaveProposal : () => ({});
   const { CampaignStrategyPage } = load('src/pages/client-side/campaign-strategy-page/ui/campaign-strategy-page.tsx', {
     react: harness.hooks, '@/components': { ButtonMain }, 'react-router-dom': { useNavigate: () => (url) => navigation.push(url) },
     '@components/ui/modal-fix/Modal': {}, [builderModule]: { useCampaignBuilderStore: store },
@@ -756,7 +763,7 @@ function strategyFixture(store, { save, toast = { success() {}, error() {} }, vi
     '@/features/client-side/campaign-tables/view-change/ui/view-change': { ViewChange }, '@/features/client-side/campaign-tables/view-audience/ui/view-audince': {},
     [strategyModule]: strategyPayloads, [offerModule]: offerHelpers, [saveResultModule]: saveResults, [builderTypesModule]: builderTypes,
     '@/widgets/client-side/campaign-tables/ui/live-view-card/ui/live-view-card': { LiveViewCard },
-    '@/widgets/client-side/campaign-tables/model/use-save-proposal.ts': { useSaveProposal: () => ({}) },
+    '@/widgets/client-side/campaign-tables/model/use-save-proposal.ts': { useSaveProposal },
     '@/widgets/client-side/campaign-tables/model/use-proposal-share.ts': { useProposalShare: () => ({}) },
     '@/widgets/client-side/campaign-tables/ui/bar-campaigns/ui/bar.tsx': { Bar },
     '@/widgets/client-side/campaign-tables/ui/bar-campaigns/model/campaign-strategy-bar.helpers.ts': load('src/widgets/client-side/campaign-tables/ui/bar-campaigns/model/campaign-strategy-bar.helpers.ts', {
@@ -2036,4 +2043,100 @@ test('all filter sections toggle natively without scheduled scrolling and preser
     }
   }
   assert.deepEqual(sections, original);
+});
+
+function proposalSaveFixture({ code = 'EUR', reject = () => false } = {}) {
+  const store = builderFixture(); const draft = draftExample();
+  const content = draft.campaignContent[0];
+  content.additionalBrief.push({ _id: '000000000000000000000888', additionalBrief: 'Second preserved brief' });
+  draft.addedAccounts[0].selectedCampaignContentItem.additionalBriefId = content.additionalBrief[1]._id;
+  draft.addedAccounts[1].selectedCampaignContentItem.descriptionId = null;
+  draft.addedAccounts[1].selectedCampaignContentItem.additionalBriefId = null;
+  hydrateFixture(store, draft); store.getState().actions.setSelectedCurrency(code);
+  store.setState({ postContentDraft: { mainLink: 'https://example.test/typed', additionalBrief: 'Keep my form' } });
+  const calls = []; const success = []; const errors = [];
+  const page = strategyFixture(store, {
+    toast: { success: (message) => success.push(message), error: (message) => errors.push(message) },
+    proposalPost: async (url, payload) => {
+      calls.push({ url, body: JSON.parse(JSON.stringify(payload)) });
+      if (reject()) throw new Error('Proposal API rejected the request');
+      return { data: { data: { campaignId: 'synthetic-proposal-id', socialMedia: 'instagram' } } };
+    },
+  });
+  const render = () => page.render();
+  const saveButton = () => elements(render()).find((node) => node.type === 'button' && node.props.children === 'Save proposal');
+  const modalOpen = () => elements(render()).some((node) => node.type === 'h2' && node.props.children === 'Proposal saved');
+  return { store, calls, success, errors, page, render, saveButton, modalOpen };
+}
+
+test('real Save proposal button -> handler -> builder -> API wrapper sends EUR/USD/GBP and canonical content without conversion', async () => {
+  for (const [code, symbol, amount] of [['EUR', '€', 115], ['USD', '$', 124], ['GBP', '£', 106]]) {
+    const f = proposalSaveFixture({ code }); const before = f.store.getState();
+    const tree = f.render();
+    assert.equal(elements(tree).find((node) => node.type === f.page.Bar).props.budgetLabel, `Budget: ${amount}${symbol}`);
+    await f.saveButton().props.onClick();
+    assert.equal(f.calls.length, 1); assert.equal(f.calls[0].url, '/proposal-system');
+    const body = f.calls[0].body;
+    assert.equal(body.displayCurrency, code); assert.equal(body.campaignPrice, amount);
+    assert.equal(body.campaignName, before.campaignName);
+    assert.deepEqual(body.campaignContent, before.campaignContent);
+    assert.ok(body.campaignContent.every((item) => Array.isArray(item.descriptions) && Array.isArray(item.additionalBrief)));
+    assert.deepEqual(body.addedAccounts.map((row) => row.selectedCampaignContentItem), before.selectedAccounts.map((row) => row.selectedCampaignContentItem));
+    for (const row of body.addedAccounts) {
+      assert.ok(row.socialAccountId); assert.equal(Object.hasOwn(row, 'addedAccountsId'), false);
+      assert.equal(Object.hasOwn(row, 'selectionId'), false); assert.equal(Object.hasOwn(row, 'bundleId'), false);
+      const item = body.campaignContent.find((item) => item._id === row.selectedCampaignContentItem.campaignContentItemId);
+      assert.ok(row.selectedCampaignContentItem.descriptionId === null || item.descriptions.some((d) => d._id === row.selectedCampaignContentItem.descriptionId));
+      assert.ok(row.selectedCampaignContentItem.additionalBriefId === null || item.additionalBrief.some((b) => b._id === row.selectedCampaignContentItem.additionalBriefId));
+    }
+    assert.equal(Object.hasOwn(body, 'paymentDetails'), false); assert.equal(Object.hasOwn(body, 'selectedOfferSnapshot'), false);
+    assert.equal(Object.hasOwn(body, 'selectedOffer'), false, 'this save never serialized Offer metadata; do not invent row-ID semantics from a Swagger example');
+    assert.deepEqual(f.errors, []); assert.equal(f.success.length, 1); assert.equal(f.modalOpen(), true);
+    assert.equal(f.store.getState(), before, 'save cannot reset or mutate the campaign/form');
+  }
+});
+
+test('existing Save proposal callback reads the new currency, amount and content from one current builder snapshot', async () => {
+  const f = proposalSaveFixture(); const save = f.saveButton().props.onClick;
+  for (const [code, symbol, amount] of [['GBP', '£', 106], ['USD', '$', 124], ['EUR', '€', 115]]) {
+    f.store.getState().actions.setSelectedCurrency(code);
+    f.store.getState().actions.setCampaignName('Changed immediately before save ' + code);
+    const before = f.store.getState();
+    await save();
+    const sent = f.calls.at(-1).body;
+    assert.equal(sent.displayCurrency, code); assert.equal(sent.campaignPrice, amount);
+    assert.equal(sent.campaignName, before.campaignName); assert.deepEqual(sent.campaignContent, before.campaignContent);
+    assert.equal(elements(f.render()).find((node) => node.type === f.page.Bar).props.budgetLabel, `Budget: ${amount}${symbol}`);
+    assert.equal(f.store.getState(), before);
+  }
+  assert.deepEqual(f.errors, []);
+});
+
+test('Proposal rejects absent/unsupported currencies and unavailable/non-finite totals before API, without EUR fallback', async () => {
+  for (const selectedCurrency of ['', undefined, null, 'CAD', 'usd']) {
+    const f = proposalSaveFixture(); f.store.setState({ selectedCurrency }); const before = f.store.getState();
+    await f.saveButton().props.onClick();
+    assert.equal(f.calls.length, 0); assert.equal(f.success.length, 0); assert.equal(f.errors.length, 1);
+    assert.equal(f.modalOpen(), false); assert.equal(f.store.getState(), before);
+  }
+  for (const patch of [{ totalPriceReady: false, totalPrice: 0 }, { totalPrice: NaN }, { totalPrice: Infinity }, { totalPrice: -1 }]) {
+    const f = proposalSaveFixture(); f.store.setState(patch); const before = f.store.getState();
+    await f.saveButton().props.onClick();
+    assert.equal(f.calls.length, 0); assert.equal(f.success.length, 0); assert.equal(f.errors.length, 1);
+    assert.equal(f.store.getState(), before);
+  }
+  for (const [displayCurrency, code] of [['EUR', 'EUR'], ['USD', 'USD'], ['GBP', 'GBP'], ['€', 'EUR'], ['$', 'USD'], ['£', 'GBP']]) {
+    const body = strategyPayloads.buildStrategyProposalPayload({ campaignName: 'Zero is valid', totalPrice: 0, accounts: [], content: [], displayCurrency });
+    assert.equal(body.displayCurrency, code); assert.equal(body.campaignPrice, 0);
+  }
+});
+
+test('Proposal API rejection reports no false success, closes stale success modal and preserves the current form', async () => {
+  let rejected = false; const f = proposalSaveFixture({ reject: () => rejected });
+  const save = f.saveButton().props.onClick;
+  await save(); assert.equal(f.modalOpen(), true); assert.equal(f.success.length, 1);
+  rejected = true; const before = f.store.getState(); await save();
+  assert.equal(f.calls.length, 2); assert.equal(f.success.length, 1); assert.equal(f.errors.length, 1);
+  assert.equal(f.modalOpen(), false); assert.equal(f.store.getState(), before);
+  assert.equal(f.store.getState().postContentDraft.additionalBrief, 'Keep my form');
 });
