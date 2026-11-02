@@ -3,7 +3,7 @@ import { useCreateProposalOption } from "./use-create-proposal-option";
 import { buildCloneProposalOption, OPTION_CREATE_MODE } from "@/client-side/utils/proposal-option-create";
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 import { serializeCampaignContent } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-content.transport";
-import { buildProposalOptionPatchBody, dirtyProposalOptions, proposalEditorPatches } from "@/client-side/utils/proposal-option-patch";
+import { assertProposalPatchDescriptions, buildProposalOptionPatchBody, dirtyProposalOptions, proposalEditorPatches } from "@/client-side/utils/proposal-option-patch";
 import { BUNDLES_AVAILABLE } from "@/shared/config/bundle-availability";
 import { ObjectId } from "bson";
 import { assertProposalAddSource, proposalAddUrl } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/proposal-add-influencer-builder";
@@ -400,6 +400,7 @@ export const useCampaignPageActions = ({
       const body = buildProposalOptionPatchBody({ campaignName: data.campaignName, snapshot, accounts,
         content: state.contentByOption[activeOption] ?? [], patches: useUpdateCampaign.getState().patches ?? {},
         selectedOfferChange: Object.hasOwn(state.selectedOfferChangeByOption, activeOption) ? state.selectedOfferChangeByOption[activeOption] : undefined });
+      assertProposalPatchDescriptions(body.campaignContent);
       const version = useFetchCampaign.getState().requestVersion;
       const patches = useUpdateCampaign.getState().patches;
       await patchAddProposalOption(data.campaignId, activeOption, body);
@@ -426,6 +427,7 @@ export const useCampaignPageActions = ({
         if (!BUNDLES_AVAILABLE && ((snapshot?.addedBundles?.length ?? 0) || accounts.some((a: any) => a.bundleId || a.campaignBundleId))) throw new Error('Bundle Proposal editing is unavailable.');
         const patches = proposalEditorPatches(useUpdateCampaign.getState().patches, index, activeOption);
         const body = buildProposalOptionPatchBody({ campaignName: data.campaignName, snapshot, accounts, content, patches, selectedOfferChange: state.selectedOfferChangeByOption[index] });
+        assertProposalPatchDescriptions(body.campaignContent);
         const version = useFetchCampaign.getState().requestVersion;
         await patchAddProposalOption(campaignIdForActions, index, body);
         if (!currentWriteContext(key)) return false;

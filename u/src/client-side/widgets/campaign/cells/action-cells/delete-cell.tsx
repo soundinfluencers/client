@@ -16,7 +16,7 @@ import {
   decideProposalOverlapRemoval,
 } from "@/client-side/widgets/campaign/model/proposal-overlap-removal";
 import {
-  decideProposalRowRemoval,
+  decideProposalRowRemoval, LAST_PLACEMENT_MESSAGE,
   executeProposalRowRemovalDecision,
 } from "@/client-side/widgets/campaign/model/proposal-row-removal";
 
@@ -145,7 +145,7 @@ export const ActionCell: React.FC<Props> = ({
           if (await onDeleteOption?.(optionIndex) === false) throw new Error("Option deletion was not synchronized.");
         },
         onBlockLastOption: () => {
-          toast.error("You cannot delete the last option");
+          toast.error(LAST_PLACEMENT_MESSAGE);
         },
       });
       setIsConfirming(false);
@@ -164,7 +164,7 @@ export const ActionCell: React.FC<Props> = ({
 
     if (fullOverlapDecision.kind === "block_last_option") {
       toast.error(
-        "This action would remove the last Proposal option. Deleting the entire Proposal campaign is not supported yet.",
+        LAST_PLACEMENT_MESSAGE,
       );
       return;
     }
@@ -178,7 +178,7 @@ export const ActionCell: React.FC<Props> = ({
     }
 
     if (rowRemovalDecision.kind === "block_last_option") {
-      toast.error("You cannot delete the last option");
+      toast.error(LAST_PLACEMENT_MESSAGE);
       return;
     }
 
@@ -254,9 +254,9 @@ export const ActionCell: React.FC<Props> = ({
                   disabled={isDeleteDisabled}
                   title={
                     fullOverlapDecision.kind === "block_last_option"
-                      ? "Removing the last Proposal option is not supported yet"
+                      ? LAST_PLACEMENT_MESSAGE
                       : rowRemovalDecision.kind === "block_last_option"
-                        ? "You cannot delete the last option"
+                        ? LAST_PLACEMENT_MESSAGE
                         : rowRemovalDecision.kind !== "not_removable" || isFullOverlap
                           ? "Delete account"
                           : "You cannot delete the last Proposal account"

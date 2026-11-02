@@ -207,7 +207,9 @@ export const CampaignPage = () => {
     }
   }, [data?.campaignId]);
   const uncertainDeletion = actions.getPendingProposalWrite()?.uncertain;
+  const normalProposalPending = (isLoading || isRequesting) && !uncertainDeletion && !actions.optionCreateBlocked;
   if (!data || isLoading) {
+    if (normalProposalPending) return <Loader/>;
     return actions.optionCreateBlocked ? <div role="alert">The option may already exist. Reopen the Proposal from the dashboard before creating another option.</div> : actions.needsProposalRead ? <div role="alert">{isLoading && !uncertainDeletion && <Loader/>}{uncertainDeletion ? <>Deletion outcome is unknown. Do not repeat deletion. <a href="/client">Review dashboard</a></> : <>The write succeeded. Reload the saved option before continuing.<button disabled={isRequesting} onClick={recoverProposalRead}>Retry reading option</button></>}</div> : <Loader/>;
   }
 
@@ -260,7 +262,7 @@ export const CampaignPage = () => {
   return (
     <ProposalActionsContext.Provider value={{ onDeleteOption: requestDeleteOption, onAddInfluencer: actions.onAddInfluencer, isMutationPending: isRequesting || actions.needsProposalRead || actions.optionCreateBlocked }}>
       {actions.optionCreateBlocked && <p role="alert">The option may already exist. Reopen the Proposal from the dashboard; do not submit again.</p>}
-      {actions.needsProposalRead && <p role="alert">{uncertainDeletion ? <>Deletion outcome is unknown. Do not repeat deletion. <a href="/client">Review dashboard</a></> : <>Write succeeded; synchronization is incomplete. <button disabled={isRequesting} onClick={recoverProposalRead}>Retry reading option</button></>}</p>}
+      {actions.needsProposalRead && !normalProposalPending && <p role="alert">{uncertainDeletion ? <>Deletion outcome is unknown. Do not repeat deletion. <a href="/client">Review dashboard</a></> : <>Write succeeded; synchronization is incomplete. <button disabled={isRequesting} onClick={recoverProposalRead}>Retry reading option</button></>}</p>}
       <Container className="campaignBase">
         <CampaignPageHeader
           title={`${data.campaignName} - Campaign SoundInfluencers`}
@@ -314,7 +316,7 @@ export const CampaignPage = () => {
             isRequestingPDF={isRequestingPDF}
           />
 
-          {data.kind === "proposal" && isRequesting && !actions.needsProposalRead && <Loader/>}
+          {data.kind === "proposal" && normalProposalPending && <Loader/>}
           <div inert={isRequesting || actions.needsProposalRead || actions.optionCreateBlocked}><CampaignPageContent
             data={data}
             changeView={changeView}

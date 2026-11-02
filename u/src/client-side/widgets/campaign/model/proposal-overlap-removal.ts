@@ -134,7 +134,6 @@ export const decideProposalOverlapRemoval = ({
   targetAccount,
   accounts,
   selectedOffer,
-  optionIndexes,
 }: {
   targetAccount: ProposalTopologyAccount;
   accounts: readonly ProposalTopologyAccount[];
@@ -157,11 +156,7 @@ export const decideProposalOverlapRemoval = ({
 
   if (hasRemainingAccounts) return { kind: "remove_packages", overlap };
 
-  const uniqueOptionIndexes = new Set(optionIndexes);
-
-  return uniqueOptionIndexes.size > 1
-    ? { kind: "delete_option", overlap }
-    : { kind: "block_last_option", overlap };
+  return { kind: "block_last_option", overlap };
 };
 
 export const removeFullOverlapAccounts = <T extends ProposalTopologyAccount>(

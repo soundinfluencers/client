@@ -25,6 +25,7 @@ const oid = () => new ObjectId().toHexString();
 //   socialMedia?: string;
 // };
 type CampaignContentItem = {
+  profileType?: "community" | "creator";
   _id: string;
   socialMedia: string;
   socialMediaGroup: "main" | "music" | "press";
@@ -62,6 +63,7 @@ type ProposalAccountsStore = {
       socialMedia: string,
       payload: { mainLink: string },
       inheritFromContentId?: string,
+      targetAccountKey?: string,
   ) => {
     contentId: string;
     firstDescriptionId: string;
@@ -284,56 +286,31 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         socialMedia,
         payload,
         inheritFromContentId,
+        targetAccountKey,
     ) => {
-      useUpdateCampaign.getState().markDirty();
+      const state = get();
       const sm = String(socialMedia ?? "").toLowerCase();
-      const group = getGroupBySocial(sm);
-      const newId = oid();
-
-      let firstDescriptionId = "";
-
-      set((state) => {
-        const prev = state.contentByOption[optionIndex] ?? [];
-
-        const base =
-            (inheritFromContentId
-                ? prev.find((c) => c._id === inheritFromContentId)
-                : prev.find((c) => String(c.socialMedia ?? "").toLowerCase() === sm)) ??
-            prev.find((c) => c.socialMediaGroup === group);
-
-        const descriptions = (base?.descriptions ?? []).map((d: any) => ({
-          _id: oid(),
-          description: d.description ?? "",
-        }));
-
-        firstDescriptionId = String(descriptions?.[0]?._id ?? "");
-
-        const nextItem: CampaignContentItem = {
-          _id: newId,
-          socialMedia: sm,
-          socialMediaGroup: group,
-          mainLink: payload.mainLink,
-          taggedUser: base?.taggedUser ?? "",
-          taggedLink: base?.taggedLink ?? "",
-          additionalBrief: (base?.additionalBrief ?? []).map((brief) => ({
-            _id: oid(),
-            additionalBrief: brief.additionalBrief ?? "",
-          })),
-          descriptions,
-        };
-
-        return {
-          contentByOption: {
-            ...state.contentByOption,
-            [optionIndex]: [...prev, nextItem],
-          },
-        };
-      });
-
-      return {
-        contentId: newId,
-        firstDescriptionId,
-      };
+      const target = targetAccountKey ? state.accountsByOption[optionIndex]?.find(row => getAccountKey(row) === targetAccountKey) : undefined;
+      if (targetAccountKey && (!target || String(target.socialMedia).toLowerCase() !== sm)) throw new Error("The placement changed. Reopen its content editor.");
+      const source = inheritFromContentId ? state.contentByOption[optionIndex]?.find(item => item._id === inheritFromContentId) : undefined;
+      const profileType = (target as any)?.profileType ?? source?.profileType ?? "community";
+      if (source && (source.profileType ?? "community") !== profileType) throw new Error("The selected content does not match this placement's profile.");
+      const newId = oid(), firstDescriptionId = oid();
+      const selected = { campaignContentItemId: newId, descriptionId: firstDescriptionId };
+      const item: CampaignContentItem = { _id: newId, socialMedia: sm, socialMediaGroup: getGroupBySocial(sm), profileType,
+        mainLink: payload.mainLink, taggedUser: "", taggedLink: "", additionalBrief: [],
+        descriptions: [{ _id: firstDescriptionId, description: "" }] };
+      useUpdateCampaign.getState().markDirty();
+      // One store publication: a target row never points outside working content.
+      set(current => ({
+        contentByOption: { ...current.contentByOption, [optionIndex]: [...(current.contentByOption[optionIndex] ?? []), item] },
+        ...(targetAccountKey ? { accountsByOption: { ...current.accountsByOption, [optionIndex]: current.accountsByOption[optionIndex].map(row => {
+          if (getAccountKey(row) !== targetAccountKey) return row;
+          const { selectedContentItem: _display, ...rest } = row as any;
+          return { ...rest, selectedContent: selected, selectedCampaignContentItem: selected };
+        }) } } : {}),
+      }));
+      return { contentId: newId, firstDescriptionId };
     },
     removeContentItem: (optionIndex, contentId) => {
       useUpdateCampaign.getState().markDirty();
