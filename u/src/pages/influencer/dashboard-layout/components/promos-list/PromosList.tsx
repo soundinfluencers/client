@@ -2,8 +2,8 @@ import { useDashboardLayoutStore } from "../../store/useDashboardLayoutStore";
 import { PromosGrid } from "./components/promos-grid/PromosGrid";
 import { PromosTable } from "./components/promos-table/PromosTable";
 import { ButtonMain } from "@components/ui/buttons-fix/ButtonFix.tsx";
-import { getInfluencerPromos } from "@/api/influencer/promos/influencer-promos.api.ts";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useDashboardPromos } from "@/pages/influencer/promos/hooks/useDashboardPromos";
+
 // import { Loader } from "@/components";
 
 // import { ScrollToTop } from "@/components/ui/scroll-to-top/ScrollToTop";
@@ -21,25 +21,8 @@ export const PromosList = () => {
 
   // console.log(activePromosFilter);
 
-  const { data, isError, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isPending } =
-    useInfiniteQuery({
-      queryKey: ["promos", activePromosFilter, limit],
-      initialPageParam: 1,
-      queryFn: ({ pageParam }) =>
-        getInfluencerPromos(activePromosFilter, limit, pageParam as number),
-
-      getNextPageParam: (lastPage, allPages) => {
-        if (!lastPage || lastPage.length === 0) return undefined;
-        if (lastPage.length < limit) {
-          return undefined;
-        }
-        return allPages.length + 1;
-      },
-      staleTime: 1_000, // 1 seconds
-      // refetchInterval: 60_000, // 1 minute
-      // refetchOnWindowFocus: true,
-      placeholderData: (prev) => prev,
-    });
+  const { data, isError, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isPending, refetch } =
+    useDashboardPromos(activePromosFilter, limit);
 
   // console.log("Promos query status:", { isError, isFetching, isFetchingNextPage, hasNextPage, isPending });
 
@@ -55,7 +38,7 @@ export const PromosList = () => {
 
   if (isError) {
     return (
-      <Error />
+      <Error onRetry={() => { void refetch(); }} />
     );
   }
 

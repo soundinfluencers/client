@@ -60,6 +60,11 @@ export const useCampaignPostContent = ({
     const setCampaignContent = useCampaignBuilderStore(
         (s) => s.actions.setCampaignContent,
     );
+    const proposalEditorSession = useCampaignBuilderStore((s) => mode === "add-influencer" ? s.proposalAddSession?.sessionId : undefined);
+    const editorMounted = React.useRef(true);
+    React.useEffect(() => { editorMounted.current = true; return () => { editorMounted.current = false; }; }, []);
+    const ownsProposalEditor = () => !proposalEditorSession || (editorMounted.current &&
+        useCampaignBuilderStore.getState().proposalAddSession?.sessionId === proposalEditorSession && !useCampaignBuilderStore.getState().proposalAddSession?.completed);
 
     const initialBlocks = React.useMemo(() => {
         let baseBlocks: CampaignPostContentBlock[] = [];
@@ -103,6 +108,7 @@ export const useCampaignPostContent = ({
         const accountsKey = JSON.stringify(
             accounts.map((item) => ({
                 accountId: item.accountId,
+                selectionId: item.selectionId,
                 socialMedia: item.socialMedia,
                 profileType: item.profileType,
             })),
@@ -285,6 +291,7 @@ export const useCampaignPostContent = ({
     );
 
     const buildPayload = React.useCallback((): BuiltCampaignPostContentPayload => {
+        if (!ownsProposalEditor()) throw new Error("This content editor no longer owns the Add Influencer session.");
         const data = form.getValues();
 
         const payload = buildCampaignPostContentPayload({
@@ -292,16 +299,21 @@ export const useCampaignPostContent = ({
             campaignPrice,
             accounts,
             blocks: data.blocks,
+            onBuiltBlocks: (blocks) => {
+                form.setValue("blocks", blocks, { shouldDirty: false, shouldValidate: false });
+                setBlocksDraft(blocks);
+            },
         });
 
         setCampaignContent(payload.campaignContent);
 
         return payload;
-    }, [accounts, campaignPrice, form, setCampaignContent]);
+    }, [accounts, campaignPrice, form, setCampaignContent, setBlocksDraft, proposalEditorSession]);
 
     React.useEffect(() => {
         const subscription = form.watch((values) => {
-            setCampaignName(values.campaignName ?? "");
+            if (!ownsProposalEditor()) return;
+            if (mode !== "add-influencer") setCampaignName(values.campaignName ?? "");
             setPostContentDraft(values as Record<string, unknown>);
             setBlocksDraft(
                 (values.blocks as CampaignPostContentBlock[] | undefined) ?? null,
@@ -309,7 +321,7 @@ export const useCampaignPostContent = ({
         });
 
         return () => subscription.unsubscribe();
-    }, [form, setCampaignName, setPostContentDraft, setBlocksDraft]);
+    }, [form, setCampaignName, setPostContentDraft, setBlocksDraft, proposalEditorSession, mode]);
 
     return {
         form,

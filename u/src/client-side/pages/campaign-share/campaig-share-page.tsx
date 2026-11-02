@@ -64,13 +64,6 @@ const CampaignShareView = ({ id, type }: { id?: string; type?: string }) => {
 
   const isBarSection =
     campaign && ["distributing", "completed"].includes(campaign?.status);
-  const BarComponent = campaign
-    ? isBarSection
-      ? BarSection
-      : Bar
-    : proposal
-      ? Bar
-      : null;
   const onClickOption = (optionIndex: number) => {
     setActiveOption(optionIndex);
   };
@@ -140,9 +133,9 @@ const CampaignShareView = ({ id, type }: { id?: string; type?: string }) => {
           SoundInfluencers
         </h1>
       </div>{" "}
-      {BarComponent && barCampaign && (
-          <BarComponent campaign={barCampaign} visibleStats={visibleStats} />
-      )}
+      {barCampaign && (isBarSection
+          ? <BarSection campaign={barCampaign} visibleStats={visibleStats} readOnlyShare />
+          : <Bar campaign={barCampaign} visibleStats={visibleStats} readOnlyShare />)}
       {isProposal && proposal && (
         <OptionsSlider
           optionIndexes={optionIndexes}

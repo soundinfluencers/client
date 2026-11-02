@@ -17,7 +17,7 @@ export const useCampaignPageBootstrap = (campaignData: any) => {
         ? session.status
         : "regular";
     const sessionOption = sessionKind === "proposal" ? session?.optionIndex ?? 0 : 0;
-    const data = campaignData?.kind === sessionKind &&
+    const data = !(sessionKind === "proposal" && useFetchCampaign.getState().isProposalDeleted?.(sessionId)) && campaignData?.kind === sessionKind &&
         String(sessionKind === "draft" ? campaignData.draftId : campaignData.campaignId) === sessionId
         ? campaignData
         : null;
@@ -35,8 +35,8 @@ export const useCampaignPageBootstrap = (campaignData: any) => {
     const clearProposalStore = useProposalAccountsStore((s) => s.clearAll);
 
     React.useEffect(() => {
-        if (!sessionId) {
-            navigate("/client/dashboard");
+        if (!sessionId || (sessionKind === "proposal" && useFetchCampaign.getState().isProposalDeleted?.(sessionId))) {
+            navigate("/client", { replace: true });
             return;
         }
 
@@ -51,7 +51,7 @@ export const useCampaignPageBootstrap = (campaignData: any) => {
     }, [location.key, sessionId, sessionKind, sessionOption, navigate]);
 
     React.useEffect(() => {
-        if (data?.kind !== "proposal") return;
+        if (data?.kind !== "proposal" || useFetchCampaign.getState().isProposalDeleted?.(data.campaignId)) return;
 
         const nextCampaignId = String(data.campaignId ?? "");
         if (!nextCampaignId) return;
@@ -75,7 +75,7 @@ export const useCampaignPageBootstrap = (campaignData: any) => {
     ]);
 
     React.useEffect(() => {
-        if (data?.kind !== "proposal") return;
+        if (data?.kind !== "proposal" || useFetchCampaign.getState().isProposalDeleted?.(data.campaignId)) return;
 
         const idx = data.selectedOption?.optionIndex ?? 0;
         const state = useProposalAccountsStore.getState();
@@ -83,12 +83,13 @@ export const useCampaignPageBootstrap = (campaignData: any) => {
         const hasLocalAccounts = (state.accountsByOption?.[idx] ?? []).length > 0;
         const hasLocalContent = (state.contentByOption?.[idx] ?? []).length > 0;
 
-        if (hasLocalAccounts || hasLocalContent) return;
+        if ((hasLocalAccounts || hasLocalContent) && !state.optionSnapshotsByIndex) return;
 
         initOption(
             idx,
             data.selectedOption?.addedAccounts ?? [],
             data.selectedOption?.campaignContent ?? [],
+            { snapshot: data.selectedOption },
         );
     }, [data, initOption]);
 
@@ -108,7 +109,9 @@ export const useCampaignPageBootstrap = (campaignData: any) => {
                 data.draftId,
                 data.addedAccounts ?? [],
                 data.campaignContent ?? [],
+                { campaignName: data.campaignName, selectedOffer: data.selectedOffer ?? null, displayCurrency: data.displayCurrency },
             );
         }
     }, [data, initDraft]);
+    return data;
 };

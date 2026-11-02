@@ -22,6 +22,8 @@ export type CampaignPostContentTarget = {
 };
 
 export type CampaignPostContentAccount = {
+    selectionId?: string;
+    selectedCampaignContentItem?: { campaignContentItemId: string; descriptionId: string | null; additionalBriefId?: string | null } | null;
     accountId: string;
     influencerId: string;
     socialMedia: string;
@@ -31,10 +33,12 @@ export type CampaignPostContentAccount = {
     followers?: number;
     price?: number;
     dateRequest?: string;
-    source?: "offer" | "manual";
+    source?: "offer" | "manual" | "bundle";
 };
 
 export type CampaignPostContentBlock = {
+    briefFieldId?: string | null;
+    savedContent?: BuiltCampaignContentItem[];
     id: string;
     group: CampaignContentGroup;
     platform: string;
@@ -57,7 +61,7 @@ export type BuiltCampaignContentItem = {
     }>;
     taggedUser: string;
     taggedLink: string;
-    additionalBrief: string;
+    additionalBrief: Array<{ _id: string; additionalBrief: string }>;
 };
 
 export type BuiltCampaignContentWithMeta = BuiltCampaignContentItem & {
@@ -71,6 +75,7 @@ export type BuiltCampaignContentWithMeta = BuiltCampaignContentItem & {
 };
 
 export type BuiltAddedAccount = {
+    selectionId?: string;
     socialAccountId: string;
     influencerId: string;
     socialMedia: string;
@@ -78,7 +83,8 @@ export type BuiltAddedAccount = {
     profileType?: CampaignContentAudience;
     selectedCampaignContentItem: {
         campaignContentItemId: string;
-        descriptionId: string;
+        descriptionId: string | null;
+        additionalBriefId?: string | null;
     };
     dateRequest: string;
 };

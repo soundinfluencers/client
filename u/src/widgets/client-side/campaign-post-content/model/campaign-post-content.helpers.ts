@@ -1,4 +1,5 @@
 import { ObjectId } from "bson";
+import { serializeCampaignContent, serializeContentReference } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-content.transport";
 import {
     MAIN_PLATFORMS,
     MUSIC_PLATFORMS,
@@ -19,6 +20,8 @@ import type {
 } from "./campaign-post-content.types";
 
 const oid = () => new ObjectId().toHexString();
+const briefText = (brief: BuiltCampaignContentWithMeta["additionalBrief"] | string) =>
+    Array.isArray(brief) ? brief[0]?.additionalBrief ?? "" : brief ?? "";
 
 export const normalizeSocial = (value: string) =>
     String(value || "").toLowerCase();
@@ -423,7 +426,7 @@ export const buildCampaignContentFromBlocks = (
     blocks: CampaignPostContentBlock[],
     accounts: CampaignPostContentAccount[],
 ): BuiltCampaignContentWithMeta[] => {
-    return blocks.flatMap<BuiltCampaignContentWithMeta>((block) => {
+    const built = blocks.flatMap<BuiltCampaignContentWithMeta>((block) => {
         const blockAccounts = getAccountsForBlock(block, accounts);
 
         if (block.group === "main") {
@@ -460,7 +463,7 @@ export const buildCampaignContentFromBlocks = (
                 })),
                 taggedUser: block.fields.taggedUser.trim(),
                 taggedLink: block.fields.taggedLink.trim(),
-                additionalBrief: block.fields.additionalBrief.trim(),
+                additionalBrief: [],
                 meta: {
                     blockId: block.id,
                     platform: block.platform,
@@ -493,7 +496,7 @@ export const buildCampaignContentFromBlocks = (
                     })),
                     taggedUser: "",
                     taggedLink: "",
-                    additionalBrief: block.fields.additionalBrief.trim(),
+                    additionalBrief: [],
                     meta: {
                         blockId: block.id,
                         platform: block.platform,
@@ -526,7 +529,7 @@ export const buildCampaignContentFromBlocks = (
                 })),
                 taggedUser: "",
                 taggedLink: block.fields.taggedLink.trim(),
-                additionalBrief: block.fields.additionalBrief.trim(),
+                additionalBrief: [],
                 meta: {
                     blockId: block.id,
                     platform: block.platform,
@@ -536,6 +539,24 @@ export const buildCampaignContentFromBlocks = (
                 },
             }),
         );
+    });
+    return built.map((item) => {
+        const block = blocks.find((b) => b.id === item.meta.blockId);
+        const saved = block?.savedContent?.find((c) => c.socialMedia === item.socialMedia && c.profileType === item.profileType);
+        const descriptions = item.descriptions.map((d, index) => {
+            const fieldId = block?.fields.descriptions[index]?.id;
+            const originalIndex = block?.savedContent?.[0]?.descriptions.findIndex((desc) => desc._id === fieldId) ?? -1;
+            return { ...d, _id: originalIndex >= 0 ? saved?.descriptions[originalIndex]?._id ?? fieldId ?? d._id : fieldId ?? d._id };
+        });
+        const briefs = Array.isArray(saved?.additionalBrief) ? saved.additionalBrief : [];
+        const editedBrief = block?.fields.additionalBrief.trim() ?? "";
+        const firstBriefs = block?.savedContent?.[0]?.additionalBrief;
+        const editedIndex = block?.briefFieldId === null ? -1 : block?.briefFieldId && Array.isArray(firstBriefs)
+            ? firstBriefs.findIndex((brief) => brief._id === block.briefFieldId) : 0;
+        const additionalBrief = briefs.flatMap((brief, index) => index === editedIndex
+            ? editedBrief ? [{ ...brief, additionalBrief: editedBrief }] : [] : [brief]);
+        if (editedBrief && !briefs[editedIndex]) additionalBrief.unshift({ _id: oid(), additionalBrief: editedBrief });
+        return { ...serializeCampaignContent([{ ...item, _id: saved?._id ?? item._id, descriptions, additionalBrief }])[0], meta: item.meta };
     });
 };
 
@@ -588,7 +609,9 @@ export const buildAddedAccountsFromBlocks = ({
 }): BuiltAddedAccount[] => {
     return accounts
         .map((account) => {
-            const contentItem = pickContentItemForAccount({
+            const savedRef = account.selectedCampaignContentItem;
+            const savedItem = savedRef && contentItems.find((c) => c._id === savedRef.campaignContentItemId);
+            const contentItem = savedItem || pickContentItemForAccount({
                 account,
                 contentItems,
             });
@@ -596,14 +619,16 @@ export const buildAddedAccountsFromBlocks = ({
             if (!contentItem) return null;
 
             return {
+                ...(account.selectionId ? { selectionId: account.selectionId } : {}),
                 socialAccountId: String(account.accountId),
                 influencerId: String(account.influencerId),
                 socialMedia: normalizeSocial(account.socialMedia),
                 username: String(account.username),
-                selectedCampaignContentItem: {
+                selectedCampaignContentItem: serializeContentReference(savedItem && savedRef ? savedRef : {
                     campaignContentItemId: contentItem._id,
-                    descriptionId: contentItem.descriptions[0]?._id ?? "",
-                },
+                    descriptionId: contentItem.descriptions[0]?._id ?? null,
+                    additionalBriefId: Array.isArray(contentItem.additionalBrief) ? contentItem.additionalBrief[0]?._id ?? null : null,
+                }, contentItems)!,
                 profileType: account.profileType,
                 dateRequest: account.dateRequest ?? "ASAP",
             };
@@ -616,13 +641,25 @@ export const buildCampaignPostContentPayload = ({
                                                     campaignPrice,
                                                     accounts,
                                                     blocks,
+                                                    onBuiltBlocks,
                                                 }: {
     campaignName: string;
     campaignPrice: number;
     accounts: CampaignPostContentAccount[];
     blocks: CampaignPostContentBlock[];
+    onBuiltBlocks?: (blocks: CampaignPostContentBlock[]) => void;
 }): BuiltCampaignPostContentPayload => {
     const builtContent = buildCampaignContentFromBlocks(blocks, accounts);
+    // Pin generated transport IDs to the existing form-block snapshot before another save/transition.
+    onBuiltBlocks?.(blocks.map((block) => {
+        const savedContent = builtContent.filter((item) => item.meta.blockId === block.id).map(({ meta, ...item }) => item);
+        const firstBriefs = savedContent[0]?.additionalBrief;
+        const previousBriefs = block.savedContent?.[0]?.additionalBrief;
+        const previousBriefIndex = block.briefFieldId && Array.isArray(previousBriefs)
+            ? previousBriefs.findIndex((brief) => brief._id === block.briefFieldId) : 0;
+        return { ...block, savedContent, briefFieldId: block.fields.additionalBrief.trim()
+            ? (Array.isArray(firstBriefs) ? firstBriefs[Math.max(previousBriefIndex, 0)]?._id : undefined) : null };
+    }));
 
     const addedAccounts = buildAddedAccountsFromBlocks({
         accounts,
@@ -763,9 +800,11 @@ export const syncBlocksWithAccounts = ({
 
     return next.map((block) => {
         if (block.group === "main" && !block.isAdditional) {
+            // Distinct saved Creator/Community briefs must not become two shared blocks.
+            const separateMainBriefs = next.filter((item) => item.group === "main" && !item.isAdditional).length > 1;
             return {
                 ...block,
-                audience: mainAudience,
+                audience: separateMainBriefs ? block.audience : mainAudience,
                 targetSocialMedias: mainPlatforms,
             };
         }
@@ -800,7 +839,7 @@ export const buildBlocksFromCampaignContent = ({
         descriptions: { _id: string; description: string }[];
         taggedUser: string;
         taggedLink: string;
-        additionalBrief: string;
+        additionalBrief: string | Array<{ _id: string; additionalBrief: string }>;
         profileType?: "creator" | "community";
     }>;
 }): CampaignPostContentBlock[] => {
@@ -838,13 +877,17 @@ export const buildBlocksFromCampaignContent = ({
         const bDescriptions = JSON.stringify(
             (b.descriptions ?? []).map((d) => String(d.description ?? "").trim()),
         );
+        const briefValues = (brief: typeof a.additionalBrief) => JSON.stringify(
+            typeof brief === "string" ? (brief.trim() ? [brief.trim()] : [])
+                : brief.map((item) => item.additionalBrief.trim()),
+        );
 
         return (
             String(a.mainLink ?? "").trim() === String(b.mainLink ?? "").trim() &&
             aDescriptions === bDescriptions &&
             String(a.taggedUser ?? "").trim() === String(b.taggedUser ?? "").trim() &&
             String(a.taggedLink ?? "").trim() === String(b.taggedLink ?? "").trim() &&
-            String(a.additionalBrief ?? "").trim() === String(b.additionalBrief ?? "").trim()
+            briefValues(a.additionalBrief) === briefValues(b.additionalBrief)
         );
     };
 
@@ -867,6 +910,7 @@ export const buildBlocksFromCampaignContent = ({
             usedMainIds.add(String(matchingCommunity._id));
 
             blocks.push({
+                savedContent: [creatorItem, matchingCommunity] as BuiltCampaignContentWithMeta[],
                 id: oid(),
                 group: "main",
                 platform: "main",
@@ -884,7 +928,7 @@ export const buildBlocksFromCampaignContent = ({
                     descriptions: normalizeDescriptions(creatorItem.descriptions ?? []),
                     taggedUser: String(creatorItem.taggedUser ?? ""),
                     taggedLink: String(creatorItem.taggedLink ?? ""),
-                    additionalBrief: String(creatorItem.additionalBrief ?? ""),
+                    additionalBrief: briefText(creatorItem.additionalBrief),
                 },
             });
 
@@ -894,6 +938,7 @@ export const buildBlocksFromCampaignContent = ({
         usedMainIds.add(String(creatorItem._id));
 
         blocks.push({
+            savedContent: [creatorItem] as BuiltCampaignContentWithMeta[],
             id: oid(),
             group: "main",
             platform: "main",
@@ -906,7 +951,7 @@ export const buildBlocksFromCampaignContent = ({
                 descriptions: normalizeDescriptions(creatorItem.descriptions ?? []),
                 taggedUser: String(creatorItem.taggedUser ?? ""),
                 taggedLink: String(creatorItem.taggedLink ?? ""),
-                additionalBrief: String(creatorItem.additionalBrief ?? ""),
+                additionalBrief: briefText(creatorItem.additionalBrief),
             },
         });
     });
@@ -917,6 +962,7 @@ export const buildBlocksFromCampaignContent = ({
         usedMainIds.add(String(communityItem._id));
 
         blocks.push({
+            savedContent: [communityItem] as BuiltCampaignContentWithMeta[],
             id: oid(),
             group: "main",
             platform: "main",
@@ -929,13 +975,14 @@ export const buildBlocksFromCampaignContent = ({
                 descriptions: normalizeDescriptions(communityItem.descriptions ?? []),
                 taggedUser: String(communityItem.taggedUser ?? ""),
                 taggedLink: String(communityItem.taggedLink ?? ""),
-                additionalBrief: String(communityItem.additionalBrief ?? ""),
+                additionalBrief: briefText(communityItem.additionalBrief),
             },
         });
     });
 
     musicItems.forEach((item, index) => {
         blocks.push({
+            savedContent: [item] as BuiltCampaignContentWithMeta[],
             id: oid(),
             group: "music",
             platform: normalizeSocial(item.socialMedia),
@@ -947,13 +994,14 @@ export const buildBlocksFromCampaignContent = ({
                 descriptions: normalizeDescriptions(item.descriptions ?? []),
                 taggedUser: "",
                 taggedLink: "",
-                additionalBrief: String(item.additionalBrief ?? ""),
+                additionalBrief: briefText(item.additionalBrief),
             },
         });
     });
 
     pressItems.forEach((item, index) => {
         blocks.push({
+            savedContent: [item] as BuiltCampaignContentWithMeta[],
             id: oid(),
             group: "press",
             platform: "press",
@@ -965,7 +1013,7 @@ export const buildBlocksFromCampaignContent = ({
                 descriptions: normalizeDescriptions(item.descriptions ?? []),
                 taggedUser: "",
                 taggedLink: String(item.taggedLink ?? ""),
-                additionalBrief: String(item.additionalBrief ?? ""),
+                additionalBrief: briefText(item.additionalBrief),
             },
         });
     });

@@ -39,9 +39,13 @@ export const setupInterceptors = (
       console.count("RESPONSE INTERCEPTOR ERROR");
       console.log("url:", error.config?.url, "status:", error.response?.status);
       const originalRequest: any = error.config;
+      // Opt-in continuation ownership for promo operations. A 401 refresh must
+      // not replay an old mutation into another page/auth session.
+      if (originalRequest?.isCurrentRequest && !originalRequest.isCurrentRequest()) return Promise.reject(error);
 
+      const silentRead = (error.config as any)?.silentReadError === true;
       if (!error.response) {
-        handleApiError(error);
+        if (!silentRead) handleApiError(error);
         return Promise.reject(error);
       }
 
@@ -53,18 +57,19 @@ export const setupInterceptors = (
         error.response.status === 401 && !originalRequest?._retry;
 
       if (!shouldTryRefresh) {
-        handleApiError(error);
+        if (!silentRead) handleApiError(error);
         return Promise.reject(error);
       }
 
       originalRequest._retry = true;
 
       try {
-        const token = await refreshAccessToken(setAccessToken);
+        const token = await refreshAccessToken(token => { if (!originalRequest?.isCurrentRequest || originalRequest.isCurrentRequest()) setAccessToken(token); });
+        if (originalRequest?.isCurrentRequest && !originalRequest.isCurrentRequest()) return Promise.reject(error);
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return $api(originalRequest);
       } catch (err) {
-        logout();
+        if (!originalRequest?.isCurrentRequest || originalRequest.isCurrentRequest()) logout();
         return Promise.reject(err);
       }
     },

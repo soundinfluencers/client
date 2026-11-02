@@ -1,3 +1,4 @@
+import { buildCampaignDraftPayload } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/build-draft-payload";
 import React from "react";
 import {Container, Breadcrumbs, ButtonMain, ButtonSecondary} from "@/components";
 import { useNavigate } from "react-router-dom";
@@ -12,13 +13,10 @@ import styles from "./campaign-strategy-page.module.scss";
 import {
     useCampaignStrategyViewParams,
 } from "@/features/client-side/campaign-tables/model/use-campaign-strategy-view-params";
-import { ViewChange } from "@/features/client-side/campaign-tables/view-change/ui/view-change";
 import { ViewAudience } from "@/features/client-side/campaign-tables/view-audience/ui/view-audince";
 import {
-    buildStrategyDraftPayload,
     buildStrategyProposalPayload,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
-import { LiveViewCard } from "@/widgets/client-side/campaign-tables/ui/live-view-card/ui/live-view-card";
 import {useSaveProposal} from "@/widgets/client-side/campaign-tables/model/use-save-proposal.ts";
 import {useProposalShare} from "@/widgets/client-side/campaign-tables/model/use-proposal-share.ts";
 import {Bar} from "@/widgets/client-side/campaign-tables/ui/bar-campaigns/ui/bar.tsx";
@@ -29,20 +27,26 @@ import {Checkbox} from "@/widgets/client-side/campaign-tables/ui/check-box-row/u
 import {postCampaignDraft} from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
 import {toast} from "react-toastify";
 import {DraftButton} from "@components/ui/draft-button/draft-button.tsx";
+import { isInvalidOfferError } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
+import { getSavedDraftId } from "@/entities/client-side/campaign-draft/api/draft-save-result";
+import { CampaignDraftLatestStep } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
 
 
 export const CampaignStrategyPage = () => {
     const navigate = useNavigate();
 
     const campaignName = useCampaignBuilderStore((s) => s.campaignName);
+    const offerAvailable = useCampaignBuilderStore((s) => s.selectedOfferIsAvailable);
+    const totalPriceReady = useCampaignBuilderStore((s) => s.totalPriceReady);
     const accounts = useCampaignBuilderStore((s) => s.selectedAccounts);
     const content = useCampaignBuilderStore((s) => s.campaignContent);
     const totalPrice = useCampaignBuilderStore((s) => s.totalPrice);
-    const draftId = useCampaignBuilderStore((s) => s.draftId);
     const selectedCurrency = useCampaignBuilderStore((s) => s.selectedCurrency);
 
     const reset = useCampaignBuilderStore((s) => s.actions.reset);
     const [checked, setChecked] = React.useState(true);
+    const [isSavingDraft, setIsSavingDraft] = React.useState(false);
+    const draftSaveInFlightRef = React.useRef(false);
 
     const setAccountDateRequest = useCampaignBuilderStore(
         (s) => s.actions.setAccountDateRequest,
@@ -55,7 +59,7 @@ export const CampaignStrategyPage = () => {
     const setSelectedCampaignContentItem = React.useCallback(
         (
             accountId: string,
-            selected: { campaignContentItemId: string; descriptionId: string } | null,
+            selected: { campaignContentItemId: string; descriptionId: string | null; additionalBriefId?: string | null } | null,
         ) => {
             if (!selected) return;
             setSelectedCampaignContentItemRaw(accountId, selected);
@@ -63,7 +67,7 @@ export const CampaignStrategyPage = () => {
         [setSelectedCampaignContentItemRaw],
     );
 
-    const { view, setView, insights, setInsights } =
+    const { insights, setInsights } =
         useCampaignStrategyViewParams({ isProposal: false });
 
     const grouped = React.useMemo(
@@ -83,36 +87,34 @@ export const CampaignStrategyPage = () => {
         [setAccountDateRequest, setSelectedCampaignContentItem],
     );
 
-    const pageMode = React.useMemo(() => {
-        if (view === -1) return "edit";
-        if (view === 0) return "readonlyDate";
-        return "readonly";
-    }, [view]);
+    // Creation Strategy is table-only, even for persisted/legacy ?view=1 links.
+    const pageMode = "readonlyDate" as const;
 
     const onSaveDraft = React.useCallback(async () => {
-        const payload = buildStrategyDraftPayload({
-            campaignName,
-            draftId,
-            accounts,
-            content,
-        });
-
-        console.log("SAVE STRATEGY DRAFT", payload);
-        await postCampaignDraft(payload);
-        toast.success("Draft saved successfully");
-    }, [campaignName, draftId, accounts, content]);
+        if (draftSaveInFlightRef.current) return;
+        draftSaveInFlightRef.current = true;
+        setIsSavingDraft(true);
+        try {
+            const state = useCampaignBuilderStore.getState();
+            const payload = buildCampaignDraftPayload(state, CampaignDraftLatestStep.strategyTable);
+            const response = await postCampaignDraft(payload);
+            state.actions.setDraftMeta({ draftId: getSavedDraftId(response, state.draftId), draftStep: CampaignDraftLatestStep.strategyTable });
+            toast.success("Draft saved successfully");
+        } catch (error) {
+            toast.error(isInvalidOfferError(error) ? "Your selected offer has changed or is unavailable. Return to the offer selection and refresh the catalogue before saving again." : error instanceof Error ? error.message : "Failed to save draft");
+        } finally {
+            draftSaveInFlightRef.current = false;
+            setIsSavingDraft(false);
+        }
+    }, []);
 
     const {
         isProposalModalOpen,
         campaignProposalId,
         setProposalModalOpen,
         saveProposal,
-    } = useSaveProposal({
-        campaignName,
-        totalPrice,
-        accounts,
-        content,
-    });
+        isSavingProposal, proposalReadPending,
+    } = useSaveProposal();
 
     const {
         shareUrl,
@@ -121,11 +123,13 @@ export const CampaignStrategyPage = () => {
     } = useProposalShare(campaignProposalId);
 
     const onProceed = React.useCallback(() => {
+        if (!useCampaignBuilderStore.getState().totalPriceReady) return;
         const payload = buildStrategyProposalPayload({
             campaignName,
             totalPrice,
             accounts,
             content,
+            displayCurrency: selectedCurrency,
         });
 
         console.log("STRATEGY PROPOSAL PAYLOAD", payload);
@@ -133,8 +137,8 @@ export const CampaignStrategyPage = () => {
         console.log("strategy accounts", accounts);
         console.log("strategy content", content);
         console.log("strategy totalPrice", totalPrice);
-        navigate("/client/create-campaign/content/strategy/payment");
-    }, [campaignName, totalPrice, accounts, content, navigate]);
+        navigate(`/client/create-campaign/content/strategy/payment?currency=${selectedCurrency === "$" ? "USD" : selectedCurrency === "£" ? "GBP" : "EUR"}`);
+    }, [campaignName, totalPrice, accounts, content, navigate, selectedCurrency]);
     const barData = React.useMemo(
         () =>
             buildCampaignBarData({
@@ -144,27 +148,18 @@ export const CampaignStrategyPage = () => {
                 submittedAt: new Date(),
                 currency: selectedCurrency,
             }),
-        [totalPrice, accounts, content],
+        [totalPrice, accounts, content, selectedCurrency],
     );
-    const getNetworksForContentItem = React.useCallback(
-        (
-            itemId: string,
-            networks: typeof accounts,
-        ) => {
-            return networks.filter((account) => {
-                const selectedId = account.selectedCampaignContentItem?.campaignContentItemId;
-
-                return String(selectedId) === String(itemId);
-            });
-        },
-        [],
-    );
+    const ambiguous = accounts.filter((a, index) => accounts.findIndex((b) => b.accountId === a.accountId) !== index);
+    if (ambiguous.length) return <Container><p role="alert">This draft contains ambiguous account selections. Review the individual rows before checkout; no content or rows have been removed.</p>
+        <button type="button" onClick={() => navigate(`/client/create-campaign/content?currency=${selectedCurrency === "$" ? "USD" : selectedCurrency === "£" ? "GBP" : "EUR"}`)}>Review saved selections</button>
+    </Container>;
     return (
         <>
             <Container>
                 <div className={styles.navMenu}>
                     <Breadcrumbs />
-                    <DraftButton onClick={onSaveDraft} />
+                    <DraftButton onClick={onSaveDraft} isDisabled={isSavingDraft} />
                 </div>
 
                 <div className={styles.page}>
@@ -173,38 +168,31 @@ export const CampaignStrategyPage = () => {
                         <Bar
 
                             submittedLabel={barData.submittedLabel}
-                            budgetLabel={barData.budgetLabel}
+                            budgetLabel={offerAvailable === false ? "Offer unavailable — review selection" : !totalPriceReady ? "Prices unavailable for the selected currency" : barData.budgetLabel}
                             reachLabel={barData.reachLabel}
                             postsLabel={barData.postsLabel}
                             videosLabel={barData.videosLabel}
                         />
                         <div className={styles.controls}>
                             <div className={styles.controlsContent}>
-                                {view !== 1 && (
                                     <ViewAudience
                                         flag={insights}
                                         onChange={() => setInsights(!insights)}
                                     />
-                                )}
                                 <button
                                     type="button"
                                     className={styles.controlsProposal}
+                                    disabled={isSavingProposal}
                                     onClick={saveProposal}
                                 >
-                                    Save proposal
+                                    {proposalReadPending ? "Retry reading created proposal" : isSavingProposal ? "Saving..." : "Save proposal"}
                                 </button>
                             </div>
-                            <ViewChange
-                                view={view}
-                                setView={setView}
-                                isProposal={false}
-                            />
 
 
                         </div>
                     </div>
 
-                    {view === 0 ? (
                         <div className={styles.pageContent}>
                             {!!grouped.mainCreator.accounts.length && (
                                 <CampaignStrategySection
@@ -214,7 +202,7 @@ export const CampaignStrategyPage = () => {
                                     accounts={grouped.mainCreator.accounts}
                                     items={grouped.mainCreator.items}
                                     totalPrice={totalPrice}
-                                    actions={pageMode !== "readonly" ? readonlyDateActions : undefined}
+                                    actions={readonlyDateActions}
                                     insights={insights}
                                     currency={selectedCurrency}
                                 />
@@ -228,7 +216,7 @@ export const CampaignStrategyPage = () => {
                                     accounts={grouped.mainCommunity.accounts}
                                     items={grouped.mainCommunity.items}
                                     totalPrice={totalPrice}
-                                    actions={pageMode !== "readonly" ? readonlyDateActions : undefined}
+                                    actions={readonlyDateActions}
                                     insights={insights}
                                     currency={selectedCurrency}
 
@@ -243,7 +231,7 @@ export const CampaignStrategyPage = () => {
                                     accounts={grouped.music.accounts}
                                     items={grouped.music.items}
                                     totalPrice={totalPrice}
-                                    actions={pageMode !== "readonly" ? readonlyDateActions : undefined}
+                                    actions={readonlyDateActions}
                                     insights={insights}
                                     currency={selectedCurrency}
 
@@ -258,7 +246,7 @@ export const CampaignStrategyPage = () => {
                                     accounts={grouped.press.accounts}
                                     items={grouped.press.items}
                                     totalPrice={totalPrice}
-                                    actions={pageMode !== "readonly" ? readonlyDateActions : undefined}
+                                    actions={readonlyDateActions}
                                     insights={insights}
                                     currency={selectedCurrency}
 
@@ -266,85 +254,6 @@ export const CampaignStrategyPage = () => {
                                 />
                             )}
                         </div>
-                    ) : (
-                        <div className={styles.pageContentCards}>
-                            {!!grouped.mainCreator.items.length &&
-                                grouped.mainCreator.items.map((item) => {
-                                    const networks = getNetworksForContentItem(
-                                        String(item._id),
-                                        grouped.mainCreator.accounts,
-                                    );
-
-                                    if (!networks.length) return null;
-
-                                    return (
-                                        <LiveViewCard
-                                            key={item._id}
-                                            item={item}
-                                            networks={networks}
-                                            canEdit={pageMode === "edit"}
-                                        />
-                                    );
-                                })}
-
-                            {!!grouped.mainCommunity.items.length &&
-                                grouped.mainCommunity.items.map((item) => {
-                                    const networks = getNetworksForContentItem(
-                                        String(item._id),
-                                        grouped.mainCommunity.accounts,
-                                    );
-
-                                    if (!networks.length) return null;
-
-                                    return (
-                                        <LiveViewCard
-                                            key={item._id}
-                                            item={item}
-                                            networks={networks}
-                                            canEdit={pageMode === "edit"}
-                                        />
-                                    );
-                                })}
-
-                            {!!grouped.music.items.length &&
-                                grouped.music.items.map((item) => {
-                                    const networks = getNetworksForContentItem(
-                                        String(item._id),
-                                        grouped.music.accounts,
-                                    );
-
-                                    if (!networks.length) return null;
-
-                                    return (
-                                        <LiveViewCard
-                                            key={item._id}
-                                            item={item}
-                                            networks={networks}
-                                            canEdit={pageMode === "edit"}
-                                        />
-                                    );
-                                })}
-
-                            {!!grouped.press.items.length &&
-                                grouped.press.items.map((item) => {
-                                    const networks = getNetworksForContentItem(
-                                        String(item._id),
-                                        grouped.press.accounts,
-                                    );
-
-                                    if (!networks.length) return null;
-
-                                    return (
-                                        <LiveViewCard
-                                            key={item._id}
-                                            item={item}
-                                            networks={networks}
-                                            canEdit={pageMode === "edit"}
-                                        />
-                                    );
-                                })}
-                        </div>
-                    )}
 
                     <div className={styles.footerActions}>
 
@@ -355,7 +264,7 @@ export const CampaignStrategyPage = () => {
                         />
                         <ButtonMain
                             className={styles.proceedButton}
-                            onClick={onProceed} text={"Proceed"}                        />
+                            onClick={onProceed} text={"Proceed"} isDisabled={!totalPriceReady} />
 
                     </div>
                 </div>

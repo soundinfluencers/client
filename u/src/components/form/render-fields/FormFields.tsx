@@ -10,16 +10,19 @@ import { StarRatingField } from '@/components';
 // import {Fragment} from 'react/jsx-runtime';
 import { InfluencerDateInput } from '../../ui/influencer-date-input/InfluencerDateInput';
 import { CountryField } from "@/pages/influencer/shared/components/CountryField.tsx";
+import type { ImageUploadOptions } from '../../ui/image-upload/ImageUpload';
 
 interface Props {
   inputs: any;
+  imageUploadOptions?: ImageUploadOptions;
+  inert?: boolean;
 }
 
-export const FormFields = ({ inputs }: Props) => {
+export const FormFields = ({ inputs, imageUploadOptions, inert }: Props) => {
   const { control } = useFormContext();
 
   return (
-    <div className="form-fields">
+    <div className="form-fields" inert={inert}>
       {inputs.map((input) => {
         switch (input.type) {
           case 'text':
@@ -46,6 +49,7 @@ export const FormFields = ({ inputs }: Props) => {
                 placeholder={input.placeholder}
                 description={input.description}
                 size={input.size}
+                uploadOptions={imageUploadOptions}
                 // value={field.value}
                 // onChange={field.onChange}
                 // error={fieldState.error}

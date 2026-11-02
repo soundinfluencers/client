@@ -6,7 +6,7 @@ import { TableCard } from "../card-table/table-card-insight";
 
 import chevron from "@/assets/icons/chevron-up.svg";
 import { columns, titles } from "@/client-side/data/table-campaign.data";
-import { getCurrencySymbol } from "@/pages/influencer/negotiation/utils/getCurrencySymbol.ts";
+import { formatSavedShareTotal, sharePlacementRows } from "@/client-side/pages/campaign-share/model/share-campaign-read";
 
 interface Props {
   campaign: CampaignResponse | any;
@@ -71,24 +71,6 @@ const getCampaignAccounts = (campaign: any) => {
   return campaign?.selectedOption?.addedAccounts ?? campaign?.addedAccounts ?? [];
 };
 
-const getCampaignPrice = (campaign: any, accounts: any[]) => {
-  const directPrice = Number(
-      campaign?.selectedOption?.price ??
-      campaign?.selectedOption?.campaignPrice ??
-      campaign?.price ??
-      campaign?.campaignPrice ??
-      0,
-  );
-
-  if (Number.isFinite(directPrice) && directPrice > 0) {
-    return directPrice;
-  }
-
-  return accounts.reduce((sum, account) => {
-    return sum + Number(account?.publicPrice ?? account?.price ?? 0);
-  }, 0);
-};
-
 const getTotals = (campaign: any, accounts: any[]) => {
   return {
     followers:
@@ -134,7 +116,7 @@ export const TableDistributingInsight: React.FC<Props> = ({ campaign }) => {
   );
 
   const price = React.useMemo(
-      () => getCampaignPrice(campaign, accounts),
+      () => formatSavedShareTotal(campaign),
       [campaign, accounts],
   );
 
@@ -232,15 +214,9 @@ export const TableDistributingInsight: React.FC<Props> = ({ campaign }) => {
           </thead>
 
           <tbody>
-          {sortedAccounts.map((row, index) => (
+          {sharePlacementRows(sortedAccounts).map(({ row, key }) => (
               <TableCard
-                  key={
-                      row.addedAccountsId ??
-                      row.socialAccountId ??
-                      row.accountId ??
-                      row._id ??
-                      `${row.influencerId}-${index}`
-                  }
+                  key={key}
                   data={row}
               />
           ))}
@@ -262,7 +238,7 @@ export const TableDistributingInsight: React.FC<Props> = ({ campaign }) => {
                         price:{" "}
                         {campaign?.isPriceHidden
                             ? "—"
-                            : `${price}${getCurrencySymbol(campaign?.displayCurrency)}`}
+                            : price}
                       </p>
                   )}
 

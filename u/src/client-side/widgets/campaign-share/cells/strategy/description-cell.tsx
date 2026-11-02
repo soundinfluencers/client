@@ -56,14 +56,16 @@ export const DescriptionCell = React.memo(function DescriptionCell({
   //     </td>
   //   );
   // }
+  const rawDescription = descriptions?.[selectedPd]?.description;
+  const description = typeof rawDescription === "string" && rawDescription.trim() ? rawDescription : null;
   return (
     <td className="tableBase__td">
       {group !== 'press' ? <div className="no-edit">
         <p className="hidden-text desc" title={enableTitle ? descriptions?.[selectedPd]?.description ?? "" : undefined}>
           {descriptions?.[selectedPd]?.description}
         </p>
-      </div> : <Link  to={normalizeLink(descriptions?.[selectedPd]?.description)}
-                      target="_blank"><p className="hidden-text tagged-link">{descriptions?.[selectedPd]?.description}</p></Link>}
+      </div> : description ? <Link  to={normalizeLink(description)}
+                      target="_blank"><p className="hidden-text tagged-link">{description}</p></Link> : <p className="hidden-text">—</p>}
     </td>
   );
 });

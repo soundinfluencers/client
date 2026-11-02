@@ -79,7 +79,7 @@ export const getCampaignResultDataSchema = (platform: Platform) => {
       return multipromoDataSchema;
 
     default:
-      return socialsDataSchema;
+      throw new Error("Unsupported promo platform");
   }
 };
 

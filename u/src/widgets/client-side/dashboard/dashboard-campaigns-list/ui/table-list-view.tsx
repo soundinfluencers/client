@@ -9,6 +9,7 @@ import {
     useDeleteCampaignDraft
 } from "@/features/client-side/dashboard/delete-campaign-draft/model/use-delete-campaign-draft.ts";
 import { DeleteDraftModal } from "./delete-draft-modal";
+import { formatCurrency } from "@/shared/functions/formatCurrency.ts";
 
 type Props = {
     thead: string[];
@@ -108,7 +109,7 @@ export const TableListView = ({ thead, list, onOpen, isLoading }: Props) => {
                         </div>
 
                         <div className={styles.tableCell} style={{ width: COLS[3] }}>
-                            <p>{item.price ? `${item.price}€` : ""}</p>
+                            <p>{item.price ? `${formatCurrency(item.price, item.currency ?? item.displayCurrency)}` : ""}</p>
                         </div>
                     </div>
                 ))}

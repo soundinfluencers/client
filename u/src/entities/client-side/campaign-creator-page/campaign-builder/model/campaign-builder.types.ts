@@ -1,4 +1,7 @@
+import type { Bundle } from "../../bundle/model/bundle.types";
 import type { CampaignPostContentBlock } from "@/widgets/client-side/campaign-post-content/model/campaign-post-content.types";
+import type { DisplayCurrency, OfferPrices } from "./selected-offer";
+import type { ProposalAddSession } from "./proposal-add-influencer-builder";
 
 // @ts-ignore
 export enum CampaignDraftLatestStep {
@@ -9,10 +12,17 @@ export enum CampaignDraftLatestStep {
 
 export type SelectedCampaignContentRef = {
     campaignContentItemId: string;
-    descriptionId: string;
+    descriptionId: string | null;
+    additionalBriefId?: string | null;
 };
 
 export type SelectedCampaignAccount = {
+    isAvailable?: boolean;
+    unavailableReason?: string;
+    selectionId?: string;
+    _id?: string;
+    addedAccountsId?: string;
+    bundleId?: string;
     accountId: string;
     influencerId: string;
     socialMedia: string;
@@ -20,15 +30,21 @@ export type SelectedCampaignAccount = {
     logoUrl?: string;
     followers?: number;
     price?: number;
+    priceCurrency?: DisplayCurrency;
+    prices?: Partial<OfferPrices>;
     dateRequest?: string;
     selectedCampaignContentItem?: SelectedCampaignContentRef | null;
     profileType?: "creator" | "community";
-    source?: "manual" | "offer";
+    source?: "manual" | "offer" | "bundle";
 
     genres?: string[];
+    communityMusicGenres?: string[];
+    communityThemeTopics?: string[];
+    creatorMusicGenres?: string[];
+    creatorContentFocus?: string[];
     countries?: Array<{
         country: string;
-        percentage: number;
+        percentage?: number;
     }>;
 };
 
@@ -45,20 +61,33 @@ export type CampaignContentItem = {
     descriptions: CampaignContentDescription[];
     taggedUser: string;
     taggedLink: string;
-    additionalBrief: string;
+    additionalBrief: string | Array<{ _id: string; additionalBrief: string }>;
     accountId?: string;
     profileType?: "creator" | "community";
     mediaCache?: any;
 };
 
+export type SelectedBundleSnapshot = Bundle & {
+    selectedAccountIds?: string[];
+    currentAccountIds?: string[];
+    isAvailable?: boolean;
+    unavailableReason?: string;
+};
+
 export type CampaignBuilderState = {
+    proposalAddSession: ProposalAddSession | null;
+    selectedBundles: SelectedBundleSnapshot[];
     campaignName: string;
     selectedOfferName: string;
     draftId: string | null;
     draftStep: CampaignDraftLatestStep | null;
 
     selectedOfferId: string | null;
-    selectedOfferPrice: number;
+    selectedOfferPrice: number | null;
+    selectedOfferPrices: Partial<OfferPrices> | null;
+    selectedOfferIsAvailable: boolean | null;
+    selectedOfferUnavailableReason: string | null;
+    offerCatalogContext: { platform: string; genre: string } | null;
     selectedPromoCardIds: string[];
     selectedOfferAccountIds: string[];
     selectedAccounts: SelectedCampaignAccount[];
@@ -68,10 +97,14 @@ export type CampaignBuilderState = {
     postContentDraft: Record<string, unknown> | null;
     blocksDraft: CampaignPostContentBlock[] | null;
     totalPrice: number;
+    totalPriceReady: boolean;
+    unsupportedDraftBundles: boolean;
     selectedCurrency: string;
 };
 
 export type CampaignBuilderActions = {
+    selectBundle: (bundle: Bundle) => void;
+    removeBundle: (bundleId: string) => void;
     setCampaignName: (value: string) => void;
     setDraftMeta: (payload: {
         draftId: string | null;
@@ -84,12 +117,16 @@ export type CampaignBuilderActions = {
         accounts?: SelectedCampaignAccount[];
         offerName?: string;
         offerPrice?: number;
+        offerPrices?: Partial<OfferPrices>;
+        catalogContext?: { platform: string; genre: string };
     }) => void;
+    setOfferDisplay: (offerId: string, name: string, price: number) => void;
 
     setSelectedPromoCardIds: (ids: string[]) => void;
     togglePromoCardId: (id: string) => void;
     togglePromoCard: (account: SelectedCampaignAccount) => void;
     setSelectedAccounts: (accounts: SelectedCampaignAccount[]) => void;
+    removeSelection: (selectionId: string) => void;
     upsertSelectedAccount: (account: SelectedCampaignAccount) => void;
 
     setSelectedCampaignContentItem: (
@@ -104,41 +141,22 @@ export type CampaignBuilderActions = {
     setBlocksDraft: (value: CampaignPostContentBlock[] | null) => void;
     syncSelectedAccountsContent: (
         addedAccounts: Array<{
+            selectionId?: string;
             socialAccountId: string;
             selectedCampaignContentItem?: {
                 campaignContentItemId: string;
-                descriptionId: string;
+                descriptionId: string | null;
+                additionalBriefId?: string | null;
             } | null;
             dateRequest?: string;
             profileType?: "creator" | "community";
         }>,
     ) => void;
     setSelectedCurrency: (currency: string) => void;
-    hydrateFromDraft: (payload: {
-        draftId: string;
-        draftStep: "addAccounts" | "addContent" | "strategyTable";
-        campaignName: string;
-        totalPrice: number;
-        selectedOfferId: null;
-        selectedOfferAccountIds: any[];
-        selectedPromoCardIds: string[];
-        selectedAccounts: {
-            accountId: string;
-            influencerId: string;
-            username: string;
-            socialMedia: string;
-            followers: number;
-            profileType: "creator" | "community";
-            price: number;
-            logoUrl: string;
-            source: string;
-            selectedCampaignContentItem: { campaignContentItemId: string; descriptionId: string } | null;
-            dateRequest: string
-        }[];
-        campaignContent: any[];
-        postContentDraft: null;
-        blocksDraft: null
-    }) => void;
+    hydrateFromDraft: (payload: Pick<CampaignBuilderState,
+        "draftId" | "draftStep" | "campaignName" | "totalPrice" | "selectedOfferId" |
+        "selectedOfferAccountIds" | "selectedPromoCardIds" | "selectedAccounts" | "campaignContent"
+    > & Partial<CampaignBuilderState>) => void;
 
     setTotalPrice: (value: number) => void;
     reset: () => void;

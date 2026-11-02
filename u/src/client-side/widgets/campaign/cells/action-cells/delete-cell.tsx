@@ -1,4 +1,8 @@
+import { useFetchCampaign } from "@/client-side/store";
+import { BUNDLES_AVAILABLE } from "@/shared/config/bundle-availability";
+import { ProposalActionsContext } from "@/client-side/pages/campaign/model/proposal-actions-context";
 import React from "react";
+import { toast } from "react-toastify";
 import trash from "@/assets/icons/trash-2.svg";
 
 import checkConfirm from "@/assets/icons/check (1).svg";
@@ -6,36 +10,57 @@ import x from "@/assets/icons/x.svg";
 
 import { useProposalAccountsStore } from "@/client-side/store";
 import { getAccountKey } from "@/client-side/utils";
+import { Modal } from "@/components/ui/modal-fix/Modal";
+import { ButtonMain, ButtonSecondary } from "@/shared/ui";
+import {
+  decideProposalOverlapRemoval,
+} from "@/client-side/widgets/campaign/model/proposal-overlap-removal";
+import {
+  decideProposalRowRemoval,
+  executeProposalRowRemovalDecision,
+} from "@/client-side/widgets/campaign/model/proposal-row-removal";
 
-const getGroupBySocial = (social?: string) => {
-  const s = String(social ?? "").toLowerCase();
+type ExecutableOverlapRemovalDecision = { kind: "remove_packages" | "delete_option"; overlap: { bundleId: string; socialAccountIds: string[] } };
 
-  if (["facebook", "instagram", "youtube", "tiktok"].includes(s)) {
-    return "main";
-  }
-
-  if (["spotify", "soundcloud"].includes(s)) {
-    return "music";
-  }
-
-  return "press";
+type Props = {
+  data: any;
+  optionIndex: number;
+  optionIndexes?: number[];
+  onDeleteOption?: (optionIndex: number) => Promise<boolean | void>;
+  isMutationPending?: boolean;
 };
 
-export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
-                                                                           data,
-                                                                           optionIndex,
-                                                                         }) => {
+export const ActionCell: React.FC<Props> = ({
+  data,
+  optionIndex,
+  optionIndexes: suppliedIndexes,
+  onDeleteOption: suppliedDelete,
+  isMutationPending: suppliedPending,
+}) => {
+  const context = React.useContext(ProposalActionsContext);
+  const currentData = useFetchCampaign((s: any) => s.data);
+  const optionIndexes = suppliedIndexes ?? currentData?.existingOptions ?? [optionIndex];
+  const onDeleteOption = suppliedDelete ?? context.onDeleteOption;
+  const isMutationPending = suppliedPending ?? context.isMutationPending;
   const [isConfirming, setIsConfirming] = React.useState(false);
+  const [overlapDecision, setOverlapDecision] =
+    React.useState<ExecutableOverlapRemovalDecision | null>(null);
+  const [isDestructiveActionPending, setIsDestructiveActionPending] =
+    React.useState(false);
+  const destructiveActionPendingRef = React.useRef(false);
   const accountKey = getAccountKey(data);
 
   const removeAccount = useProposalAccountsStore((s) => s.removeAccount);
+  const removeOfferBundleOverlap = useProposalAccountsStore(
+    (s) => s.removeOfferBundleOverlap,
+  );
   const clearRecentlyAdded = useProposalAccountsStore(
       (s) => s.clearRecentlyAdded,
   );
 
   const accounts = useProposalAccountsStore(
-      (s) => s.accountsByOption?.[optionIndex] ?? [],
-  );
+      (s) => s.accountsByOption?.[optionIndex],
+  ) ?? [];
 
   const isRecentlyAdded = useProposalAccountsStore(
       (s) => !!s.recentlyAddedKeysByOption?.[optionIndex]?.[String(accountKey)],
@@ -44,15 +69,46 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
   const markPendingDelete = useProposalAccountsStore((s) => s.markPendingDelete);
   const clearPendingDelete = useProposalAccountsStore((s) => s.clearPendingDelete);
 
-  const currentGroup = getGroupBySocial(data?.socialMedia);
-
-  const accountsInSameGroup = React.useMemo(() => {
-    return accounts.filter(
-        (account: any) => getGroupBySocial(account?.socialMedia) === currentGroup,
-    );
-  }, [accounts, currentGroup]);
-
-  const canDelete = accountsInSameGroup.length > 1;
+  const snapshot = useProposalAccountsStore(
+      (s) => s.optionSnapshotsByIndex?.[optionIndex],
+  );
+  const pendingOffer = useProposalAccountsStore((state) =>
+    Object.prototype.hasOwnProperty.call(
+      state.selectedOfferChangeByOption,
+      optionIndex,
+    )
+      ? state.selectedOfferChangeByOption[optionIndex]
+      : undefined,
+  );
+  const effectiveOffer =
+    pendingOffer === undefined ? snapshot?.selectedOffer ?? null : pendingOffer;
+  const fullOverlapDecision = React.useMemo(
+    () =>
+      decideProposalOverlapRemoval({
+        targetAccount: data,
+        accounts,
+        selectedOffer: effectiveOffer,
+        optionIndexes,
+      }),
+    [data, accounts, effectiveOffer, optionIndexes],
+  );
+  const rowRemovalDecision = React.useMemo(
+    () =>
+      decideProposalRowRemoval({
+        targetAccount: data,
+        accounts,
+        selectedOffer: effectiveOffer,
+        optionIndexes,
+      }),
+    [data, accounts, effectiveOffer, optionIndexes],
+  );
+  const deleteLabel = rowRemovalDecision.kind === "not_removable"
+    ? "Delete?"
+    : rowRemovalDecision.removalKind === "bundle"
+      ? "Remove Bundle?"
+      : rowRemovalDecision.removalKind === "offer"
+        ? "Remove Offer?"
+        : "Delete?";
 
   React.useEffect(() => {
     if (!isRecentlyAdded) return;
@@ -60,20 +116,73 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
     clearRecentlyAdded(optionIndex, [String(accountKey)]);
   }, [isRecentlyAdded, optionIndex, accountKey, clearRecentlyAdded]);
 
-  const onDelete = (e: React.MouseEvent) => {
+  const onDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (!canDelete) return;
+    if (
+      rowRemovalDecision.kind === "not_removable" ||
+      destructiveActionPendingRef.current ||
+      isMutationPending
+    ) {
+      return;
+    }
 
-    clearPendingDelete(optionIndex, String(accountKey));
-    removeAccount(optionIndex, accountKey);
-    setIsConfirming(false);
+    if (rowRemovalDecision.kind === "delete_option" && !onDeleteOption) {
+      toast.error("This Proposal option cannot be deleted from this view.");
+      return;
+    }
+
+    destructiveActionPendingRef.current = true;
+    setIsDestructiveActionPending(true);
+
+    try {
+      await executeProposalRowRemovalDecision(rowRemovalDecision, {
+        onKeepOption: () => {
+          clearPendingDelete(optionIndex, String(accountKey));
+          removeAccount(optionIndex, accountKey);
+        },
+        onDeleteOption: async () => {
+          if (await onDeleteOption?.(optionIndex) === false) throw new Error("Option deletion was not synchronized.");
+        },
+        onBlockLastOption: () => {
+          toast.error("You cannot delete the last option");
+        },
+      });
+      setIsConfirming(false);
+    } catch (error) { if (!(error instanceof Error) || error.message !== "Option deletion was not synchronized.") toast.error(error instanceof Error ? error.message : "Failed to remove selection");
+    } finally {
+      clearPendingDelete(optionIndex, String(accountKey));
+      destructiveActionPendingRef.current = false;
+      setIsDestructiveActionPending(false);
+    }
   };
 
   const onDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (!canDelete) return;
+    if (blocked || isMutationPending || destructiveActionPendingRef.current) return;
+
+    if (fullOverlapDecision.kind === "block_last_option") {
+      toast.error(
+        "This action would remove the last Proposal option. Deleting the entire Proposal campaign is not supported yet.",
+      );
+      return;
+    }
+
+    if (
+      fullOverlapDecision.kind === "remove_packages" ||
+      fullOverlapDecision.kind === "delete_option"
+    ) {
+      setOverlapDecision(fullOverlapDecision as ExecutableOverlapRemovalDecision);
+      return;
+    }
+
+    if (rowRemovalDecision.kind === "block_last_option") {
+      toast.error("You cannot delete the last option");
+      return;
+    }
+
+    if (rowRemovalDecision.kind === "not_removable") return;
 
     markPendingDelete(optionIndex, String(accountKey));
     setIsConfirming(true);
@@ -86,7 +195,51 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
     setIsConfirming(false);
   };
 
+  const onCancelOverlapRemoval = () => {
+    if (isDestructiveActionPending || isMutationPending) return;
+    setOverlapDecision(null);
+  };
+
+  const onConfirmOverlapRemoval = async () => {
+    if (
+      !overlapDecision ||
+      destructiveActionPendingRef.current ||
+      isMutationPending
+    ) {
+      return;
+    }
+
+    destructiveActionPendingRef.current = true;
+    setIsDestructiveActionPending(true);
+
+    try {
+      if (overlapDecision.kind === "remove_packages") {
+        removeOfferBundleOverlap(optionIndex, accountKey);
+      } else {
+        if (!onDeleteOption) {
+          toast.error("This Proposal option cannot be deleted from this view.");
+          return;
+        }
+        if (await onDeleteOption(optionIndex) === false) throw new Error("Option deletion was not synchronized.");
+      }
+
+      setOverlapDecision(null);
+    } catch (error) { if (!(error instanceof Error) || error.message !== "Option deletion was not synchronized.") toast.error(error instanceof Error ? error.message : "Failed to remove groups");
+    } finally {
+      destructiveActionPendingRef.current = false;
+      setIsDestructiveActionPending(false);
+    }
+  };
+
+  const blocked = !snapshot?.canEdit || (!BUNDLES_AVAILABLE && Boolean(snapshot?.addedBundles?.length || accounts.some((a: any) => a.bundleId || a.campaignBundleId)));
+  const isFullOverlap = fullOverlapDecision.kind !== "not_full_overlap";
+  const isDeleteDisabled =
+    blocked || isMutationPending ||
+    isDestructiveActionPending ||
+    (!isFullOverlap && rowRemovalDecision.kind === "not_removable");
+
   return (
+    <>
       <td
           className={`tableBase__td trash-action ${
               isConfirming ? "td-wide" : ""
@@ -98,11 +251,15 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
                   type="button"
                   onClick={onDeleteClick}
                   className="trash-action__delete"
-                  disabled={!canDelete}
+                  disabled={isDeleteDisabled}
                   title={
-                    canDelete
-                        ? "Delete account"
-                        : "You cannot delete the last account in this group"
+                    fullOverlapDecision.kind === "block_last_option"
+                      ? "Removing the last Proposal option is not supported yet"
+                      : rowRemovalDecision.kind === "block_last_option"
+                        ? "You cannot delete the last option"
+                        : rowRemovalDecision.kind !== "not_removable" || isFullOverlap
+                          ? "Delete account"
+                          : "You cannot delete the last Proposal account"
                   }
               >
                 <img src={trash} alt="" />
@@ -112,14 +269,16 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
 
         {isConfirming && (
             <div className="trash-action__confirm-block">
-              <span className="trash-action__label">Delete?</span>
+              <span className="trash-action__label">{deleteLabel}</span>
 
               <div className="trash-action__confirm-block-row">
                 <button
                     type="button"
                     onClick={onDelete}
                     className="trash-action__same"
-                    disabled={!canDelete}
+                    disabled={
+                      isMutationPending || isDestructiveActionPending
+                    }
                 >
                   <img src={checkConfirm} alt="" />
                 </button>
@@ -128,6 +287,9 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
                     type="button"
                     onClick={onCancelDelete}
                     className="trash-action__same"
+                    disabled={
+                      isMutationPending || isDestructiveActionPending
+                    }
                 >
                   <img src={x} alt="" />
                 </button>
@@ -135,5 +297,44 @@ export const ActionCell: React.FC<{ data: any; optionIndex: number }> = ({
             </div>
         )}
       </td>
+
+      {overlapDecision && (
+        <Modal
+          isShowCloseButton={false}
+          isCloseOnClickOutsideDisabled={
+            isDestructiveActionPending || isMutationPending
+          }
+          onClose={onCancelOverlapRemoval}
+        >
+          <div className="create-option">
+            <h2>Are you sure?</h2>
+            <p>
+              {overlapDecision.kind === "delete_option"
+                ? "Removing this account will remove both the Offer and the Bundle. Since no other accounts will remain, this Proposal option will also be deleted."
+                : "Removing this account will remove both the Offer and the Bundle from this Proposal option."}
+            </p>
+
+            <div className="create-option-btn">
+              <ButtonSecondary
+                className="btn"
+                text="Cancel"
+                onClick={onCancelOverlapRemoval}
+                isDisabled={isDestructiveActionPending || isMutationPending}
+              />
+              <ButtonMain
+                className="btn"
+                text={
+                  isDestructiveActionPending || isMutationPending
+                    ? "Deleting..."
+                    : "Delete"
+                }
+                onClick={onConfirmOverlapRemoval}
+                isDisabled={isDestructiveActionPending || isMutationPending}
+              />
+            </div>
+          </div>
+        </Modal>
+      )}
+    </>
   );
 };

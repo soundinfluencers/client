@@ -1,8 +1,10 @@
 import React from "react";
+import { priceForCurrency } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total";
 import chevronDown from "@/assets/icons/Vector (17).svg";
 import { getSocialMediaIcon } from "@/constants/social-medias";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { GenresCountriesPopover } from "./genres-countries-popover";
+import { getAccountCardTaxonomy } from "@/widgets/client-side/campaign-tables/model/account-taxonomy";
 import styles from "./promo-card-grid.module.scss";
 import {
     useBuildCampaignParams
@@ -25,7 +27,7 @@ const getPriceByCurrency = (
     prices: Record<string, number>,
     currency: { currency: string },
 ) => {
-    return Number(prices?.[currency.currency] ?? prices?.EUR ?? 0);
+    return priceForCurrency(prices, currency.currency);
 };
 
 export const PromoCardGrid: React.FC<Props> = ({
@@ -39,11 +41,11 @@ export const PromoCardGrid: React.FC<Props> = ({
 
     const [open, setOpen] = React.useState(false);
 
-    const hasGenres = (data.musicGenres?.length ?? 0) > 0;
+    const hasGenres = getAccountCardTaxonomy(data).items.length > 0;
     const hasCountries = (data.countries?.length ?? 0) > 0;
     const hasMeta = hasGenres || hasCountries;
     const onSelect = () => {
-        if (isInclude) return;
+        if (isInclude || getPriceByCurrency(data.prices, selectedCurrency) === null) return;
 
         console.log("[TABLE CARD] selected data", data);
         console.log("[TABLE CARD] account id fields", {
@@ -65,11 +67,16 @@ export const PromoCardGrid: React.FC<Props> = ({
             socialMedia: data.socialMedia,
             username: data.username,
             profileType: data.profileType,
-            price: getPriceByCurrency(data.prices, selectedCurrency),
+            price: getPriceByCurrency(data.prices, selectedCurrency) ?? undefined,
+            prices: { ...data.prices },
             dateRequest: "ASAP",
             followers: data.followers,
             countries: data.countries,
             genres: data.musicGenres,
+            communityMusicGenres: data.communityMusicGenres,
+            communityThemeTopics: data.communityThemeTopics,
+            creatorMusicGenres: data.creatorMusicGenres,
+            creatorContentFocus: data.creatorContentFocus,
             logoUrl: data.logoUrl,
             source: "manual",
         });
@@ -89,7 +96,7 @@ export const PromoCardGrid: React.FC<Props> = ({
                 <div className={styles.cost}>
                     <img src={data.logoUrl} alt="" />
                     <p>
-                        {getPriceByCurrency(data.prices, selectedCurrency)}
+                        {getPriceByCurrency(data.prices, selectedCurrency) ?? "Price unavailable"}
                         {selectedCurrency.key}
                     </p>
                 </div>
@@ -123,10 +130,7 @@ export const PromoCardGrid: React.FC<Props> = ({
                         refElement={dropdownRef}
                         setOpen={setOpen}
                         open={open}
-                        data={{
-                            musicGenres: data.musicGenres ?? [],
-                            countries: data.countries ?? [],
-                        }}
+                        data={{ ...data, countries: data.countries ?? [] }}
                         isInclude={isInclude}
                         isSelected={isSelected}
                     />

@@ -1,15 +1,14 @@
 import React from "react";
 import { useClickOutside } from "@/hooks/global/useClickOutside";
 import styles from "./genres-countries-popover.module.scss";
+import { getAccountCardTaxonomyGroups } from "@/widgets/client-side/campaign-tables/model/account-taxonomy";
 import type {
-    PromoAccountCountry
+    PromoAccount
 } from "@/entities/client-side/campaign-creator-page/campaign-promo-account/model/promo-account.types.ts";
 
 type Props = {
-    data: {
-        musicGenres: string[];
-        countries: PromoAccountCountry[];
-    };
+    data: Pick<PromoAccount, "profileType" | "countries" | "communityMusicGenres" |
+        "communityThemeTopics" | "creatorMusicGenres" | "creatorContentFocus">;
     isInclude?: boolean;
     isSelected?: boolean;
     open?: boolean;
@@ -26,6 +25,7 @@ export const GenresCountriesPopover: React.FC<Props> = ({
                                                             refElement,
                                                         }) => {
     useClickOutside(refElement, () => setOpen(false));
+    const taxonomy = getAccountCardTaxonomyGroups(data);
 
     return (
         <div
@@ -45,16 +45,16 @@ export const GenresCountriesPopover: React.FC<Props> = ({
                 </div>
 
                 <div className={styles.infoContent}>
-                    {data.musicGenres.length > 0 && (
-                        <div className={styles.genres}>
-                            <h3>Genres</h3>
+                    {taxonomy.map((group) => (
+                        <div key={group.title} className={styles.genres}>
+                            <h3>{group.title}</h3>
                             <ul>
-                                {data.musicGenres.map((item, i) => (
-                                    <li key={`${item}-${i}`}>{item}</li>
+                                {group.items.map((item, i) => (
+                                    <li key={`${item.value}-${i}`}>{item.label}</li>
                                 ))}
                             </ul>
                         </div>
-                    )}
+                    ))}
 
                     {data.countries.length > 0 && (
                         <div className={styles.countries}>

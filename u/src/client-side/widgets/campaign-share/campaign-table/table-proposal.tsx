@@ -1,3 +1,4 @@
+import { formatShareMoney, sharePlacementRows } from "@/client-side/pages/campaign-share/model/share-campaign-read";
 import React from "react";
 import "@/client-side/styles-table/table-base.scss";
 
@@ -18,13 +19,15 @@ import {
   titles,
 } from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
-import { getAccountKey, getColumns } from "@/client-side/utils";
+import { getColumns } from "@/client-side/utils";
 import { TableCard } from "../card-table/table-card-proposal";
 
 type Props = {
   items: CampaignContentItem[];
   networks: CampaignAddedAccount[];
-  totalPrice: number;
+  totalPrice: unknown;
+  displayCurrency?: unknown;
+  isPriceHidden?: boolean;
   changeView: boolean;
   group: TableGroup;
   canEdit: boolean;
@@ -34,8 +37,6 @@ type Props = {
 
 type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
 
-const makeRowKey = (n: CampaignAddedAccount, index: number) =>
-  String((n as any).accountId ?? `${(n as any).influencerId}-${index}`);
 
 type ActiveDropdown = {
   rowKey: string;
@@ -46,6 +47,8 @@ export function TableProposal({
   items,
   networks,
   totalPrice,
+  displayCurrency,
+  isPriceHidden,
   changeView,
   group,
   canEdit,
@@ -75,16 +78,6 @@ export function TableProposal({
   );
 
   const closeDropdown = React.useCallback(() => setActive(null), []);
-
-  const uniqueNetworks = React.useMemo(() => {
-    const seen = new Set<string>();
-    return sortedNetworks.filter((n) => {
-      const key = getAccountKey(n);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [sortedNetworks]);
 
   const columns = React.useMemo(
       () => getColumns(changeView, group, canEdit),
@@ -149,8 +142,7 @@ export function TableProposal({
         </thead>
 
         <tbody>
-          {uniqueNetworks.map((network, index) => {
-            const rowKey = makeRowKey(network, index);
+          {sharePlacementRows(sortedNetworks).map(({ row: network, key: rowKey }) => {
             return (
               <TableCard
                 columns={columns}
@@ -193,7 +185,7 @@ export function TableProposal({
               <td
                 key={col}
                 className={`tableBase__td td--footer ${isPrice ? "td--footer-strategy" : ""} ${isFollowers ? "td--footer-strategy" : ""}`}>
-                {isPrice && <p className="td__price">Price: {totalPrice}€</p>}
+                {isPrice && <p className="td__price">Price: {isPriceHidden ? "" : formatShareMoney(totalPrice, displayCurrency)}</p>}
                 {isFollowers && (
                   <p className="td__followers">{totalFollowers}</p>
                 )}
