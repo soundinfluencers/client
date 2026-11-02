@@ -1,3 +1,5 @@
+import type { ApproveProposalCampaignBody } from "@/api/client/campaign/campaign.api";
+import { proposalApprovalPayment } from "./proposal-checkout";
 import type { CampaignPaymentDetails, CreateRegularCampaignRequest } from "@/api/client/campaign/create-campaign.types";
 import { serializeSelectedOffer } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
 
@@ -21,8 +23,10 @@ export const resolveCheckoutContext = (pathname: string, params: URLSearchParams
     }
     if (draftId) return { kind: "draft", draftId };
     if (proposalId) {
-        const optionIndex = Number(params.get("option") ?? 0);
-        return Number.isInteger(optionIndex) && optionIndex >= 0
+        const rawOption = params.get("option");
+        const optionIndex = Number(rawOption);
+        return /^[a-f0-9]{24}$/i.test(proposalId) && params.getAll("proposal").length === 1 &&
+            params.getAll("option").length === 1 && /^(0|[1-9]\d*)$/.test(rawOption ?? "") && Number.isSafeInteger(optionIndex)
             ? { kind: "proposal", proposalId, optionIndex }
             : { kind: "invalid", message: "Invalid proposal option." };
     }
@@ -37,14 +41,14 @@ export const submitCheckout = async ({ context, base, paymentDetails, offerIsAva
     paymentDetails: CampaignPaymentDetails;
     offerIsAvailable?: boolean | null;
     postCampaign: (payload: CreateRegularCampaignRequest) => Promise<unknown>;
-    approveProposal: (id: string, option: number, payment: CampaignPaymentDetails) => Promise<unknown>;
+    approveProposal: (id: string, option: number, payment: ApproveProposalCampaignBody) => Promise<unknown>;
     deleteDraft: (id: string) => Promise<unknown>;
     clearDraft: (id: string) => void;
     onCreated?: () => void;
 }): Promise<{ cleanupError?: unknown }> => {
     if (context.kind === "invalid") throw new Error(context.message);
     if (context.kind === "proposal") {
-        await approveProposal(context.proposalId, context.optionIndex, paymentDetails);
+        await approveProposal(context.proposalId, context.optionIndex, proposalApprovalPayment(paymentDetails));
         return {};
     }
     if (!Number.isSafeInteger(base.campaignPrice) || base.campaignPrice < 0) {

@@ -11,10 +11,7 @@ import { Modal } from "@/components/ui/modal-fix/Modal";
 import { postCampaignRequest } from "@/api/client/campaign/campaign.api";
 import { toast } from "react-toastify";
 
-import {
-    useProposalCampaignStore,
-    useUpdateCampaign,
-} from "@/client-side/store";
+import { proposalPaymentPath } from "@/client-side/pages/payment-campaign/proposal-checkout";
 
 import { useNavigate } from "react-router-dom";
 import { useGroupPromos } from "@/client-side/hooks";
@@ -38,21 +35,24 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
                                                                flag,
                                                            }) => {
     const navigate = useNavigate();
+    const entryKey = `${campaign?.campaignId}:${campaign?.selectedOption?.optionIndex}`;
+    const currentEntry = React.useRef(entryKey);
+    currentEntry.current = entryKey;
+    React.useEffect(() => {
+        currentEntry.current = entryKey;
+        return () => { if (currentEntry.current === entryKey) currentEntry.current = ""; };
+    }, [entryKey]);
 
     const optionIndex = campaign?.selectedOption?.optionIndex ?? 0;
 
     const [requestModal, setRequestModal] = React.useState(false);
     const [isRequesting, setIsRequesting] = React.useState(false);
 
-    const [approvedOptions, setApprovedOptions] = React.useState<
-        Record<number, boolean>
-    >({});
 
     const [, setRequestSentOptions] = React.useState<Record<number, boolean>>({});
 
     const [textareaValue, setTextareaValue] = React.useState("");
 
-    const isApproved = Boolean(approvedOptions[optionIndex]);
 
     const accounts = React.useMemo(
         () => campaign?.selectedOption?.addedAccounts ?? [],
@@ -81,72 +81,30 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
     );
 
     const proceedProposalToPayment = React.useCallback(() => {
-        const campaignId = String(campaign?.campaignId ?? "");
-        if (!campaignId) return;
-
-        const patches = useUpdateCampaign.getState().patches ?? {};
-
-        useProposalCampaignStore.getState().initOption(
-            campaignId,
-            optionIndex,
-            accounts,
-            content,
-            { force: true },
-        );
-
-        const prepared = useProposalCampaignStore
-            .getState()
-            .getCampaignPayload(
-                campaignId,
-                optionIndex,
-                campaign?.campaignName ?? "",
-                patches,
-            );
-        const base = { ...prepared, campaignPrice: Number(campaign?.selectedOption?.price ?? prepared.campaignPrice) };
-
-        useProposalCampaignStore
-            .getState()
-            .setProposalPayload(campaignId, optionIndex, base);
-
-        sessionStorage.setItem(
-            "proposalPaymentPayload",
-            JSON.stringify({
-                campaignId,
-                optionIndex,
-                payload: base,
-            }),
-        );
-
-        const paymentPath = `/client/campaign/payment?proposal=${campaignId}&option=${optionIndex}`;
-
+        if (currentEntry.current !== entryKey) return;
+        const campaignId = campaign?.campaignId;
+        const selectedIndex = campaign?.selectedOption?.optionIndex;
+        const paymentPath = proposalPaymentPath(campaignId, selectedIndex);
+        if (!paymentPath) { toast.error("Cannot resolve the selected Proposal option"); return; }
+        // Public approval always reads saved data in checkout; never archive private patches.
         sessionStorage.setItem(
             "postAuthRedirect",
             JSON.stringify({
                 path: paymentPath,
                 campaignId,
-                optionIndex,
+                optionIndex: selectedIndex,
             }),
         );
 
         navigate(paymentPath);
     }, [
         campaign?.campaignId,
-        campaign?.campaignName,
-        campaign?.selectedOption?.price,
-        optionIndex,
-        accounts,
-        content,
+        campaign?.selectedOption?.optionIndex,
+        entryKey,
         navigate,
     ]);
 
-    const approveOption = React.useCallback(() => {
-        setApprovedOptions((prev) => ({
-            ...prev,
-            [optionIndex]: true,
-        }));
-
-        proceedProposalToPayment();
-    }, [optionIndex, proceedProposalToPayment]);
+    const approveOption = proceedProposalToPayment;
 
     const requestCampaign = React.useCallback(
         async (campaignId: string, text: string) => {
@@ -222,7 +180,9 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
             {byGroup.main.length >= 1 && (
                 <TableProposal
                     optionIndex={optionIndex}
-                    totalPrice={campaign?.isPriceHidden ? null : campaign?.price}
+                    totalPrice={campaign?.selectedOption?.price}
+                    displayCurrency={campaign?.selectedOption?.displayCurrency}
+                    isPriceHidden={campaign?.isPriceHidden}
                     items={byGroup.main}
                     networks={mainPromos}
                     group="main"
@@ -235,7 +195,9 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
             {byGroup.music.length >= 1 && (
                 <TableProposal
                     optionIndex={optionIndex}
-                    totalPrice={campaign?.isPriceHidden ? null : campaign?.price}
+                    totalPrice={campaign?.selectedOption?.price}
+                    displayCurrency={campaign?.selectedOption?.displayCurrency}
+                    isPriceHidden={campaign?.isPriceHidden}
                     items={byGroup.music}
                     networks={musicPromos}
                     group="music"
@@ -248,7 +210,9 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
             {byGroup.press.length >= 1 && (
                 <TableProposal
                     optionIndex={optionIndex}
-                    totalPrice={campaign?.isPriceHidden ? null : campaign?.price}
+                    totalPrice={campaign?.selectedOption?.price}
+                    displayCurrency={campaign?.selectedOption?.displayCurrency}
+                    isPriceHidden={campaign?.isPriceHidden}
                     items={byGroup.press}
                     networks={otherPromos}
                     group="press"
@@ -276,7 +240,6 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
                     ? renderStrategyTables()
                     : renderInsightTable()}
 
-            {!isApproved && (
                 <div className="table-page__options">
                     <ButtonMain
                         className="btn"
@@ -284,7 +247,6 @@ export const ProposalCampaignPageShare: React.FC<Props> = ({
                         onClick={approveOption}
                     />
                 </div>
-            )}
 
             {requestModal && (
                 <Modal onClose={() => setRequestModal(false)}>

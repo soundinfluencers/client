@@ -28,11 +28,12 @@ export class OfferSelectionError extends Error {
 
 export const getBuilderSelectedOffer = (state: {
     unsupportedDraftBundles?: boolean;
+    selectedBundles?: readonly unknown[];
     selectedAccounts?: readonly { source?: string; bundleId?: string }[];
     selectedOfferId: string | null;
     selectedOfferAccountIds: string[];
 }): SelectedOffer | null => {
-    assertSupportedSelections(state.selectedAccounts ?? [], state.unsupportedDraftBundles);
+    assertSupportedSelections(state.selectedAccounts ?? [], state.unsupportedDraftBundles || Boolean(state.selectedBundles?.length));
     if (state.selectedOfferId === null) {
         if (state.selectedOfferAccountIds.length) throw new OfferSelectionError();
         return null;

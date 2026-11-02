@@ -1,3 +1,4 @@
+import type { CreateCampaignProposalRequest } from "@/entities/client-side/campaign-strategy-page/api/save-proposal";
 import $api from "../../api.ts";
 import type { CreateRegularCampaignRequest } from "./create-campaign.types";
 
@@ -9,7 +10,6 @@ export type ApproveProposalCampaignBody = {
   address: string;
   country: string;
   referenceNumber: string;
-  amount: number;
   company?: string;
   vatNumber?: string;
   poNumber?: string;
@@ -21,7 +21,15 @@ export const approveProposalCampaign = async (
     optionIndex: number,
     body: ApproveProposalCampaignBody,
 ) => {
-  return $api.post(`/proposal-system/approve/${campaignId}`, body, {
+  // DTO allowlist: price and saved composition belong to the server.
+  const payment = {
+    firstName: body.firstName, lastName: body.lastName, address: body.address, country: body.country,
+    referenceNumber: body.referenceNumber, selectedPaymentMethod: body.selectedPaymentMethod,
+    ...(body.company !== undefined ? { company: body.company } : {}),
+    ...(body.vatNumber !== undefined ? { vatNumber: body.vatNumber } : {}),
+    ...(body.poNumber !== undefined ? { poNumber: body.poNumber } : {}),
+  };
+  return $api.post(`/proposal-system/approve/${campaignId}`, payment, {
     params: { optionIndex },
   });
 };
@@ -130,11 +138,7 @@ export async function patchAddProposalOption(
 
 export async function postAddProposalOption(
     campaignId: string,
-    body: {
-      campaignName?: string;
-      addedAccounts?: any[];
-      campaignContent?: any[];
-    },
+    body: CreateCampaignProposalRequest,
 ) {
   return $api.post(`/proposal-system`, body, {
     params: { campaignId },

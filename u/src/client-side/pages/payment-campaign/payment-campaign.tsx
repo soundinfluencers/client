@@ -19,7 +19,6 @@ import { PaymentBar } from "@/client-side/widgets";
 import { PaymentForm } from "@/client-side/client-forms";
 import {
   useDraftCampaignStore,
-  useProposalCampaignStore,
   useUpdateCampaign,
 } from "@/client-side/store";
 import { useInvoceDetailsQuery } from "@/client-side/react-query";
@@ -39,6 +38,10 @@ import type { CreateRegularCampaignRequest } from "@/api/client/campaign/create-
 import { resolveCheckoutContext, submitCheckout } from "./checkout-context";
 import { OfferCatalogueReview } from "./offer-catalogue-review";
 
+import { useProposalCheckout } from "./use-proposal-checkout";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUser } from "@/store/get-user";
+
 import "./_payment-campaign.scss";
 export type PaymentMethodId =
     | "bank_card"
@@ -53,7 +56,7 @@ export const PaymentCampaign = () => {
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, key: locationKey } = useLocation();
   const queryClient = useQueryClient();
 
   const [referenceNumber, setReferenceNumber] = React.useState(() =>
@@ -78,8 +81,6 @@ export const PaymentCampaign = () => {
       | null
   >(null);
 
-  const proposalId = searchParams.get("proposal");
-  const optionIndex = Number(searchParams.get("option") ?? 0);
 
   const { data: invoiceDetails } = useInvoceDetailsQuery();
 
@@ -93,7 +94,12 @@ export const PaymentCampaign = () => {
   const builderOfferAvailable = useCampaignBuilderStore((s) => s.selectedOfferIsAvailable);
   const builderCatalogue = useCampaignBuilderStore((s) => s.offerCatalogContext);
   const context = React.useMemo(() => resolveCheckoutContext(pathname, searchParams, builderDraftId),
-      [pathname, searchParams, builderDraftId]);
+      [pathname, searchParams.toString(), builderDraftId]);
+
+  const auth = useAuth();
+  const user = useUser((s) => s.user);
+  const canApprove = auth.isAuthReady && !!auth.accessToken && ["client", "admin"].includes(user?.role ?? "");
+  const proposalCheckout = useProposalCheckout(context, canApprove, `${locationKey ?? ""}:${pathname}?${searchParams.toString()}`);
 
   React.useEffect(() => {
     if (context.kind !== "draft") return;
@@ -157,28 +163,6 @@ export const PaymentCampaign = () => {
       },
       [],
   );
-  const proposalPaymentPayload = React.useMemo(() => {
-    if (!proposalId) return null;
-
-    try {
-      const raw = sessionStorage.getItem("proposalPaymentPayload");
-      if (!raw) return null;
-
-      const parsed = JSON.parse(raw);
-
-      const isSameProposal =
-          String(parsed?.campaignId ?? "") === String(proposalId) &&
-          Number(parsed?.optionIndex ?? 0) === Number(optionIndex);
-
-      return isSameProposal ? parsed?.payload ?? null : null;
-    } catch {
-      return null;
-    }
-  }, [proposalId, optionIndex]);
-  const proposalStore = useProposalCampaignStore();
-  const proposalBase = context.kind === "proposal"
-      ? proposalPaymentPayload ?? proposalStore.getProposalPayload(context.proposalId, context.optionIndex)
-      : null;
   const draftMeta = context.kind === "draft" ? draftStore.metadataByDraftId[context.draftId] : null;
   const draftReady = context.kind === "draft" && Boolean(draftMeta &&
       draftStore.accountsByCampaignId[context.draftId] && draftStore.contentByCampaignId[context.draftId]);
@@ -187,19 +171,21 @@ export const PaymentCampaign = () => {
       : context.kind === "draft" && draftStore.accountsByCampaignId[context.draftId]?.some((row) =>
           (row as { source?: string; bundleId?: string }).source === "bundle" || (row as { bundleId?: string }).bundleId)
           ? "This checkout does not support bundle drafts. No selections will be submitted."
-      : context.kind === "proposal" && !proposalBase ? "Please reopen the proposal and choose its option before payment."
+      : context.kind === "proposal" ? proposalCheckout.status === "ready" && canApprove ? null
+          : proposalCheckout.message ?? (!canApprove ? "Sign in with a client account to approve this Proposal."
+              : proposalCheckout.status === "submitting" ? "Confirming the saved option..." : "Loading your saved option...")
       : context.kind === "builder" && unsupportedBundles ? "This builder does not support bundle drafts. No selections will be submitted."
       : context.kind === "builder" && !builderPriceReady && builderOfferAvailable !== false ? "Prices are unavailable in the selected currency. Return to selection and choose a currency with confirmed prices."
       : context.kind === "draft" && !Number.isSafeInteger(draftStore.getCampaignPrice(context.draftId)) ? "Draft prices are unavailable in its selected currency. Please review the selection."
       : null;
   const paymentAmount = context.kind === "builder" ? Number(builderTotalPrice ?? 0)
       : context.kind === "draft" && draftReady ? draftStore.getCampaignPrice(context.draftId)
-      : context.kind === "proposal" ? Number(proposalBase?.campaignPrice ?? proposalBase?.totalPrice ?? 0) : 0;
+      : context.kind === "proposal" ? proposalCheckout.saved?.selectedOption.price ?? 0 : 0;
   const currencySymbols: Record<string, string> = { EUR: "€", USD: "$", GBP: "£" };
   const selectedCurrency = context.kind === "builder" ? builderCurrency
       : context.kind === "draft" && draftReady
           ? currencySymbols[draftStore.getCampaignPriceBreakdown(context.draftId).currency] ?? ""
-          : "";
+          : context.kind === "proposal" ? currencySymbols[proposalCheckout.saved?.selectedOption.displayCurrency ?? ""] ?? "" : "";
   const offerIsAvailable = context.kind === "builder" ? builderOfferAvailable : draftMeta?.selectedOffer?.isAvailable;
   const hasOffer = context.kind === "builder" ? Boolean(builderOffer) : Boolean(draftMeta?.selectedOffer);
   const openCatalogue = async () => {
@@ -227,6 +213,12 @@ export const PaymentCampaign = () => {
     navigate(`/client/create-campaign?${new URLSearchParams({ ...catalogue, currency: displayCurrency })}`);
   };
   const onSent = async (values: PaymentCampaignFormValues) => {
+    if (context.kind === "proposal") {
+      await proposalCheckout.approve({ firstName: values.firstName, lastName: values.lastName,
+        address: values.address, country: values.country, company: values.company ?? "",
+        vatNumber: values.vatNumber ?? "", selectedPaymentMethod: selectedIdPayment, referenceNumber });
+      return;
+    }
     if (submissionLock.current || creationCompleted.current) return;
     submissionLock.current = true;
 
@@ -245,8 +237,6 @@ export const PaymentCampaign = () => {
             selectedIdPayment,
             patches,
         );
-      } else if (context.kind === "proposal") {
-        base = proposalBase;
       } else {
         const state = useCampaignBuilderStore.getState();
         if (!state.totalPriceReady && state.selectedOfferIsAvailable !== false) throw new Error("Prices are not ready for checkout.");
@@ -302,26 +292,19 @@ export const PaymentCampaign = () => {
         },
       });
       if (result.cleanupError) setCleanupWarning("Your campaign was created successfully, but its old draft could not be removed. Do not submit it again; remove the old draft from the dashboard.");
-      if (context.kind === "proposal") {
-        sessionStorage.removeItem("proposalPaymentPayload");
-      }
 
       setModalCompleted(true);
       toast.success(
-          context.kind === "proposal"
-              ? "Proposal approved successfully!"
-              : "Campaign saved successfully!",
+          "Campaign saved successfully!",
       );
     } catch (e) {
       console.error(e);
-      if (context.kind !== "proposal" && (e instanceof OfferSelectionError || isInvalidOfferError(e))) {
+      if (e instanceof OfferSelectionError || isInvalidOfferError(e)) {
         setOfferError(e instanceof OfferSelectionError ? e.message : "Your selected offer is no longer valid. Refresh the catalogue and review your selection.");
         return;
       }
       toast.error(
-          context.kind === "proposal"
-              ? "Failed to approve proposal"
-              : "Failed to save campaign",
+          "Failed to save campaign",
       );
     } finally {
       setIsPaymentSubmitting(false);
@@ -347,7 +330,22 @@ export const PaymentCampaign = () => {
         </div>
 
         <h1>Payment method</h1>
-        {contextError && <p role="alert">{contextError}</p>}
+        {contextError && <p role={context.kind === "proposal" && proposalCheckout.status === "completed" ? "status" : "alert"}>{contextError}</p>}
+        {context.kind === "proposal" && <section aria-label="Saved Proposal option">
+          {proposalCheckout.saved && <>
+            <h2>{proposalCheckout.saved.campaignName} - Option {context.optionIndex + 1}</h2>
+            <p>{selectedCurrency}{paymentAmount} {proposalCheckout.saved.selectedOption.displayCurrency}</p>
+            {proposalCheckout.saved.selectedOption.selectedOffer && <p>
+              Offer: {proposalCheckout.saved.selectedOption.selectedOffer.title}
+              {" - "}{proposalCheckout.saved.selectedOption.selectedOffer.selectedAccountIds?.length ?? 0} accounts
+            </p>}
+            <ul>{proposalCheckout.saved.selectedOption.addedAccounts.map((row, index) =>
+              <li key={row.addedAccountsId ?? index}>{row.username ?? row.socialAccountId} - {row.socialMedia}</li>)}</ul>
+          </>}
+          {!contextError && proposalCheckout.message && <p role="status">{proposalCheckout.message}</p>}
+          {proposalCheckout.status === "error" && <button type="button" onClick={() => void proposalCheckout.load()}>Retry reading saved option</button>}
+          {proposalCheckout.status === "completed" && <button type="button" onClick={() => navigate("/client")}>Go to dashboard</button>}
+        </section>}
         {hasOffer && offerIsAvailable === false && <div role="alert">
           <p>Your saved offer is unavailable or has changed. Please review your selection.</p>
           <button type="button" onClick={() => void openCatalogue()}>Refresh catalogue / review offer</button>
@@ -366,7 +364,10 @@ export const PaymentCampaign = () => {
                 defaultValues={defaultValues}
                 classNameBtnSection={tab === "bank_transfer" ? "margin" : ""}
                 submitButton={
-                  checkoutCompleted ? <button type="button" disabled>Campaign created</button> : <SubmitButton
+                  context.kind === "proposal" ? <button type="submit" disabled={!proposalCheckout.canSubmit}>
+                    {proposalCheckout.status === "completed" ? "Proposal approved" : proposalCheckout.status === "uncertain"
+                      ? "Approval outcome unknown" : proposalCheckout.busy ? "Please wait..." : "Confirm payment sent"}
+                  </button> : checkoutCompleted ? <button type="button" disabled>Campaign created</button> : <SubmitButton
                       className="btn-margin"
                       data="Confirm payment sent"
                   />
@@ -430,7 +431,7 @@ export const PaymentCampaign = () => {
             <button type="button" onClick={() => { setOfferError(null); setCatalogueOpen(false); }}>Close</button>
           </div>
         </Modal>}
-        {modalCompleted && (
+        {context.kind !== "proposal" && modalCompleted && (
             <Modal
                 addStyles="content-width"
                 onClose={() => {

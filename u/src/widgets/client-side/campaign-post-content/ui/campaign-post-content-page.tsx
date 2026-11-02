@@ -26,6 +26,7 @@ import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator
 type GroupKey = "main" | "music" | "press";
 
 type Props = {
+    submitLabel?: string;
     mode?: "create" | "add-influencer";
     allowedGroups?: GroupKey[];
 
@@ -47,6 +48,7 @@ type Props = {
 };
 
 export const CampaignPostContentPage: React.FC<Props> = ({
+                                                             submitLabel,
                                                              mode = "create",
                                                              allowedGroups,
                                                              accounts,
@@ -398,7 +400,7 @@ export const CampaignPostContentPage: React.FC<Props> = ({
 
                             <div className={styles.submitSection}>
                                 <button type="submit" className={styles.submitButton} disabled={!totalPriceReady}>
-                                    Continue
+                                    {submitLabel ?? "Continue"}
                                 </button>
                             </div>
                         </div>
@@ -416,11 +418,13 @@ export const CampaignPostContentPage: React.FC<Props> = ({
                         offerPrice={mode === "add-influencer" ? 0 : offerPrice ?? null}
                         onEditSelection={() => {
                             if (mode === "add-influencer") {
-                                navigate(`/client/create-campaign?mode=add-influencer&option=${new URLSearchParams(window.location.search).get("option") ?? 0}`);
+                                  navigate('/client/create-campaign?' + new URLSearchParams(window.location.search));
                                 return;
                             }
 
                             const catalogue = useCampaignBuilderStore.getState().offerCatalogContext;
+                            const currentParams = new URLSearchParams(window.location.search);
+                            if (currentParams.get('mode') === 'proposal-option-create') { navigate('/client/create-campaign?' + currentParams); return; }
                             navigate(`/client/create-campaign?${new URLSearchParams({
                                 currency: currency === "$" ? "USD" : currency === "£" ? "GBP" : "EUR",
                                 ...(catalogue?.platform ? { platform: catalogue.platform } : {}),

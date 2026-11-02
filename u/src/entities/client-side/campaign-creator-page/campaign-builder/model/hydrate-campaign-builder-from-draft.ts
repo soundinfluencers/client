@@ -4,13 +4,54 @@ import { getDraftRowIds } from "./selected-offer";
 import { currencySymbol } from "./selected-offer";
 import { calcBuilderTotal } from "./calc-builder-total";
 import type { CampaignDraftDto } from "@/entities/client-side/campaign-draft/api/campaign-draft.dto";
+import { reconcileDraftSelectionRows } from "./draft-occurrences";
+
+const validateDraft = (draft: CampaignDraftDto) => {
+    if (!draft._id || !["addAccounts", "addContent", "strategyTable"].includes(draft.step) ||
+        !["EUR", "USD", "GBP"].includes(draft.displayCurrency) || !Array.isArray(draft.addedAccounts)) {
+        throw new Error("This Draft has an invalid identity, step or currency. No builder data was changed.");
+    }
+    const offer = draft.selectedOffer ?? null;
+    for (const row of draft.addedAccounts) {
+        if (!["standalone", "offer", "bundle"].includes(row.source) ||
+            (row.source === "standalone" && (row.offerId || row.bundleId)) ||
+            (row.source === "offer" && (!offer || row.offerId !== offer.offerId || row.bundleId)) ||
+            (row.source === "bundle" && (!row.bundleId || row.offerId))) {
+            throw new Error("This Draft has inconsistent source/group membership. No builder data was changed.");
+        }
+    }
+    reconcileDraftSelectionRows(draft.addedAccounts.map((a) => ({ ...a, accountId: a.socialAccountId,
+        source: a.source === "standalone" ? "manual" : a.source })), offer);
+    for (const bundle of draft.addedBundles ?? []) {
+        const saved = draft.addedAccounts.filter((a) => a.source === "bundle" && a.bundleId === bundle.bundleId).map((a) => a.socialAccountId);
+        if (!saved.length || saved.length !== bundle.selectedAccountIds.length || bundle.selectedAccountIds.some((id) => !saved.includes(id))) {
+            throw new Error("This Draft has inconsistent saved Bundle membership. No builder data was changed.");
+        }
+    }
+};
 
 export const mapDraftToBuilder = (
     draft: CampaignDraftDto,
 ) => {
+    validateDraft(draft);
     const offer = draft.selectedOffer ?? null;
     const membership = new Set(offer?.selectedAccountIds ?? []);
     return {
+        selectedBundles: (draft.addedBundles ?? []).map((bundle) => ({
+            ...bundle,
+            influencerId: bundle.influencerId ?? "",
+            prices: { ...bundle.prices }, originalPrices: { ...bundle.originalPrices },
+            createdAt: "", followers: 0,
+            // Saved occurrences are authoritative; currentAccountIds is availability metadata only.
+            accounts: draft.addedAccounts.filter((a) => a.source === "bundle" && a.bundleId === bundle.bundleId).map((a) => ({
+                accountId: a.socialAccountId, influencerId: a.influencerId, socialMedia: a.socialMedia,
+                username: a.username, logoUrl: a.logoUrl ?? "", followers: a.followers ?? 0,
+                prices: { ...a.prices }, profileType: a.profileType ?? "", engagementRate: 0, averageViews: 0,
+                countries: (a.countries ?? []).map((c) => ({ ...c, percentage: c.percentage ?? 0 })),
+                communityMusicGenres: [...(a.communityMusicGenres ?? [])], communityThemeTopics: [...(a.communityThemeTopics ?? [])],
+                creatorMusicGenres: [...(a.creatorMusicGenres ?? [])], creatorContentFocus: [...(a.creatorContentFocus ?? [])],
+            })),
+        })),
         draftId: String(draft._id),
         draftStep: CampaignDraftLatestStep[draft.step],
         unsupportedDraftBundles: Boolean(draft.addedBundles?.length || draft.addedAccounts.some((a) => a.source === "bundle" || a.bundleId)),
@@ -36,13 +77,15 @@ export const mapDraftToBuilder = (
         selectedCurrency: currencySymbol(draft.displayCurrency),
 
         selectedPromoCardIds:
-            draft.addedAccounts?.filter((acc) => !membership.has(acc.socialAccountId)).map((acc) =>
+            draft.addedAccounts?.filter((acc) => acc.source === "standalone" && !membership.has(acc.socialAccountId)).map((acc) =>
                 String(acc.socialAccountId),
             ) ?? [],
 
         selectedAccounts:
             draft.addedAccounts?.map((acc) => ({
                 ...getDraftRowIds(acc),
+                isAvailable: acc.isAvailable,
+                unavailableReason: acc.unavailableReason,
                 accountId: String(acc.socialAccountId),
                 ...(acc.bundleId ? { bundleId: acc.bundleId } : {}),
 
@@ -56,7 +99,7 @@ export const mapDraftToBuilder = (
 
                 profileType: acc.profileType,
 
-                price: acc.prices?.[draft.displayCurrency] ?? 0,
+                price: acc.prices?.[draft.displayCurrency],
                 priceCurrency: draft.displayCurrency,
                 prices: acc.prices ? { ...acc.prices } : undefined,
 
@@ -69,8 +112,7 @@ export const mapDraftToBuilder = (
 
                 source: acc.source === "offer" ? "offer" as const : acc.source === "bundle" ? "bundle" as const : "manual" as const,
 
-                selectedCampaignContentItem:
-                    acc.selectedCampaignContentItem ?? null,
+                ...(Object.hasOwn(acc, "selectedCampaignContentItem") ? { selectedCampaignContentItem: acc.selectedCampaignContentItem } : {}),
 
                 dateRequest:
                     acc.dateRequest ?? "ASAP",
@@ -85,5 +127,7 @@ export const mapDraftToBuilder = (
 };
 
 export const hydrateCampaignBuilderFromDraft = (draft: CampaignDraftDto) => {
-    useCampaignBuilderStore.getState().actions.hydrateFromDraft(mapDraftToBuilder(draft));
+    // Build and validate a detached snapshot completely before the single store update.
+    const next = mapDraftToBuilder(structuredClone(draft));
+    useCampaignBuilderStore.getState().actions.hydrateFromDraft(next);
 };

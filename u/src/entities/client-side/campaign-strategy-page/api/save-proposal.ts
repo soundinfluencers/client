@@ -5,6 +5,7 @@ import type { DisplayCurrency } from "@/entities/client-side/campaign-creator-pa
 
 export type CreateCampaignProposalRequest = Pick<CreateRegularCampaignRequest,
     "campaignName" | "socialMedia" | "campaignPrice" | "addedAccounts"> & {
+    selectedOffer?: { offerId: string; selectedAccountIds: string[] } | null;
     displayCurrency: DisplayCurrency;
     campaignContent: Array<Omit<CampaignContentItem, "additionalBrief"> & {
         additionalBrief: Array<{ _id: string; additionalBrief: string }>;
@@ -14,3 +15,5 @@ export type CreateCampaignProposalRequest = Pick<CreateRegularCampaignRequest,
 export const postCampaignProposal = async (payload: CreateCampaignProposalRequest) => {
     return $api.post("/proposal-system", payload);
 };
+
+export const getSavedProposal = (campaignId: string, optionIndex: number) => $api.get(`/proposal-system/${campaignId}?optionIndex=${optionIndex}`);

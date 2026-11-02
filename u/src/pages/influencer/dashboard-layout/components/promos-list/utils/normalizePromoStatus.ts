@@ -1,6 +1,6 @@
 import type {TClosedStatusType, TConfirmationType} from "@/pages/influencer/promos/types/promos.types.ts";
 
-export const normalizePromoStatus = (confirmation: TConfirmationType, closedStatus: TClosedStatusType): string => {
+export const normalizePromoStatus = (confirmation?: TConfirmationType, closedStatus?: TClosedStatusType): string => {
     if (confirmation === 'wait' && closedStatus === "wait") {
         return 'New request';
     } else if (confirmation === 'accept' && closedStatus === 'wait') {

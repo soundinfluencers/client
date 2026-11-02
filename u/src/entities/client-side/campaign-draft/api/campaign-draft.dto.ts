@@ -16,7 +16,7 @@ export type DraftAddedAccountDto = {
     communityThemeTopics?: string[];
     creatorMusicGenres?: string[];
     creatorContentFocus?: string[];
-    prices: OfferPrices;
+    prices: Partial<OfferPrices>;
     isAvailable?: boolean;
     unavailableReason?: string;
     dateRequest?: string;
@@ -56,5 +56,14 @@ export type CampaignDraftDto = {
 
     }>;
     addedAccounts: DraftAddedAccountDto[];
-    addedBundles?: unknown[];
+    addedBundles?: Array<{
+        bundleId: string;
+        influencerId?: string;
+        selectedAccountIds: string[];
+        currentAccountIds: string[];
+        prices: Partial<OfferPrices>;
+        originalPrices: Partial<OfferPrices>;
+        isAvailable: boolean;
+        unavailableReason?: string;
+    }>;
 };

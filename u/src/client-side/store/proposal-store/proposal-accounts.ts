@@ -1,3 +1,5 @@
+import { getProposalWorkingRowKey, removeProposalGroup, type ProposalOptionSnapshot } from "@/client-side/utils/proposal-option-patch";
+import { BUNDLES_AVAILABLE } from "@/shared/config/bundle-availability";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { CampaignAddedAccount } from "@/types/store/index.types";
@@ -7,11 +9,12 @@ import {useUpdateCampaign} from "@/client-side/store";
 
 export const getAccountKey = (n: CampaignAddedAccount) =>
     String(
+        getProposalWorkingRowKey(n) || (
         (n as any).addedAccountsId ??
         (n as any).accountId ??
         (n as any).socialAccountId ??
         (n as any)._id ??
-        "",
+        ""),
     );
 const oid = () => new ObjectId().toHexString();
 
@@ -35,6 +38,11 @@ type CampaignContentItem = {
   }>;
 };
 type ProposalAccountsStore = {
+  offerPreviewByOption: Record<number, any>;
+  optionSnapshotsByIndex: Record<number, ProposalOptionSnapshot>;
+  selectedOfferChangeByOption: Record<number, any>;
+  restoreOptionFromSnapshot: (index: number) => boolean;
+  removeOfferBundleOverlap: (index: number, key: string) => void;
   accountsByOption: Record<number, CampaignAddedAccount[]>;
   contentByOption: Record<number, CampaignContentItem[]>;
   recentlyAddedKeysByOption: Record<number, Record<string, true>>;
@@ -47,7 +55,7 @@ type ProposalAccountsStore = {
     optionIndex: number,
     serverAccounts: CampaignAddedAccount[],
     serverContent: any[],
-    opts?: { force?: boolean },
+    opts?: { force?: boolean; snapshot?: ProposalOptionSnapshot },
   ) => void;
   addContentForSocial: (
       optionIndex: number,
@@ -89,7 +97,21 @@ type ProposalAccountsStore = {
 };
 
 export const useProposalAccountsStore = create<ProposalAccountsStore>()(
-  devtools((set) => ({
+  devtools((set, get) => ({
+    optionSnapshotsByIndex: {}, selectedOfferChangeByOption: {}, offerPreviewByOption: {},
+    restoreOptionFromSnapshot: (index) => {
+      const snapshot = get().optionSnapshotsByIndex[index]; if (!snapshot) return false;
+      get().initOption(index, structuredClone(snapshot.addedAccounts), structuredClone(snapshot.campaignContent), { force: true, snapshot });
+      return true;
+    },
+    removeOfferBundleOverlap: (index, key) => {
+      if (!BUNDLES_AVAILABLE) return;
+      const state = get(); const snapshot = state.optionSnapshotsByIndex[index];
+      if (!snapshot?.canEdit) return;
+      const result = removeProposalGroup(snapshot, state.accountsByOption[index] ?? [], key, true);
+      useUpdateCampaign.getState().markDirty();
+      set({ accountsByOption: { ...state.accountsByOption, [index]: result.accounts }, selectedOfferChangeByOption: { ...state.selectedOfferChangeByOption, [index]: null } });
+    },
     accountsByOption: {},
     contentByOption: {},
     recentlyAddedKeysByOption: {},
@@ -133,6 +155,7 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     },
     clearAll: () =>
         set({
+          optionSnapshotsByIndex: {}, selectedOfferChangeByOption: {}, offerPreviewByOption: {},
           currentCampaignId: null,
           accountsByOption: {},
           contentByOption: {},
@@ -186,9 +209,10 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     initOption: (optionIndex, serverAccounts, serverContent, opts) => {
       set((state) => {
         const exists = state.contentByOption[optionIndex];
-        if (exists && !opts?.force) return state;
+        if (exists && !opts?.force) return opts?.snapshot ? { optionSnapshotsByIndex: { ...state.optionSnapshotsByIndex, [optionIndex]: structuredClone(opts.snapshot) } } : state;
 
         const normalizedContent = (serverContent ?? []).map((item: any) => ({
+          profileType: item.profileType,
           _id: String(item?._id ?? oid()),
           socialMedia: String(item?.socialMedia ?? "").toLowerCase(),
           socialMediaGroup: item?.socialMediaGroup ?? getGroupBySocial(item?.socialMedia),
@@ -212,7 +236,18 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
               : [],
         }));
 
+        const snapshots = { ...state.optionSnapshotsByIndex };
+        const changes = { ...state.selectedOfferChangeByOption };
+        const previews = { ...state.offerPreviewByOption };
+        if (opts?.snapshot) {
+          snapshots[optionIndex] = structuredClone({ ...opts.snapshot, addedAccounts: serverAccounts, campaignContent: normalizedContent });
+          delete changes[optionIndex];
+          delete previews[optionIndex];
+        }
         return {
+          optionSnapshotsByIndex: snapshots,
+          selectedOfferChangeByOption: changes,
+          offerPreviewByOption: previews,
           accountsByOption: {
             ...state.accountsByOption,
             [optionIndex]: serverAccounts ?? [],
@@ -576,68 +611,16 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
     //   });
     // },
     removeAccount: (optionIndex, accountKey) => {
+      const state = get(); const snapshot = state.optionSnapshotsByIndex[optionIndex];
+      if (!snapshot?.canEdit) return;
+      if (!BUNDLES_AVAILABLE && ((snapshot.addedBundles?.length ?? 0) || snapshot.addedAccounts.some((a) => a.bundleId || a.campaignBundleId))) return;
+      const effective = { ...snapshot, selectedOffer: Object.hasOwn(state.selectedOfferChangeByOption, optionIndex) ? state.selectedOfferChangeByOption[optionIndex] : snapshot.selectedOffer };
+        const result = removeProposalGroup(effective, state.accountsByOption[optionIndex] ?? [], accountKey, false, Object.hasOwn(state.selectedOfferChangeByOption, optionIndex));
+      if (!result.accounts.length) return;
       useUpdateCampaign.getState().markDirty();
-
-      set((state) => {
-        const prevAcc = state.accountsByOption[optionIndex] ?? [];
-
-        const removed = prevAcc.find(
-            (account) => String(getAccountKey(account)) === String(accountKey),
-        );
-
-        if (!removed) return state;
-
-        const nextAcc = prevAcc.filter(
-            (account) => String(getAccountKey(account)) !== String(accountKey),
-        );
-
-        if (nextAcc.length === prevAcc.length) return state;
-
-        const removedGroup = getGroupBySocial((removed as any).socialMedia);
-
-        const stillHasGroup = nextAcc.some(
-            (account) => getGroupBySocial((account as any).socialMedia) === removedGroup,
-        );
-
-        let nextContent = state.contentByOption[optionIndex] ?? [];
-
-        if (!stillHasGroup) {
-          nextContent = nextContent.filter(
-              (content) => content.socialMediaGroup !== removedGroup,
-          );
-        }
-
-        const pendingDelete = {
-          ...(state.pendingDeleteKeysByOption?.[optionIndex] ?? {}),
-        };
-
-        delete pendingDelete[String(accountKey)];
-
-        const recentlyAdded = {
-          ...(state.recentlyAddedKeysByOption?.[optionIndex] ?? {}),
-        };
-
-        delete recentlyAdded[String(accountKey)];
-
-        return {
-          accountsByOption: {
-            ...state.accountsByOption,
-            [optionIndex]: nextAcc,
-          },
-          contentByOption: {
-            ...state.contentByOption,
-            [optionIndex]: nextContent,
-          },
-          pendingDeleteKeysByOption: {
-            ...(state.pendingDeleteKeysByOption ?? {}),
-            [optionIndex]: pendingDelete,
-          },
-          recentlyAddedKeysByOption: {
-            ...(state.recentlyAddedKeysByOption ?? {}),
-            [optionIndex]: recentlyAdded,
-          },
-        };
-      });
+      set({ accountsByOption: { ...state.accountsByOption, [optionIndex]: result.accounts },
+          ...(result.selectedOfferChange === null ? { offerPreviewByOption: { ...state.offerPreviewByOption, [optionIndex]: null } } : {}),
+        selectedOfferChangeByOption: result.selectedOfferChange === null ? { ...state.selectedOfferChangeByOption, [optionIndex]: null } : state.selectedOfferChangeByOption });
     },
     clearOption: (optionIndex) => {
       set((state) => {
@@ -645,7 +628,8 @@ export const useProposalAccountsStore = create<ProposalAccountsStore>()(
         const nextContent = { ...state.contentByOption };
         delete nextAcc[optionIndex];
         delete nextContent[optionIndex];
-        return { accountsByOption: nextAcc, contentByOption: nextContent };
+          const previews = { ...state.offerPreviewByOption }; delete previews[optionIndex];
+          return { accountsByOption: nextAcc, contentByOption: nextContent, offerPreviewByOption: previews };
       });
     },
   })),

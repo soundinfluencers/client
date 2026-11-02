@@ -21,7 +21,7 @@ import {
 } from "@/client-side/data/table-campaign.data";
 import { useFollowersSort } from "@/client-side/hooks";
 import {getColumns} from "@/client-side/utils";
-import {getCurrencySymbol} from "@/pages/influencer/negotiation/utils/getCurrencySymbol.ts";
+import { formatShareMoney, sharePlacementRows } from "@/client-side/pages/campaign-share/model/share-campaign-read";
 
 type Props = {
   items: CampaignContentItem[];
@@ -33,8 +33,6 @@ type Props = {
   campaign: any
 };
 type ColumnKey = keyof ReturnType<typeof getWidthColumn>;
-const makeRowKey = (n: CampaignAddedAccount, index: number) =>
-  String((n as any).accountId ?? `${(n as any).influencerId}-${index}`);
 
 type ActiveDropdown = {
   rowKey: string;
@@ -81,24 +79,6 @@ export function TableStrategy({
     [],
   );
   const closeDropdown = React.useCallback(() => setActive(null), []);
-  const uniqueNetworks = React.useMemo(() => {
-    const seen = new Set<string>();
-
-    return sortedNetworks.filter((n, index) => {
-      const key = String(
-          (n as any).addedAccountsId ??
-          (n as any).socialAccountId ??
-          (n as any).accountId ??
-          (n as any)._id ??
-          `${(n as any).influencerId}-${index}`,
-      );
-
-      if (seen.has(key)) return false;
-
-      seen.add(key);
-      return true;
-    });
-  }, [sortedNetworks]);
   const columns = React.useMemo(
       () => getColumns(false, group, false),
       [ group],
@@ -162,8 +142,7 @@ export function TableStrategy({
         </thead>
 
         <tbody>
-          {uniqueNetworks.map((network, index) => {
-            const rowKey = makeRowKey(network, index);
+          {sharePlacementRows(sortedNetworks).map(({ row: network, key: rowKey }) => {
             return (
               <TableCard
                   group={group}
@@ -201,7 +180,7 @@ export function TableStrategy({
               <td
                 key={col}
                 className={`tableBase__td td--footer ${isPrice ? "td--footer-strategy" : ""} ${isFollowers ? "td--footer-strategy" : ""}`}>
-                {isPrice && <p className="td__price">Price: {campaign.isPriceHidden ? "" : `${totalPrice}${getCurrencySymbol(campaign.displayCurrency)}`}</p>}
+                {isPrice && <p className="td__price">Price: {campaign.isPriceHidden ? "" : formatShareMoney(totalPrice, campaign.displayCurrency)}</p>}
                 {isFollowers && (
                   <p className="td__followers">{totalFollowers}</p>
                 )}

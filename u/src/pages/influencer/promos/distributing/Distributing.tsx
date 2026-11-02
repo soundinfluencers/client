@@ -1,3 +1,6 @@
+import { BUNDLES_AVAILABLE } from '@/shared/config/bundle-availability';
+import { usePromoLocation, promoSearch } from '../model/promo-navigation';
+import { canUsePlacementAction, isPromoId, isPromoPlatform } from '../model/promo-read';
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDetailedPromos } from '../hooks/useDetailedPromos';
@@ -9,7 +12,6 @@ import {
   isSubmitOpen,
   isSubmitState,
   SUBMIT_HASH,
-  type DistributingNavState,
   type SubmitResultsNavState,
 } from './components/campaign-result-form/utils/distributing-nav.helper';
 import type { IPromoDetailsModel } from '../types/promos.types';
@@ -32,14 +34,13 @@ export const Distributing: React.FC = () => {
   const isFormOpen = isSubmitOpen(location.hash);
   const isSubmit = isSubmitState(location.state);
   const submitState = isSubmit ? (location.state as SubmitResultsNavState) : null;
+  const hasFormState = isFormOpen && !!location.state && typeof location.state === 'object' && ('meta' in location.state || 'username' in location.state);
+  const invalidSubmit = (hasFormState && !submitState) || (!!submitState && ((!BUNDLES_AVAILABLE && !!submitState.bundleContext) || !isPromoId(submitState.campaignId) || !isPromoId(submitState.addedAccountsId) || !isPromoPlatform(submitState.meta) || !submitState.username.trim()));
 
-  const distributingState = !isSubmit
-    ? ((location.state as DistributingNavState | null) ?? null)
-    : null;
+  const context = usePromoLocation();
+  const { campaignId, addedAccountsId } = context.pin ?? {};
 
-  const campaignId = distributingState?.campaignId;
-  const addedAccountsId = distributingState?.addedAccountsId;
-
+  const mismatchedSubmit = !!submitState && !!context.pin && (submitState.campaignId !== context.pin.campaignId || submitState.addedAccountsId !== context.pin.addedAccountsId);
   const shouldFetchPromos = !(isFormOpen && submitState);
 
   const {
@@ -49,7 +50,8 @@ export const Distributing: React.FC = () => {
     isLoading,
     error,
     isFetchingNextPage,
-  } = useDetailedPromos({ status: 'ongoing', campaignId, addedAccountsId, enabled: shouldFetchPromos });
+    refetch,
+  } = useDetailedPromos({ status: 'ongoing', campaignId, addedAccountsId, enabled: shouldFetchPromos && !context.invalid && !invalidSubmit });
 
   const promos = data?.promos || [];
 
@@ -60,6 +62,7 @@ export const Distributing: React.FC = () => {
   }, [isFormOpen, submitState, navigate, location.pathname]);
 
   const openFormScreen = (promo: IPromoDetailsModel) => {
+    if (!canUsePlacementAction(promo) || !isPromoPlatform(promo.accountSocialMedia) || !promo.username) return;
     const nextState: SubmitResultsNavState = {
       campaignId: promo.campaignId,
       addedAccountsId: promo.addedAccountsId,
@@ -68,16 +71,18 @@ export const Distributing: React.FC = () => {
 
       // from: { campaignId, addedAccountsId },
     };
-    navigate({ pathname: location.pathname, hash: SUBMIT_HASH }, { state: nextState });
+    navigate({ pathname: location.pathname, search: promoSearch(promo), hash: SUBMIT_HASH }, { state: nextState });
   };
 
   // console.log("Distributing page data:", { campaignId, addedAccountsId, data: d });
+
+  if (context.invalid || mismatchedSubmit || invalidSubmit) return <Error message="Invalid promo link. Open a promo from the dashboard." />;
 
   if (isFormOpen && submitState) {
     return (
       <Container className="distributing-page">
         <Breadcrumbs/>
-        <CampaignResultForm submitState={submitState}/>
+        <CampaignResultForm key={`${submitState.campaignId}:${submitState.addedAccountsId}`} submitState={submitState}/>
       </Container>
     );
   }
@@ -87,7 +92,7 @@ export const Distributing: React.FC = () => {
   }
 
   if (error) {
-    return <Error />;
+    return <Error onRetry={() => { void refetch(); }} message={error instanceof globalThis.Error ? error.message : undefined} />;
   }
 
   if (promos.length === 0) {
@@ -106,15 +111,14 @@ export const Distributing: React.FC = () => {
           data={promos}
           status="distributing"
           onSubmitResults={openFormScreen}
+          onBundleMemberResults={state => { if (BUNDLES_AVAILABLE) navigate({ pathname: location.pathname, search: promoSearch(state), hash: SUBMIT_HASH }, { state }); }}
         />
 
-        {!campaignId && !addedAccountsId && (
-          <ButtonMain
-            label={isFetchingNextPage ? "Loading..." : "View more"}
-            onClick={() => fetchNextPage()}
-            isDisabled={!hasNextPage}
-          />
-        )}
+        {hasNextPage && <ButtonMain
+          label={isFetchingNextPage ? "Loading..." : "View more"}
+          onClick={() => { if (!isFetchingNextPage) void fetchNextPage({ cancelRefetch: false }); }}
+          isDisabled={isFetchingNextPage}
+        />}
       </div>
     </Container>
   );

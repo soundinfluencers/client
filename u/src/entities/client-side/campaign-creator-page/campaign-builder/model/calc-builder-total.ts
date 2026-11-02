@@ -14,7 +14,7 @@ export const priceForCurrency = (
 // NaN means "not ready", never a display amount or a price to submit.
 export const calcBuilderTotal = ({
     selectedOfferId, offers = [], selectedAccounts, selectedOfferAccountIds = [],
-    selectedOfferPrices, selectedCurrency = "EUR",
+    selectedOfferPrices, selectedCurrency = "EUR", selectedBundles = [],
 }: {
     selectedOfferId: string | null;
     offers?: BuildCampaignOffer[];
@@ -23,7 +23,10 @@ export const calcBuilderTotal = ({
     selectedOfferPrices?: Partial<OfferPrices> | null;
     selectedOfferPrice?: number | null;
     selectedCurrency?: string;
+    selectedBundles?: readonly unknown[];
 }) => {
+    // Bundle allocation/quote transport is a later stage. Never price these rows as standalone.
+    if (selectedBundles.length || selectedAccounts.some((a) => a.source === "bundle" || a.bundleId)) return NaN;
     const code = currencyCode(selectedCurrency);
     const membership = new Set(selectedOfferId ? selectedOfferAccountIds : []);
     const catalogue = offers.find((offer) => offer.id === selectedOfferId);

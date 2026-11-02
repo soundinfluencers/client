@@ -33,7 +33,7 @@ import { PaymentDetails } from "@/pages/influencer/payment-details/PaymentDetail
 import { SocialAccounts } from "@/pages/influencer/social-accounts/SocialAccounts.tsx";
 import { InfluencerTermsPage } from "@/pages/auth/terms/influencer/InfluencerTermsPage.tsx";
 import { Agreement } from "@/pages/influencer/agreement/Agreement.tsx";
-import { HomePage } from "@/client-side";
+// import { HomePage } from "@/client-side";
 import {
   EditPassword,
 } from "@/pages/influencer/account-setting/components/edit-password-flow/edit-password/EditPassword.tsx";

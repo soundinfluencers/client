@@ -1,3 +1,4 @@
+import { hasDisplayValue } from '../../../model/promo-read';
 import './_promos-details-list-card.scss';
 import copy from '../../../../../../assets/icons/copy.svg';
 import checkCircle from '../../../../../../assets/icons/check-circle.svg';
@@ -57,7 +58,7 @@ export const DetailsRow: React.FC<Props> = ({ label, value, copyable, linkable, 
         {/*<p className="promos-details-list-card__body-details-item-name">{label}</p>*/}
         {/*{icon && <img src={icon} alt={`${label}-icon`} className="promos-details-list-card__body-details-item-icon"/>}*/}
       </span>
-      {copyable ? (
+      {copyable && hasDisplayValue(value) ? (
         <div className="promos-details-list-card__body-details-item-wrapper">
           <p className="promos-details-list-card__body-details-item-description">{value}</p>
           <button
@@ -69,7 +70,7 @@ export const DetailsRow: React.FC<Props> = ({ label, value, copyable, linkable, 
             <img src={copied ? checkCircle : copy} alt="copy-icon"/>
           </button>
         </div>
-      ) : linkable ? (
+      ) : linkable && hasDisplayValue(value) ? (
         <a
           href={value}
           target="_blank"

@@ -1,87 +1,38 @@
-import { useEffect, useMemo } from 'react';
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@/store/get-user';
 import { Form } from '@/components';
 import { ButtonMain } from '@components/ui/buttons-fix/ButtonFix.tsx';
 import { FormFields } from '@components/form/render-fields/FormFields.tsx';
-
 import { CAMPAIGN_RESULT_INPUTS_DATA } from './data/campaign-result-form-inputs.data';
-import { createInfluencerPromoReview } from '@/api/influencer/promos/influencer-promos.api';
-import { campaignResultMapper } from './utils/campaign-result-form.mapper';
-import { handleApiError } from '@/api/error.api';
-import { toast } from "react-toastify";
 import type { SubmitResultsNavState } from './utils/distributing-nav.helper';
-
-import {
-  type CampaignResultDataValues,
-  getCampaignResultDataSchema,
-} from "@/pages/influencer/promos/distributing/components/campaign-result-form/validation/campaignResult.schema.ts";
-
+import { usePromoCompletion } from './model/use-promo-completion';
+import { createPromoScreenshot } from './model/promo-screenshot';
+import { type CampaignResultDataValues, getCampaignResultDataSchema } from './validation/campaignResult.schema';
 import './_campaign-result-form.scss';
 
-interface Props {
-  submitState: SubmitResultsNavState;
-}
-
-export const CampaignResultForm = ({ submitState }: Props) => {
-  const { user, setUser } = useUser();
+export const CampaignResultForm = ({ submitState }: { submitState: SubmitResultsNavState }) => {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
-  const queryClient = useQueryClient();
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: createInfluencerPromoReview,
-
-    onSuccess: async (balance) => {
-      if (user) {
-        setUser({ ...user, balance });
-      }
-      toast.success("Campaign result submitted successfully!");
-
-      await queryClient.invalidateQueries({ queryKey: ["detailedPromos"] });
-
-      // await queryClient.refetchQueries({ queryKey: ["distributingOrCompleted-promos"], type: 'active' });
-      // state: submitState.from ?? null
-      navigate(
-        { pathname: '/influencer/promos/distributing', hash: '' },
-        { replace: true, state: null }
-      );
-    },
-
-    onError: (error) => {
-      handleApiError(error);
-    },
-  });
-
+  const success = () => navigate({ pathname: '/influencer/promos/distributing', search: '', hash: '' }, { replace: true, state: null });
+  const operation = usePromoCompletion(submitState, success);
+  const uploadBusy = useRef(false);
+  const [uploadPending, setUploadPending] = useState(false);
   const schema = useMemo(() => getCampaignResultDataSchema(submitState.meta), [submitState.meta]);
-
-  // mutate(campaignResultMapper(submitState, data))
-  // console.log(campaignResultMapper(submitState, data))
-
-  return (
-    <div className="campaign-result">
-      <h2 className="campaign-result__title">Campaign result</h2>
-      <Form<CampaignResultDataValues>
-        onSubmit={(data) => mutate(campaignResultMapper(submitState, data))}
-        className="campaign-result__form"
-        schema={schema}
-        validateMode={'all'}
-      >
-        <FormFields inputs={CAMPAIGN_RESULT_INPUTS_DATA[submitState.meta].inputs}/>
-
-        <div className="campaign-result__form-submit">
-          <ButtonMain
-            type="submit"
-            label={isPending ? 'Submitting...' : 'Submit'}
-            isDisabled={isPending}
-          />
-        </div>
-      </Form>
-    </div>
-  );
+  const lockedInputs = operation.isPending || operation.completed;
+  return <div className="campaign-result">
+    <h2 className="campaign-result__title">Campaign result</h2>
+    <Form<CampaignResultDataValues>
+      onSubmit={values => { if (!uploadBusy.current) return operation.submit(values); }}
+      className="campaign-result__form" schema={schema} validateMode="all">
+      <FormFields inputs={CAMPAIGN_RESULT_INPUTS_DATA[submitState.meta].inputs} inert={!!lockedInputs} imageUploadOptions={{
+        contextKey: `${operation.owner.epoch}:${submitState.campaignId}:${submitState.addedAccountsId}:${operation.scope}`,
+        isCurrent: () => operation.live() && !lockedInputs,
+        createController: createPromoScreenshot,
+        accept: 'image/jpeg,image/png,image/webp',
+        onPendingChange: pending => { uploadBusy.current = pending; setUploadPending(pending); },
+      }} />
+      <div className="campaign-result__form-submit">
+        <ButtonMain type="submit" label={operation.isPending ? 'Submitting...' : 'Submit'} isDisabled={lockedInputs || uploadPending || !operation.owner.active} />
+      </div>
+    </Form>
+  </div>;
 };

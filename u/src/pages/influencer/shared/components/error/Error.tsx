@@ -4,7 +4,7 @@ import serviceIcon from "@/assets/empty-list/services.svg";
 
 import './_error.scss';
 
-export const Error = () => {
+export const Error = ({ onRetry, message }: { onRetry?: () => void; message?: string }) => {
   return (
     <Container className="error">
       <img
@@ -17,12 +17,12 @@ export const Error = () => {
       <div className="error__content">
         <div className={"error__info"}>
           <h1 className="error__title">Service temporarily unavailable</h1>
-          <p className="error__description">We’re performing technical maintenance. Please check back shortly.</p>
+          <p className="error__description">{message ?? 'We’re performing technical maintenance. Please check back shortly.'}</p>
         </div>
 
         <ButtonMain
-          label={"Notify me when it’s back"}
-          onClick={() => alert("You will be notified when the service is back.")}
+          label={onRetry ? 'Retry' : 'Notify me when it’s back'}
+          onClick={onRetry ?? (() => alert("You will be notified when the service is back."))}
         />
       </div>
 

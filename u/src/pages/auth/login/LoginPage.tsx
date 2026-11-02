@@ -1,3 +1,4 @@
+import { changeReaderSession } from '@/shared/auth/reader-session';
 import { useState, type FC } from "react";
 import {Link, useNavigate} from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext.tsx";
@@ -45,10 +46,12 @@ export const LoginPage: FC = () => {
       const response = await loginApi({ email, password, role });
       if (!response) return;
 
+      changeReaderSession(false);
       setAccessToken(response.accessToken);
 
       const userData = await getMe();
       setUser(userData);
+      changeReaderSession(true);
       console.log(userData,'qwertyuiop')
       const rawRedirect = sessionStorage.getItem("postAuthRedirect");
       console.log(rawRedirect,'rawRedirect')

@@ -7,6 +7,7 @@ import { formatCampaignDate } from "@/utils/functions/formatDate";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { getResultCPM } from "@/client-side/utils";
 import {EyeHide} from "@/client-side/widgets/campaign/components/eye-hide/eye-hide.tsx";
+import { formatShareMoney, formatShareSubmitted } from "@/client-side/pages/campaign-share/model/share-campaign-read";
 
 type VisibilityState = {
   isCpmAndResultHidden: boolean;
@@ -23,6 +24,7 @@ interface Props {
   onVisibilityChange?: (nextVisibility: VisibilityState) => void;
   canToggleVisibility?: boolean;
   visibleStats?: VisibleStats;
+  readOnlyShare?: boolean;
 }
 
 const currencySymbols: Record<string, string> = {
@@ -43,11 +45,15 @@ export const BarSection: React.FC<Props> = ({
                                               campaign,
                                               onVisibilityChange,
                                               canToggleVisibility = false,
-                                              visibleStats
+                                              visibleStats,
+                                              readOnlyShare = false,
                                             }) => {
   const resultCPM = getResultCPM(campaign.cpm);
 
   const currency = campaign.displayCurrency ?? "EUR";
+  const money = (value: unknown, decimals?: number) => readOnlyShare
+      ? formatShareMoney(value, campaign.displayCurrency, decimals)
+      : formatCurrency(decimals === undefined ? value as number : Number(value ?? 0).toFixed(decimals), currency);
 
   const isPriceHidden = Boolean(campaign.isPriceHidden);
 
@@ -89,7 +95,7 @@ export const BarSection: React.FC<Props> = ({
             <div className="BarSection-info__left-section">
               <p>
                 Submitted:{" "}
-                <span>{formatCampaignDate(campaign.creationDate)}</span>
+                <span>{readOnlyShare ? formatShareSubmitted(campaign) : formatCampaignDate(campaign.creationDate)}</span>
               </p>
 
               <div className="BarSection-info__eye-row">
@@ -98,7 +104,7 @@ export const BarSection: React.FC<Props> = ({
                   {isPriceHidden ? (
                       <span>••••</span>
                   ) : (
-                      <span>{formatCurrency(campaign.price, currency)}</span>
+                      <span>{money(campaign.price)}</span>
                   )}
                 </p>
 
@@ -176,7 +182,7 @@ export const BarSection: React.FC<Props> = ({
                       <span>••••</span>
                   ) : (
                       <span>
-                        {formatCurrency(Number(campaign.cpm ?? 0).toFixed(2), currency)}
+                        {money(campaign.cpm, 2)}
                       </span>
                   )}
                 </p>
@@ -191,7 +197,7 @@ export const BarSection: React.FC<Props> = ({
               <p>
                 Average Instagram CPM:{" "}
                 <span>
-                {formatCurrency(5, currency)} to {formatCurrency(12, currency)}
+                {money(5)} to {money(12)}
               </span>
               </p>
 

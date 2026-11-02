@@ -1,9 +1,10 @@
 import React from "react";
+import { useProposalAddInfluencer } from "@/pages/client-side/campaign-post-content/model/use-proposal-add-influencer";
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 // import { priceForCurrency } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total";
 import { useSearchParams } from "react-router-dom";
 
-import { Breadcrumbs, Container } from "@/components";
+import { Breadcrumbs, Container, Loader } from "@/components";
 import { ButtonMain, ButtonSecondary } from "@/shared/ui";
 import { Modal } from "@/shared/ui/modal-fix/Modal";
 import { NoData } from "@components/ui/no-array/no-data";
@@ -36,6 +37,13 @@ import {
 } from "@/widgets/client-side/campaign-creator-page/build-campaign/model/use-campaign-proceed-summary.tsx";
 
 export const CampaignCreatorPage: React.FC = () => {
+    const [params] = useSearchParams();
+    const add = useProposalAddInfluencer(params);
+    if (add.requested && add.error) return <p role="alert">{add.error}</p>;
+    if (add.requested && !add.ready) return <Loader/>;
+    return <><CampaignCreatorPageContent /></>;
+};
+const CampaignCreatorPageContent: React.FC = () => {
     const offerAvailable = useCampaignBuilderStore((s) => s.selectedOfferIsAvailable);
     // const offerName = useCampaignBuilderStore((s) => s.selectedOfferName);
     // const offerPrices = useCampaignBuilderStore((s) => s.selectedOfferPrices);
@@ -99,7 +107,7 @@ export const CampaignCreatorPage: React.FC = () => {
                 )}
             </div>
 
-            {!isAddInfluencerMode && (
+            {(
                 <>
                     <h1>Ready-to-launch offers</h1>
 
@@ -141,7 +149,7 @@ export const CampaignCreatorPage: React.FC = () => {
                     <p>
                         Total:{" "}
                         <span>
-                            {offerAvailable === false && !isAddInfluencerMode ? "Review unavailable offer" : !totalPriceReady ? "Prices unavailable for the selected currency" : `${totalPrice}${currencySymbol}`}
+                            {offerAvailable === false ? "Review unavailable offer" : !totalPriceReady ? "Prices unavailable for the selected currency" : `${totalPrice}${currencySymbol}`}
                         </span>
                     </p>
                 </div>

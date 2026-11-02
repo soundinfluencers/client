@@ -1,3 +1,4 @@
+import { buildCampaignDraftPayload } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/build-draft-payload";
 import React from "react";
 import {Container, Breadcrumbs, ButtonMain, ButtonSecondary} from "@/components";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +15,6 @@ import {
 } from "@/features/client-side/campaign-tables/model/use-campaign-strategy-view-params";
 import { ViewAudience } from "@/features/client-side/campaign-tables/view-audience/ui/view-audince";
 import {
-    buildStrategyDraftPayload,
     buildStrategyProposalPayload,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
 import {useSaveProposal} from "@/widgets/client-side/campaign-tables/model/use-save-proposal.ts";
@@ -27,7 +27,7 @@ import {Checkbox} from "@/widgets/client-side/campaign-tables/ui/check-box-row/u
 import {postCampaignDraft} from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
 import {toast} from "react-toastify";
 import {DraftButton} from "@components/ui/draft-button/draft-button.tsx";
-import { getBuilderSelectedOffer, isInvalidOfferError } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
+import { isInvalidOfferError } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
 import { getSavedDraftId } from "@/entities/client-side/campaign-draft/api/draft-save-result";
 import { CampaignDraftLatestStep } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
 
@@ -96,14 +96,7 @@ export const CampaignStrategyPage = () => {
         setIsSavingDraft(true);
         try {
             const state = useCampaignBuilderStore.getState();
-            const payload = buildStrategyDraftPayload({
-                campaignName: state.campaignName,
-                draftId: state.draftId,
-                accounts: state.selectedAccounts,
-                content: state.campaignContent,
-                selectedOffer: getBuilderSelectedOffer(state),
-                displayCurrency: state.selectedCurrency,
-            });
+            const payload = buildCampaignDraftPayload(state, CampaignDraftLatestStep.strategyTable);
             const response = await postCampaignDraft(payload);
             state.actions.setDraftMeta({ draftId: getSavedDraftId(response, state.draftId), draftStep: CampaignDraftLatestStep.strategyTable });
             toast.success("Draft saved successfully");
@@ -120,6 +113,7 @@ export const CampaignStrategyPage = () => {
         campaignProposalId,
         setProposalModalOpen,
         saveProposal,
+        isSavingProposal, proposalReadPending,
     } = useSaveProposal();
 
     const {
@@ -188,9 +182,10 @@ export const CampaignStrategyPage = () => {
                                 <button
                                     type="button"
                                     className={styles.controlsProposal}
+                                    disabled={isSavingProposal}
                                     onClick={saveProposal}
                                 >
-                                    Save proposal
+                                    {proposalReadPending ? "Retry reading created proposal" : isSavingProposal ? "Saving..." : "Save proposal"}
                                 </button>
                             </div>
 

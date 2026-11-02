@@ -1,5 +1,7 @@
+import type { Bundle } from "../../bundle/model/bundle.types";
 import type { CampaignPostContentBlock } from "@/widgets/client-side/campaign-post-content/model/campaign-post-content.types";
 import type { DisplayCurrency, OfferPrices } from "./selected-offer";
+import type { ProposalAddSession } from "./proposal-add-influencer-builder";
 
 // @ts-ignore
 export enum CampaignDraftLatestStep {
@@ -15,6 +17,8 @@ export type SelectedCampaignContentRef = {
 };
 
 export type SelectedCampaignAccount = {
+    isAvailable?: boolean;
+    unavailableReason?: string;
     selectionId?: string;
     _id?: string;
     addedAccountsId?: string;
@@ -63,7 +67,16 @@ export type CampaignContentItem = {
     mediaCache?: any;
 };
 
+export type SelectedBundleSnapshot = Bundle & {
+    selectedAccountIds?: string[];
+    currentAccountIds?: string[];
+    isAvailable?: boolean;
+    unavailableReason?: string;
+};
+
 export type CampaignBuilderState = {
+    proposalAddSession: ProposalAddSession | null;
+    selectedBundles: SelectedBundleSnapshot[];
     campaignName: string;
     selectedOfferName: string;
     draftId: string | null;
@@ -90,6 +103,8 @@ export type CampaignBuilderState = {
 };
 
 export type CampaignBuilderActions = {
+    selectBundle: (bundle: Bundle) => void;
+    removeBundle: (bundleId: string) => void;
     setCampaignName: (value: string) => void;
     setDraftMeta: (payload: {
         draftId: string | null;

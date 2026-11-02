@@ -71,8 +71,10 @@ export const buildStrategyProposalPayload = ({
                                                  accounts,
                                                  content,
                                                  displayCurrency,
+                                                 selectedOffer = null,
                                              }: Omit<BuildStrategyBaseParams, "displayCurrency" | "totalPrice" | "accounts" | "content"> & {
     displayCurrency: string;
+    selectedOffer?: SelectedOffer | null;
     totalPrice: number;
     accounts: SelectedCampaignAccount[];
     content: CampaignContentItem[];
@@ -81,7 +83,7 @@ export const buildStrategyProposalPayload = ({
     if (!["EUR", "USD", "GBP", "€", "$", "£"].includes(displayCurrency)) {
         throw new Error("Choose EUR, USD or GBP before saving the proposal.");
     }
-    if (!Number.isFinite(totalPrice) || totalPrice < 0) {
+    if (!Number.isSafeInteger(totalPrice) || totalPrice < 0) {
         throw new Error("Prices are unavailable for the selected currency. Review the selection before saving the proposal.");
     }
     const campaignContent = mapContentForStrategy(content);
@@ -90,6 +92,7 @@ export const buildStrategyProposalPayload = ({
     socialMedia: resolveStrategySocialMedia(content),
     campaignPrice: totalPrice,
     displayCurrency: currencyCode(displayCurrency),
+    selectedOffer: serializeSelectedOffer(selectedOffer, mapAccountsForStrategy(accounts, campaignContent)),
     addedAccounts: mapAccountsForStrategy(accounts, campaignContent),
     campaignContent,
     };

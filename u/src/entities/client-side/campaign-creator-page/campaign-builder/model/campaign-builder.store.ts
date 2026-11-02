@@ -1,3 +1,5 @@
+import { BUNDLES_AVAILABLE } from "@/shared/config/bundle-availability";
+import { selectOfferFromCampaignSelection, selectBundleFromCampaignSelection, removeBundleFromCampaignSelection } from "./campaign-builder-selection";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { ObjectId } from "bson";
@@ -9,6 +11,8 @@ import type {
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types.ts";
 
 const initialState = {
+    proposalAddSession: null,
+    selectedBundles: [],
     campaignName: "",
     draftId: null,
     draftStep: null,
@@ -40,7 +44,7 @@ const recalculate = (state: CampaignBuilderStore): CampaignBuilderStore => {
     const total = calcBuilderTotal(state);
     const totalPriceReady = Number.isSafeInteger(total) && total >= 0 &&
         state.selectedOfferIsAvailable !== false && !state.unsupportedDraftBundles &&
-        !state.selectedAccounts.some((account) => account.source === "bundle");
+        !state.selectedBundles.length && !state.selectedAccounts.some((account) => account.source === "bundle" || account.bundleId || account.isAvailable === false);
     return {
         ...state,
         totalPrice: totalPriceReady ? total : 0,
@@ -67,7 +71,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                     const patch = typeof change === "function" ? change(state) : change;
                     if (Object.entries(patch).every(([key, value]) => Object.is(state[key as keyof CampaignBuilderStore], value))) return state;
                     const next = { ...state, ...patch };
-                    const affectsPricing = ["selectedAccounts", "selectedOfferId", "selectedOfferPrices", "selectedOfferAccountIds",
+                    const affectsPricing = ["selectedBundles", "selectedAccounts", "selectedOfferId", "selectedOfferPrices", "selectedOfferAccountIds",
                         "selectedCurrency", "selectedOfferIsAvailable", "unsupportedDraftBundles", "selectedPromoCardIds", "totalPrice"]
                         .some((key) => Object.hasOwn(patch, key));
                     return affectsPricing ? recalculate(next) : next;
@@ -84,70 +88,15 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                         draftStep,
                     }),
 
-                selectOffer: ({
-                                  offerId,
-                                  offerName,
-                                  offerPrice,
-                                  offerPrices,
-                                  accountIds = [],
-                                  accounts = [],
-                                  catalogContext,
-                              }) =>
-                    update((state) => {
-                        const isSame = state.selectedOfferId === offerId;
-
-                        if (!offerId || isSame) {
-                            const nextAccounts = state.selectedAccounts.filter(
-                                (account) => account.source !== "offer" && !state.selectedOfferAccountIds.includes(account.accountId),
-                            );
-
-                            return {
-                                selectedOfferId: null,
-                                selectedOfferName: "",
-                                selectedOfferPrice: 0,
-                                selectedOfferPrices: null,
-                                selectedOfferIsAvailable: null,
-                                selectedOfferUnavailableReason: null,
-                                offerCatalogContext: null,
-                                selectedOfferAccountIds: [],
-                                selectedAccounts: nextAccounts,
-                            };
-                        }
-
-                        const membership = new Set(accountIds);
-                        const previousMembership = new Set(state.selectedOfferAccountIds);
-                        const independent = state.selectedAccounts.filter((account) =>
-                            account.source !== "offer" && !previousMembership.has(account.accountId) && !membership.has(account.accountId));
-                        const offerAccounts = accountIds.flatMap((id) => {
-                            const existing = state.selectedAccounts.filter((account) => account.accountId === id);
-                            const catalogueAccount = accounts.find((account) => account.accountId === id);
-                            // Preserve ambiguous saved rows for explicit review; never silently collapse them.
-                            const rows = existing.length ? existing : accounts.filter((account) => account.accountId === id);
-                            return rows.map((account) => ({
-                                ...account,
-                                ...Object.fromEntries((["countries", "communityMusicGenres", "communityThemeTopics", "creatorMusicGenres", "creatorContentFocus"] as const)
-                                    .filter((key) => catalogueAccount?.[key] !== undefined).map((key) => [key, catalogueAccount![key]])),
-                                ...(catalogueAccount?.prices ? {
-                                    prices: { ...catalogueAccount.prices },
-                                    price: undefined,
-                                    priceCurrency: undefined,
-                                } : {}),
-                                selectionId: account.selectionId ?? new ObjectId().toHexString(),
-                                source: "offer" as const,
-                            }));
-                        });
-                        return {
-                            selectedOfferId: offerId,
-                            selectedOfferName: offerName ?? "",
-                            selectedOfferPrices: offerPrices ? { ...offerPrices } : typeof offerPrice === "number" ? { EUR: offerPrice } : null,
-                            selectedOfferIsAvailable: true,
-                            selectedOfferUnavailableReason: null,
-                            offerCatalogContext: catalogContext ?? null,
-                            selectedOfferAccountIds: [...accountIds],
-                            selectedPromoCardIds: state.selectedPromoCardIds.filter((id) => !membership.has(id) && !previousMembership.has(id)),
-                            selectedAccounts: [...independent, ...offerAccounts],
-                        };
-                    }),
+                selectOffer: (payload) => update((state) => selectOfferFromCampaignSelection(state, payload)),
+                selectBundle: (bundle) => {
+                    if (!BUNDLES_AVAILABLE) return;
+                    update((state) => selectBundleFromCampaignSelection(state, bundle) ?? {});
+                },
+                removeBundle: (bundleId) => {
+                    if (!BUNDLES_AVAILABLE) return;
+                    update((state) => removeBundleFromCampaignSelection(state, bundleId));
+                },
 
                 setSelectedPromoCardIds: (ids) =>
                     update({ selectedPromoCardIds: ids }),
@@ -179,22 +128,22 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
 
                 upsertSelectedAccount: (account: SelectedCampaignAccount) =>
                     update((state) => {
-                        const exists = state.selectedAccounts.some(
-                            (item) => item.accountId === account.accountId,
-                        );
-
+                        const matches = state.selectedAccounts.filter((item) =>
+                            account.selectionId ? item.selectionId === account.selectionId : item.accountId === account.accountId);
+                        // Account-only callers cannot choose between saved placements.
+                        if (!account.selectionId && matches.length > 1) return {};
+                        const existing = matches[0];
                         return {
-                            selectedAccounts: exists
-                                ? state.selectedAccounts.map((item) =>
-                                    item.accountId === account.accountId ? { ...account, selectionId: item.selectionId ?? account.selectionId ?? new ObjectId().toHexString() } : item,
-                                )
+                            selectedAccounts: existing
+                                ? state.selectedAccounts.map((item) => item === existing
+                                    ? { ...item, ...account, selectionId: item.selectionId ?? new ObjectId().toHexString() } : item)
                                 : [...state.selectedAccounts, { ...account, selectionId: account.selectionId ?? new ObjectId().toHexString() }],
                         };
                     }),
 
                 togglePromoCard: (account) =>
                     update((state) => {
-                        if (state.selectedOfferAccountIds.includes(account.accountId)) return {};
+                        if (state.selectedOfferAccountIds.includes(account.accountId) || state.selectedBundles.some((b) => b.accounts.some((a) => a.accountId === account.accountId))) return {};
                         account = { ...account, priceCurrency: account.priceCurrency ?? currencyCode(state.selectedCurrency) };
                         const existing = state.selectedAccounts.find(
                             (item) => item.accountId === account.accountId,
@@ -294,6 +243,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                     })),
 
                 hydrateFromDraft: ({
+                                       selectedBundles = [],
                                        draftId,
                                        draftStep,
                                        campaignName,
@@ -313,8 +263,11 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
                                        campaignContent,
                                        postContentDraft = null,
                                        blocksDraft = null,
+                                       proposalAddSession = null,
                                    }) =>
                     update({
+                        selectedBundles,
+                        proposalAddSession,
                         totalPrice,
                         selectedCurrency,
                         unsupportedDraftBundles,
@@ -345,6 +298,7 @@ export const useCampaignBuilderStore = create<CampaignBuilderStore>()(
             name: "campaign-builder-store",
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({
+                selectedBundles: state.selectedBundles,
                 campaignName: state.campaignName,
                 draftId: state.draftId,
                 draftStep: state.draftStep,

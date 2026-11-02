@@ -2,13 +2,15 @@ import { useDashboardLayoutStore } from "@/pages/influencer/dashboard-layout/sto
 import { PromosTableItem } from './promos-table-item/PromosTableItem';
 import { TableCardSkeleton } from "@/shared/ui/skeletons/table-card-skeleton.tsx";
 import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
-import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
+import type { DashboardPromo } from '@/pages/influencer/promos/types/promo-read.types';
+import { BundlePromo } from '@/pages/influencer/promos/components/bundle-promo/BundlePromo';
+import { dashboardKey } from '@/pages/influencer/promos/model/promo-read';
 import { EMPTY_MESSAGE } from "@/pages/influencer/dashboard-layout/data/emptyListMessage.ts";
 
 import './_promos-table.scss';
 
 interface Props {
-  promos: IPromo[];
+  promos: DashboardPromo[];
   isInitialLoading?: boolean;
   isRefreshing?: boolean;
 }
@@ -66,7 +68,9 @@ export const PromosTable = ({ promos, isInitialLoading, isRefreshing }: Props) =
 
         <tbody className="promos-table__tbody">
           {promos.map((promo) => (
-            <PromosTableItem key={promo.addedAccountsId + promo.campaignId} promo={promo} />
+            promo.type === 'bundle'
+              ? <tr key={dashboardKey(promo)}><td colSpan={4}><BundlePromo promo={promo} /></td></tr>
+              : <PromosTableItem key={dashboardKey(promo)} promo={promo} />
           ))}
         </tbody>
       </table>

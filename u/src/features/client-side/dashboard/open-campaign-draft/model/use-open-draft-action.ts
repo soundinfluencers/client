@@ -16,10 +16,15 @@ type Params = {
 
 export const useOpenDraftAction = ({ getDraftDetails }: Params) => {
     const navigate = useNavigate();
+    const generation = React.useRef(0);
+    React.useEffect(() => () => { generation.current += 1; }, []);
 
     return React.useCallback(
         async (draftId: string) => {
+            const request = ++generation.current;
+            try {
             const draft = await getDraftDetails(draftId);
+            if (request !== generation.current) return;
 
             hydrateCampaignBuilderFromDraft(draft);
             if (draft.selectedOffer?.isAvailable === false) {
@@ -30,6 +35,10 @@ export const useOpenDraftAction = ({ getDraftDetails }: Params) => {
                 ...(draft.selectedOffer?.socialMedia ? { platform: draft.selectedOffer.socialMedia } : {}),
                 ...(draft.selectedOffer?.genre ? { genre: draft.selectedOffer.genre } : {}),
             })}`);
+            } catch (error) {
+                if (request !== generation.current) return;
+                toast.error(error instanceof Error ? error.message : "Failed to open draft. Please try again.");
+            }
         },
         [getDraftDetails, navigate],
     );

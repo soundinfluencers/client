@@ -1,3 +1,4 @@
+import { canNavigatePlacement, formatPromoReward } from '@/pages/influencer/promos/model/promo-read';
 import { usePromoNavigate } from "@/pages/influencer/dashboard-layout/components/promos-list/hooks/usePromoNavigate.ts";
 import { getSocialMediaIcon } from '@/constants/social-medias.ts';
 import {
@@ -19,10 +20,10 @@ export const PromosTableItem = ({ promo }: Props) => {
       <td className='promos-table-item__status'>
         <div
           className="promos-table-item__status-content"
-          onClick={() => handleNavigate(promo.confirmation, promo.closedStatus, promo.campaignId, promo.addedAccountsId)}
+          onClick={canNavigatePlacement(promo) ? () => handleNavigate(promo.confirmation, promo.closedStatus, promo.campaignId, promo.addedAccountsId) : undefined}
         >
           <img
-            src={getSocialMediaIcon(promo.socialMedia) || ''}
+            src={getSocialMediaIcon(promo.socialMedia as any) || ''}
             alt={promo.socialMedia}
             className="promos-table-item__status-icon"
           />
@@ -34,7 +35,7 @@ export const PromosTableItem = ({ promo }: Props) => {
       </td>
       <td className='promos-table-item__name'>{promo.campaignName}</td>
       <td className='promos-table-item__reward'>
-        {promo.reward && `${promo.reward}€`}
+        {formatPromoReward(promo.reward)}
       </td>
     </tr>
   );

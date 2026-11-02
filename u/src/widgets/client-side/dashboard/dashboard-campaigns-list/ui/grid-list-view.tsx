@@ -77,7 +77,7 @@ export const GridListView = ({ list, onOpen, isLoading }: Props) => {
                             </div>
 
                             <div className={styles.gridItemPrice}>
-                                <p>{item.price ? `${formatCurrency(item.price, item.displayCurrency)}` : ""}</p>
+                                <p>{item.price ? `${formatCurrency(item.price, item.currency ?? item.displayCurrency)}` : ""}</p>
                             </div>
                         </div>
 

@@ -1,6 +1,6 @@
 import React from "react";
-import { serializeCampaignContent, serializeContentReference } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-content.transport";
-import { currencyCode, getBuilderSelectedOffer, getDraftRowIds, isInvalidOfferError, serializeDraftSelection } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
+import { isInvalidOfferError } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
+import { buildCampaignDraftPayload } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/build-draft-payload";
 import { getSavedDraftId } from "@/entities/client-side/campaign-draft/api/draft-save-result";
 import { toast } from "react-toastify";
 
@@ -49,7 +49,6 @@ export const useCampaignPostContentPageDraft = ({
         try {
             const payload = buildPayload();
             const state = useCampaignBuilderStore.getState();
-            const campaignContent = serializeCampaignContent(payload.campaignContent);
             const draftId = state.draftId;
             const nextCampaignName = draftName.trim() || state.campaignName || "";
 
@@ -58,21 +57,9 @@ export const useCampaignPostContentPageDraft = ({
                 return;
             }
 
-            const rows = payload.addedAccounts.filter((row) => state.selectedAccounts.some((account) =>
-                row.selectionId ? account.selectionId === row.selectionId : account.accountId === row.socialAccountId)).map((row) => {
-                const original = state.selectedAccounts.find((account) => row.selectionId
-                    ? account.selectionId === row.selectionId : account.accountId === row.socialAccountId);
-                return { ...row, ...getDraftRowIds(original ?? {}), selectedCampaignContentItem: serializeContentReference(row.selectedCampaignContentItem, campaignContent) };
+            const draftPayload = buildCampaignDraftPayload(state, CampaignDraftLatestStep.addContent, {
+                campaignName: nextCampaignName, campaignContent: payload.campaignContent, workflowRows: payload.addedAccounts,
             });
-            const draftPayload = {
-                draftId: draftId || undefined,
-                step: CampaignDraftLatestStep.addContent,
-                campaignName: nextCampaignName,
-                socialMedia: payload.socialMedia,
-                displayCurrency: currencyCode(state.selectedCurrency),
-                ...serializeDraftSelection(rows, getBuilderSelectedOffer(state)),
-                campaignContent,
-            };
             const response = draftId
                 ? await updateCampaignDraft(draftPayload)
                 : await postCampaignDraft(draftPayload);

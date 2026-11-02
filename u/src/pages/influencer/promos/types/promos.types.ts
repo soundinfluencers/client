@@ -1,76 +1,25 @@
+import type { DashboardStandaloneDto, PlacementPromo, PromoBrief, PromoDisplay, PlacementIdentity, PromoPlatform } from './promo-read.types';
 export type TPromoStatus = "pending" | "distributing" | "completed";
 export type TConfirmationType = "accept" | "decline" | "wait";
 export type TClosedStatusType = "close" | "wait";
 export type TFilterStatus = "new" | "close" | "ongoing" | "all";
-
-export type socialMediaType =
-  | "instagram"
-  | "tiktok"
-  | "youtube"
-  | "facebook"
-  | "spotify"
-  | "press"
-  | "soundcloud"
-  | "multipromo"
-  ;
-
-export interface IPromo {
-  campaignId: string;
-  influencerId: string;
-  addedAccountsId: string;
-  socialAccountId: string;
-  campaignName: string;
-  userName: string;
-  reward: number;
-  socialMedia: socialMediaType;
-  createdAt: string;
-  statusCampaign: TPromoStatus;
-  closedStatus: TClosedStatusType;
-  confirmation: TConfirmationType;
-}
-
-export interface IPromoDetailsModel {
-  campaignId: string;
-  influencerId: string;
-  addedAccountsId: string;
-  socialAccountId: string;
-  campaignName: string;
-  username: string;
-  accountSocialMedia: socialMediaType;
-  createdAt: string;
-  clientName: string;
-  reward: number;
-  logoUrl: string;
-  postLink: string;
-  dateRequest: string;
-  mainLink: string;
-  description: string;
-  taggedUser: string;
-  taggedLink: string;
-  additionalBrief: string;
-  statusCampaign: TPromoStatus;
-  closedStatus: TClosedStatusType;
-  confirmation: TConfirmationType;
-}
-
-export type TAcceptDeclineRequestPromoModel = Pick<
-  IPromoDetailsModel,
-  "campaignId" | "addedAccountsId" | "username"
-> & {
-  campaignResponse: TConfirmationType;
+export type socialMediaType = PromoPlatform;
+// Compatibility names for existing consumers; endpoint projections stay separate.
+export type IPromo = DashboardStandaloneDto;
+export type IPromoDetailsModel = PlacementPromo;
+export type TAcceptDeclineRequestPromoModel = PlacementIdentity & {
+  username?: string;
+  campaignResponse: 'accept' | 'decline';
 };
-
 export type TDetailsField = {
-  key: keyof IPromoDetailsModel;
+  key: keyof (PromoDisplay & PromoBrief & { reward?: number | null; postLink?: string | null });
   label: string;
-  format?: (value: number, promo: IPromoDetailsModel) => string;
+  format?: (value: unknown, promo: PlacementPromo) => string;
   copyable?: boolean;
   linkable?: boolean;
   icon?: string;
 };
-
 export type fieldsConfig = Record<socialMediaType, TDetailsField[]>;
-
 
 //Mock data
 // export const NEW_PROMOS_DATA = [
