@@ -9,6 +9,20 @@ export type ProposalOptionSnapshot = {
 export const getProposalWorkingRowKey = (row: any): string => row.addedAccountsId ? String(row.addedAccountsId)
     : row.isNewProposalPlacement === true && row.selectionId ? `selection:${row.selectionId}` : "";
 
+// Validate the final PATCH array, including unselected variants. Local unfinished
+// content remains editable and can pass through Add Influencer without a write.
+export const assertProposalPatchDescriptions = (content: ReturnType<typeof serializeCampaignContent>) => {
+    for (const item of content) {
+        const emptyIndex = item.descriptions.findIndex(description => !description.description.trim());
+        if (emptyIndex < 0) continue;
+        // UI numbers are local to platform/profile, not the global campaignContent index.
+        const siblings = content.filter(candidate => candidate.socialMedia === item.socialMedia && candidate.profileType === item.profileType);
+        const number = siblings.findIndex(candidate => candidate._id === item._id) + 1;
+        const label = item.socialMediaGroup === "main" ? "Video" : item.socialMediaGroup === "music" ? "Song" : "Press";
+        throw new Error(`${label} ${number} (${item.socialMedia}, ${item.profileType}; content ID ${item._id}), description ${emptyIndex + 1} is empty. Fill it in or delete the empty variant before saving.`);
+    }
+};
+
 export const offerRowIds = (snapshot: ProposalOptionSnapshot): Set<string> => {
     const offer = snapshot.selectedOffer;
     if (!offer) return new Set();
@@ -27,6 +41,7 @@ export const buildProposalOptionPatchBody = ({ snapshot, accounts, content, patc
     selectedOfferChange?: any; campaignName?: string;
 }) => {
     if (!snapshot || !snapshot.canEdit) throw new Error("This option is unavailable for editing. Reload it before saving.");
+    if (!accounts.length) throw new Error("Add at least one placement before saving this Proposal option.");
     const ids = snapshot.addedAccounts.map((a) => a.addedAccountsId);
     if (ids.some((id) => !id) || new Set(ids).size !== ids.length) throw new Error("Existing Proposal placement identities are missing or ambiguous.");
     const offerIds = offerRowIds(snapshot);

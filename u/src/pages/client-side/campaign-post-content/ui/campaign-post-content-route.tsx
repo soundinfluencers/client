@@ -74,7 +74,7 @@ export const CampaignPostContentDefaultRoute = () => {
     if (optionCreate.invalid) return <p role="alert">Proposal option context is invalid. Reopen the Proposal.</p>;
     if (optionCreate.finalizing) return <Loader/>;
     if (optionCreate.blocked) return <p role="alert">The option may already exist. Reopen the Proposal from the dashboard; do not submit again.</p>;
-    if (optionCreate.needsRead) return <div role="alert">{optionCreate.busy && <Loader/>}Option created; reading is incomplete.<button disabled={optionCreate.busy} onClick={() => optionCreate.submit()}>Retry reading option</button></div>;
+    if (optionCreate.needsRead && !optionCreate.busy) return <div role="alert">Option created; reading is incomplete.<button disabled={optionCreate.busy} onClick={() => optionCreate.submit()}>Retry reading option</button></div>;
 
     return (
         <Container>

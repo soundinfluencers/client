@@ -3,7 +3,7 @@ import { ButtonSecondary } from "@/shared/ui";
 import styles from "./campaign-post-content.module.scss";
 import contentStyles from "@/widgets/client-side/campaign-post-content/ui/campaign-post-content-page.module.scss";
 import React from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { CampaignPostContentPage } from "@/widgets/client-side/campaign-post-content/ui/campaign-post-content-page";
 import { useProposalAddInfluencer } from "../model/use-proposal-add-influencer";
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
@@ -22,7 +22,7 @@ export const ProposalAddInfluencerContentRoute = () => {
             <ButtonSecondary className={contentStyles.secondaryButton} text="Cancel and return to option" onClick={add.cancel}/>
         </div>
     </div>;
-    if (add.error) return <Container><p role="alert">{add.error}</p></Container>;
+    if (add.error) return <Container>{recoveryNavigation}<p role="alert">{add.error}</p><Link to="/client">Back to dashboard</Link></Container>;
     if (add.ready && (!builder.totalPriceReady || failedSession === add.session?.sessionId)) return <Container>{recoveryNavigation}<div role="alert">
         The selection was not applied. Review its prices and source option before continuing.
     </div></Container>;

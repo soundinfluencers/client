@@ -2,7 +2,7 @@ import React from "react";
 import { useProposalAddInfluencer } from "@/pages/client-side/campaign-post-content/model/use-proposal-add-influencer";
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 // import { priceForCurrency } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import { Breadcrumbs, Container, Loader } from "@/components";
 import { ButtonMain, ButtonSecondary } from "@/shared/ui";
@@ -39,7 +39,7 @@ import {
 export const CampaignCreatorPage: React.FC = () => {
     const [params] = useSearchParams();
     const add = useProposalAddInfluencer(params);
-    if (add.requested && add.error) return <p role="alert">{add.error}</p>;
+    if (add.requested && add.error) return <Container><Breadcrumbs/><p role="alert">{add.error}</p><Link to="/client">Back to dashboard</Link></Container>;
     if (add.requested && !add.ready) return <Loader/>;
     return <><CampaignCreatorPageContent /></>;
 };

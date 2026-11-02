@@ -12,6 +12,8 @@ type ProposalOfferMembership = {
   selectedAccountIds?: readonly unknown[];
 } | null;
 
+export const LAST_PLACEMENT_MESSAGE = "Add another placement before removing this selection. A Proposal option cannot be saved without placements.";
+
 export type ProposalRowRemovalKind = "standalone" | "offer" | "bundle";
 
 export type ProposalRowRemovalDecision =
@@ -99,7 +101,6 @@ export const decideProposalRowRemoval = ({
   targetAccount,
   accounts,
   selectedOffer,
-  optionIndexes,
 }: {
   targetAccount: ProposalTopologyAccount;
   accounts: readonly ProposalTopologyAccount[];
@@ -113,9 +114,7 @@ export const decideProposalRowRemoval = ({
     return { kind: "keep_option", ...result };
   }
 
-  return new Set(optionIndexes).size > 1
-    ? { kind: "delete_option", ...result }
-    : { kind: "block_last_option", ...result };
+  return { kind: "block_last_option", ...result };
 };
 
 export const executeProposalRowRemovalDecision = async (

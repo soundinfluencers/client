@@ -4413,7 +4413,7 @@ test('UX new-option Content uses Loader only for progress and keeps form mounted
  const render=()=>h.render(()=>Route());assert.equal(render().type,UI.Loader);
  state={...state,finalizing:false,blocked:true};assert.equal(render().props.role,'alert');
  state={...state,blocked:false,needsRead:true};assert.ok(elements(render()).find(n=>n.props.children==='Retry reading option'));
- state={...state,needsRead:false,busy:true};const tree=render();assert.equal(tree.type,UI.Container);assert.ok(elements(tree).find(n=>n.type===Page));assert.ok(elements(tree).find(n=>n.type===UI.Loader));assert.ok(elements(tree).find(n=>n.props.inert===true));
+ state={...state,needsRead:true,busy:true};assert.equal(elements(render()).some(n=>n.props.role==='alert'),false);assert.ok(elements(render()).find(n=>n.type===Page));state={...state,needsRead:false,busy:true};const tree=render();assert.equal(tree.type,UI.Container);assert.ok(elements(tree).find(n=>n.type===Page));assert.ok(elements(tree).find(n=>n.type===UI.Loader));assert.ok(elements(tree).find(n=>n.props.inert===true));
 });
 
 test('UX dirty delete confirmation Cancel leaves patches and every option unchanged without mutation',async()=>{
@@ -4430,11 +4430,11 @@ test('UX dirty delete confirmation Cancel leaves patches and every option unchan
 test('UX Add Influencer catalogue uses the shared Loader and keeps permission errors explicit',()=>{
  const file='src/pages/client-side/campaign-creator-page/ui/campaign-creator-page.tsx';
  const deps=Object.fromEntries(ts.preProcessFile(fs.readFileSync(path.join(root,file),'utf8')).importedFiles.map(i=>[i.fileName,{}]));
- const Loader=()=>{};let state={requested:true,ready:false,error:''};
- Object.assign(deps,{react:React,'@/components':{Loader},'react-router-dom':{useSearchParams:()=>[new URLSearchParams('mode=add-influencer')]},
+ const Loader=()=>{},Container=()=>{},Breadcrumbs=()=>{},Link=()=>{};let state={requested:true,ready:false,error:''};
+ Object.assign(deps,{react:React,'@/components':{Loader,Container,Breadcrumbs},'react-router-dom':{Link,useSearchParams:()=>[new URLSearchParams('mode=add-influencer')]},
  '@/pages/client-side/campaign-post-content/model/use-proposal-add-influencer':{useProposalAddInfluencer:()=>state}});
  const {CampaignCreatorPage:Page}=load(file,deps);assert.equal(Page().type,Loader);
- state={...state,error:'Unavailable option'};assert.equal(Page().props.role,'alert');
+ state={...state,error:'Unavailable option'};assert.equal(Page().type,Container);assert.ok(elements(Page()).find(n=>n.props.role==='alert'));assert.equal(elements(Page()).find(n=>n.type===Link).props.to,'/client');
  state={...state,error:'',ready:true};assert.equal(elements(Page()).some(n=>n.type==='button'),false);
 });
 
@@ -4467,6 +4467,7 @@ test('UX existing Summary Edit Selection preserves Proposal session, composition
  const catalogue=stage5SessionFixture(f,{query:next.searchParams.toString()});await tick();catalogue.render();catalogue.harness.flush();assert.equal(catalogue.render().ready,true);assert.equal(f.builder.getState().blocksDraft,saved);
  const again=stage5ContentPage(f,catalogue);again.render();again.harness.flush();const props=again.page();assert.equal(props.defaultBlocks,saved);
  const reloaded=realContentFormFixture(f.builder,undefined,'add-influencer',props.accounts);assert.equal(reloaded.form.getValues('blocks')[0].fields.additionalBrief,'Keep this entered brief');
+ for(const block of reloaded.form.getValues('blocks'))for(const description of block.fields.descriptions)if(!description.value.trim())reloaded.vm.onChangeDescription(block.id,description.id,'Filled new track title');
  props.onSubmitPayload(reloaded.vm.buildPayload());assert.equal(f.writes.length,0);assert.equal(again.navigation.at(-1),'/client/campaign');
  const save=f.render().updateProposalOption();await tick();assert.equal(f.writes[0][0],'patch');f.pending.at(-1).resolve(patchGetWithNewIds(f));assert.equal(await save,true);
 });
@@ -4525,4 +4526,123 @@ test('delete navigation clears only related references and recovery links point 
   const page=stage3PageFixture(f);const links=elements(page.render()).filter(n=>n.type==='a'&&n.props.children==='Review dashboard');assert.ok(links.length);const {routes,Dashboard}=configuredClientRoutes();
   for(const link of links)assert.equal(require('react-router-dom').matchRoutes(routes,link.props.href).at(-1).route.component,Dashboard);
  }finally{global.sessionStorage=previous;}
+});
+
+
+// Structural pinned-backend fixtures, not captured HTTP responses.
+test('test-deploy initial Proposal creation invalidates dashboard even when GET fails; retry only reads',async()=>{
+ const client=new QueryClient();for(const status of ['proposal','ongoing','completed'])client.setQueryData(['dashboard-campaigns',status],{pages:[{campaigns:['cached']}],pageParams:[1]});client.setQueryData(['unrelated'],42);
+ const b=builderFixture();hydrateFixture(b);const h=hookHarness();let posts=0,reads=0,fail=true;
+ const Hook=load('src/widgets/client-side/campaign-tables/model/use-save-proposal.ts',{
+ react:h.hooks,'@tanstack/react-query':{useQueryClient:()=>client},[builderModule]:{useCampaignBuilderStore:b},[strategyModule]:strategyPayloads,'react-toastify':{toast:{success(){},error(){}}},
+ '@/entities/client-side/campaign-strategy-page/api/save-proposal.ts':{postCampaignProposal:async()=>{posts++;return{data:{data:{campaignId:'new',optionIndex:0}}};},getSavedProposal:async()=>{reads++;for(const status of ['proposal','ongoing','completed'])assert.equal(client.getQueryState(['dashboard-campaigns',status]).isInvalidated,true);if(fail)throw Error('read failed');return{data:{data:stage3Proposal('new')}};}}}).useSaveProposal;
+ const render=()=>h.render(()=>Hook());render();h.flush();await render().saveProposal();assert.equal(render().proposalReadPending,true);assert.equal(posts,1);assert.equal(client.getQueryState(['unrelated']).isInvalidated,false);
+ fail=false;await render().saveProposal();assert.equal(posts,1);assert.equal(reads,2);assert.equal(render().isProposalModalOpen,true);
+ let lists=0;const observer=new QueryObserver(client,{queryKey:['dashboard-campaigns','proposal'],queryFn:async()=>{lists++;return{pages:[{campaigns:['new']}],pageParams:[1]};}});const unsubscribe=observer.subscribe(()=>{});await tick();assert.equal(lists,1);unsubscribe();client.clear();
+});
+
+test('test-deploy Advanced Insights Genres joins profile-specific arrays and safely labels unknown values',()=>{
+ const Cell=load('src/client-side/widgets/campaign/cells/strategy/genres-cell.tsx').GenresCell;
+ for(const data of [{profileType:'community',communityMusicGenres:['techno'],communityThemeTopics:['future-topic']},{profileType:'creator',creatorMusicGenres:['techno'],creatorContentFocus:['future-focus']},{profileType:'community',communityThemeTopics:['future-topic']},{profileType:'creator',creatorContentFocus:['future-focus']}]){
+  const before=structuredClone(data);const expected=taxonomy.getAccountTaxonomyGroups(data).flatMap(g=>g.items).map(i=>i.label);
+  assert.deepEqual(elements(Cell({data})).filter(n=>n.type==='li').map(n=>n.props.children),expected);assert.deepEqual(data,before);assert.ok(expected.length);
+ }
+});
+
+function proposalContentCellFixture(f,key){
+ const h=hookHarness(),errors=[],Main=()=>{},Secondary=()=>{};const s=f.stores.useProposalAccountsStore.getState(),row=s.accountsByOption[0].find(r=>r.addedAccountsId===key);
+ const file='src/client-side/widgets/campaign/cells/editable-cells/content-edit-cell.tsx';const deps=Object.fromEntries(ts.preProcessFile(fs.readFileSync(path.join(root,file),'utf8')).importedFiles.map(i=>[i.fileName,{}]));
+ Object.assign(deps,{react:{...h.hooks,memo:fn=>fn},'react-toastify':{toast:{error:e=>errors.push(e)}},'@/client-side/store':f.stores,'@/components':{ButtonMain:Main,ButtonSecondary:Secondary},'@/shared/ui/dropdowns/dropdowns-table':{Dropdown(){}},'@/shared/ui/modal-fix/Modal':{Modal(){}}});
+ const Cell=load(file,deps).ContentCellEdit;
+ const render=()=>h.render(()=>Cell({optionIndex:0,accountKey:key,selectedItem:s.contentByOption[0][0],socialMedia:row.socialMedia,group:'main',platformItems:s.contentByOption[0],selectedContent:0,isOpen:true,onClose(){},setSelectedPd(){},setSelectedContent(){throw Error('stale index setter must not run');}}));
+ render();h.flush();return{render,errors,create(link){elements(render()).find(n=>n.props.className==='add-video').props.onClick();elements(render()).find(n=>n.type==='input'&&n.props.placeholder==='Paste video link...').props.onChange({target:{value:link}});elements(render()).find(n=>n.type===Main&&n.props.text==='Create').props.onClick();}};
+}
+
+test('test-deploy real Content dropdown assigns stable blank content atomically, then Save and Add Influencer use current refs',async()=>{
+ const f=await stage3ActionsFixture();addReviewOption(f,1,true);const store=f.stores.useProposalAccountsStore;
+ const before=store.getState(),snapshot=before.optionSnapshotsByIndex[0],other=before.accountsByOption[0][1],otherOption=before.contentByOption[1];
+ const row=before.accountsByOption[0][0],ref=other.selectedCampaignContentItem;
+ const cell=proposalContentCellFixture(f,row.addedAccountsId);let publications=0;
+ const unsub=store.subscribe(s=>{publications++;const r=s.accountsByOption[0][0];assert.ok(s.contentByOption[0].find(c=>c._id===r.selectedCampaignContentItem.campaignContentItemId));});
+ cell.create('https://example.test/new-video');unsub();assert.equal(publications,1);assert.deepEqual(cell.errors,[]);
+ const after=store.getState(),item=after.contentByOption[0].at(-1),selected=after.accountsByOption[0][0].selectedCampaignContentItem;
+ assert.match(item._id,/^[a-f0-9]{24}$/);assert.match(item.descriptions[0]._id,/^[a-f0-9]{24}$/);assert.equal(selected.campaignContentItemId,item._id);assert.equal(selected.descriptionId,item.descriptions[0]._id);
+ assert.equal(item.mainLink,'https://example.test/new-video');assert.equal(item.taggedLink,'');assert.equal(item.taggedUser,'');assert.deepEqual(item.additionalBrief,[]);assert.deepEqual(item.descriptions,[{_id:selected.descriptionId,description:''}]);assert.equal(Object.hasOwn(selected,'additionalBriefId'),false);
+ assert.equal(after.accountsByOption[0][1],other);assert.equal(after.accountsByOption[0][1].selectedCampaignContentItem,ref);assert.equal(after.contentByOption[1],otherOption);assert.equal(after.optionSnapshotsByIndex[0],snapshot);
+ proposalDescriptionFixture(f,row.addedAccountsId).edit(0,'Filled original description');
+ const save=f.render().updateProposalOption();await tick();const body=f.writes[0][3];assert.deepEqual(body.addedAccounts[0].selectedCampaignContentItem,selected);assert.equal(body.campaignContent.at(-1).descriptions[0].description,'Filled original description');
+ f.pending.at(-1).resolve(reviewWriteGet(f,0));assert.equal(await save,true);
+ assert.equal(f.render().onAddInfluencer(0),true);const add=await prepareStage5(f);assert.equal(add.render().ready,true);assert.equal(add.render().error,'');
+ assert.equal(f.builder.getState().selectedAccounts[0].selectedCampaignContentItem.campaignContentItemId,item._id);
+});
+
+test('test-deploy invalid target/profile creation leaves content unchanged; blank input does not assign missing refs',async()=>{
+ const f=await stage3ActionsFixture();const store=f.stores.useProposalAccountsStore;const before=store.getState();const row=before.accountsByOption[0][0],source=before.contentByOption[0][0];
+ assert.throws(()=>store.getState().addContentForSocial(0,row.socialMedia,{mainLink:'new'},source._id,'missing'),/placement changed/);assert.equal(store.getState(),before);
+ const cell=proposalContentCellFixture(f,row.addedAccountsId);cell.create(' ');assert.equal(store.getState(),before);
+ store.setState({accountsByOption:{0:before.accountsByOption[0].map((r,i)=>i===0?{...r,profileType:'creator'}:r)}});
+ const incompatible=store.getState();assert.throws(()=>incompatible.addContentForSocial(0,row.socialMedia,{mainLink:'new'},source._id,row.addedAccountsId),/profile/);assert.equal(store.getState(),incompatible);assert.equal(store.getState().accountsByOption[0][1],before.accountsByOption[0][1]);
+});
+
+test('test-deploy final standalone/whole Offer removal blocks empty option regardless of option count; never dispatches DELETE',async()=>{
+ for(const offer of [false,true])for(const indexes of [[0],[0,1]]){
+  const raw=stage3Proposal(),rows=offer?raw.selectedOption.addedAccounts.slice(0,2):raw.selectedOption.addedAccounts.slice(2);
+  const decision=removalDecisions.decideProposalRowRemoval({targetAccount:rows[0],accounts:rows,selectedOffer:offer?raw.selectedOption.selectedOffer:null,optionIndexes:indexes});assert.equal(decision.kind,'block_last_option');let blocked=0;
+  await removalDecisions.executeProposalRowRemovalDecision(decision,{onKeepOption(){throw Error('cannot empty option');},onDeleteOption(){throw Error('implicit DELETE forbidden');},onBlockLastOption(){blocked++;}});assert.equal(blocked,1);
+ }
+ const f=await stage3ActionsFixture();const s=f.stores.useProposalAccountsStore.getState();assert.throws(()=>proposalPatch.buildProposalOptionPatchBody({snapshot:s.optionSnapshotsByIndex[0],accounts:[],content:s.contentByOption[0],selectedOfferChange:null}),/at least one placement/);
+ const decision=removalDecisions.decideProposalRowRemoval({targetAccount:s.accountsByOption[0][0],accounts:s.accountsByOption[0],selectedOffer:s.optionSnapshotsByIndex[0].selectedOffer,optionIndexes:[0]});assert.equal(decision.kind,'keep_option');assert.equal(decision.removalKind,'offer');assert.equal(decision.remainingAccountsCount,1);
+});
+
+
+function proposalDescriptionFixture(f,key){
+ const tableH=hookHarness(),editorH=hookHarness(),ev={preventDefault(){},stopPropagation(){}};
+ const editorFile='src/client-side/widgets/campaign/cells/editable-cells/descritpion-edit-cell.tsx';
+ const Editor=load(editorFile,{react:{...editorH.hooks,memo:fn=>fn},'@/components/table-ui/dropdowns-table':{Dropdown(){}},'@/client-side/store':f.stores},{window:{setTimeout:fn=>{fn();return 1;},clearTimeout(){}},crypto:require('node:crypto').webcrypto}).DescriptionCellEdit;
+ const tableFile='src/client-side/widgets/campaign/card-table/table-card-proposal.tsx';
+ const deps=Object.fromEntries(ts.preProcessFile(fs.readFileSync(path.join(root,tableFile),'utf8')).importedFiles.map(i=>[i.fileName,{}]));
+ Object.assign(deps,{react:{...tableH.hooks,memo:fn=>fn},'@/client-side/store':f.stores,'@/client-side/utils':load('src/client-side/utils/get-id.ts'),
+ '../cells/editable-cells/descritpion-edit-cell':{DescriptionCellEdit:Editor}});
+ const Table=load(tableFile,deps).TableCard;
+ const props=()=>{const s=f.stores.useProposalAccountsStore.getState();const tree=tableH.render(()=>Table({data:s.accountsByOption[0].find(r=>r.addedAccountsId===key),rowKey:key,changeView:false,group:'main',items:s.contentByOption[0],canEdit:true,optionIndex:0,columns:[],onCloseDropdown(){},onToggleDropdown(){}}));tableH.flush();return elements(tree).find(n=>n.type===Editor).props;};
+ const render=()=>editorH.render(()=>Editor({...props(),isOpen:true}));render();editorH.flush();
+ const rows=()=>elements(render()).filter(n=>n.type==='li'&&n.props.className==='desc-li');
+ return{render,rows,edit(i,text){rows()[i].props.onDoubleClick(ev);elements(render()).find(n=>n.type==='input'&&!n.props.placeholder).props.onChange({target:{value:text}});elements(render()).find(n=>n.type==='input'&&!n.props.placeholder).props.onBlur();},
+ add(text){elements(render()).find(n=>n.props.className==='add-desc').props.onClick(ev);elements(render()).find(n=>n.type==='input'&&n.props.placeholder).props.onChange({target:{value:text}});elements(render()).find(n=>n.type==='input'&&n.props.placeholder).props.onKeyDown({...ev,key:'Enter'});},
+ remove(i){elements(rows()[i]).find(n=>n.type==='img'&&n.props.className==='trash').props.onClick(ev);elements(elements(rows()[i]).find(n=>n.props.className==='confirm-delete')).find(n=>n.type==='img').props.onClick(ev);}};
+}
+
+test('description Save validates all serialized variants by content ID; second selection does not hide empty first',async()=>{
+ const f=await stage3ActionsFixture();addReviewOption(f,1,true);const store=f.stores.useProposalAccountsStore;
+ const before=store.getState(),otherRows=before.accountsByOption[1],otherContent=before.contentByOption[1],neighbor=before.accountsByOption[0][1],snapshot=before.optionSnapshotsByIndex[0];
+ const key=before.accountsByOption[0][0].addedAccountsId;proposalContentCellFixture(f,key).create('https://example.test/second-description');
+ const created=store.getState().contentByOption[0].at(-1),first=created.descriptions[0]._id;const editor=proposalDescriptionFixture(f,key);
+ editor.add('Chosen second text');const patched=f.stores.useUpdateCampaign.getState().patches[created._id].descriptions;
+ assert.equal(patched.length,2);assert.deepEqual(patched[0],{_id:first,description:''});assert.equal(patched[1].description,'Chosen second text');
+ assert.equal(store.getState().accountsByOption[0][0].selectedCampaignContentItem.descriptionId,patched[1]._id);
+ assert.equal(await f.render().updateProposalOption(),false);assert.equal(f.writes.length,0);
+ assert.match(f.messages.at(-1)[1],new RegExp('content ID '+created._id));assert.match(f.messages.at(-1)[1],/Video 2.*description 1 is empty.*Fill it in or delete/);
+ assert.deepEqual(f.stores.useUpdateCampaign.getState().patches[created._id].descriptions,patched);assert.equal(store.getState().optionSnapshotsByIndex[0],snapshot);
+ assert.equal(store.getState().accountsByOption[0][1],neighbor);assert.equal(store.getState().accountsByOption[1],otherRows);assert.equal(store.getState().contentByOption[1],otherContent);
+ editor.remove(0);const selected=store.getState().accountsByOption[0][0].selectedCampaignContentItem;assert.equal(selected.descriptionId,patched[1]._id);
+ const save=f.render().updateProposalOption();await tick();assert.equal(f.writes.length,1);const transported=f.writes[0][3].campaignContent.find(c=>c._id===created._id);
+ assert.deepEqual(transported.descriptions,[patched[1]]);assert.equal(f.writes[0][3].addedAccounts[0].selectedCampaignContentItem.descriptionId,patched[1]._id);
+ f.pending.at(-1).resolve(reviewWriteGet(f,0));assert.equal(await save,true);assert.equal(f.render().onAddInfluencer(0),true);const s=await prepareStage5(f);assert.equal(s.render().ready,true);
+});
+
+test('description preflight checks unselected content and uses platform/profile-local label, not global array index',async()=>{
+ const f=await stage3ActionsFixture();const store=f.stores.useProposalAccountsStore,s=store.getState();const key=s.accountsByOption[0][0].addedAccountsId;
+ const base=s.contentByOption[0][0];store.setState({contentByOption:{0:[base,{...structuredClone(base),_id:'000000000000000000000977',profileType:'creator'}]}});
+ proposalContentCellFixture(f,key).create('https://example.test/content-at-index-two');const created=store.getState().contentByOption[0][2];
+ proposalDescriptionFixture(f,key).edit(0,'Edited original text');
+ assert.deepEqual(f.stores.useUpdateCampaign.getState().patches[created._id].descriptions,[{_id:created.descriptions[0]._id,description:'Edited original text'}]);
+ const body=proposalPatch.buildProposalOptionPatchBody({snapshot:s.optionSnapshotsByIndex[0],accounts:store.getState().accountsByOption[0],content:store.getState().contentByOption[0],patches:f.stores.useUpdateCampaign.getState().patches});
+ assert.equal(body.campaignContent[2]._id,created._id);assert.equal(body.campaignContent[2].descriptions[0].description,'Edited original text');proposalPatch.assertProposalPatchDescriptions(body.campaignContent);
+ // A second unused blank variant is still transmitted and must be fixed explicitly.
+ const editor=proposalDescriptionFixture(f,key);editor.add('Selected third text');const patches=f.stores.useUpdateCampaign.getState().patches;
+ const texts=patches[created._id].descriptions;f.stores.useUpdateCampaign.getState().setDescriptions(created._id,[{...texts[0],description:'   '},texts[1]]);
+ assert.equal(await f.render().updateProposalOption(),false);assert.equal(f.writes.length,0);assert.match(f.messages.at(-1)[1],/Video 2.*description 1 is empty/);
+ // Both normal Save and batch Save use the same final payload check.
+ assert.equal(await f.render().saveDirtyProposalOptions(),false);assert.equal(f.writes.length,0);
+ assert.equal(store.getState().accountsByOption[0][0].selectedCampaignContentItem.descriptionId,texts[1]._id);
 });

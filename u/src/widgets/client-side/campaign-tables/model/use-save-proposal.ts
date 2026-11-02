@@ -1,4 +1,5 @@
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { buildStrategyProposalPayload } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload";
 import {postCampaignProposal, getSavedProposal} from "@/entities/client-side/campaign-strategy-page/api/save-proposal.ts";
@@ -6,6 +7,7 @@ import { getBuilderSelectedOffer } from "@/entities/client-side/campaign-creator
 import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 
 export const useSaveProposal = () => {
+    const queryClient = useQueryClient();
     const [isProposalModalOpen, setProposalModalOpen] = React.useState(false);
     const [campaignProposalId, setCampaignProposalId] = React.useState("");
     const [createdProposal, setCreatedProposal] = React.useState<any>(null);
@@ -42,6 +44,8 @@ export const useSaveProposal = () => {
             });
             const response = await postCampaignProposal(proposalPayload);
             postSucceeded.current = true;
+            // Creation is final even if the authoritative read or a background list fails.
+            void queryClient.invalidateQueries({ queryKey: ["dashboard-campaigns"] }).catch(() => {});
 
             const payload =
                 (response as any)?.data?.data ??
@@ -83,7 +87,7 @@ export const useSaveProposal = () => {
             busy.current = false;
             if (current()) setIsSavingProposal(false);
         }
-    }, []);
+    }, [queryClient]);
 
     return {
         isProposalModalOpen,
