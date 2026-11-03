@@ -1239,13 +1239,13 @@ function paymentFixture({ path = '/client/create-campaign/content/strategy/payme
     './campaign-builder.store': { useCampaignBuilderStore: builder }, './campaign-builder.types': builderTypes, './selected-offer': offerHelpers, './calc-builder-total': totals,
   });
   const { PaymentCampaign } = load('src/client-side/pages/payment-campaign/payment-campaign.tsx', {
-    react: harness.hooks, '@/components': {},
+    react: harness.hooks, '@/components': { ButtonMain:'button', SubmitButton:'button' },
     '@/contexts/AuthContext': { useAuth: () => authorization }, '@/store/get-user': { useUser: (selector) => selector({ user }) },
     'react-router-dom': { useLocation: () => ({ pathname: path }), useSearchParams: () => [params], useNavigate: () => (url) => navigation.push(url) },
     '@tanstack/react-query': { useQueryClient: () => ({ invalidateQueries: async (...args) => calls.push(['invalidate', ...args]) }) },
     'react-toastify': { toast: { success: (msg) => notifications.push(['success', msg]), error: (msg) => notifications.push(['error', msg]) } },
     '@/client-side/constants/payment-campaign-tabs.inputs': {}, '@/client-side/schemas': {},
-    '@/client-side/data/payment-campaign-tabs': { PAYMENT_CAMPAIGN_TABS: [] }, '@/client-side/widgets': {}, '@/client-side/client-forms': {},
+    '@/client-side/data/payment-campaign-tabs': { PAYMENT_CAMPAIGN_TABS: [{id:'bank_card',component:'confirmation'}] }, '@/client-side/widgets': {}, '@/client-side/client-forms': {},
     '@/client-side/store': { useDraftCampaignStore: draft, useProposalCampaignStore: proposalStore, useUpdateCampaign: updates,
       useCampaignStore: () => ({ draftId: 'foreign-legacy-id', campaignName: 'Foreign legacy' }) },
     '@/client-side/react-query': { useInvoceDetailsQuery: () => ({ data: undefined }) },
@@ -3615,8 +3615,8 @@ test('cold saved standalone/Offer payment uses authoritative EUR/USD/GBP and rea
     const patches = f.updates.getState(); f.updates.getState().setField('c', 'mainLink', 'unrelated private edit');
     const before = f.updates.getState(); const builderBefore = f.builder.getState();
     f.session.set('proposalPaymentPayload', JSON.stringify({ payload: { campaignPrice: 999, displayCurrency: 'GBP' } }));
-    assert.ok(elements(f.render()).some((n) => n.type === 'p' && Array.isArray(n.props.children) && n.props.children[0] === symbol && n.props.children[1] === price), currency);
-    if (offer) assert.ok(paymentText(f).includes('Saved Offer'));
+    assert.ok(elements(f.render()).some(n=>n.type==='confirmation'&&n.props.currencySymbol===symbol&&n.props.amount===price),currency);
+    assert.equal(elements(f.render()).some(n=>n.props['aria-label']==='Saved Proposal option'),false);
     assert.equal(elements(f.render()).find((n) => n.type === f.FormPayment).props.submitButton.props.disabled, false, 'canEdit=false is not an approve permission');
     await paymentSubmit(f)({ ...paymentValues, amount: 999, selectedOfferSnapshot: { fake: true } });
     const sent = f.calls.find(([kind]) => kind === 'approve'); assert.ok(sent);
@@ -3647,7 +3647,7 @@ test('Proposal read error retries only the requested GET and preserves the payme
   const f = await readyProposalPayment({ loadProposal: async () => { if (fail) throw new Error('read failed'); return checkoutSaved(); } });
   const form = elements(f.render()).find((n) => n.type === f.FormPayment);
   await form.props.onSubmit(paymentValues); assert.equal(f.calls.filter(([kind]) => kind === 'approve').length, 0);
-  fail = false; await elements(f.render()).find((n) => n.type === 'button' && n.props.children === 'Retry reading saved option').props.onClick();
+  fail = false; await elements(f.render()).find((n) => n.type === 'button' && n.props.text === 'Retry reading saved option').props.onClick();
   await tick(); assert.equal(elements(f.render()).find((n) => n.type === f.FormPayment).props.submitButton.props.disabled, false);
   assert.equal(f.calls.filter(([kind]) => kind === 'getProposal').length, 2);
 });
@@ -3671,7 +3671,7 @@ test('double click and old callbacks cannot repeat a successful void approve; no
   const submit = paymentSubmit(f); const first = submit(paymentValues); const second = submit(paymentValues);
   await tick(); assert.equal(f.calls.filter(([k]) => k === 'approve').length, 1); write.resolve(undefined); await Promise.all([first, second]);
   await submit(paymentValues); await paymentSubmit(f)(paymentValues);
-  assert.equal(reads, 2); assert.ok(paymentText(f).includes('Proposal approved')); assert.ok(paymentText(f).includes('Go to dashboard'));
+  assert.equal(reads, 2); assert.ok(paymentText(f).includes('Proposal approved')); assert.ok(paymentText(f).includes('Campaign Received'));
   assert.equal(f.calls.filter(([k]) => k === 'approve').length, 1); assert.equal(f.calls.some(([k]) => ['post', 'delete'].includes(k)), false);
   assert.equal(JSON.parse(f.session.get(`proposalApprove:${checkoutProposalId}`)).status, 'completed');
 });
@@ -3682,7 +3682,7 @@ test('confirmed approval refusal preserves the form and requires GET before a ne
     const f = await readyProposalPayment({ approve: async () => { if (fail) throw { response: { status } }; } });
     await paymentSubmit(f)(paymentValues); assert.ok(paymentText(f).includes('Approval was rejected'));
     await paymentSubmit(f)(paymentValues); assert.equal(f.calls.filter(([k]) => k === 'approve').length, 1);
-    fail = false; await elements(f.render()).find((n) => n.type === 'button' && n.props.children === 'Retry reading saved option').props.onClick(); await tick();
+    fail = false; await elements(f.render()).find((n) => n.type === 'button' && n.props.text === 'Retry reading saved option').props.onClick(); await tick();
     assert.equal(f.calls.filter(([k]) => k === 'approve').length, 1, 'read never retries the write or changes index');
     await paymentSubmit(f)(paymentValues); assert.equal(f.calls.filter(([k]) => k === 'approve').length, 2);
     assert.ok(f.calls.filter(([k]) => k === 'approve').every((call) => call[2] === 0));
@@ -3788,11 +3788,11 @@ test('Proposal completed/pending receipts survive F5 without another write or in
 test('same-option keyed reader accepts only the latest retry; stale responses cannot reenable an old summary', async () => {
   let count = 0; const reads = [deferredPayment(), deferredPayment()];
   const f = await readyProposalPayment({ loadProposal: async () => { if (!count++) throw new Error('initial GET refused'); return reads[count - 2].promise; } });
-  const retry = elements(f.render()).find((n) => n.type === 'button' && n.props.children === 'Retry reading saved option').props.onClick;
+  const retry = elements(f.render()).find((n) => n.type === 'button' && n.props.text === 'Retry reading saved option').props.onClick;
   retry(); retry();
   const fresh = checkoutSaved(0, { currency: 'GBP', price: 44 }); reads[1].resolve(fresh); await tick();
   reads[0].resolve(checkoutSaved(0, { currency: 'EUR', price: 1000 })); await tick();
-  assert.ok(elements(f.render()).some((n) => n.type === 'p' && Array.isArray(n.props.children) && n.props.children[1] === 44));
+  assert.ok(elements(f.render()).some(n=>n.type==='confirmation'&&n.props.amount===44));
 });
 
 test('failed pre-approve GET never mutates, and a 409 followed by reindex refresh requires an updated user confirmation', async () => {
@@ -3803,9 +3803,9 @@ test('failed pre-approve GET never mutates, and a 409 followed by reindex refres
   let reject = true; let saved = checkoutSaved();
   const g = await readyProposalPayment({ loadProposal: async () => structuredClone(saved), approve: async () => { if (reject) throw { response: { status: 409 } }; } });
   await paymentSubmit(g)(paymentValues); saved = checkoutSaved(0, { price: 60 }); saved.selectedOption.addedAccounts[0].addedAccountsId = 'replacement-after-reindex';
-  await elements(g.render()).find((n) => n.type === 'button' && n.props.children === 'Retry reading saved option').props.onClick(); await tick();
+  await elements(g.render()).find((n) => n.type === 'button' && n.props.text === 'Retry reading saved option').props.onClick(); await tick();
   assert.equal(g.calls.filter(([k]) => k === 'approve').length, 1);
-  assert.ok(elements(g.render()).some((n) => n.type === 'p' && Array.isArray(n.props.children) && n.props.children[1] === 60));
+  assert.ok(elements(g.render()).some(n=>n.type==='confirmation'&&n.props.amount===60));
   reject = false; await paymentSubmit(g)(paymentValues);
   assert.equal(g.calls.filter(([k]) => k === 'approve').length, 2); assert.ok(g.calls.filter(([k]) => k === 'approve').every((call) => call[2] === 0));
 });
@@ -3913,7 +3913,7 @@ test('stage 6 review confirmed refusal releases only its attempt and another opt
   assert.equal(proposalReceipt(sessionData), null); assert.ok(paymentText(owner).includes('Approval was rejected'));
   // Clearing the campaign lock is not a confirmation and does not revive old ready data.
   await paymentSubmit(other)(paymentValues); assert.equal(approveCalls(owner, other).length, 1);
-  await elements(other.render()).find((n) => n.type === 'button' && n.props.children === 'Retry reading saved option').props.onClick(); await tick();
+  await elements(other.render()).find((n) => n.type === 'button' && n.props.text === 'Retry reading saved option').props.onClick(); await tick();
   assert.equal(approveCalls(owner, other).length, 1);
   await paymentSubmit(other)(paymentValues); assert.equal(approveCalls(owner, other).length, 2);
   const receipt = proposalReceipt(sessionData); assert.equal(receipt.status, 'completed'); assert.equal(receipt.optionIndex, 1); assert.notEqual(receipt.attemptId, firstId);
@@ -4645,4 +4645,21 @@ test('description preflight checks unselected content and uses platform/profile-
  // Both normal Save and batch Save use the same final payload check.
  assert.equal(await f.render().saveDirtyProposalOptions(),false);assert.equal(f.writes.length,0);
  assert.equal(store.getState().accountsByOption[0][0].selectedCampaignContentItem.descriptionId,texts[1]._id);
+});
+
+
+test('Share UI taxonomy preserves raw ordinary and saved Proposal profile fields without mutations',()=>{
+ const Cell=load('src/client-side/widgets/campaign-share/cells/strategy/genres-cell.tsx').GenresCell;
+ const adapter=load('src/client-side/pages/campaign-share/model/share-campaign-read.ts');const mapper=load('src/client-side/utils/getCampaign.utils.ts');
+ const rows=[{_id:'placement-a',profileType:'community',communityMusicGenres:['techno'],communityThemeTopics:['ibiza','unknown']},{addedAccountsId:'placement-b',profileType:'creator',creatorMusicGenres:[],creatorContentFocus:['music_dance']}];
+ for(const list of [adapter.toPublicShareCampaign({addedAccounts:rows}).addedAccounts,mapper.toCampaignPageModelFromProposal({campaignId:'p',selectedOption:{addedAccounts:rows}}).selectedOption.addedAccounts]){
+ assert.deepEqual(elements(Cell({data:list[0]})).filter(n=>n.type==='li').map(n=>n.props.children),['Techno','Ibiza','unknown']);assert.deepEqual(elements(Cell({data:list[1]})).filter(n=>n.type==='li').map(n=>n.props.children),['Dance']);assert.deepEqual(list[0].communityThemeTopics,rows[0].communityThemeTopics);
+ }
+ const Countries=load('src/client-side/widgets/campaign-share/cells/strategy/countries-cell.tsx').CountriesCell;const tree=Countries({data:{countries:[{country:'United Kingdom of Great Britain and Northern Ireland',percentage:37.85}]}});assert.equal(elements(tree).find(n=>n.props.className==='country-chips__percentage').props.children[0],37.85);assert.equal(elements(tree).find(n=>n.props.className==='country-chips__name').props.children,'United Kingdom of Great Britain and Northern Ireland');
+});
+
+
+test('restored Proposal success uses the existing payment modal and dashboard action without clearing private edits',async()=>{
+ const f=await readyProposalPayment();const before=f.updates.getState();await paymentSubmit(f)(paymentValues);
+ assert.ok(elements(f.render()).some(n=>n.type===f.Modal));const ok=elements(f.render()).find(n=>n.props.text==='Ok');assert.ok(ok);ok.props.onClick();assert.equal(f.navigation.at(-1),'/client');assert.equal(f.updates.getState(),before);assert.equal(f.calls.filter(c=>c[0]==='approve').length,1);
 });

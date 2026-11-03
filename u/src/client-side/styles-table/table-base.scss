@@ -964,3 +964,22 @@
 .table-campaign-page__tr.row--delete {
   background: #EBF5FE;
 }
+
+// Share country chips retain their design while allowing long names to wrap.
+.tableBase td.td-chips .chips.country-chips {
+  max-height: none;
+  overflow: visible;
+  li {
+    height: auto;
+    min-height: 22px;
+    min-width: 0;
+    box-sizing: border-box;
+    white-space: normal;
+    overflow: visible;
+    gap: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .country-chips__name { min-width: 0; overflow-wrap: anywhere; }
+  .country-chips__percentage { flex: 0 0 auto; white-space: nowrap; }
+}

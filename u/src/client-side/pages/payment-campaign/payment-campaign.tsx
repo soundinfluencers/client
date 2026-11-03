@@ -3,6 +3,7 @@ import {
   Breadcrumbs,
   ButtonMain,
   Container,
+  Loader,
   SubmitButton,
 } from "@/components";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -330,22 +331,6 @@ export const PaymentCampaign = () => {
         </div>
 
         <h1>Payment method</h1>
-        {contextError && <p role={context.kind === "proposal" && proposalCheckout.status === "completed" ? "status" : "alert"}>{contextError}</p>}
-        {context.kind === "proposal" && <section aria-label="Saved Proposal option">
-          {proposalCheckout.saved && <>
-            <h2>{proposalCheckout.saved.campaignName} - Option {context.optionIndex + 1}</h2>
-            <p>{selectedCurrency}{paymentAmount} {proposalCheckout.saved.selectedOption.displayCurrency}</p>
-            {proposalCheckout.saved.selectedOption.selectedOffer && <p>
-              Offer: {proposalCheckout.saved.selectedOption.selectedOffer.title}
-              {" - "}{proposalCheckout.saved.selectedOption.selectedOffer.selectedAccountIds?.length ?? 0} accounts
-            </p>}
-            <ul>{proposalCheckout.saved.selectedOption.addedAccounts.map((row, index) =>
-              <li key={row.addedAccountsId ?? index}>{row.username ?? row.socialAccountId} - {row.socialMedia}</li>)}</ul>
-          </>}
-          {!contextError && proposalCheckout.message && <p role="status">{proposalCheckout.message}</p>}
-          {proposalCheckout.status === "error" && <button type="button" onClick={() => void proposalCheckout.load()}>Retry reading saved option</button>}
-          {proposalCheckout.status === "completed" && <button type="button" onClick={() => navigate("/client")}>Go to dashboard</button>}
-        </section>}
         {hasOffer && offerIsAvailable === false && <div role="alert">
           <p>Your saved offer is unavailable or has changed. Please review your selection.</p>
           <button type="button" onClick={() => void openCatalogue()}>Refresh catalogue / review offer</button>
@@ -364,10 +349,9 @@ export const PaymentCampaign = () => {
                 defaultValues={defaultValues}
                 classNameBtnSection={tab === "bank_transfer" ? "margin" : ""}
                 submitButton={
-                  context.kind === "proposal" ? <button type="submit" disabled={!proposalCheckout.canSubmit}>
-                    {proposalCheckout.status === "completed" ? "Proposal approved" : proposalCheckout.status === "uncertain"
-                      ? "Approval outcome unknown" : proposalCheckout.busy ? "Please wait..." : "Confirm payment sent"}
-                  </button> : checkoutCompleted ? <button type="button" disabled>Campaign created</button> : <SubmitButton
+                  context.kind === "proposal" ? <SubmitButton
+                    className="btn-margin" data="Confirm payment sent" disabled={!proposalCheckout.canSubmit}
+                  /> : checkoutCompleted ? <button type="button" disabled>Campaign created</button> : <SubmitButton
                       className="btn-margin"
                       data="Confirm payment sent"
                   />
@@ -392,13 +376,20 @@ export const PaymentCampaign = () => {
                         ))}
                       </ul>
                   )}
-                  <div className="payment-campaign__confirmation">
-                    {CurrentConfirmation && !contextError && !(hasOffer && offerIsAvailable === false) && (
+                  <div className={`payment-campaign__confirmation${context.kind === "proposal" && proposalCheckout.busy ? " payment-campaign__confirmation--loading" : ""}`}
+                       inert={context.kind === "proposal" && proposalCheckout.busy}>
+                    {context.kind === "proposal" && proposalCheckout.busy ? <Loader/> : <>
+                      {contextError && <p role={proposalCheckout.status === "completed" ? "status" : "alert"}>{contextError}</p>}
+                      {context.kind === "proposal" && !contextError && proposalCheckout.message && <p role="status">{proposalCheckout.message}</p>}
+                      {context.kind === "proposal" && proposalCheckout.status === "error" && <ButtonMain className="btn" text="Retry reading saved option" onClick={() => void proposalCheckout.load()}/>}
+                    </>}
+
+                    {CurrentConfirmation && (!contextError || (context.kind === "proposal" && proposalCheckout.busy)) && !(hasOffer && offerIsAvailable === false) && (
                         <CurrentConfirmation
                             currencySymbol={selectedCurrency}
                             currency={currency ? [currency] : []}
                             referenceNumber={referenceNumber}
-                            isSubmitting={isPaymentSubmitting}
+                            isSubmitting={isPaymentSubmitting || (context.kind === "proposal" && proposalCheckout.status === "submitting")}
                             amount={paymentAmount}
                         />
                     )}
@@ -431,7 +422,7 @@ export const PaymentCampaign = () => {
             <button type="button" onClick={() => { setOfferError(null); setCatalogueOpen(false); }}>Close</button>
           </div>
         </Modal>}
-        {context.kind !== "proposal" && modalCompleted && (
+        {(context.kind === "proposal" ? proposalCheckout.status === "completed" : modalCompleted) && (
             <Modal
                 addStyles="content-width"
                 onClose={() => {
@@ -446,7 +437,7 @@ export const PaymentCampaign = () => {
                   We are reviewing your campaign and will notify you once it&apos;s
                   approved and sent to distribution.
                 </p>
-                {cleanupWarning && <p role="status">{cleanupWarning}</p>}
+                {context.kind !== "proposal" && cleanupWarning && <p role="status">{cleanupWarning}</p>}
                 <ButtonMain
                     className="btn"
                     text="Ok"
