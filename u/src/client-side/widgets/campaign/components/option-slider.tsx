@@ -7,26 +7,29 @@ import { Modal } from "@/components/ui/modal-fix/Modal";
 import { ButtonMain, ButtonSecondary } from "@/shared/ui";
 type Props = {
   optionIndexes: number[];
+  canEdit?: boolean;
   activeOption: number;
   onClickOption: (idx: number) => void;
 
-  onDeleteOption: (idx: number) => void;
+  onDeleteOption: (idx: number) => void | Promise<boolean | void>;
 };
 
 export function OptionsSlider({
-  optionIndexes,
+  optionIndexes, canEdit = false,
   activeOption,
   onClickOption,
 
   onDeleteOption,
 }: Props) {
+  const deleting = React.useRef(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const scrollerRef = React.useRef<HTMLUListElement | null>(null);
   const [canScroll, setCanScroll] = React.useState(false);
   const [atStart, setAtStart] = React.useState(true);
   const [atEnd, setAtEnd] = React.useState(false);
   const [modal, setModal] = React.useState<boolean>(false);
   const [activeChooseOption, setActiveOption] = React.useState(activeOption);
-  const canDelete = optionIndexes.length > 1;
+  const canDelete = canEdit && optionIndexes.length > 0;
   const update = React.useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -114,20 +117,23 @@ export function OptionsSlider({
               Are you sure you want to <br></br> delete this Option{" "}
               {activeChooseOption + 1}?
             </h2>
-            <p>You won’t be able to restore this!</p>
+            <p>{optionIndexes.length === 1 ? "Deleting this last option deletes the entire Proposal. This cannot be undone." : "You cannot restore this option."}</p>
             <div className="create-option-btn">
               <ButtonSecondary
                 className="btn"
                 text="Cancel"
-                onClick={() => setModal(false)}
+                isDisabled={isDeleting}
+                onClick={() => { if (!isDeleting) setModal(false); }}
               />
               <ButtonMain
                 className="btn"
                 text="Delete"
-                onClick={() => {{
-                  onDeleteOption(activeChooseOption);
-                  setModal(false);
-                }}}
+                isDisabled={isDeleting}
+                onClick={async () => {
+                  if (deleting.current) return; deleting.current = true; setIsDeleting(true);
+                  try { if (await onDeleteOption(activeChooseOption) !== false) setModal(false); }
+                  finally { deleting.current = false; setIsDeleting(false); }
+                }}
               />
             </div>
           </div>

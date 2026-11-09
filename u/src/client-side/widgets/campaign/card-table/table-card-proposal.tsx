@@ -69,7 +69,8 @@ export const TableCard = React.memo(function TableCard({
   const platformItems = React.useMemo(() => {
     const social = String(data.socialMedia ?? "").toLowerCase();
 
-    const socialItems = (items ?? []).filter(
+    const compatibleItems = (items ?? []).filter((item: any) => (item.profileType ?? "community") === (data.profileType ?? "community"));
+    const socialItems = compatibleItems.filter(
       (it: CampaignContentItem) =>
         String(it.socialMedia ?? "").toLowerCase() === social,
     );
@@ -77,7 +78,7 @@ export const TableCard = React.memo(function TableCard({
     if (socialItems.length) return socialItems;
 
     const socialGroup = getGroupBySocial(social);
-    const groupItems = (items ?? []).filter(
+    const groupItems = compatibleItems.filter(
       (it: CampaignContentItem) => it.socialMediaGroup === socialGroup,
     );
 
@@ -85,7 +86,7 @@ export const TableCard = React.memo(function TableCard({
     if (socialGroup === "main") return groupItems.slice(0, 1);
 
     return groupItems;
-  }, [items, data.socialMedia]);
+  }, [items, data.socialMedia, data.profileType]);
 
   const selectedMeta =
     (proposalAccount as any)?.selectedContent ??
@@ -163,9 +164,7 @@ export const TableCard = React.memo(function TableCard({
   }, [resolvedSelectedContent, resolvedSelectedPd, platformItems]);
 
   const safeSelectedContent =
-    selectedContent >= 0 && selectedContent < platformItems.length
-      ? selectedContent
-      : 0;
+    selectedContentId ? resolvedSelectedContent : (selectedContent >= 0 && selectedContent < platformItems.length ? selectedContent : 0);
 
   const currentContentId = String(
     platformItems?.[safeSelectedContent]?._id ?? "",
@@ -245,15 +244,15 @@ export const TableCard = React.memo(function TableCard({
         const nextPd =
           typeof value === "function" ? value(prevPd) : value;
 
-        syncSelectedToAccount(contentIndex, nextPd);
-
+        // DescriptionCellEdit writes the stable ID through onSelectDescriptionId.
+        // A deferred index updater must not overwrite it using an older patch array.
         return {
           ...prev,
           [itemId]: nextPd,
         };
       });
     },
-    [platformItems, safeSelectedContent, syncSelectedToAccount],
+    [platformItems, safeSelectedContent],
   );
 
   const handleSelectDescriptionId = React.useCallback(
@@ -267,7 +266,7 @@ export const TableCard = React.memo(function TableCard({
           selectedMeta?.additionalBriefId ?? selectedItem?.additionalBrief?.[0]?._id,
       });
     },
-    [setAccountSelectedContent, optionIndex, accountKey, selectedItem],
+    [setAccountSelectedContent, optionIndex, accountKey, selectedItem, selectedMeta?.additionalBriefId],
   );
 
   const dateRequestRaw = String((data as any).dateRequest ?? "ASAP");
@@ -323,6 +322,7 @@ export const TableCard = React.memo(function TableCard({
               <ContentCellEdit
                 optionIndex={optionIndex ?? 0}
                 accountKey={accountKey}
+                referenceError={selectedContentId && !platformItems.some(item => String(item._id) === selectedContentId) ? "Selected content is missing. Choose a valid content item." : undefined}
                 selectedItem={selectedItem}
                 group={group}
                 media0={media0}
@@ -418,6 +418,7 @@ export const TableCard = React.memo(function TableCard({
               <ContentCellEdit
                 optionIndex={optionIndex ?? 0}
                 accountKey={accountKey}
+                referenceError={selectedContentId && !platformItems.some(item => String(item._id) === selectedContentId) ? "Selected content is missing. Choose a valid content item." : undefined}
                 selectedItem={selectedItem}
                 group={group}
                 media0={media0}

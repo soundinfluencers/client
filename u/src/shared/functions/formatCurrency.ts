@@ -1,6 +1,6 @@
 export type DisplayCurrency = "EUR" | "USD" | "GBP" | string;
 
-const currencySymbols: Record<string, string> = {
+const currencySymbols: Record<DisplayCurrency, string> = {
     EUR: "€",
     USD: "$",
     GBP: "£",

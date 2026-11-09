@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import {
   CampaignDraftConflictError,
   getCampaignDraft,
-  updateCampaignDraft,
+  updateAiCampaignDraft,
 } from "@/entities/client-side/campaign-draft/api/campaign-draft.api";
 import type {
   CampaignDraftDto,
@@ -126,7 +126,7 @@ export const AiCampaignDraftPage = () => {
   const totalPrice = React.useMemo(
     () =>
       selectedAccounts.reduce(
-        (sum, account) => sum + Number(account.price ?? 0),
+        (sum, account) => sum + Number(account.prices?.EUR ?? account.price ?? 0),
         0,
       ),
     [selectedAccounts],
@@ -202,7 +202,7 @@ export const AiCampaignDraftPage = () => {
         .catch(() => false)
         .then(async () => {
           try {
-            const result = await updateCampaignDraft({
+            const result = await updateAiCampaignDraft({
               ...payload,
               revision: revisionRef.current,
             });
@@ -465,7 +465,7 @@ export const AiCampaignDraftPage = () => {
           ? {
               ...account,
               selectedContent: nextContent.selectedContent,
-              selectedCampaignContentItem: nextContent.selectedContent,
+              selectedCampaignContentItem: { ...nextContent.selectedContent, descriptionId: nextContent.selectedContent.descriptionId ?? null },
             }
           : account;
       }),
@@ -826,7 +826,7 @@ export const AiCampaignDraftPage = () => {
                         {Number(account.followers ?? 0).toLocaleString("en")}
                       </td>
                       <td className={styles.price}>
-                        {formatCurrency(Number(account.price ?? 0))}
+                        {formatCurrency(Number(account.prices?.EUR ?? account.price ?? 0))}
                       </td>
                       <td>
                         <CampaignRequiredDateControl

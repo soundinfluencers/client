@@ -9,8 +9,8 @@ export const usePublishedOffersQuery = (
 ) => {
     return useQuery({
         queryKey: ["publishedOffers", platform, genre] as const,
+        enabled: enabled && Boolean(platform && genre),
         queryFn: () => getPublishedOffers(platform, genre),
-        enabled,
         staleTime: 30_000,
         retry: (failureCount, error) => {
             if (axios.isAxiosError(error)) {

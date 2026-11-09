@@ -17,7 +17,7 @@ import { getTableColumnWidths, getTitle } from "@/client-side/data/table-campaig
 import { useFollowersSort } from "@/client-side/hooks";
 import { getAccountKey, getColumns } from "@/client-side/utils";
 import { useProposalAccountsStore } from "@/client-side/store";
-import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
+import { ProposalActionsContext } from "@/client-side/pages/campaign/model/proposal-actions-context";
 
 type Props = {
   campaignId?: string;
@@ -48,7 +48,9 @@ export function TableProposal({
   optionIndex,
   title,
 }: Props) {
-  const resetCampaign = useCampaignBuilderStore((s) => s.actions.reset);
+  const proposalActions = React.useContext(ProposalActionsContext);
+  const campaignId = useProposalAccountsStore((s) => s.currentCampaignId);
+  const currency = useProposalAccountsStore((s) => s.optionSnapshotsByIndex[optionIndex]?.displayCurrency);
   const getGroupBySocial = (social?: string): TableGroup => {
     const s = String(social ?? "").toLowerCase();
 
@@ -63,12 +65,12 @@ export function TableProposal({
     return "press";
   };
   const optionItems = useProposalAccountsStore(
-    (s) => s.contentByOption[optionIndex] ?? items ?? [],
-  );
+    (s) => s.contentByOption[optionIndex],
+  ) ?? items ?? [];
 
   const optionNetworks = useProposalAccountsStore(
-    (s) => s.accountsByOption[optionIndex] ?? networks ?? [],
-  );
+    (s) => s.accountsByOption[optionIndex],
+  ) ?? networks ?? [];
 
   const localItems = React.useMemo(
     () =>
@@ -221,8 +223,11 @@ export function TableProposal({
                 className={`td--footer ${isAddInfluencer ? "is-left" : ""} ${col.includes("followers") ? "followers" : ""}`}
               >
                 {isAddInfluencer && (
-                  <Link onClick={() => resetCampaign()}
-                        to={`/client/create-campaign?mode=add-influencer&option=${optionIndex}`}>
+                  <Link onClick={(event) => {
+                    if (proposalActions.isMutationPending) { event.preventDefault(); return; }
+                    if (proposalActions.onAddInfluencer) { event.preventDefault(); proposalActions.onAddInfluencer(optionIndex); }
+                  }}
+                        to={`/client/create-campaign?${new URLSearchParams({ mode: 'add-influencer', campaignId: campaignId ?? '', option: String(optionIndex), currency: currency ?? '' })}`}>
                     <div className="add-influencer">
                       <img src={plus} alt=""/>
                       <p>Add Influencer</p>

@@ -3,11 +3,13 @@ import { devtools } from "zustand/middleware";
 import type { CampaignAddedAccount } from "@/types/store/index.types";
 import { ObjectId } from "bson";
 import { getGroupBySocial } from "@/client-side/widgets/add-influencer-build-campaign/add-to-proposal/bc-prooced";
-import { buildProposalPatchBody, pickPrice } from "@/client-side/utils";
+import { buildProposalPatchBody } from "@/client-side/utils";
+import { calcBuilderTotal } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total";
+import { assertSupportedSelections, serializeSelectedOffer, type DraftSelectedOffer } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
 
 export const getDraftAccountKey = (n: CampaignAddedAccount | any) =>
     String(
-        n?.addedAccountsId ??
+        n?.selectionId ?? n?.addedAccountsId ??
         n?.socialAccountId ??
         n?.accountId ??
         n?._id ??
@@ -27,6 +29,7 @@ type CampaignContentItem = {
 };
 
 type DraftCampaignStore = {
+  metadataByDraftId: Record<string, { campaignName: string; selectedOffer: DraftSelectedOffer | null; displayCurrency: "EUR" | "USD" | "GBP" }>;
   accountsByCampaignId: Record<string, CampaignAddedAccount[]>;
   contentByCampaignId: Record<string, CampaignContentItem[]>;
   getCampaignPrice: (campaignId: string) => number;
@@ -53,7 +56,7 @@ type DraftCampaignStore = {
     campaignId: string,
     serverAccounts: CampaignAddedAccount[],
     serverContent: CampaignContentItem[],
-    opts?: { force?: boolean },
+    opts?: { force?: boolean; campaignName?: string; selectedOffer?: DraftSelectedOffer | null; displayCurrency?: "EUR" | "USD" | "GBP" },
   ) => void;
   addContentForSocial: (
     campaignId: string,
@@ -95,6 +98,7 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
     accountsByCampaignId: {},
     contentByCampaignId: {},
     payloadByDraftId: {},
+    metadataByDraftId: {},
 
     initCampaign: (campaignId, serverAccounts, serverContent, opts) => {
       set((state) => {
@@ -106,6 +110,10 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
         if (exists && !opts?.force) return state;
 
         return {
+          metadataByDraftId: {
+            ...state.metadataByDraftId,
+            [key]: { campaignName: opts?.campaignName ?? "", selectedOffer: opts?.selectedOffer ?? null, displayCurrency: opts?.displayCurrency ?? "EUR" },
+          },
           accountsByCampaignId: {
             ...state.accountsByCampaignId,
             [key]: serverAccounts ?? [],
@@ -166,10 +174,14 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
     getCampaignPrice: (campaignId) => {
       const state = get();
       const accounts = state.accountsByCampaignId[campaignId] ?? [];
-      return accounts.reduce(
-        (sum, acc: any) => sum + pickPrice(acc.prices).amount,
-        0,
-      );
+      const meta = state.metadataByDraftId[campaignId];
+      return calcBuilderTotal({
+        selectedOfferId: meta?.selectedOffer?.offerId ?? null,
+        selectedOfferAccountIds: meta?.selectedOffer?.selectedAccountIds ?? [],
+        selectedOfferPrices: meta?.selectedOffer?.prices,
+        selectedCurrency: meta?.displayCurrency ?? "EUR",
+        selectedAccounts: accounts.map((a: any) => ({ ...a, accountId: a.socialAccountId })),
+      });
     },
     setDraftPayload: (draftId, payload) =>
       set((s) => ({
@@ -183,24 +195,8 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
 
     getCampaignPriceBreakdown: (campaignId) => {
       const state = get();
-      const accounts = state.accountsByCampaignId[campaignId] ?? [];
-
-      const hasEUR = accounts.some((a: any) => Number(a?.prices?.EUR ?? 0) > 0);
-      const hasUSD = accounts.some((a: any) => Number(a?.prices?.USD ?? 0) > 0);
-      const hasGBP = accounts.some((a: any) => Number(a?.prices?.GBP ?? 0) > 0);
-
-      const currency = hasEUR
-        ? "EUR"
-        : hasUSD
-          ? "USD"
-          : hasGBP
-            ? "GBP"
-            : "UNKNOWN";
-
-      const amount = accounts.reduce(
-        (sum, acc: any) => sum + pickPrice(acc.prices).amount,
-        0,
-      );
+      const currency = state.metadataByDraftId[campaignId]?.displayCurrency ?? "EUR";
+      const amount = state.getCampaignPrice(campaignId);
 
       return { amount, currency };
     },
@@ -213,7 +209,13 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
       const st = get();
       const id = String(campaignId ?? "");
 
+      if (!st.accountsByCampaignId[id] || !st.contentByCampaignId[id]) {
+        throw new Error("Please open this draft before proceeding to payment.");
+      }
+      const metadata = st.metadataByDraftId[id];
+
       const accounts = st.accountsByCampaignId[id] ?? [];
+      assertSupportedSelections(accounts as Array<{ source?: string; bundleId?: string }>);
       const content = st.contentByCampaignId[id] ?? [];
       const preparedAccounts = accounts.map((a: any) => {
         const sm = String(a.socialMedia ?? "").toLowerCase();
@@ -240,7 +242,7 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
         };
       });
       const body = buildProposalPatchBody({
-        campaignName,
+        campaignName: metadata?.campaignName || campaignName,
         accounts: preparedAccounts,
         content,
         patches,
@@ -257,12 +259,21 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
       const socialMedia =
         socials.length > 1 ? "multipromo" : (socials[0] ?? "");
 
+      // Restore exact saved references after the shared legacy content mapper.
+      // Do not let its proposal defaults replace a saved null/second variant.
+      body.addedAccounts = body.addedAccounts.map((row: any) => {
+        const originals = accounts.filter((a: any) => a.socialAccountId === row.socialAccountId);
+        const saved = originals.length === 1 ? originals[0].selectedCampaignContentItem : null;
+        return saved ? { ...row, selectedCampaignContentItem: { ...saved } } : row;
+      });
       const campaignPrice = st.getCampaignPrice(id);
 
       return {
         ...body, // campaignName, addedAccounts, campaignContent
         socialMedia,
         campaignPrice,
+        displayCurrency: metadata?.displayCurrency ?? "EUR",
+        selectedOffer: serializeSelectedOffer(metadata?.selectedOffer, body.addedAccounts, metadata?.selectedOffer?.isAvailable),
         paymentType: paymentMethod,
       };
     },
@@ -423,12 +434,18 @@ export const useDraftCampaignStore = create<DraftCampaignStore>()(
 
         const nextAcc = { ...state.accountsByCampaignId };
         const nextContent = { ...state.contentByCampaignId };
+        const nextMetadata = { ...state.metadataByDraftId };
+        const nextPayload = { ...state.payloadByDraftId };
         delete nextAcc[key];
         delete nextContent[key];
+        delete nextMetadata[key];
+        delete nextPayload[key];
 
         return {
           accountsByCampaignId: nextAcc,
           contentByCampaignId: nextContent,
+          metadataByDraftId: nextMetadata,
+          payloadByDraftId: nextPayload,
         };
       });
     },

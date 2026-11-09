@@ -2,13 +2,15 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useEffect } from "react";
+import { currencySymbol } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
+import { proposalAddUrl } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/proposal-add-influencer-builder";
 
 import {
     useCampaignBuilderStore,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
 
 import {
-    type BuildCampaignOffer,
     calcBuilderTotal,
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total";
 
@@ -18,7 +20,7 @@ import {
 import { buildCampaignDraftPayload } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/build-draft-payload";
 import {
     getCampaignDraft,
-    updateCampaignDraft,
+    updateAiCampaignDraft,
 } from "@/entities/client-side/campaign-draft/api/campaign-draft.api";
 import { CampaignDraftLatestStep } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.types";
 
@@ -37,9 +39,14 @@ export const useCampaignProceedSummary = ({
     const queryClient = useQueryClient();
     const [isSaving, setIsSaving] = useState(false);
 
-    const { selectedCurrency } = useBuildCampaignParams();
+    const { selectedCurrency: queryCurrency } = useBuildCampaignParams();
+    const addSession = useCampaignBuilderStore((s) => s.proposalAddSession);
+    const selectedCurrency = mode === 'add-influencer' && addSession ? { currency: addSession.currency, key: currencySymbol(addSession.currency) } : queryCurrency;
 
     const selectedOfferId = useCampaignBuilderStore((s) => s.selectedOfferId);
+    const offerPrices = useCampaignBuilderStore((s) => s.selectedOfferPrices);
+    const offerAvailable = useCampaignBuilderStore((s) => s.selectedOfferIsAvailable);
+    const membership = useCampaignBuilderStore((s) => s.selectedOfferAccountIds);
     const selectedPromoCardIds = useCampaignBuilderStore(
         (s) => s.selectedPromoCardIds,
     );
@@ -52,27 +59,26 @@ export const useCampaignProceedSummary = ({
     const setSelectedCurrency = useCampaignBuilderStore(
         (s) => s.actions.setSelectedCurrency,
     );
+    useEffect(() => {
+        setSelectedCurrency(selectedCurrency?.key ?? "€");
+    }, [selectedCurrency?.key, setSelectedCurrency]);
 
     const isAddInfluencerMode = mode === "add-influencer" && optionIndex !== null;
     const isAiAddPagesMode = mode === "ai-add-pages";
 
-    const offersQueries = queryClient.getQueriesData({
-        queryKey: ["publishedOffers"],
-    });
-
-    const cachedOffers = offersQueries.flatMap(([, data]) =>
-        Array.isArray(data) ? data : [],
-    ) as BuildCampaignOffer[];
-
     const totalPrice = calcBuilderTotal({
-        selectedOfferId: isAddInfluencerMode ? null : selectedOfferId,
-        offers: isAddInfluencerMode ? [] : cachedOffers,
+        selectedOfferId,
         selectedAccounts,
+        selectedOfferPrices: offerPrices,
+        selectedOfferAccountIds: membership,
+        selectedCurrency: selectedCurrency?.key ?? "€",
     });
+    const unsupportedBundles = useCampaignBuilderStore((s) => s.unsupportedDraftBundles);
+    const totalPriceReady = Number.isSafeInteger(totalPrice) && totalPrice >= 0 && !unsupportedBundles;
 
-    const canProceed = isAddInfluencerMode || isAiAddPagesMode
-        ? selectedPromoCardIds.length >= 1
-        : Boolean(selectedOfferId || selectedPromoCardIds.length >= 1);
+    const builderReady = useCampaignBuilderStore((s) => s.totalPriceReady);
+    const canProceed = Boolean(selectedOfferId || selectedPromoCardIds.length >= 1) && offerAvailable !== false && totalPriceReady &&
+        (!isAddInfluencerMode || Boolean(addSession && !addSession.completed && addSession.optionIndex === optionIndex && builderReady));
 
     const handleProceed = async () => {
         if (!canProceed || isSaving) return;
@@ -96,13 +102,18 @@ export const useCampaignProceedSummary = ({
                 const payload = buildCampaignDraftPayload(state, step);
                 const selectedPayloadAccounts = payload.addedAccounts as Array<{
                     socialAccountId: string;
+                    selectionId: string;
                 }>;
                 const selectedIds = new Set(
-                    selectedPayloadAccounts.map((account) => String(account.socialAccountId)),
+                    selectedPayloadAccounts.map((account) => account.selectionId),
                 );
                 const excludedAccounts = (latestDraft.addedAccounts ?? [])
-                    .filter((account) => !selectedIds.has(String(account.socialAccountId)))
+                    .filter((account) => !selectedIds.has(account.selectionId))
                     .map((account) => ({
+                        selectionId: account.selectionId,
+                        source: account.source,
+                        ...(account.offerId ? { offerId: account.offerId } : {}),
+                        ...(account.bundleId ? { bundleId: account.bundleId } : {}),
                         influencerId: account.influencerId,
                         socialAccountId: account.socialAccountId,
                         socialMedia: account.socialMedia,
@@ -117,9 +128,9 @@ export const useCampaignProceedSummary = ({
                             : {}),
                     }));
 
-                const updatedDraft = await updateCampaignDraft({
+                const updatedDraft = await updateAiCampaignDraft({
                     ...payload,
-                    revision: Number(latestDraft.revision ?? 0),
+                    revision: state.draftRevision,
                     addedAccounts: [...selectedPayloadAccounts, ...excludedAccounts],
                     ...(latestDraft.noContentAvailable !== undefined
                         ? { noContentAvailable: latestDraft.noContentAvailable }
@@ -142,13 +153,18 @@ export const useCampaignProceedSummary = ({
         }
 
         if (isAddInfluencerMode) {
-            navigate(
-                `/client/create-campaign/content?mode=add-influencer&option=${optionIndex}`,
-            );
+            if (addSession) {
+                const params = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
+                if (params.get('session') === addSession.sessionId && params.get('campaignId') === addSession.campaignId) {
+                    params.set('currency', addSession.currency); navigate('/client/create-campaign/content?' + params);
+                } else navigate(proposalAddUrl(addSession, addSession.currency, '/client/create-campaign/content', useCampaignBuilderStore.getState().offerCatalogContext));
+            }
             return;
         }
 
-        navigate("/client/create-campaign/content");
+        const params = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
+        if (params.get('mode') === 'proposal-option-create') { params.set('currency', selectedCurrency.currency); navigate('/client/create-campaign/content?' + params); return; }
+        navigate(`/client/create-campaign/content?currency=${selectedCurrency.currency}`);
     };
 
     return {
@@ -160,6 +176,7 @@ export const useCampaignProceedSummary = ({
         selectedPromoCardIds,
         selectedAccounts,
         totalPrice,
+        totalPriceReady,
         canProceed,
         handleProceed,
     };

@@ -5,7 +5,7 @@ import "@/client-side/styles-table/_table-campaign.scss";
 import { LiveViewCard } from "../live-view-card/live-view";
 
 // import type { CampaignPageModel } from "@/pages/client/types";
-import { useProposalAccountsStore } from "@/client-side/store";
+import { useProposalAccountsStore, useFetchCampaign } from "@/client-side/store";
 import { useGroupPromos } from "@/client-side/hooks";
 import { TableProposal } from "../tables/table-proposal";
 import { calcGroupPrices } from "@/client-side/utils";
@@ -34,13 +34,14 @@ export const ProposalCampaignPage: React.FC<Props> = ({
     (s) => s.contentByOption?.[optionIndex],
   );
   const accounts = useProposalAccountsStore(
-    (s) => s.accountsByOption[optionIndex] ?? [],
-  );
+    (s) => s.accountsByOption[optionIndex],
+  ) ?? [];
   const { groupPrices } = React.useMemo(
     () => calcGroupPrices(accounts),
     [accounts],
   );
   React.useEffect(() => {
+    if (useFetchCampaign.getState().isProposalDeleted?.(campaign.campaignId)) return;
     initOption(
       optionIndex,
       campaign.selectedOption.addedAccounts,

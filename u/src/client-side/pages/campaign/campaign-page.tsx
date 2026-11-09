@@ -1,3 +1,6 @@
+import { proposalOptionDirty } from "@/client-side/utils/proposal-option-patch";
+import { ProposalActionsContext } from "./model/proposal-actions-context";
+import { useProposalAccountsStore } from "@/client-side/store";
 import React from "react";
 import { ButtonMain, Container, Loader } from "@/components";
 import save from "@/assets/icons/check-circle.svg";
@@ -26,7 +29,7 @@ type VisibilityState = {
 };
 
 export const CampaignPage = () => {
-  const { data, isLoading } = useFetchCampaign();
+  const { data: fetchedData, isLoading } = useFetchCampaign();
   const { isPending } = useCopyShareLinkMutation();
 
   const [visibility, setVisibility] = React.useState<VisibilityState>({
@@ -34,7 +37,7 @@ export const CampaignPage = () => {
     isPriceHidden: false,
   });
 
-  useCampaignPageBootstrap(data);
+  const data = useCampaignPageBootstrap(fetchedData);
 
   React.useEffect(() => {
     if (!data) return;
@@ -82,12 +85,20 @@ export const CampaignPage = () => {
     setIsRequestingPDF,
   });
 
+  const [pendingCreate, setPendingCreate] = React.useState<"clone" | "new" | null>(null);
+  const [pendingSwitch, setPendingSwitch] = React.useState<number | null>(null);
+  const [switchSaving, setSwitchSaving] = React.useState(false);
+  const switchLock = React.useRef(false);
+  const proposalState = useProposalAccountsStore((state) => state);
   const patches = useUpdateCampaign((s) => s.patches);
   const hasStructuralChanges = useUpdateCampaign((s) => s.hasStructuralChanges);
 
   const isDirty = React.useMemo(() => {
+    if (data?.kind === 'proposal') return proposalOptionDirty(proposalState.optionSnapshotsByIndex[activeOption],
+      proposalState.accountsByOption[activeOption] ?? [], proposalState.contentByOption[activeOption] ?? [], patches ?? {},
+      proposalState.selectedOfferChangeByOption[activeOption]);
     return Object.keys(patches ?? {}).length > 0 || hasStructuralChanges;
-  }, [patches, hasStructuralChanges]);
+  }, [patches, hasStructuralChanges, proposalState, activeOption, data?.kind]);
 
   const isVisibilityDirty = React.useMemo(() => {
     if (!data) return false;
@@ -152,8 +163,54 @@ export const CampaignPage = () => {
     }
   }, [isDirty, isVisibilityDirty, setIsRequestSent]);
 
+  const optionIntent = (index: number) => {
+    if (isRequesting || actions.needsProposalRead || index === activeOption) return;
+    if (isDirty) setPendingSwitch(index); else void actions.onClickOption(index);
+  };
+  const requestDeleteOption = (index: number): Promise<boolean> => {
+    if (isRequesting || actions.needsProposalRead) return Promise.resolve(false);
+    return actions.onDeleteOption(index);
+  };
+  const recoverProposalRead = () => actions.retryProposalRead();
+  const createIntent = async (kind: "clone" | "new") => {
+    if (isRequesting || actions.needsProposalRead || actions.optionCreateBlocked) return;
+    if (isDirty) { setPendingCreate(kind); return; }
+    if (kind === 'clone') await actions.onAddOption(true); else actions.onStartProposalOptionCreate();
+  };
+  const closeDirtyModal = () => {
+    if (switchSaving || switchLock.current) return;
+    setPendingSwitch(null); setPendingCreate(null);
+  };
+  const resolveSwitch = async (save: boolean) => {
+    if ((pendingSwitch === null && pendingCreate === null) || switchLock.current) return;
+    switchLock.current = true; setSwitchSaving(true);
+    const creating = pendingCreate;
+    const target = pendingSwitch;
+    try {
+      if (creating !== null) {
+        if (data?.kind !== 'proposal' || useFetchCampaign.getState().requestKey !== `proposal:${data.campaignId}:${activeOption}`) return;
+        if (save) { if (actions.needsProposalRead ? !await actions.retryProposalRead() : isDirty && !await actions.updateProposalOption()) return; }
+        else { if (!useProposalAccountsStore.getState().restoreOptionFromSnapshot(activeOption)) return; useUpdateCampaign.getState().reset(); }
+        setPendingCreate(null);
+        if (creating === 'clone') await actions.onAddOption(true); else actions.onStartProposalOptionCreate();
+        return;
+      }
+      if (save) { if (actions.needsProposalRead ? !await actions.retryProposalRead() : isDirty && !await actions.updateProposalOption()) return; }
+      else { if (!useProposalAccountsStore.getState().restoreOptionFromSnapshot(activeOption)) return; useUpdateCampaign.getState().reset(); }
+      setPendingSwitch(null); await actions.onClickOption(target!);
+    } finally { switchLock.current = false; setSwitchSaving(false); }
+  };
+  const modalCampaign = React.useRef(data?.campaignId);
+  React.useEffect(() => {
+    if (data?.campaignId && modalCampaign.current !== data.campaignId) {
+      modalCampaign.current = data.campaignId; setPendingSwitch(null); setPendingCreate(null);
+    }
+  }, [data?.campaignId]);
+  const uncertainDeletion = actions.getPendingProposalWrite()?.uncertain;
+  const normalProposalPending = (isLoading || isRequesting) && !uncertainDeletion && !actions.optionCreateBlocked;
   if (!data || isLoading) {
-    return <Loader/>;
+    if (normalProposalPending) return <Loader/>;
+    return actions.optionCreateBlocked ? <div role="alert">The option may already exist. Reopen the Proposal from the dashboard before creating another option.</div> : actions.needsProposalRead ? <div role="alert">{isLoading && !uncertainDeletion && <Loader/>}{uncertainDeletion ? <>Deletion outcome is unknown. Do not repeat deletion. <a href="/client">Review dashboard</a></> : <>The write succeeded. Reload the saved option before continuing.<button disabled={isRequesting} onClick={recoverProposalRead}>Retry reading option</button></>}</div> : <Loader/>;
   }
 
   const { isBarSection, showBar } = getBarComponentKind(data);
@@ -197,7 +254,9 @@ export const CampaignPage = () => {
   })();
 
   return (
-    <>
+    <ProposalActionsContext.Provider value={{ onDeleteOption: requestDeleteOption, onAddInfluencer: actions.onAddInfluencer, isMutationPending: isRequesting || actions.needsProposalRead || actions.optionCreateBlocked }}>
+      {actions.optionCreateBlocked && <p role="alert">The option may already exist. Reopen the Proposal from the dashboard; do not submit again.</p>}
+      {actions.needsProposalRead && !normalProposalPending && <p role="alert">{uncertainDeletion ? <>Deletion outcome is unknown. Do not repeat deletion. <a href="/client">Review dashboard</a></> : <>Write succeeded; synchronization is incomplete. <button disabled={isRequesting} onClick={recoverProposalRead}>Retry reading option</button></>}</p>}
       <Container className="campaignBase">
         <CampaignPageHeader
           title={`${data.campaignName} - Campaign SoundInfluencers`}
@@ -233,9 +292,9 @@ export const CampaignPage = () => {
             setFlag={setFlag}
             optionIndexes={actions.optionIndexes}
             activeOption={activeOption}
-            onClickOption={actions.onClickOption}
-            onDeleteOption={actions.onDeleteOption}
-            onOpenOptionModal={() => setOptionModal(true)}
+            onClickOption={optionIntent}
+            onDeleteOption={requestDeleteOption}
+            onOpenOptionModal={() => { if (!isRequesting && !actions.needsProposalRead && actions.beginOptionCreate()) setOptionModal(true); }}
             onCopyShareLink={() => {
               if (data.status === "completed" || data.kind === "regular") {
                 actions.copyShareLink();
@@ -251,12 +310,13 @@ export const CampaignPage = () => {
             isRequestingPDF={isRequestingPDF}
           />
 
-          <CampaignPageContent
+          {data.kind === "proposal" && normalProposalPending && <Loader/>}
+          <div inert={isRequesting || actions.needsProposalRead || actions.optionCreateBlocked}><CampaignPageContent
             data={data}
             changeView={changeView}
             view={view}
             flag={flag}
-          />
+          /></div>
         </div>
 
         {data.kind === "proposal" && (
@@ -280,8 +340,16 @@ export const CampaignPage = () => {
         optionModal={optionModal}
         activeOption={activeOption}
         onCloseOptionModal={() => setOptionModal(false)}
-        onAddOptionYes={() => actions.onAddOption(true)}
+        onAddOptionYes={() => createIntent("clone")}
+        onAddOptionNo={() => createIntent("new")}
+        isOptionPending={isRequesting || actions.needsProposalRead || actions.optionCreateBlocked}
+        isDirtySwitchModalOpen={pendingSwitch !== null || pendingCreate !== null}
+        dirtyMessage={pendingCreate !== null ? "Save changes to the source option before creating another option, or leave without saving?" : undefined}
+        isDirtySwitchSaving={switchSaving}
+        onCloseDirtySwitchModal={closeDirtyModal}
+        onSaveDirtySwitch={() => resolveSwitch(true)}
+        onDiscardDirtySwitch={() => resolveSwitch(false)}
       />
-    </>
+    </ProposalActionsContext.Provider>
   );
 };

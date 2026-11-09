@@ -194,6 +194,7 @@ export const TableCard = React.memo(function TableCard({
               {group !== "press" && (
                   <DescriptionCell
                       group={group}
+                      enableTitle={group === "main"}
                       isOpen={isPostDescriptionOpen}
                       onToggle={togglePD}
                       onClose={onCloseDropdown}
@@ -258,6 +259,7 @@ export const TableCard = React.memo(function TableCard({
 
               <DescriptionCell
                   group={group}
+                  enableTitle={group === "main"}
                   isOpen={isPostDescriptionOpen}
                   onToggle={togglePD}
                   onClose={onCloseDropdown}

@@ -1,5 +1,6 @@
+import { usePromoLocation } from '../model/promo-navigation';
 import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+
 import { useDetailedPromos } from '../hooks/useDetailedPromos';
 
 import { Breadcrumbs, Container, Loader } from '@/components';
@@ -13,18 +14,12 @@ import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 
 //TODO: mb add session storage for campaignId and addedAccountsId to persist state on reload
 export const Completed: React.FC = () => {
-  const { state } = useLocation() as {
-    state?: {
-      campaignId?: string;
-      addedAccountsId?: string;
-    }
-  };
-
+  const context = usePromoLocation();
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const { campaignId, addedAccountsId } = state || {};
+  const { campaignId, addedAccountsId } = context.pin ?? {};
   console.log(campaignId, addedAccountsId);
 
   const {
@@ -34,7 +29,8 @@ export const Completed: React.FC = () => {
     isLoading,
     error,
     isFetchingNextPage,
-  } = useDetailedPromos({ status: 'close', campaignId, addedAccountsId });
+    refetch,
+  } = useDetailedPromos({ status: 'close', campaignId, addedAccountsId, enabled: !context.invalid });
 
   console.log(data);
 
@@ -42,11 +38,13 @@ export const Completed: React.FC = () => {
 
   console.log('Completed promos:', promos);
 
+  if (context.invalid) return <Error message="Invalid promo link. Open a promo from the dashboard." />;
+
   if (isLoading) {
     return <Loader/>;
   }
   if (error) {
-    return <Error/>;
+    return <Error onRetry={() => { void refetch(); }} message={error instanceof globalThis.Error ? error.message : undefined} />;
   }
   if (promos.length === 0) {
     return (
@@ -68,11 +66,11 @@ export const Completed: React.FC = () => {
           status="completed"
         />
 
-        <ButtonMain
+        {hasNextPage && <ButtonMain
           label={isFetchingNextPage ? 'Loading...' : 'View more'}
-          onClick={() => fetchNextPage()}
-          isDisabled={!hasNextPage}
-        />
+          onClick={() => { if (!isFetchingNextPage) void fetchNextPage({ cancelRefetch: false }); }}
+          isDisabled={isFetchingNextPage}
+        />}
       </div>
     </Container>
   );

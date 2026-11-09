@@ -1,3 +1,4 @@
+import { changeReaderSession } from '@/shared/auth/reader-session';
 import {
   createContext,
   type ReactNode, useCallback,
@@ -47,6 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // };
 
   const logout = useCallback(async () => {
+    changeReaderSession(false);
     try {
       await logoutApi();
     } catch (err) {
@@ -69,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await refreshAccessToken(setAccessToken);
         const userData = await getMe();
         setUser(userData);
+        changeReaderSession(true);
       } catch {
         setAccessToken(null);
         setUser(null);

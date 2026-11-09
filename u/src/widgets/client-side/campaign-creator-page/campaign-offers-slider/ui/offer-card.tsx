@@ -6,13 +6,23 @@ import {
     useCampaignBuilderStore
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store.ts";
 import type {PublishedOffer} from "@/entities/client-side/campaign-creator-page/offer/model/offer.types.ts";
+import { usePlatformParam } from "@/features/client-side/campaign-creator-page/select-platform/model/use-platform-param";
+import { useGenreParam } from "@/features/client-side/campaign-creator-page/select-genre/model/use-genre-param";
+import { useBuildCampaignParams } from "@/features/client-side/campaign-creator-page/build-campaign-filters/model/use-build-campaign-params";
+import { priceForCurrency } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total";
 
 type Props = {
     offer: PublishedOffer;
 };
 
 export const OfferCard: React.FC<Props> = ({ offer }) => {
+    const { platform, platformKey } = usePlatformParam();
+    const { genre } = useGenreParam(platformKey);
     const selectedOfferId = useCampaignBuilderStore((s) => s.selectedOfferId);
+    const selectedPrices = useCampaignBuilderStore((s) => s.selectedOfferPrices);
+    const selectedAvailable = useCampaignBuilderStore((s) => s.selectedOfferIsAvailable);
+    const { selectedCurrency } = useBuildCampaignParams();
+    const price = priceForCurrency(selectedOfferId === offer.id && selectedPrices ? selectedPrices : offer.prices, selectedCurrency.currency);
     const selectOffer = useCampaignBuilderStore((s) => s.actions.selectOffer);
     const isActive = selectedOfferId === offer.id;
     const onChoose = React.useCallback(() => {
@@ -27,8 +37,9 @@ export const OfferCard: React.FC<Props> = ({ offer }) => {
                 }
                 : {
                     offerId: offer.id,
+                    catalogContext: { platform, genre },
                     offerName: offer.title,
-                    offerPrice: Number(offer.price ?? 0),
+                    offerPrices: { ...offer.prices },
                     accountIds: offer.connectedAccounts.map((account) => account.accountId),
                     accounts: offer.connectedAccounts.map((account) => ({
                         accountId: account.accountId,
@@ -38,18 +49,22 @@ export const OfferCard: React.FC<Props> = ({ offer }) => {
                         logoUrl: account.logoUrl,
                         profileType: account.profileType,
                         followers: account.followers,
+                        prices: { ...account.prices },
+                        ...(account.countries ? { countries: account.countries.map((country) => ({ ...country })) } : {}),
+                        ...Object.fromEntries((["communityMusicGenres", "communityThemeTopics", "creatorMusicGenres", "creatorContentFocus"] as const)
+                            .filter((key) => account[key] !== undefined).map((key) => [key, [...account[key]!]])),
                         dateRequest: "ASAP",
                     })),
                 },
         );
-    }, [selectOffer, isActive, offer]);
+    }, [selectOffer, isActive, offer, platform, genre]);
 
     return (
         <div className={`${styles.card} ${isActive ? styles.cardActive : ""}`}>
             <div className={styles.cardHeader}>
                 <div className={styles.cardTitleSection}>
                     <h2>{offer.title}</h2>
-                    <p>{offer.price}€</p>
+                    <p>{isActive && selectedAvailable === false ? "Saved offer selection unavailable — review selection" : price === null ? `Price unavailable in ${selectedCurrency.currency}` : `${price}${selectedCurrency.key}`}</p>
                 </div>
 
                 <ul>

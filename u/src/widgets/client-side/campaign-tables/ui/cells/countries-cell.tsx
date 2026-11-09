@@ -17,7 +17,7 @@ export const CountriesCell: React.FC<Props> = ({ row }) => {
             <ul className="chips">
                 {countries.map((item) => (
                     <li key={`${item.country}-${item.percentage}`}>
-                        {item.country} {item.percentage}%
+                        {item.country}{typeof item.percentage === "number" ? ` ${item.percentage}%` : ""}
                     </li>
                 ))}
             </ul>

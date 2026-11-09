@@ -1,6 +1,8 @@
+import { usePromoLocation } from '../model/promo-navigation';
 import { useConfirmInfluencerPromo } from './hooks/useConfirmInfluencerPromo';
 // import { useInfluencerNewPromos } from './hooks/useInfluencerNewPromos';
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { PromosDetailsList } from '../components/promos-details-list/PromosDetailsList';
 import { Modal } from '@components/ui/modal-fix/Modal.tsx';
 import { Breadcrumbs, Container, Loader } from '@/components';
@@ -10,25 +12,25 @@ import successIcon from '@/assets/icons/success-icon.svg';
 import './_new-promos.scss';
 import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
 import { useDetailedPromos } from "@/pages/influencer/promos/hooks/useDetailedPromos.ts";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 
-type TNewPromosLocationState = {
-  campaignId?: string;
-  addedAccountsId?: string;
-}
+import { Error } from "@/pages/influencer/shared/components/error/Error.tsx";
 
 export const NewPromos = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDecline, setIsDecline] = useState(false);
   const [isAccepted, setIsAccepted] = useState(false);
-  const location = useLocation();
-  const state = location.state as TNewPromosLocationState | undefined;
-  const navigate = useNavigate();
-
-  const { campaignId, addedAccountsId } = state || {};
-  // const isSinglePromoView = !!campaignId && !!addedAccountsId;
-  // console.log(campaignId, addedAccountsId);
+  const context = usePromoLocation();
+  const { campaignId, addedAccountsId } = context.pin ?? {};
+  const location = useLocation(); const navigate = useNavigate();
+  const decisionSucceeded = (payload: { campaignId: string; addedAccountsId?: string; groupMembers?: string[] }, accepted: boolean) => {
+    setIsDecline(!accepted); setIsAccepted(accepted); setIsModalOpen(true);
+    // A confirmed decision removes this pin from New eligibility. Drop it only
+    // now, never at mount; otherwise its required pin GET would keep returning
+    // 404 after the successful action. The remaining New list stays available.
+    if (payload.campaignId === campaignId && (payload.addedAccountsId === addedAccountsId || payload.groupMembers?.includes(addedAccountsId ?? ''))) {
+      navigate({ pathname: location.pathname, search: '', hash: '' }, { replace: true, state: null });
+    }
+  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -41,29 +43,25 @@ export const NewPromos = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useDetailedPromos({ status: 'new', campaignId, addedAccountsId });
+    refetch,
+  } = useDetailedPromos({ status: 'new', campaignId, addedAccountsId, enabled: !context.invalid });
 
-  const { mutate: confirmPromo, isPending, variables } = useConfirmInfluencerPromo();
-
-  // TODO: if error dont clear state and show error message, if success clear state to prevent modal from showing again on page reload
-  useEffect(() => {
-    navigate(location.pathname, {
-      replace: true,
-      state: null,
-    });
-  }, [confirmPromo, location.pathname, navigate]);
+  const confirmation = useConfirmInfluencerPromo();
+  const { mutate: confirmPromo } = confirmation;
 
   const promos = data?.promos || [];
 
-  if (isFetchPending) {
+  if (context.invalid) return <Error message="Invalid promo link. Open a promo from the dashboard." />;
+
+  if (isFetchPending && !data && !isModalOpen) {
     return <Loader/>;
   }
 
-  if (fetchError) {
-    return <Error/>;
+  if (fetchError && !data && !isModalOpen) {
+    return <Error onRetry={() => { void refetch(); }} message={fetchError instanceof globalThis.Error ? fetchError.message : undefined} />;
   }
 
-  if (promos.length === 0) {
+  if (promos.length === 0 && !isModalOpen && !fetchError) {
     return (
         <EmptyPromosList
             title={'No new promotions right now'}
@@ -77,6 +75,7 @@ export const NewPromos = () => {
   return (
     <Container className="new-promos">
       <Breadcrumbs/>
+      {fetchError && <Error onRetry={() => { void refetch(); }} message={fetchError instanceof globalThis.Error ? fetchError.message : undefined} />}
       <div className="new-promos__quantity">
         <p className="new-promos__label">New promos</p>
         <span className="new-promos__number">{promos.length}</span>
@@ -86,35 +85,27 @@ export const NewPromos = () => {
         <PromosDetailsList
           data={promos}
           status="pending"
+          isActionBlocked={promo => confirmation.stateFor(promo).isPending}
+          mutationStateFor={confirmation.stateFor}
+          onBundleDecision={(promo, action) => { void confirmation.confirmBundle(promo, action, { onSuccess: () => decisionSucceeded({ campaignId: promo.campaignId, groupMembers: promo.accounts.map(account => account.addedAccountsId) }, action === 'accept') }); }}
+          bundleActionState={promo => ({ blocked: promo.accounts.some(account => confirmation.stateFor({ campaignId: promo.campaignId, addedAccountsId: account.addedAccountsId }).isPending), feedback: null })}
           onAccept={(payload) => {
             confirmPromo(payload, {
-              onSuccess: () => {
-                setIsDecline(false);
-                setIsAccepted(true);
-                setIsModalOpen(true);
-              },
+              onSuccess: () => decisionSucceeded(payload, true),
             });
           }}
           onDecline={(payload) => {
             confirmPromo(payload, {
-              onSuccess: () => {
-                setIsAccepted(false);
-                setIsDecline(true);
-                setIsModalOpen(true);
-              },
+              onSuccess: () => decisionSucceeded(payload, false),
             });
-          }}
-          mutationState={{
-            isPending,
-            variables,
           }}
         />
 
-        <ButtonMain
+        {hasNextPage && <ButtonMain
           label={isFetchingNextPage ? "Loading..." : "View more"}
-          onClick={() => fetchNextPage()}
-          isDisabled={!hasNextPage}
-        />
+          onClick={() => { if (!isFetchingNextPage && !fetchError) void fetchNextPage({ cancelRefetch: false }); }}
+          isDisabled={isFetchingNextPage || !!fetchError}
+        />}
       </div>
 
       {isModalOpen && (
@@ -135,8 +126,7 @@ export const NewPromos = () => {
 
                 {isDecline && (
                   <>
-                    <p className="new-promos__modal-subtitle">The campaign has been marked as declined and permanently
-                      removed from your profile.</p>
+                    <p className="new-promos__modal-subtitle">The promo request has been declined and removed from your active promos.</p>
                     <p className="new-promos__modal-text">If this was a mistake, please contact support.</p>
                   </>
                 )}

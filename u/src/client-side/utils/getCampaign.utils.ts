@@ -1,7 +1,7 @@
 import type { CampaignDetails, CampaignDraft } from "@/client-side/types/campaign";
 import type { ProposalSystem } from "@/client-side/types/proposal";
 type RegularCampaignData = CampaignDetails & { displayCurrency?: string };
-type DraftCampaignData = CampaignDraft;
+type DraftCampaignData = CampaignDraft & Pick<import("@/entities/client-side/campaign-draft/api/campaign-draft.dto").CampaignDraftDto, "selectedOffer"> & { displayCurrency?: string };
 type ProposalCampaignData = ProposalSystem;
 type CampaignPageModel = ReturnType<typeof toCampaignPageModelFromRegular> | ReturnType<typeof toCampaignPageModelFromDraft> | ReturnType<typeof toCampaignPageModelFromProposal>;
 
@@ -62,6 +62,8 @@ export function toCampaignPageModelFromDraft(
     kind: "draft" as const,
 
     draftId: api._id,
+    selectedOffer: api.selectedOffer ?? null,
+    displayCurrency: api.displayCurrency ?? "EUR",
     campaignName: api.campaignName,
     socialMedia: api.socialMedia,
 

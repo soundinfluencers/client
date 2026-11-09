@@ -3,14 +3,16 @@ import { useDashboardLayoutStore } from "@/pages/influencer/dashboard-layout/sto
 import { PromosGridCard } from './promos-grid-card/PromosGridCard';
 import { CardSkeleton } from "@/shared/ui/skeletons/card-skeleton.tsx";
 import { EmptyPromosList } from "@/pages/influencer/shared/components/empty-promo-list/EmptyPromoList.tsx";
-import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
+import type { DashboardPromo } from '@/pages/influencer/promos/types/promo-read.types';
+import { BundlePromo } from '@/pages/influencer/promos/components/bundle-promo/BundlePromo';
+import { dashboardKey, canNavigatePlacement } from '@/pages/influencer/promos/model/promo-read';
 // import { SmallLoader } from "@components/ui/small-loader/SmallLoader.tsx";
 import { EMPTY_MESSAGE } from "@/pages/influencer/dashboard-layout/data/emptyListMessage.ts";
 
 import './_promos-grid.scss';
 
 interface Props {
-  promos: IPromo[];
+  promos: DashboardPromo[];
   isInitialLoading?: boolean;
   isRefreshing?: boolean;
 }
@@ -44,11 +46,11 @@ export const PromosGrid = ({ promos, isInitialLoading, isRefreshing }: Props) =>
       <ul className={`promos-grid ${isRefreshing ? "promos-grid--dimmed" : ""}`}>
         {promos.map((promo) => (
           <li
-            key={promo.addedAccountsId + promo.campaignId}
+            key={dashboardKey(promo)}
             className="promos-grid__item"
-            onClick={() => handleNavigate(promo.confirmation, promo.closedStatus, promo.campaignId, promo.addedAccountsId)}
+            onClick={promo.type === 'standalone' && canNavigatePlacement(promo) ? () => handleNavigate(promo.confirmation, promo.closedStatus, promo.campaignId, promo.addedAccountsId) : undefined}
           >
-            <PromosGridCard promo={promo} />
+            {promo.type === 'bundle' ? <BundlePromo promo={promo} /> : <PromosGridCard promo={promo} />}
           </li>
         ))}
       </ul>

@@ -11,7 +11,7 @@ import type {
 import {
   CampaignDraftConflictError,
   getCampaignDraft,
-  updateCampaignDraft,
+  updateAiCampaignDraft,
 } from "@/entities/client-side/campaign-draft/api/campaign-draft.api.ts";
 import type {
   CampaignDraftDto,
@@ -154,7 +154,7 @@ export const AiCampaignDraftCard = ({
   const totalPrice = useMemo(
     () =>
       selectedAccounts.reduce(
-        (sum, account) => sum + Number(account.price ?? 0),
+        (sum, account) => sum + Number(account.prices?.EUR ?? account.price ?? 0),
         0,
       ),
     [selectedAccounts],
@@ -249,7 +249,7 @@ export const AiCampaignDraftCard = ({
         return true;
       }
       try {
-        const result = await updateCampaignDraft({
+        const result = await updateAiCampaignDraft({
           ...payload,
           revision: revisionRef.current,
         });
@@ -489,7 +489,7 @@ export const AiCampaignDraftCard = ({
           ? {
               ...account,
               selectedContent: content.selectedContent,
-              selectedCampaignContentItem: content.selectedContent,
+              selectedCampaignContentItem: { ...content.selectedContent, descriptionId: content.selectedContent.descriptionId ?? null },
             }
           : account;
       }),
@@ -799,7 +799,7 @@ export const AiCampaignDraftCard = ({
                   )}
                   {focusMode === "selection" && (
                     <td data-label="Price">
-                      {formatDraftCurrency(Number(account.price ?? 0))}
+                      {formatDraftCurrency(Number(account.prices?.EUR ?? account.price ?? 0))}
                     </td>
                   )}
                   {focusMode === "content" && (

@@ -1,0 +1,152 @@
+{
+  "statusCode": 200,
+  "message": "Success",
+  "data": {
+    "_id": "000000000000000000000001",
+    "step": "strategyTable",
+    "socialMedia": "instagram",
+    "displayCurrency": "USD",
+    "campaignName": "Example campaign",
+    "campaignContent": [
+      {
+        "_id": "000000000000000000000401",
+        "socialMedia": "instagram",
+        "socialMediaGroup": "main",
+        "mainLink": "https://example.invalid/media/video.mp4",
+        "descriptions": [
+          {
+            "_id": "000000000000000000000411",
+            "description": "Example description A"
+          },
+          {
+            "_id": "000000000000000000000412",
+            "description": "Example description B"
+          }
+        ],
+        "profileType": "community",
+        "taggedUser": "@example_artist",
+        "taggedLink": "https://example.invalid/release",
+        "additionalBrief": [
+          {
+            "_id": "000000000000000000000421",
+            "additionalBrief": "Example brief"
+          }
+        ]
+      }
+    ],
+    "addedAccounts": [
+      {
+        "influencerId": "000000000000000000000201",
+        "socialAccountId": "000000000000000000000101",
+        "selectionId": "000000000000000000000301",
+        "source": "offer",
+        "offerId": "000000000000000000000010",
+        "socialMedia": "instagram",
+        "username": "example_account_a",
+        "logoUrl": "https://example.invalid/avatar-a.png",
+        "profileType": "community",
+        "countries": [
+          {
+            "country": "Germany",
+            "percentage": 22.5
+          }
+        ],
+        "communityMusicGenres": [],
+        "communityThemeTopics": [],
+        "creatorMusicGenres": [],
+        "creatorContentFocus": [],
+        "followers": 10000,
+        "selectedCampaignContentItem": {
+          "campaignContentItemId": "000000000000000000000401",
+          "descriptionId": "000000000000000000000411",
+          "additionalBriefId": "000000000000000000000421"
+        },
+        "dateRequest": "ASAP",
+        "isAvailable": true,
+        "prices": {
+          "EUR": 60,
+          "USD": 65,
+          "GBP": 55
+        }
+      },
+      {
+        "influencerId": "000000000000000000000202",
+        "socialAccountId": "000000000000000000000102",
+        "selectionId": "000000000000000000000302",
+        "source": "offer",
+        "offerId": "000000000000000000000010",
+        "socialMedia": "instagram",
+        "username": "example_account_b",
+        "logoUrl": "https://example.invalid/avatar-b.png",
+        "profileType": "community",
+        "countries": [],
+        "communityMusicGenres": [],
+        "communityThemeTopics": [],
+        "creatorMusicGenres": [],
+        "creatorContentFocus": [],
+        "followers": 20000,
+        "selectedCampaignContentItem": {
+          "campaignContentItemId": "000000000000000000000401",
+          "descriptionId": "000000000000000000000412",
+          "additionalBriefId": "000000000000000000000421"
+        },
+        "dateRequest": "2026-11-01",
+        "isAvailable": true,
+        "prices": {
+          "EUR": 50,
+          "USD": 54,
+          "GBP": 46
+        }
+      },
+      {
+        "influencerId": "000000000000000000000203",
+        "socialAccountId": "000000000000000000000103",
+        "selectionId": "000000000000000000000303",
+        "source": "standalone",
+        "socialMedia": "instagram",
+        "username": "example_account_c",
+        "logoUrl": "https://example.invalid/avatar-c.png",
+        "profileType": "community",
+        "countries": [],
+        "communityMusicGenres": [],
+        "communityThemeTopics": [],
+        "creatorMusicGenres": [],
+        "creatorContentFocus": [],
+        "followers": 30000,
+        "selectedCampaignContentItem": {
+          "campaignContentItemId": "000000000000000000000401",
+          "descriptionId": "000000000000000000000411",
+          "additionalBriefId": null
+        },
+        "dateRequest": "ASAP",
+        "isAvailable": true,
+        "prices": {
+          "EUR": 25,
+          "USD": 27,
+          "GBP": 23
+        }
+      }
+    ],
+    "selectedOffer": {
+      "offerId": "000000000000000000000010",
+      "title": "Example Instagram package",
+      "socialMedia": "instagram",
+      "genre": "techno",
+      "selectedAccountIds": [
+        "000000000000000000000101",
+        "000000000000000000000102"
+      ],
+      "currentAccountIds": [
+        "000000000000000000000101",
+        "000000000000000000000102"
+      ],
+      "prices": {
+        "EUR": 90,
+        "USD": 97,
+        "GBP": 83
+      },
+      "isAvailable": true
+    },
+    "addedBundles": []
+  }
+}

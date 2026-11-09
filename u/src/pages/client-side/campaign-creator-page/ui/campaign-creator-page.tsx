@@ -1,13 +1,16 @@
 import React from "react";
-import { useSearchParams } from "react-router-dom";
+import { useProposalAddInfluencer } from "@/pages/client-side/campaign-post-content/model/use-proposal-add-influencer";
+import { useCampaignBuilderStore } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-builder.store";
+// import { priceForCurrency } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total";
+import { Link, useSearchParams } from "react-router-dom";
 
-import { Breadcrumbs, Container } from "@/components";
+import { Breadcrumbs, Container, Loader } from "@/components";
 import { ButtonMain, ButtonSecondary } from "@/shared/ui";
 import { Modal } from "@/shared/ui/modal-fix/Modal";
 import { NoData } from "@components/ui/no-array/no-data";
 import { DraftButton } from "@components/ui/draft-button/draft-button.tsx";
 
-import { postCampaignDraft } from "@/api/client/campaign/draft.api";
+import { postCampaignDraft } from "@/entities/client-side/campaign-draft/api/campaign-draft.api";
 
 import { useCampaignCreatorPage } from "../model/use-campaign-creator-page";
 import { useSaveCampaignCreatorDraft } from "../model/use-save-campaign-creator-draft";
@@ -38,8 +41,18 @@ import {
 } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/use-hydrate-draft-from-url.ts";
 
 export const CampaignCreatorPage: React.FC = () => {
+    const [params] = useSearchParams();
+    const add = useProposalAddInfluencer(params);
+    if (add.requested && add.error) return <Container><Breadcrumbs/><p role="alert">{add.error}</p><Link to="/client">Back to dashboard</Link></Container>;
+    if (add.requested && !add.ready) return <Loader/>;
+    return <><CampaignCreatorPageContent /></>;
+};
+const CampaignCreatorPageContent: React.FC = () => {
     useHydrateDraftFromUrl();
-
+    const offerAvailable = useCampaignBuilderStore((s) => s.selectedOfferIsAvailable);
+    // const offerName = useCampaignBuilderStore((s) => s.selectedOfferName);
+    // const offerPrices = useCampaignBuilderStore((s) => s.selectedOfferPrices);
+    // const selectOffer = useCampaignBuilderStore((s) => s.actions.selectOffer);
     const [searchParams] = useSearchParams();
 
     const isAddInfluencerMode =
@@ -55,6 +68,7 @@ export const CampaignCreatorPage: React.FC = () => {
         selectedOfferId,
         selectedPromoCardIds,
         totalPrice,
+        totalPriceReady,
         canProceed,
         handleProceed,
         isSaving,
@@ -87,6 +101,14 @@ export const CampaignCreatorPage: React.FC = () => {
 
     return (
         <Container className={styles.root}>
+            {/*{!isAddInfluencerMode && selectedOfferId && offerAvailable !== false && <p>*/}
+            {/*    Selected offer: {offerName || "Selected offer"} — {priceForCurrency(offerPrices, selectedCurrency.currency) === null ? `Price unavailable in ${selectedCurrency.currency}` : `${priceForCurrency(offerPrices, selectedCurrency.currency)}${currencySymbol}`}*/}
+            {/*</p>}*/}
+            {/*{!isAddInfluencerMode && <button type="button" onClick={() => void refetch()}>Refresh catalogue</button>}*/}
+            {/*{!isAddInfluencerMode && offerAvailable === false && <div role="alert">*/}
+            {/*    <p>{offerName || "Saved offer"} is unavailable or has changed. Review the catalogue and select another offer, or explicitly remove this selection.</p>*/}
+            {/*    <button type="button" onClick={() => selectOffer({ offerId: null })}>Remove unavailable offer</button>*/}
+            {/*</div>}*/}
             <div className={styles.navmenu}>
                 <Breadcrumbs />
 
@@ -137,8 +159,7 @@ export const CampaignCreatorPage: React.FC = () => {
                     <p>
                         Total:{" "}
                         <span>
-                            {totalPrice}
-                            {currencySymbol}
+                            {offerAvailable === false ? "Review unavailable offer" : !totalPriceReady ? "Prices unavailable for the selected currency" : `${totalPrice}${currencySymbol}`}
                         </span>
                     </p>
                 </div>
@@ -159,8 +180,10 @@ export const CampaignCreatorPage: React.FC = () => {
                 selectedOfferId={selectedOfferId}
                 selectedPromoCardIds={selectedPromoCardIds}
                 totalPrice={totalPrice}
+                totalPriceReady={totalPriceReady}
                 canProceed={canProceed}
-                onProceed={() => void handleProceed()}
+                offerAvailable={isAddInfluencerMode ? undefined : offerAvailable}
+                onProceed={handleProceed}
             />
 
             {!isAddInfluencerMode && !isAiAddPagesMode && draft.isOpen && (
@@ -184,8 +207,9 @@ export const CampaignCreatorPage: React.FC = () => {
 
                             <ButtonMain
                                 className={styles.btn}
-                                text="Save"
+                                text={draft.isSaving ? "Saving…" : "Save"}
                                 onClick={draft.save}
+                                isDisabled={draft.isSaving}
                             />
                         </div>
                     </div>

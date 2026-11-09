@@ -2,7 +2,6 @@ import { create } from "zustand";
 import {
   getCampaign,
   getProposalCampaign,
-  postAddProposalOption,
 } from "@/api/client/campaign/campaign.api";
 import { getCampaignDraft } from "@/api/client/campaign/draft.api";
 
@@ -12,125 +11,103 @@ import {
   toCampaignPageModelFromRegular,
 } from "@/client-side/utils/getCampaign.utils";
 
+// A single data slot: only its latest request may publish data/loading/error.
+let latestRequest = 0;
+const deletedProposals = new Set<string>();
+
 export const useFetchCampaign = create<any>((set, get) => ({
+  isProposalDeleted: (id: string) => deletedProposals.has(id),
+  forgetProposal: (id: string) => {
+    deletedProposals.add(id);
+    if (get().requestKey?.startsWith(`proposal:${id}:`)) {
+      set({ requestVersion: ++latestRequest, data: null, dataKey: null, requestKey: null, isLoading: false, error: null });
+    }
+  },
+  requestVersion: 0,
   data: null,
+  dataKey: null,
+  requestKey: null,
   isLoading: false,
+  error: null,
 
   setDraft: async (draftId: string) => {
-    set({ data: null, isLoading: true });
+    const requestId = ++latestRequest;
+    const requestKey = `draft:${draftId}`;
+    set({
+      data: get().dataKey === requestKey ? get().data : null,
+      isLoading: true, error: null, requestKey, requestVersion: requestId,
+    });
 
     try {
       const data = await getCampaignDraft(draftId);
+      if (requestId !== latestRequest) return null;
       const next = toCampaignPageModelFromDraft(data);
 
-      set({ data: next });
+      set({ data: next, dataKey: requestKey });
       return next;
     } catch (error) {
+      if (requestId !== latestRequest) return null;
       console.log(error);
-      set({ data: null });
+      set({ error });
       return null;
     } finally {
-      set({ isLoading: false });
+      if (requestId === latestRequest) set({ isLoading: false });
     }
   },
 
-  setProposalOption: async (campaignId: string, optionIndex: number) => {
-    set({ isLoading: true });
+  setProposalOption: async (campaignId: string, optionIndex: number, isOwnerCurrent = () => true) => {
+    if (deletedProposals.has(campaignId)) return null;
+    const requestId = ++latestRequest;
+    const requestKey = `proposal:${campaignId}:${optionIndex}`;
+    set({
+      data: get().dataKey === requestKey ? get().data : null,
+      isLoading: true, error: null, requestKey, requestVersion: requestId,
+    });
 
     try {
       const { data } = await getProposalCampaign(campaignId, optionIndex);
+      if (requestId !== latestRequest || deletedProposals.has(campaignId) || !isOwnerCurrent()) return null;
       const payload = (data as any).data ?? data;
+      if (payload?.campaignId !== campaignId || payload?.selectedOption?.optionIndex !== optionIndex) throw new Error("Proposal response identity does not match the requested option.");
       const next = toCampaignPageModelFromProposal(payload);
 
-      set({ data: next });
+      set({ data: next, dataKey: requestKey });
       return next;
     } catch (error) {
+      if (requestId !== latestRequest || deletedProposals.has(campaignId) || !isOwnerCurrent()) return null;
       console.log(error);
+      set({ error });
       return null;
     } finally {
-      set({ isLoading: false });
+      if (requestId === latestRequest) set({ isLoading: false });
     }
   },
 
   setCampaign: async (campaignId: string) => {
-    set({ data: null, isLoading: true });
+    const requestId = ++latestRequest;
+    const requestKey = `regular:${campaignId}`;
+    set({
+      data: get().dataKey === requestKey ? get().data : null,
+      isLoading: true, error: null, requestKey, requestVersion: requestId,
+    });
 
     try {
       const { data: res } = await getCampaign(campaignId);
+      if (requestId !== latestRequest) return null;
       const payload = (res as any).data ?? res;
 
       const next = toCampaignPageModelFromRegular(payload);
 
-      set({ data: next });
+      set({ data: next, dataKey: requestKey });
       return next;
     } catch (error) {
+      if (requestId !== latestRequest) return null;
       console.log(error);
-      set({ data: null });
+      set({ error });
       return null;
     } finally {
-      set({ isLoading: false });
+      if (requestId === latestRequest) set({ isLoading: false });
     }
   },
 
-  addProposalOption: async (campaignId: string, inheritFromOption0: boolean) => {
-    const data = get().data;
-    if (!data || data.kind !== "proposal") return null;
-
-    const base = data;
-
-    const body = inheritFromOption0
-        ? {
-          campaignName: base.campaignName,
-          addedAccounts: base.selectedOption.addedAccounts.map((a: any) => ({
-            socialAccountId: a.socialAccountId,
-            influencerId: a.influencerId,
-            socialMedia: a.socialMedia,
-            username: a.username,
-            selectedCampaignContentItem: a.selectedContent
-                ? {
-                  campaignContentItemId: a.selectedContent.campaignContentItemId,
-                  descriptionId: a.selectedContent.descriptionId,
-                  additionalBriefId: a.selectedContent.additionalBriefId,
-                }
-                : undefined,
-            dateRequest: a.dateRequest,
-          })),
-          campaignContent: base.selectedOption.campaignContent.map((c: any) => ({
-            _id: c._id,
-            socialMedia: c.socialMedia,
-            socialMediaGroup: c.socialMediaGroup,
-            mainLink: c.mainLink,
-            descriptions: (c.descriptions ?? []).map((d: any) => ({
-              _id: d._id,
-              description: d.description,
-            })),
-            taggedUser: c.taggedUser,
-            taggedLink: c.taggedLink,
-            additionalBrief: c.additionalBrief,
-          })),
-          socialMedia: base.socialMedia,
-          campaignPrice: base?.price ?? 0,
-          paymentType: "",
-        }
-        : {
-          campaignName: base.campaignName,
-          addedAccounts: [],
-          campaignContent: [],
-          socialMedia: base.socialMedia,
-          campaignPrice: base?.price ?? 0,
-          paymentType: "",
-        };
-
-    set({ isLoading: true });
-
-    try {
-      await postAddProposalOption(campaignId, body);
-      return true;
-    } catch (error) {
-      console.log(error);
-      return null;
-    } finally {
-      set({ isLoading: false });
-    }
-  },
 }));

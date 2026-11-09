@@ -31,7 +31,9 @@ export const startGuidedCampaignDraft = async (): Promise<{
     return res.data.data;
 };
 
-export const updateCampaignDraft = async (payload: Record<string, unknown>) => {
+export const updateCampaignDraft = postCampaignDraft;
+
+export const updateAiCampaignDraft = async (payload: Record<string, unknown>) => {
     try {
         const res = await $api.post("/campaigns/draft", payload);
         return res.data.data as { revision: number };

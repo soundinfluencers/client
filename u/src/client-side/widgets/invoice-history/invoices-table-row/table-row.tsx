@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import React from "react";
 import { EditInvoiceModal } from "./pop-up.tsx";
 import {CircleLoader} from "@/features/auth/sign-up-client/ui/circle-loader";
+import { formatCurrency } from "@/shared/functions/formatCurrency.ts";
 
 interface Props {
   item: any;
@@ -53,7 +54,8 @@ export const TableRow = ({ item, onReload }: Props) => {
           <td className="custom-table-row__cell">{item?.creationDate}</td>
 
           <td className="custom-table-row__cell">
-            {item?.amount} {item?.amount ? "€" : ""}
+            {formatCurrency(item.amount, item.currency)}
+            {/*{item?.amount} {item?.amount ? "€" : ""}*/}
           </td>
 
           <td className="custom-table-row__cell custom-table-row__cell--campaign">

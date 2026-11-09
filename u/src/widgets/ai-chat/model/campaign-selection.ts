@@ -1,3 +1,4 @@
+import { ObjectId } from "bson";
 import type {
   AgentSearchCandidate,
   AgentSearchOutcome,
@@ -49,6 +50,9 @@ export const includeRecommendedPages = (
   for (const page of pages) {
     if (byId.has(page.accountId)) continue;
     byId.set(page.accountId, {
+      selectionId: new ObjectId().toHexString(),
+      source: "standalone",
+      prices: { EUR: page.priceEUR },
       influencerId: page.influencerId,
       socialAccountId: page.accountId,
       socialMedia: page.socialMedia,
@@ -75,7 +79,7 @@ export const getSelectionTotals = (
   return {
     count: selected.length,
     priceEUR: selected.reduce(
-      (sum, account) => sum + Number(account.price ?? 0),
+      (sum, account) => sum + Number(account.prices?.EUR ?? account.price ?? 0),
       0,
     ),
     followers: selected.reduce(
@@ -111,7 +115,7 @@ export const getConvertedSelectionTotal = (
     )
     .reduce((sum, account) => {
       const candidate = candidates.get(String(account.socialAccountId));
-      const priceEUR = Number(account.price ?? 0);
+      const priceEUR = Number(account.prices?.EUR ?? account.price ?? 0);
       return (
         sum +
         (candidate?.currency === currency && candidate.priceEUR === priceEUR

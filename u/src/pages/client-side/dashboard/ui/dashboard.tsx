@@ -27,6 +27,8 @@ export const DashboardPage = () => {
         loadMore,
     } = useDashboardCampaigns();
 
+  console.log("DASHBOARD");
+
     if (isError) {
         return (
             <Container className={styles.root}>

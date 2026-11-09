@@ -8,12 +8,15 @@ import card from "./assets/image 20 (1).png";
 import paypal from "./assets//image 20 (2).png";
 import { getInvoiceById, patchInvoiceById } from "@/api/client/invoice/invoice.api";
 import { toast } from "react-toastify";
-import "./_table-row.scss";
-import { formatFollowers } from "@/utils/functions/formatFollowers.ts";
+import './_table-row.scss'
+import {formatFollowers} from "@/utils/functions/formatFollowers.ts";
+import { type DisplayCurrency, formatCurrency } from "@/shared/functions/formatCurrency.ts";
+
 type InvoiceDetails = {
     invoiceId: string;
     creationDate: string;
     amount: string;
+    currency: DisplayCurrency;
     fullName: string;
     country: string;
     address: string;
@@ -196,7 +199,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                 project: invoice.campaignName || "—",
                 poNumber: form.poNumber || "—",
                 reach: invoice.campaignFollowers || "—",
-                total: invoice.amount ? `${invoice.amount}€` : "—",
+                total: invoice.amount ? `${formatCurrency(invoice.amount, invoice.currency)}` : "—",
             },
         ];
     }, [invoice, form.company, form.poNumber]);
@@ -294,7 +297,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                    </div>
                    <div className='edit-invoicePopUp__balance-total'>
                        <h4>Total Due:</h4>
-                       <p>{invoice?.amount ? `${invoice.amount}€` : "—"}</p>
+                       <p>{invoice?.amount ? `${formatCurrency(invoice.amount, invoice.currency)}` : "—"}</p>
                    </div>
                </div>
                <div className="invoice-grid">
@@ -326,7 +329,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                    <div className='popup-edit-row'></div>
                    <div className="invoice-total-edit">
                        <span>Total:</span>
-                       <span>{invoice?.amount ? `${invoice.amount}€` : "—"}</span>
+                       <span>{invoice?.amount ? `${formatCurrency(invoice.amount, invoice.currency)}` : "—"}</span>
                    </div>
                </div>
                <div className='edit-invoicePopUp-payment'>

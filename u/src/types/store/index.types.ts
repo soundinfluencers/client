@@ -280,7 +280,11 @@ export interface CampaignAddedAccount {
   updatedAt: ISODateString;
 
   /** В JSON есть selectedCampaignContentItem (snapshot) */
-  selectedCampaignContentItem?: SelectedCampaignContentItemSnapshot;
+  selectedCampaignContentItem?: SelectedCampaignContentItemSnapshot | {
+    campaignContentItemId: string;
+    descriptionId: string;
+    additionalBriefId?: string | null;
+  };
 }
 
 // -------------------------

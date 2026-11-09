@@ -623,7 +623,27 @@
   text-align: left;
   max-width: 150px !important;
   flex: 1 1 auto;
-}.edit-desc{
+}
+
+.tableBase__tdpage__td {
+  .tooltip-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .username {
+    min-width: 0;
+    max-width: 100% !important;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
+.edit-desc{
    max-width: 140px !important;
    white-space: nowrap;
    overflow: hidden;
@@ -943,4 +963,23 @@
 }
 .table-campaign-page__tr.row--delete {
   background: #EBF5FE;
+}
+
+// Share country chips retain their design while allowing long names to wrap.
+.tableBase td.td-chips .chips.country-chips {
+  max-height: none;
+  overflow: visible;
+  li {
+    height: auto;
+    min-height: 22px;
+    min-width: 0;
+    box-sizing: border-box;
+    white-space: normal;
+    overflow: visible;
+    gap: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .country-chips__name { min-width: 0; overflow-wrap: anywhere; }
+  .country-chips__percentage { flex: 0 0 auto; white-space: nowrap; }
 }

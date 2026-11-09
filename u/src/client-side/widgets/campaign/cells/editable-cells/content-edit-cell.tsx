@@ -1,4 +1,5 @@
 import React from "react";
+import { toast } from "react-toastify";
 import { Dropdown } from "@/shared/ui/dropdowns/dropdowns-table";
 import { Modal } from "@/shared/ui/modal-fix/Modal";
 import { useProposalAccountsStore } from "@/client-side/store";
@@ -27,10 +28,12 @@ type Props = {
   socialMedia?: string;
   media0: any;
   group: string;
+  referenceError?: string;
 };
 
 export const ContentCellEdit = React.memo(function ContentCellEdit({
   optionIndex,
+  accountKey,
   selectedItem,
 
   isOpen,
@@ -44,6 +47,7 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
 
   socialMedia,
   media0,
+  referenceError,
 }: Props) {
   const addContentForSocial = useProposalAccountsStore(
     (s) => s.addContentForSocial,
@@ -117,9 +121,8 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
     const sm = String(socialMedia ?? "").toLowerCase();
     if (!sm) return;
 
-    addContentForSocial(optionIndex, sm, { mainLink: link }, selectedItem?._id);
-
-    setSelectedContent(platformItems.length);
+    try { addContentForSocial(optionIndex, sm, { mainLink: link }, selectedItem?._id, accountKey); }
+    catch (error) { toast.error(error instanceof Error ? error.message : "Unable to create content."); return; }
 
     closeAddModal();
     onClose();
@@ -130,6 +133,7 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
     selectedItem?._id,
     addContentForSocial,
     platformItems.length,
+    accountKey,
     setSelectedContent,
     setSelectedPd,
     closeAddModal,
@@ -201,10 +205,10 @@ export const ContentCellEdit = React.memo(function ContentCellEdit({
               <span onClick={onClickHeaderEye} className="eye">
                 <img src={eye} alt="" />
               </span>
-              <p title={selectedLink}>
-                {selectedLink
+              <p title={selectedLink} role={referenceError ? "alert" : undefined}>
+                {referenceError ?? (selectedLink
                   ? `${groupTitle(group)} ${selectedContent + 1}`
-                  : "—"}
+                  : "—")}
               </p>
             </div>
           }>

@@ -1,3 +1,4 @@
+import { canUsePlacementAction, hasDisplayValue } from '../../../model/promo-read';
 import React from "react";
 import { DetailsRow } from './DetailsRow';
 import { ButtonMain, ButtonSecondary } from '@components/ui/buttons-fix/ButtonFix.tsx';
@@ -16,6 +17,7 @@ interface Props {
   status: TPromoStatus;
   index: number;
   isPending?: boolean;
+  actionsDisabled?: boolean;
   pendingAction?: TConfirmationType;
   onAccept?: () => void;
   onDecline?: () => void;
@@ -30,6 +32,7 @@ export const PromosDetailsListCard: React.FC<Props> = ({
   status,
   index,
   isPending,
+  actionsDisabled,
   pendingAction,
   onAccept,
   onDecline,
@@ -41,6 +44,7 @@ export const PromosDetailsListCard: React.FC<Props> = ({
   // const { user } = useUser();
   const fields = getPromoFields(promo, status);
 
+  const canAct = canUsePlacementAction(promo) && !actionsDisabled;
   const isNew = status === 'pending';
   const isDistributing = status === 'distributing';
   const isCompleted = status === 'completed';
@@ -61,7 +65,7 @@ export const PromosDetailsListCard: React.FC<Props> = ({
       <div className="promos-details-list-card__body">
         <span className="promos-details-list-card__body-header">
           <img
-            src={promo.logoUrl?.trim() || '/promo-preview.png'}
+            src={(typeof promo.logoUrl === 'string' ? promo.logoUrl.trim() : '') || '/promo-preview.png'}
             alt={promo.username}
             onError={(e) => {
               const img = e.currentTarget;
@@ -73,14 +77,14 @@ export const PromosDetailsListCard: React.FC<Props> = ({
           <span>{promo.campaignName}</span>
         </span>
         <div className="promos-details-list-card__body-details">
-          {fields?.map(field => (
+          {fields?.filter(field => hasDisplayValue((promo as unknown as Record<string, unknown>)[field.key]) || field.key === 'reward').map(field => (
               <DetailsRow
                 key={`${field.key}-${field.label}`}
                 label={field.label}
                 value={
                   field.format
-                    ? field.format((promo)[field.key] as unknown as number, promo)
-                    : (promo)[field.key]?.toString() ?? ''
+                    ? field.format((promo as unknown as Record<string, unknown>)[field.key], promo)
+                    : (promo as unknown as Record<string, unknown>)[field.key]?.toString() ?? ''
                 }
                 copyable={field.copyable}
                 linkable={field.linkable}
@@ -90,18 +94,19 @@ export const PromosDetailsListCard: React.FC<Props> = ({
         </div>
       </div>
 
+      {promo.isPaused === true && <p role="status">Campaign is paused</p>}
       {!isCompleted && (
         <div className="promos-details-list-card__actions">
           {isNew && (
             <>
               <ButtonSecondary
                 label={isDeclineLoading ? 'Processing...' : 'Decline'}
-                isDisabled={isPending}
+                isDisabled={isPending || !canAct}
                 onClick={onDecline}
               />
               <ButtonMain
                 label={isAcceptLoading ? 'Processing...' : 'Accept promo'}
-                isDisabled={isPending}
+                isDisabled={isPending || !canAct}
                 onClick={onAccept}
               />
             </>
@@ -110,6 +115,7 @@ export const PromosDetailsListCard: React.FC<Props> = ({
           {isDistributing && (
             <ButtonMain
               label="Submit results & get paid"
+              isDisabled={!canAct}
               onClick={() => {
                 if (onSubmitResults) {
                   onSubmitResults();

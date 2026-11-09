@@ -1,25 +1,38 @@
+import type { DisplayCurrency, DraftSelectedOffer, OfferPrices } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/selected-offer";
+
 export type DraftAddedAccountDto = {
+    selectionId: string;
+    source: "offer" | "standalone" | "bundle";
+    offerId?: string;
+    bundleId?: string;
     influencerId: string;
     socialAccountId: string;
     socialMedia: string;
     username: string;
     logoUrl?: string;
     followers?: number;
+    countries?: Array<{ country: string; percentage?: number }>;
+    communityMusicGenres?: string[];
+    communityThemeTopics?: string[];
+    creatorMusicGenres?: string[];
+    creatorContentFocus?: string[];
+    prices: Partial<OfferPrices>;
     price?: number;
+    isAvailable?: boolean;
+    unavailableReason?: string;
     dateRequest?: string;
     isSelected?: boolean;
-    isAvailable?: boolean;
-    profileType:  "creator" | "community";
+    profileType?: "creator" | "community";
     selectedCampaignContentItem?: {
         campaignContentItemId: string;
-        descriptionId?: string;
-        additionalBriefId?: string;
-    };
+        descriptionId: string | null;
+        additionalBriefId?: string | null;
+    } | null;
     selectedContent?: {
         campaignContentItemId: string;
-        descriptionId?: string;
-        additionalBriefId?: string;
-    };
+        descriptionId?: string | null;
+        additionalBriefId?: string | null;
+    } | null;
 };
 
 export type PromoCreativeSource = "upload" | "photo" | "generated";
@@ -67,11 +80,13 @@ export type CampaignStrategyDto = {
 };
 
 export type CampaignDraftDto = {
+    selectedOffer?: DraftSelectedOffer | null;
     _id: string;
     revision?: number;
     step: "addAccounts" | "addContent" | "strategyTable";
     socialMedia: string;
-    campaignName: string;
+    campaignName?: string | null;
+    displayCurrency: DisplayCurrency;
     brief?: CampaignBriefDto;
     strategy?: CampaignStrategyDto;
     campaignContent?: Array<{
@@ -101,4 +116,14 @@ export type CampaignDraftDto = {
     source?: string;
     noContentAvailable?: boolean;
     promoCreative?: PromoCreativeDto;
+    addedBundles?: Array<{
+        bundleId: string;
+        influencerId?: string;
+        selectedAccountIds: string[];
+        currentAccountIds: string[];
+        prices: Partial<OfferPrices>;
+        originalPrices: Partial<OfferPrices>;
+        isAvailable: boolean;
+        unavailableReason?: string;
+    }>;
 };

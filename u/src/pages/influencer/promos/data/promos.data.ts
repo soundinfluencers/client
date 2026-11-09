@@ -1,3 +1,4 @@
+import { formatPromoReward } from '../model/promo-read';
 import type {
   fieldsConfig,
   IPromoDetailsModel,
@@ -349,7 +350,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "reward",
       label: "Reward",
-      format: (v: number) => `${v}€`,
+      format: formatPromoReward,
     },
   ],
   tiktok: [
@@ -363,7 +364,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "reward",
       label: "Reward",
-      format: (v: number) => `${v}€`,
+      format: formatPromoReward,
     },
   ],
   youtube: [
@@ -377,7 +378,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "reward",
       label: "Reward",
-      format: (v: number) => `${v}€`,
+      format: formatPromoReward,
     },
   ],
   facebook: [
@@ -391,7 +392,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "reward",
       label: "Reward",
-      format: (v: number) => `${v}€`,
+      format: formatPromoReward,
     },
   ],
   spotify: [
@@ -405,7 +406,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "reward",
       label: "Reward",
-      format: (v: number) => `${v}€`,
+      format: formatPromoReward,
     },
   ],
   press: [
@@ -419,7 +420,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "reward",
       label: "Reward",
-      format: (v: number) => `${v}€`,
+      format: formatPromoReward,
     },
   ],
   soundcloud: [
@@ -433,7 +434,7 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "reward",
       label: "Reward",
-      format: (v: number) => `${v}€`,
+      format: formatPromoReward,
     },
   ],
   multipromo: [
@@ -446,17 +447,16 @@ const COMPLETED_FIELDS: fieldsConfig = {
     {
       key: "reward",
       label: "Reward",
-      format: (v: number) => `${v}€`,
+      format: formatPromoReward,
     },
   ],
 };
 
-export const getPromoFields = (
-  promo: IPromoDetailsModel,
+export const getPromoFieldsBySocialMedia = (
+  socialMedia: string | undefined,
   status: TPromoStatus,
 ): TDetailsField[] => {
-  if (status === "completed") return COMPLETED_FIELDS[promo.accountSocialMedia];
-  if (status === "distributing") return DISTRIBUTING_FIELDS[promo.accountSocialMedia];
-
-  return NEW_PROMOS_FIELDS[promo.accountSocialMedia];
+  const config = status === 'completed' ? COMPLETED_FIELDS : status === 'distributing' ? DISTRIBUTING_FIELDS : NEW_PROMOS_FIELDS;
+  return typeof socialMedia === 'string' && Object.hasOwn(config, socialMedia) ? config[socialMedia as keyof fieldsConfig] : [];
 };
+export const getPromoFields = (promo: IPromoDetailsModel, status: TPromoStatus) => getPromoFieldsBySocialMedia(promo.accountSocialMedia, status);

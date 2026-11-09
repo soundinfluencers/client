@@ -97,8 +97,9 @@ export const useCampaignContentData = ({
                     : (campaign?.campaignContent ?? EMPTY_ARRAY);
 
             const content = applyPatches(baseContent, patches);
+            // Insights show published server results; Strategy keeps the editing draft.
             const accounts =
-                regularAccounts.length > 0
+                flag && regularAccounts.length > 0
                     ? regularAccounts
                     : (campaign?.addedAccounts ?? EMPTY_ARRAY);
 

@@ -1,3 +1,4 @@
+import { ObjectId } from "bson";
 import React from "react";
 
 import { searchPromoAccounts } from "@/entities/client-side/campaign-creator-page/campaign-promo-account/api/promo-account.api.ts";
@@ -17,6 +18,9 @@ type Props = {
 };
 
 const mapResultToDraftAccount = (account: PromoAccount): DraftAddedAccountDto => ({
+    selectionId: new ObjectId().toHexString(),
+    source: "standalone",
+    prices: account.prices ?? {},
     influencerId: account.influencerId,
     socialAccountId: account.accountId,
     socialMedia: account.socialMedia,

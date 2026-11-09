@@ -1,3 +1,4 @@
+import { formatPromoReward } from '@/pages/influencer/promos/model/promo-read';
 import { getSocialMediaIcon } from '@/constants/social-medias.ts';
 import type { IPromo } from '@/pages/influencer/promos/types/promos.types';
 import {
@@ -17,16 +18,16 @@ export const PromosGridCard = ({ promo }: Props) => {
       <div className='promos-grid-card__header'>
         <div className='promos-grid-card__header-status'>
           <img
-            src={getSocialMediaIcon(promo.socialMedia) || ''}
+            src={getSocialMediaIcon(promo.socialMedia as any) || ''}
             alt={promo.socialMedia}
             className='promos-grid-card__header-icon'
           />
           <p className='promos-grid-card__header-status-text'>{normalizePromoStatus(promo.confirmation, promo.closedStatus)}</p>
           <p className='promos-grid-card__header-status-date'>{promo.createdAt}</p>
         </div>
-        {promo.reward > 0 && <p className='promos-grid-card__header-status-reward'>{promo.reward}€</p>}
+        <p className='promos-grid-card__header-status-reward'>{formatPromoReward(promo.reward)}</p>
       </div>
-      <p className='promos-grid-card__campaign-name'>{promo.campaignName.length > 40 ? (promo.campaignName.slice(0, 40).trim().concat('...')) : promo.campaignName}</p>
+      <p className='promos-grid-card__campaign-name'>{(promo.campaignName?.length ?? 0) > 40 ? (promo.campaignName!.slice(0, 40).trim().concat('...')) : (promo.campaignName ?? '—')}</p>
     </article>
   );
 };

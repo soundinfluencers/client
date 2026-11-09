@@ -1,18 +1,26 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
     useDraftCampaignStore,
     useFetchCampaign,
     useProposalAccountsStore,
     useStrategyCampaignStore,
 } from "@/client-side/store";
-import {
-    getCurrentDataId,
-    parseLastCampaignSession,
-} from "./campaign-page.utils";
+import { parseLastCampaignSession } from "./campaign-page.utils";
 
-export const useCampaignPageBootstrap = (data: any) => {
+export const useCampaignPageBootstrap = (campaignData: any) => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const session = React.useMemo(parseLastCampaignSession, [location.key]);
+    const sessionId = session?.id;
+    const sessionKind = session?.status === "draft" || session?.status === "proposal"
+        ? session.status
+        : "regular";
+    const sessionOption = sessionKind === "proposal" ? session?.optionIndex ?? 0 : 0;
+    const data = !(sessionKind === "proposal" && useFetchCampaign.getState().isProposalDeleted?.(sessionId)) && campaignData?.kind === sessionKind &&
+        String(sessionKind === "draft" ? campaignData.draftId : campaignData.campaignId) === sessionId
+        ? campaignData
+        : null;
 
     const initOption = useProposalAccountsStore((s) => s.initOption);
     const initCampaign = useStrategyCampaignStore((s) => s.initCampaign);
@@ -27,34 +35,23 @@ export const useCampaignPageBootstrap = (data: any) => {
     const clearProposalStore = useProposalAccountsStore((s) => s.clearAll);
 
     React.useEffect(() => {
-        const session = parseLastCampaignSession();
-
-        if (!session) {
-            navigate("/client/dashboard");
+        if (!sessionId || (sessionKind === "proposal" && useFetchCampaign.getState().isProposalDeleted?.(sessionId))) {
+            navigate("/client", { replace: true });
             return;
         }
 
-        const currentId = getCurrentDataId(data);
-
-        if (!data || currentId !== session.id) {
-            if (session.status === "draft") {
-                useFetchCampaign.getState().setDraft(session.id);
-                return;
-            }
-
-            if (session.status === "proposal") {
-                useFetchCampaign
-                    .getState()
-                    .setProposalOption(session.id, session.optionIndex ?? 0);
-                return;
-            }
-
-            useFetchCampaign.getState().setCampaign(session.id);
+        // Revalidate on entry; server data changes must not trigger another GET.
+        if (sessionKind === "draft") {
+            useFetchCampaign.getState().setDraft(sessionId);
+        } else if (sessionKind === "proposal") {
+            useFetchCampaign.getState().setProposalOption(sessionId, sessionOption);
+        } else {
+            useFetchCampaign.getState().setCampaign(sessionId);
         }
-    }, [data, navigate]);
+    }, [location.key, sessionId, sessionKind, sessionOption, navigate]);
 
     React.useEffect(() => {
-        if (data?.kind !== "proposal") return;
+        if (data?.kind !== "proposal" || useFetchCampaign.getState().isProposalDeleted?.(data.campaignId)) return;
 
         const nextCampaignId = String(data.campaignId ?? "");
         if (!nextCampaignId) return;
@@ -78,7 +75,7 @@ export const useCampaignPageBootstrap = (data: any) => {
     ]);
 
     React.useEffect(() => {
-        if (data?.kind !== "proposal") return;
+        if (data?.kind !== "proposal" || useFetchCampaign.getState().isProposalDeleted?.(data.campaignId)) return;
 
         const idx = data.selectedOption?.optionIndex ?? 0;
         const state = useProposalAccountsStore.getState();
@@ -86,12 +83,13 @@ export const useCampaignPageBootstrap = (data: any) => {
         const hasLocalAccounts = (state.accountsByOption?.[idx] ?? []).length > 0;
         const hasLocalContent = (state.contentByOption?.[idx] ?? []).length > 0;
 
-        if (hasLocalAccounts || hasLocalContent) return;
+        if ((hasLocalAccounts || hasLocalContent) && !state.optionSnapshotsByIndex) return;
 
         initOption(
             idx,
             data.selectedOption?.addedAccounts ?? [],
             data.selectedOption?.campaignContent ?? [],
+            { snapshot: data.selectedOption },
         );
     }, [data, initOption]);
 
@@ -111,7 +109,9 @@ export const useCampaignPageBootstrap = (data: any) => {
                 data.draftId,
                 data.addedAccounts ?? [],
                 data.campaignContent ?? [],
+                { campaignName: data.campaignName, selectedOffer: data.selectedOffer ?? null, displayCurrency: data.displayCurrency },
             );
         }
     }, [data, initDraft]);
+    return data;
 };

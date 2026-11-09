@@ -42,10 +42,17 @@ export const setupInterceptors = (
       console.log("url:", error.config?.url, "status:", error.response?.status);
       const originalRequest = error.config as (InternalAxiosRequestConfig & {
         _retry?: boolean;
+        isCurrentRequest?: () => boolean;
+        silentReadError?: boolean;
       }) | undefined;
 
+      if (originalRequest?.isCurrentRequest && !originalRequest.isCurrentRequest()) {
+        return Promise.reject(error);
+      }
+
+      const silentRead = originalRequest?.silentReadError === true;
       if (!error.response) {
-        if (!handlesErrorInline(originalRequest?.url)) handleApiError(error);
+        if (!silentRead && !handlesErrorInline(originalRequest?.url)) handleApiError(error);
         return Promise.reject(error);
       }
 
@@ -57,18 +64,19 @@ export const setupInterceptors = (
         error.response.status === 401 && !originalRequest?._retry;
 
       if (!shouldTryRefresh || !originalRequest) {
-        if (!handlesErrorInline(originalRequest?.url)) handleApiError(error);
+        if (!silentRead && !handlesErrorInline(originalRequest?.url)) handleApiError(error);
         return Promise.reject(error);
       }
 
       originalRequest._retry = true;
 
       try {
-        const token = await refreshAccessToken(setAccessToken);
+        const token = await refreshAccessToken(token => { if (!originalRequest?.isCurrentRequest || originalRequest.isCurrentRequest()) setAccessToken(token); });
+        if (originalRequest?.isCurrentRequest && !originalRequest.isCurrentRequest()) return Promise.reject(error);
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return $api(originalRequest);
       } catch (err) {
-        logout();
+        if (!originalRequest?.isCurrentRequest || originalRequest.isCurrentRequest()) logout();
         return Promise.reject(err);
       }
     },

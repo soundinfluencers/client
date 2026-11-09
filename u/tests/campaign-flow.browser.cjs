@@ -3,11 +3,11 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { createRequire } = require('node:module');
-const serverRequire = createRequire(path.resolve(__dirname, '../../../SoundInfluencers-server/package.json'));
+const serverRequire = createRequire(path.resolve(__dirname, process.env.CAMPAIGN_TEST_SERVER_PACKAGE || '../../../server/package.json'));
 const puppeteer = serverRequire('puppeteer');
 const base = process.env.CAMPAIGN_TEST_URL || 'http://127.0.0.1:4186';
 const draftId = '650000000000000000000001';
-const fixture = () => ({ _id: draftId, revision: 1, campaignName: 'October track campaign', step: 'addAccounts', socialMedia: 'instagram',
+const fixture = () => ({ _id: draftId, revision: 1, campaignName: 'October track campaign', step: 'addAccounts', socialMedia: 'instagram', displayCurrency: 'EUR',
   brief: { budget: 1500, budgetCurrency: 'EUR', campaignGoal: 'Promote a new track', genre: 'Techno', platforms: ['instagram'], countries: ['DE', 'FR'], dateRequest: '2026-10-01' },
   addedAccounts: [], campaignContent: [] });
 const pages = Array.from({ length: 10 }, (_, index) => ({
@@ -34,7 +34,7 @@ const hasText = async (page, text) => {
 };
 
 async function run() {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: true, executablePath: process.env.CAMPAIGN_TEST_CHROME || undefined });
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 1360, height: 1100 });
@@ -77,10 +77,13 @@ async function run() {
         if (failSave) { status = 500; data = {}; }
         else {
           assert.equal(body.revision, draft.revision, 'saves must use the latest revision');
+          assert.equal(body.displayCurrency, 'EUR');
+          assert.ok(body.addedAccounts.every(account => /^[a-f0-9]{24}$/.test(account.selectionId) && account.source === 'standalone'));
+          assert.equal(new Set(body.addedAccounts.map(account => account.selectionId)).size, body.addedAccounts.length);
           // The real GET enriches stored account references from the roster.
           const addedAccounts = body.addedAccounts.map(account => {
             const roster = pages.find(page => page.accountId === account.socialAccountId);
-            return { username: roster.username, followers: roster.followers, price: roster.priceEUR,
+            return { username: roster.username, followers: roster.followers, prices: { EUR: roster.priceEUR },
               isAvailable: true, ...account };
           });
           draft = { ...draft, ...body, addedAccounts, _id: draftId, revision: draft.revision + 1 };

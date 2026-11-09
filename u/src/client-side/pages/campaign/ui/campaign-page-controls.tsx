@@ -62,9 +62,10 @@ export const CampaignPageControls: React.FC<Props> = ({
     return (
       <>
         <div className="controls">
-          {view === -1 && <AddinitonalOption onClick={onOpenOptionModal}/>}
+          {view === -1 && data.selectedOption?.canEdit === true && <AddinitonalOption onClick={onOpenOptionModal}/>}
 
           <OptionsSlider
+            canEdit={data.selectedOption?.canEdit === true}
             optionIndexes={optionIndexes}
             activeOption={activeOption}
             onClickOption={onClickOption}

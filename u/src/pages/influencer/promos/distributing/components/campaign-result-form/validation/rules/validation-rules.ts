@@ -47,7 +47,7 @@ const makeRequiredDate = (requiredMsg: string, invalidMsg: string) =>
     })
   );
 
-const makeNumberField = (requiredMsg: string, min = 0) =>
+const makeNumberField = (requiredMsg: string, min = 0, integer = true) =>
   z.preprocess(
     (v) => (v == null ? NaN : v),
     z
@@ -55,7 +55,8 @@ const makeNumberField = (requiredMsg: string, min = 0) =>
     .refine((n) => Number.isFinite(n), {
       message: requiredMsg,
     })
-    .refine((n) => n >= 0, {
+    .refine((n) => !integer || Number.isSafeInteger(n), { message: "Must be an integer" })
+    .refine((n) => n >= min, {
       message: `Must be ${min} or more`,
     })
   );
@@ -81,7 +82,7 @@ export const impressionsField = makeNumberField("Impressions is required", 0);
 export const likeField = makeNumberField("Likes is required", 0);
 export const commentsField = makeNumberField("Comments is required", 0);
 export const sharesField = makeNumberField("Shares is required", 0);
-export const ratingField = makeNumberField("Rating is required", 1);
+export const ratingField = makeNumberField("Rating is required", 1, false);
 export const savesField = makeNumberField("Saves is required", 0);
 export const favoritesField = makeNumberField("Favorites is required", 0);
 

@@ -32,7 +32,7 @@ export const AiPaymentModal = ({ draftId, onClose, onCompleted }: Props) => {
                     setState("not-ready");
                     return;
                 }
-                hydrateCampaignBuilderFromDraft(draft);
+                hydrateCampaignBuilderFromDraft(draft, true);
                 setState("ready");
             } catch {
                 if (!cancelled) setState("error");
@@ -65,7 +65,7 @@ export const AiPaymentModal = ({ draftId, onClose, onCompleted }: Props) => {
                         <p>Complete the brief, pages, dates and publishing content before checkout.</p>
                     </div>
                 )}
-                {state === "ready" && <PaymentCampaign onCompleted={onCompleted} />}
+                {state === "ready" && <PaymentCampaign embeddedDraftId={draftId} onCompleted={onCompleted} />}
             </div>
         </Modal>
     );

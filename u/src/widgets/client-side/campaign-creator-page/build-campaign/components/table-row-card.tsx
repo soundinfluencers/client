@@ -1,8 +1,10 @@
 import React from "react";
+import { priceForCurrency } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total";
 import { getSocialMediaIcon } from "@/constants/social-medias";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { Checkbox } from "@/components";
 import { TagsDropdown } from "./tags-dropdown";
+import { getAccountCardTaxonomy } from "@/widgets/client-side/campaign-tables/model/account-taxonomy";
 import styles from "./table-row-card.module.scss";
 import type {
     PromoAccount
@@ -27,7 +29,7 @@ const getPriceByCurrency = (
     prices: Record<string, number>,
     currency: { currency: string },
 ) => {
-    return Number(prices?.[currency.currency] ?? prices?.EUR ?? 0);
+    return priceForCurrency(prices, currency.currency);
 };
 
 export const TableRowCard: React.FC<Props> = ({
@@ -43,7 +45,7 @@ export const TableRowCard: React.FC<Props> = ({
 
 
     const onToggle = () => {
-        if (isInclude) return;
+        if (isInclude || getPriceByCurrency(data.prices, selectedCurrency) === null) return;
 
         togglePromoCard({
             accountId: data.accountId,
@@ -51,12 +53,17 @@ export const TableRowCard: React.FC<Props> = ({
             socialMedia: data.socialMedia,
             username: data.username,
             profileType: data.profileType,
-            price: getPriceByCurrency(data.prices, selectedCurrency),
+            price: getPriceByCurrency(data.prices, selectedCurrency) ?? undefined,
+            prices: { ...data.prices },
             dateRequest: "ASAP",
             followers: data.followers,
 
             countries: data.countries,
             genres: data.musicGenres,
+            communityMusicGenres: data.communityMusicGenres,
+            communityThemeTopics: data.communityThemeTopics,
+            creatorMusicGenres: data.creatorMusicGenres,
+            creatorContentFocus: data.creatorContentFocus,
             logoUrl: data.logoUrl,
             source: "manual",
         });
@@ -74,7 +81,7 @@ export const TableRowCard: React.FC<Props> = ({
         return () => observer.disconnect();
     }, [data.accountId, setIsSmall]);
 
-    const genres = [...(data.musicGenres || [])];
+    const genres = getAccountCardTaxonomy(data).items.map((item) => item.label);
     const countries =
         data.countries?.map((c) => `${c.country} ${c.percentage}%`) ?? [];
 
@@ -89,12 +96,13 @@ export const TableRowCard: React.FC<Props> = ({
                     isChecked={isInclude || isSelected}
                     name={data.username}
                 />
+                {isInclude && <span>Included in your selected offer</span>}
             </div>
 
             <div className={styles.price}>
                 <img src={data.logoUrl} alt="" />
                 <span>
-          {getPriceByCurrency(data.prices, selectedCurrency)}
+          {getPriceByCurrency(data.prices, selectedCurrency) ?? "Price unavailable"}
                     {selectedCurrency.key}
         </span>
             </div>

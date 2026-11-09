@@ -9,9 +9,9 @@ import "../styles/table-components.scss";
 import { formatCampaignDate } from "@/utils/functions/formatDate";
 import { formatFollowers } from "@/utils/functions/formatFollowers";
 import { useCampaignStore, useDraftCampaignStore } from "@/client-side/store";
-import { getCampaignSelectedAccounts } from "@/client-side/pages/campaign-strategy/model/campaign-strategy.helpers.ts";
-import { calcGroupPrices } from "@/client-side/utils";
-import { formatCurrency } from "@/shared/functions/formatCurrency.ts";
+import {getCampaignSelectedAccounts} from "@/client-side/pages/campaign-strategy/model/campaign-strategy.helpers.ts";
+import {formatCurrency} from "@/shared/functions/formatCurrency.ts";
+import { formatSavedShareTotal, formatShareSubmitted } from "@/client-side/pages/campaign-share/model/share-campaign-read";
 
 type AnyCampaign = any;
 type VisibleStats = {
@@ -34,10 +34,10 @@ function pickContentFromCampaign(c: AnyCampaign): any[] | undefined {
   return c.campaignContent;
 }
 
-export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleStats?:VisibleStats  }) => {
+export const Bar = ({ campaign,visibleStats, readOnlyShare = false }: { campaign: AnyCampaign,visibleStats?:VisibleStats; readOnlyShare?: boolean }) => {
   const store = useCampaignStore();
   const useDraftCampaignPrice = (campaignId: string) =>
-    useDraftCampaignStore((s) => s.getCampaignPrice(campaignId));
+    useDraftCampaignStore((s) => readOnlyShare ? 0 : s.getCampaignPrice(campaignId));
   const draftPrice = useDraftCampaignPrice(campaign?.draftId);
   // const accounts = React.useMemo(() => {
   //   const fromCampaign = pickAccountsFromCampaign(campaign);
@@ -46,24 +46,22 @@ export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleSt
   //   return (store.promoCard ?? []) as any[];
   // }, [campaign, store.promoCard]);
   const accounts = React.useMemo(() => {
+    if (readOnlyShare) return campaign?.selectedOption?.addedAccounts ?? campaign?.addedAccounts ?? [];
     return getCampaignSelectedAccounts(campaign, store);
-  }, [campaign, store.offer, store.promoCard]);
+  }, [campaign, store.offer, store.promoCard, readOnlyShare]);
   console.log(campaign,'aqwe')
-  React.useMemo(
-() => calcGroupPrices(accounts),
-[accounts]
-);
   const content = React.useMemo(() => {
     const fromCampaign = pickContentFromCampaign(campaign);
+    if (readOnlyShare) return fromCampaign ?? [];
     if (isNonEmpty(fromCampaign)) return fromCampaign as any[];
 
     return (store.campaignContent ?? []) as any[];
-  }, [campaign, store.campaignContent]);
+  }, [campaign, store.campaignContent, readOnlyShare]);
 
   const budget =
     campaign?.price;
 
-  const submitted = formatCampaignDate(
+  const submitted = readOnlyShare ? formatShareSubmitted(campaign) : formatCampaignDate(
     String(campaign?.submittedAt ?? campaign?.createdAt ?? new Date()),
   );
 
@@ -83,7 +81,7 @@ export const Bar = ({ campaign,visibleStats }: { campaign: AnyCampaign,visibleSt
       name: `Budget: ${
           campaign.isPriceHidden
               ? ""
-              : formatCurrency(budget || draftPrice, currency)
+              : (readOnlyShare || campaign?.kind === "proposal") ? formatSavedShareTotal(campaign) : formatCurrency(budget || draftPrice, currency)
       }`,
       img: creditcard,
       row: true,

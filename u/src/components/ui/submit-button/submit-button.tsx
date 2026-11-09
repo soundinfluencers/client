@@ -6,12 +6,14 @@ interface Props {
     type?: "submit";
     data: string;
     className?: string;
+    disabled?: boolean;
 }
 
 export const SubmitButton: React.FC<Props> = ({
                                                   type = "submit",
                                                   data,
                                                   className,
+                                                  disabled = false,
                                               }) => {
     const { control } = useFormContext();
     const { isSubmitting,  } = useFormState({ control });
@@ -20,7 +22,7 @@ export const SubmitButton: React.FC<Props> = ({
         <button
             type={type}
             className={`${className ?? ""} ready`}
-            disabled={isSubmitting}
+            disabled={disabled || isSubmitting}
         >
             {isSubmitting ? <CircleLoader/> : data}
         </button>

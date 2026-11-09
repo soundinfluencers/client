@@ -19,6 +19,7 @@ import {
     CardsContainer
 } from "@/widgets/client-side/campaign-creator-page/build-campaign/components/cards-container.tsx";
 import {useSearchParams} from "react-router-dom";
+import { priceForCurrency } from "@/entities/client-side/campaign-creator-page/campaign-builder/model/calc-builder-total";
 
 export const BuildCampaign = () => {
     const [searchParams] = useSearchParams();
@@ -89,7 +90,9 @@ export const BuildCampaign = () => {
                                                     <p>{account.username}</p>
                                                 </div>
                                                 <div className={styles.price}>
-                                                    {account.prices.EUR ?? 0}€
+                                                    {priceForCurrency(account.prices, vm.selectedCurrency.currency) === null
+                                                        ? "Price unavailable"
+                                                        : `${priceForCurrency(account.prices, vm.selectedCurrency.currency)}${vm.selectedCurrency.key}`}
                                                 </div>
                                             </div>
                                         ))

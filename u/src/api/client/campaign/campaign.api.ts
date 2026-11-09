@@ -1,4 +1,6 @@
+import type { CreateCampaignProposalRequest } from "@/entities/client-side/campaign-strategy-page/api/save-proposal";
 import $api from "../../api.ts";
+import type { CreateRegularCampaignRequest } from "./create-campaign.types";
 
 // CAMPAIGN
 
@@ -8,7 +10,6 @@ export type ApproveProposalCampaignBody = {
   address: string;
   country: string;
   referenceNumber: string;
-  amount: number;
   company?: string;
   vatNumber?: string;
   poNumber?: string;
@@ -20,7 +21,15 @@ export const approveProposalCampaign = async (
     optionIndex: number,
     body: ApproveProposalCampaignBody,
 ) => {
-  return $api.post(`/proposal-system/approve/${campaignId}`, body, {
+  // DTO allowlist: price and saved composition belong to the server.
+  const payment = {
+    firstName: body.firstName, lastName: body.lastName, address: body.address, country: body.country,
+    referenceNumber: body.referenceNumber, selectedPaymentMethod: body.selectedPaymentMethod,
+    ...(body.company !== undefined ? { company: body.company } : {}),
+    ...(body.vatNumber !== undefined ? { vatNumber: body.vatNumber } : {}),
+    ...(body.poNumber !== undefined ? { poNumber: body.poNumber } : {}),
+  };
+  return $api.post(`/proposal-system/approve/${campaignId}`, payment, {
     params: { optionIndex },
   });
 };
@@ -79,7 +88,7 @@ export async function patchCampaign(
   return $api.patch(`/campaigns/${campaignId}/update`, body);
 }
 
-export const postCampaign = async (payload: any) => {
+export const postCampaign = async (payload: CreateRegularCampaignRequest) => {
   try {
     await $api.post("/campaigns", payload);
   } catch (error) {
@@ -129,11 +138,7 @@ export async function patchAddProposalOption(
 
 export async function postAddProposalOption(
     campaignId: string,
-    body: {
-      campaignName?: string;
-      addedAccounts?: any[];
-      campaignContent?: any[];
-    },
+    body: CreateCampaignProposalRequest,
 ) {
   return $api.post(`/proposal-system`, body, {
     params: { campaignId },

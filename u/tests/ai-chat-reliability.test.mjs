@@ -1,7 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { mapDraftContentToCampaignContent } from '../src/entities/client-side/campaign-draft/model/campaign-draft.mappers.ts';
-import { buildStrategyDraftPayload } from '../src/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload.ts';
+import { registerHooks } from 'node:module';
+
+const resolution = registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (specifier === './selected-offer' || specifier === './campaign-content.transport') {
+      return nextResolve(specifier + '.ts', context);
+    }
+    return nextResolve(specifier, context);
+  },
+});
+const { buildStrategyDraftPayload } = await import('../src/entities/client-side/campaign-creator-page/campaign-builder/model/campaign-strategy.payload.ts');
+resolution.deregister();
 
 test('resumed draft preserves all note variants and the selected second note through save', () => {
   const notes = [

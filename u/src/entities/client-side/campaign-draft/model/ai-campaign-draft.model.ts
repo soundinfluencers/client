@@ -47,7 +47,7 @@ export const formatDraftCurrency = (value: number) =>
   }).format(value);
 
 export const draftAccountKey = (account: DraftAddedAccountDto) =>
-  `${account.socialMedia}:${account.socialAccountId}`;
+  account.selectionId || `${account.socialMedia}:${account.socialAccountId}`;
 
 export const normalizeDraftPlatform = (platform: string) =>
   platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : "Unknown";
@@ -63,9 +63,18 @@ export const buildAiDraftPayload = (
   draftId: draft._id,
   revision: Number(draft.revision ?? 0),
   step: draft.step,
+  displayCurrency: draft.displayCurrency,
+  ...(draft.selectedOffer ? { selectedOffer: {
+    offerId: draft.selectedOffer.offerId,
+    selectedAccountIds: draft.selectedOffer.selectedAccountIds,
+  } } : {}),
   socialMedia: draft.socialMedia,
   campaignName: draft.campaignName,
   addedAccounts: accounts.map((account) => ({
+    selectionId: account.selectionId,
+    source: account.source,
+    ...(account.bundleId ? { bundleId: account.bundleId } : {}),
+    ...(account.offerId ? { offerId: account.offerId } : {}),
     influencerId: account.influencerId,
     socialAccountId: account.socialAccountId,
     socialMedia: account.socialMedia,
