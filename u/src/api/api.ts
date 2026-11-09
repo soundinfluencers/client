@@ -27,7 +27,7 @@ export const setupInterceptors = (
       url.includes("/auth/refresh") ||
       url.includes("/auth/logout"));
   const handlesErrorInline = (url?: string) =>
-    !!url && (url.includes("/agent/chat") || url.includes("/agent/promo-images"));
+    !!url && (url.includes("/agent/chat") || url.includes("/agent/promo-images") || url.startsWith("/agent/v1/"));
 
   const reqId = $api.interceptors.request.use((config) => {
     const token = tokenStorage.get();

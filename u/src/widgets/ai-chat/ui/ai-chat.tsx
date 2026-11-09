@@ -20,6 +20,8 @@ import {
   findCampaignRecommendations,
   type AgentSearchOutcome,
 } from "@/api/agent/agent.api.ts";
+import { awaitQueuedReply, cancelQueuedMessage, submitQueuedMessage, TerminalRunError } from "@/api/agent/agent-queue.api.ts";
+import { AGENT_QUEUE_ENABLED } from "@/shared/config/runtime-config.ts";
 import { useUser } from "@/store/get-user";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import type {
@@ -135,11 +137,14 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const attachmentsByMessageRef = useRef(new Map<string, File>());
   const aliveRef = useRef(true);
+  const [queuedRunId, setQueuedRunId] = useState<string>();
+  const queueStream = useRef<AbortController | undefined>(undefined);
 
   useEffect(() => {
     aliveRef.current = true;
     return () => {
       aliveRef.current = false;
+      queueStream.current?.abort();
     };
   }, []);
 
@@ -161,23 +166,46 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
     role === "client" ? (selectedDraftId ?? linkedDraftId) : undefined;
 
   const { mutate, isPending } = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
+      id,
       message,
       draftId,
       image,
+      resumeRunId,
     }: {
       id: string;
       message: string;
       recommendationAction?: "brief" | "more";
       draftId?: string;
       image?: File;
-    }) =>
-      sendAgentMessage(
+      resumeRunId?: string;
+    }) => {
+      const conversation = getConversationId();
+      if (AGENT_QUEUE_ENABLED && role === "client" && !image) {
+        const run = resumeRunId && conversation
+          ? { conversationId: conversation, runId: resumeRunId }
+          : await submitQueuedMessage(message, conversation, draftId ?? activeDraftId);
+        if (!aliveRef.current) throw new Error("Chat closed");
+        conversationRef.current = run.conversationId;
+        setConversationId(run.conversationId);
+        setMessages(current => current.map(turn => turn.id === id ? { ...turn, queuedRunId: run.runId } : turn));
+        const controller = new AbortController();
+        queueStream.current = controller;
+        setQueuedRunId(run.runId);
+        try {
+          return await awaitQueuedReply(run.conversationId, run.runId, controller.signal);
+        } finally {
+          queueStream.current = undefined;
+          if (aliveRef.current) setQueuedRunId(undefined);
+        }
+      }
+      return sendAgentMessage(
         message,
-        getConversationId(),
+        conversation?.length === 24 ? conversation : undefined,
         draftId ?? activeDraftId,
         image,
-      ),
+      );
+    },
     onMutate: (variables) => ({ generation: searchGeneration.current.get(variables.draftId ?? activeDraftId ?? "") }),
     onSuccess: (
       { reply, links, conversationId: cid, search, media = [] },
@@ -185,9 +213,11 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
       context,
     ) => {
       if (!aliveRef.current) return;
-      setConversationId(cid);
-      const searchDraftId = resolveSearchDraftId(variables.draftId, links);
-      conversationRef.current = cid;
+      if (!variables.image || conversationRef.current?.length !== 36) {
+        setConversationId(cid);
+        conversationRef.current = cid;
+      }
+      const searchDraftId = resolveSearchDraftId(variables.draftId ?? activeDraftId, links);
       links.forEach((link) => {
         const linkedDraftId = getCampaignDraftId(link);
         if (linkedDraftId) {
@@ -206,6 +236,7 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
                 links,
                 media,
                 status: "success",
+                queuedRunId: undefined,
                 errorCode: undefined,
               }
             : message,
@@ -230,12 +261,22 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
       setMessages((prev) =>
         prev.map((message) =>
           message.id === variables.id
-            ? { ...message, status: "error", errorCode }
+            ? { ...message, status: "error", errorCode, ...(error instanceof TerminalRunError ? { queuedRunId: undefined } : {}) }
             : message,
         ),
       );
     },
   });
+
+  useEffect(() => {
+    if (!AGENT_QUEUE_ENABLED || role !== "client" || !initialChat.conversationId) return;
+    const pending = initialChat.messages.find(turn => turn.status === "pending" && turn.queuedRunId);
+    if (!pending) return;
+    const timer = window.setTimeout(() => mutate({
+      id: pending.id, message: pending.q, draftId: initialChat.activeDraftId, resumeRunId: pending.queuedRunId,
+    }), 0);
+    return () => window.clearTimeout(timer);
+  }, [initialChat, mutate, role]);
 
   // Keep the newest message in view.
   useEffect(() => {
@@ -419,6 +460,7 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
       recommendationAction: message.recommendationAction,
       draftId: activeDraftId,
       image: attachmentsByMessageRef.current.get(message.id),
+      resumeRunId: message.queuedRunId,
     });
   };
 
@@ -570,7 +612,7 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
     try {
       const result = await findCampaignRecommendations({
         draftId,
-        conversationId: getConversationId(),
+        conversationId: conversationRef.current?.length === 24 ? conversationRef.current : undefined,
         page: action === "more" ? (previous?.nextPage ?? 1) : 1,
         ...(action === "more" && previous?.request ? { request: previous.request } : {}),
       });
@@ -969,6 +1011,15 @@ const AiChatSession = ({ identity, role }: AiChatSessionProps) => {
             >
               {isPending ? "Thinking…" : isPreparingSend ? "Saving…" : "Send"}
             </button>
+            {queuedRunId && (
+              <button
+                type="button"
+                className={styles.resetButton}
+                onClick={() => { void cancelQueuedMessage(queuedRunId).catch(() => {}); }}
+              >
+                Stop
+              </button>
+            )}
             <button
               className={styles.resetButton}
               onClick={handleReset}

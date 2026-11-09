@@ -1,5 +1,7 @@
 import axios from "axios";
 import $api from "@/api/api.ts";
+import { AGENT_QUEUE_ENABLED } from "@/shared/config/runtime-config.ts";
+import { awaitQueuedReply, TerminalRunError } from "@/api/agent/agent-queue.api.ts";
 
 type GeneratedImageDto = {
   base64: string;
@@ -78,6 +80,27 @@ export const createPromoImageDirections = async ({
     if (fidelity) form.append("fidelity", fidelity);
   }
   try {
+    if (AGENT_QUEUE_ENABLED) {
+      const requestId = crypto.randomUUID();
+      let attachmentId: string | undefined;
+      if (source) {
+        const upload = new FormData();
+        upload.append("image", source);
+        attachmentId = (await $api.post(`/agent/v1/promo-attachments/${requestId}`, upload, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })).data.data.attachmentId;
+      }
+      const { runId, conversationId } = (await $api.post("/agent/v1/promo-runs", {
+        requestId, prompt, attachmentId, fidelity, count: 3, size: "1024x1536", quality: "low",
+      })).data.data;
+      const { promo } = await awaitQueuedReply(conversationId, runId);
+      if (!promo?.count) throw new PromoImageError(FALLBACK_MESSAGE);
+      const files = await Promise.all(Array.from({ length: promo.count }, async (_, index) => {
+        const image = await $api.get<Blob>(`/agent/v1/runs/${runId}/promo-images/${index}`, { responseType: "blob" });
+        return new File([image.data], `promo-direction-${index + 1}.jpg`, { type: "image/jpeg" });
+      }));
+      return { model: promo.model, files };
+    }
     const response = await $api.post("/agent/promo-images", form, {
       headers: { "Content-Type": "multipart/form-data" },
     });
@@ -87,6 +110,10 @@ export const createPromoImageDirections = async ({
       files: payload.images.map(base64ToFile),
     };
   } catch (error) {
+    if (error instanceof TerminalRunError && error.message === "promo_result_unknown_retry") {
+      throw new PromoImageError("The previous generation could not be confirmed. Start a new generation to retry.", error.message);
+    }
+    if (error instanceof PromoImageError) throw error;
     throw toPromoImageError(error);
   }
 };

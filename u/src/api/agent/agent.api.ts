@@ -1,6 +1,7 @@
 import { isAgentSearchOutcome, isAgentChatResponse } from "./agent-response.validation.ts";
 import axios from "axios";
 import $api from "../api.ts";
+import { AGENT_QUEUE_ENABLED } from "@/shared/config/runtime-config.ts";
 
 export const AGENT_CHAT_ERROR_CODES = [
   "AGENT_DAILY_LIMIT_REACHED",
@@ -101,7 +102,7 @@ export const findCampaignRecommendations = async (input: {
   page: number;
   request?: Record<string, unknown>;
 }): Promise<{ conversationId: string; draftId: string; search: AgentSearchOutcome }> => {
-  const response = await $api.post('/agent/recommendations', input);
+  const response = await $api.post(AGENT_QUEUE_ENABLED ? '/agent/v1/recommendations' : '/agent/recommendations', input);
   const result = response.data.data;
   if (result?.draftId !== input.draftId || typeof result?.conversationId !== "string" || !isAgentSearchOutcome(result?.search)) throw new Error("Invalid recommendations response");
   return result;

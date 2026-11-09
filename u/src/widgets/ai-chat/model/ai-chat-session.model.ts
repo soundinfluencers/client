@@ -24,6 +24,7 @@ export interface Message {
   media: AgentMedia[];
   status: "pending" | "success" | "error";
   errorCode?: AgentChatErrorCode;
+  queuedRunId?: string;
   // The backend request may differ from the visible user bubble for automatic workspace actions.
   request?: string;
   recommendationAction?: "brief" | "more";
@@ -90,7 +91,8 @@ export const restoreMessage = (message: Message, index: number): Message => {
     links: message.links ?? [],
     media: message.media ?? [],
     // A request cannot still be running after a reload.
-    status: message.status === "pending" ? "error" : (message.status ?? "success"),
+    status: message.status === "pending" && !message.queuedRunId ? "error" : (message.status ?? "success"),
+    queuedRunId: typeof message.queuedRunId === "string" ? message.queuedRunId : undefined,
     errorCode: message.errorCode,
     request: message.request,
     recommendationAction: message.recommendationAction,

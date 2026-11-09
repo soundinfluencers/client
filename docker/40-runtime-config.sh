@@ -13,6 +13,11 @@ esac
 
 escaped_api_url="$(printf '%s' "$PUBLIC_API_URL" | sed 's/\\/\\\\/g; s/"/\\"/g')"
 
-printf 'window.RUNTIME_CONFIG = Object.freeze({ PUBLIC_API_URL: "%s" });\n' \
-  "$escaped_api_url" \
+agent_queue=false
+if [ "${PUBLIC_AGENT_QUEUE_ENABLED:-false}" = "true" ]; then
+  agent_queue=true
+fi
+
+printf 'window.RUNTIME_CONFIG = Object.freeze({ PUBLIC_API_URL: "%s", PUBLIC_AGENT_QUEUE_ENABLED: %s });\n' \
+  "$escaped_api_url" "$agent_queue" \
   > /usr/share/nginx/html/runtime-config.js
