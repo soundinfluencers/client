@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "@/store/get-user";
 import { Loader } from "@/shared/ui";
@@ -22,17 +22,23 @@ export const PublicRoute = ({ children }: Props) => {
 
 
 
+  // Consume only after commit: StrictMode may render Navigate more than once.
+  useEffect(() => {
+    if (isAuthReady && accessToken && user && !isAllowedPublicRoute) clearPostAuthRedirect();
+  }, [isAuthReady, accessToken, user?.role, isAllowedPublicRoute]);
+
+  if (!isAuthReady && !isAllowedPublicRoute) return <Loader />;
+
   if (accessToken && !isAllowedPublicRoute) {
     if (!user) return <Loader />;
 
     const redirectPath = getPostAuthRedirect();
 
     if (
-        redirectPath &&
-        redirectPath.startsWith("/") &&
+        user.role === "client" && redirectPath &&
+        redirectPath.startsWith("/") && !redirectPath.startsWith("//") &&
         redirectPath !== `${location.pathname}${location.search}`
     ) {
-      clearPostAuthRedirect();
       return <Navigate to={redirectPath} replace />;
     }
 

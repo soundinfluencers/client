@@ -1,6 +1,6 @@
 import { changeReaderSession } from '@/shared/auth/reader-session';
 import { useState, type FC } from "react";
-import {Link, useNavigate} from "react-router-dom";
+import {Link} from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { useUser } from "@/store/get-user/index.ts";
 import { getMe, loginApi } from "@/api/auth/auth.api.ts";
@@ -19,25 +19,6 @@ export const LoginPage: FC = () => {
   const { setAccessToken } = useAuth();
   const { role, setUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate()
-  // const handleLogin = async (formData: LoginFormData) => {
-  //   const { email, password } = formData;
-  //
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await loginApi({ email, password, role });
-  //
-  //     if (response) {
-  //       setAccessToken(response.accessToken);
-  //       const userData = await getMe();
-  //       setUser(userData);
-  //     }
-  //   } catch (error) {
-  //     handleApiError(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
   const handleLogin = async (formData: LoginFormData) => {
     const { email, password } = formData;
 
@@ -47,34 +28,12 @@ export const LoginPage: FC = () => {
       if (!response) return;
 
       changeReaderSession(false);
+      setUser(null);
       setAccessToken(response.accessToken);
 
       const userData = await getMe();
       setUser(userData);
       changeReaderSession(true);
-      console.log(userData,'qwertyuiop')
-      const rawRedirect = sessionStorage.getItem("postAuthRedirect");
-      console.log(rawRedirect,'rawRedirect')
-      if (rawRedirect) {
-        try {
-          const parsed = JSON.parse(rawRedirect);
-          const redirectPath =
-            typeof parsed?.path === "string" ? parsed.path : null;
-
-
-
-          if (redirectPath && redirectPath.startsWith("/")) {
-            navigate(redirectPath, { replace: true });
-            return;
-          }
-        } catch {
-          sessionStorage.removeItem("postAuthRedirect");
-        }
-      }
-
-      navigate(role === "client" ? "/client" : "/influencer", {
-        replace: true,
-      });
     } catch (error) {
       handleApiError(error);
     } finally {

@@ -3771,7 +3771,7 @@ test('existing LoginPage continuation keeps the exact Proposal payment route aft
   }, { sessionStorage: { getItem: (key) => session.get(key) ?? null, removeItem: (key) => session.delete(key) }, console: { log() {} } });
   const tree = harness.render(() => LoginPage());
   await elements(tree).find((n) => n.type === Form).props.onSubmit({ email: 'fixture@example.test', password: 'mock' });
-  assert.deepEqual(navigation, [[path, { replace: true }]]); assert.equal(calls.length, 2);
+  assert.deepEqual(navigation, []); assert.deepEqual(calls,[['user',null],['token','token'],['user',{role:'client'}]]); assert.ok(session.has('postAuthRedirect'));
   const f = await readyProposalPayment({ query: path.split('?')[1], loadProposal: async (id, index) => checkoutSaved(index, { id }) });
   assert.deepEqual(f.calls[0], ['getProposal', checkoutProposalId, 2]);
 });
@@ -4485,8 +4485,8 @@ test('delete navigation uses actual dashboard route and query key; invalid old p
  f.queryClient.setQueryData(query.queryKey,{pages:[],pageParams:[]});
  const op=f.render().onDeleteOption(0);await tick();f.pending.at(-1).reject({response:{status:404,data:{message:'Proposal campaign not found'}}});assert.equal(await op,true);
  const destination=f.navigation.at(-1);assert.equal(matchRoutes(routes,destination).at(-1).route.component,Dashboard);assert.deepEqual(f.navigationOptions.at(-1),{replace:true});assert.equal(f.queryClient.getQueryState(query.queryKey).isInvalidated,true);
- const Navigate=()=>{};let cleared=false;const {PublicRoute}=load('src/router/components/PublicRoute.tsx',{'react-router-dom':{Navigate,useLocation:()=>({pathname:'/auth',search:''})},'../../contexts/AuthContext':{useAuth:()=>({accessToken:'fixture',isAuthReady:true})},'@/store/get-user':{useUser:()=>({user:{role:'client'}})},'@/shared/ui':{Loader(){}},'@/utils/functions/getPostAuthRedirect.ts':{getPostAuthRedirect:()=>'/client/campaign',clearPostAuthRedirect:()=>{cleared=true;}}});
- const redirect=PublicRoute({children:null});assert.equal(redirect.props.to,'/client/campaign');assert.equal(cleared,true);
+ const Navigate=()=>{};let cleared=false;const publicHarness=hookHarness();const {PublicRoute}=load('src/router/components/PublicRoute.tsx',{react:publicHarness.hooks,'react-router-dom':{Navigate,useLocation:()=>({pathname:'/auth',search:''})},'../../contexts/AuthContext':{useAuth:()=>({accessToken:'fixture',isAuthReady:true})},'@/store/get-user':{useUser:()=>({user:{role:'client'}})},'@/shared/ui':{Loader(){}},'@/utils/functions/getPostAuthRedirect.ts':{getPostAuthRedirect:()=>'/client/campaign',clearPostAuthRedirect:()=>{cleared=true;}}});
+ const redirect=publicHarness.render(()=>PublicRoute({children:null}));assert.equal(redirect.props.to,'/client/campaign');assert.equal(cleared,false);publicHarness.flush();assert.equal(cleared,true);
 });
 
 test('delete navigation ActionCell and Proposal selectors return stable repeated snapshots after clear and missing option',async()=>{
@@ -4662,4 +4662,14 @@ test('Share UI taxonomy preserves raw ordinary and saved Proposal profile fields
 test('restored Proposal success uses the existing payment modal and dashboard action without clearing private edits',async()=>{
  const f=await readyProposalPayment();const before=f.updates.getState();await paymentSubmit(f)(paymentValues);
  assert.ok(elements(f.render()).some(n=>n.type===f.Modal));const ok=elements(f.render()).find(n=>n.props.text==='Ok');assert.ok(ok);ok.props.onClick();assert.equal(f.navigation.at(-1),'/client');assert.equal(f.updates.getState(),before);assert.equal(f.calls.filter(c=>c[0]==='approve').length,1);
+});
+
+
+test('PublicRoute uses authenticated role, retains exact client continuation through repeated renders, and consumes after commit',()=>{
+ for(const role of ['client','influencer']){
+ const h=hookHarness(),Navigate=()=>{},Loader=()=>{};let target='/client/campaign/payment?proposal=fixture&option=2&extra=kept';let cleared=0;
+ const {PublicRoute}=load('src/router/components/PublicRoute.tsx',{react:h.hooks,'react-router-dom':{Navigate,useLocation:()=>({pathname:'/login',search:''})},'../../contexts/AuthContext':{useAuth:()=>({accessToken:'token',isAuthReady:true})},'@/store/get-user':{useUser:()=>({user:{role}})},'@/shared/ui':{Loader},'@/utils/functions/getPostAuthRedirect.ts':{getPostAuthRedirect:()=>target,clearPostAuthRedirect:()=>{target=null;cleared++;}}});
+ const render=()=>h.render(()=>PublicRoute({children:null}));const first=render();const second=render();assert.equal(first.props.to,role==='client'?target:'/influencer');assert.equal(second.props.to,first.props.to);assert.equal(cleared,0);
+ h.unmount();
+ }
 });

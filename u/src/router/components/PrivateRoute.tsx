@@ -25,5 +25,10 @@ export const PrivateRoute = ({ children }: Props) => {
     return <Loader />;
   }
 
+  const isClientRoute = location.pathname === "/client" || location.pathname.startsWith("/client/");
+  if (isClientRoute && user.role !== "client") {
+    return <Navigate to="/influencer" replace />;
+  }
+
   return <>{children}</>;
 };
