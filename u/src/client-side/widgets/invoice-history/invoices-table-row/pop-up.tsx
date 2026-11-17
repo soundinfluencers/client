@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import './_table-row.scss'
 import {formatFollowers} from "@/utils/functions/formatFollowers.ts";
 import { type DisplayCurrency, formatCurrency } from "@/shared/functions/formatCurrency.ts";
+import { PAYMENTS_DISABLED } from "@/shared/config/runtime-config";
 
 type InvoiceDetails = {
     invoiceId: string;
@@ -335,7 +336,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                        <span>{invoice?.amount ? `${formatCurrency(invoice.amount, invoice.currency)}` : "—"}</span>
                    </div>
                </div>
-               <div className='edit-invoicePopUp-payment'>
+               {!PAYMENTS_DISABLED && <div className='edit-invoicePopUp-payment'>
                    <h2>Payment Information</h2>
                    <div className='edit-invoicePopUp-payment-block'>
                        <div className='edit-invoicePopUp-payment-block-iconWrapper'>
@@ -382,7 +383,7 @@ export const EditInvoiceModal = ({ invoiceId, onClose, onSaved }: Props) => {
                            </div>
                        ))}
                    </div>
-               </div>
+               </div>}
            </div>
         </Modal>
     );

@@ -1,0 +1,104 @@
+name: Codex CI
+
+on:
+  pull_request:
+    branches: [codex-main]
+  push:
+    branches: [codex-main]
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_IMAGE: ghcr.io/soundinfluencers/codex-client
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: u
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: u/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Build and smoke-test candidate image
+        working-directory: .
+        shell: bash
+        run: |
+          docker build --platform linux/amd64 \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --tag codex-candidate .
+          container_id=$(docker run --detach --publish 127.0.0.1::8080 \
+            --env PUBLIC_API_URL=https://codex-api.example.invalid \
+            --env PAYMENTS_DISABLED=true codex-candidate)
+          trap 'docker rm -f "$container_id" >/dev/null' EXIT
+          origin="http://$(docker port "$container_id" 8080/tcp)"
+          curl --fail --silent --show-error --retry 5 --retry-connrefused --max-time 5 "$origin/health"
+          curl --fail --silent --show-error --max-time 5 "$origin/" > spa-root.html
+          curl --fail --silent --show-error --max-time 5 "$origin/a/client-side/route" > spa-nested.html
+          cmp spa-root.html spa-nested.html
+          curl --fail --silent --show-error --max-time 5 "$origin/runtime-config.js" > runtime-config.js
+          grep -F 'https://codex-api.example.invalid' runtime-config.js
+          grep -F 'PAYMENTS_DISABLED: true' runtime-config.js
+      - name: Export tested image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/codex-main'
+        working-directory: .
+        shell: bash
+        run: docker save codex-candidate | gzip -1 > codex-candidate.tar.gz
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/codex-main'
+        with:
+          name: candidate-${{ github.sha }}
+          path: codex-candidate.tar.gz
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+          overwrite: true
+
+  publish:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/codex-main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: candidate-${{ github.sha }}
+      - name: Publish tested image and record digest
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          docker load --input codex-candidate.tar.gz
+          test "$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' codex-candidate)" = "$GITHUB_SHA"
+          printf '%s\n' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          trap 'docker logout ghcr.io >/dev/null' EXIT
+          tag="$RELEASE_IMAGE:sha-$GITHUB_SHA"
+          docker tag codex-candidate "$tag"
+          docker push "$tag"
+          digest_ref=$(docker image inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "$tag" |
+            awk -v prefix="$RELEASE_IMAGE@sha256:" 'index($0,prefix)==1 {print}')
+          digest="${digest_ref#"$RELEASE_IMAGE@sha256:"}"
+          [[ "$digest" =~ ^[a-f0-9]{64}$ ]]
+          jq -n --arg repository "$GITHUB_REPOSITORY" --arg sha "$GITHUB_SHA" \
+            --arg image "$digest_ref" '{repository: $repository, sha: $sha, image: $image}' > release.json
+          printf '### Codex release\n\n- Commit: `%s`\n- Image: `%s`\n' "$GITHUB_SHA" "$digest_ref" \
+            >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-${{ github.sha }}-${{ github.run_attempt }}
+          path: release.json
+          if-no-files-found: error
+          retention-days: 90

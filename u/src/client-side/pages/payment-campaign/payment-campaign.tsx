@@ -42,6 +42,7 @@ import { OfferCatalogueReview } from "./offer-catalogue-review";
 import { useProposalCheckout } from "./use-proposal-checkout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUser } from "@/store/get-user";
+import { PAYMENTS_DISABLED } from "@/shared/config/runtime-config";
 
 import "./_payment-campaign.scss";
 export type PaymentMethodId =
@@ -54,7 +55,18 @@ export type PaymentMethodId =
 export type PaymentTabId = "bank_card" | "paypal" | "bank_transfer";
 
 export const PaymentCampaign = () => {
+  if (PAYMENTS_DISABLED) {
+    return (
+      <Container className="payment-campaign">
+        <h2>Payments are disabled in this test environment.</h2>
+      </Container>
+    );
+  }
 
+  return <CampaignCheckout />;
+};
+
+const CampaignCheckout = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { pathname, key: locationKey } = useLocation();
